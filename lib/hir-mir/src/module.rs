@@ -32,7 +32,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     .configuration()
                     .ok()
                     .into_iter()
-                    .flat_map(|configuration| utility_function_declaration::compile(configuration))
+                    .flat_map(utility_function_declaration::compile)
                     .map(Ok),
             )
             .collect::<Result<_, _>>()?,

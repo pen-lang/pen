@@ -149,22 +149,19 @@ mod tests {
     #[test]
     fn compile_debug() {
         assert_eq!(
-            compile_call(
-                &BuiltInCall::new(
-                    Some(
-                        types::Function::new(
-                            vec![types::ByteString::new(Position::fake()).into()],
-                            types::None::new(Position::fake()),
-                            Position::fake()
-                        )
-                        .into()
-                    ),
-                    BuiltInFunction::Debug,
-                    vec![ByteString::new(vec![], Position::fake()).into()],
-                    Position::fake(),
-                )
-                .into(),
-            ),
+            compile_call(&BuiltInCall::new(
+                Some(
+                    types::Function::new(
+                        vec![types::ByteString::new(Position::fake()).into()],
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                BuiltInFunction::Debug,
+                vec![ByteString::new(vec![], Position::fake()).into()],
+                Position::fake(),
+            ),),
             Ok(mir::ir::Call::new(
                 mir::types::Function::new(
                     vec![mir::types::Type::ByteString],
@@ -191,28 +188,25 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(
-                    &BuiltInCall::new(
-                        Some(
-                            types::Function::new(
-                                vec![function_type.clone().into()],
-                                function_type,
-                                Position::fake()
-                            )
-                            .into()
-                        ),
-                        BuiltInFunction::Spawn,
-                        vec![Lambda::new(
-                            vec![],
-                            types::Number::new(Position::fake()),
-                            Number::new(42.0, Position::fake()),
+                compile_call(&BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![function_type.clone().into()],
+                            function_type,
                             Position::fake()
                         )
-                        .into()],
-                        Position::fake(),
+                        .into()
+                    ),
+                    BuiltInFunction::Spawn,
+                    vec![Lambda::new(
+                        vec![],
+                        types::Number::new(Position::fake()),
+                        Number::new(42.0, Position::fake()),
+                        Position::fake()
                     )
-                    .into(),
-                ),
+                    .into()],
+                    Position::fake(),
+                ),),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
                     thunk_type.clone(),
@@ -280,28 +274,25 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(
-                    &BuiltInCall::new(
-                        Some(
-                            types::Function::new(
-                                vec![function_type.clone().into()],
-                                function_type,
-                                Position::fake()
-                            )
-                            .into()
-                        ),
-                        BuiltInFunction::Spawn,
-                        vec![Lambda::new(
-                            vec![],
-                            types::Any::new(Position::fake()),
-                            Variable::new("x", Position::fake()),
+                compile_call(&BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![function_type.clone().into()],
+                            function_type,
                             Position::fake()
                         )
-                        .into()],
-                        Position::fake(),
+                        .into()
+                    ),
+                    BuiltInFunction::Spawn,
+                    vec![Lambda::new(
+                        vec![],
+                        types::Any::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
                     )
-                    .into(),
-                ),
+                    .into()],
+                    Position::fake(),
+                ),),
                 Ok(mir::ir::Let::new(
                     "$any_thunk",
                     thunk_type.clone(),
