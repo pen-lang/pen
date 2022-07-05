@@ -16,6 +16,5 @@ Feature: Standard packages
       | json         |
       | os           |
       | os-sync      |
-      | prelude-test |
       | sql          |
       | test         |
