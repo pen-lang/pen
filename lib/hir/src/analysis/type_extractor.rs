@@ -252,7 +252,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     fn empty_context() -> AnalysisContext {
-        AnalysisContext::new(Default::default(), Default::default(), None)
+        AnalysisContext::new(Default::default(), Default::default())
     }
 
     #[test]

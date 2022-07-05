@@ -19,7 +19,8 @@ use once_cell::sync::Lazy;
 use position::Position;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
-const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
+const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "error", "none", "number", "string"];
+const BUILT_IN_FUNCTIONS: &[&str] = &["debug", "error", "go", "size", "source"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     [
         "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -27,6 +28,7 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     .iter()
     .chain(BUILT_IN_LITERALS)
     .chain(BUILT_IN_TYPES)
+    .chain(BUILT_IN_FUNCTIONS)
     .copied()
     .collect()
 });
@@ -274,6 +276,7 @@ fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
         boolean_type().map(Type::from),
+        error_type().map(Type::from),
         none_type().map(Type::from),
         number_type().map(Type::from),
         string_type().map(Type::from),
@@ -289,6 +292,12 @@ fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
     attempt(position().skip(keyword("boolean")))
         .map(types::Boolean::new)
         .expected("boolean type")
+}
+
+fn error_type<'a>() -> impl Parser<Stream<'a>, Output = types::Error> {
+    attempt(position().skip(keyword("error")))
+        .map(types::Error::new)
+        .expected("error type")
 }
 
 fn none_type<'a>() -> impl Parser<Stream<'a>, Output = types::None> {

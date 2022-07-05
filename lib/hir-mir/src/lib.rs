@@ -311,13 +311,6 @@ mod tests {
         assert_eq!(
             compile_module(
                 &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false
-                    )])
                     .set_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -325,10 +318,7 @@ mod tests {
                                 "x",
                                 types::Union::new(
                                     types::None::new(Position::fake()),
-                                    types::Reference::new(
-                                        &ERROR_TYPE_CONFIGURATION.error_type_name,
-                                        Position::fake(),
-                                    ),
+                                    types::Error::new(Position::fake(),),
                                     Position::fake(),
                                 ),
                             )],

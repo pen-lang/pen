@@ -35,6 +35,7 @@ fn check_canonical(one: &Type, other: &Type) -> bool {
         (Type::Record(one), Type::Record(other)) => one.name() == other.name(),
         (Type::Any(_), Type::Any(_))
         | (Type::Boolean(_), Type::Boolean(_))
+        | (Type::Error(_), Type::Error(_))
         | (Type::None(_), Type::None(_))
         | (Type::Number(_), Type::Number(_))
         | (Type::String(_), Type::String(_)) => true,
