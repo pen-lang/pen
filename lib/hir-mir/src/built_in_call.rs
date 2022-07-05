@@ -27,6 +27,20 @@ pub fn compile(
         .collect::<Result<_, _>>()?;
 
     Ok(match call.function() {
+        BuiltInFunction::Debug => mir::ir::Call::new(
+            type_::compile_function(
+                context,
+                &type_canonicalizer::canonicalize_function(
+                    call.function_type()
+                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+                    context.types(),
+                )?
+                .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
+            )?,
+            mir::ir::Variable::new(&context.configuration()?.debug_function_name),
+            arguments,
+        )
+        .into(),
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
@@ -120,6 +134,7 @@ pub fn compile(
 
 #[cfg(test)]
 mod tests {
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use super::*;
     use position::{test::PositionFake, Position};
 
@@ -128,6 +143,37 @@ mod tests {
             &CompileContext::dummy(Default::default(), Default::default()),
             call,
         )
+    }
+
+    #[test]
+    fn compile_debug() {
+        assert_eq!(
+            compile_call(
+                &BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![types::ByteString::new(Position::fake()).into()],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    BuiltInFunction::Debug,
+                    vec![ByteString::new(vec![], Position::fake()).into()],
+                    Position::fake(),
+                )
+                .into(),
+            ),
+            Ok(mir::ir::Call::new(
+                mir::types::Function::new(
+                    vec![mir::types::Type::ByteString],
+                    mir::types::Type::None
+                ),
+                mir::ir::Variable::new(&COMPILE_CONFIGURATION.debug_function_name),
+                vec![mir::ir::ByteString::new(vec![]).into()],
+            )
+            .into())
+        );
     }
 
     mod spawn {
