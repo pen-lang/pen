@@ -46,6 +46,7 @@ fn compile_type_definition(
         )),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::String(_)
         | Type::None(_)
         | Type::Number(_)

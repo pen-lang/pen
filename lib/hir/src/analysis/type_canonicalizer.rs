@@ -30,6 +30,7 @@ pub fn canonicalize(type_: &Type, types: &FnvHashMap<String, Type>) -> Result<Ty
         Type::Union(union) => canonicalize_union(union, types)?,
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::Record(_)
         | Type::None(_)
         | Type::Number(_)
@@ -97,6 +98,7 @@ fn collect_types(
             .collect(),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::Function(_)
         | Type::Record(_)
         | Type::List(_)

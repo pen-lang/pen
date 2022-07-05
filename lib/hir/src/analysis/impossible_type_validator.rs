@@ -62,6 +62,7 @@ fn is_type_recursive(
             .all(identity),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::Function(_)
         | Type::List(_)
         | Type::Map(_)

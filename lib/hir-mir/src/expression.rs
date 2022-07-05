@@ -214,6 +214,7 @@ pub fn compile(
 
             match &from {
                 Type::Boolean(_)
+                | Type::Error(_)
                 | Type::None(_)
                 | Type::Number(_)
                 | Type::Record(_)

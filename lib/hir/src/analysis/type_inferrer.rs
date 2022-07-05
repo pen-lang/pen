@@ -92,6 +92,11 @@ fn infer_expression(
             BuiltInCall::new(
                 Some(
                     match call.function() {
+                        BuiltInFunction::Error => types::Function::new(
+                            vec![types::Any::new(position.clone()).into()],
+                            types::Error::new(position.clone()),
+                            position.clone(),
+                        ),
                         BuiltInFunction::Debug => types::Function::new(
                             vec![types::ByteString::new(position.clone()).into()],
                             types::None::new(position.clone()),
@@ -100,6 +105,11 @@ fn infer_expression(
                         BuiltInFunction::Size => types::Function::new(
                             argument_types,
                             types::Number::new(position.clone()),
+                            position.clone(),
+                        ),
+                        BuiltInFunction::Source => types::Function::new(
+                            vec![types::Error::new(position.clone()).into()],
+                            types::Any::new(position.clone()),
                             position.clone(),
                         ),
                         BuiltInFunction::Spawn => {

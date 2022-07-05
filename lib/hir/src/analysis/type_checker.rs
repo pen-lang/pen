@@ -75,7 +75,6 @@ fn check_expression(
             }
 
             match call.function() {
-                BuiltInFunction::Debug => {}
                 BuiltInFunction::Size => {
                     if let [argument_type] = function_type.arguments() {
                         if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
@@ -103,6 +102,7 @@ fn check_expression(
                         return Err(AnalysisError::WrongArgumentCount(position.clone()));
                     }
                 }
+                BuiltInFunction::Debug | BuiltInFunction::Error | BuiltInFunction::Source => {}
             }
 
             function_type.result().clone()
