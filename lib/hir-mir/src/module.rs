@@ -1,5 +1,5 @@
 use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
-use crate::spawn_function_declaration;
+use crate::utility_function_declaration;
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -27,11 +27,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain(context.configuration().ok().map(|configuration| {
-                Ok(spawn_function_declaration::compile(
-                    &configuration.spawn_function_name,
-                ))
-            }))
+            .chain(
+                context
+                    .configuration()
+                    .ok()
+                    .into_iter()
+                    .flat_map(|configuration| utility_function_declaration::compile(configuration))
+                    .map(Ok),
+            )
             .collect::<Result<_, _>>()?,
         module
             .function_definitions()
@@ -158,9 +161,9 @@ mod tests {
                 )])
             ),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &COMPILE_CONFIGURATION.spawn_function_name
-                )])
+                .set_foreign_declarations(utility_function_declaration::compile(
+                    &COMPILE_CONFIGURATION
+                ))
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -194,9 +197,9 @@ mod tests {
                 )])
             ),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &COMPILE_CONFIGURATION.spawn_function_name
-                )])
+                .set_foreign_declarations(utility_function_declaration::compile(
+                    &COMPILE_CONFIGURATION
+                ))
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",

@@ -1,6 +1,5 @@
 mod built_in_call;
 mod compile_configuration;
-mod concurrency;
 mod context;
 mod downcast;
 mod error;
@@ -13,12 +12,12 @@ mod main_module_configuration;
 mod map_type_configuration;
 mod module;
 mod module_interface;
-mod spawn_function_declaration;
 mod string_type_configuration;
 mod test_function;
 mod test_module_configuration;
 mod transformation;
 mod type_;
+mod utility_function_declaration;
 
 pub use compile_configuration::CompileConfiguration;
 use context::CompileContext;

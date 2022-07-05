@@ -1,6 +1,8 @@
 use crate::{
-    concurrency::MODULE_LOCAL_SPAWN_FUNCTION_NAME, context::CompileContext, downcast, expression,
-    type_, CompileError,
+    context::CompileContext,
+    downcast, expression, type_,
+    utility_function_declaration::{LOCAL_DEBUG_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME},
+    CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
@@ -37,7 +39,7 @@ pub fn compile(
                 )?
                 .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
             )?,
-            mir::ir::Variable::new(&context.configuration()?.debug_function_name),
+            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
             arguments,
         )
         .into(),
@@ -75,7 +77,7 @@ pub fn compile(
                 mir_thunk_type.clone(),
                 mir::ir::Call::new(
                     type_::compile_spawn_function(),
-                    mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                    mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                     vec![mir::ir::LetRecursive::new(
                         mir::ir::FunctionDefinition::thunk(
                             ANY_THUNK_NAME,
@@ -134,7 +136,6 @@ pub fn compile(
 
 #[cfg(test)]
 mod tests {
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use super::*;
     use position::{test::PositionFake, Position};
 
@@ -169,7 +170,7 @@ mod tests {
                     vec![mir::types::Type::ByteString],
                     mir::types::Type::None
                 ),
-                mir::ir::Variable::new(&COMPILE_CONFIGURATION.debug_function_name),
+                mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
                 vec![mir::ir::ByteString::new(vec![]).into()],
             )
             .into())
@@ -217,7 +218,7 @@ mod tests {
                     thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
@@ -306,7 +307,7 @@ mod tests {
                     thunk_type.clone(),
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
-                        mir::ir::Variable::new(MODULE_LOCAL_SPAWN_FUNCTION_NAME),
+                        mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
