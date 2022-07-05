@@ -2,7 +2,7 @@ Feature: Test packages
   Scenario Outline: Build and test test packages
     Given I run the following script:
     """
-    cp -r $PEN_ROOT/packages .
+    cp -r $PEN_ROOT/test .
     """
     When I cd to "test/<package>"
     Then I successfully run `pen format --check`
