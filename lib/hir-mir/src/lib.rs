@@ -99,9 +99,7 @@ fn compile_module(
 mod tests {
     use super::*;
     use crate::{
-        compile_configuration::COMPILE_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        map_type_configuration::HASH_CONFIGURATION,
+        compile_configuration::COMPILE_CONFIGURATION, map_type_configuration::HASH_CONFIGURATION,
     };
     use hir::{
         analysis::AnalysisError,
