@@ -2,10 +2,10 @@ type Error {
   source any
 }
 
-Error = \(source any) error {
-  error{source: source}
+Error = \(s any) Error {
+  Error{source: s}
 }
 
-Source = \(error error) any {
-  error.source
+Source = \(e Error) any {
+  e.source
 }
