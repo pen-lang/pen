@@ -12,7 +12,6 @@ pub fn compile(
     module: &ir::Module,
     imported_modules: &[ImportedModule],
     prelude_module_interfaces: &[interface::Module],
-    context_module_interfaces: &[interface::Module],
 ) -> ir::Module {
     let module = compile_imports(
         module,
@@ -20,7 +19,6 @@ pub fn compile(
             .iter()
             .map(|module| module.interface())
             .chain(prelude_module_interfaces)
-            .chain(context_module_interfaces)
             .collect::<Vec<_>>(),
     );
 
@@ -181,10 +179,17 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
+    fn compile_module(
+        module: &ir::Module,
+        explicitly_imported_modules: &[ImportedModule],
+    ) -> ir::Module {
+        compile(module, explicitly_imported_modules, &[])
+    }
+
     #[test]
     fn compile_empty_module() {
         assert_eq!(
-            compile(&ir::Module::empty(), &[], &[], &[]),
+            compile_module(&ir::Module::empty(), &[]),
             ir::Module::empty()
         );
     }
@@ -192,7 +197,7 @@ mod tests {
     #[test]
     fn rename_variable() {
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
                     "Foo",
                     ir::Lambda::new(
@@ -221,8 +226,6 @@ mod tests {
                     "Bar",
                     Default::default(),
                 )],
-                &[],
-                &[],
             ),
             ir::Module::empty()
                 .set_declarations(vec![ir::FunctionDeclaration::new(
@@ -250,7 +253,7 @@ mod tests {
     #[test]
     fn rename_type_definition() {
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
@@ -288,8 +291,6 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[],
-                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![
@@ -329,7 +330,7 @@ mod tests {
     #[test]
     fn rename_type_alias() {
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
                         "Foo",
@@ -366,8 +367,6 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[],
-                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![ir::TypeDefinition::fake(
@@ -425,7 +424,7 @@ mod tests {
         );
 
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
@@ -445,8 +444,6 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[],
-                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![
@@ -489,7 +486,7 @@ mod tests {
         );
 
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
                     .set_definitions(vec![definition.clone()]),
@@ -508,8 +505,6 @@ mod tests {
                     "Bar",
                     Default::default()
                 )],
-                &[],
-                &[],
             ),
             ir::Module::empty()
                 .set_type_definitions(vec![type_definition])
@@ -532,7 +527,7 @@ mod tests {
         };
 
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty(),
                 &vec![
                     ImportedModule::new(
@@ -546,8 +541,6 @@ mod tests {
                         Default::default()
                     )
                 ],
-                &[],
-                &[],
             ),
             ir::Module::empty().set_type_definitions(vec![ir::TypeDefinition::fake(
                 "Foo",
@@ -572,7 +565,7 @@ mod tests {
         };
 
         assert_eq!(
-            compile(
+            compile_module(
                 &ir::Module::empty(),
                 &vec![
                     ImportedModule::new(
@@ -586,8 +579,6 @@ mod tests {
                         Default::default()
                     )
                 ],
-                &[],
-                &[],
             ),
             ir::Module::empty().set_type_aliases(vec![ir::TypeAlias::fake(
                 "Foo",
@@ -605,7 +596,7 @@ mod tests {
         #[test]
         fn rename_variable() {
             assert_eq!(
-                compile(
+                compile_module(
                     &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
@@ -634,8 +625,6 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[],
-                    &[],
                 ),
                 ir::Module::empty()
                     .set_declarations(vec![ir::FunctionDeclaration::new(
@@ -663,7 +652,7 @@ mod tests {
         #[test]
         fn rename_type_definition() {
             assert_eq!(
-                compile(
+                compile_module(
                     &ir::Module::empty()
                         .set_type_definitions(vec![ir::TypeDefinition::fake(
                             "Foo",
@@ -701,8 +690,6 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[],
-                    &[],
                 ),
                 ir::Module::empty()
                     .set_type_definitions(vec![
@@ -742,7 +729,7 @@ mod tests {
         #[test]
         fn rename_type_alias() {
             assert_eq!(
-                compile(
+                compile_module(
                     &ir::Module::empty()
                         .set_type_definitions(vec![ir::TypeDefinition::fake(
                             "Foo",
@@ -779,8 +766,6 @@ mod tests {
                         "Bar",
                         ["Bar".into()].into_iter().collect()
                     )],
-                    &[],
-                    &[],
                 ),
                 ir::Module::empty()
                     .set_type_definitions(vec![ir::TypeDefinition::fake(
