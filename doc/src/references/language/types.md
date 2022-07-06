@@ -211,9 +211,7 @@ any
 
 ## Error
 
-It is an error. See also [Error handling](syntax.md#error-handling).
-
-You can create error values by calling [the `error` built-in function](built-ins.md#error).
+It is an error. You can create error values by calling [the `error` built-in function](built-ins.md#error). See also [Error handling](syntax.md#error-handling).
 
 ```pen
 error
