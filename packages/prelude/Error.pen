@@ -1,11 +1,11 @@
-type error {
+type Error {
   source any
 }
 
-error = \(source any) error {
+Error = \(source any) error {
   error{source: source}
 }
 
-source = \(error error) any {
+Source = \(error error) any {
   error.source
 }
