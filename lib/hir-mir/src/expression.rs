@@ -214,6 +214,7 @@ pub fn compile(
 
             match &from {
                 Type::Boolean(_)
+                | Type::Error(_)
                 | Type::None(_)
                 | Type::Number(_)
                 | Type::Record(_)
@@ -732,11 +733,7 @@ fn compile_operation(
                 .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
             let error_type = type_::compile(
                 context,
-                &types::Reference::new(
-                    &context.configuration()?.error_type.error_type_name,
-                    operation.position().clone(),
-                )
-                .into(),
+                &types::Error::new(operation.position().clone()).into(),
             )?;
 
             mir::ir::Case::new(
@@ -1407,15 +1404,7 @@ mod tests {
 
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
-                        [(
-                            "error".into(),
-                            types::Record::new("error", Position::fake()).into()
-                        )]
-                        .into_iter()
-                        .collect(),
-                        Default::default()
-                    ),
+                    &CompileContext::dummy(Default::default(), Default::default()),
                     &TryOperation::new(
                         Some(types::None::new(Position::fake()).into()),
                         Variable::new("x", Position::fake()),
@@ -1447,15 +1436,7 @@ mod tests {
 
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
-                        [(
-                            "error".into(),
-                            types::Record::new("error", Position::fake()).into()
-                        )]
-                        .into_iter()
-                        .collect(),
-                        Default::default()
-                    ),
+                    &CompileContext::dummy(Default::default(), Default::default()),
                     &TryOperation::new(
                         Some(
                             types::Union::new(

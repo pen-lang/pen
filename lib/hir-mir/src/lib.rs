@@ -70,8 +70,7 @@ pub fn compile_test(
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
     let context = CompileContext::new(module, compile_configuration.clone().into());
 
-    let (module, test_information) =
-        test_function::compile(&context, module, test_module_configuration)?;
+    let (module, test_information) = test_function::compile(module, test_module_configuration)?;
     let (module, _) = compile_module(&context, &module)?;
 
     Ok((module, test_information))
@@ -99,9 +98,7 @@ fn compile_module(
 mod tests {
     use super::*;
     use crate::{
-        compile_configuration::COMPILE_CONFIGURATION,
-        error_type_configuration::ERROR_TYPE_CONFIGURATION,
-        map_type_configuration::HASH_CONFIGURATION,
+        compile_configuration::COMPILE_CONFIGURATION, map_type_configuration::HASH_CONFIGURATION,
     };
     use hir::{
         analysis::AnalysisError,
@@ -310,38 +307,27 @@ mod tests {
     fn fail_to_compile_invalid_try_operator_in_function() {
         assert_eq!(
             compile_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    types::Reference::new(
-                                        &ERROR_TYPE_CONFIGURATION.error_type_name,
-                                        Position::fake(),
-                                    ),
-                                    Position::fake(),
-                                ),
-                            )],
-                            types::None::new(Position::fake()),
-                            TryOperation::new(
-                                None,
-                                Variable::new("x", Position::fake()),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
+                                types::None::new(Position::fake()),
+                                types::Error::new(Position::fake(),),
                                 Position::fake(),
                             ),
+                        )],
+                        types::None::new(Position::fake()),
+                        TryOperation::new(
+                            None,
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )])
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );

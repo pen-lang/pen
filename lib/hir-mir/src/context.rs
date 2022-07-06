@@ -18,13 +18,6 @@ impl CompileContext {
             analysis_context: AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                configuration.as_ref().map(|configuration| {
-                    types::Reference::new(
-                        &configuration.error_type.error_type_name,
-                        module.position().clone(),
-                    )
-                    .into()
-                }),
             ),
             configuration,
         }
@@ -36,20 +29,9 @@ impl CompileContext {
         records: FnvHashMap<String, Vec<types::RecordField>>,
     ) -> Self {
         use super::compile_configuration::COMPILE_CONFIGURATION;
-        use position::{test::PositionFake, Position};
 
         Self {
-            analysis_context: AnalysisContext::new(
-                types,
-                records,
-                Some(
-                    types::Reference::new(
-                        &COMPILE_CONFIGURATION.error_type.error_type_name,
-                        Position::fake(),
-                    )
-                    .into(),
-                ),
-            ),
+            analysis_context: AnalysisContext::new(types, records),
             configuration: COMPILE_CONFIGURATION.clone().into(),
         }
     }

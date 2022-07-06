@@ -75,7 +75,6 @@ fn check_expression(
             }
 
             match call.function() {
-                BuiltInFunction::Debug => {}
                 BuiltInFunction::Size => {
                     if let [argument_type] = function_type.arguments() {
                         if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
@@ -103,6 +102,7 @@ fn check_expression(
                         return Err(AnalysisError::WrongArgumentCount(position.clone()));
                     }
                 }
+                BuiltInFunction::Debug | BuiltInFunction::Error | BuiltInFunction::Source => {}
             }
 
             function_type.result().clone()
@@ -610,19 +610,15 @@ fn check_operation(
             let success_type = operation
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+            let error_type = types::Error::new(position.clone()).into();
             let union_type = check_expression(operation.expression())?;
 
-            check_subsumption(context.error_type()?, &union_type)?;
+            check_subsumption(&error_type, &union_type)?;
             check_subsumption(success_type, &union_type)?;
 
             check_subsumption(
                 &union_type,
-                &types::Union::new(
-                    success_type.clone(),
-                    context.error_type()?.clone(),
-                    position.clone(),
-                )
-                .into(),
+                &types::Union::new(success_type.clone(), error_type, position.clone()).into(),
             )?;
 
             success_type.clone()
@@ -659,7 +655,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new("error", Position::fake()).into()),
             ),
             module,
         )
@@ -1576,33 +1571,25 @@ mod tests {
         fn check_try_operation() {
             let union_type = types::Union::new(
                 types::None::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            union_type,
-                            TryOperation::new(
-                                Some(types::None::new(Position::fake()).into()),
-                                Variable::new("x", Position::fake()),
-                                Position::fake(),
-                            ),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type,
+                        TryOperation::new(
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1611,38 +1598,30 @@ mod tests {
         fn check_try_operation_with_number() {
             let union_type = types::Union::new(
                 types::Number::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            union_type,
-                            ArithmeticOperation::new(
-                                ArithmeticOperator::Add,
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Number::new(42.0, Position::fake()),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type,
+                        ArithmeticOperation::new(
+                            ArithmeticOperator::Add,
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
+                            Number::new(42.0, Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1652,28 +1631,20 @@ mod tests {
             let any_type = types::Any::new(Position::fake());
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", any_type.clone())],
-                            any_type.clone(),
-                            TryOperation::new(
-                                Some(any_type.into()),
-                                Variable::new("x", Position::fake()),
-                                Position::fake(),
-                            ),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", any_type.clone())],
+                        any_type.clone(),
+                        TryOperation::new(
+                            Some(any_type.into()),
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1682,34 +1653,26 @@ mod tests {
         fn fail_to_check_try_operation_with_wrong_success_type() {
             let union_type = types::Union::new(
                 types::None::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             assert_eq!(
                 check_module(
-                    &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::fake(
-                            "error",
-                            vec![],
-                            false,
-                            false,
-                            false,
-                        )])
-                        .set_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![Argument::new("x", union_type.clone())],
-                                union_type,
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type,
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
-                            false,
-                        )]),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
                 ),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
@@ -1722,32 +1685,24 @@ mod tests {
         fn fail_to_check_try_operation_with_wrong_operand_type() {
             assert_eq!(
                 check_module(
-                    &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::fake(
-                            "error",
-                            vec![],
-                            false,
-                            false,
-                            false,
-                        )])
-                        .set_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![Argument::new("x", types::None::new(Position::fake()))],
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    types::Reference::new("error", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", types::None::new(Position::fake()))],
+                            types::Union::new(
+                                types::None::new(Position::fake()),
+                                types::Error::new(Position::fake()),
                                 Position::fake(),
                             ),
-                            false,
-                        )]),
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
                 ),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),

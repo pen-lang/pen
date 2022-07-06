@@ -205,11 +205,17 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 ast::Expression::Variable(variable) if variable.name() == "debug" => {
                     built_in_call(ir::BuiltInFunction::Debug).into()
                 }
-                ast::Expression::Variable(variable) if variable.name() == "size" => {
-                    built_in_call(ir::BuiltInFunction::Size).into()
+                ast::Expression::Variable(variable) if variable.name() == "error" => {
+                    built_in_call(ir::BuiltInFunction::Error).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "go" => {
                     built_in_call(ir::BuiltInFunction::Spawn).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "size" => {
+                    built_in_call(ir::BuiltInFunction::Size).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "source" => {
+                    built_in_call(ir::BuiltInFunction::Source).into()
                 }
                 _ => ir::Call::new(
                     None,

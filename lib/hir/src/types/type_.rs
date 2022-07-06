@@ -1,6 +1,7 @@
 use super::{
-    any::Any, boolean::Boolean, byte_string::ByteString, function::Function, list::List, map::Map,
-    none::None, number::Number, record::Record, reference::Reference, union::Union,
+    any::Any, boolean::Boolean, byte_string::ByteString, error::Error, function::Function,
+    list::List, map::Map, none::None, number::Number, record::Record, reference::Reference,
+    union::Union,
 };
 use position::Position;
 use serde::{Deserialize, Serialize};
@@ -9,6 +10,7 @@ use serde::{Deserialize, Serialize};
 pub enum Type {
     Any(Any),
     Boolean(Boolean),
+    Error(Error),
     Function(Function),
     List(List),
     Map(Map),
@@ -25,6 +27,7 @@ impl Type {
         match self {
             Self::Any(any) => any.position(),
             Self::Boolean(boolean) => boolean.position(),
+            Self::Error(error) => error.position(),
             Self::Function(function) => function.position(),
             Self::List(list) => list.position(),
             Self::Map(map) => map.position(),
@@ -41,6 +44,7 @@ impl Type {
         match self {
             Self::Any(any) => any.set_position(position).into(),
             Self::Boolean(boolean) => boolean.set_position(position).into(),
+            Self::Error(error) => error.set_position(position).into(),
             Self::Function(function) => function.set_position(position).into(),
             Self::List(list) => list.set_position(position).into(),
             Self::Map(map) => map.set_position(position).into(),
@@ -125,6 +129,12 @@ impl From<Boolean> for Type {
 impl From<ByteString> for Type {
     fn from(string: ByteString) -> Self {
         Self::String(string)
+    }
+}
+
+impl From<Error> for Type {
+    fn from(error: Error) -> Self {
+        Self::Error(error)
     }
 }
 

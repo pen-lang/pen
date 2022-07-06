@@ -59,6 +59,7 @@ fn transform_type(type_: &Type, transform: &impl Fn(&Type) -> Type) -> Type {
         .into(),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::None(_)
         | Type::Number(_)
         | Type::Record(_)

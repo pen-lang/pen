@@ -44,6 +44,7 @@ fn collect_references(type_: &Type) -> FnvHashSet<&str> {
             .collect(),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::Record(_)
         | Type::None(_)
         | Type::Number(_)

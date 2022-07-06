@@ -215,7 +215,7 @@ fn transform_equal_operation(
             rhs,
             position,
         )?,
-        Type::Any(_) | Type::Function(_) => {
+        Type::Any(_) | Type::Error(_) | Type::Function(_) => {
             return Err(AnalysisError::TypeNotComparable(position.clone()).into())
         }
     })

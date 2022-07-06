@@ -132,7 +132,7 @@ pub fn transform(
             &type_resolver::resolve(reference, context.types())?,
             position,
         )?,
-        Type::Any(_) | Type::Function(_) => {
+        Type::Any(_) | Type::Error(_) | Type::Function(_) => {
             return Err(AnalysisError::TypeNotComparable(position.clone()).into())
         }
     })

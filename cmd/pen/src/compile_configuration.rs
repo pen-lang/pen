@@ -65,9 +65,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     equal_function_name: "_equalStrings".into(),
                 },
                 error_type: app::module_compiler::ErrorTypeConfiguration {
-                    error_type_name: "error".into(),
-                    error_function_name: "error".into(),
-                    source_function_name: "source".into(),
+                    error_type_name: "Error".into(),
+                    error_function_name: "Error".into(),
+                    source_function_name: "Source".into(),
                 },
                 spawn_function_name: "_pen_spawn".into(),
                 debug_function_name: "_pen_debug".into(),

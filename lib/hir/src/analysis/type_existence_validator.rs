@@ -21,6 +21,7 @@ pub fn validate(module: &Module) -> Result<(), AnalysisError> {
             }
             Type::Any(_)
             | Type::Boolean(_)
+            | Type::Error(_)
             | Type::Function(_)
             | Type::List(_)
             | Type::Map(_)

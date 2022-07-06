@@ -26,10 +26,9 @@ pub fn compile(
         .arguments()
         .iter()
         .map(|argument| expression::compile(context, argument))
-        .collect::<Result<_, _>>()?;
-
-    Ok(match call.function() {
-        BuiltInFunction::Debug => mir::ir::Call::new(
+        .collect::<Result<Vec<_>, _>>()?;
+    let compile_call = |function| -> Result<_, CompileError> {
+        Ok(mir::ir::Call::new(
             type_::compile_function(
                 context,
                 &type_canonicalizer::canonicalize_function(
@@ -39,9 +38,18 @@ pub fn compile(
                 )?
                 .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
             )?,
-            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-            arguments,
-        )
+            function,
+            arguments.clone(),
+        ))
+    };
+
+    Ok(match call.function() {
+        BuiltInFunction::Debug => {
+            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME))?.into()
+        }
+        BuiltInFunction::Error => compile_call(mir::ir::Variable::new(
+            &context.configuration()?.error_type.error_function_name,
+        ))?
         .into(),
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
@@ -56,6 +64,10 @@ pub fn compile(
             },
             arguments,
         )
+        .into(),
+        BuiltInFunction::Source => compile_call(mir::ir::Variable::new(
+            &context.configuration()?.error_type.source_function_name,
+        ))?
         .into(),
         BuiltInFunction::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";

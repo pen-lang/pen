@@ -224,6 +224,7 @@ fn compile_type(type_: &Type) -> Document {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
+        Type::Error(_) => "error".into(),
         Type::Function(function) => sequence([
             "\\(".into(),
             sequence(

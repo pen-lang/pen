@@ -19,7 +19,8 @@ use once_cell::sync::Lazy;
 use position::Position;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
-const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "none", "number", "string"];
+const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "error", "none", "number", "string"];
+const BUILT_IN_FUNCTIONS: &[&str] = &["debug", "error", "go", "size", "source"];
 static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     [
         "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -27,6 +28,7 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     .iter()
     .chain(BUILT_IN_LITERALS)
     .chain(BUILT_IN_TYPES)
+    .chain(BUILT_IN_FUNCTIONS)
     .copied()
     .collect()
 });
@@ -274,6 +276,7 @@ fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
         boolean_type().map(Type::from),
+        error_type().map(Type::from),
         none_type().map(Type::from),
         number_type().map(Type::from),
         string_type().map(Type::from),
@@ -289,6 +292,12 @@ fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
     attempt(position().skip(keyword("boolean")))
         .map(types::Boolean::new)
         .expected("boolean type")
+}
+
+fn error_type<'a>() -> impl Parser<Stream<'a>, Output = types::Error> {
+    attempt(position().skip(keyword("error")))
+        .map(types::Error::new)
+        .expected("error type")
 }
 
 fn none_type<'a>() -> impl Parser<Stream<'a>, Output = types::None> {
@@ -483,6 +492,21 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
         .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
+fn built_in_call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
+    (
+        attempt((position(), built_in_function())),
+        between(sign("("), sign(")"), sep_end_by(expression(), sign(","))),
+    )
+        .map(|((position, function), arguments)| {
+            Call::new(
+                Variable::new(function, position.clone()),
+                arguments,
+                position,
+            )
+        })
+        .expected("built-in function call")
+}
+
 fn record_field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
         .map(|(position, identifier)| SuffixOperator::RecordField(identifier, position))
@@ -508,6 +532,7 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
             none_literal().map(Expression::from),
             number_literal().map(Expression::from),
             string_literal().map(Expression::from),
+            built_in_call().map(Expression::from),
             variable().map(Expression::from),
             between(sign("("), sign(")"), expression()),
         )))
@@ -844,18 +869,35 @@ fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    unchecked_identifier()
+        .then(|identifier| {
+            if KEYWORDS.contains(&identifier.as_str()) {
+                // TODO Fix those misuse of `unexpected_any` combinators.
+                // These lead to wrong positions in error messages.
+                // We use the `silent` method  below because its position is wrong anyway.
+                unexpected_any("keyword").left()
+            } else {
+                value(identifier).right()
+            }
+        })
+        .silent()
+}
+
+fn unchecked_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
     (
         choice((letter(), combine::parser::char::char('_'))),
         many(choice((alpha_num(), combine::parser::char::char('_')))),
     )
         .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+}
+
+fn built_in_function<'a>() -> impl Parser<Stream<'a>, Output = String> {
+    token(attempt(unchecked_identifier()))
         .then(|identifier| {
-            if KEYWORDS.contains(&identifier.as_str()) {
-                // TODO Fix those misuse of `unexpected_any` combinators.
-                // These lead to wrong positions in error messages.
-                unexpected_any("keyword").left()
-            } else {
+            if BUILT_IN_FUNCTIONS.contains(&identifier.as_str()) {
                 value(identifier).right()
+            } else {
+                unexpected_any("identifier").left()
             }
         })
         .silent()
@@ -2281,6 +2323,54 @@ mod tests {
                 let source = "f(1+)";
 
                 insta::assert_debug_snapshot!(expression()
+                    .parse(stream(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .err());
+            }
+        }
+
+        mod built_in_call {
+            use super::*;
+            use pretty_assertions::assert_eq;
+
+            #[test]
+            fn parse() {
+                for &name in BUILT_IN_FUNCTIONS {
+                    let source = name.to_owned() + "()";
+
+                    assert_eq!(
+                        built_in_call().parse(stream(&source, "")).unwrap().0,
+                        Call::new(
+                            Variable::new(name, Position::fake()),
+                            vec![],
+                            Position::fake()
+                        )
+                    );
+                }
+            }
+
+            #[test]
+            fn parse_as_expression() {
+                for &name in BUILT_IN_FUNCTIONS {
+                    let source = name.to_owned() + "()";
+
+                    assert_eq!(
+                        expression().parse(stream(&source, "")).unwrap().0,
+                        Call::new(
+                            Variable::new(name, Position::fake()),
+                            vec![],
+                            Position::fake()
+                        )
+                        .into()
+                    );
+                }
+            }
+
+            #[test]
+            fn fail_to_parse_call() {
+                let source = "f()";
+
+                insta::assert_debug_snapshot!(built_in_call()
                     .parse(stream(source, ""))
                     .map_err(|error| ParseError::new(source, "", error))
                     .err());

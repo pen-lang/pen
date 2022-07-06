@@ -46,6 +46,7 @@ fn compile_type_definition(
         )),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::String(_)
         | Type::None(_)
         | Type::Number(_)
@@ -288,10 +289,7 @@ mod tests {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::Record::new(
-                &context.configuration().unwrap().error_type.error_type_name,
-                Position::fake(),
-            ),
+            types::None::new(Position::fake()),
             Position::fake(),
         );
 
@@ -331,10 +329,7 @@ mod tests {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::Record::new(
-                &context.configuration().unwrap().error_type.error_type_name,
-                Position::fake(),
-            ),
+            types::Error::new(Position::fake()),
             Position::fake(),
         );
 

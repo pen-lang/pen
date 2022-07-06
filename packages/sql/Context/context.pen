@@ -7,17 +7,17 @@ import foreign _pen_sql_pool_execute \(Pool, string, [any]) numberResult
 
 type poolResult {
   pool Pool
-  error string
+  error_ string
 }
 
 type listResult {
   list [any]
-  error string
+  error_ string
 }
 
 type numberResult {
   value number
-  error string
+  error_ string
 }
 
 type Context {
@@ -36,28 +36,28 @@ New = \() Context {
       CreatePool: \(uri string, options Options) Pool | error {
         r = _pen_sql_pool_create(uri, options)
 
-        if r.error == "" {
+        if r.error_ == "" {
           r.pool
         } else {
-          error(r.error)
+          error(r.error_)
         }
       },
       QueryPool: \(pool Pool, query string, arguments [any]) [[any]] | error {
         r = _pen_sql_pool_query(pool, query, arguments)
 
-        if r.error == "" {
+        if r.error_ == "" {
           [[any] if r = r() as [any] { r } else { [any] } for r in r.list]
         } else {
-          error(r.error)
+          error(r.error_)
         }
       },
       ExecutePool: \(pool Pool, query string, arguments [any]) number | error {
         r = _pen_sql_pool_execute(pool, query, arguments)
 
-        if r.error == "" {
+        if r.error_ == "" {
           r.value
         } else {
-          error(r.error)
+          error(r.error_)
         }
       },
     },

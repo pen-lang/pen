@@ -9,6 +9,9 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
+            Type::Error(_) => {
+                mir::types::Record::new(&context.configuration()?.error_type.error_type_name).into()
+            }
             Type::Function(function) => compile_function(context, &function)?.into(),
             Type::List(_) => compile_list(context)?.into(),
             Type::Map(_) => compile_map(context)?.into(),

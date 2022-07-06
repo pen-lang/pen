@@ -62,6 +62,7 @@ fn is_type_recursive(
             .all(identity),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::Function(_)
         | Type::List(_)
         | Type::Map(_)
@@ -99,7 +100,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                None,
             ),
             module,
         )

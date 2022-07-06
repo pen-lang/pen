@@ -600,7 +600,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new("error", Position::fake()).into()),
             ),
             module,
         )

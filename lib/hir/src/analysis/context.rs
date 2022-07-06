@@ -1,4 +1,3 @@
-use super::AnalysisError;
 use crate::types::{self, Type};
 use fnv::FnvHashMap;
 
@@ -6,20 +5,14 @@ use fnv::FnvHashMap;
 pub struct AnalysisContext {
     types: FnvHashMap<String, Type>,
     records: FnvHashMap<String, Vec<types::RecordField>>,
-    error_type: Option<Type>,
 }
 
 impl AnalysisContext {
     pub fn new(
         types: FnvHashMap<String, Type>,
         records: FnvHashMap<String, Vec<types::RecordField>>,
-        error_type: Option<Type>,
     ) -> Self {
-        Self {
-            types,
-            records,
-            error_type,
-        }
+        Self { types, records }
     }
 
     pub fn types(&self) -> &FnvHashMap<String, Type> {
@@ -28,12 +21,5 @@ impl AnalysisContext {
 
     pub fn records(&self) -> &FnvHashMap<String, Vec<types::RecordField>> {
         &self.records
-    }
-
-    // TODO Can we introduce a built-in error type in HIR and remove this method?
-    pub fn error_type(&self) -> Result<&Type, AnalysisError> {
-        self.error_type
-            .as_ref()
-            .ok_or(AnalysisError::ErrorTypeUndefined)
     }
 }

@@ -28,6 +28,7 @@ Some(
             "none literal",
             "number literal",
             "string literal",
+            "built-in function call",
             "variable",
         ],
         position: Position {
