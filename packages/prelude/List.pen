@@ -1,4 +1,4 @@
-import foreign "c" _pen_prelude_combinehashes \(number, number) number
+import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 
 type List {
   node \() node | none
@@ -107,7 +107,7 @@ hashNode = \(f \(any) number, node \() node | none, h number) number {
     hashNode(
       f,
       n.rest,
-      _pen_prelude_combinehashes(h, f(n)),
+      _pen_prelude_combine_hashes(h, f(n)),
     )
   } else {
     h
