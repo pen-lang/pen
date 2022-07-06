@@ -310,28 +310,27 @@ mod tests {
     fn fail_to_compile_invalid_try_operator_in_function() {
         assert_eq!(
             compile_module(
-                &Module::empty()
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    types::Error::new(Position::fake(),),
-                                    Position::fake(),
-                                ),
-                            )],
-                            types::None::new(Position::fake()),
-                            TryOperation::new(
-                                None,
-                                Variable::new("x", Position::fake()),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
+                                types::None::new(Position::fake()),
+                                types::Error::new(Position::fake(),),
                                 Position::fake(),
                             ),
+                        )],
+                        types::None::new(Position::fake()),
+                        TryOperation::new(
+                            None,
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )])
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
