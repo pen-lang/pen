@@ -213,10 +213,8 @@ any
 
 It is an error. See also [Error handling](syntax.md#error-handling).
 
-It doesn't have any literal. You can create error values calling [the `error` built-in function](built-ins.md#error).
+You can create error values by calling [the `error` built-in function](built-ins.md#error).
 
 ```pen
-type error {
-  ...
-}
+error
 ```
