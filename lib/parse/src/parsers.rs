@@ -28,7 +28,6 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
     .iter()
     .chain(BUILT_IN_LITERALS)
     .chain(BUILT_IN_TYPES)
-    .chain(BUILT_IN_FUNCTIONS)
     .copied()
     .collect()
 });
