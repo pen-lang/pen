@@ -4,15 +4,7 @@ Built-in types and functions are ones implicitly defined in every module.
 
 ## Types
 
-### `error`
-
-It is a special type used for error handling. See also [Error handling](/references/language/syntax.md#error-handling).
-
-```pen
-type error {
-  ...
-}
-```
+See [Types](types.md).
 
 ## Functions
 
