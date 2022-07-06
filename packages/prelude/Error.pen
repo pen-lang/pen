@@ -1,11 +1,11 @@
 type Error {
-  source any
+  source_ any
 }
 
 Error = \(s any) Error {
-  Error{source: s}
+  Error{source_: s}
 }
 
 Source = \(e Error) any {
-  e.source
+  e.source_
 }

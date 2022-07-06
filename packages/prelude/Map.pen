@@ -4,7 +4,7 @@ import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
 
 type _map {
   hamt _hamt
-  size number
+  size_ number
 }
 
 type _empty {}
@@ -29,7 +29,7 @@ type _mapIterator {
 
 type _hamtUpdate {
   hamt _hamt
-  size boolean
+  resized boolean
 }
 
 type _entry = _keyValue | _hamt | none
@@ -86,7 +86,7 @@ _newMapContext = \(
 }
 
 _newMap = \() _map {
-  _map{hamt: _newHamt(), size: 0}
+  _map{hamt: _newHamt(), size_: 0}
 }
 
 _newHamt = \() _hamt {
@@ -161,12 +161,12 @@ _setMap = \(
   value any,
 ) _map {
   # Deconstruct a size for optimization.
-  s = map.size
+  s = map.size_
   u = _setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
   _map{
     hamt: u.hamt,
-    size: s + if u.size { 1 } else { 0 },
+    size_: s + if u.resized { 1 } else { 0 },
   }
 }
 
@@ -184,8 +184,8 @@ _setKeyValue = \(
   e = _getEntry(hamt, i)
   hamt = _setEntry(hamt, i, none)
 
-  update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
+  update = \(e _entry, b boolean) _hamtUpdate {
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), resized: b}
   }
 
   if e = e as _keyValue {
@@ -205,7 +205,7 @@ _setKeyValue = \(
       _setKeyValue(ctx, e, key, value, layer, level + 1)
     }
 
-    update(u.hamt, u.size)
+    update(u.hamt, u.resized)
   } else if none {
     update(_keyValue{key: key, value: value}, true)
   }
@@ -220,21 +220,21 @@ _deleteMap = \(
 
   _map{
     hamt: u.hamt,
-    size: map.size - if u.size { 1 } else { 0 },
+    size_: map.size_ - if u.resized { 1 } else { 0 },
   }
 }
 
 _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number) _hamtUpdate {
   i = _hamtIndex(ctx, key, layer, level)
-  update = \(e _entry, size boolean) _hamtUpdate {
-    _hamtUpdate{hamt: _setEntry(hamt, i, e), size: size}
+  update = \(e _entry, b boolean) _hamtUpdate {
+    _hamtUpdate{hamt: _setEntry(hamt, i, e), resized: b}
   }
 
   if e = _getEntry(hamt, i) as _keyValue {
     if ctx.equalKeys(e.key, key) {
       update(none, true)
     } else {
-      _hamtUpdate{hamt: hamt, size: false}
+      _hamtUpdate{hamt: hamt, resized: false}
     }
   } else if _hamt {
     u = if level > _maxLevel() {
@@ -243,9 +243,9 @@ _deleteKey = \(ctx _mapContext, hamt _hamt, key any, layer number, level number)
       _deleteKey(ctx, e, key, layer, level + 1)
     }
 
-    update(_normalizeHamt(u.hamt), u.size)
+    update(_normalizeHamt(u.hamt), u.resized)
   } else if none {
-    _hamtUpdate{hamt: hamt, size: false}
+    _hamtUpdate{hamt: hamt, resized: false}
   }
 }
 
@@ -297,7 +297,7 @@ _mergeHamt = \(ctx _mapContext, m _map, h _hamt, i number) _map {
 }
 
 _equalMaps = \(ctx _mapContext, x _map, y _map) boolean {
-  x.size == y.size & _equalHamts(ctx, x.hamt, y.hamt, 1)
+  x.size_ == y.size_ & _equalHamts(ctx, x.hamt, y.hamt, 1)
 }
 
 _equalHamts = \(ctx _mapContext, h1 _hamt, h2 _hamt, i number) boolean {
@@ -387,7 +387,7 @@ _mapIteratorValue = \(i _mapIterator) any { i.value }
 _mapIteratorRest = \(i _mapIterator) _mapIterator | none { i.rest() }
 
 _mapSize = \(x _map) number {
-  x.size
+  x.size_
 }
 
 _hamtIndex = \(ctx _mapContext, key any, layer number, level number) number {
