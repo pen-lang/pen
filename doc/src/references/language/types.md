@@ -208,3 +208,15 @@ Literally, it's an _any_ type. Any values can be converted to the type.
 ```pen
 any
 ```
+
+## Error
+
+It is an error. See also [Error handling](syntax.md#error-handling).
+
+It doesn't have any literal. You can create error values calling [the `error` built-in function](built-ins.md#error).
+
+```pen
+type error {
+  ...
+}
+```
