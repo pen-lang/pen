@@ -24,8 +24,8 @@ pub fn compile(
             .collect::<Vec<_>>(),
     );
 
-    let module = rename_types(&module, imported_modules, prelude_module_interfaces);
-    rename_variables(&module, imported_modules, prelude_module_interfaces)
+    let module = rename_types(&module, imported_modules);
+    rename_variables(&module, imported_modules)
 }
 
 fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]) -> ir::Module {
@@ -89,11 +89,7 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
     )
 }
 
-fn rename_variables(
-    module: &ir::Module,
-    imported_modules: &[ImportedModule],
-    prelude_module_interfaces: &[interface::Module],
-) -> ir::Module {
+fn rename_variables(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir::Module {
     variable_renamer::rename(
         module,
         &imported_modules
@@ -118,23 +114,11 @@ fn rename_variables(
                     })
                     .collect::<Vec<_>>()
             })
-            .chain(prelude_module_interfaces.iter().flat_map(|module| {
-                module.function_declarations().iter().map(|declaration| {
-                    (
-                        declaration.original_name().into(),
-                        declaration.name().into(),
-                    )
-                })
-            }))
             .collect(),
     )
 }
 
-fn rename_types(
-    module: &ir::Module,
-    imported_modules: &[ImportedModule],
-    prelude_module_interfaces: &[interface::Module],
-) -> ir::Module {
+fn rename_types(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir::Module {
     let names = imported_modules
         .iter()
         .flat_map(|module| {
@@ -164,18 +148,6 @@ fn rename_types(
                 })
                 .collect::<Vec<_>>()
         })
-        .chain(prelude_module_interfaces.iter().flat_map(|module| {
-            module
-                .type_definitions()
-                .iter()
-                .map(|definition| (definition.original_name().into(), definition.name().into()))
-                .chain(
-                    module
-                        .type_aliases()
-                        .iter()
-                        .map(|alias| (alias.original_name().into(), alias.name().into())),
-                )
-        }))
         .collect::<FnvHashMap<String, String>>();
 
     type_transformer::transform(module, |type_| match type_ {
