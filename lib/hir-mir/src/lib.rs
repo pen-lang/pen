@@ -70,8 +70,7 @@ pub fn compile_test(
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
     let context = CompileContext::new(module, compile_configuration.clone().into());
 
-    let (module, test_information) =
-        test_function::compile(&context, module, test_module_configuration)?;
+    let (module, test_information) = test_function::compile(module, test_module_configuration)?;
     let (module, _) = compile_module(&context, &module)?;
 
     Ok((module, test_information))

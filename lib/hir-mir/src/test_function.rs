@@ -1,5 +1,4 @@
 use super::{error::CompileError, test_module_configuration::TestModuleConfiguration};
-use crate::context::CompileContext;
 use hir::{ir::*, types};
 use std::{
     collections::hash_map::DefaultHasher,
@@ -12,7 +11,6 @@ const MESSAGE_VARIABLE_NAME: &str = "$message";
 const NON_STRING_TEST_ERROR_MESSAGE: &str = "<non-string test error>";
 
 pub fn compile(
-    context: &CompileContext,
     module: &Module,
     configuration: &TestModuleConfiguration,
 ) -> Result<(Module, test_info::Module), CompileError> {
@@ -62,15 +60,9 @@ pub fn compile(
                                             None,
                                             IfType::new(
                                                 MESSAGE_VARIABLE_NAME,
-                                                Call::new(
+                                                BuiltInCall::new(
                                                     None,
-                                                    Variable::new(
-                                                        &context
-                                                            .configuration()?
-                                                            .error_type
-                                                            .source_function_name,
-                                                        position.clone(),
-                                                    ),
+                                                    BuiltInFunction::Source,
                                                     vec![Variable::new(
                                                         RESULT_VARIABLE_NAME,
                                                         position.clone(),
