@@ -2,14 +2,14 @@ import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 import foreign "c" _pen_prelude_hash_number \(number) number
 import foreign "c" _pen_prelude_hash_string \(string) number
 
-_combineHashes = \(x number, y number) number {
+CombineHashes = \(x number, y number) number {
   _pen_prelude_combine_hashes(x, y)
 }
 
-_hashNumber = \(x number) number {
+HashNumber = \(x number) number {
   _pen_prelude_hash_number(x)
 }
 
-_hashString = \(x string) number {
+HashString = \(x string) number {
   _pen_prelude_hash_string(x)
 }
