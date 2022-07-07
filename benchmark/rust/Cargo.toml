@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dev-dependencies]
-criterion = "0.3.5"
+criterion = "0.3.6"
 im = "15.1.0"
 ordered-float = "3.0.0"
 
