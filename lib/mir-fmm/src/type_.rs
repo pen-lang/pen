@@ -88,8 +88,8 @@ pub fn compile_record(
     }
 }
 
-// Box large records. This logic needs to be simple because we also use the
-// same logic for FFI.
+// Box large records. This logic needs to be simple because we also use exactly
+// the same one for FFI.
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
