@@ -57,17 +57,3 @@ Feature: Core
     """
     When I run `pen build`
     Then the exit status should be 0
-
-  Scenario: Get a length of a list
-    Given a file named "Foo.pen" with:
-    """pen
-    import Core'List
-
-    f = \() number {
-      xs = [none]
-
-      List'Length([any ...xs])
-    }
-    """
-    When I run `pen build`
-    Then the exit status should be 0

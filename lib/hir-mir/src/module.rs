@@ -1,5 +1,5 @@
 use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
-use crate::spawn_function_declaration;
+use crate::utility_function_declaration;
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -27,11 +27,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain(context.configuration().ok().map(|configuration| {
-                Ok(spawn_function_declaration::compile(
-                    &configuration.concurrency,
-                ))
-            }))
+            .chain(
+                context
+                    .configuration()
+                    .ok()
+                    .into_iter()
+                    .flat_map(utility_function_declaration::compile)
+                    .map(Ok),
+            )
             .collect::<Result<_, _>>()?,
         module
             .function_definitions()
@@ -90,7 +93,7 @@ fn compile_function_declaration(
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
-        type_::compile_function(declaration.type_(), context)?,
+        type_::compile_function(context, declaration.type_())?,
     ))
 }
 
@@ -126,10 +129,7 @@ fn compile_function_definition(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        compile_configuration::COMPILE_CONFIGURATION,
-        concurrency_configuration::CONCURRENCY_CONFIGURATION,
-    };
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{test::ModuleFake, types};
     use mir::test::ModuleFake as _;
     use position::{test::PositionFake, Position};
@@ -161,9 +161,9 @@ mod tests {
                 )])
             ),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &CONCURRENCY_CONFIGURATION
-                )])
+                .set_foreign_declarations(utility_function_declaration::compile(
+                    &COMPILE_CONFIGURATION
+                ))
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -197,9 +197,9 @@ mod tests {
                 )])
             ),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(vec![spawn_function_declaration::compile(
-                    &CONCURRENCY_CONFIGURATION
-                )])
+                .set_foreign_declarations(utility_function_declaration::compile(
+                    &COMPILE_CONFIGURATION
+                ))
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",

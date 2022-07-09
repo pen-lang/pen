@@ -1,0 +1,22 @@
+import Core'Number
+import Os'File
+
+main = \(ctx context) none {
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    Number'String(fibonacci(40)),
+  )
+
+  none
+}
+
+fibonacci = \(n number) number {
+  if n <= 0 {
+    0
+  } else if n == 1 {
+    1
+  } else {
+    fibonacci(n - 1) + fibonacci(n - 2)
+  }
+}

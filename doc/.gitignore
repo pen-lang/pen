@@ -1,2 +1,5 @@
 *.svg
 book
+theme/index.hbs
+theme/pagetoc.css
+theme/pagetoc.js

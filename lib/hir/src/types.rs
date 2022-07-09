@@ -1,6 +1,7 @@
 mod any;
 mod boolean;
 mod byte_string;
+mod error;
 mod function;
 mod list;
 mod map;
@@ -15,6 +16,7 @@ mod union;
 pub use any::*;
 pub use boolean::*;
 pub use byte_string::*;
+pub use error::*;
 pub use function::*;
 pub use list::*;
 pub use map::*;

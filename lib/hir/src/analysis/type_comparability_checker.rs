@@ -22,6 +22,7 @@ fn check_with_cache(
     Ok(match type_ {
         Type::Any(_) => false,
         Type::Boolean(_) => true,
+        Type::Error(_) => false,
         Type::Function(_) => false,
         Type::List(list) => check_with_cache(list.element(), record_names)?,
         Type::Map(map) => {

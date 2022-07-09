@@ -27,7 +27,7 @@ fn compile_type_definition(
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_function_name(function_type, context.types())?,
             mir::types::RecordBody::new(vec![
-                type_::compile_function(function_type, context)?.into()
+                type_::compile_function(context, function_type)?.into()
             ]),
         )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
@@ -46,6 +46,7 @@ fn compile_type_definition(
         )),
         Type::Any(_)
         | Type::Boolean(_)
+        | Type::Error(_)
         | Type::String(_)
         | Type::None(_)
         | Type::Number(_)
@@ -156,8 +157,8 @@ mod tests {
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_function_name(&function_type, context.types()).unwrap(),
                 mir::types::RecordBody::new(vec![type_::compile_function(
+                    &context,
                     &function_type,
-                    &context
                 )
                 .unwrap()
                 .into()]),
@@ -288,10 +289,7 @@ mod tests {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::Record::new(
-                &context.configuration().unwrap().error_type.error_type_name,
-                Position::fake(),
-            ),
+            types::None::new(Position::fake()),
             Position::fake(),
         );
 
@@ -331,10 +329,7 @@ mod tests {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
-            types::Record::new(
-                &context.configuration().unwrap().error_type.error_type_name,
-                Position::fake(),
-            ),
+            types::Error::new(Position::fake()),
             Position::fake(),
         );
 

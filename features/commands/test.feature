@@ -56,5 +56,5 @@ Feature: Testing packages
     }
     """
     And I append "1" to the environment variable "PEN_DEBUG"
-    When I run `pen_test_on_linux.sh`
+    When I run `pen test`
     Then the exit status should be 0

@@ -7,7 +7,6 @@ Some(
         message: "unexpected `)`",
         expected: [
             "unary operator",
-            "go",
             "if",
             "\\(",
             "[",
@@ -29,6 +28,7 @@ Some(
             "none literal",
             "number literal",
             "string literal",
+            "built-in function call",
             "variable",
         ],
         position: Position {

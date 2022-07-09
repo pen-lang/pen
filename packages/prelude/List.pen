@@ -1,66 +1,66 @@
 import foreign "c" _pen_prelude_combine_hashes \(number, number) number
 
-type _anyList {
-  node \() _node | none
+type List {
+  node \() node | none
 }
 
-type _node {
+type node {
   first \() any
-  rest \() _node | none
+  rest \() node | none
 }
 
-type _firstRest {
+type FirstRest {
   first \() any
-  rest _anyList
+  rest List
 }
 
-_first = \(fr _firstRest) \() any {
+First = \(fr FirstRest) \() any {
   fr.first
 }
 
-_rest = \(fr _firstRest) _anyList {
+Rest = \(fr FirstRest) List {
   fr.rest
 }
 
-_firstRest = \(l _anyList) _firstRest | none {
-  if n = l.node() as _node {
-    _firstRest{
+FirstRest = \(l List) FirstRest | none {
+  if n = l.node() as node {
+    FirstRest{
       first: n.first,
-      rest: _anyList{node: n.rest},
+      rest: List{node: n.rest},
     }
   } else {
     none
   }
 }
 
-_emptyList = \() _anyList {
-  _anyList{node: \() _node | none { none }}
+EmptyList = \() List {
+  List{node: \() node | none { none }}
 }
 
-_prependToList = \(x \() any, l _anyList) _anyList {
-  _anyList{node: \() _node | none { _prependToNode(x, l.node) }}
+PrependToList = \(x \() any, l List) List {
+  List{node: \() node | none { prependToNode(x, l.node) }}
 }
 
-_prependToNode = \(x \() any, n \() _node | none) _node {
-  _node{
+prependToNode = \(x \() any, n \() node | none) node {
+  node{
     first: x,
     rest: n,
   }
 }
 
-_lazy = \(x \() _anyList) _anyList {
-  _anyList{
-    node: \() _node | none {
+LazyList = \(x \() List) List {
+  List{
+    node: \() node | none {
       x().node()
     },
   }
 }
 
-_concatenateLists = \(x \() _anyList, y _anyList) _anyList {
-  _anyList{
-    node: \() _node | none {
-      if x = x().node() as _node {
-        _prependToNode(x.first, _concatenateNodes(x.rest, y.node))
+ConcatenateLists = \(x \() List, y List) List {
+  List{
+    node: \() node | none {
+      if x = x().node() as node {
+        prependToNode(x.first, concatenateNodes(x.rest, y.node))
       } else {
         y.node()
       }
@@ -68,29 +68,29 @@ _concatenateLists = \(x \() _anyList, y _anyList) _anyList {
   }
 }
 
-_concatenateNodes = \(x \() _node | none, y \() _node | none) \() _node | none {
-  \() _node | none {
-    if x = x() as _node {
-      _prependToNode(x.first, _concatenateNodes(x.rest, y))
+concatenateNodes = \(x \() node | none, y \() node | none) \() node | none {
+  \() node | none {
+    if x = x() as node {
+      prependToNode(x.first, concatenateNodes(x.rest, y))
     } else {
       y()
     }
   }
 }
 
-_equalLists = \(f \(any, any) boolean, x _anyList, y _anyList) boolean {
-  _equalNodes(f, x.node(), y.node())
+EqualLists = \(f \(any, any) boolean, x List, y List) boolean {
+  equalNodes(f, x.node(), y.node())
 }
 
-_equalNodes = \(f \(any, any) boolean, x _node | none, y _node | none) boolean {
-  if x = x as _node {
-    if y = y as _node {
-      f(x.first(), y.first()) & _equalNodes(f, x.rest(), y.rest())
+equalNodes = \(f \(any, any) boolean, x node | none, y node | none) boolean {
+  if x = x as node {
+    if y = y as node {
+      f(x.first(), y.first()) & equalNodes(f, x.rest(), y.rest())
     } else {
       false
     }
   } else {
-    if y = y as _node {
+    if y = y as node {
       false
     } else {
       true
@@ -98,18 +98,30 @@ _equalNodes = \(f \(any, any) boolean, x _node | none, y _node | none) boolean {
   }
 }
 
-_hashList = \(f \(any) number, l _anyList) number {
-  _hashNode(f, l.node, 0)
+HashList = \(f \(any) number, l List) number {
+  hashNode(f, l.node, 0)
 }
 
-_hashNode = \(f \(any) number, node \() _node | none, h number) number {
-  if n = node() as _node {
-    _hashNode(
+hashNode = \(f \(any) number, node \() node | none, h number) number {
+  if n = node() as node {
+    hashNode(
       f,
       n.rest,
       _pen_prelude_combine_hashes(h, f(n)),
     )
   } else {
     h
+  }
+}
+
+ListSize = \(l List) number {
+  nodeSize(l.node(), 0)
+}
+
+nodeSize = \(n node | none, s number) number {
+  if n = n as node {
+    nodeSize(n.rest(), s + 1)
+  } else {
+    s
   }
 }

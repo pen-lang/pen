@@ -1,0 +1,18 @@
+---
+source: lib/parse/src/parsers.rs
+expression: "built_in_call().parse(stream(source,\n                \"\")).map_err(|error| ParseError::new(source, \"\", error)).err()"
+---
+Some(
+    ParseError {
+        message: "unexpected `f`",
+        expected: [
+            "built-in function call",
+        ],
+        position: Position {
+            path: "",
+            line_number: 1,
+            column_number: 2,
+            line: "f()",
+        },
+    },
+)

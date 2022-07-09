@@ -1,15 +1,17 @@
 use super::{
-    boolean::Boolean, call::Call, if_::If, if_list::IfList, if_map::IfMap, if_type::IfType,
-    list::List, map::Map, none::None, number::Number, operation::Operation,
-    record_construction::RecordConstruction, record_deconstruction::RecordDeconstruction,
-    record_update::RecordUpdate, string::ByteString, type_coercion::TypeCoercion,
-    variable::Variable, Lambda, Let, ListComprehension, MapIterationComprehension, Thunk,
+    boolean::Boolean, built_in_call::BuiltInCall, call::Call, if_::If, if_list::IfList,
+    if_map::IfMap, if_type::IfType, list::List, map::Map, none::None, number::Number,
+    operation::Operation, record_construction::RecordConstruction,
+    record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
+    type_coercion::TypeCoercion, variable::Variable, Lambda, Let, ListComprehension,
+    MapIterationComprehension, Thunk,
 };
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     Boolean(Boolean),
+    BuiltInCall(BuiltInCall),
     Call(Call),
     If(If),
     IfList(IfList),
@@ -37,6 +39,7 @@ impl Expression {
     pub fn position(&self) -> &Position {
         match self {
             Self::Boolean(boolean) => boolean.position(),
+            Self::BuiltInCall(call) => call.position(),
             Self::Call(call) => call.position(),
             Self::If(if_) => if_.position(),
             Self::IfList(if_) => if_.position(),
@@ -62,15 +65,21 @@ impl Expression {
     }
 }
 
-impl From<Call> for Expression {
-    fn from(call: Call) -> Self {
-        Self::Call(call)
-    }
-}
-
 impl From<Boolean> for Expression {
     fn from(boolean: Boolean) -> Self {
         Self::Boolean(boolean)
+    }
+}
+
+impl From<BuiltInCall> for Expression {
+    fn from(call: BuiltInCall) -> Self {
+        Self::BuiltInCall(call)
+    }
+}
+
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
     }
 }
 

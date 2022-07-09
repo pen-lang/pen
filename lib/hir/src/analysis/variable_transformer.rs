@@ -53,6 +53,16 @@ fn transform_expression(
     transform: &dyn Fn(&Variable) -> Expression,
 ) -> Expression {
     match expression {
+        Expression::BuiltInCall(call) => BuiltInCall::new(
+            call.function_type().cloned(),
+            call.function(),
+            call.arguments()
+                .iter()
+                .map(|argument| transform_expression(argument, transform))
+                .collect(),
+            call.position().clone(),
+        )
+        .into(),
         Expression::Call(call) => Call::new(
             call.function_type().cloned(),
             transform_expression(call.function(), transform),
@@ -290,11 +300,6 @@ fn transform_operation(
             operation.operator(),
             transform_expression(operation.lhs(), transform),
             transform_expression(operation.rhs(), transform),
-            operation.position().clone(),
-        )
-        .into(),
-        Operation::Spawn(operation) => SpawnOperation::new(
-            transform_lambda(operation.function(), transform),
             operation.position().clone(),
         )
         .into(),

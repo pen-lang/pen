@@ -1,6 +1,6 @@
 # Syntax
 
-This page describes syntactical constructs of the language. You can compose programs building up those constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntax of Pen. You can compose programs building up those language constructs. See also [Types](types.md) about syntax for specific data types.
 
 ## Module
 
@@ -252,18 +252,6 @@ You can also iterate keys and values in a map.
 
 ```pen
 [number f(key, value) for key, value in map]
-```
-
-### Concurrency
-
-#### `go` expression
-
-It executes a function concurrently. Its returned value is a future represented as a function that returns a result of the executed function.
-
-```pen
-f = go \() number {
-  ...
-}
 ```
 
 ## Comment

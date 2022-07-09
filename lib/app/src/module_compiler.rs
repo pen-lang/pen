@@ -9,9 +9,9 @@ use crate::{
     test_configuration::TestModuleConfiguration,
 };
 pub use compile_configuration::{
-    CompileConfiguration, ConcurrencyConfiguration, ErrorTypeConfiguration, FmmConfiguration,
-    HashConfiguration, HirConfiguration, ListTypeConfiguration, MapTypeConfiguration,
-    MapTypeIterationConfiguration, MirConfiguration, StringTypeConfiguration,
+    CompileConfiguration, ErrorTypeConfiguration, FmmConfiguration, HashConfiguration,
+    HirConfiguration, ListTypeConfiguration, MapTypeConfiguration, MapTypeIterationConfiguration,
+    MirConfiguration, StringTypeConfiguration,
 };
 use fnv::FnvHashMap;
 use std::{collections::BTreeMap, error::Error};
@@ -164,8 +164,8 @@ fn compile_to_hir(
             .map(|file| {
                 interface_serializer::deserialize(&infrastructure.file_system.read_to_vec(file)?)
             })
+            .chain(context_interfaces.iter().cloned().map(Ok))
             .collect::<Result<Vec<_>, _>>()?,
-        context_interfaces,
     )?)
 }
 

@@ -1,6 +1,5 @@
-use crate::{number, string};
-
 use super::error::CompileError;
+use crate::{number, string};
 use hir::{ir, types};
 use position::Position;
 
@@ -116,11 +115,6 @@ fn compile_block(block: &ast::Block) -> Result<ir::Expression, CompileError> {
 
 fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, CompileError> {
     Ok(match expression {
-        ast::Expression::SpawnOperation(operation) => ir::SpawnOperation::new(
-            compile_lambda(operation.function())?,
-            operation.position().clone(),
-        )
-        .into(),
         ast::Expression::BinaryOperation(operation) => {
             let lhs = compile_expression(operation.lhs())?;
             let rhs = compile_expression(operation.rhs())?;
@@ -197,16 +191,41 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         ast::Expression::Boolean(boolean) => {
             ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
-        ast::Expression::Call(call) => ir::Call::new(
-            None,
-            compile_expression(call.function())?,
-            call.arguments()
+        ast::Expression::Call(call) => {
+            let arguments = call
+                .arguments()
                 .iter()
                 .map(compile_expression)
-                .collect::<Result<_, _>>()?,
-            call.position().clone(),
-        )
-        .into(),
+                .collect::<Result<Vec<_>, _>>()?;
+            let built_in_call = |function| {
+                ir::BuiltInCall::new(None, function, arguments.clone(), call.position().clone())
+            };
+
+            match call.function() {
+                ast::Expression::Variable(variable) if variable.name() == "debug" => {
+                    built_in_call(ir::BuiltInFunction::Debug).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "error" => {
+                    built_in_call(ir::BuiltInFunction::Error).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "go" => {
+                    built_in_call(ir::BuiltInFunction::Spawn).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "size" => {
+                    built_in_call(ir::BuiltInFunction::Size).into()
+                }
+                ast::Expression::Variable(variable) if variable.name() == "source" => {
+                    built_in_call(ir::BuiltInFunction::Source).into()
+                }
+                _ => ir::Call::new(
+                    None,
+                    compile_expression(call.function())?,
+                    arguments,
+                    call.position().clone(),
+                )
+                .into(),
+            }
+        }
         ast::Expression::RecordDeconstruction(operation) => ir::RecordDeconstruction::new(
             None,
             compile_expression(operation.expression())?,

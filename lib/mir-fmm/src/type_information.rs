@@ -1,6 +1,6 @@
 use crate::{context::Context, error::CompileError, reference_count, type_};
 
-pub fn compile_type_information_global_variable(
+pub fn compile_global_variable(
     context: &Context,
     type_: &mir::types::Type,
 ) -> Result<(), CompileError> {

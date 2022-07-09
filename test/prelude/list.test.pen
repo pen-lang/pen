@@ -1,0 +1,18 @@
+import Core'Number
+import Test'Assert
+
+SizeZero = \() none | error {
+  Assert'True(size([none]) == 0)
+}
+
+SizeOne = \() none | error {
+  Assert'True(size([none none]) == 1)
+}
+
+SizeTwo = \() none | error {
+  Assert'True(size([none none, none]) == 2)
+}
+
+SizeMany = \() none | error {
+  Assert'True(size(Number'Sequence(42)) == 42)
+}

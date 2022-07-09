@@ -27,6 +27,7 @@ fn calculate_string(type_: &Type) -> String {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
+        Type::Error(_) => "error".into(),
         Type::Function(function) => format!(
             "(\\({}){})",
             function

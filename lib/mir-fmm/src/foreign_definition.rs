@@ -1,6 +1,6 @@
 use crate::{call, context::Context, foreign_value, type_, CompileError};
 
-pub fn compile_foreign_definition(
+pub fn compile(
     context: &Context,
     definition: &mir::ir::ForeignDefinition,
     function_type: &mir::types::Function,

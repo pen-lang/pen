@@ -1,6 +1,6 @@
 # Types
 
-This page describes different data types in the language.
+This page describes different data types in Pen.
 
 ## Number
 
@@ -207,4 +207,12 @@ Literally, it's an _any_ type. Any values can be converted to the type.
 
 ```pen
 any
+```
+
+## Error
+
+It is an error. You can create error values by calling [the `error` built-in function](built-ins.md#error). See also [Error handling](syntax.md#error-handling).
+
+```pen
+error
 ```

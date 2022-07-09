@@ -14,6 +14,7 @@ pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
         map_type_name: "GenericMap".into(),
         merge_function_name: "mergeMaps".into(),
         set_function_name: "setMap".into(),
+        size_function_name: "mapSize".into(),
         hash: HASH_CONFIGURATION.clone(),
         iteration: MAP_TYPE_ITERATION_CONFIGURATION.clone(),
     });
@@ -49,6 +50,7 @@ pub struct MapTypeConfiguration {
     pub map_type_name: String,
     pub merge_function_name: String,
     pub set_function_name: String,
+    pub size_function_name: String,
     pub hash: HashConfiguration,
     pub iteration: MapTypeIterationConfiguration,
 }

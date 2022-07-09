@@ -91,6 +91,28 @@ fn transform_expression(
     };
 
     Ok(match expression {
+        Expression::BuiltInCall(call) => {
+            let function_type = type_canonicalizer::canonicalize_function(
+                call.function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?;
+
+            BuiltInCall::new(
+                call.function_type().cloned(),
+                call.function(),
+                call.arguments()
+                    .iter()
+                    .zip(function_type.arguments())
+                    .map(|(argument, type_)| {
+                        transform_and_coerce_expression(argument, type_, variables)
+                    })
+                    .collect::<Result<_, _>>()?,
+                call.position().clone(),
+            )
+            .into()
+        }
         Expression::Call(call) => {
             let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()
@@ -410,11 +432,6 @@ fn transform_expression(
                 operation.position().clone(),
             )
             .into(),
-            Operation::Spawn(operation) => SpawnOperation::new(
-                transform_lambda(operation.function(), variables, context)?,
-                operation.position().clone(),
-            )
-            .into(),
             Operation::Boolean(operation) => BooleanOperation::new(
                 operation.operator(),
                 transform_expression(operation.lhs(), variables)?,
@@ -583,7 +600,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new("error", Position::fake()).into()),
             ),
             module,
         )
@@ -669,6 +685,35 @@ mod tests {
                 )],)
             )
         );
+    }
+
+    #[test]
+    fn coerce_built_in_call() {
+        let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            "f",
+            Lambda::new(
+                vec![Argument::new("x", list_type.clone())],
+                types::Number::new(Position::fake()),
+                BuiltInCall::new(
+                    Some(
+                        types::Function::new(
+                            vec![list_type.into()],
+                            types::Number::new(Position::fake()),
+                            Position::fake(),
+                        )
+                        .into(),
+                    ),
+                    BuiltInFunction::Size,
+                    vec![Variable::new("x", Position::fake()).into()],
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+
+        assert_eq!(coerce_module(&module), Ok(module));
     }
 
     #[test]

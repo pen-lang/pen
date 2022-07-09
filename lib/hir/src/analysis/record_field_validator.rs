@@ -71,21 +71,12 @@ fn collect_expressions(module: &Module) -> Vec<Expression> {
     expressions
 }
 
-fn collect_open_records(type_definitions: &[TypeDefinition]) -> FnvHashSet<String> {
+fn collect_open_records(type_definitions: &[TypeDefinition]) -> FnvHashSet<&str> {
     type_definitions
         .iter()
-        .filter_map(|definition| {
-            if is_record_open(definition) {
-                Some(definition.name().into())
-            } else {
-                None
-            }
-        })
+        .filter(|definition| !definition.is_external() || definition.is_open())
+        .map(|definition| definition.name())
         .collect()
-}
-
-fn is_record_open(definition: &TypeDefinition) -> bool {
-    !definition.is_external() || definition.is_open()
 }
 
 #[cfg(test)]
@@ -103,7 +94,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new("error", Position::fake()).into()),
             ),
             module,
         )

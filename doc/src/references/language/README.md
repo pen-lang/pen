@@ -1,3 +1,3 @@
 # Language
 
-This chapter describes the language's constructs and its type, module and package systems.
+This chapter describes the Pen's syntax, and type, module and package systems.

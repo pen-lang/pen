@@ -5,6 +5,7 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashMap;
+use position::Position;
 
 pub fn extract_from_expression(
     context: &AnalysisContext,
@@ -16,14 +17,18 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::Call(call) => type_canonicalizer::canonicalize_function(
-            call.function_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-            context.types(),
-        )?
-        .ok_or_else(|| AnalysisError::FunctionExpected(call.function().position().clone()))?
-        .result()
-        .clone(),
+        Expression::BuiltInCall(call) => extract_from_call_like(
+            context,
+            call.function_type(),
+            call.position(),
+            call.position(),
+        )?,
+        Expression::Call(call) => extract_from_call_like(
+            context,
+            call.function_type(),
+            call.position(),
+            call.function().position(),
+        )?,
         Expression::If(if_) => types::Union::new(
             extract_from_expression(if_.then(), variables)?,
             extract_from_expression(if_.else_(), variables)?,
@@ -83,51 +88,49 @@ pub fn extract_from_expression(
             )
             .into()
         }
-        Expression::IfType(if_) => {
-            union_type_creator::create(
-                &if_.branches()
-                    .iter()
-                    .map(|branch| {
-                        extract_from_expression(
-                            branch.expression(),
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain([(if_.name().into(), branch.type_().clone())])
-                                .collect(),
-                        )
-                    })
-                    .collect::<Result<Vec<_>, _>>()?
-                    .into_iter()
-                    .chain(
-                        if_.else_()
-                            .map(|branch| {
-                                extract_from_expression(
-                                    branch.expression(),
-                                    &variables
-                                        .clone()
-                                        .into_iter()
-                                        .chain([(
-                                            if_.name().into(),
-                                            branch
-                                                .type_()
-                                                .ok_or_else(|| {
-                                                    AnalysisError::TypeNotInferred(
-                                                        branch.position().clone(),
-                                                    )
-                                                })?
-                                                .clone(),
-                                        )])
-                                        .collect(),
-                                )
-                            })
-                            .transpose()?,
+        Expression::IfType(if_) => union_type_creator::create(
+            &if_.branches()
+                .iter()
+                .map(|branch| {
+                    extract_from_expression(
+                        branch.expression(),
+                        &variables
+                            .clone()
+                            .into_iter()
+                            .chain([(if_.name().into(), branch.type_().clone())])
+                            .collect(),
                     )
-                    .collect::<Vec<_>>(),
-                if_.position(),
-            )
-            .unwrap()
-        }
+                })
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+                .chain(
+                    if_.else_()
+                        .map(|branch| {
+                            extract_from_expression(
+                                branch.expression(),
+                                &variables
+                                    .clone()
+                                    .into_iter()
+                                    .chain([(
+                                        if_.name().into(),
+                                        branch
+                                            .type_()
+                                            .ok_or_else(|| {
+                                                AnalysisError::TypeNotInferred(
+                                                    branch.position().clone(),
+                                                )
+                                            })?
+                                            .clone(),
+                                    )])
+                                    .collect(),
+                            )
+                        })
+                        .transpose()?,
+                )
+                .collect::<Vec<_>>(),
+            if_.position(),
+        )
+        .unwrap(),
         Expression::Lambda(lambda) => extract_from_lambda(lambda).into(),
         Expression::List(list) => {
             types::List::new(list.type_().clone(), list.position().clone()).into()
@@ -173,12 +176,6 @@ pub fn extract_from_expression(
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {
             Operation::Arithmetic(_) => types::Number::new(expression.position().clone()).into(),
-            Operation::Spawn(operation) => types::Function::new(
-                vec![],
-                operation.function().result_type().clone(),
-                operation.position().clone(),
-            )
-            .into(),
             Operation::Boolean(_)
             | Operation::Equality(_)
             | Operation::Not(_)
@@ -221,6 +218,21 @@ pub fn extract_from_expression(
     })
 }
 
+fn extract_from_call_like(
+    context: &AnalysisContext,
+    type_: Option<&Type>,
+    call_position: &Position,
+    function_position: &Position,
+) -> Result<Type, AnalysisError> {
+    Ok(type_canonicalizer::canonicalize_function(
+        type_.ok_or_else(|| AnalysisError::TypeNotInferred(call_position.clone()))?,
+        context.types(),
+    )?
+    .ok_or_else(|| AnalysisError::FunctionExpected(function_position.clone()))?
+    .result()
+    .clone())
+}
+
 pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
     types::Function::new(
         lambda
@@ -240,7 +252,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     fn empty_context() -> AnalysisContext {
-        AnalysisContext::new(Default::default(), Default::default(), None)
+        AnalysisContext::new(Default::default(), Default::default())
     }
 
     #[test]
@@ -313,27 +325,76 @@ mod tests {
         );
     }
 
-    #[test]
-    fn extract_from_spawn_operation() {
-        assert_eq!(
-            extract_from_expression(
-                &empty_context(),
-                &SpawnOperation::new(
-                    Lambda::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        None::new(Position::fake()),
+    mod built_in_call {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn extract_from_size() {
+            assert_eq!(
+                extract_from_expression(
+                    &empty_context(),
+                    &BuiltInCall::new(
+                        Some(
+                            types::Function::new(
+                                vec![types::List::new(
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
+                                )
+                                .into()],
+                                types::Number::new(Position::fake()),
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        BuiltInFunction::Size,
+                        vec![List::new(
+                            types::None::new(Position::fake()),
+                            vec![],
+                            Position::fake()
+                        )
+                        .into()],
                         Position::fake()
-                    ),
-                    Position::fake()
-                )
-                .into(),
-                &Default::default(),
-            ),
-            Ok(
-                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
-                    .into()
-            )
-        );
+                    )
+                    .into(),
+                    &Default::default(),
+                ),
+                Ok(types::Number::new(Position::fake()).into())
+            );
+        }
+
+        #[test]
+        fn extract_from_spawn() {
+            let function_type =
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
+            assert_eq!(
+                extract_from_expression(
+                    &empty_context(),
+                    &BuiltInCall::new(
+                        Some(
+                            types::Function::new(
+                                vec![function_type.clone().into()],
+                                function_type.clone(),
+                                Position::fake()
+                            )
+                            .into()
+                        ),
+                        BuiltInFunction::Spawn,
+                        vec![Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into(),
+                    &Default::default(),
+                ),
+                Ok(function_type.into())
+            );
+        }
     }
 }

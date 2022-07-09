@@ -237,6 +237,22 @@ CompareMapsWithMultipleDifferentKeys = \() none | error {
   Assert'True({string: number "foo": 1, "bar": 2} != {string: number "foo": 1, "baz": 2})
 }
 
+SizeZero = \() none | error {
+  Assert'True(size({none: none}) == 0)
+}
+
+SizeOne = \() none | error {
+  Assert'True(size({number: none 1: none}) == 1)
+}
+
+SizeTwo = \() none | error {
+  Assert'True(size({number: none 1: none, 2: none}) == 2)
+}
+
+SizeMany = \() none | error {
+  Assert'True(size(numberSet(Number'Sequence(42))) == 42)
+}
+
 assertKeys = \(xs {number: none}, ks [number]) none | error {
   if [k, ...ks] = ks {
     if _ = xs[k()] {

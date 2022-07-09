@@ -8,10 +8,10 @@ The following entities compose packages.
 
 - Standard packages bundled in [installation](/introduction/install.md) of the language
 - Remote repositories managed by version control systems (VCS)
-  - Currently, the language supports only [Git](https://git-scm.com/) as a VCS.
+  - Currently, Pen supports only [Git](https://git-scm.com/) as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
 
-During builds of packages, the language's build system automatically download and initialize their dependency packages based on their URLs.
+During builds of packages, Pen's build system automatically download and initialize their dependency packages based on their URLs.
 
 ## Package types
 

@@ -57,6 +57,56 @@ fn check_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
+        Expression::BuiltInCall(call) => {
+            let position = call.position();
+            let function_type = type_canonicalizer::canonicalize_function(
+                call.function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
+
+            if call.arguments().len() != function_type.arguments().len() {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+
+            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                check_subsumption(&check_expression(argument, variables)?, type_)?;
+            }
+
+            match call.function() {
+                BuiltInFunction::Size => {
+                    if let [argument_type] = function_type.arguments() {
+                        if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
+                            return Err(AnalysisError::CollectionExpected(
+                                call.arguments()[0].position().clone(),
+                            ));
+                        }
+                    } else {
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
+                }
+                BuiltInFunction::Spawn => {
+                    if let [argument_type] = function_type.arguments() {
+                        if !type_canonicalizer::canonicalize_function(
+                            argument_type,
+                            context.types(),
+                        )?
+                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
+                        .arguments()
+                        .is_empty()
+                        {
+                            return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
+                        }
+                    } else {
+                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                    }
+                }
+                BuiltInFunction::Debug | BuiltInFunction::Error | BuiltInFunction::Source => {}
+            }
+
+            function_type.result().clone()
+        }
         Expression::Call(call) => {
             let type_ = call
                 .function_type()
@@ -509,15 +559,6 @@ fn check_operation(
 
             number_type
         }
-        Operation::Spawn(operation) => {
-            if !operation.function().arguments().is_empty() {
-                return Err(AnalysisError::SpawnOperationArguments(
-                    operation.position().clone(),
-                ));
-            }
-
-            check_lambda(context, operation.function(), variables)?.into()
-        }
         Operation::Boolean(operation) => {
             let boolean_type = types::Boolean::new(operation.position().clone()).into();
 
@@ -569,19 +610,15 @@ fn check_operation(
             let success_type = operation
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+            let error_type = types::Error::new(position.clone()).into();
             let union_type = check_expression(operation.expression())?;
 
-            check_subsumption(context.error_type()?, &union_type)?;
+            check_subsumption(&error_type, &union_type)?;
             check_subsumption(success_type, &union_type)?;
 
             check_subsumption(
                 &union_type,
-                &types::Union::new(
-                    success_type.clone(),
-                    context.error_type()?.clone(),
-                    position.clone(),
-                )
-                .into(),
+                &types::Union::new(success_type.clone(), error_type, position.clone()).into(),
             )?;
 
             success_type.clone()
@@ -618,7 +655,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new("error", Position::fake()).into()),
             ),
             module,
         )
@@ -1535,33 +1571,25 @@ mod tests {
         fn check_try_operation() {
             let union_type = types::Union::new(
                 types::None::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            union_type,
-                            TryOperation::new(
-                                Some(types::None::new(Position::fake()).into()),
-                                Variable::new("x", Position::fake()),
-                                Position::fake(),
-                            ),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type,
+                        TryOperation::new(
+                            Some(types::None::new(Position::fake()).into()),
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1570,38 +1598,30 @@ mod tests {
         fn check_try_operation_with_number() {
             let union_type = types::Union::new(
                 types::Number::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            union_type,
-                            ArithmeticOperation::new(
-                                ArithmeticOperator::Add,
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Number::new(42.0, Position::fake()),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        union_type,
+                        ArithmeticOperation::new(
+                            ArithmeticOperator::Add,
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
+                            Number::new(42.0, Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1611,28 +1631,20 @@ mod tests {
             let any_type = types::Any::new(Position::fake());
 
             check_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false,
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", any_type.clone())],
-                            any_type.clone(),
-                            TryOperation::new(
-                                Some(any_type.into()),
-                                Variable::new("x", Position::fake()),
-                                Position::fake(),
-                            ),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", any_type.clone())],
+                        any_type.clone(),
+                        TryOperation::new(
+                            Some(any_type.into()),
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
-                        false,
-                    )]),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
             )
             .unwrap();
         }
@@ -1641,34 +1653,26 @@ mod tests {
         fn fail_to_check_try_operation_with_wrong_success_type() {
             let union_type = types::Union::new(
                 types::None::new(Position::fake()),
-                types::Reference::new("error", Position::fake()),
+                types::Error::new(Position::fake()),
                 Position::fake(),
             );
 
             assert_eq!(
                 check_module(
-                    &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::fake(
-                            "error",
-                            vec![],
-                            false,
-                            false,
-                            false,
-                        )])
-                        .set_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![Argument::new("x", union_type.clone())],
-                                union_type,
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", union_type.clone())],
+                            union_type,
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
-                            false,
-                        )]),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
                 ),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
@@ -1681,99 +1685,29 @@ mod tests {
         fn fail_to_check_try_operation_with_wrong_operand_type() {
             assert_eq!(
                 check_module(
-                    &Module::empty()
-                        .set_type_definitions(vec![TypeDefinition::fake(
-                            "error",
-                            vec![],
-                            false,
-                            false,
-                            false,
-                        )])
-                        .set_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![Argument::new("x", types::None::new(Position::fake()))],
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    types::Reference::new("error", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                TryOperation::new(
-                                    Some(types::Number::new(Position::fake()).into()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )]),
-                ),
-                Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
-                ))
-            );
-        }
-
-        #[test]
-        fn check_spawn_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake(),
-                        ),
-                        SpawnOperation::new(
-                            Lambda::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                None::new(Position::fake()),
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )]),
-            )
-            .unwrap();
-        }
-
-        #[test]
-        fn fail_to_check_spawn_operation() {
-            let none_type = types::None::new(Position::fake());
-
-            assert_eq!(
-                check_module(
                     &Module::empty().set_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
-                            vec![],
-                            types::Function::new(
-                                vec![none_type.clone().into()],
-                                none_type.clone(),
+                            vec![Argument::new("x", types::None::new(Position::fake()))],
+                            types::Union::new(
+                                types::None::new(Position::fake()),
+                                types::Error::new(Position::fake()),
                                 Position::fake(),
                             ),
-                            SpawnOperation::new(
-                                Lambda::new(
-                                    vec![Argument::new("x", none_type.clone())],
-                                    none_type,
-                                    None::new(Position::fake()),
-                                    Position::fake(),
-                                ),
+                            TryOperation::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
                             Position::fake(),
                         ),
                         false,
-                    )])
+                    )]),
                 ),
-                Err(AnalysisError::SpawnOperationArguments(Position::fake()))
+                Err(AnalysisError::TypesNotMatched(
+                    Position::fake(),
+                    Position::fake()
+                ))
             );
         }
     }
@@ -3174,6 +3108,203 @@ mod tests {
                 )]),
             )
             .unwrap();
+        }
+    }
+
+    mod built_in_call {
+        use super::*;
+
+        mod size {
+            use super::*;
+
+            #[test]
+            fn check_list() {
+                let list_type =
+                    types::List::new(types::None::new(Position::fake()), Position::fake());
+
+                check_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            types::Number::new(Position::fake()),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![list_type.into()],
+                                        types::Number::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::Size,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+                )
+                .unwrap();
+            }
+
+            #[test]
+            fn check_map() {
+                let map_type = types::Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                check_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", map_type.clone())],
+                            types::Number::new(Position::fake()),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.into()],
+                                        types::Number::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::Size,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+                )
+                .unwrap();
+            }
+
+            #[test]
+            fn fail_to_check_none() {
+                assert!(matches!(
+                    check_module(
+                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "x",
+                            Lambda::new(
+                                vec![Argument::new("x", types::None::new(Position::fake()),)],
+                                types::Number::new(Position::fake()),
+                                BuiltInCall::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![types::None::new(Position::fake()).into()],
+                                            types::Number::new(Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                    ),
+                                    BuiltInFunction::Size,
+                                    vec![Variable::new("x", Position::fake()).into()],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                    ),
+                    Err(AnalysisError::CollectionExpected(_)),
+                ));
+            }
+        }
+
+        mod spawn {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let function_type = types::Function::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                check_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            function_type.clone(),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![function_type.clone().into()],
+                                        function_type,
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::Spawn,
+                                vec![Lambda::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+                )
+                .unwrap();
+            }
+
+            #[test]
+            fn fail_to_check_with_argument() {
+                let function_type = types::Function::new(
+                    vec![types::None::new(Position::fake()).into()],
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                assert!(matches!(
+                    check_module(
+                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                            "x",
+                            Lambda::new(
+                                vec![],
+                                function_type.clone(),
+                                BuiltInCall::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![function_type.clone().into()],
+                                            function_type,
+                                            Position::fake()
+                                        )
+                                        .into()
+                                    ),
+                                    BuiltInFunction::Spawn,
+                                    vec![Lambda::new(
+                                        vec![Argument::new(
+                                            "x",
+                                            types::None::new(Position::fake())
+                                        )],
+                                        types::None::new(Position::fake()),
+                                        None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into()],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                    ),
+                    Err(AnalysisError::SpawnedFunctionArguments(_))
+                ));
+            }
         }
     }
 }

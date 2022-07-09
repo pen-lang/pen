@@ -12,7 +12,7 @@ $(dirname $0)/build.sh
 strip target/release/pen
 
 tar caf $tarball \
-  README.md LICENSE.md LICENSE-MIT LICENSE-APACHE \
+  README.md LICENSE-MIT LICENSE-APACHE \
   cmd doc lib rust-toolchain.toml target/release/pen
 
 echo $tarball

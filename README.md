@@ -3,7 +3,7 @@
 # Pen programming language
 
 [![GitHub Action](https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square)](https://github.com/pen-lang/pen/actions)
-[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
 Pen is the programming language for **scalable** software development, focused on software maintainability and portability.
@@ -51,7 +51,7 @@ Pen aims to make large-scale software development efficient where a number of pe
   - Testability: Unit tests are always fast and reliable.
   - Modifiability: Developers can change application logic independently from implementation details.
 - Portability
-  - Programs written in the language can be ported to different platforms including [WebAssembly](https://webassembly.org/).
+  - Programs written in Pen can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
 ## Features
 
@@ -75,6 +75,12 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Unit tests are always deterministic and fast.
 - No flaky or slow tests bother developers.
 
+### Security
+
+- No runtime exception
+- No undefined behavior
+- No data race
+
 ### Even more...
 
 - Static typing
@@ -87,6 +93,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ## License
 
-Pen is released under open source licenses. See [its LICENSE file](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
+Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
 [syntax]: https://pen-lang.org/references/language/syntax.html

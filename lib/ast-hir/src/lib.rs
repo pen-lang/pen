@@ -21,7 +21,6 @@ pub fn compile(
     prefix: &str,
     module_interfaces: &FnvHashMap<ast::ModulePath, interface::Module>,
     prelude_module_interfaces: &[interface::Module],
-    context_module_interfaces: &[interface::Module],
 ) -> Result<ir::Module, CompileError> {
     let imported_modules = module
         .imports()
@@ -38,12 +37,7 @@ pub fn compile(
         })
         .collect::<Result<Vec<_>, _>>()?;
     let module = module::compile(module)?;
-    let module = import::compile(
-        &module,
-        &imported_modules,
-        prelude_module_interfaces,
-        context_module_interfaces,
-    );
+    let module = import::compile(&module, &imported_modules, prelude_module_interfaces);
 
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
@@ -74,7 +68,6 @@ mod tests {
                 "",
                 &Default::default(),
                 &[],
-                &[],
             ),
             Ok(ir::Module::empty()),
         );
@@ -100,7 +93,6 @@ mod tests {
                 ),
                 "",
                 &Default::default(),
-                &[],
                 &[],
             ),
             Err(CompileError::ModuleNotFound(path.into())),

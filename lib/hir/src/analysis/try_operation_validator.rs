@@ -1,5 +1,5 @@
 use super::{context::AnalysisContext, error::AnalysisError};
-use crate::{analysis::type_subsumption_checker, ir::*, types::Type};
+use crate::{analysis::type_subsumption_checker, ir::*, types, types::Type};
 
 pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
     for definition in module.function_definitions() {
@@ -21,6 +21,11 @@ fn validate_expression(
     let validate = |expression| validate_expression(context, expression, result_type);
 
     match expression {
+        Expression::BuiltInCall(call) => {
+            for argument in call.arguments() {
+                validate(argument)?;
+            }
+        }
         Expression::Call(call) => {
             validate(call.function())?;
 
@@ -102,9 +107,6 @@ fn validate_expression(
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
             }
-            Operation::Spawn(operation) => {
-                validate_lambda(context, operation.function())?;
-            }
             Operation::Boolean(operation) => {
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
@@ -121,20 +123,18 @@ fn validate_expression(
                 validate(operation.rhs())?;
             }
             Operation::Try(operation) => {
+                let position = operation.position();
+
                 if let Some(result_type) = result_type {
                     if !type_subsumption_checker::check(
-                        context.error_type()?,
+                        &types::Error::new(position.clone()).into(),
                         result_type,
                         context.types(),
                     )? {
-                        return Err(AnalysisError::InvalidTryOperation(
-                            operation.position().clone(),
-                        ));
+                        return Err(AnalysisError::InvalidTryOperation(position.clone()));
                     }
                 } else {
-                    return Err(AnalysisError::TryOperationInList(
-                        operation.position().clone(),
-                    ));
+                    return Err(AnalysisError::TryOperationInList(position.clone()));
                 }
 
                 validate(operation.expression())?;
@@ -193,7 +193,6 @@ mod tests {
             &AnalysisContext::new(
                 type_collector::collect(module),
                 type_collector::collect_records(module),
-                Some(types::Record::new(ERROR_TYPE_NAME, Position::fake()).into()),
             ),
             module,
         )
@@ -244,45 +243,36 @@ mod tests {
 
     #[test]
     fn validate_thunk() {
-        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
         let union_type = types::Union::new(
             types::None::new(Position::fake()),
-            error_type,
+            types::Error::new(Position::fake()),
             Position::fake(),
         );
 
         assert_eq!(
             validate_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new("x", union_type.clone())],
-                            types::Function::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                Position::fake()
-                            ),
-                            Thunk::new(
-                                Some(union_type.into()),
-                                TryOperation::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake()
-                            ),
-                            Position::fake(),
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new("x", union_type.clone())],
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        false,
-                    )])
+                        Thunk::new(
+                            Some(union_type.into()),
+                            TryOperation::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Ok(())
         );
@@ -290,47 +280,37 @@ mod tests {
 
     #[test]
     fn fail_to_validate_thunk() {
-        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
-
         assert_eq!(
             validate_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    error_type,
-                                    Position::fake(),
-                                ),
-                            )],
-                            types::Function::new(
-                                vec![],
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
                                 types::None::new(Position::fake()),
-                                Position::fake()
+                                types::Error::new(Position::fake()),
+                                Position::fake(),
                             ),
-                            Thunk::new(
-                                Some(types::None::new(Position::fake()).into()),
-                                TryOperation::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake()
-                            ),
-                            Position::fake(),
+                        )],
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        false,
-                    )])
+                        Thunk::new(
+                            Some(types::None::new(Position::fake()).into()),
+                            TryOperation::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::InvalidTryOperation(Position::fake()))
         );
@@ -338,50 +318,40 @@ mod tests {
 
     #[test]
     fn fail_to_validate_list() {
-        let error_type = types::Reference::new(ERROR_TYPE_NAME, Position::fake());
-
         assert_eq!(
             validate_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
-                        vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Union::new(
-                                    types::None::new(Position::fake()),
-                                    error_type,
-                                    Position::fake(),
-                                ),
-                            )],
-                            types::Function::new(
-                                vec![],
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Union::new(
                                 types::None::new(Position::fake()),
-                                Position::fake()
+                                types::Error::new(Position::fake()),
+                                Position::fake(),
                             ),
-                            List::new(
-                                types::None::new(Position::fake()),
-                                vec![ListElement::Single(
-                                    TryOperation::new(
-                                        None,
-                                        Variable::new("x", Position::fake()),
-                                        Position::fake(),
-                                    )
-                                    .into()
-                                )],
-                                Position::fake()
-                            ),
-                            Position::fake(),
+                        )],
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        false,
-                    )])
+                        List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into()
+                            )],
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );
@@ -391,39 +361,31 @@ mod tests {
     fn fail_to_validate_element_of_list_comprehension() {
         assert_eq!(
             validate_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
                         vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
+                        types::Function::new(
                             vec![],
-                            types::Function::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                Position::fake()
-                            ),
-                            ListComprehension::new(
-                                None,
-                                types::None::new(Position::fake()),
-                                TryOperation::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                "x",
-                                Variable::new("xs", Position::fake()),
-                                Position::fake()
-                            ),
-                            Position::fake(),
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        false,
-                    )])
+                        ListComprehension::new(
+                            None,
+                            types::None::new(Position::fake()),
+                            TryOperation::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            "x",
+                            Variable::new("xs", Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );
@@ -433,39 +395,31 @@ mod tests {
     fn fail_to_validate_list_of_list_comprehension() {
         assert_eq!(
             validate_module(
-                &Module::empty()
-                    .set_type_definitions(vec![TypeDefinition::fake(
-                        "error",
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
                         vec![],
-                        false,
-                        false,
-                        false
-                    )])
-                    .set_definitions(vec![FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
+                        types::Function::new(
                             vec![],
-                            types::Function::new(
-                                vec![],
-                                types::None::new(Position::fake()),
-                                Position::fake()
-                            ),
-                            ListComprehension::new(
-                                None,
-                                types::None::new(Position::fake()),
-                                None::new(Position::fake()),
-                                "x",
-                                TryOperation::new(
-                                    None,
-                                    Variable::new("xs", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake()
-                            ),
-                            Position::fake(),
+                            types::None::new(Position::fake()),
+                            Position::fake()
                         ),
-                        false,
-                    )])
+                        ListComprehension::new(
+                            None,
+                            types::None::new(Position::fake()),
+                            None::new(Position::fake()),
+                            "x",
+                            TryOperation::new(
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
             ),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );

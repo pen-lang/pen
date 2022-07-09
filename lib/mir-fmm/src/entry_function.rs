@@ -96,12 +96,12 @@ fn compile_body(
                     .collect::<Result<Vec<_>, _>>()?,
             )
             .chain(if global {
-                vec![]
+                None
             } else {
-                vec![(
+                Some((
                     definition.name().into(),
                     compile_closure_pointer(definition.type_(), context.types())?,
-                )]
+                ))
             })
             .chain(definition.arguments().iter().map(|argument| {
                 (

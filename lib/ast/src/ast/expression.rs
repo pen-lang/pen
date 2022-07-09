@@ -1,7 +1,7 @@
 use super::{
     if_list::IfList, BinaryOperation, Boolean, ByteString, Call, If, IfMap, IfType, Lambda, List,
     ListComprehension, Map, MapIterationComprehension, None, Number, Record, RecordDeconstruction,
-    SpawnOperation, UnaryOperation, Variable,
+    UnaryOperation, Variable,
 };
 use position::Position;
 
@@ -23,7 +23,6 @@ pub enum Expression {
     Number(Number),
     Record(Record),
     RecordDeconstruction(RecordDeconstruction),
-    SpawnOperation(SpawnOperation),
     String(ByteString),
     UnaryOperation(UnaryOperation),
     Variable(Variable),
@@ -48,7 +47,6 @@ impl Expression {
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
             Self::RecordDeconstruction(operation) => operation.position(),
-            Self::SpawnOperation(operation) => operation.position(),
             Self::String(string) => string.position(),
             Self::UnaryOperation(operation) => operation.position(),
             Self::Variable(variable) => variable.position(),
@@ -155,12 +153,6 @@ impl From<Record> for Expression {
 impl From<RecordDeconstruction> for Expression {
     fn from(operation: RecordDeconstruction) -> Self {
         Self::RecordDeconstruction(operation)
-    }
-}
-
-impl From<SpawnOperation> for Expression {
-    fn from(operation: SpawnOperation) -> Self {
-        Self::SpawnOperation(operation)
     }
 }
 

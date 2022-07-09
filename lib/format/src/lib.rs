@@ -224,6 +224,7 @@ fn compile_type(type_: &Type) -> Document {
     match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
+        Type::Error(_) => "error".into(),
         Type::Function(function) => sequence([
             "\\(".into(),
             sequence(
@@ -567,9 +568,6 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             ".".into(),
             deconstruction.name().into(),
         ]),
-        Expression::SpawnOperation(operation) => {
-            sequence(["go ".into(), compile_lambda(context, operation.function())])
-        }
         Expression::String(string) => sequence(["\"", string.value(), "\""]),
         Expression::UnaryOperation(operation) => {
             let operand = compile_expression(context, operation.expression());
@@ -2497,25 +2495,6 @@ mod tests {
                     "0xFA"
                 );
             }
-        }
-
-        #[test]
-        fn format_spawn_operation() {
-            assert_eq!(
-                format(
-                    &SpawnOperation::new(
-                        Lambda::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                            Position::fake(),
-                        ),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                "go \\() none { none }"
-            );
         }
 
         #[test]

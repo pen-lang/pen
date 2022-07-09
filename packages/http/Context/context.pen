@@ -17,7 +17,7 @@ type Inner {
 
 type ffiResponseResult {
   response FfiResponse
-  error string
+  error_ string
 }
 
 New = \() Context {
@@ -31,7 +31,7 @@ New = \() Context {
           r.Body,
         )
 
-        if r.error == "" {
+        if r.error_ == "" {
           r = r.response
 
           Response{
@@ -40,7 +40,7 @@ New = \() Context {
             Body: r.Body,
           }
         } else {
-          error(r.error)
+          error(r.error_)
         }
       },
       Serve: \(address string, callback \(Request) Response) none | error {
