@@ -1,5 +1,6 @@
 # This module provides common number operations.
 
+import foreign "c" _pen_core_absolute \(number) number
 import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_convert_number_to_string \(number) string
 import foreign "c" _pen_core_floor \(number) number
@@ -14,11 +15,7 @@ import foreign "c" _pen_core_truncate \(number) number
 
 # Calcualate an absolute value.
 Absolute = \(x number) number {
-  if x >= 0 {
-    x
-  } else {
-    0 - x
-  }
+  _pen_core_absolute(x)
 }
 
 # Calculate a ceil value.
