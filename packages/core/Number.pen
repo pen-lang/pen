@@ -1,14 +1,16 @@
 # This module provides common number operations.
 
+import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_convert_number_to_string \(number) string
+import foreign "c" _pen_core_floor \(number) number
+import foreign "c" _pen_core_infinity \() number
+import foreign "c" _pen_core_is_nan \(number) boolean
+import foreign "c" _pen_core_nan \() number
 import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
+import foreign "c" _pen_core_round \(number) number
 import foreign "c" _pen_core_square_root \(number) number
-import foreign "c" _pen_core_is_nan \(number) boolean
-import foreign "c" _pen_core_ceil \(number) number
-import foreign "c" _pen_core_floor \(number) number
-import foreign "c" _pen_core_nan \() number
-import foreign "c" _pen_core_infinity \() number
+import foreign "c" _pen_core_truncate \(number) number
 
 # Calcualate an absolute value.
 Absolute = \(x number) number {
@@ -66,6 +68,11 @@ Nan = \() number {
   _pen_core_nan()
 }
 
+# Calculate a power.
+Power = \(base number, exponent number) number {
+  _pen_core_power(base, exponent)
+}
+
 # Create a list of numbers from a minimum to a maximum.
 Range = \(minimum number, maximum number) [number] {
   if minimum > maximum {
@@ -80,9 +87,9 @@ Remainder = \(dividend number, divisor number) number {
   _pen_core_remainder(dividend, divisor)
 }
 
-# Calculate a power.
-Power = \(base number, exponent number) number {
-  _pen_core_power(base, exponent)
+# Rounds a number.
+Round = \(x number) number {
+  _pen_core_round(x)
 }
 
 # Create a list of numbers from 1 to a maximum value.
@@ -111,4 +118,9 @@ sumRecursive = \(xs [number], sum number) number {
   } else {
     sum
   }
+}
+
+# Returns an integer value of a number.
+Truncate = \(x number) number {
+  _pen_core_truncate(x)
 }

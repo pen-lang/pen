@@ -17,6 +17,11 @@ fn _pen_core_power(x: ffi::Number, y: ffi::Number) -> ffi::Number {
 }
 
 #[ffi::bindgen]
+fn _pen_core_round(number: ffi::Number) -> ffi::Number {
+    f64::from(number).round().into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
     f64::from(x).sqrt().into()
 }
@@ -44,6 +49,11 @@ fn _pen_core_nan() -> ffi::Number {
 #[ffi::bindgen]
 fn _pen_core_infinity() -> ffi::Number {
     f64::INFINITY.into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_truncate(number: ffi::Number) -> ffi::Number {
+    f64::from(number).trunc().into()
 }
 
 #[cfg(test)]
