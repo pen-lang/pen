@@ -4,6 +4,7 @@ import foreign "c" _pen_core_absolute \(number) number
 import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_convert_number_to_string \(number) string
 import foreign "c" _pen_core_floor \(number) number
+import foreign "c" _pen_core_fraction \(number) number
 import foreign "c" _pen_core_infinity \() number
 import foreign "c" _pen_core_is_nan \(number) boolean
 import foreign "c" _pen_core_nan \() number
@@ -26,6 +27,11 @@ Ceil = \(x number) number {
 # Calculate a floor value.
 Floor = \(x number) number {
   _pen_core_floor(x)
+}
+
+# Calculate a fraction value of a number.
+Fraction = \(x number) number {
+  _pen_core_fraction(x)
 }
 
 # Infinity

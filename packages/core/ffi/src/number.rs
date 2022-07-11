@@ -21,6 +21,11 @@ fn _pen_core_floor(number: ffi::Number) -> ffi::Number {
 }
 
 #[ffi::bindgen]
+fn _pen_core_fraction(number: ffi::Number) -> ffi::Number {
+    f64::from(number).fract().into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_infinity() -> ffi::Number {
     f64::INFINITY.into()
 }
