@@ -2,7 +2,7 @@ use alloc::format;
 
 #[ffi::bindgen]
 fn _pen_core_absolute(number: ffi::Number) -> ffi::Number {
-    f64::from(number).absolute().into()
+    f64::from(number).abs().into()
 }
 
 #[ffi::bindgen]
