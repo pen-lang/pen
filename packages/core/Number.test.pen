@@ -1,0 +1,11 @@
+import Test'Assert
+
+import 'Number
+
+AbsolutePositive = \() none | error {
+  Assert'True(Number'Absolute(1) == 1)
+}
+
+AbsoluteNegative = \() none | error {
+  Assert'True(Number'Absolute(-1) == 1)
+}

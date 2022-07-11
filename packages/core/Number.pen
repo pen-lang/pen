@@ -10,6 +10,91 @@ import foreign "c" _pen_core_floor \(number) number
 import foreign "c" _pen_core_nan \() number
 import foreign "c" _pen_core_infinity \() number
 
+# Calcualate an absolute value.
+Absolute = \(x number) number {
+  if x >= 0 {
+    x
+  } else {
+    0 - x
+  }
+}
+
+# Calculate a ceil value.
+Ceil = \(x number) number {
+  _pen_core_ceil(x)
+}
+
+# Calculate a floor value.
+Floor = \(x number) number {
+  _pen_core_floor(x)
+}
+
+# Infinity
+Infinity = \() number {
+  _pen_core_infinity()
+}
+
+# Check if a number is NaN.
+IsNan = \(x number) boolean {
+  _pen_core_is_nan(x)
+}
+
+# Calculate a maximum.
+Maximum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x > y {
+    x
+  } else {
+    y
+  }
+}
+
+# Calculate a minimum.
+Minimum = \(x number, y number) number {
+  if IsNan(x) | IsNan(y) {
+    Nan()
+  } else if x < y {
+    x
+  } else {
+    y
+  }
+}
+
+# NaN
+Nan = \() number {
+  _pen_core_nan()
+}
+
+# Create a list of numbers from a minimum to a maximum.
+Range = \(minimum number, maximum number) [number] {
+  if minimum > maximum {
+    [number]
+  } else {
+    [number minimum, ...Range(minimum + 1, maximum)]
+  }
+}
+
+# Calculate a remainder.
+Remainder = \(dividend number, divisor number) number {
+  _pen_core_remainder(dividend, divisor)
+}
+
+# Calculate a power.
+Power = \(base number, exponent number) number {
+  _pen_core_power(base, exponent)
+}
+
+# Create a list of numbers from 1 to a maximum value.
+Sequence = \(maximum number) [number] {
+  Range(1, maximum)
+}
+
+# Calculate a square root.
+SquareRoot = \(x number) number {
+  _pen_core_square_root(x)
+}
+
 # Convert a number into its string representation.
 String = \(x number) string {
   _pen_core_convert_number_to_string(x)
@@ -25,81 +110,5 @@ sumRecursive = \(xs [number], sum number) number {
     sumRecursive(xs, sum + x())
   } else {
     sum
-  }
-}
-
-# Calculate a remainder.
-Remainder = \(dividend number, divisor number) number {
-  _pen_core_remainder(dividend, divisor)
-}
-
-# Calculate a power.
-Power = \(base number, exponent number) number {
-  _pen_core_power(base, exponent)
-}
-
-# Calculate a square root.
-SquareRoot = \(x number) number {
-  _pen_core_square_root(x)
-}
-
-# Create a list of numbers from 1 to a maximum value.
-Sequence = \(maximum number) [number] {
-  Range(1, maximum)
-}
-
-# Create a list of numbers from a minimum to a maximum.
-Range = \(minimum number, maximum number) [number] {
-  if minimum > maximum {
-    [number]
-  } else {
-    [number minimum, ...Range(minimum + 1, maximum)]
-  }
-}
-
-# Check if a number is NaN.
-IsNan = \(x number) boolean {
-  _pen_core_is_nan(x)
-}
-
-# Calculate a ceil value.
-Ceil = \(x number) number {
-  _pen_core_ceil(x)
-}
-
-# Calculate a floor value.
-Floor = \(x number) number {
-  _pen_core_floor(x)
-}
-
-# NaN
-Nan = \() number {
-  _pen_core_nan()
-}
-
-# Infinity
-Infinity = \() number {
-  _pen_core_infinity()
-}
-
-# Calculate a minimum.
-Minimum = \(x number, y number) number {
-  if IsNan(x) | IsNan(y) {
-    Nan()
-  } else if x < y {
-    x
-  } else {
-    y
-  }
-}
-
-# Calculate a maximum.
-Maximum = \(x number, y number) number {
-  if IsNan(x) | IsNan(y) {
-    Nan()
-  } else if x > y {
-    x
-  } else {
-    y
   }
 }
