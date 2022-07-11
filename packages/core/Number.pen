@@ -14,7 +14,7 @@ import foreign "c" _pen_core_round \(number) number
 import foreign "c" _pen_core_square_root \(number) number
 import foreign "c" _pen_core_truncate \(number) number
 
-# Calcualate an absolute value.
+# Calculate an absolute value.
 Absolute = \(x number) number {
   _pen_core_absolute(x)
 }

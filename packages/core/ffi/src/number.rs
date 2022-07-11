@@ -22,6 +22,7 @@ fn _pen_core_floor(number: ffi::Number) -> ffi::Number {
 
 #[ffi::bindgen]
 fn _pen_core_fraction(number: ffi::Number) -> ffi::Number {
+    // spell-checker: disable-next-line
     f64::from(number).fract().into()
 }
 
@@ -63,6 +64,7 @@ fn _pen_core_square_root(x: ffi::Number) -> ffi::Number {
 
 #[ffi::bindgen]
 fn _pen_core_truncate(number: ffi::Number) -> ffi::Number {
+    // spell-checker: disable-next-line
     f64::from(number).trunc().into()
 }
 
