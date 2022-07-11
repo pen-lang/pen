@@ -9,3 +9,19 @@ AbsolutePositive = \() none | error {
 AbsoluteNegative = \() none | error {
   Assert'True(Number'Absolute(-1) == 1)
 }
+
+RoundLarge = \() none | error {
+  Assert'True(Number'Round(1.1) == 1)
+}
+
+RoundSmall = \() none | error {
+  Assert'True(Number'Round(0.9) == 1)
+}
+
+TruncateLarge = \() none | error {
+  Assert'True(Number'Truncate(1.1) == 1)
+}
+
+TruncateSmall = \() none | error {
+  Assert'True(Number'Truncate(0.9) == 0)
+}
