@@ -2,6 +2,9 @@
 
 import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
+import foreign "c" _pen_core_utf8_trim \(stringBuilder, string) string
+import foreign "c" _pen_core_utf8_trim_start \(stringBuilder, string) string
+import foreign "c" _pen_core_utf8_trim_end \(stringBuilder, string) string
 
 # Return a length of a string.
 Length = \(s string) number {
@@ -11,4 +14,29 @@ Length = \(s string) number {
 # Slice a string.
 Slice = \(s string, start number, end number) string {
   _pen_core_utf8_slice(s, start, end)
+}
+
+# Trim leading and trailing spaces.
+Trim = \(s string) string {
+  _pen_core_utf8_trim(s)
+}
+
+# Trim trailing spaces.
+TrimEnd = \(s string) string {
+  _pen_core_utf8_trim_end(s)
+}
+
+# Trim trailing patterns.
+TrimEndMatch = \(s string, pat string) string {
+  _pen_core_utf8_trim_end(s, pat)
+}
+
+# Trim leading spaces.
+TrimStart = \(s string) string {
+  _pen_core_utf8_trim_start(s)
+}
+
+# Trim leading patterns.
+TrimStartMatch = \(s string, pat string) string {
+  _pen_core_utf8_trim_start_match(s, pat)
 }
