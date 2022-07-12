@@ -1,0 +1,46 @@
+import Test'Assert
+
+import 'Number
+
+AbsolutePositive = \() none | error {
+  Assert'True(Number'Absolute(1) == 1)
+}
+
+AbsoluteNegative = \() none | error {
+  Assert'True(Number'Absolute(-1) == 1)
+}
+
+Epsilon = \() none | error {
+  Assert'True(Number'Epsilon() < 0.000000000001)
+}
+
+Exponential = \() none | error {
+  Assert'True(Number'Exponential(1) > 2.5)?
+  Assert'True(Number'Exponential(1) < 3)?
+  Assert'True(Number'Exponential(2) > 7)?
+  Assert'True(Number'Exponential(2) < 8)?
+}
+
+FractionPositive = \() none | error {
+  Assert'True(Number'Fraction(0.5) == 0.5)
+}
+
+FractionNegative = \() none | error {
+  Assert'True(Number'Fraction(-0.5) == -0.5)
+}
+
+RoundLarge = \() none | error {
+  Assert'True(Number'Round(1.1) == 1)
+}
+
+RoundSmall = \() none | error {
+  Assert'True(Number'Round(0.9) == 1)
+}
+
+TruncateLarge = \() none | error {
+  Assert'True(Number'Truncate(1.1) == 1)
+}
+
+TruncateSmall = \() none | error {
+  Assert'True(Number'Truncate(0.9) == 0)
+}
