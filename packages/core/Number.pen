@@ -31,7 +31,7 @@ Epsilon = \() number {
   _pen_core_epsilon()
 }
 
-# Calculates an exponential of a number.
+# Calculate an exponential of a number.
 Exponential = \(x number) number {
   _pen_core_exponential(x)
 }
@@ -102,7 +102,7 @@ Remainder = \(dividend number, divisor number) number {
   _pen_core_remainder(dividend, divisor)
 }
 
-# Rounds a number.
+# Round a number.
 Round = \(x number) number {
   _pen_core_round(x)
 }
@@ -135,7 +135,7 @@ sumRecursive = \(xs [number], sum number) number {
   }
 }
 
-# Returns an integer value of a number.
+# Return an integer value of a number.
 Truncate = \(x number) number {
   _pen_core_truncate(x)
 }

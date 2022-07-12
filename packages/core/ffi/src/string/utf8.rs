@@ -1,3 +1,4 @@
+use alloc::{string::String, vec::Vec};
 use core::str;
 
 #[ffi::bindgen]
@@ -5,6 +6,56 @@ fn _pen_core_utf8_contains(string: ffi::ByteString, pattern: ffi::ByteString) ->
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string.contains(pattern)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+    .into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_find(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Number {
+    find(string, pattern)
+        .map(|index| (index + 1) as f64)
+        .unwrap_or(-1.0)
+        .into()
+}
+
+fn find(string: ffi::ByteString, pattern: ffi::ByteString) -> Option<usize> {
+    let string = str::from_utf8(string.as_slice()).ok()?;
+    let pattern = str::from_utf8(pattern.as_slice()).ok()?;
+    let index = string.find(pattern)?;
+
+    Some(
+        string
+            .char_indices()
+            .enumerate()
+            .find(|(_, (byte_index, _))| byte_index == &index)?
+            .0,
+    )
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_has_prefix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string.starts_with(pattern)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+    .into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_has_suffix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string.ends_with(pattern)
         } else {
             false
         }
@@ -44,6 +95,27 @@ fn _pen_core_utf8_slice(
     }
 }
 
+// TODO Split a string and collect sub-strings lazily.
+#[ffi::bindgen]
+fn _pen_core_utf8_split(
+    original: ffi::ByteString,
+    pattern: ffi::ByteString,
+) -> ffi::Arc<ffi::List> {
+    if let Ok(string) = str::from_utf8(original.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string
+                .split(pattern)
+                .map(ffi::ByteString::from)
+                .collect::<Vec<_>>()
+                .into()
+        } else {
+            [original].into()
+        }
+    } else {
+        [original].into()
+    }
+}
+
 fn get_utf8_byte_index(string: &str, index: usize) -> usize {
     string
         .char_indices()
@@ -53,13 +125,23 @@ fn get_utf8_byte_index(string: &str, index: usize) -> usize {
 }
 
 #[ffi::bindgen]
+fn _pen_core_utf8_to_lowercase(string: ffi::ByteString) -> ffi::ByteString {
+    convert_string(string, |string| string.to_lowercase())
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_to_uppercase(string: ffi::ByteString) -> ffi::ByteString {
+    convert_string(string, |string| string.to_uppercase())
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_trim(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim())
+    convert_string(string, |string| string.trim().into())
 }
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_end(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim_end())
+    convert_string(string, |string| string.trim_end().into())
 }
 
 #[ffi::bindgen]
@@ -74,7 +156,7 @@ fn _pen_core_utf8_trim_end_matches(
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_start(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim_start())
+    convert_string(string, |string| string.trim_start().into())
 }
 
 #[ffi::bindgen]
@@ -87,10 +169,7 @@ fn _pen_core_utf8_trim_start_matches(
     })
 }
 
-fn trim(
-    original: ffi::ByteString,
-    callback: for<'a, 'b> fn(&'a str) -> &'a str,
-) -> ffi::ByteString {
+fn convert_string(original: ffi::ByteString, callback: fn(&str) -> String) -> ffi::ByteString {
     if let Ok(string) = str::from_utf8(original.as_slice()) {
         callback(string).into()
     } else {
