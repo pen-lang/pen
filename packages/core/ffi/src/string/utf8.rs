@@ -45,6 +45,7 @@ fn _pen_core_utf8_slice(
     }
 }
 
+// TODO Split a string and collect sub-strings lazily.
 #[ffi::bindgen]
 fn _pen_core_utf8_split(
     original: ffi::ByteString,
