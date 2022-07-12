@@ -1,4 +1,4 @@
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 use core::str;
 
 #[ffi::bindgen]
@@ -97,13 +97,23 @@ fn get_utf8_byte_index(string: &str, index: usize) -> usize {
 }
 
 #[ffi::bindgen]
+fn _pen_core_utf8_to_lowercase(string: ffi::ByteString) -> ffi::ByteString {
+    convert_string(string, |string| string.to_lowercase())
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_to_uppercase(string: ffi::ByteString) -> ffi::ByteString {
+    convert_string(string, |string| string.to_uppercase())
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_trim(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim())
+    convert_string(string, |string| string.trim().into())
 }
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_end(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim_end())
+    convert_string(string, |string| string.trim_end().into())
 }
 
 #[ffi::bindgen]
@@ -118,7 +128,7 @@ fn _pen_core_utf8_trim_end_matches(
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_start(string: ffi::ByteString) -> ffi::ByteString {
-    trim(string, |string| string.trim_start())
+    convert_string(string, |string| string.trim_start().into())
 }
 
 #[ffi::bindgen]
@@ -131,10 +141,7 @@ fn _pen_core_utf8_trim_start_matches(
     })
 }
 
-fn trim(
-    original: ffi::ByteString,
-    callback: for<'a, 'b> fn(&'a str) -> &'a str,
-) -> ffi::ByteString {
+fn convert_string(original: ffi::ByteString, callback: fn(&str) -> String) -> ffi::ByteString {
     if let Ok(string) = str::from_utf8(original.as_slice()) {
         callback(string).into()
     } else {

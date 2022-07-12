@@ -51,6 +51,14 @@ Split = \() none | error {
   Assert'True(Utf8'Split("🗿 😄 🐶", " ") == [string "🗿", "😄", "🐶"])
 }
 
+ToLowercase = \() none | error {
+  Assert'True(Utf8'ToLowercase("FOO") == "foo")
+}
+
+ToUppercase = \() none | error {
+  Assert'True(Utf8'ToUppercase("foo") == "FOO")
+}
+
 Trim = \() none | error {
   Assert'True(Utf8'Trim(" foo ") == "foo")
 }

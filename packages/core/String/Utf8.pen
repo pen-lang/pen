@@ -5,13 +5,15 @@ import foreign "c" _pen_core_utf8_find \(string, string) number
 import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_split \(string, string) [string]
+import foreign "c" _pen_core_utf8_to_lowercase \(string) string
+import foreign "c" _pen_core_utf8_to_uppercase \(string) string
 import foreign "c" _pen_core_utf8_trim \(string) string
 import foreign "c" _pen_core_utf8_trim_end \(string) string
 import foreign "c" _pen_core_utf8_trim_end_matches \(string, string) string
 import foreign "c" _pen_core_utf8_trim_start \(string) string
 import foreign "c" _pen_core_utf8_trim_start_matches \(string, string) string
 
-# Checks if a string contains a pattern.
+# Check if a string contains a pattern.
 Contains = \(s string, pat string) boolean {
   _pen_core_utf8_contains(s, pat)
 }
@@ -36,6 +38,16 @@ Slice = \(s string, start number, end number) string {
 # Split a string by a pattern.
 Split = \(s string, pat string) [string] {
   _pen_core_utf8_split(s, pat)
+}
+
+# Convert a string into lowercase.
+ToLowercase = \(s string) string {
+  _pen_core_utf8_to_lowercase(s)
+}
+
+# Convert a string into uppercase.
+ToUppercase = \(s string) string {
+  _pen_core_utf8_to_uppercase(s)
 }
 
 # Trim leading and trailing spaces.
