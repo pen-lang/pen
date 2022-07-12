@@ -24,6 +24,11 @@ Slice = \(s string, start number, end number) string {
   _pen_core_utf8_slice(s, start, end)
 }
 
+# Split a string by a pattern.
+Split = \(s string, pat string) string {
+  _pen_core_utf8_split(s, pat)
+}
+
 # Trim leading and trailing spaces.
 Trim = \(s string) string {
   _pen_core_utf8_trim(s)
