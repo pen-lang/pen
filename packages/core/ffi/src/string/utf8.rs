@@ -51,8 +51,8 @@ fn _pen_core_utf8_split(string: ffi::ByteString, pattern: ffi::ByteString) -> ff
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string
                 .split(pattern)
-                .map(|string| ffi::ByteString::from(string).into())
-                .collect::<Vec<ffi::Any>>()
+                .map(|string| ffi::ByteString::from(string))
+                .collect::<Vec<_>>()
                 .into()
         } else {
             ffi::List::new()
