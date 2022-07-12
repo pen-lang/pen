@@ -46,8 +46,11 @@ fn _pen_core_utf8_slice(
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_split(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Arc<ffi::List> {
-    if let Ok(string) = str::from_utf8(string.as_slice()) {
+fn _pen_core_utf8_split(
+    original: ffi::ByteString,
+    pattern: ffi::ByteString,
+) -> ffi::Arc<ffi::List> {
+    if let Ok(string) = str::from_utf8(original.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string
                 .split(pattern)
@@ -55,10 +58,10 @@ fn _pen_core_utf8_split(string: ffi::ByteString, pattern: ffi::ByteString) -> ff
                 .collect::<Vec<_>>()
                 .into()
         } else {
-            ffi::List::new()
+            [original].into()
         }
     } else {
-        ffi::List::new()
+        [original].into()
     }
 }
 
