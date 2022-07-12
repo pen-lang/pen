@@ -1,4 +1,5 @@
 use crate::{Any, Arc, BoxAny, Closure};
+use alloc::vec::Vec;
 
 extern "C" {
     fn pen_ffi_list_create() -> Arc<List>;
@@ -25,5 +26,17 @@ impl List {
 impl Default for Arc<List> {
     fn default() -> Self {
         List::new()
+    }
+}
+
+impl<T: Into<Any>> From<Vec<T>> for Arc<List> {
+    fn from(xs: Vec<T>) -> Arc<List> {
+        let mut list = List::new();
+
+        for x in xs.into_iter().rev() {
+            list = List::prepend(list, x);
+        }
+
+        list
     }
 }
