@@ -1,4 +1,3 @@
-use alloc::vec::Vec;
 use core::str;
 
 #[ffi::bindgen]
