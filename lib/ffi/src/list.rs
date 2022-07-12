@@ -1,5 +1,4 @@
 use crate::{Any, Arc, BoxAny, Closure};
-use alloc::vec::Vec;
 
 extern "C" {
     fn pen_ffi_list_create() -> Arc<List>;
