@@ -19,6 +19,14 @@ FindFail = \() none | error {
   Assert'True(Utf8'Find("🗿😄🐶", "🐱") == none)
 }
 
+HasPrefix = \() none | error {
+  Assert'True(Utf8'HasPrefix("🗿😄🐶", "🗿😄"))
+}
+
+HasSuffix = \() none | error {
+  Assert'True(Utf8'HasSuffix("🗿😄🐶", "😄🐶"))
+}
+
 LengthEmpty = \() none | error {
   Assert'True(Utf8'Length("") == 0)
 }

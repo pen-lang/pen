@@ -38,6 +38,34 @@ fn find(string: ffi::ByteString, pattern: ffi::ByteString) -> Option<usize> {
 }
 
 #[ffi::bindgen]
+fn _pen_core_utf8_has_prefix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string.starts_with(pattern)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+    .into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_has_suffix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string.ends_with(pattern)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+    .into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_length(string: ffi::ByteString) -> ffi::Number {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         string.chars().count() as f64

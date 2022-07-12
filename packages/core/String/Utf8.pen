@@ -3,6 +3,8 @@
 import foreign "c" _pen_core_utf8_contains \(string, string) boolean
 import foreign "c" _pen_core_utf8_find \(string, string) number
 import foreign "c" _pen_core_utf8_length \(string) number
+import foreign "c" _pen_core_utf8_has_prefix \(string, string) boolean
+import foreign "c" _pen_core_utf8_has_suffix \(string, string) boolean
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_split \(string, string) [string]
 import foreign "c" _pen_core_utf8_to_lowercase \(string) string
@@ -23,6 +25,16 @@ Find = \(s string, pat string) number | none {
   i = _pen_core_utf8_find(s, pat)
 
   if i < 0 { none } else { i }
+}
+
+# Checks if a string has a prefix..
+HasPrefix = \(s string, pat string) boolean {
+  _pen_core_utf8_has_prefix(s, pat)
+}
+
+# Checks if a string has a suffix..
+HasSuffix = \(s string, pat string) boolean {
+  _pen_core_utf8_has_suffix(s, pat)
 }
 
 # Return a length of a string.
