@@ -31,7 +31,7 @@ Epsilon = \() number {
   _pen_core_epsilon()
 }
 
-# Calculates an exponential of anumber number.
+# Calculates an exponential of a number.
 Exponential = \(x number) number {
   _pen_core_exponential(x)
 }
