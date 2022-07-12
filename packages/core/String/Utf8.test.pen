@@ -40,10 +40,12 @@ TrimEnd = \() none | error {
 }
 
 TrimEndMatch = \() none | error {
+  # spell-checker: disable-next-line
   Assert'True(Utf8'TrimEndMatch("bazbarfoo", "o") == "bazbarf")
 }
 
 TrimMatch = \() none | error {
+  # spell-checker: disable-next-line
   Assert'True(Utf8'TrimMatch("foobarfoo", "foo") == "bar")
 }
 
@@ -52,5 +54,6 @@ TrimStart = \() none | error {
 }
 
 TrimStartMatch = \() none | error {
+  # spell-checker: disable-next-line
   Assert'True(Utf8'TrimStartMatch("foobarbaz", "fo") == "obarbaz")
 }
