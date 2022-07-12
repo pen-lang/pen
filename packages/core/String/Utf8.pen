@@ -1,6 +1,7 @@
 # This module provides operations for strings encoded in UTF-8.
 
 import foreign "c" _pen_core_utf8_contains \(string, string) boolean
+import foreign "c" _pen_core_utf8_find \(string, string) number
 import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_split \(string, string) [string]
@@ -13,6 +14,13 @@ import foreign "c" _pen_core_utf8_trim_start_matches \(string, string) string
 # Checks if a string contains a pattern.
 Contains = \(s string, pat string) boolean {
   _pen_core_utf8_contains(s, pat)
+}
+
+# Find an index for a pattern in a string.
+Find = \(s string, pat string) number | none {
+  i = _pen_core_utf8_find(s, pat)
+
+  if i < 0 { none } else { i }
 }
 
 # Return a length of a string.

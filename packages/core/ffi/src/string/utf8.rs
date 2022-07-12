@@ -16,6 +16,28 @@ fn _pen_core_utf8_contains(string: ffi::ByteString, pattern: ffi::ByteString) ->
 }
 
 #[ffi::bindgen]
+fn _pen_core_utf8_find(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Number {
+    find(string, pattern)
+        .map(|index| (index + 1) as f64)
+        .unwrap_or(-1.0)
+        .into()
+}
+
+fn find(string: ffi::ByteString, pattern: ffi::ByteString) -> Option<usize> {
+    let string = str::from_utf8(string.as_slice()).ok()?;
+    let pattern = str::from_utf8(pattern.as_slice()).ok()?;
+    let index = string.find(pattern)?;
+
+    Some(
+        string
+            .char_indices()
+            .enumerate()
+            .find(|(_, (byte_index, _))| byte_index == &index)?
+            .0,
+    )
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_length(string: ffi::ByteString) -> ffi::Number {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         string.chars().count() as f64

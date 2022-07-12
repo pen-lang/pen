@@ -11,6 +11,14 @@ ContainsFail = \() none | error {
   Assert'True(!Utf8'Contains("tomato", "foo"))
 }
 
+Find = \() none | error {
+  Assert'True(Utf8'Find("🗿😄🐶", "😄") == 2)
+}
+
+FindFail = \() none | error {
+  Assert'True(Utf8'Find("🗿😄🐶", "🐱") == none)
+}
+
 LengthEmpty = \() none | error {
   Assert'True(Utf8'Length("") == 0)
 }
