@@ -39,21 +39,21 @@ TrimEnd = \() none | error {
   Assert'True(Utf8'TrimEnd(" foo ") == " foo")
 }
 
-TrimEndMatch = \() none | error {
+TrimEndMatches = \() none | error {
   # spell-checker: disable-next-line
-  Assert'True(Utf8'TrimEndMatch("bazbarfoo", "o") == "bazbarf")
+  Assert'True(Utf8'TrimEndMatches("bazbarfoo", "o") == "bazbarf")
 }
 
-TrimMatch = \() none | error {
+TrimMatches = \() none | error {
   # spell-checker: disable-next-line
-  Assert'True(Utf8'TrimMatch("foobarfoo", "foo") == "bar")
+  Assert'True(Utf8'TrimMatches("foobarfoo", "foo") == "bar")
 }
 
 TrimStart = \() none | error {
   Assert'True(Utf8'TrimStart(" foo ") == "foo ")
 }
 
-TrimStartMatch = \() none | error {
+TrimStartMatches = \() none | error {
   # spell-checker: disable-next-line
-  Assert'True(Utf8'TrimStartMatch("foobarbaz", "fo") == "obarbaz")
+  Assert'True(Utf8'TrimStartMatches("foobarbaz", "fo") == "obarbaz")
 }

@@ -4,9 +4,9 @@ import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_trim \(string) string
 import foreign "c" _pen_core_utf8_trim_end \(string) string
-import foreign "c" _pen_core_utf8_trim_end_match \(string, string) string
+import foreign "c" _pen_core_utf8_trim_end_matches \(string, string) string
 import foreign "c" _pen_core_utf8_trim_start \(string) string
-import foreign "c" _pen_core_utf8_trim_start_match \(string, string) string
+import foreign "c" _pen_core_utf8_trim_start_matches \(string, string) string
 
 # Return a length of a string.
 Length = \(s string) number {
@@ -29,13 +29,13 @@ TrimEnd = \(s string) string {
 }
 
 # Trim trailing patterns.
-TrimEndMatch = \(s string, pat string) string {
-  _pen_core_utf8_trim_end_match(s, pat)
+TrimEndMatches = \(s string, pat string) string {
+  _pen_core_utf8_trim_end_matches(s, pat)
 }
 
 # Trim leading and trailing patterns.
-TrimMatch = \(s string, pat string) string {
-  TrimEndMatch(TrimStartMatch(s, pat), pat)
+TrimMatches = \(s string, pat string) string {
+  TrimEndMatches(TrimStartMatches(s, pat), pat)
 }
 
 # Trim leading spaces.
@@ -44,6 +44,6 @@ TrimStart = \(s string) string {
 }
 
 # Trim leading patterns.
-TrimStartMatch = \(s string, pat string) string {
-  _pen_core_utf8_trim_start_match(s, pat)
+TrimStartMatches = \(s string, pat string) string {
+  _pen_core_utf8_trim_start_matches(s, pat)
 }

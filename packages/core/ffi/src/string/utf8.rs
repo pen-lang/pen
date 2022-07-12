@@ -55,11 +55,11 @@ fn _pen_core_utf8_trim_end(string: ffi::ByteString) -> ffi::ByteString {
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_trim_end_match(
+fn _pen_core_utf8_trim_end_matches(
     string: ffi::ByteString,
     pattern: ffi::ByteString,
 ) -> ffi::ByteString {
-    trim_match(string, pattern, |string, pattern| {
+    trim_matches(string, pattern, |string, pattern| {
         string.trim_end_matches(pattern)
     })
 }
@@ -73,16 +73,16 @@ fn _pen_core_utf8_trim_start(string: ffi::ByteString) -> ffi::ByteString {
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_trim_start_match(
+fn _pen_core_utf8_trim_start_matches(
     string: ffi::ByteString,
     pattern: ffi::ByteString,
 ) -> ffi::ByteString {
-    trim_match(string, pattern, |string, pattern| {
+    trim_matches(string, pattern, |string, pattern| {
         string.trim_start_matches(pattern)
     })
 }
 
-fn trim_match(
+fn trim_matches(
     string: ffi::ByteString,
     pattern: ffi::ByteString,
     callback: for<'a, 'b> fn(&'a str, &'b str) -> &'a str,
