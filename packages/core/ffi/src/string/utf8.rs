@@ -40,18 +40,12 @@ fn get_utf8_byte_index(string: &str, index: usize) -> usize {
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim(string: ffi::ByteString) -> ffi::ByteString {
-    str::from_utf8(string.as_slice())
-        .unwrap_or("")
-        .trim()
-        .into()
+    trim(string, |string| string.trim())
 }
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_end(string: ffi::ByteString) -> ffi::ByteString {
-    str::from_utf8(string.as_slice())
-        .unwrap_or("")
-        .trim_end()
-        .into()
+    trim(string, |string| string.trim_end())
 }
 
 #[ffi::bindgen]
@@ -66,10 +60,7 @@ fn _pen_core_utf8_trim_end_matches(
 
 #[ffi::bindgen]
 fn _pen_core_utf8_trim_start(string: ffi::ByteString) -> ffi::ByteString {
-    str::from_utf8(string.as_slice())
-        .unwrap_or("")
-        .trim_start()
-        .into()
+    trim(string, |string| string.trim_start())
 }
 
 #[ffi::bindgen]
@@ -82,18 +73,29 @@ fn _pen_core_utf8_trim_start_matches(
     })
 }
 
+fn trim(
+    original: ffi::ByteString,
+    callback: for<'a, 'b> fn(&'a str) -> &'a str,
+) -> ffi::ByteString {
+    if let Ok(string) = str::from_utf8(original.as_slice()) {
+        callback(string).into()
+    } else {
+        original
+    }
+}
+
 fn trim_matches(
-    string: ffi::ByteString,
+    original: ffi::ByteString,
     pattern: ffi::ByteString,
     callback: for<'a, 'b> fn(&'a str, &'b str) -> &'a str,
 ) -> ffi::ByteString {
-    if let Ok(string) = str::from_utf8(string.as_slice()) {
+    if let Ok(string) = str::from_utf8(original.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             callback(string, pattern).into()
         } else {
-            Default::default()
+            original
         }
     } else {
-        Default::default()
+        original
     }
 }
