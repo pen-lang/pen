@@ -77,7 +77,7 @@ fn _pen_core_utf8_split(
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string
                 .split(pattern)
-                .map(|string| ffi::ByteString::from(string))
+                .map(ffi::ByteString::from)
                 .collect::<Vec<_>>()
                 .into()
         } else {
