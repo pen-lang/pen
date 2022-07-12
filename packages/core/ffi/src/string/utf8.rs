@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use core::str;
 
 #[ffi::bindgen]
@@ -41,6 +42,23 @@ fn _pen_core_utf8_slice(
         }
     } else {
         Default::default()
+    }
+}
+
+#[ffi::bindgen]
+fn _pen_core_utf8_split(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Arc<ffi::List> {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string
+                .split(pattern)
+                .map(|string| ffi::ByteString::from(string).into())
+                .collect::<Vec<ffi::Any>>()
+                .into()
+        } else {
+            ffi::List::new()
+        }
+    } else {
+        ffi::List::new()
     }
 }
 

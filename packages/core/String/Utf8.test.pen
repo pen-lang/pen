@@ -39,6 +39,10 @@ SliceInfinity = \() none | error {
   Assert'True(Utf8'Slice("🗿😄🐶", 2, Number'Infinity()) == "😄🐶")
 }
 
+Split = \() none | error {
+  Assert'True(Utf8'Split("🗿 😄 🐶", " ") == [string "🗿", "😄", "🐶"])
+}
+
 Trim = \() none | error {
   Assert'True(Utf8'Trim(" foo ") == "foo")
 }
