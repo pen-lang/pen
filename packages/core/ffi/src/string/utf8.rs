@@ -1,6 +1,20 @@
 use core::str;
 
 #[ffi::bindgen]
+fn _pen_core_utf8_contains(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            string.contains(pattern)
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+    .into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_length(string: ffi::ByteString) -> ffi::Number {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         string.chars().count() as f64

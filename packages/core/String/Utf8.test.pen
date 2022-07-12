@@ -3,6 +3,14 @@ import Test'Assert
 import 'Number
 import 'String'Utf8
 
+Contains = \() none | error {
+  Assert'True(Utf8'Contains("tomato", "mat"))
+}
+
+ContainsFail = \() none | error {
+  Assert'True(!Utf8'Contains("tomato", "foo"))
+}
+
 LengthEmpty = \() none | error {
   Assert'True(Utf8'Length("") == 0)
 }
