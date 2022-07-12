@@ -254,7 +254,7 @@ They can be converted from and into integers represented in IEEE-754 of a
 <pre><code class="language-pen">\() number
 </code></pre>
 <h4 id="exponential"><a class="header" href="#exponential"><code>Exponential</code></a></h4>
-<p>Calculates an exponential of a number.</p>
+<p>Calculate an exponential of a number.</p>
 <pre><code class="language-pen">\(x number) number
 </code></pre>
 <h4 id="floor"><a class="header" href="#floor"><code>Floor</code></a></h4>
@@ -298,7 +298,7 @@ They can be converted from and into integers represented in IEEE-754 of a
 <pre><code class="language-pen">\(dividend number, divisor number) number
 </code></pre>
 <h4 id="round"><a class="header" href="#round"><code>Round</code></a></h4>
-<p>Rounds a number.</p>
+<p>Round a number.</p>
 <pre><code class="language-pen">\(x number) number
 </code></pre>
 <h4 id="sequence"><a class="header" href="#sequence"><code>Sequence</code></a></h4>
@@ -318,7 +318,7 @@ They can be converted from and into integers represented in IEEE-754 of a
 <pre><code class="language-pen">\(xs [number]) number
 </code></pre>
 <h4 id="truncate"><a class="header" href="#truncate"><code>Truncate</code></a></h4>
-<p>Returns an integer value of a number.</p>
+<p>Return an integer value of a number.</p>
 <pre><code class="language-pen">\(x number) number
 </code></pre>
 <h2 id="corestring-module"><a class="header" href="#corestring-module"><code>Core'String</code> module</a></h2>
@@ -404,7 +404,19 @@ By using those views, you can apply operations to strings without copying them.<
 <p>No types are defined.</p>
 <h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
 <h4 id="contains"><a class="header" href="#contains"><code>Contains</code></a></h4>
-<p>Checks if a string contains a pattern.</p>
+<p>Check if a string contains a pattern.</p>
+<pre><code class="language-pen">\(s string, pat string) boolean
+</code></pre>
+<h4 id="find"><a class="header" href="#find"><code>Find</code></a></h4>
+<p>Find an index for a pattern in a string.</p>
+<pre><code class="language-pen">\(s string, pat string) number | none
+</code></pre>
+<h4 id="hasprefix-2"><a class="header" href="#hasprefix-2"><code>HasPrefix</code></a></h4>
+<p>Checks if a string has a prefix..</p>
+<pre><code class="language-pen">\(s string, pat string) boolean
+</code></pre>
+<h4 id="hassuffix"><a class="header" href="#hassuffix"><code>HasSuffix</code></a></h4>
+<p>Checks if a string has a suffix..</p>
 <pre><code class="language-pen">\(s string, pat string) boolean
 </code></pre>
 <h4 id="length-2"><a class="header" href="#length-2"><code>Length</code></a></h4>
@@ -414,6 +426,18 @@ By using those views, you can apply operations to strings without copying them.<
 <h4 id="slice-2"><a class="header" href="#slice-2"><code>Slice</code></a></h4>
 <p>Slice a string.</p>
 <pre><code class="language-pen">\(s string, start number, end number) string
+</code></pre>
+<h4 id="split"><a class="header" href="#split"><code>Split</code></a></h4>
+<p>Split a string by a pattern.</p>
+<pre><code class="language-pen">\(s string, pat string) [string]
+</code></pre>
+<h4 id="tolowercase"><a class="header" href="#tolowercase"><code>ToLowercase</code></a></h4>
+<p>Convert a string into lowercase.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="touppercase"><a class="header" href="#touppercase"><code>ToUppercase</code></a></h4>
+<p>Convert a string into uppercase.</p>
+<pre><code class="language-pen">\(s string) string
 </code></pre>
 <h4 id="trim"><a class="header" href="#trim"><code>Trim</code></a></h4>
 <p>Trim leading and trailing spaces.</p>
