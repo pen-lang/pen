@@ -241,6 +241,74 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
+<h4 id="absolute"><a class="header" href="#absolute"><code>Absolute</code></a></h4>
+<p>Calculate an absolute value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="ceil"><a class="header" href="#ceil"><code>Ceil</code></a></h4>
+<p>Calculate a ceil value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="epsilon"><a class="header" href="#epsilon"><code>Epsilon</code></a></h4>
+<p>Machine epsilon</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="exponential"><a class="header" href="#exponential"><code>Exponential</code></a></h4>
+<p>Calculates an exponential of a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="floor"><a class="header" href="#floor"><code>Floor</code></a></h4>
+<p>Calculate a floor value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="fraction"><a class="header" href="#fraction"><code>Fraction</code></a></h4>
+<p>Calculate a fraction value of a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="infinity"><a class="header" href="#infinity"><code>Infinity</code></a></h4>
+<p>Infinity</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="isnan"><a class="header" href="#isnan"><code>IsNan</code></a></h4>
+<p>Check if a number is NaN.</p>
+<pre><code class="language-pen">\(x number) boolean
+</code></pre>
+<h4 id="maximum"><a class="header" href="#maximum"><code>Maximum</code></a></h4>
+<p>Calculate a maximum.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="minimum"><a class="header" href="#minimum"><code>Minimum</code></a></h4>
+<p>Calculate a minimum.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="nan"><a class="header" href="#nan"><code>Nan</code></a></h4>
+<p>NaN</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="power"><a class="header" href="#power"><code>Power</code></a></h4>
+<p>Calculate a power.</p>
+<pre><code class="language-pen">\(base number, exponent number) number
+</code></pre>
+<h4 id="range"><a class="header" href="#range"><code>Range</code></a></h4>
+<p>Create a list of numbers from a minimum to a maximum.</p>
+<pre><code class="language-pen">\(minimum number, maximum number) [number]
+</code></pre>
+<h4 id="remainder"><a class="header" href="#remainder"><code>Remainder</code></a></h4>
+<p>Calculate a remainder.</p>
+<pre><code class="language-pen">\(dividend number, divisor number) number
+</code></pre>
+<h4 id="round"><a class="header" href="#round"><code>Round</code></a></h4>
+<p>Rounds a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="sequence"><a class="header" href="#sequence"><code>Sequence</code></a></h4>
+<p>Create a list of numbers from 1 to a maximum value.</p>
+<pre><code class="language-pen">\(maximum number) [number]
+</code></pre>
+<h4 id="squareroot"><a class="header" href="#squareroot"><code>SquareRoot</code></a></h4>
+<p>Calculate a square root.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
 <h4 id="string"><a class="header" href="#string"><code>String</code></a></h4>
 <p>Convert a number into its string representation.</p>
 <pre><code class="language-pen">\(x number) string
@@ -249,53 +317,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 <p>Sum up numbers.</p>
 <pre><code class="language-pen">\(xs [number]) number
 </code></pre>
-<h4 id="remainder"><a class="header" href="#remainder"><code>Remainder</code></a></h4>
-<p>Calculate a remainder.</p>
-<pre><code class="language-pen">\(dividend number, divisor number) number
-</code></pre>
-<h4 id="power"><a class="header" href="#power"><code>Power</code></a></h4>
-<p>Calculate a power.</p>
-<pre><code class="language-pen">\(base number, exponent number) number
-</code></pre>
-<h4 id="squareroot"><a class="header" href="#squareroot"><code>SquareRoot</code></a></h4>
-<p>Calculate a square root.</p>
+<h4 id="truncate"><a class="header" href="#truncate"><code>Truncate</code></a></h4>
+<p>Returns an integer value of a number.</p>
 <pre><code class="language-pen">\(x number) number
-</code></pre>
-<h4 id="sequence"><a class="header" href="#sequence"><code>Sequence</code></a></h4>
-<p>Create a list of numbers from 1 to a maximum value.</p>
-<pre><code class="language-pen">\(maximum number) [number]
-</code></pre>
-<h4 id="range"><a class="header" href="#range"><code>Range</code></a></h4>
-<p>Create a list of numbers from a minimum to a maximum.</p>
-<pre><code class="language-pen">\(minimum number, maximum number) [number]
-</code></pre>
-<h4 id="isnan"><a class="header" href="#isnan"><code>IsNan</code></a></h4>
-<p>Check if a number is NaN.</p>
-<pre><code class="language-pen">\(x number) boolean
-</code></pre>
-<h4 id="ceil"><a class="header" href="#ceil"><code>Ceil</code></a></h4>
-<p>Calculate a ceil value.</p>
-<pre><code class="language-pen">\(x number) number
-</code></pre>
-<h4 id="floor"><a class="header" href="#floor"><code>Floor</code></a></h4>
-<p>Calculate a floor value.</p>
-<pre><code class="language-pen">\(x number) number
-</code></pre>
-<h4 id="nan"><a class="header" href="#nan"><code>Nan</code></a></h4>
-<p>NaN</p>
-<pre><code class="language-pen">\() number
-</code></pre>
-<h4 id="infinity"><a class="header" href="#infinity"><code>Infinity</code></a></h4>
-<p>Infinity</p>
-<pre><code class="language-pen">\() number
-</code></pre>
-<h4 id="minimum"><a class="header" href="#minimum"><code>Minimum</code></a></h4>
-<p>Calculate a minimum.</p>
-<pre><code class="language-pen">\(x number, y number) number
-</code></pre>
-<h4 id="maximum"><a class="header" href="#maximum"><code>Maximum</code></a></h4>
-<p>Calculate a maximum.</p>
-<pre><code class="language-pen">\(x number, y number) number
 </code></pre>
 <h2 id="corestring-module"><a class="header" href="#corestring-module"><code>Core'String</code> module</a></h2>
 <p>This module provides common string operations.</p>
