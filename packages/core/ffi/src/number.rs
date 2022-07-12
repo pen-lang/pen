@@ -16,6 +16,16 @@ fn _pen_core_convert_number_to_string(number: ffi::Number) -> ffi::ByteString {
 }
 
 #[ffi::bindgen]
+fn _pen_core_epsilon() -> ffi::Number {
+    f64::EPSILON.into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_exponential(x: ffi::Number) -> ffi::Number {
+    f64::from(x).exp().into()
+}
+
+#[ffi::bindgen]
 fn _pen_core_floor(number: ffi::Number) -> ffi::Number {
     f64::from(number).floor().into()
 }

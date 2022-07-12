@@ -3,6 +3,8 @@
 import foreign "c" _pen_core_absolute \(number) number
 import foreign "c" _pen_core_ceil \(number) number
 import foreign "c" _pen_core_convert_number_to_string \(number) string
+import foreign "c" _pen_core_epsilon \() number
+import foreign "c" _pen_core_exponential \(number) number
 import foreign "c" _pen_core_floor \(number) number
 import foreign "c" _pen_core_fraction \(number) number
 import foreign "c" _pen_core_infinity \() number
@@ -22,6 +24,16 @@ Absolute = \(x number) number {
 # Calculate a ceil value.
 Ceil = \(x number) number {
   _pen_core_ceil(x)
+}
+
+# Machine epsilon
+Epsilon = \() number {
+  _pen_core_epsilon()
+}
+
+# Calculates an exponential of anumber number.
+Exponential = \(x number) number {
+  _pen_core_exponential(x)
 }
 
 # Calculate a floor value.
