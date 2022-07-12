@@ -29,8 +29,11 @@ impl Default for Arc<List> {
     }
 }
 
-impl<T: Into<Any>> From<Vec<T>> for Arc<List> {
-    fn from(xs: Vec<T>) -> Arc<List> {
+impl<T: Into<Any>, I: IntoIterator<Item = T>> From<I> for Arc<List>
+where
+    <I as IntoIterator>::IntoIter: DoubleEndedIterator,
+{
+    fn from(xs: I) -> Arc<List> {
         let mut list = List::new();
 
         for x in xs.into_iter().rev() {
