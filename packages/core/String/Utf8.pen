@@ -1,7 +1,18 @@
 # This module provides operations for strings encoded in UTF-8.
 
+import foreign "c" _pen_core_utf8_contains \(string, string) boolean
 import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
+import foreign "c" _pen_core_utf8_trim \(string) string
+import foreign "c" _pen_core_utf8_trim_end \(string) string
+import foreign "c" _pen_core_utf8_trim_end_matches \(string, string) string
+import foreign "c" _pen_core_utf8_trim_start \(string) string
+import foreign "c" _pen_core_utf8_trim_start_matches \(string, string) string
+
+# Checks if a string contains a pattern.
+Contains = \(s string, pat string) boolean {
+  _pen_core_utf8_contains(s, pat)
+}
 
 # Return a length of a string.
 Length = \(s string) number {
@@ -11,4 +22,34 @@ Length = \(s string) number {
 # Slice a string.
 Slice = \(s string, start number, end number) string {
   _pen_core_utf8_slice(s, start, end)
+}
+
+# Trim leading and trailing spaces.
+Trim = \(s string) string {
+  _pen_core_utf8_trim(s)
+}
+
+# Trim trailing spaces.
+TrimEnd = \(s string) string {
+  _pen_core_utf8_trim_end(s)
+}
+
+# Trim trailing patterns.
+TrimEndMatches = \(s string, pat string) string {
+  _pen_core_utf8_trim_end_matches(s, pat)
+}
+
+# Trim leading and trailing patterns.
+TrimMatches = \(s string, pat string) string {
+  TrimEndMatches(TrimStartMatches(s, pat), pat)
+}
+
+# Trim leading spaces.
+TrimStart = \(s string) string {
+  _pen_core_utf8_trim_start(s)
+}
+
+# Trim leading patterns.
+TrimStartMatches = \(s string, pat string) string {
+  _pen_core_utf8_trim_start_matches(s, pat)
 }
