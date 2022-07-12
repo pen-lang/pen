@@ -66,13 +66,6 @@ fn _pen_core_utf8_trim_end_match(
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_trim_match(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::ByteString {
-    trim_match(string, pattern, |string, pattern| {
-        string.trim_matches(&*pattern.chars().collect::<Vec<_>>())
-    })
-}
-
-#[ffi::bindgen]
 fn _pen_core_utf8_trim_start(string: ffi::ByteString) -> ffi::ByteString {
     str::from_utf8(string.as_slice())
         .unwrap_or("")
