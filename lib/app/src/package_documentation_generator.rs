@@ -26,9 +26,10 @@ pub fn generate(
             url: package.name.clone(),
             description: package.name.clone(),
             type_: infrastructure
-                    .package_configuration_reader
-                    .read(package_directory)?
-                    .type_().to_string(),
+                .package_configuration_reader
+                .read(package_directory)?
+                .type_()
+                .to_string(),
         },
         &module_finder::find(infrastructure, package_directory)?
             .iter()
