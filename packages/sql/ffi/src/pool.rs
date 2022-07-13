@@ -51,7 +51,7 @@ async fn _pen_sql_pool_create(
         sqlx::any::AnyPoolOptions::new()
             .min_connections(f64::from(options.min_connections) as u32)
             .max_connections(f64::from(options.max_connections) as u32)
-            .connect_timeout(Duration::from_millis(
+            .acquire_timeout(Duration::from_millis(
                 f64::from(options.connect_timeout) as u64
             ))
             .connect(str::from_utf8(uri.as_slice())?)

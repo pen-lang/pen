@@ -1,10 +1,27 @@
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    fmt::{self, Display, Formatter},
+};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PackageType {
     Application,
     Library,
     System,
+}
+
+impl Display for PackageType {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(
+            formatter,
+            "{}",
+            match self {
+                Self::Application => "application",
+                Self::Library => "library",
+                Self::System => "system",
+            }
+        )
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
