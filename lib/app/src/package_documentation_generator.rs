@@ -6,7 +6,7 @@ use crate::{
 use parse::{parse, parse_comments};
 use std::error::Error;
 
-pub struct PackageDocumentation {
+pub struct DocumentationPackage {
     pub name: String,
     pub url: String,
     pub description: String,
@@ -16,20 +16,22 @@ pub type DocumentationConfiguration = doc::Configuration;
 
 pub fn generate(
     infrastructure: &Infrastructure,
-    package: &PackageDocumentation,
+    package: &DocumentationPackage,
     package_directory: &FilePath,
     configuration: &DocumentationConfiguration,
 ) -> Result<String, Box<dyn Error>> {
-    let package_configuration = infrastructure
-        .package_configuration_reader
-        .read(package_directory)?;
-
     Ok(doc::generate(
         &doc::Package {
             name: package.name.clone(),
             url: package.name.clone(),
             description: package.name.clone(),
-            type_: format!("{}", package_configuration.type_()),
+            type_: format!(
+                "{}",
+                infrastructure
+                    .package_configuration_reader
+                    .read(package_directory)?
+                    .type_()
+            ),
         },
         &module_finder::find(infrastructure, package_directory)?
             .iter()
