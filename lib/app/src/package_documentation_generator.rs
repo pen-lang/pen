@@ -23,8 +23,8 @@ pub fn generate(
     Ok(doc::generate(
         &doc::Package {
             name: package.name.clone(),
-            url: package.name.clone(),
-            description: package.name.clone(),
+            url: package.url.clone(),
+            description: package.description.clone(),
             type_: infrastructure
                 .package_configuration_reader
                 .read(package_directory)?
