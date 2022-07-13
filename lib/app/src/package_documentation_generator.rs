@@ -25,13 +25,10 @@ pub fn generate(
             name: package.name.clone(),
             url: package.name.clone(),
             description: package.name.clone(),
-            type_: format!(
-                "{}",
-                infrastructure
+            type_: infrastructure
                     .package_configuration_reader
                     .read(package_directory)?
-                    .type_()
-            ),
+                    .type_().to_string(),
         },
         &module_finder::find(infrastructure, package_directory)?
             .iter()
