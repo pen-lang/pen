@@ -956,11 +956,15 @@ Blah = \() number {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="standard-packages"><a class="header" href="#standard-packages">Standard packages</a></h1>
 <p>Standard packages provide common utility functions and system interfaces. They are installed together with the <code>pen</code> command on your system. This chapter describes their APIs and how to use them.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="core-package"><a class="header" href="#core-package"><code>Core</code> package</a></h1>
-<p>This package provides common algorithms and data structures.</p>
+<p>Core</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
 <h2 id="install-3"><a class="header" href="#install-3">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Core&quot;: &quot;pen:///core&quot;
+    &quot;Core&quot;: &quot;Core&quot;
   } 
 }
 </code></pre>
@@ -1270,11 +1274,15 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(s string, pat string) string
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="flag-package"><a class="header" href="#flag-package"><code>Flag</code> package</a></h1>
-<p>This package provides command-line flag parsing.</p>
+<p>Flag</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
 <h2 id="install-4"><a class="header" href="#install-4">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Flag&quot;: &quot;pen:///flag&quot;
+    &quot;Flag&quot;: &quot;Flag&quot;
   } 
 }
 </code></pre>
@@ -1300,11 +1308,15 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ss [string]) Set | error
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="json-package"><a class="header" href="#json-package"><code>Json</code> package</a></h1>
-<p>This package provides a JSON parser.</p>
+<p>Json</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
 <h2 id="install-5"><a class="header" href="#install-5">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Json&quot;: &quot;pen:///json&quot;
+    &quot;Json&quot;: &quot;Json&quot;
   } 
 }
 </code></pre>
@@ -1346,11 +1358,15 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(v Value) Raw
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="http-package"><a class="header" href="#http-package"><code>Http</code> package</a></h1>
-<p>This package provides HTTP client and server.</p>
+<p>Http</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;system&quot;
+}
+</code></pre>
 <h2 id="install-6"><a class="header" href="#install-6">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Http&quot;: &quot;pen:///http&quot;
+    &quot;Http&quot;: &quot;Http&quot;
   } 
 }
 </code></pre>
@@ -1406,11 +1422,15 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, address string, callback \(Request) Response) none | error
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="os-package"><a class="header" href="#os-package"><code>Os</code> package</a></h1>
-<p>This package provides an interface for operating systems.</p>
+<p>Os</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;system&quot;
+}
+</code></pre>
 <h2 id="install-7"><a class="header" href="#install-7">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
+    &quot;Os&quot;: &quot;Os&quot;
   } 
 }
 </code></pre>
@@ -1676,11 +1696,15 @@ By using those views, you can apply operations to strings without copying them.<
 <h3 id="functions-34"><a class="header" href="#functions-34">Functions</a></h3>
 <p>No functions are defined.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sql-package"><a class="header" href="#sql-package"><code>Sql</code> package</a></h1>
-<p>This package provides a SQL database client.</p>
+<p>Sql</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;system&quot;
+}
+</code></pre>
 <h2 id="install-8"><a class="header" href="#install-8">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Sql&quot;: &quot;pen:///sql&quot;
+    &quot;Sql&quot;: &quot;Sql&quot;
   } 
 }
 </code></pre>
@@ -1732,11 +1756,15 @@ By using those views, you can apply operations to strings without copying them.<
 <h3 id="functions-38"><a class="header" href="#functions-38">Functions</a></h3>
 <p>No functions are defined.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="test-package"><a class="header" href="#test-package"><code>Test</code> package</a></h1>
-<p>This package provides test utilities.</p>
+<p>Test</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
 <h2 id="install-9"><a class="header" href="#install-9">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
-    &quot;Test&quot;: &quot;pen:///test&quot;
+    &quot;Test&quot;: &quot;Test&quot;
   } 
 }
 </code></pre>
