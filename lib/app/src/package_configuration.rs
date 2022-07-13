@@ -16,9 +16,9 @@ impl Display for PackageType {
             formatter,
             "{}",
             match self {
-                PackageType::Application => "application",
-                PackageType::Library => "library",
-                PackageType::System => "system",
+                Self::Application => "application",
+                Self::Library => "library",
+                Self::System => "system",
             }
         )
     }
