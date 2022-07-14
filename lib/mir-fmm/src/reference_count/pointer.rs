@@ -3,6 +3,8 @@ use super::{super::error::CompileError, count, heap};
 // Reference counts are negative for synchronized memory blocks and otherwise
 // positive. References to static memory blocks are tagged.
 
+// TODO Implement sticky count ranges.
+
 pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
