@@ -6,8 +6,6 @@ use core::{
     sync::atomic::{fence, AtomicIsize, Ordering},
 };
 
-// TODO Implement sticky count ranges.
-
 const UNIQUE_COUNT: isize = 0;
 const SYNCHRONIZED_UNIQUE_COUNT: isize = -1;
 // The static count is also synchronized.
