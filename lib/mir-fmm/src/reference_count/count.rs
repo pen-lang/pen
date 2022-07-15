@@ -62,3 +62,37 @@ pub fn is_synchronized_unique(
     )?
     .into())
 }
+
+pub fn sticky_count() -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::bitwise_operation(
+        fmm::ir::BitwiseOperator::LeftShift,
+        fmm::ir::Primitive::PointerInteger(1),
+        fmm::build::arithmetic_operation(
+            fmm::ir::ArithmeticOperator::Divide,
+            fmm::build::arithmetic_operation(
+                fmm::ir::ArithmeticOperator::Multiply,
+                fmm::build::size_of(compile_type()),
+                fmm::ir::Primitive::PointerInteger(8),
+            )?,
+            fmm::ir::Primitive::PointerInteger(2),
+        )?,
+    )?
+    .into())
+}
+
+pub fn drop_sticky_count() -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::bitwise_operation(
+        fmm::ir::BitwiseOperator::LeftShift,
+        fmm::ir::Primitive::PointerInteger(1),
+        fmm::build::arithmetic_operation(
+            fmm::ir::ArithmeticOperator::Divide,
+            fmm::build::arithmetic_operation(
+                fmm::ir::ArithmeticOperator::Multiply,
+                fmm::build::size_of(compile_type()),
+                fmm::ir::Primitive::PointerInteger(8),
+            )?,
+            fmm::ir::Primitive::PointerInteger(2),
+        )?,
+    )?
+    .into())
+}
