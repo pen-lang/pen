@@ -105,10 +105,11 @@ fn compile_global_variables(
                 declaration.name().into(),
                 fmm::build::variable(
                     declaration.name(),
-                    fmm::types::Pointer::new(type_::compile_unsized_closure(
-                        declaration.type_(),
-                        types,
-                    )),
+                    fmm::types::Pointer::new(
+                        reference_count::heap::compile_type_with_reference_count(
+                            type_::compile_unsized_closure(declaration.type_(), types),
+                        ),
+                    ),
                 ),
             )
         })
@@ -117,10 +118,11 @@ fn compile_global_variables(
                 declaration.name().into(),
                 fmm::build::variable(
                     declaration.name(),
-                    fmm::types::Pointer::new(type_::compile_unsized_closure(
-                        declaration.type_(),
-                        types,
-                    )),
+                    fmm::types::Pointer::new(
+                        reference_count::heap::compile_type_with_reference_count(
+                            type_::compile_unsized_closure(declaration.type_(), types),
+                        ),
+                    ),
                 ),
             )
         }))
@@ -128,19 +130,24 @@ fn compile_global_variables(
             (
                 definition.name().into(),
                 fmm::build::bit_cast(
-                    fmm::types::Pointer::new(type_::compile_unsized_closure(
-                        definition.type_(),
-                        types,
-                    )),
+                    fmm::types::Pointer::new(
+                        reference_count::heap::compile_type_with_reference_count(
+                            type_::compile_unsized_closure(definition.type_(), types),
+                        ),
+                    ),
                     fmm::build::variable(
                         definition.name(),
-                        fmm::types::Pointer::new(type_::compile_sized_closure(definition, types)),
+                        fmm::types::Pointer::new(
+                            reference_count::heap::compile_type_with_reference_count(
+                                type_::compile_sized_closure(definition, types),
+                            ),
+                        ),
                     ),
                 )
                 .into(),
             )
         }))
-        .map(|(name, expression)| Ok((name, reference_count::pointer::tag_as_static(&expression)?)))
+        .map(|(name, expression)| Ok((name, fmm::build::record_address(expression, 1)?.into())))
         .collect::<Result<_, _>>()
 }
 

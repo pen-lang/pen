@@ -1,5 +1,9 @@
 use super::{super::error::CompileError, count};
 
+pub fn compile_type_with_reference_count(type_: impl Into<fmm::types::Type>) -> fmm::types::Record {
+    fmm::types::Record::new(vec![count::compile_type().into(), type_.into()])
+}
+
 pub fn allocate(
     builder: &fmm::build::InstructionBuilder,
     type_: impl Into<fmm::types::Type>,

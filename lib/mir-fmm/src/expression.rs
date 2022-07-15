@@ -197,30 +197,35 @@ pub fn compile(
             if string.value().is_empty() {
                 fmm::ir::Undefined::new(type_::compile_string()).into()
             } else {
-                reference_count::pointer::tag_as_static(
-                    &fmm::build::bit_cast(
-                        type_::compile_string(),
+                fmm::build::bit_cast(
+                    type_::compile_string(),
+                    fmm::build::record_address(
                         context.module_builder().define_anonymous_variable(
-                            fmm::build::record(
-                                [
-                                    fmm::ir::Primitive::PointerInteger(string.value().len() as i64)
-                                        .into(),
-                                ]
-                                .into_iter()
-                                .chain(
-                                    string
-                                        .value()
-                                        .iter()
-                                        .map(|&byte| fmm::ir::Primitive::Integer8(byte).into()),
+                            fmm::build::record(vec![
+                                reference_count::count::compile_static()?.into(),
+                                fmm::build::record(
+                                    [fmm::ir::Primitive::PointerInteger(
+                                        string.value().len() as i64
+                                    )
+                                    .into()]
+                                    .into_iter()
+                                    .chain(
+                                        string
+                                            .value()
+                                            .iter()
+                                            .map(|&byte| fmm::ir::Primitive::Integer8(byte).into()),
+                                    )
+                                    .collect(),
                                 )
-                                .collect(),
-                            ),
+                                .into(),
+                            ]),
                             false,
                             None,
                         ),
-                    )
-                    .into(),
-                )?
+                        1,
+                    )?,
+                )
+                .into()
             }
         }
         mir::ir::Expression::TryOperation(operation) => {
