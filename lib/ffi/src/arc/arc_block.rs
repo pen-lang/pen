@@ -1,7 +1,6 @@
 use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
-    mem::size_of,
     ptr::{drop_in_place, null},
     sync::atomic::{fence, AtomicIsize, Ordering},
 };
@@ -9,7 +8,7 @@ use core::{
 const UNIQUE_COUNT: isize = 0;
 const SYNCHRONIZED_UNIQUE_COUNT: isize = -1;
 // The static count is also synchronized.
-const STATIC_COUNT: isize = 1 << (size_of::<isize>() * 8 - 1);
+const STATIC_COUNT: isize = 1 << (isize::BITS as usize - 1);
 
 #[derive(Debug)]
 #[repr(C)]
