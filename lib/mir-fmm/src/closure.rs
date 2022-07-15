@@ -2,7 +2,7 @@ mod drop;
 pub mod metadata;
 mod sync;
 
-use super::{reference_count, CompileError};
+use super::CompileError;
 
 pub fn get_entry_function_pointer(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
@@ -26,11 +26,7 @@ fn get_field(
     closure_pointer: impl Into<fmm::build::TypedExpression>,
     index: usize,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record_address(
-        reference_count::pointer::untag(&closure_pointer.into())?,
-        index,
-    )?
-    .into())
+    Ok(fmm::build::record_address(closure_pointer, index)?.into())
 }
 
 pub fn compile_content(

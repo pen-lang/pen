@@ -137,20 +137,6 @@ pub fn synchronize(
     Ok(())
 }
 
-pub fn untag(
-    pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::bit_cast(
-        pointer.type_().clone(),
-        fmm::build::bitwise_operation(
-            fmm::ir::BitwiseOperator::And,
-            fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-            fmm::build::bitwise_not_operation(fmm::ir::Primitive::PointerInteger(1))?,
-        )?,
-    )
-    .into())
-}
-
 pub fn is_unique(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
