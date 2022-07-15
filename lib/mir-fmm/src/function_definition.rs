@@ -10,17 +10,11 @@ pub fn compile(
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         definition.name(),
-        fmm::build::record(vec![
-            reference_count::count::compile_static()?,
-            closure::compile_content(
-                entry_function::compile(context, definition, true, global_variables)?,
-                closure::metadata::compile(context, definition)?,
-                fmm::ir::Undefined::new(type_::compile_closure_payload(
-                    definition,
-                    context.types(),
-                )),
-            ),
-        ]),
+        reference_count::compile_static(closure::compile_content(
+            entry_function::compile(context, definition, true, global_variables)?,
+            closure::metadata::compile(context, definition)?,
+            fmm::ir::Undefined::new(type_::compile_closure_payload(definition, context.types())),
+        ))?,
         definition.is_thunk(),
         fmm::ir::Linkage::External,
         None,

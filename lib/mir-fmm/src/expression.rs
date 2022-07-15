@@ -201,24 +201,20 @@ pub fn compile(
                     type_::compile_string(),
                     fmm::build::record_address(
                         context.module_builder().define_anonymous_variable(
-                            fmm::build::record(vec![
-                                reference_count::count::compile_static()?.into(),
-                                fmm::build::record(
-                                    [fmm::ir::Primitive::PointerInteger(
-                                        string.value().len() as i64
-                                    )
-                                    .into()]
-                                    .into_iter()
-                                    .chain(
-                                        string
-                                            .value()
-                                            .iter()
-                                            .map(|&byte| fmm::ir::Primitive::Integer8(byte).into()),
-                                    )
-                                    .collect(),
+                            reference_count::compile_static(fmm::build::record(
+                                [
+                                    fmm::ir::Primitive::PointerInteger(string.value().len() as i64)
+                                        .into(),
+                                ]
+                                .into_iter()
+                                .chain(
+                                    string
+                                        .value()
+                                        .iter()
+                                        .map(|&byte| fmm::ir::Primitive::Integer8(byte).into()),
                                 )
-                                .into(),
-                            ]),
+                                .collect(),
+                            ))?,
                             false,
                             None,
                         ),
