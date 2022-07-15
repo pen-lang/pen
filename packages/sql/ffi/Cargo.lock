@@ -251,7 +251,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "pin-project",
- "spin 0.9.3",
+ "spin 0.9.4",
 ]
 
 [[package]]
@@ -739,9 +739,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.6.7"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b72d9ee85dc3c158f5dd37d9edc0e897e467b839cac6bb1f6ca8b98ddcd754db"
+checksum = "2ea360568d5fab450011e7d61d5cf2b294a8b560b87b5c19d5ad1a343aa25f9d"
 dependencies = [
  "async-stream",
  "futures",
@@ -1080,9 +1080,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "spin"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c530c2b0d0bf8b69304b39fe2001993e267461948b890cd037d8ad4293fa1a0d"
+checksum = "7f6002a767bff9e83f8eeecf883ecb8011875a21ae8da43bffb817a57e78cc09"
 dependencies = [
  "lock_api",
 ]
@@ -1111,7 +1111,7 @@ dependencies = [
 [[package]]
 name = "sqlx"
 version = "0.6.0"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4d17b202446af0cc9d5e0b2ba8b9574b5142cd16"
+source = "git+https://github.com/launchbadge/sqlx#9534de3476ed7e40d390b7713208b686c8e7366a"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -1120,7 +1120,7 @@ dependencies = [
 [[package]]
 name = "sqlx-core"
 version = "0.6.0"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4d17b202446af0cc9d5e0b2ba8b9574b5142cd16"
+source = "git+https://github.com/launchbadge/sqlx#9534de3476ed7e40d390b7713208b686c8e7366a"
 dependencies = [
  "ahash",
  "atoi",
@@ -1178,7 +1178,7 @@ dependencies = [
 [[package]]
 name = "sqlx-macros"
 version = "0.6.0"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4d17b202446af0cc9d5e0b2ba8b9574b5142cd16"
+source = "git+https://github.com/launchbadge/sqlx#9534de3476ed7e40d390b7713208b686c8e7366a"
 dependencies = [
  "dotenv",
  "either",
@@ -1196,7 +1196,7 @@ dependencies = [
 [[package]]
 name = "sqlx-rt"
 version = "0.6.0"
-source = "git+https://github.com/raviqqe/sqlx?branch=bug/any-type-info#4d17b202446af0cc9d5e0b2ba8b9574b5142cd16"
+source = "git+https://github.com/launchbadge/sqlx#9534de3476ed7e40d390b7713208b686c8e7366a"
 dependencies = [
  "once_cell",
  "tokio",
@@ -1267,10 +1267,11 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.19.2"
+version = "1.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c51a52ed6686dd62c320f9b89299e9dfb46f730c7a48e635c19f21d116cb1439"
+checksum = "57aec3cfa4c296db7255446efb4928a6be304b431a806216105542a67b6ca82e"
 dependencies = [
+ "autocfg",
  "bytes",
  "libc",
  "memchr",
