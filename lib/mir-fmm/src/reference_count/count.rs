@@ -63,6 +63,17 @@ pub fn is_synchronized_unique(
     .into())
 }
 
+pub fn is_static(
+    count: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(fmm::build::comparison_operation(
+        fmm::ir::ComparisonOperator::Equal,
+        count.clone(),
+        compile_static()?,
+    )?
+    .into())
+}
+
 pub fn compile_static() -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::bitwise_operation(
         fmm::ir::BitwiseOperator::LeftShift,

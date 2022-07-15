@@ -8,7 +8,8 @@ pub fn clone(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     builder.if_(
-        is_heap(pointer)?,
+        is_null(pointer)?,
+        |builder| Ok(builder.branch(pointer.clone())),
         |builder| {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
@@ -17,14 +18,20 @@ pub fn clone(
             builder.if_(
                 count::is_synchronized(&count)?,
                 |builder| -> Result<_, CompileError> {
-                    builder.atomic_operation(
-                        fmm::ir::AtomicOperator::Subtract,
-                        count_pointer.clone(),
-                        count::compile(1),
-                        fmm::ir::AtomicOrdering::Relaxed,
-                    )?;
+                    Ok(builder.branch(builder.if_(
+                        count::is_static(&count)?,
+                        |builder| Ok(builder.branch(fmm::ir::void_value())),
+                        |builder| -> Result<_, CompileError> {
+                            builder.atomic_operation(
+                                fmm::ir::AtomicOperator::Subtract,
+                                count_pointer.clone(),
+                                count::compile(1),
+                                fmm::ir::AtomicOrdering::Relaxed,
+                            )?;
 
-                    Ok(builder.branch(fmm::ir::void_value()))
+                            Ok(builder.branch(fmm::ir::void_value()))
+                        },
+                    )?))
                 },
                 |builder| {
                     builder.store(
@@ -42,7 +49,6 @@ pub fn clone(
 
             Ok(builder.branch(pointer.clone()))
         },
-        |builder| Ok(builder.branch(pointer.clone())),
     )
 }
 
@@ -57,7 +63,8 @@ pub fn drop(
     };
 
     builder.if_(
-        is_heap(pointer)?,
+        is_null(pointer)?,
+        |builder| Ok(builder.branch(fmm::ir::void_value())),
         |builder| -> Result<_, CompileError> {
             let count_pointer = heap::get_count_pointer(pointer)?;
             let count =
@@ -67,19 +74,25 @@ pub fn drop(
                 count::is_synchronized(&count)?,
                 |builder| -> Result<_, CompileError> {
                     Ok(builder.branch(builder.if_(
-                        count::is_synchronized_unique(&builder.atomic_operation(
-                            fmm::ir::AtomicOperator::Add,
-                            count_pointer.clone(),
-                            count::compile(1),
-                            fmm::ir::AtomicOrdering::Release,
-                        )?)?,
-                        |builder| -> Result<_, CompileError> {
-                            builder.fence(fmm::ir::AtomicOrdering::Acquire);
-                            drop_inner(&builder)?;
-
-                            Ok(builder.branch(fmm::ir::void_value()))
-                        },
+                        count::is_static(&count)?,
                         |builder| Ok(builder.branch(fmm::ir::void_value())),
+                        |builder| -> Result<_, CompileError> {
+                            Ok(builder.branch(builder.if_(
+                                count::is_synchronized_unique(&builder.atomic_operation(
+                                    fmm::ir::AtomicOperator::Add,
+                                    count_pointer.clone(),
+                                    count::compile(1),
+                                    fmm::ir::AtomicOrdering::Release,
+                                )?)?,
+                                |builder| -> Result<_, CompileError> {
+                                    builder.fence(fmm::ir::AtomicOrdering::Acquire);
+                                    drop_inner(&builder)?;
+
+                                    Ok(builder.branch(fmm::ir::void_value()))
+                                },
+                                |builder| Ok(builder.branch(fmm::ir::void_value())),
+                            )?))
+                        },
                     )?))
                 },
                 |builder| {
@@ -106,7 +119,6 @@ pub fn drop(
                 },
             )?))
         },
-        |builder| Ok(builder.branch(fmm::ir::void_value())),
     )?;
 
     Ok(())
@@ -142,7 +154,8 @@ pub fn is_unique(
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     builder.if_(
-        is_heap(pointer)?,
+        is_null(pointer)?,
+        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
         |builder| {
             // This atomic ordering can be relaxed because blocks get never un-synchronized.
             let count = builder.atomic_load(
@@ -162,45 +175,28 @@ pub fn is_unique(
                 |builder| Ok(builder.branch(count::is_unique(&count)?)),
             )?))
         },
-        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
     )
 }
 
-// Heap blocks are synchronized always by their owners before references are
+// Heap blocks are always synchronized by their owners before references are
 // shared with other threads. So an ordering to load counts can always be
 // relaxed.
 pub fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::bitwise_operation(
-        fmm::ir::BitwiseOperator::Or,
-        fmm::build::bitwise_not_operation(is_heap(pointer)?)?,
-        count::is_synchronized(&builder.atomic_load(
-            heap::get_count_pointer(pointer)?,
-            fmm::ir::AtomicOrdering::Relaxed,
-        )?)?,
-    )?
-    .into())
-}
-
-fn is_heap(
-    pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::bitwise_operation(
-        fmm::ir::BitwiseOperator::And,
-        fmm::build::bitwise_not_operation(is_null(pointer)?)?,
-        fmm::build::comparison_operation(
-            fmm::ir::ComparisonOperator::NotEqual,
-            fmm::build::bitwise_operation(
-                fmm::ir::BitwiseOperator::And,
-                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-                fmm::ir::Primitive::PointerInteger(1),
-            )?,
-            fmm::ir::Primitive::PointerInteger(1),
-        )?,
-    )?
-    .into())
+    Ok(builder
+        .if_(
+            is_null(pointer)?,
+            |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
+            |builder| -> Result<_, CompileError> {
+                Ok(builder.branch(count::is_synchronized(&builder.atomic_load(
+                    heap::get_count_pointer(pointer)?,
+                    fmm::ir::AtomicOrdering::Relaxed,
+                )?)?))
+            },
+        )?
+        .into())
 }
 
 fn is_null(
