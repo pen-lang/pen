@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: Swatinem/rust-cache@v1
       - run: tools/format.sh -- --check
   lint:
     runs-on: ubuntu-latest
