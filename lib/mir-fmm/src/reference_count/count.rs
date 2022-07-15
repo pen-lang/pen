@@ -34,7 +34,7 @@ pub fn is_synchronized(
     count: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::comparison_operation(
-        fmm::ir::ComparisonOperator::LessThan,
+        fmm::ir::ComparisonOperator::LessThan(true),
         count.clone(),
         compile_unique(),
     )?
