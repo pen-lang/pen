@@ -185,18 +185,16 @@ pub fn is_synchronized(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder
-        .if_(
-            is_null(pointer)?,
-            |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
-            |builder| -> Result<_, CompileError> {
-                Ok(builder.branch(count::is_synchronized(&builder.atomic_load(
-                    heap::get_count_pointer(pointer)?,
-                    fmm::ir::AtomicOrdering::Relaxed,
-                )?)?))
-            },
-        )?
-        .into())
+    builder.if_(
+        is_null(pointer)?,
+        |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
+        |builder| -> Result<_, CompileError> {
+            Ok(builder.branch(count::is_synchronized(&builder.atomic_load(
+                heap::get_count_pointer(pointer)?,
+                fmm::ir::AtomicOrdering::Relaxed,
+            )?)?))
+        },
+    )
 }
 
 fn is_null(
