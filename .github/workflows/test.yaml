@@ -17,6 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: git diff --exit-code
@@ -28,12 +29,14 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
   coverage:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v2
@@ -53,6 +56,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
       - uses: actions/download-artifact@v2
