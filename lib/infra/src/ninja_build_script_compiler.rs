@@ -99,6 +99,8 @@ impl NinjaBuildScriptCompiler {
                     -simplifycfg -sink -aggressive-instcombine -adce \
                     -tailcallelim \
                     -simplifycfg -sink -aggressive-instcombine -adce \
+                    -inline \
+                    -simplifycfg -sink -aggressive-instcombine -adce \
                     -mergefunc \
                     -o $out $in",
                 opt.display(),
