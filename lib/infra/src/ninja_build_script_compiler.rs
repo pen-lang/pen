@@ -99,8 +99,8 @@ impl NinjaBuildScriptCompiler {
             &format!(
                 "  command = {} \
                     -function-attrs -globalopt -gvn \
-                    -adce -simplifycfg -sink -aggressive-instcombine \
-                    -tailcallelim -mergefunc \
+                    -adce -aggressive-instcombine \
+                    -tailcallelim -inline -mergefunc \
                     -o $out $in",
                 opt.display(),
             ),
