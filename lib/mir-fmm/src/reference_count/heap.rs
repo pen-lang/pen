@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, count};
+use super::{super::error::CompileError, block, count};
 
 pub fn allocate(
     builder: &fmm::build::InstructionBuilder,
@@ -30,21 +30,8 @@ pub fn free(
 ) -> Result<(), CompileError> {
     builder.free_heap(fmm::build::bit_cast(
         fmm::types::generic_pointer_type(),
-        get_count_pointer(&pointer.into())?,
+        block::compile_count_pointer(&pointer.into())?,
     ));
 
     Ok(())
-}
-
-pub fn get_count_pointer(
-    pointer: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
-    Ok(fmm::build::pointer_address(
-        fmm::build::bit_cast(
-            fmm::types::Pointer::new(count::compile_type()),
-            pointer.clone(),
-        ),
-        fmm::ir::Primitive::PointerInteger(-1),
-    )?
-    .into())
 }
