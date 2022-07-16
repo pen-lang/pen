@@ -90,7 +90,7 @@ impl NinjaBuildScriptCompiler {
             "rule opt",
             &format!(
                 "  command = {} \
-                    -function-attrs -adce -globalopt -gvn -sccp -inline \
+                    -function-attrs -adce -globalopt -gvn -inline \
                     -aggressive-instcombine -adce -mergefunc \
                     -o $out $in",
                 opt.display(),
