@@ -95,12 +95,7 @@ impl NinjaBuildScriptCompiler {
                 "  command = {} \
                     -function-attrs -globalopt -gvn \
                     -simplifycfg -sink -aggressive-instcombine -adce \
-                    -inline \
-                    -simplifycfg -sink -aggressive-instcombine -adce \
-                    -tailcallelim \
-                    -simplifycfg -sink -aggressive-instcombine -adce \
-                    -inline \
-                    -simplifycfg -sink -aggressive-instcombine -adce \
+                    -inline -tailcallelim -inline \
                     -mergefunc \
                     -o $out $in",
                 opt.display(),
