@@ -42,6 +42,7 @@ impl NinjaBuildScriptCompiler {
         target_triple: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let llc = llvm_command_finder::find("llc")?;
+        let opt = llvm_command_finder::find("opt")?;
         let ar = llvm_command_finder::find("llvm-ar")?;
 
         let resolve_dependency_command = format!(
@@ -81,6 +82,14 @@ impl NinjaBuildScriptCompiler {
             "  description = compiling test module $module_name",
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
+            "rule opt",
+            &format!(
+                "  command = {} \
+                    -function-attrs -adce -globalopt -gvn -sccp -inline \
+                    -aggressive-instcombine -adce -mergefunc \
+                    -o $out $in",
+                opt.display(),
+            ),
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
@@ -154,13 +163,9 @@ impl NinjaBuildScriptCompiler {
                     format!("  srcdep = {}", target.source_file()),
                     format!("  module_name = {}", target.source().module_name()),
                     self.format_in_package_name_variable(target.source().package_name()),
-                    format!(
-                        "build {}: llc {}",
-                        object_file.display(),
-                        bit_code_file.display(),
-                    ),
                 ]
                 .into_iter()
+                .chain(self.compile_object_file(&bit_code_file, &object_file))
                 .chain(self.compile_dependency(
                     &source_file,
                     &bit_code_file,
@@ -210,13 +215,9 @@ impl NinjaBuildScriptCompiler {
                     format!("  dyndep = {}", ninja_dependency_file.display()),
                     format!("  module_name = {}", target.source().module_name()),
                     format!("  srcdep = {}", target.source_file()),
-                    format!(
-                        "build {}: llc {}",
-                        object_file.display(),
-                        bit_code_file.display(),
-                    ),
                 ]
                 .into_iter()
+                .chain(self.compile_object_file(&bit_code_file, &object_file))
                 .chain(self.compile_dependency(
                     &source_file,
                     &bit_code_file,
@@ -280,13 +281,9 @@ impl NinjaBuildScriptCompiler {
             format!("  dyndep = {}", ninja_dependency_file.display()),
             format!("  module_name = {}", target.source().module_name()),
             format!("  srcdep = {}", target.source_file()),
-            format!(
-                "build {}: llc {}",
-                object_file.display(),
-                bit_code_file.display(),
-            ),
         ]
         .into_iter()
+        .chain(self.compile_object_file(&bit_code_file, &object_file))
         .chain(
             self.compile_dependency(
                 &source_file,
@@ -415,6 +412,32 @@ impl NinjaBuildScriptCompiler {
             format!("  object_files = {}", &object_files),
             format!("  package_name = {}", package_name.unwrap_or_default()),
         ])
+    }
+
+    fn compile_object_file(
+        &self,
+        bit_code_file: &std::path::Path,
+        object_file: &std::path::Path,
+    ) -> Vec<String> {
+        let optimized_bit_code_file = bit_code_file
+            .with_file_name(format!(
+                "{}_opt",
+                bit_code_file.file_name().unwrap().to_string_lossy()
+            ))
+            .with_extension(self.bit_code_file_extension);
+
+        vec![
+            format!(
+                "build {}: opt {}",
+                optimized_bit_code_file.display(),
+                bit_code_file.display(),
+            ),
+            format!(
+                "build {}: llc {}",
+                object_file.display(),
+                optimized_bit_code_file.display(),
+            ),
+        ]
     }
 
     fn join_paths(&self, paths: &[&FilePath]) -> String {
@@ -679,19 +702,14 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     .convert_to_os_path(target.object_file());
                 let bit_code_file = object_file.with_extension(self.bit_code_file_extension);
 
-                vec![
-                    format!(
-                        "build {} {}: compile_prelude {}",
-                        bit_code_file.display(),
-                        interface_file.display(),
-                        source_file.display(),
-                    ),
-                    format!(
-                        "build {}: llc {}",
-                        object_file.display(),
-                        bit_code_file.display(),
-                    ),
-                ]
+                [format!(
+                    "build {} {}: compile_prelude {}",
+                    bit_code_file.display(),
+                    interface_file.display(),
+                    source_file.display(),
+                )]
+                .into_iter()
+                .chain(self.compile_object_file(&bit_code_file, &object_file))
             })
             .chain(
                 self.compile_archive(
