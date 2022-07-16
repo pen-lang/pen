@@ -130,19 +130,24 @@ pub fn synchronize(
     synchronize_content: impl Fn(&fmm::build::InstructionBuilder) -> Result<(), CompileError>,
 ) -> Result<(), CompileError> {
     builder.if_(
-        is_synchronized(builder, pointer)?,
+        is_null(pointer)?,
         |builder| Ok(builder.branch(fmm::ir::void_value())),
         |builder| -> Result<_, CompileError> {
-            let pointer = heap::get_count_pointer(pointer)?;
+            let count_pointer = heap::get_count_pointer(pointer)?;
+            let count =
+                builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
-            builder.store(
-                count::synchronize(&builder.load(pointer.clone())?)?,
-                pointer,
-            );
+            Ok(builder.branch(builder.if_(
+                count::is_synchronized(&count)?,
+                |builder| Ok(builder.branch(fmm::ir::void_value())),
+                |builder| -> Result<_, CompileError> {
+                    builder.store(count::synchronize(&count)?, count_pointer.clone());
 
-            synchronize_content(&builder)?;
+                    synchronize_content(&builder)?;
 
-            Ok(builder.branch(fmm::ir::void_value()))
+                    Ok(builder.branch(fmm::ir::void_value()))
+                },
+            )?))
         },
     )?;
 
