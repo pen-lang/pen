@@ -88,6 +88,7 @@ impl NinjaBuildScriptCompiler {
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
             "rule opt",
+            // spell-checker: disable
             &format!(
                 "  command = {} \
                     -function-attrs -adce -globalopt -gvn -inline \
@@ -95,6 +96,7 @@ impl NinjaBuildScriptCompiler {
                     -o $out $in",
                 opt.display(),
             ),
+            // spell-checker: enable
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
