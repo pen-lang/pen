@@ -423,7 +423,7 @@ impl NinjaBuildScriptCompiler {
         let optimized_bit_code_file = bit_code_file
             .with_file_name(format!(
                 "{}_opt",
-                bit_code_file.file_name().unwrap().to_string_lossy()
+                bit_code_file.file_stem().unwrap().to_string_lossy()
             ))
             .with_extension(self.bit_code_file_extension);
 
