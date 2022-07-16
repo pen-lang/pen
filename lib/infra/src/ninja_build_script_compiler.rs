@@ -91,6 +91,8 @@ impl NinjaBuildScriptCompiler {
             // spell-checker: disable
             // Do not use the -sccp pass here as it breaks tail call optimization by llc becaue we
             // use a return type of an empty struct for CPS!
+            //
+            // TODO Use a void type as a return type in CPS.
             &format!(
                 "  command = {} \
                     -function-attrs -globalopt -gvn \
