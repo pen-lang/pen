@@ -89,10 +89,17 @@ impl NinjaBuildScriptCompiler {
             "  command = pen compile-package-test-information -o $out $in",
             "rule opt",
             // spell-checker: disable
+            // Do not use the -sccp pass here as it breaks tail call optimization by llc becaue we
+            // use a return type of an empty struct for CPS!
             &format!(
                 "  command = {} \
-                    -function-attrs -adce -globalopt -gvn -inline \
-                    -aggressive-instcombine -adce -mergefunc -tailcallelim \
+                    -function-attrs -globalopt -gvn \
+                    -simplifycfg -sink -aggressive-instcombine -adce \
+                    -inline \
+                    -simplifycfg -sink -aggressive-instcombine -adce \
+                    -tailcallelim \
+                    -simplifycfg -sink -aggressive-instcombine -adce \
+                    -mergefunc \
                     -o $out $in",
                 opt.display(),
             ),
