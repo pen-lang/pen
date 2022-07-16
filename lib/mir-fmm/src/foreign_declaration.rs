@@ -12,7 +12,7 @@ pub fn compile(
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         declaration.name(),
-        reference_count::compile_static(closure::compile_content(
+        reference_count::block::compile_static(closure::compile_content(
             compile_entry_function(context, declaration)?,
             fmm::ir::Undefined::new(type_::compile_closure_metadata()),
             fmm::build::record(vec![]),

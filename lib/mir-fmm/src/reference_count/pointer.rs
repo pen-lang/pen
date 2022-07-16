@@ -1,4 +1,4 @@
-use super::{super::error::CompileError, count, heap};
+use super::{super::error::CompileError, block, count, heap};
 
 // Reference counts are negative for synchronized memory blocks and otherwise
 // positive. References to static memory blocks are tagged.
@@ -11,7 +11,7 @@ pub fn clone(
         is_null(pointer)?,
         |builder| Ok(builder.branch(pointer.clone())),
         |builder| {
-            let count_pointer = heap::get_count_pointer(pointer)?;
+            let count_pointer = block::compile_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
@@ -66,7 +66,7 @@ pub fn drop(
         is_null(pointer)?,
         |builder| Ok(builder.branch(fmm::ir::void_value())),
         |builder| -> Result<_, CompileError> {
-            let count_pointer = heap::get_count_pointer(pointer)?;
+            let count_pointer = block::compile_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
@@ -133,7 +133,7 @@ pub fn synchronize(
         is_null(pointer)?,
         |builder| Ok(builder.branch(fmm::ir::void_value())),
         |builder| -> Result<_, CompileError> {
-            let count_pointer = heap::get_count_pointer(pointer)?;
+            let count_pointer = block::compile_count_pointer(pointer)?;
             let count =
                 builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
 
@@ -164,7 +164,7 @@ pub fn is_unique(
         |builder| {
             // This atomic ordering can be relaxed because blocks get never un-synchronized.
             let count = builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
+                block::compile_count_pointer(pointer)?,
                 fmm::ir::AtomicOrdering::Relaxed,
             )?;
 
@@ -195,7 +195,7 @@ pub fn is_synchronized(
         |builder| Ok(builder.branch(fmm::ir::Primitive::Boolean(false))),
         |builder| -> Result<_, CompileError> {
             Ok(builder.branch(count::is_synchronized(&builder.atomic_load(
-                heap::get_count_pointer(pointer)?,
+                block::compile_count_pointer(pointer)?,
                 fmm::ir::AtomicOrdering::Relaxed,
             )?)?))
         },

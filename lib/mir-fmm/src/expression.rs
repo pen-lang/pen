@@ -201,7 +201,7 @@ pub fn compile(
                     type_::compile_string(),
                     fmm::build::record_address(
                         context.module_builder().define_anonymous_variable(
-                            reference_count::compile_static(fmm::build::record(
+                            reference_count::block::compile_static(fmm::build::record(
                                 [
                                     fmm::ir::Primitive::PointerInteger(string.value().len() as i64)
                                         .into(),
