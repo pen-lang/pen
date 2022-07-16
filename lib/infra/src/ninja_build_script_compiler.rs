@@ -3,7 +3,12 @@ use crate::{
     default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
 };
 use app::infra::FilePath;
-use std::{collections::BTreeMap, error::Error, path::PathBuf, sync::Arc};
+use std::{
+    collections::BTreeMap,
+    error::Error,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
@@ -414,11 +419,7 @@ impl NinjaBuildScriptCompiler {
         ])
     }
 
-    fn compile_object_file(
-        &self,
-        bit_code_file: &std::path::Path,
-        object_file: &std::path::Path,
-    ) -> Vec<String> {
+    fn compile_object_file(&self, bit_code_file: &Path, object_file: &Path) -> Vec<String> {
         let optimized_bit_code_file = bit_code_file
             .with_file_name(format!(
                 "{}_opt",
