@@ -19,14 +19,14 @@ Encode = \(n Node) string | error {
     s
   } else {
     error("unknown tag")
-  }
+  }?
 
   String'Concatenate(
     [string
       "<",
       tag,
       " ",
-      encodeAttributes(n.Attributes),
+      ...encodeAttributes(n.Attributes),
       if size(n.Children) == 0 {
         [string "/>"]
       } else {
@@ -39,7 +39,7 @@ Encode = \(n Node) string | error {
 }
 
 encodeAttributes = \(attrs {string: string}) [string] {
-  [string String'Join([string k, "=\"", v, "\""]) for k, v in attrs]
+  [string String'Concatenate([string k, "=\"", v, "\""]) for k, v in attrs]
 }
 
 encodeChildren = \(ns [Node]) [string] | error {
