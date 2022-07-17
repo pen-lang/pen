@@ -1,16 +1,54 @@
+import Core'String
+
 import 'Node { Node, Tag }
 
 tagToString = \() {Tag: string} {
   {Tag: string
-    Node'A: "a",
-    Node'Body: "body",
-    Node'Head: "head",
-    Node'Html: "html",
-    Node'P: "p",
-    Node'Title: "title",
+    Node'A{}: "a",
+    Node'Body{}: "body",
+    Node'Div{}: "div",
+    Node'Head{}: "head",
+    Node'Html{}: "html",
+    Node'P{}: "p",
+    Node'Title{}: "title",
   }
 }
 
-Encode = \(n Node) string {
-  none
+Encode = \(n Node) string | error {
+  tag = if s = tagToString()[n.Tag] {
+    s
+  } else {
+    error("unknown tag")
+  }
+
+  String'Concatenate(
+    [string
+      "<",
+      tag,
+      " ",
+      encodeAttributes(n.Attributes),
+      if size(n.Children) == 0 {
+        [string "/>"]
+      } else {
+        children = encodeChildren(n.Children)
+
+        [string ">", ...chlidren, "</", tag, ">"]
+      },
+    ],
+  )
+}
+
+encodeAttributes = \(attrs {string: string}) [string] {
+  [string String'Join([string k, "=\"", v, "\""]) for k, v in attrs]
+}
+
+encodeChildren = \(ns [Node]) [string] | error {
+  if [n, ...ns] = ns {
+    n = encodeChildren(n)?
+    ns = encodeChildren(ns)?
+
+    [string n, ...ns]
+  } else {
+    [string]
+  }
 }
