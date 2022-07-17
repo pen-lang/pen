@@ -4,7 +4,14 @@ type Node {
   Children [Node]
 }
 
-type Tag = Html | Body | Head | A | Div | P | Title
+type Tag =
+  A |
+  Body |
+  Div |
+  Head |
+  Html |
+  P |
+  Title
 
 type A {}
 
