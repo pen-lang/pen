@@ -1274,13 +1274,32 @@ mod tests {
             assert_eq!(
                 format_type(
                     &types::Union::new(
-                        types::Number::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Number::new(line_position(1)),
+                        types::None::new(line_position(2)),
                         Position::fake()
                     )
                     .into()
                 ),
                 "number |\nnone"
+            );
+        }
+
+        #[test]
+        fn format_function_multi_line_union_type_with_3_types() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Number::new(line_position(1)),
+                        types::Union::new(
+                            types::ByteString::new(line_position(2)),
+                            types::None::new(line_position(2)),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "number |\nstring |\nnone"
             );
         }
     }
