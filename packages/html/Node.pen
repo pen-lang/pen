@@ -1,7 +1,7 @@
 type Node {
-  tag Tag
-  attributes {string: string}
-  children [Node]
+  Tag Tag
+  Attributes {string: string}
+  Children [Node]
 }
 
 type Tag = Html | Body | Head | A | Div | P | Title

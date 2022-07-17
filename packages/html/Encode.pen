@@ -1,0 +1,16 @@
+import 'Node { Node, Tag }
+
+tagToString = \() {Tag: string} {
+  {Tag: string
+    Node'A: "a",
+    Node'Body: "body",
+    Node'Head: "head",
+    Node'Html: "html",
+    Node'P: "p",
+    Node'Title: "title",
+  }
+}
+
+Encode = \(n Node) string {
+  none
+}
