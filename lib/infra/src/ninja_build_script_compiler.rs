@@ -88,11 +88,18 @@ impl NinjaBuildScriptCompiler {
             "rule compile_package_test_information",
             "  command = pen compile-package-test-information -o $out $in",
             "rule opt",
+            // Do not use the -sccp pass here as it breaks tail call optimization by llc because we
+            // use a return type of an empty struct for CPS!
+            //
+            // TODO Use a void type as a return type in CPS.
             // spell-checker: disable
             &format!(
                 "  command = {} \
-                    -function-attrs -adce -globalopt -gvn -inline \
-                    -aggressive-instcombine -adce -mergefunc -tailcallelim \
+                    -verify \
+                    -function-attrs -globalopt -gvn \
+                    -adce -aggressive-instcombine \
+                    -tailcallelim -inline -mergefunc \
+                    -verify \
                     -o $out $in",
                 opt.display(),
             ),
