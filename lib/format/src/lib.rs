@@ -189,12 +189,18 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
 }
 
 fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
+    let type_ = compile_type(alias.type_());
+
     sequence([
         compile_block_comment(context, alias.position()),
         "type ".into(),
         alias.name().into(),
-        " = ".into(),
-        compile_type(alias.type_()),
+        " =".into(),
+        if is_broken(&type_) {
+            indent(sequence([line(), type_]))
+        } else {
+            sequence([" ".into(), type_])
+        },
         line(),
     ])
 }
@@ -1201,46 +1207,75 @@ mod tests {
         );
     }
 
-    #[test]
-    fn format_type_alias() {
-        assert_eq!(
-            format_module(&Module::new(
-                vec![],
-                vec![],
-                vec![
-                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
-                        .into()
-                ],
-                vec![],
-                Position::fake()
-            )),
-            "type foo = none\n"
-        );
-    }
+    mod tyep_alias {
+        use super::*;
 
-    #[test]
-    fn format_multiple_type_aliases() {
-        assert_eq!(
-            format_module(&Module::new(
-                vec![],
-                vec![],
-                vec![
-                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
-                        .into(),
-                    TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
-                        .into()
-                ],
-                vec![],
-                Position::fake()
-            )),
-            indoc!(
-                "
+        #[test]
+        fn format_type_alias() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![TypeAlias::new(
+                        "foo",
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    vec![],
+                    Position::fake()
+                )),
+                "type foo = none\n"
+            );
+        }
+
+        #[test]
+        fn format_multiple_type_aliases() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![
+                        TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                            .into(),
+                        TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
+                            .into()
+                    ],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
                 type foo = none
 
                 type bar = none
                 "
-            ),
-        );
+                ),
+            );
+        }
+
+        #[test]
+        fn format_type_alias_with_broken_type() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![TypeAlias::new(
+                        "foo",
+                        types::Union::new(
+                            types::Number::new(line_position(1)),
+                            types::None::new(line_position(2)),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    )
+                    .into()],
+                    vec![],
+                    Position::fake()
+                )),
+                "type foo =\n  number |\n  none\n"
+            );
+        }
     }
 
     mod type_ {
