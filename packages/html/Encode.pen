@@ -21,19 +21,23 @@ Encode = \(n Node) string | error {
     error("unknown tag")
   }?
 
+  attrs = encodeAttributes(n.Attributes)
+
+  ns = if size(n.Children) == 0 {
+    [string "/>"]
+  } else {
+    ns = encodeChildren(n.Children)?
+
+    [string ">", ...ns, "</", tag, ">"]
+  }
+
   String'Concatenate(
     [string
       "<",
       tag,
       " ",
-      ...encodeAttributes(n.Attributes),
-      if size(n.Children) == 0 {
-        [string "/>"]
-      } else {
-        children = encodeChildren(n.Children)
-
-        [string ">", ...chlidren, "</", tag, ">"]
-      },
+      ...attrs,
+      ...ns,
     ],
   )
 }
@@ -44,7 +48,7 @@ encodeAttributes = \(attrs {string: string}) [string] {
 
 encodeChildren = \(ns [Node]) [string] | error {
   if [n, ...ns] = ns {
-    n = encodeChildren(n)?
+    n = Encode(n())?
     ns = encodeChildren(ns)?
 
     [string n, ...ns]
