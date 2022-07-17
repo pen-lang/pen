@@ -264,7 +264,7 @@ fn compile_type(type_: &Type) -> Document {
                     .iter()
                     .enumerate()
                     .map(|(index, type_)| {
-                        let document = compile_type(&type_);
+                        let document = compile_type(type_);
 
                         if index != types.len() - 1 && type_.is_function() {
                             sequence(["(".into(), document, ")".into()])
