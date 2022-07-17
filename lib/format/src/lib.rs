@@ -250,18 +250,34 @@ fn compile_type(type_: &Type) -> Document {
         Type::Record(record) => record.name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        Type::Union(union) => {
-            let lhs = compile_type(union.lhs());
+        Type::Union(_) => {
+            let types = collect_union_types(type_);
 
-            sequence([
-                if union.lhs().is_function() {
-                    sequence(["(".into(), lhs, ")".into()])
-                } else {
-                    lhs
-                },
-                " | ".into(),
-                compile_type(union.rhs()),
-            ])
+            let union = sequence(
+                types
+                    .iter()
+                    .enumerate()
+                    .map(|(index, type_)| {
+                        let document = compile_type(&type_);
+
+                        if index != types.len() - 1 && type_.is_function() {
+                            sequence(["(".into(), document, ")".into()])
+                        } else {
+                            document
+                        }
+                    })
+                    .intersperse(sequence([" |".into(), line()])),
+            );
+
+            if types.len() == 1
+                || types.get(0).map(|type_| type_.position().line_number())
+                    == types.get(1).map(|type_| type_.position().line_number())
+                    && !is_broken(&union)
+            {
+                flatten(union)
+            } else {
+                break_(union)
+            }
         }
     }
 }
@@ -851,6 +867,16 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
                 ])
             }),
     )
+}
+
+fn collect_union_types(type_: &Type) -> Vec<Type> {
+    match type_ {
+        Type::Union(union) => collect_union_types(union.lhs())
+            .into_iter()
+            .chain(collect_union_types(union.rhs()))
+            .collect(),
+        _ => vec![type_.clone()],
+    }
 }
 
 #[cfg(test)]
