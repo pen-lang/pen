@@ -1207,7 +1207,7 @@ mod tests {
         );
     }
 
-    mod tyep_alias {
+    mod type_alias {
         use super::*;
 
         #[test]
