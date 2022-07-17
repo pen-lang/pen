@@ -1268,6 +1268,21 @@ mod tests {
                 "(\\() none) | none"
             );
         }
+
+        #[test]
+        fn format_function_multi_line_union_type() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "number |\nnone"
+            );
+        }
     }
 
     mod definition {
