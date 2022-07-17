@@ -1,0 +1,21 @@
+type Node {
+  tag Tag
+  attributes {string: string}
+  children [Node]
+}
+
+type Tag = Html | Body | Head | A | Div | P | Title
+
+type A {}
+
+type Title {}
+
+type Body {}
+
+type Div {}
+
+type Head {}
+
+type Html {}
+
+type P {}
