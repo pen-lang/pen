@@ -92,9 +92,6 @@ impl NinjaBuildScriptCompiler {
             // use a return type of an empty struct for CPS!
             //
             // TODO Use a void type as a return type in CPS.
-            // TODO Enable the -inline pass after the -tailcallelim pass.
-            // Although that makes some programs like fibonacci number faster, that breaks some
-            // other codes too.
             // spell-checker: disable
             &format!(
                 "  command = {} \
