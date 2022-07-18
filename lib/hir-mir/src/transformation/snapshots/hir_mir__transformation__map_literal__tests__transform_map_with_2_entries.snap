@@ -1,0 +1,1650 @@
+---
+source: lib/hir-mir/src/transformation/map_literal.rs
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapEntry ::\n                new(Number :: new(1.0, Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into(), MapEntry\n                ::\n                new(Number :: new(2.0, Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into()],\n            Position::fake()))"
+---
+Ok(
+    Call(
+        Call {
+            function_type: Some(
+                Function(
+                    Function {
+                        arguments: [
+                            Reference(
+                                Reference {
+                                    name: "mapContext",
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Reference(
+                                Reference {
+                                    name: "GenericMap",
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Any(
+                                Any {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Any(
+                                Any {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ],
+                        result: Reference(
+                            Reference {
+                                name: "GenericMap",
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+            ),
+            function: Variable(
+                Variable {
+                    name: "setMap",
+                    position: Position {
+                        path: "",
+                        line_number: 1,
+                        column_number: 1,
+                        line: "",
+                    },
+                },
+            ),
+            arguments: [
+                Call(
+                    Call {
+                        function_type: Some(
+                            Function(
+                                Function {
+                                    arguments: [
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Boolean(
+                                                    Boolean {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Number(
+                                                    Number {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Boolean(
+                                                    Boolean {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Any(
+                                                        Any {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Number(
+                                                    Number {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ],
+                                    result: Reference(
+                                        Reference {
+                                            name: "mapContext",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ),
+                        function: Variable(
+                            Variable {
+                                name: "newMapContext",
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        arguments: [
+                            Lambda(
+                                Lambda {
+                                    arguments: [
+                                        Argument {
+                                            name: "$lhs",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                        Argument {
+                                            name: "$rhs",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                    result_type: Boolean(
+                                        Boolean {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    body: IfType(
+                                        IfType {
+                                            name: "$lhs",
+                                            argument: Variable(
+                                                Variable {
+                                                    name: "$lhs",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            branches: [
+                                                IfTypeBranch {
+                                                    type_: None(
+                                                        None {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    expression: IfType(
+                                                        IfType {
+                                                            name: "$rhs",
+                                                            argument: Variable(
+                                                                Variable {
+                                                                    name: "$rhs",
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            branches: [
+                                                                IfTypeBranch {
+                                                                    type_: None(
+                                                                        None {
+                                                                            position: Position {
+                                                                                path: "",
+                                                                                line_number: 1,
+                                                                                column_number: 1,
+                                                                                line: "",
+                                                                            },
+                                                                        },
+                                                                    ),
+                                                                    expression: Boolean(
+                                                                        Boolean {
+                                                                            value: true,
+                                                                            position: Position {
+                                                                                path: "",
+                                                                                line_number: 1,
+                                                                                column_number: 1,
+                                                                                line: "",
+                                                                            },
+                                                                        },
+                                                                    ),
+                                                                },
+                                                            ],
+                                                            else_: None,
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                },
+                                            ],
+                                            else_: None,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Lambda(
+                                Lambda {
+                                    arguments: [
+                                        Argument {
+                                            name: "$x",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                    result_type: Number(
+                                        Number {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    body: IfType(
+                                        IfType {
+                                            name: "$x",
+                                            argument: Variable(
+                                                Variable {
+                                                    name: "$x",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            branches: [
+                                                IfTypeBranch {
+                                                    type_: None(
+                                                        None {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    expression: Number(
+                                                        Number {
+                                                            value: 0.0,
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                },
+                                            ],
+                                            else_: None,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Lambda(
+                                Lambda {
+                                    arguments: [
+                                        Argument {
+                                            name: "$lhs",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                        Argument {
+                                            name: "$rhs",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                    result_type: Boolean(
+                                        Boolean {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    body: IfType(
+                                        IfType {
+                                            name: "$lhs",
+                                            argument: Variable(
+                                                Variable {
+                                                    name: "$lhs",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            branches: [
+                                                IfTypeBranch {
+                                                    type_: None(
+                                                        None {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    expression: IfType(
+                                                        IfType {
+                                                            name: "$rhs",
+                                                            argument: Variable(
+                                                                Variable {
+                                                                    name: "$rhs",
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            branches: [
+                                                                IfTypeBranch {
+                                                                    type_: None(
+                                                                        None {
+                                                                            position: Position {
+                                                                                path: "",
+                                                                                line_number: 1,
+                                                                                column_number: 1,
+                                                                                line: "",
+                                                                            },
+                                                                        },
+                                                                    ),
+                                                                    expression: Boolean(
+                                                                        Boolean {
+                                                                            value: true,
+                                                                            position: Position {
+                                                                                path: "",
+                                                                                line_number: 1,
+                                                                                column_number: 1,
+                                                                                line: "",
+                                                                            },
+                                                                        },
+                                                                    ),
+                                                                },
+                                                            ],
+                                                            else_: None,
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                },
+                                            ],
+                                            else_: None,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Lambda(
+                                Lambda {
+                                    arguments: [
+                                        Argument {
+                                            name: "$x",
+                                            type_: Any(
+                                                Any {
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ],
+                                    result_type: Number(
+                                        Number {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    body: IfType(
+                                        IfType {
+                                            name: "$x",
+                                            argument: Variable(
+                                                Variable {
+                                                    name: "$x",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            branches: [
+                                                IfTypeBranch {
+                                                    type_: None(
+                                                        None {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    expression: Number(
+                                                        Number {
+                                                            value: 0.0,
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                },
+                                            ],
+                                            else_: None,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ],
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+                Call(
+                    Call {
+                        function_type: Some(
+                            Function(
+                                Function {
+                                    arguments: [
+                                        Reference(
+                                            Reference {
+                                                name: "mapContext",
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Reference(
+                                            Reference {
+                                                name: "GenericMap",
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Any(
+                                            Any {
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Any(
+                                            Any {
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ],
+                                    result: Reference(
+                                        Reference {
+                                            name: "GenericMap",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ),
+                        function: Variable(
+                            Variable {
+                                name: "setMap",
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        arguments: [
+                            Call(
+                                Call {
+                                    function_type: Some(
+                                        Function(
+                                            Function {
+                                                arguments: [
+                                                    Function(
+                                                        Function {
+                                                            arguments: [
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            result: Boolean(
+                                                                Boolean {
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    Function(
+                                                        Function {
+                                                            arguments: [
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            result: Number(
+                                                                Number {
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    Function(
+                                                        Function {
+                                                            arguments: [
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            result: Boolean(
+                                                                Boolean {
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    Function(
+                                                        Function {
+                                                            arguments: [
+                                                                Any(
+                                                                    Any {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            ],
+                                                            result: Number(
+                                                                Number {
+                                                                    position: Position {
+                                                                        path: "",
+                                                                        line_number: 1,
+                                                                        column_number: 1,
+                                                                        line: "",
+                                                                    },
+                                                                },
+                                                            ),
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                ],
+                                                result: Reference(
+                                                    Reference {
+                                                        name: "mapContext",
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ),
+                                    function: Variable(
+                                        Variable {
+                                            name: "newMapContext",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    arguments: [
+                                        Lambda(
+                                            Lambda {
+                                                arguments: [
+                                                    Argument {
+                                                        name: "$lhs",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                    Argument {
+                                                        name: "$rhs",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                                result_type: Boolean(
+                                                    Boolean {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                body: IfType(
+                                                    IfType {
+                                                        name: "$lhs",
+                                                        argument: Variable(
+                                                            Variable {
+                                                                name: "$lhs",
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        branches: [
+                                                            IfTypeBranch {
+                                                                type_: None(
+                                                                    None {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                expression: IfType(
+                                                                    IfType {
+                                                                        name: "$rhs",
+                                                                        argument: Variable(
+                                                                            Variable {
+                                                                                name: "$rhs",
+                                                                                position: Position {
+                                                                                    path: "",
+                                                                                    line_number: 1,
+                                                                                    column_number: 1,
+                                                                                    line: "",
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        branches: [
+                                                                            IfTypeBranch {
+                                                                                type_: None(
+                                                                                    None {
+                                                                                        position: Position {
+                                                                                            path: "",
+                                                                                            line_number: 1,
+                                                                                            column_number: 1,
+                                                                                            line: "",
+                                                                                        },
+                                                                                    },
+                                                                                ),
+                                                                                expression: Boolean(
+                                                                                    Boolean {
+                                                                                        value: true,
+                                                                                        position: Position {
+                                                                                            path: "",
+                                                                                            line_number: 1,
+                                                                                            column_number: 1,
+                                                                                            line: "",
+                                                                                        },
+                                                                                    },
+                                                                                ),
+                                                                            },
+                                                                        ],
+                                                                        else_: None,
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ],
+                                                        else_: None,
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Lambda(
+                                            Lambda {
+                                                arguments: [
+                                                    Argument {
+                                                        name: "$x",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                                result_type: Number(
+                                                    Number {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                body: IfType(
+                                                    IfType {
+                                                        name: "$x",
+                                                        argument: Variable(
+                                                            Variable {
+                                                                name: "$x",
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        branches: [
+                                                            IfTypeBranch {
+                                                                type_: None(
+                                                                    None {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                expression: Number(
+                                                                    Number {
+                                                                        value: 0.0,
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ],
+                                                        else_: None,
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Lambda(
+                                            Lambda {
+                                                arguments: [
+                                                    Argument {
+                                                        name: "$lhs",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                    Argument {
+                                                        name: "$rhs",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                                result_type: Boolean(
+                                                    Boolean {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                body: IfType(
+                                                    IfType {
+                                                        name: "$lhs",
+                                                        argument: Variable(
+                                                            Variable {
+                                                                name: "$lhs",
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        branches: [
+                                                            IfTypeBranch {
+                                                                type_: None(
+                                                                    None {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                expression: IfType(
+                                                                    IfType {
+                                                                        name: "$rhs",
+                                                                        argument: Variable(
+                                                                            Variable {
+                                                                                name: "$rhs",
+                                                                                position: Position {
+                                                                                    path: "",
+                                                                                    line_number: 1,
+                                                                                    column_number: 1,
+                                                                                    line: "",
+                                                                                },
+                                                                            },
+                                                                        ),
+                                                                        branches: [
+                                                                            IfTypeBranch {
+                                                                                type_: None(
+                                                                                    None {
+                                                                                        position: Position {
+                                                                                            path: "",
+                                                                                            line_number: 1,
+                                                                                            column_number: 1,
+                                                                                            line: "",
+                                                                                        },
+                                                                                    },
+                                                                                ),
+                                                                                expression: Boolean(
+                                                                                    Boolean {
+                                                                                        value: true,
+                                                                                        position: Position {
+                                                                                            path: "",
+                                                                                            line_number: 1,
+                                                                                            column_number: 1,
+                                                                                            line: "",
+                                                                                        },
+                                                                                    },
+                                                                                ),
+                                                                            },
+                                                                        ],
+                                                                        else_: None,
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ],
+                                                        else_: None,
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                        Lambda(
+                                            Lambda {
+                                                arguments: [
+                                                    Argument {
+                                                        name: "$x",
+                                                        type_: Any(
+                                                            Any {
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                    },
+                                                ],
+                                                result_type: Number(
+                                                    Number {
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                body: IfType(
+                                                    IfType {
+                                                        name: "$x",
+                                                        argument: Variable(
+                                                            Variable {
+                                                                name: "$x",
+                                                                position: Position {
+                                                                    path: "",
+                                                                    line_number: 1,
+                                                                    column_number: 1,
+                                                                    line: "",
+                                                                },
+                                                            },
+                                                        ),
+                                                        branches: [
+                                                            IfTypeBranch {
+                                                                type_: None(
+                                                                    None {
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                                expression: Number(
+                                                                    Number {
+                                                                        value: 0.0,
+                                                                        position: Position {
+                                                                            path: "",
+                                                                            line_number: 1,
+                                                                            column_number: 1,
+                                                                            line: "",
+                                                                        },
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ],
+                                                        else_: None,
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ],
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            Call(
+                                Call {
+                                    function_type: Some(
+                                        Function(
+                                            Function {
+                                                arguments: [],
+                                                result: Reference(
+                                                    Reference {
+                                                        name: "GenericMap",
+                                                        position: Position {
+                                                            path: "",
+                                                            line_number: 1,
+                                                            column_number: 1,
+                                                            line: "",
+                                                        },
+                                                    },
+                                                ),
+                                                position: Position {
+                                                    path: "",
+                                                    line_number: 1,
+                                                    column_number: 1,
+                                                    line: "",
+                                                },
+                                            },
+                                        ),
+                                    ),
+                                    function: Variable(
+                                        Variable {
+                                            name: "emptyMap",
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    arguments: [],
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            TypeCoercion(
+                                TypeCoercion {
+                                    from: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    to: Any(
+                                        Any {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    argument: Number(
+                                        Number {
+                                            value: 1.0,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            TypeCoercion(
+                                TypeCoercion {
+                                    from: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    to: Any(
+                                        Any {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    argument: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        ],
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+                TypeCoercion(
+                    TypeCoercion {
+                        from: None(
+                            None {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        to: Any(
+                            Any {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        argument: Number(
+                            Number {
+                                value: 2.0,
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+                TypeCoercion(
+                    TypeCoercion {
+                        from: None(
+                            None {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        to: Any(
+                            Any {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        argument: None(
+                            None {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+            ],
+            position: Position {
+                path: "",
+                line_number: 1,
+                column_number: 1,
+                line: "",
+            },
+        },
+    ),
+)

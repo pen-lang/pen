@@ -182,6 +182,32 @@ mod tests {
     }
 
     #[test]
+    fn transform_map_with_2_entries() {
+        insta::assert_debug_snapshot!(transform(
+            &CompileContext::dummy(Default::default(), Default::default()),
+            &Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                vec![
+                    MapEntry::new(
+                        Number::new(1.0, Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
+                    MapEntry::new(
+                        Number::new(2.0, Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ],
+                Position::fake()
+            ),
+        ));
+    }
+
+    #[test]
     fn transform_map_with_spread_map() {
         assert_eq!(
             transform(
