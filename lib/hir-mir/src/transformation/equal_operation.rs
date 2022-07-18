@@ -3,7 +3,7 @@ use crate::{context::CompileContext, transformation::record_type_information};
 use hir::{
     analysis::{
         type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
-        union_type_member_calculator, AnalysisError,
+        union_type_creator, union_type_member_calculator, AnalysisError,
     },
     ir::*,
     types::{self, Type},
@@ -166,38 +166,45 @@ fn transform_equal_operation(
                 lhs.clone(),
                 member_types
                     .iter()
-                    .map(|lhs_type| {
+                    .map(|member_type| {
                         Ok(IfTypeBranch::new(
-                            lhs_type.clone(),
+                            member_type.clone(),
                             IfType::new(
                                 RHS_NAME,
                                 rhs.clone(),
-                                member_types
-                                    .iter()
-                                    .map(|rhs_type| {
-                                        Ok(IfTypeBranch::new(
-                                            rhs_type.clone(),
-                                            if type_equality_checker::check(
-                                                lhs_type,
-                                                rhs_type,
-                                                context.types(),
-                                            )? {
-                                                transform_equal_operation(
-                                                    context,
-                                                    rhs_type,
-                                                    &Variable::new(LHS_NAME, position.clone())
-                                                        .into(),
-                                                    &Variable::new(RHS_NAME, position.clone())
-                                                        .into(),
-                                                    position,
-                                                )?
-                                            } else {
-                                                Boolean::new(false, position.clone()).into()
-                                            },
-                                        ))
-                                    })
-                                    .collect::<Result<_, CompileError>>()?,
-                                None,
+                                vec![IfTypeBranch::new(
+                                    member_type.clone(),
+                                    transform_equal_operation(
+                                        context,
+                                        member_type,
+                                        &Variable::new(LHS_NAME, position.clone()).into(),
+                                        &Variable::new(RHS_NAME, position.clone()).into(),
+                                        position,
+                                    )?,
+                                )],
+                                Some(ElseBranch::new(
+                                    Some(
+                                        union_type_creator::create(
+                                            &member_types
+                                                .iter()
+                                                .cloned()
+                                                .filter_map(|type_| {
+                                                    type_equality_checker::check(
+                                                        &type_,
+                                                        member_type,
+                                                        context.types(),
+                                                    )
+                                                    .map(|equal| (!equal).then_some(type_))
+                                                    .transpose()
+                                                })
+                                                .collect::<Result<Vec<_>, _>>()?,
+                                            position,
+                                        )
+                                        .unwrap(),
+                                    ),
+                                    Boolean::new(false, position.clone()),
+                                    position.clone(),
+                                )),
                                 position.clone(),
                             ),
                         ))
@@ -306,17 +313,15 @@ mod tests {
                         IfType::new(
                             RHS_NAME,
                             Variable::new("y", Position::fake()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(true, Position::fake()),
-                                ),
-                                IfTypeBranch::new(
-                                    types::Number::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
-                                ),
-                            ],
-                            None,
+                            vec![IfTypeBranch::new(
+                                types::None::new(Position::fake()),
+                                Boolean::new(true, Position::fake()),
+                            )],
+                            Some(ElseBranch::new(
+                                Some(types::Number::new(Position::fake()).into()),
+                                Boolean::new(false, Position::fake()),
+                                Position::fake()
+                            )),
                             Position::fake(),
                         ),
                     ),
@@ -325,23 +330,21 @@ mod tests {
                         IfType::new(
                             RHS_NAME,
                             Variable::new("y", Position::fake()),
-                            vec![
-                                IfTypeBranch::new(
-                                    types::None::new(Position::fake()),
-                                    Boolean::new(false, Position::fake()),
+                            vec![IfTypeBranch::new(
+                                types::Number::new(Position::fake()),
+                                EqualityOperation::new(
+                                    Some(types::Number::new(Position::fake()).into()),
+                                    EqualityOperator::Equal,
+                                    Variable::new(LHS_NAME, Position::fake()),
+                                    Variable::new(RHS_NAME, Position::fake()),
+                                    Position::fake(),
                                 ),
-                                IfTypeBranch::new(
-                                    types::Number::new(Position::fake()),
-                                    EqualityOperation::new(
-                                        Some(types::Number::new(Position::fake()).into()),
-                                        EqualityOperator::Equal,
-                                        Variable::new(LHS_NAME, Position::fake()),
-                                        Variable::new(RHS_NAME, Position::fake()),
-                                        Position::fake(),
-                                    ),
-                                ),
-                            ],
-                            None,
+                            )],
+                            Some(ElseBranch::new(
+                                Some(types::None::new(Position::fake()).into()),
+                                Boolean::new(false, Position::fake()),
+                                Position::fake()
+                            )),
                             Position::fake(),
                         ),
                     ),
