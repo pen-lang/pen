@@ -80,15 +80,18 @@ pub fn compile(
                 })
                 .collect(),
             if let Some(branch) = if_.else_() {
-                type_equality_checker::check(
+                if type_equality_checker::check(
                     branch.type_().unwrap(),
                     &types::Any::new(if_.position().clone()).into(),
                     context.types(),
-                )?
-                .then_some(mir::ir::DefaultAlternative::new(
-                    if_.name(),
-                    compile(branch.expression())?,
-                ))
+                )? {
+                    Some(mir::ir::DefaultAlternative::new(
+                        if_.name(),
+                        compile(branch.expression())?,
+                    ))
+                } else {
+                    None
+                }
             } else {
                 None
             },
