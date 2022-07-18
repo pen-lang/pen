@@ -189,12 +189,18 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
 }
 
 fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
+    let type_ = compile_type(alias.type_());
+
     sequence([
         compile_block_comment(context, alias.position()),
         "type ".into(),
         alias.name().into(),
-        " = ".into(),
-        compile_type(alias.type_()),
+        " =".into(),
+        if is_broken(&type_) {
+            indent(sequence([line(), type_]))
+        } else {
+            sequence([" ".into(), type_])
+        },
         line(),
     ])
 }
@@ -250,18 +256,34 @@ fn compile_type(type_: &Type) -> Document {
         Type::Record(record) => record.name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        Type::Union(union) => {
-            let lhs = compile_type(union.lhs());
+        Type::Union(_) => {
+            let types = collect_union_types(type_);
 
-            sequence([
-                if union.lhs().is_function() {
-                    sequence(["(".into(), lhs, ")".into()])
-                } else {
-                    lhs
-                },
-                " | ".into(),
-                compile_type(union.rhs()),
-            ])
+            let union = sequence(
+                types
+                    .iter()
+                    .enumerate()
+                    .map(|(index, type_)| {
+                        let document = compile_type(type_);
+
+                        if index != types.len() - 1 && type_.is_function() {
+                            sequence(["(".into(), document, ")".into()])
+                        } else {
+                            document
+                        }
+                    })
+                    .intersperse(sequence([" |".into(), line()])),
+            );
+
+            if types.len() == 1
+                || types.get(0).map(|type_| type_.position().line_number())
+                    == types.get(1).map(|type_| type_.position().line_number())
+                    && !is_broken(&union)
+            {
+                flatten(union)
+            } else {
+                break_(union)
+            }
         }
     }
 }
@@ -853,6 +875,16 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
     )
 }
 
+fn collect_union_types(type_: &Type) -> Vec<Type> {
+    match type_ {
+        Type::Union(union) => collect_union_types(union.lhs())
+            .into_iter()
+            .chain(collect_union_types(union.rhs()))
+            .collect(),
+        _ => vec![type_.clone()],
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1175,46 +1207,75 @@ mod tests {
         );
     }
 
-    #[test]
-    fn format_type_alias() {
-        assert_eq!(
-            format_module(&Module::new(
-                vec![],
-                vec![],
-                vec![
-                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
-                        .into()
-                ],
-                vec![],
-                Position::fake()
-            )),
-            "type foo = none\n"
-        );
-    }
+    mod type_alias {
+        use super::*;
 
-    #[test]
-    fn format_multiple_type_aliases() {
-        assert_eq!(
-            format_module(&Module::new(
-                vec![],
-                vec![],
-                vec![
-                    TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
-                        .into(),
-                    TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
-                        .into()
-                ],
-                vec![],
-                Position::fake()
-            )),
-            indoc!(
-                "
+        #[test]
+        fn format_type_alias() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![TypeAlias::new(
+                        "foo",
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    vec![],
+                    Position::fake()
+                )),
+                "type foo = none\n"
+            );
+        }
+
+        #[test]
+        fn format_multiple_type_aliases() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![
+                        TypeAlias::new("foo", types::None::new(Position::fake()), Position::fake())
+                            .into(),
+                        TypeAlias::new("bar", types::None::new(Position::fake()), Position::fake())
+                            .into()
+                    ],
+                    vec![],
+                    Position::fake()
+                )),
+                indoc!(
+                    "
                 type foo = none
 
                 type bar = none
                 "
-            ),
-        );
+                ),
+            );
+        }
+
+        #[test]
+        fn format_type_alias_with_broken_type() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![],
+                    vec![],
+                    vec![TypeAlias::new(
+                        "foo",
+                        types::Union::new(
+                            types::Number::new(line_position(1)),
+                            types::None::new(line_position(2)),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    )
+                    .into()],
+                    vec![],
+                    Position::fake()
+                )),
+                "type foo =\n  number |\n  none\n"
+            );
+        }
     }
 
     mod type_ {
@@ -1240,6 +1301,40 @@ mod tests {
                     .into()
                 ),
                 "(\\() none) | none"
+            );
+        }
+
+        #[test]
+        fn format_function_multi_line_union_type() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Number::new(line_position(1)),
+                        types::None::new(line_position(2)),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "number |\nnone"
+            );
+        }
+
+        #[test]
+        fn format_function_multi_line_union_type_with_3_types() {
+            assert_eq!(
+                format_type(
+                    &types::Union::new(
+                        types::Number::new(line_position(1)),
+                        types::Union::new(
+                            types::ByteString::new(line_position(2)),
+                            types::None::new(line_position(2)),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+                "number |\nstring |\nnone"
             );
         }
     }
