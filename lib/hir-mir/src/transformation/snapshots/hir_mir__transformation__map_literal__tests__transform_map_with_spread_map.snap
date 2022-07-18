@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/map_literal.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()), vec![], Position::fake()))"
+expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapElement :: Map(None :: new(Position :: fake()).into())],\n            Position::fake()))"
 ---
 Ok(
     Let(
@@ -649,44 +649,8 @@ Ok(
                     },
                 },
             ),
-            expression: Call(
-                Call {
-                    function_type: Some(
-                        Function(
-                            Function {
-                                arguments: [],
-                                result: Reference(
-                                    Reference {
-                                        name: "GenericMap",
-                                        position: Position {
-                                            path: "",
-                                            line_number: 1,
-                                            column_number: 1,
-                                            line: "",
-                                        },
-                                    },
-                                ),
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
-                                },
-                            },
-                        ),
-                    ),
-                    function: Variable(
-                        Variable {
-                            name: "emptyMap",
-                            position: Position {
-                                path: "",
-                                line_number: 1,
-                                column_number: 1,
-                                line: "",
-                            },
-                        },
-                    ),
-                    arguments: [],
+            expression: None(
+                None {
                     position: Position {
                         path: "",
                         line_number: 1,

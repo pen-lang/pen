@@ -221,9 +221,6 @@ fn transform_equal_operation(
     })
 }
 
-// TODO Do not generate equal functions dynamically but define them once
-// globally.
-// Can we simply lift them up to global functions as optimization in MIR?
 pub fn transform_any_function(
     context: &CompileContext,
     type_: &Type,
