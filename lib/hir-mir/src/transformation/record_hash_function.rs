@@ -138,8 +138,8 @@ fn compile_hash_type(position: &Position) -> Type {
     types::Number::new(position.clone()).into()
 }
 
-// TODO Collision of these hashes might lead to infinite loop in built-in map type insertion
-// because they are treated as identities there.
+// TODO Collision of these hashes might lead to infinite loop in built-in map
+// type insertion because they are treated as identities there.
 fn hash_record_identity(id: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
 
