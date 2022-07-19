@@ -4,6 +4,7 @@ pub mod equal_operation;
 mod hash_calculation;
 pub mod if_list;
 pub mod if_map;
+pub mod if_type;
 pub mod list_literal;
 mod map_context;
 pub mod map_literal;
