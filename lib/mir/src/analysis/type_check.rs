@@ -821,6 +821,29 @@ mod tests {
                 Err(TypeCheckError::NestedVariant(_))
             ));
         }
+
+        #[test]
+        fn check_multiple_type_alternative() {
+            assert_eq!(
+                check_types(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Variant)],
+                        Case::new(
+                            Variable::new("x"),
+                            vec![Alternative::new(
+                                vec![Type::Number, Type::None],
+                                "y",
+                                Variable::new("y")
+                            )],
+                            None
+                        ),
+                        Type::Variant,
+                    )
+                ])),
+                Ok(())
+            );
+        }
     }
 
     mod synchronize {
