@@ -31,7 +31,18 @@ Encode = \(n Node) string | error {
     [string ">", ...ns, "</", tag, ">"]
   }
 
-  String'Concatenate([string "<", tag, " ", ...attrs, ...ns])
+  String'Concatenate(
+    [string
+      "<",
+      tag,
+      ...if size(attrs) == 0 {
+        [string]
+      } else {
+        [string " ", ...attrs]
+      },
+      ...ns,
+    ],
+  )
 }
 
 encodeAttributes = \(attrs {string: string}) [string] {
