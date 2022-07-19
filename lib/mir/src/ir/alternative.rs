@@ -25,6 +25,14 @@ impl Alternative {
         &self.types
     }
 
+    pub fn type_(&self) -> &Type {
+        if let [type_] = &self.types[..] {
+            type_
+        } else {
+            &Type::Variant
+        }
+    }
+
     pub fn name(&self) -> &str {
         &self.name
     }

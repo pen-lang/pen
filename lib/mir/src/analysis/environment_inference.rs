@@ -145,9 +145,8 @@ fn infer_in_alternative(
     let mut variables = variables.clone();
 
     variables.insert(alternative.name().into(), alternative.type_().clone());
-
     Alternative::new(
-        alternative.type_().clone(),
+        alternative.types().to_vec(),
         alternative.name(),
         infer_in_expression(alternative.expression(), &variables),
     )

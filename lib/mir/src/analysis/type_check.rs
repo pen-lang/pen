@@ -272,8 +272,14 @@ fn check_case(
     let mut expression_type = None;
 
     for alternative in case.alternatives() {
-        if matches!(alternative.type_(), Type::Variant) {
+        if alternative
+            .types()
+            .iter()
+            .any(|type_| matches!(type_, Type::Variant))
+        {
             return Err(TypeCheckError::VariantInVariant(case.clone().into()));
+        } else if alternative.types().is_empty() {
+            return Err(TypeCheckError::EmptyTypeAlternative(case.clone()));
         }
 
         let mut variables = variables.clone();
@@ -715,7 +721,11 @@ mod tests {
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
                             Variable::new("x"),
-                            vec![Alternative::new(Type::Number, "y", Variable::new("y"))],
+                            vec![Alternative::new(
+                                vec![Type::Number],
+                                "y",
+                                Variable::new("y")
+                            )],
                             None
                         ),
                         Type::Number,
@@ -750,8 +760,8 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Boolean, "x", Variable::new("x")),
-                            Alternative::new(Type::Number, "x", 42.0),
+                            Alternative::new(vec![Type::Boolean], "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Number], "x", 42.0),
                         ],
                         None,
                     ),
@@ -776,7 +786,7 @@ mod tests {
                         Case::new(
                             Variable::new("x"),
                             vec![Alternative::new(
-                                types::Record::new("foo"),
+                                vec![types::Record::new("foo").into()],
                                 "y",
                                 Variable::new("y")
                             )],
@@ -799,7 +809,11 @@ mod tests {
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
                             Variable::new("x"),
-                            vec![Alternative::new(Type::Variant, "y", Variable::new("y"))],
+                            vec![Alternative::new(
+                                vec![Type::Variant],
+                                "y",
+                                Variable::new("y")
+                            )],
                             None
                         ),
                         Type::Variant,
