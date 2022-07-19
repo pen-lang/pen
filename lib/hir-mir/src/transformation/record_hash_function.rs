@@ -2,7 +2,6 @@ use std::{
     collections::hash_map::DefaultHasher,
     hash::{Hash, Hasher},
 };
-
 use super::hash_calculation;
 use crate::{context::CompileContext, transformation::record_type_information, CompileError};
 use hir::{
