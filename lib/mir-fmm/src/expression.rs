@@ -7,21 +7,18 @@ use fnv::FnvHashMap;
 
 pub fn compile(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     expression: &mir::ir::Expression,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile =
-        |expression, variables: &_| compile(context, instruction_builder, expression, variables);
+    let compile = |expression, variables: &_| compile(context, builder, expression, variables);
 
     Ok(match expression {
         mir::ir::Expression::ArithmeticOperation(operation) => {
-            compile_arithmetic_operation(context, instruction_builder, operation, variables)?.into()
+            compile_arithmetic_operation(context, builder, operation, variables)?.into()
         }
         mir::ir::Expression::Boolean(boolean) => fmm::ir::Primitive::Boolean(*boolean).into(),
-        mir::ir::Expression::Case(case) => {
-            compile_case(context, instruction_builder, case, variables)?
-        }
+        mir::ir::Expression::Case(case) => compile_case(context, builder, case, variables)?,
         mir::ir::Expression::CloneVariables(clone) => compile(
             clone.expression(),
             &variables
@@ -35,7 +32,7 @@ pub fn compile(
                             Ok((
                                 variable.into(),
                                 reference_count::clone(
-                                    instruction_builder,
+                                    builder,
                                     &variables[variable],
                                     type_,
                                     context.types(),
@@ -47,22 +44,17 @@ pub fn compile(
                 .collect(),
         )?,
         mir::ir::Expression::ComparisonOperation(operation) => {
-            compile_comparison_operation(context, instruction_builder, operation, variables)?.into()
+            compile_comparison_operation(context, builder, operation, variables)?.into()
         }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
-                reference_count::drop(
-                    instruction_builder,
-                    &variables[variable],
-                    type_,
-                    context.types(),
-                )?;
+                reference_count::drop(builder, &variables[variable], type_, context.types())?;
             }
 
             compile(drop.expression(), variables)?
         }
         mir::ir::Expression::Call(call) => call::compile(
-            instruction_builder,
+            builder,
             &compile(call.function(), variables)?,
             &call
                 .arguments()
@@ -70,46 +62,31 @@ pub fn compile(
                 .map(|argument| compile(argument, variables))
                 .collect::<Result<Vec<_>, _>>()?,
         )?,
-        mir::ir::Expression::If(if_) => compile_if(context, instruction_builder, if_, variables)?,
-        mir::ir::Expression::Let(let_) => {
-            compile_let(context, instruction_builder, let_, variables)?
-        }
+        mir::ir::Expression::If(if_) => compile_if(context, builder, if_, variables)?,
+        mir::ir::Expression::Let(let_) => compile_let(context, builder, let_, variables)?,
         mir::ir::Expression::LetRecursive(let_) => {
-            compile_let_recursive(context, instruction_builder, let_, variables)?
+            compile_let_recursive(context, builder, let_, variables)?
         }
         mir::ir::Expression::Synchronize(synchronize) => {
-            compile_synchronize(context, instruction_builder, synchronize, variables)?
+            compile_synchronize(context, builder, synchronize, variables)?
         }
         mir::ir::Expression::None => fmm::ir::Undefined::new(type_::compile_none()).into(),
         mir::ir::Expression::Number(number) => fmm::ir::Primitive::Float64(*number).into(),
-        mir::ir::Expression::Record(record) => {
-            compile_record(context, instruction_builder, record, variables)?
-        }
+        mir::ir::Expression::Record(record) => compile_record(context, builder, record, variables)?,
         mir::ir::Expression::RecordField(field) => {
             let record_type = field.type_().clone();
             let field_index = field.index();
 
             let record = compile(field.record(), variables)?;
-            let field = record::get_field(
-                context,
-                instruction_builder,
-                &record,
-                field.type_(),
-                field.index(),
-            )?;
+            let field = record::get_field(context, builder, &record, field.type_(), field.index())?;
 
             let field = reference_count::clone(
-                instruction_builder,
+                builder,
                 &field,
                 &context.types()[record_type.name()].fields()[field_index],
                 context.types(),
             )?;
-            reference_count::drop(
-                instruction_builder,
-                &record,
-                &record_type.into(),
-                context.types(),
-            )?;
+            reference_count::drop(builder, &record, &record_type.into(), context.types())?;
 
             field
         }
@@ -163,8 +140,8 @@ pub fn compile(
             };
 
             if type_::is_record_boxed(update.type_(), context.types()) {
-                instruction_builder.if_(
-                    reference_count::pointer::is_unique(instruction_builder, &record)?,
+                builder.if_(
+                    reference_count::pointer::is_unique(builder, &record)?,
                     |builder| -> Result<_, CompileError> {
                         Ok(builder.branch(compile_boxed_record(
                             &builder,
@@ -190,7 +167,7 @@ pub fn compile(
                     },
                 )?
             } else {
-                compile_unboxed(instruction_builder, false)?.into()
+                compile_unboxed(builder, false)?.into()
             }
         }
         mir::ir::Expression::ByteString(string) => {
@@ -225,12 +202,12 @@ pub fn compile(
             }
         }
         mir::ir::Expression::TryOperation(operation) => {
-            compile_try_operation(context, instruction_builder, operation, variables)?
+            compile_try_operation(context, builder, operation, variables)?
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,
-            instruction_builder,
+            builder,
             &compile(variant.payload(), variables)?,
             variant.type_(),
         )?,
@@ -239,35 +216,29 @@ pub fn compile(
 
 fn compile_if(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     if_: &mir::ir::If,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile = |instruction_builder: &_, expression| {
-        compile(context, instruction_builder, expression, variables)
-    };
+    let compile = |builder: &_, expression| compile(context, builder, expression, variables);
 
-    instruction_builder.if_(
-        compile(instruction_builder, if_.condition())?,
-        |instruction_builder| {
-            Ok(instruction_builder.branch(compile(&instruction_builder, if_.then())?))
-        },
-        |instruction_builder| {
-            Ok(instruction_builder.branch(compile(&instruction_builder, if_.else_())?))
-        },
+    builder.if_(
+        compile(builder, if_.condition())?,
+        |builder| Ok(builder.branch(compile(&builder, if_.then())?)),
+        |builder| Ok(builder.branch(compile(&builder, if_.else_())?)),
     )
 }
 
 fn compile_case(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     case: &mir::ir::Case,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(compile_alternatives(
         context,
-        instruction_builder,
-        compile(context, instruction_builder, case.argument(), variables)?,
+        builder,
+        compile(context, builder, case.argument(), variables)?,
         case.alternatives(),
         case.default_alternative(),
         variables,
@@ -277,7 +248,7 @@ fn compile_case(
 
 fn compile_alternatives(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     argument: fmm::build::TypedExpression,
     alternatives: &[mir::ir::Alternative],
     default_alternative: Option<&mir::ir::DefaultAlternative>,
@@ -288,7 +259,7 @@ fn compile_alternatives(
             .map(|alternative| {
                 compile(
                     context,
-                    instruction_builder,
+                    builder,
                     alternative.expression(),
                     &variables
                         .clone()
@@ -298,7 +269,7 @@ fn compile_alternatives(
                 )
             })
             .transpose()?,
-        [alternative, ..] => Some(instruction_builder.if_(
+        [alternative, ..] => Some(builder.if_(
             alternative.types().iter().fold(
                 Ok(fmm::build::TypedExpression::from(
                     fmm::ir::Primitive::Boolean(false),
@@ -307,7 +278,7 @@ fn compile_alternatives(
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
                         result?,
-                        compile_tag_comparison(instruction_builder, &argument, type_)?,
+                        compile_tag_comparison(builder, &argument, type_)?,
                     )?
                     .into())
                 },
@@ -353,24 +324,23 @@ fn compile_alternatives(
 }
 
 fn compile_tag_comparison(
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(pointer::equal(
-        instruction_builder.deconstruct_record(argument.clone(), 0)?,
+        builder.deconstruct_record(argument.clone(), 0)?,
         variant::compile_tag(type_),
     )?)
 }
 
 fn compile_let(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::Let,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let compile =
-        |expression, variables| compile(context, instruction_builder, expression, variables);
+    let compile = |expression, variables| compile(context, builder, expression, variables);
 
     compile(
         let_.expression(),
@@ -387,16 +357,16 @@ fn compile_let(
 
 fn compile_let_recursive(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::LetRecursive,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let closure_pointer = reference_count::heap::allocate(
-        instruction_builder,
+        builder,
         type_::compile_sized_closure(let_.definition(), context.types()),
     )?;
 
-    instruction_builder.store(
+    builder.store(
         closure::compile_content(
             entry_function::compile(context, let_.definition(), false, variables)?,
             closure::metadata::compile(context, let_.definition())?,
@@ -425,7 +395,7 @@ fn compile_let_recursive(
 
     compile(
         context,
-        instruction_builder,
+        builder,
         let_.expression(),
         &variables
             .clone()
@@ -447,34 +417,24 @@ fn compile_let_recursive(
 
 fn compile_synchronize(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     synchronize: &mir::ir::Synchronize,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let value = compile(
-        context,
-        instruction_builder,
-        synchronize.expression(),
-        variables,
-    )?;
+    let value = compile(context, builder, synchronize.expression(), variables)?;
 
-    reference_count::synchronize(
-        instruction_builder,
-        &value,
-        synchronize.type_(),
-        context.types(),
-    )?;
+    reference_count::synchronize(builder, &value, synchronize.type_(), context.types())?;
 
     Ok(value)
 }
 
 fn compile_arithmetic_operation(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ArithmeticOperation,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::ir::ArithmeticOperation, CompileError> {
-    let compile = |expression| compile(context, instruction_builder, expression, variables);
+    let compile = |expression| compile(context, builder, expression, variables);
 
     let lhs = compile(operation.lhs())?;
     let rhs = compile(operation.rhs())?;
@@ -497,11 +457,11 @@ fn compile_arithmetic_operation(
 
 fn compile_comparison_operation(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ComparisonOperation,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::ir::ComparisonOperation, CompileError> {
-    let compile = |expression| compile(context, instruction_builder, expression, variables);
+    let compile = |expression| compile(context, builder, expression, variables);
 
     let lhs = compile(operation.lhs())?;
     let rhs = compile(operation.rhs())?;
@@ -590,14 +550,14 @@ fn compile_unboxed_record(
 
 fn compile_try_operation(
     context: &Context,
-    instruction_builder: &fmm::build::InstructionBuilder,
+    builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::TryOperation,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let operand = compile(context, instruction_builder, operation.operand(), variables)?;
+    let operand = compile(context, builder, operation.operand(), variables)?;
 
-    instruction_builder.if_(
-        compile_tag_comparison(instruction_builder, &operand, operation.type_())?,
+    builder.if_(
+        compile_tag_comparison(builder, &operand, operation.type_())?,
         |instruction_builder| -> Result<_, CompileError> {
             Ok(instruction_builder.return_(compile(
                 context,
