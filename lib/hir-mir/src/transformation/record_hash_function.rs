@@ -76,10 +76,7 @@ fn compile_hash_function_definition(
             vec![Argument::new(RECORD_NAME, record_type.clone())],
             hash_type.clone(),
             type_definition.fields().iter().rev().fold(
-                Ok(Expression::from(Number::new(
-                    f64::from_bits(hash_record_identity(type_definition.name())),
-                    position.clone(),
-                ))),
+                Ok(Expression::from(compile_identity_hash(type_definition))),
                 |expression, field| -> Result<_, CompileError> {
                     Ok(Call::new(
                         Some(
@@ -140,12 +137,15 @@ fn compile_hash_type(position: &Position) -> Type {
 
 // TODO Collision of these hashes might lead to infinite loop in built-in map
 // type insertion because they are treated as identities there.
-fn hash_record_identity(id: &str) -> u64 {
+fn compile_identity_hash(type_definition: &TypeDefinition) -> Number {
     let mut hasher = DefaultHasher::new();
 
-    id.hash(&mut hasher);
+    type_definition.name().hash(&mut hasher);
 
-    hasher.finish()
+    Number::new(
+        f64::from_bits(hasher.finish()),
+        type_definition.position().clone(),
+    )
 }
 
 #[cfg(test)]
@@ -214,13 +214,7 @@ mod tests {
                                         Position::fake()
                                     ),
                                     vec![
-                                        Number::new(
-                                            f64::from_bits(hash_record_identity(
-                                                type_definition.name()
-                                            )),
-                                            Position::fake()
-                                        )
-                                        .into(),
+                                        compile_identity_hash(&type_definition).into(),
                                         Number::new(0.0, Position::fake()).into(),
                                     ],
                                     Position::fake()
