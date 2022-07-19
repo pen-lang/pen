@@ -241,7 +241,7 @@ fn check_expression(
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {
-                return Err(TypeCheckError::VariantInVariant(variant.clone().into()));
+                return Err(TypeCheckError::NestedVariant(variant.clone().into()));
             }
 
             check_equality(
@@ -276,7 +276,7 @@ fn check_case(
             .iter()
             .any(|type_| matches!(type_, Type::Variant))
         {
-            return Err(TypeCheckError::VariantInVariant(case.clone().into()));
+            return Err(TypeCheckError::NestedVariant(case.clone().into()));
         } else if alternative.types().is_empty() {
             return Err(TypeCheckError::EmptyTypeAlternative(case.clone()));
         }
@@ -818,7 +818,7 @@ mod tests {
                         Type::Variant,
                     )
                 ])),
-                Err(TypeCheckError::VariantInVariant(_))
+                Err(TypeCheckError::NestedVariant(_))
             ));
         }
     }
@@ -1013,7 +1013,7 @@ mod tests {
                         Type::Variant
                     )
                 ],)),
-                Err(TypeCheckError::VariantInVariant(_))
+                Err(TypeCheckError::NestedVariant(_))
             ));
         }
     }
