@@ -107,11 +107,6 @@ mod tests {
     }
 
     #[test]
-    fn create_zero_sized_buffer() {
-        ArcBuffer::new(0);
-    }
-
-    #[test]
     fn clone() {
         let arc = ArcBuffer::new(42);
         drop(arc.clone());

@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: tools/benchmark.sh

@@ -6,23 +6,34 @@ use crate::{
 use parse::{parse, parse_comments};
 use std::error::Error;
 
-pub type PackageDocumentation = doc::Package;
+pub struct DocumentationPackage {
+    pub name: String,
+    pub url: String,
+    pub description: String,
+}
 
 pub type DocumentationConfiguration = doc::Configuration;
 
 pub fn generate(
     infrastructure: &Infrastructure,
-    package: &PackageDocumentation,
+    package: &DocumentationPackage,
     package_directory: &FilePath,
     configuration: &DocumentationConfiguration,
 ) -> Result<String, Box<dyn Error>> {
     Ok(doc::generate(
-        package,
+        &doc::Package {
+            name: package.name.clone(),
+            url: package.url.clone(),
+            description: package.description.clone(),
+            type_: infrastructure
+                .package_configuration_reader
+                .read(package_directory)?
+                .type_()
+                .to_string(),
+        },
         &module_finder::find(infrastructure, package_directory)?
             .iter()
             .map(|path| -> Result<_, Box<dyn Error>> {
-                let source = infrastructure.file_system.read_to_string(path)?;
-
                 Ok((
                     ast::ExternalModulePath::new(
                         &package.name,
@@ -30,6 +41,7 @@ pub fn generate(
                     )
                     .into(),
                     {
+                        let source = infrastructure.file_system.read_to_string(path)?;
                         let path = infrastructure.file_path_displayer.display(path);
 
                         (parse(&source, &path)?, parse_comments(&source, &path)?)

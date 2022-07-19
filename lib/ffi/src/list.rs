@@ -27,3 +27,18 @@ impl Default for Arc<List> {
         List::new()
     }
 }
+
+impl<T: Into<Any>, I: IntoIterator<Item = T>> From<I> for Arc<List>
+where
+    <I as IntoIterator>::IntoIter: DoubleEndedIterator,
+{
+    fn from(xs: I) -> Self {
+        let mut list = List::new();
+
+        for x in xs.into_iter().rev() {
+            list = List::prepend(list, x);
+        }
+
+        list
+    }
+}

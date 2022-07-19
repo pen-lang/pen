@@ -1,6 +1,7 @@
+pub mod block;
 mod count;
 mod expression;
-pub mod function;
+mod function;
 pub mod heap;
 pub mod pointer;
 pub mod record;

@@ -197,11 +197,11 @@ pub fn compile(
             if string.value().is_empty() {
                 fmm::ir::Undefined::new(type_::compile_string()).into()
             } else {
-                reference_count::pointer::tag_as_static(
-                    &fmm::build::bit_cast(
-                        type_::compile_string(),
+                fmm::build::bit_cast(
+                    type_::compile_string(),
+                    fmm::build::record_address(
                         context.module_builder().define_anonymous_variable(
-                            fmm::build::record(
+                            reference_count::block::compile_static(fmm::build::record(
                                 [
                                     fmm::ir::Primitive::PointerInteger(string.value().len() as i64)
                                         .into(),
@@ -214,13 +214,14 @@ pub fn compile(
                                         .map(|&byte| fmm::ir::Primitive::Integer8(byte).into()),
                                 )
                                 .collect(),
-                            ),
+                            ))?,
                             false,
                             None,
                         ),
-                    )
-                    .into(),
-                )?
+                        1,
+                    )?,
+                )
+                .into()
             }
         }
         mir::ir::Expression::TryOperation(operation) => {
@@ -497,13 +498,15 @@ fn compile_comparison_operation(
         match operation.operator() {
             mir::ir::ComparisonOperator::Equal => fmm::ir::ComparisonOperator::Equal,
             mir::ir::ComparisonOperator::NotEqual => fmm::ir::ComparisonOperator::NotEqual,
-            mir::ir::ComparisonOperator::GreaterThan => fmm::ir::ComparisonOperator::GreaterThan,
-            mir::ir::ComparisonOperator::GreaterThanOrEqual => {
-                fmm::ir::ComparisonOperator::GreaterThanOrEqual
+            mir::ir::ComparisonOperator::GreaterThan => {
+                fmm::ir::ComparisonOperator::GreaterThan(false)
             }
-            mir::ir::ComparisonOperator::LessThan => fmm::ir::ComparisonOperator::LessThan,
+            mir::ir::ComparisonOperator::GreaterThanOrEqual => {
+                fmm::ir::ComparisonOperator::GreaterThanOrEqual(false)
+            }
+            mir::ir::ComparisonOperator::LessThan => fmm::ir::ComparisonOperator::LessThan(false),
             mir::ir::ComparisonOperator::LessThanOrEqual => {
-                fmm::ir::ComparisonOperator::LessThanOrEqual
+                fmm::ir::ComparisonOperator::LessThanOrEqual(false)
             }
         },
         lhs,

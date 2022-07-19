@@ -7,6 +7,8 @@ use core::{
 
 const UNIQUE_COUNT: isize = 0;
 const SYNCHRONIZED_UNIQUE_COUNT: isize = -1;
+// The static count is also synchronized.
+const STATIC_COUNT: isize = 1 << (isize::BITS as usize - 1);
 
 #[derive(Debug)]
 #[repr(C)]
@@ -55,18 +57,12 @@ impl ArcBlock {
         self.pointer.is_null()
     }
 
-    fn is_static(&self) -> bool {
-        self.pointer.is_null() || self.pointer as usize & 1 == 1
-    }
-
     fn inner(&self) -> &ArcInner {
         unsafe { &*self.inner_ptr() }
     }
 
     fn inner_ptr(&self) -> *const ArcInner {
-        let pointer = self.pointer as usize & !1;
-
-        (unsafe { (pointer as *const usize).offset(-1) }) as *const ArcInner
+        (unsafe { (self.pointer as *const usize).offset(-1) }) as *const ArcInner
     }
 
     fn inner_layout(layout: Layout) -> Layout {
@@ -78,13 +74,13 @@ impl ArcBlock {
     }
 
     pub fn clone(&self) -> Self {
-        if !self.is_static() {
+        if !self.is_null() {
             let count = self.inner().count.load(Ordering::Relaxed);
 
-            if Self::is_count_synchronized(count) {
-                self.inner().count.fetch_sub(1, Ordering::Relaxed);
-            } else {
+            if !Self::is_count_synchronized(count) {
                 self.inner().count.store(count + 1, Ordering::Relaxed);
+            } else if count != STATIC_COUNT {
+                self.inner().count.fetch_sub(1, Ordering::Relaxed);
             }
         }
 
@@ -94,14 +90,16 @@ impl ArcBlock {
     }
 
     pub fn drop<T>(&mut self) {
-        if self.is_static() {
+        if self.is_null() {
             return;
         }
 
         let count = self.inner().count.load(Ordering::Relaxed);
 
         if Self::is_count_synchronized(count) {
-            if self.inner().count.fetch_add(1, Ordering::Release) == SYNCHRONIZED_UNIQUE_COUNT {
+            if count != STATIC_COUNT
+                && self.inner().count.fetch_add(1, Ordering::Release) == SYNCHRONIZED_UNIQUE_COUNT
+            {
                 fence(Ordering::Acquire);
 
                 self.drop_inner::<T>()
@@ -126,14 +124,16 @@ impl ArcBlock {
     }
 
     pub fn synchronize(&self) {
-        if !self.is_static() {
-            let count = self.inner().count.load(Ordering::Relaxed);
+        if self.is_null() {
+            return;
+        }
 
-            if !Self::is_count_synchronized(count) {
-                self.inner()
-                    .count
-                    .store(SYNCHRONIZED_UNIQUE_COUNT - count, Ordering::Relaxed);
-            }
+        let count = self.inner().count.load(Ordering::Relaxed);
+
+        if !Self::is_count_synchronized(count) {
+            self.inner()
+                .count
+                .store(SYNCHRONIZED_UNIQUE_COUNT - count, Ordering::Relaxed);
         }
     }
 
@@ -142,19 +142,20 @@ impl ArcBlock {
     }
 
     fn is_unique(&self) -> bool {
-        if self.is_static() {
+        if self.is_null() {
             return false;
         }
 
         let count = self.inner().count.load(Ordering::Relaxed);
 
-        if Self::is_count_synchronized(count) {
-            fence(Ordering::Acquire);
+        count
+            == if Self::is_count_synchronized(count) {
+                fence(Ordering::Acquire);
 
-            count == SYNCHRONIZED_UNIQUE_COUNT
-        } else {
-            count == UNIQUE_COUNT
-        }
+                SYNCHRONIZED_UNIQUE_COUNT
+            } else {
+                UNIQUE_COUNT
+            }
     }
 }
 
@@ -215,6 +216,11 @@ mod tests {
         fn synchronize() {
             let block = ArcBlock::new(Layout::from_size_align(1, 1).unwrap());
             block.synchronize();
+        }
+
+        #[test]
+        fn synchronize_empty() {
+            ArcBlock::new(Layout::from_size_align(0, 1).unwrap()).synchronize();
         }
 
         #[test]

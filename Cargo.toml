@@ -23,5 +23,4 @@ exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 
 [profile.release]
 lto = true
-# TODO Enable this when Dependabot on GitHub supports it.
-# strip = true
+strip = true

@@ -2,7 +2,7 @@ use crate::{
     documentation_configuration::DOCUMENTATION_CONFIGURATION, infrastructure,
     main_package_directory_finder,
 };
-use app::package_documentation_generator::PackageDocumentation;
+use app::package_documentation_generator::DocumentationPackage;
 use std::{
     error::Error,
     io::{stdout, Write},
@@ -18,7 +18,7 @@ pub fn generate(name: &str, url: &str, description: &str) -> Result<(), Box<dyn 
     stdout().write_all(
         app::package_documentation_generator::generate(
             &infrastructure::create(file_path_converter.clone(), &main_package_directory)?,
-            &PackageDocumentation {
+            &DocumentationPackage {
                 name: name.into(),
                 url: url.into(),
                 description: description.into(),

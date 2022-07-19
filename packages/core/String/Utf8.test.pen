@@ -3,6 +3,30 @@ import Test'Assert
 import 'Number
 import 'String'Utf8
 
+Contains = \() none | error {
+  Assert'True(Utf8'Contains("tomato", "mat"))
+}
+
+ContainsFail = \() none | error {
+  Assert'True(!Utf8'Contains("tomato", "foo"))
+}
+
+Find = \() none | error {
+  Assert'True(Utf8'Find("🗿😄🐶", "😄") == 2)
+}
+
+FindFail = \() none | error {
+  Assert'True(Utf8'Find("🗿😄🐶", "🐱") == none)
+}
+
+HasPrefix = \() none | error {
+  Assert'True(Utf8'HasPrefix("🗿😄🐶", "🗿😄"))
+}
+
+HasSuffix = \() none | error {
+  Assert'True(Utf8'HasSuffix("🗿😄🐶", "😄🐶"))
+}
+
 LengthEmpty = \() none | error {
   Assert'True(Utf8'Length("") == 0)
 }
@@ -29,4 +53,43 @@ SliceEnd = \() none | error {
 
 SliceInfinity = \() none | error {
   Assert'True(Utf8'Slice("🗿😄🐶", 2, Number'Infinity()) == "😄🐶")
+}
+
+Split = \() none | error {
+  Assert'True(Utf8'Split("🗿 😄 🐶", " ") == [string "🗿", "😄", "🐶"])
+}
+
+ToLowercase = \() none | error {
+  Assert'True(Utf8'ToLowercase("FOO") == "foo")
+}
+
+ToUppercase = \() none | error {
+  Assert'True(Utf8'ToUppercase("foo") == "FOO")
+}
+
+Trim = \() none | error {
+  Assert'True(Utf8'Trim(" foo ") == "foo")
+}
+
+TrimEnd = \() none | error {
+  Assert'True(Utf8'TrimEnd(" foo ") == " foo")
+}
+
+TrimEndMatches = \() none | error {
+  # spell-checker: disable-next-line
+  Assert'True(Utf8'TrimEndMatches("bazbarfoo", "o") == "bazbarf")
+}
+
+TrimMatches = \() none | error {
+  # spell-checker: disable-next-line
+  Assert'True(Utf8'TrimMatches("foobarfoo", "foo") == "bar")
+}
+
+TrimStart = \() none | error {
+  Assert'True(Utf8'TrimStart(" foo ") == "foo ")
+}
+
+TrimStartMatches = \() none | error {
+  # spell-checker: disable-next-line
+  Assert'True(Utf8'TrimStartMatches("foobarbaz", "fo") == "obarbaz")
 }

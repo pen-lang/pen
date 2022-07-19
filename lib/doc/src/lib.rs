@@ -16,6 +16,7 @@ pub struct Package {
     pub name: String,
     pub url: String,
     pub description: String,
+    pub type_: String,
 }
 
 #[derive(Clone, Debug)]
@@ -45,7 +46,22 @@ fn compile_package(
 ) -> Section {
     section(
         text([code(&package.name), normal(" package")]),
-        [text([normal(&package.description)]).into()],
+        [
+            text([normal(&package.description)]).into(),
+            code_block(
+                "json",
+                format!(
+                    indoc!(
+                        "
+                        {{
+                          \"type\": \"{}\"
+                        }}
+                        "
+                    ),
+                    &package.type_,
+                ),
+            ),
+        ],
         [section(
             text([normal("Install")]),
             [code_block(
@@ -310,6 +326,7 @@ mod tests {
                     name: package_name.into(),
                     url: "https://foo.com/bar".into(),
                     description: "This package is cool.".into(),
+                    type_: "application".into(),
                 },
                 modules,
                 &create_configuration(),
@@ -325,6 +342,12 @@ mod tests {
                     # `Foo` package
 
                     This package is cool.
+
+                    ```json
+                    {
+                      \"type\": \"application\"
+                    }
+                    ```
 
                     ## Install
 
@@ -360,6 +383,12 @@ mod tests {
                     # `Foo` package
 
                     This package is cool.
+
+                    ```json
+                    {
+                      \"type\": \"application\"
+                    }
+                    ```
 
                     ## Install
 
@@ -406,6 +435,12 @@ mod tests {
 
                     This package is cool.
 
+                    ```json
+                    {
+                      \"type\": \"application\"
+                    }
+                    ```
+
                     ## Install
 
                     ```json
@@ -449,6 +484,12 @@ mod tests {
                     # `Foo` package
 
                     This package is cool.
+
+                    ```json
+                    {
+                      \"type\": \"application\"
+                    }
+                    ```
 
                     ## Install
 
