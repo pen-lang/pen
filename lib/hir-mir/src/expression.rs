@@ -55,30 +55,27 @@ pub fn compile(
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    compile_alternatives(context, if_.name(), branch.type_(), branch.expression())
+                    compile_alternative(context, if_.name(), branch.type_(), branch.expression())
                 })
-                .collect::<Result<Vec<_>, CompileError>>()?
-                .into_iter()
-                .flatten()
                 .chain(if let Some(branch) = if_.else_() {
                     if !type_equality_checker::check(
                         branch.type_().unwrap(),
                         &types::Any::new(if_.position().clone()).into(),
                         context.types(),
                     )? {
-                        compile_alternatives(
+                        Some(Ok(compile_alternative(
                             context,
                             if_.name(),
                             branch.type_().unwrap(),
                             branch.expression(),
-                        )?
+                        )?))
                     } else {
-                        vec![]
+                        None
                     }
                 } else {
-                    vec![]
+                    None
                 })
-                .collect(),
+                .collect::<Result<_, _>>()?,
             if let Some(branch) = if_.else_() {
                 if type_equality_checker::check(
                     branch.type_().unwrap(),
@@ -293,90 +290,63 @@ fn compile_lambda(
     .into())
 }
 
-fn compile_alternatives(
+fn compile_alternative(
     context: &CompileContext,
     name: &str,
     type_: &Type,
     expression: &Expression,
-) -> Result<Vec<mir::ir::Alternative>, CompileError> {
+) -> Result<mir::ir::Alternative, CompileError> {
     let type_ = type_canonicalizer::canonicalize(type_, context.types())?;
     let expression = compile(context, expression)?;
+    let compile_generic_type_alternative = |generic_type| -> Result<_, CompileError> {
+        Ok(compile_generic_type_alternative(
+            name,
+            &expression,
+            &type_::compile(context, &type_)?,
+            generic_type,
+        ))
+    };
 
-    union_type_member_calculator::calculate(&type_, context.types())?
-        .into_iter()
-        .map(|member_type| {
-            let compiled_member_type = type_::compile(context, &member_type)?;
-
-            Ok(match &member_type {
-                Type::Function(function_type) => compile_generic_type_alternative(
-                    name,
-                    &expression,
-                    &type_,
-                    &compiled_member_type,
-                    &type_::compile_concrete_function(function_type, context.types())?,
-                ),
-                Type::List(list_type) => compile_generic_type_alternative(
-                    name,
-                    &expression,
-                    &type_,
-                    &compiled_member_type,
-                    &type_::compile_concrete_list(list_type, context.types())?,
-                ),
-                Type::Map(map_type) => compile_generic_type_alternative(
-                    name,
-                    &expression,
-                    &type_,
-                    &compiled_member_type,
-                    &type_::compile_concrete_map(map_type, context.types())?,
-                ),
-                _ => mir::ir::Alternative::new(compiled_member_type.clone(), name, {
-                    if type_.is_union() {
-                        mir::ir::Let::new(
-                            name,
-                            mir::types::Type::Variant,
-                            mir::ir::Variant::new(
-                                compiled_member_type,
-                                mir::ir::Variable::new(name),
-                            ),
-                            expression.clone(),
-                        )
-                        .into()
-                    } else {
-                        expression.clone()
-                    }
-                }),
-            })
-        })
-        .collect::<Result<_, _>>()
+    Ok(match &type_ {
+        Type::Function(function_type) => compile_generic_type_alternative(
+            &type_::compile_concrete_function(&function_type, context.types())?,
+        )?,
+        Type::List(list_type) => compile_generic_type_alternative(&type_::compile_concrete_list(
+            &list_type,
+            context.types(),
+        )?)?,
+        Type::Map(map_type) => compile_generic_type_alternative(&type_::compile_concrete_map(
+            &map_type,
+            context.types(),
+        )?)?,
+        _ => mir::ir::Alternative::new(
+            union_type_member_calculator::calculate(&type_, context.types())?
+                .iter()
+                .map(|type_| type_::compile_concrete(context, type_))
+                .collect::<Result<_, _>>()?,
+            name,
+            expression.clone(),
+        ),
+    })
 }
 
 fn compile_generic_type_alternative(
     name: &str,
     expression: &mir::ir::Expression,
-    type_: &hir::types::Type,
     member_type: &mir::types::Type,
     concrete_member_type: &mir::types::Record,
 ) -> mir::ir::Alternative {
-    mir::ir::Alternative::new(concrete_member_type.clone(), name, {
-        if type_.is_union() {
-            mir::ir::Let::new(
-                name,
-                mir::types::Type::Variant,
-                mir::ir::Variant::new(concrete_member_type.clone(), mir::ir::Variable::new(name)),
-                expression.clone(),
-            )
-        } else {
-            mir::ir::Let::new(
-                name,
-                member_type.clone(),
-                mir::ir::RecordField::new(
-                    concrete_member_type.clone(),
-                    0,
-                    mir::ir::Variable::new(name),
-                ),
-                expression.clone(),
-            )
-        }
+    mir::ir::Alternative::new(vec![concrete_member_type.clone().into()], name, {
+        mir::ir::Let::new(
+            name,
+            member_type.clone(),
+            mir::ir::RecordField::new(
+                concrete_member_type.clone(),
+                0,
+                mir::ir::Variable::new(name),
+            ),
+            expression.clone(),
+        )
     })
 }
 
@@ -728,9 +698,9 @@ fn compile_operation(
         )
         .into(),
         Operation::Try(operation) => {
-            let success_type = operation
-                .type_()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
+            const SUCCESS_NAME: &str = "$success";
+            const ERROR_NAME: &str = "$error";
+
             let error_type = type_::compile(
                 context,
                 &types::Error::new(operation.position().clone()).into(),
@@ -739,16 +709,18 @@ fn compile_operation(
             mir::ir::Case::new(
                 mir::ir::TryOperation::new(
                     compile(operation.expression())?,
-                    "$error",
+                    ERROR_NAME,
                     error_type.clone(),
-                    mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error")),
+                    mir::ir::Variant::new(error_type, mir::ir::Variable::new(ERROR_NAME)),
                 ),
-                compile_alternatives(
+                vec![compile_alternative(
                     context,
-                    "$success",
-                    success_type,
-                    &Variable::new("$success", operation.position().clone()).into(),
-                )?,
+                    SUCCESS_NAME,
+                    operation.type_().ok_or_else(|| {
+                        AnalysisError::TypeNotInferred(operation.position().clone())
+                    })?,
+                    &Variable::new(SUCCESS_NAME, operation.position().clone()).into(),
+                )?],
                 None,
             )
             .into()
@@ -840,12 +812,12 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number.into()],
                             "y",
                             mir::ir::Expression::None
                         ),
                         mir::ir::Alternative::new(
-                            mir::types::Type::None,
+                            vec![mir::types::Type::None.into()],
                             "y",
                             mir::ir::Expression::None
                         )
@@ -880,12 +852,12 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            mir::types::Type::Number,
+                            vec![mir::types::Type::Number.into()],
                             "y",
                             mir::ir::Expression::None
                         ),
                         mir::ir::Alternative::new(
-                            mir::types::Type::None,
+                            vec![mir::types::Type::None.into()],
                             "y",
                             mir::ir::Expression::None
                         )
@@ -919,7 +891,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        mir::types::Type::Number,
+                        vec![mir::types::Type::Number.into()],
                         "y",
                         mir::ir::Expression::None
                     )],
@@ -954,34 +926,14 @@ mod tests {
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
-                    vec![
-                        mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Expression::None
-                            )
-                        ),
-                        mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Expression::None
-                            )
-                        ),
-                    ],
+                    vec![mir::ir::Alternative::new(
+                        vec![
+                            mir::types::Type::None.into(),
+                            mir::types::Type::Number.into()
+                        ],
+                        "y",
+                        mir::ir::Expression::None
+                    )],
                     None
                 )
                 .into())
@@ -1014,7 +966,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        concrete_function_type.clone(),
+                        vec![concrete_function_type.clone().into()],
                         "y",
                         mir::ir::Let::new(
                             "y",
@@ -1058,7 +1010,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        concrete_list_type.clone(),
+                        vec![concrete_list_type.clone().into()],
                         "y",
                         mir::ir::Let::new(
                             "y",
@@ -1107,34 +1059,14 @@ mod tests {
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
-                    vec![
-                        mir::ir::Alternative::new(
-                            concrete_list_type.clone(),
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    concrete_list_type,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                    ],
+                    vec![mir::ir::Alternative::new(
+                        vec![
+                            concrete_list_type.clone().into(),
+                            mir::types::Type::None.into()
+                        ],
+                        "y",
+                        mir::ir::Variable::new("y")
+                    )],
                     None
                 )
                 .into())
@@ -1170,7 +1102,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        concrete_map_type.clone(),
+                        vec![concrete_map_type.clone().into()],
                         "y",
                         mir::ir::Let::new(
                             "y",
@@ -1223,34 +1155,14 @@ mod tests {
                 ),
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
-                    vec![
-                        mir::ir::Alternative::new(
-                            concrete_map_type.clone(),
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    concrete_map_type,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "y",
-                            mir::ir::Let::new(
-                                "y",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("y")
-                                ),
-                                mir::ir::Variable::new("y")
-                            ),
-                        ),
-                    ],
+                    vec![mir::ir::Alternative::new(
+                        vec![
+                            concrete_map_type.clone().into(),
+                            mir::types::Type::None.into()
+                        ],
+                        "y",
+                        mir::ir::Variable::new("y")
+                    )],
                     None
                 )
                 .into())
@@ -1420,7 +1332,7 @@ mod tests {
                         mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
                     ),
                     vec![mir::ir::Alternative::new(
-                        mir::types::Type::None,
+                        vec![mir::types::Type::None.into()],
                         "$success",
                         mir::ir::Variable::new("$success"),
                     )],
@@ -1458,34 +1370,14 @@ mod tests {
                         error_type.clone(),
                         mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
                     ),
-                    vec![
-                        mir::ir::Alternative::new(
-                            mir::types::Type::None,
-                            "$success",
-                            mir::ir::Let::new(
-                                "$success",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::None,
-                                    mir::ir::Variable::new("$success")
-                                ),
-                                mir::ir::Variable::new("$success"),
-                            ),
-                        ),
-                        mir::ir::Alternative::new(
-                            mir::types::Type::Number,
-                            "$success",
-                            mir::ir::Let::new(
-                                "$success",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Variable::new("$success")
-                                ),
-                                mir::ir::Variable::new("$success"),
-                            ),
-                        ),
-                    ],
+                    vec![mir::ir::Alternative::new(
+                        vec![
+                            mir::types::Type::None.into(),
+                            mir::types::Type::Number.into()
+                        ],
+                        "$success",
+                        mir::ir::Variable::new("$success"),
+                    )],
                     None
                 )
                 .into())
