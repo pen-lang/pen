@@ -3,26 +3,26 @@ use crate::types::Type;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Alternative {
-    type_: Type,
+    types: Vec<Type>,
     name: String,
     expression: Expression,
 }
 
 impl Alternative {
     pub fn new(
-        type_: impl Into<Type>,
+        types: Vec<Type>,
         name: impl Into<String>,
         expression: impl Into<Expression>,
     ) -> Self {
         Self {
-            type_: type_.into(),
+            types,
             name: name.into(),
             expression: expression.into(),
         }
     }
 
-    pub fn type_(&self) -> &Type {
-        &self.type_
+    pub fn types(&self) -> &[Type] {
+        &self.types
     }
 
     pub fn name(&self) -> &str {
