@@ -832,10 +832,7 @@ mod tests {
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
-                                vec![
-                                    mir::types::Type::Number,
-                                    mir::types::Type::None,
-                                ],
+                                vec![mir::types::Type::Number, mir::types::Type::None],
                                 "y",
                                 mir::ir::Variable::new("y"),
                             )],

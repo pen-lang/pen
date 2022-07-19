@@ -927,10 +927,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        vec![
-                            mir::types::Type::None,
-                            mir::types::Type::Number
-                        ],
+                        vec![mir::types::Type::None, mir::types::Type::Number],
                         "y",
                         mir::ir::Expression::None
                     )],
@@ -1060,10 +1057,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        vec![
-                            concrete_list_type.into(),
-                            mir::types::Type::None
-                        ],
+                        vec![concrete_list_type.into(), mir::types::Type::None],
                         "y",
                         mir::ir::Variable::new("y")
                     )],
@@ -1156,10 +1150,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        vec![
-                            concrete_map_type.into(),
-                            mir::types::Type::None
-                        ],
+                        vec![concrete_map_type.into(), mir::types::Type::None],
                         "y",
                         mir::ir::Variable::new("y")
                     )],
@@ -1371,10 +1362,7 @@ mod tests {
                         mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
                     ),
                     vec![mir::ir::Alternative::new(
-                        vec![
-                            mir::types::Type::None,
-                            mir::types::Type::Number
-                        ],
+                        vec![mir::types::Type::None, mir::types::Type::Number],
                         "$success",
                         mir::ir::Variable::new("$success"),
                     )],
