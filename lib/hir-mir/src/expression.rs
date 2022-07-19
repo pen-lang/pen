@@ -309,14 +309,14 @@ fn compile_alternative(
 
     Ok(match &type_ {
         Type::Function(function_type) => compile_generic_type_alternative(
-            &type_::compile_concrete_function(&function_type, context.types())?,
+            &type_::compile_concrete_function(function_type, context.types())?,
         )?,
         Type::List(list_type) => compile_generic_type_alternative(&type_::compile_concrete_list(
-            &list_type,
+            list_type,
             context.types(),
         )?)?,
         Type::Map(map_type) => compile_generic_type_alternative(&type_::compile_concrete_map(
-            &map_type,
+            map_type,
             context.types(),
         )?)?,
         _ => mir::ir::Alternative::new(
@@ -812,12 +812,12 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            vec![mir::types::Type::Number.into()],
+                            vec![mir::types::Type::Number],
                             "y",
                             mir::ir::Expression::None
                         ),
                         mir::ir::Alternative::new(
-                            vec![mir::types::Type::None.into()],
+                            vec![mir::types::Type::None],
                             "y",
                             mir::ir::Expression::None
                         )
@@ -852,12 +852,12 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![
                         mir::ir::Alternative::new(
-                            vec![mir::types::Type::Number.into()],
+                            vec![mir::types::Type::Number],
                             "y",
                             mir::ir::Expression::None
                         ),
                         mir::ir::Alternative::new(
-                            vec![mir::types::Type::None.into()],
+                            vec![mir::types::Type::None],
                             "y",
                             mir::ir::Expression::None
                         )
@@ -891,7 +891,7 @@ mod tests {
                 Ok(mir::ir::Case::new(
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
-                        vec![mir::types::Type::Number.into()],
+                        vec![mir::types::Type::Number],
                         "y",
                         mir::ir::Expression::None
                     )],
@@ -928,8 +928,8 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
                         vec![
-                            mir::types::Type::None.into(),
-                            mir::types::Type::Number.into()
+                            mir::types::Type::None,
+                            mir::types::Type::Number
                         ],
                         "y",
                         mir::ir::Expression::None
@@ -1061,8 +1061,8 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
                         vec![
-                            concrete_list_type.clone().into(),
-                            mir::types::Type::None.into()
+                            concrete_list_type.into(),
+                            mir::types::Type::None
                         ],
                         "y",
                         mir::ir::Variable::new("y")
@@ -1157,8 +1157,8 @@ mod tests {
                     mir::ir::Variable::new("x"),
                     vec![mir::ir::Alternative::new(
                         vec![
-                            concrete_map_type.clone().into(),
-                            mir::types::Type::None.into()
+                            concrete_map_type.into(),
+                            mir::types::Type::None
                         ],
                         "y",
                         mir::ir::Variable::new("y")
@@ -1332,7 +1332,7 @@ mod tests {
                         mir::ir::Variant::new(error_type, mir::ir::Variable::new("$error"))
                     ),
                     vec![mir::ir::Alternative::new(
-                        vec![mir::types::Type::None.into()],
+                        vec![mir::types::Type::None],
                         "$success",
                         mir::ir::Variable::new("$success"),
                     )],
@@ -1372,8 +1372,8 @@ mod tests {
                     ),
                     vec![mir::ir::Alternative::new(
                         vec![
-                            mir::types::Type::None.into(),
-                            mir::types::Type::Number.into()
+                            mir::types::Type::None,
+                            mir::types::Type::Number
                         ],
                         "$success",
                         mir::ir::Variable::new("$success"),

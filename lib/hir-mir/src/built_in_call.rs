@@ -264,7 +264,7 @@ mod tests {
                                     vec![]
                                 ),
                                 vec![mir::ir::Alternative::new(
-                                    vec![mir::types::Type::Number.into()],
+                                    vec![mir::types::Type::Number],
                                     "$value",
                                     mir::ir::Variable::new("$value")
                                 )],

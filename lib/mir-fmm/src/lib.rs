@@ -714,7 +714,7 @@ mod tests {
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
-                                vec![mir::types::Type::Number.into()],
+                                vec![mir::types::Type::Number],
                                 "y",
                                 mir::ir::Variable::new("y"),
                             )],
@@ -788,7 +788,7 @@ mod tests {
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
-                                vec![mir::types::Type::ByteString.into()],
+                                vec![mir::types::Type::ByteString],
                                 "y",
                                 mir::ir::Variable::new("y"),
                             )],
@@ -833,8 +833,8 @@ mod tests {
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
                                 vec![
-                                    mir::types::Type::Number.into(),
-                                    mir::types::Type::None.into(),
+                                    mir::types::Type::Number,
+                                    mir::types::Type::None,
                                 ],
                                 "y",
                                 mir::ir::Variable::new("y"),
@@ -1442,7 +1442,7 @@ mod tests {
                             mir::ir::Variable::new("x"),
                             vec![
                                 mir::ir::Alternative::new(
-                                    vec![mir::types::Type::ByteString.into()],
+                                    vec![mir::types::Type::ByteString],
                                     "x",
                                     mir::ir::Variable::new("x"),
                                 ),
