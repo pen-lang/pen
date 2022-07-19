@@ -50,53 +50,64 @@ pub fn compile(
         .into(),
         Expression::IfList(if_) => compile(&if_list::transform(context, if_)?)?,
         Expression::IfMap(if_) => compile(&if_map::transform(context, if_)?)?,
-        Expression::IfType(if_) => mir::ir::Case::new(
-            compile(if_.argument())?,
-            if_.branches()
-                .iter()
+        Expression::IfType(if_) => {
+            let is_else_any = if_
+                .else_()
                 .map(|branch| {
-                    compile_alternatives(context, if_.name(), branch.type_(), branch.expression())
-                })
-                .collect::<Result<Vec<_>, CompileError>>()?
-                .into_iter()
-                .flatten()
-                .chain(if let Some(branch) = if_.else_() {
-                    if !type_equality_checker::check(
+                    type_equality_checker::check(
                         branch.type_().unwrap(),
                         &types::Any::new(if_.position().clone()).into(),
                         context.types(),
-                    )? {
+                    )
+                })
+                .transpose()?
+                .unwrap_or_default();
+
+            mir::ir::Case::new(
+                compile(if_.argument())?,
+                if_.branches()
+                    .iter()
+                    .map(|branch| {
                         compile_alternatives(
                             context,
                             if_.name(),
-                            branch.type_().unwrap(),
+                            branch.type_(),
                             branch.expression(),
-                        )?
+                        )
+                    })
+                    .collect::<Result<Vec<_>, CompileError>>()?
+                    .into_iter()
+                    .flatten()
+                    .chain(if let Some(branch) = if_.else_() {
+                        if is_else_any {
+                            vec![]
+                        } else {
+                            compile_alternatives(
+                                context,
+                                if_.name(),
+                                branch.type_().unwrap(),
+                                branch.expression(),
+                            )?
+                        }
                     } else {
                         vec![]
+                    })
+                    .collect(),
+                if let Some(branch) = if_.else_() {
+                    if is_else_any {
+                        Some(mir::ir::DefaultAlternative::new(
+                            if_.name(),
+                            compile(branch.expression())?,
+                        ))
+                    } else {
+                        None
                     }
                 } else {
-                    vec![]
-                })
-                .collect(),
-            if let Some(branch) = if_.else_() {
-                if type_equality_checker::check(
-                    branch.type_().unwrap(),
-                    &types::Any::new(if_.position().clone()).into(),
-                    context.types(),
-                )? {
-                    Some(mir::ir::DefaultAlternative::new(
-                        if_.name(),
-                        compile(branch.expression())?,
-                    ))
-                } else {
                     None
-                }
-            } else {
-                None
-            },
-        )
-        .into(),
+                },
+            )
+            .into()
+        }
         Expression::Lambda(lambda) => compile_lambda(context, lambda)?,
         Expression::Let(let_) => mir::ir::Let::new(
             let_.name().unwrap_or_default(),
