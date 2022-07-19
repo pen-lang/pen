@@ -1,7 +1,3 @@
-use std::{
-    collections::hash_map::DefaultHasher,
-    hash::{Hash, Hasher},
-};
 use super::hash_calculation;
 use crate::{context::CompileContext, transformation::record_type_information, CompileError};
 use hir::{
@@ -10,6 +6,10 @@ use hir::{
     types::{self, Type},
 };
 use position::Position;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
 const RECORD_NAME: &str = "$r";
 
@@ -138,6 +138,8 @@ fn compile_hash_type(position: &Position) -> Type {
     types::Number::new(position.clone()).into()
 }
 
+// TODO Collision of these hashes might lead to infinite loop in built-in map type insertion
+// because they are treated as identities there.
 fn hash_record_identity(id: &str) -> u64 {
     let mut hasher = DefaultHasher::new();
 
