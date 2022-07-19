@@ -1,0 +1,17 @@
+import Test'Assert
+
+import 'Encode { Encode }
+import 'Node { Node }
+
+EncodeHtml = \() none | error {
+  Assert'True(
+    Encode(
+      Node{
+        Tag: Node'Html{},
+        Attributes: {string: string},
+        Children: [Node],
+      },
+    )?
+      == "<html/>",
+  )
+}
