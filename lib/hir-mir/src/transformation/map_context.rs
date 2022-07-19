@@ -3,6 +3,9 @@ use crate::{context::CompileContext, transformation::equal_operation, CompileErr
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
 
+// TODO Do not generate equal functions dynamically but define them once
+// globally.
+// Can we simply lift them up to global functions as optimization in MIR?
 pub fn transform(
     context: &CompileContext,
     key_type: &Type,
