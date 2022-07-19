@@ -689,11 +689,11 @@ mod tests {
         }
     }
 
-    mod case_expressions {
+    mod case {
         use super::*;
 
         #[test]
-        fn check_case_expressions_only_with_default_alternative() {
+        fn check_only_default_alternative() {
             assert_eq!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::new(
@@ -712,7 +712,7 @@ mod tests {
         }
 
         #[test]
-        fn check_case_expressions_with_one_alternative() {
+        fn check_one_alternative() {
             assert_eq!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::new(
@@ -735,7 +735,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_expressions_without_alternatives() {
+        fn check_no_alternative() {
             let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
@@ -750,7 +750,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_expressions_with_inconsistent_alternative_types() {
+        fn check_inconsistent_alternative_types() {
             let module = Module::empty().set_function_definitions(vec![
                 FunctionDefinition::with_environment(
                     "f",
@@ -775,7 +775,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_for_unmatched_case_type() {
+        fn check_unmatched_case_type() {
             assert!(matches!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::with_environment(
@@ -799,7 +799,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_with_variant_alternative() {
+        fn check_variant_alternative() {
             assert!(matches!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::with_environment(
