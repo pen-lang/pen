@@ -260,9 +260,8 @@ fn check_case(
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
-    let check_expression = |expression: &Expression, variables: &FnvHashMap<&str, Type>| {
-        check_expression(expression, variables, result_type, types)
-    };
+    let check_expression =
+        |expression, variables: &_| check_expression(expression, variables, result_type, types);
 
     check_equality(
         &check_expression(case.argument(), variables)?,
