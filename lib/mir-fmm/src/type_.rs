@@ -94,7 +94,7 @@ pub fn is_record_boxed(
 ) -> bool {
     let body_type = &types[record.name()];
 
-    // TODO
+    // TODO Unbox small records.
     !body_type.fields().is_empty()
 }
 
