@@ -299,7 +299,19 @@ fn compile_alternatives(
             })
             .transpose()?,
         [alternative, ..] => Some(instruction_builder.if_(
-            compile_tag_comparison(instruction_builder, &argument, alternative.type_())?,
+            alternative.types().iter().fold(
+                Ok(fmm::build::TypedExpression::from(
+                    fmm::ir::Primitive::Boolean(false),
+                )),
+                |result, type_| -> Result<_, CompileError> {
+                    Ok(fmm::build::bitwise_operation(
+                        fmm::ir::BitwiseOperator::Or,
+                        result?,
+                        compile_tag_comparison(instruction_builder, &argument, type_)?,
+                    )?
+                    .into())
+                },
+            )?,
             |instruction_builder| -> Result<_, CompileError> {
                 Ok(instruction_builder.branch(compile(
                     context,
