@@ -1,3 +1,8 @@
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
+
 use super::hash_calculation;
 use crate::{context::CompileContext, transformation::record_type_information, CompileError};
 use hir::{
@@ -7,7 +12,6 @@ use hir::{
 };
 use position::Position;
 
-const RECORD_HEADER_HASH: f64 = 3.0;
 const RECORD_NAME: &str = "$r";
 
 pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
@@ -74,7 +78,7 @@ fn compile_hash_function_definition(
             hash_type.clone(),
             type_definition.fields().iter().rev().fold(
                 Ok(Expression::from(Number::new(
-                    RECORD_HEADER_HASH,
+                    f64::from_bits(hash_record_identity(type_definition.name())),
                     position.clone(),
                 ))),
                 |expression, field| -> Result<_, CompileError> {
@@ -135,6 +139,14 @@ fn compile_hash_type(position: &Position) -> Type {
     types::Number::new(position.clone()).into()
 }
 
+fn hash_record_identity(id: &str) -> u64 {
+    let mut hasher = DefaultHasher::new();
+
+    id.hash(&mut hasher);
+
+    hasher.finish()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,7 +192,7 @@ mod tests {
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
-                .set_type_definitions(vec![type_definition])
+                .set_type_definitions(vec![type_definition.clone()])
                 .set_definitions(vec![FunctionDefinition::new(
                     "foo.$hash",
                     "foo.$hash",
@@ -201,7 +213,13 @@ mod tests {
                                         Position::fake()
                                     ),
                                     vec![
-                                        Number::new(RECORD_HEADER_HASH, Position::fake()).into(),
+                                        Number::new(
+                                            f64::from_bits(hash_record_identity(
+                                                type_definition.name()
+                                            )),
+                                            Position::fake()
+                                        )
+                                        .into(),
                                         Number::new(0.0, Position::fake()).into(),
                                     ],
                                     Position::fake()
