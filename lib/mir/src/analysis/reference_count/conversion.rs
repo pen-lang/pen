@@ -129,7 +129,7 @@ fn convert_expression(
 
                     Ok((
                         Alternative::new(
-                            alternative.type_().clone(),
+                            alternative.types().to_vec(),
                             alternative.name(),
                             expression,
                         ),
@@ -178,7 +178,7 @@ fn convert_expression(
                         .into_iter()
                         .map(|(alternative, moved_variables)| {
                             Alternative::new(
-                                alternative.type_().clone(),
+                                alternative.types().to_vec(),
                                 alternative.name(),
                                 drop_variables(
                                     alternative.expression().clone(),
@@ -1522,8 +1522,8 @@ mod tests {
                     &Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Number, "x", Variable::new("x")),
-                            Alternative::new(Type::Boolean, "x", 42.0)
+                            Alternative::new(vec![Type::Number], "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Boolean], "x", 42.0)
                         ],
                         None
                     )
@@ -1536,9 +1536,9 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Number, "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Number], "x", Variable::new("x")),
                             Alternative::new(
-                                Type::Boolean,
+                                vec![Type::Boolean],
                                 "x",
                                 DropVariables::new(
                                     [("x".into(), Type::Boolean)].into_iter().collect(),
@@ -1560,7 +1560,7 @@ mod tests {
                 convert_expression(
                     &Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::ByteString, "x", 42.0)],
+                        vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
                         Some(DefaultAlternative::new("x", 42.0))
                     )
                     .into(),
@@ -1572,7 +1572,7 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(
-                            Type::ByteString,
+                            vec![Type::ByteString],
                             "x",
                             DropVariables::new(
                                 [("x".into(), Type::ByteString)].into_iter().collect(),
@@ -1599,7 +1599,7 @@ mod tests {
                 convert_expression(
                     &Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::ByteString, "x", 42.0)],
+                        vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
                         Some(DefaultAlternative::new("x", 42.0))
                     )
                     .into(),
@@ -1614,7 +1614,7 @@ mod tests {
                             Variable::new("x")
                         ),
                         vec![Alternative::new(
-                            Type::ByteString,
+                            vec![Type::ByteString],
                             "x",
                             DropVariables::new(
                                 [("x".into(), Type::ByteString)].into_iter().collect(),

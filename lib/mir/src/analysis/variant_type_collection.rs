@@ -81,8 +81,10 @@ fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
     collect_from_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {
-            [alternative.type_().clone()]
-                .into_iter()
+            alternative
+                .types()
+                .iter()
+                .cloned()
                 .chain(collect_from_expression(alternative.expression()))
         }))
         .chain(

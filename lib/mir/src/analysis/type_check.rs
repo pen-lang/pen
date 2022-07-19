@@ -241,7 +241,7 @@ fn check_expression(
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {
-                return Err(TypeCheckError::VariantInVariant(variant.clone().into()));
+                return Err(TypeCheckError::NestedVariant(variant.clone().into()));
             }
 
             check_equality(
@@ -260,9 +260,8 @@ fn check_case(
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
-    let check_expression = |expression: &Expression, variables: &FnvHashMap<&str, Type>| {
-        check_expression(expression, variables, result_type, types)
-    };
+    let check_expression =
+        |expression, variables: &_| check_expression(expression, variables, result_type, types);
 
     check_equality(
         &check_expression(case.argument(), variables)?,
@@ -272,8 +271,14 @@ fn check_case(
     let mut expression_type = None;
 
     for alternative in case.alternatives() {
-        if matches!(alternative.type_(), Type::Variant) {
-            return Err(TypeCheckError::VariantInVariant(case.clone().into()));
+        if alternative
+            .types()
+            .iter()
+            .any(|type_| matches!(type_, Type::Variant))
+        {
+            return Err(TypeCheckError::NestedVariant(case.clone().into()));
+        } else if alternative.types().is_empty() {
+            return Err(TypeCheckError::EmptyTypeAlternative(case.clone()));
         }
 
         let mut variables = variables.clone();
@@ -684,11 +689,11 @@ mod tests {
         }
     }
 
-    mod case_expressions {
+    mod case {
         use super::*;
 
         #[test]
-        fn check_case_expressions_only_with_default_alternative() {
+        fn check_only_default_alternative() {
             assert_eq!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::new(
@@ -707,7 +712,7 @@ mod tests {
         }
 
         #[test]
-        fn check_case_expressions_with_one_alternative() {
+        fn check_one_alternative() {
             assert_eq!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::new(
@@ -715,7 +720,11 @@ mod tests {
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
                             Variable::new("x"),
-                            vec![Alternative::new(Type::Number, "y", Variable::new("y"))],
+                            vec![Alternative::new(
+                                vec![Type::Number],
+                                "y",
+                                Variable::new("y")
+                            )],
                             None
                         ),
                         Type::Number,
@@ -726,7 +735,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_expressions_without_alternatives() {
+        fn check_no_alternative() {
             let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
@@ -741,7 +750,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_expressions_with_inconsistent_alternative_types() {
+        fn check_inconsistent_alternative_types() {
             let module = Module::empty().set_function_definitions(vec![
                 FunctionDefinition::with_environment(
                     "f",
@@ -750,8 +759,8 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Boolean, "x", Variable::new("x")),
-                            Alternative::new(Type::Number, "x", 42.0),
+                            Alternative::new(vec![Type::Boolean], "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Number], "x", 42.0),
                         ],
                         None,
                     ),
@@ -766,7 +775,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_for_unmatched_case_type() {
+        fn check_unmatched_case_type() {
             assert!(matches!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::with_environment(
@@ -776,7 +785,7 @@ mod tests {
                         Case::new(
                             Variable::new("x"),
                             vec![Alternative::new(
-                                types::Record::new("foo"),
+                                vec![types::Record::new("foo").into()],
                                 "y",
                                 Variable::new("y")
                             )],
@@ -790,7 +799,7 @@ mod tests {
         }
 
         #[test]
-        fn fail_to_check_case_with_variant_alternative() {
+        fn check_variant_alternative() {
             assert!(matches!(
                 check_types(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::with_environment(
@@ -799,14 +808,41 @@ mod tests {
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
                             Variable::new("x"),
-                            vec![Alternative::new(Type::Variant, "y", Variable::new("y"))],
+                            vec![Alternative::new(
+                                vec![Type::Variant],
+                                "y",
+                                Variable::new("y")
+                            )],
                             None
                         ),
                         Type::Variant,
                     )
                 ])),
-                Err(TypeCheckError::VariantInVariant(_))
+                Err(TypeCheckError::NestedVariant(_))
             ));
+        }
+
+        #[test]
+        fn check_multiple_type_alternative() {
+            assert_eq!(
+                check_types(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Variant)],
+                        Case::new(
+                            Variable::new("x"),
+                            vec![Alternative::new(
+                                vec![Type::Number, Type::None],
+                                "y",
+                                Variable::new("y")
+                            )],
+                            None
+                        ),
+                        Type::Variant,
+                    )
+                ])),
+                Ok(())
+            );
         }
     }
 
@@ -1000,7 +1036,7 @@ mod tests {
                         Type::Variant
                     )
                 ],)),
-                Err(TypeCheckError::VariantInVariant(_))
+                Err(TypeCheckError::NestedVariant(_))
             ));
         }
     }
