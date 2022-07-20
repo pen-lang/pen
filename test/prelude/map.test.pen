@@ -1,6 +1,12 @@
 import Core'Number
 import Test'Assert
 
+type Foo {}
+
+type Bar {}
+
+type Union = Foo | Bar
+
 SetNoKey = \() none | error {
   Assert'True(Number'Sum([number k for k, _ in {number: none}]) == 0)
 }
@@ -125,6 +131,12 @@ Set3KeysWith0 = \() none | error {
     )
       == 3,
   )
+}
+
+SetUnionKeys = \() none | error {
+  _ = {Union: none Foo{}: none, Bar{}: none}
+
+  none
 }
 
 RemoveKey = \() none | error {
