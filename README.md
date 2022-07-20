@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is the programming language for **scalable** software development, focused on software maintainability and portability.
+Pen is a functional descendant of the [Go][go] programming language focused on application programming.
 
 ```pen
 import Os'Context { Context }
@@ -42,8 +42,17 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
+## Technical details
+
+> WIP
+
+## Contributing
+
+> WIP
+
 ## License
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
+[go]: https://go.dev/
 [syntax]: https://pen-lang.org/references/language/syntax.html
