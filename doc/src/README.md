@@ -71,7 +71,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - There is no default platform-dependent system library.
 - Developers choose their own [system packages][system-packages] they want to use.
 - [System packages][system-packages] encapsulate platform-dependent codes.
-- No other packages have side effects without explicit injection.
+- No package causes side effects without explicit injection.
 
 ### Security
 
