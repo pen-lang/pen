@@ -32,6 +32,25 @@ EncodeAttributes = \() none | error {
   )
 }
 
+EncodeAttributesWithChild = \() none | error {
+  Assert'True(
+    Encode(
+      Element{
+        Tag: Node'Html{},
+        Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
+        Children: [Node
+          Element{
+            Tag: Node'Body{},
+            Attributes: [Attribute],
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html foo=\"bar\"><body/></html>",
+  )
+}
+
 EncodeChild = \() none | error {
   Assert'True(
     Encode(
