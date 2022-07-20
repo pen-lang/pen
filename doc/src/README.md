@@ -26,10 +26,6 @@ main = \(ctx context) none {
 }
 ```
 
-## Install
-
-See [Install](/introduction/install.html).
-
 ## Vision
 
 Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
