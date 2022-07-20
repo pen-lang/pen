@@ -31,14 +31,14 @@ build_package_document \
   "This package provides command-line flag parsing."
 
 build_package_document \
-  http \
-  Http \
-  "This package provides HTTP client and server."
-
-build_package_document \
   html \
   Html \
   "This package provides HTML rendering logic."
+
+build_package_document \
+  http \
+  Http \
+  "This package provides HTTP client and server."
 
 build_package_document \
   json \
