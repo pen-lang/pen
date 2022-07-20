@@ -61,15 +61,17 @@ Pen aims to make large-scale software development efficient where a number of pe
 - The language and its runtime enables thread-safe concurrent/parallel computation.
 - For more information, see [Concurrency and parallelism](/guides/concurrency-and-parallelism.html).
 
-### System packages
-
-- [System packages](/advanced-features/writing-system-packages.html) encapsulate side effects as separate packages.
-- No other packages have side effects unless injected them into explicitly.
-
 ### Reliable testing
 
 - Unit tests are always deterministic and fast.
 - No flaky or slow tests bother developers.
+
+### No standard system library
+
+- There is no default platform-dependent system library.
+- Developers choose their own [system packages][system-packages] they want to use.
+- [System packages][system-packages] encapsulate platform-dependent codes.
+- No other packages have side effects without explicit injection.
 
 ### Security
 
@@ -92,3 +94,4 @@ Pen aims to make large-scale software development efficient where a number of pe
 Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
 [syntax]: /references/language/syntax.html
+[system-packages]: /advanced-features/writing-system-packages.html
