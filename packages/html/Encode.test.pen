@@ -1,14 +1,14 @@
 import Test'Assert
 
 import 'Encode { Encode }
-import 'Node { Node }
+import 'Node { Node, Attribute, Element }
 
-EncodeNode = \() none | error {
+EncodeElement = \() none | error {
   Assert'True(
     Encode(
-      Node'Element{
+      Element{
         Tag: Node'Html{},
-        Attributes: {string: string},
+        Attributes: [Attribute],
         Children: [Node],
       },
     )?
@@ -16,16 +16,32 @@ EncodeNode = \() none | error {
   )
 }
 
+EncodeAttributes = \() none | error {
+  Assert'True(
+    Encode(
+      Element{
+        Tag: Node'Html{},
+        Attributes: [Attribute
+          Attribute{Key: "foo", Value: "bar"},
+          Attribute{Key: "baz", Value: "blah"},
+        ],
+        Children: [Node],
+      },
+    )?
+      == "<html foo=\"bar\"baz=\"blah\"/>",
+  )
+}
+
 EncodeChild = \() none | error {
   Assert'True(
     Encode(
-      Node'Element{
+      Element{
         Tag: Node'Html{},
-        Attributes: {string: string},
+        Attributes: [Attribute],
         Children: [Node
-          Node'Element{
+          Element{
             Tag: Node'Body{},
-            Attributes: {string: string},
+            Attributes: [Attribute],
             Children: [Node],
           },
         ],
@@ -38,18 +54,18 @@ EncodeChild = \() none | error {
 EncodeChildren = \() none | error {
   Assert'True(
     Encode(
-      Node'Element{
+      Element{
         Tag: Node'Html{},
-        Attributes: {string: string},
+        Attributes: [Attribute],
         Children: [Node
-          Node'Element{
+          Element{
             Tag: Node'Head{},
-            Attributes: {string: string},
+            Attributes: [Attribute],
             Children: [Node],
           },
-          Node'Element{
+          Element{
             Tag: Node'Body{},
-            Attributes: {string: string},
+            Attributes: [Attribute],
             Children: [Node],
           },
         ],
@@ -62,17 +78,17 @@ EncodeChildren = \() none | error {
 EncodeNestedChildren = \() none | error {
   Assert'True(
     Encode(
-      Node'Element{
+      Element{
         Tag: Node'Html{},
-        Attributes: {string: string},
+        Attributes: [Attribute],
         Children: [Node
-          Node'Element{
+          Element{
             Tag: Node'Body{},
-            Attributes: {string: string},
+            Attributes: [Attribute],
             Children: [Node
-              Node'Element{
+              Element{
                 Tag: Node'Div{},
-                Attributes: {string: string},
+                Attributes: [Attribute],
                 Children: [Node],
               },
             ],
@@ -87,9 +103,9 @@ EncodeNestedChildren = \() none | error {
 EncodeTextNode = \() none | error {
   Assert'True(
     Encode(
-      Node'Element{
+      Element{
         Tag: Node'Html{},
-        Attributes: {string: string},
+        Attributes: [Attribute],
         Children: [Node "foo"],
       },
     )?

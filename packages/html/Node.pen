@@ -2,8 +2,13 @@ type Node = Element | string
 
 type Element {
   Tag Tag
-  Attributes {string: string}
+  Attributes [Attribute]
   Children [Node]
+}
+
+type Attribute {
+  Key string
+  Value string
 }
 
 type Tag =

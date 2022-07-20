@@ -1,6 +1,6 @@
 import Core'String
 
-import 'Node { Node, Tag }
+import 'Node { Attribute, Node, Tag }
 
 tagToString = \() {Tag: string} {
   {Tag: string
@@ -49,8 +49,8 @@ Encode = \(n Node) string | error {
   }
 }
 
-encodeAttributes = \(attrs {string: string}) [string] {
-  [string String'Concatenate([string k, "=\"", v, "\""]) for k, v in attrs]
+encodeAttributes = \(attrs [Attribute]) [string] {
+  [string String'Concatenate([string a().Key, "=\"", a().Value, "\""]) for a in attrs]
 }
 
 encodeChildren = \(ns [Node]) [string] | error {
