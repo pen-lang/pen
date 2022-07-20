@@ -3,15 +3,96 @@ import Test'Assert
 import 'Encode { Encode }
 import 'Node { Node }
 
-EncodeHtml = \() none | error {
+EncodeNode = \() none | error {
   Assert'True(
     Encode(
-      Node{
+      Node'Element{
         Tag: Node'Html{},
         Attributes: {string: string},
         Children: [Node],
       },
     )?
       == "<html/>",
+  )
+}
+
+EncodeChild = \() none | error {
+  Assert'True(
+    Encode(
+      Node'Element{
+        Tag: Node'Html{},
+        Attributes: {string: string},
+        Children: [Node
+          Node'Element{
+            Tag: Node'Body{},
+            Attributes: {string: string},
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html><body/></html>",
+  )
+}
+
+EncodeChildren = \() none | error {
+  Assert'True(
+    Encode(
+      Node'Element{
+        Tag: Node'Html{},
+        Attributes: {string: string},
+        Children: [Node
+          Node'Element{
+            Tag: Node'Head{},
+            Attributes: {string: string},
+            Children: [Node],
+          },
+          Node'Element{
+            Tag: Node'Body{},
+            Attributes: {string: string},
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html><head/><body/></html>",
+  )
+}
+
+EncodeNestedChildren = \() none | error {
+  Assert'True(
+    Encode(
+      Node'Element{
+        Tag: Node'Html{},
+        Attributes: {string: string},
+        Children: [Node
+          Node'Element{
+            Tag: Node'Body{},
+            Attributes: {string: string},
+            Children: [Node
+              Node'Element{
+                Tag: Node'Div{},
+                Attributes: {string: string},
+                Children: [Node],
+              },
+            ],
+          },
+        ],
+      },
+    )?
+      == "<html><body><div/></body></html>",
+  )
+}
+
+EncodeTextNode = \() none | error {
+  Assert'True(
+    Encode(
+      Node'Element{
+        Tag: Node'Html{},
+        Attributes: {string: string},
+        Children: [Node "foo"],
+      },
+    )?
+      == "<html>foo</html>",
   )
 }

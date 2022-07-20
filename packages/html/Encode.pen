@@ -15,34 +15,38 @@ tagToString = \() {Tag: string} {
 }
 
 Encode = \(n Node) string | error {
-  tag = if s = tagToString()[n.Tag] {
-    s
+  if n = n as string {
+    n
   } else {
-    error("unknown tag")
-  }?
+    tag = if s = tagToString()[n.Tag] {
+      s
+    } else {
+      error("unknown tag")
+    }?
 
-  attrs = encodeAttributes(n.Attributes)
+    attrs = encodeAttributes(n.Attributes)
 
-  ns = if size(n.Children) == 0 {
-    [string "/>"]
-  } else {
-    ns = encodeChildren(n.Children)?
+    ns = if size(n.Children) == 0 {
+      [string "/>"]
+    } else {
+      ns = encodeChildren(n.Children)?
 
-    [string ">", ...ns, "</", tag, ">"]
+      [string ">", ...ns, "</", tag, ">"]
+    }
+
+    String'Concatenate(
+      [string
+        "<",
+        tag,
+        ...if size(attrs) == 0 {
+          [string]
+        } else {
+          [string " ", ...attrs]
+        },
+        ...ns,
+      ],
+    )
   }
-
-  String'Concatenate(
-    [string
-      "<",
-      tag,
-      ...if size(attrs) == 0 {
-        [string]
-      } else {
-        [string " ", ...attrs]
-      },
-      ...ns,
-    ],
-  )
 }
 
 encodeAttributes = \(attrs {string: string}) [string] {

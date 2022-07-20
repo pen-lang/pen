@@ -1,4 +1,6 @@
-type Node {
+type Node = Element | string
+
+type Element {
   Tag Tag
   Attributes {string: string}
   Children [Node]
