@@ -2,28 +2,10 @@ import Core'String
 
 import 'Node { Attribute, Node, Tag }
 
-tagToString = \() {Tag: string} {
-  {Tag: string
-    Node'A{}: "a",
-    Node'Body{}: "body",
-    Node'Div{}: "div",
-    Node'Head{}: "head",
-    Node'Html{}: "html",
-    Node'P{}: "p",
-    Node'Title{}: "title",
-  }
-}
-
 Encode = \(n Node) string | error {
   if n = n as string {
     n
   } else {
-    tag = if s = tagToString()[n.Tag] {
-      s
-    } else {
-      error("unknown tag")
-    }?
-
     attrs = encodeAttributes(n.Attributes)
 
     ns = if size(n.Children) == 0 {
@@ -31,13 +13,13 @@ Encode = \(n Node) string | error {
     } else {
       ns = encodeChildren(n.Children)?
 
-      [string ">", ...ns, "</", tag, ">"]
+      [string ">", ...ns, "</", n.Tag, ">"]
     }
 
     String'Concatenate(
       [string
         "<",
-        tag,
+        n.Tag,
         ...if size(attrs) == 0 {
           [string]
         } else {

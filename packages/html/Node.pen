@@ -1,7 +1,7 @@
 type Node = Element | string
 
 type Element {
-  Tag Tag
+  Tag string
   Attributes [Attribute]
   Children [Node]
 }
@@ -10,26 +10,3 @@ type Attribute {
   Key string
   Value string
 }
-
-type Tag =
-  A |
-  Body |
-  Div |
-  Head |
-  Html |
-  P |
-  Title
-
-type A {}
-
-type Body {}
-
-type Div {}
-
-type Head {}
-
-type Html {}
-
-type P {}
-
-type Title {}
