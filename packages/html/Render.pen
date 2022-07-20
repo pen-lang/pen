@@ -1,0 +1,48 @@
+import Core'String
+
+import 'Node { Attribute, Node, Tag }
+
+# Render an HTML node.
+Render = \(n Node) string | error {
+  if n = n as string {
+    n
+  } else {
+    attrs = renderAttributes(n.Attributes)
+
+    ns = if size(n.Children) == 0 {
+      [string "/>"]
+    } else {
+      ns = renderChildren(n.Children)?
+
+      [string ">", ...ns, "</", n.Tag, ">"]
+    }
+
+    String'Concatenate(
+      [string
+        "<",
+        n.Tag,
+        ...if size(attrs) == 0 {
+          [string]
+        } else {
+          [string " ", ...attrs]
+        },
+        ...ns,
+      ],
+    )
+  }
+}
+
+renderAttributes = \(attrs [Attribute]) [string] {
+  [string String'Concatenate([string a().Key, "=\"", a().Value, "\""]) for a in attrs]
+}
+
+renderChildren = \(ns [Node]) [string] | error {
+  if [n, ...ns] = ns {
+    n = Render(n())?
+    ns = renderChildren(ns)?
+
+    [string n, ...ns]
+  } else {
+    [string]
+  }
+}

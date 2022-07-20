@@ -1,0 +1,15 @@
+# An HTML node
+type Node = Element | string
+
+# An HTML element
+type Element {
+  Tag string
+  Attributes [Attribute]
+  Children [Node]
+}
+
+# An HTML attribute
+type Attribute {
+  Key string
+  Value string
+}
