@@ -69,7 +69,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 ### No standard system library
 
 - There is no default platform-dependent system library.
-- Developers choose their own [system packages][system-packages] for their applications.
+- Developers choose [system packages][system-packages] suitable for their applications.
 - [System packages][system-packages] encapsulate platform-dependent codes and side effects.
 - No package causes side effects without explicit injection.
 
