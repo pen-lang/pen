@@ -2,6 +2,7 @@ import Core'String
 
 import 'Node { Attribute, Node, Tag }
 
+# Render an HTML node.
 Render = \(n Node) string | error {
   if n = n as string {
     n
