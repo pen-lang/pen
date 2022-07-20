@@ -30,14 +30,6 @@ main = \(ctx context) none {
 
 See [Install](/introduction/install.html).
 
-## Documentation
-
-- [Getting started](/introduction/getting-started.html)
-- [Language reference][syntax]
-- Code examples
-  - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
-  - [Snippets](/examples)
-
 ## Vision
 
 Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
