@@ -42,6 +42,19 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
+## Difference from Go
+
+### Types
+
+| Type             | Go                             | Pen                         |
+| ---------------- | ------------------------------ | --------------------------- |
+| Number           | `int`, `float64`, ...          | `number` (IEEE 754)         |
+| Sequence         | `[]int` (array or slice)       | `[number]` (lazy list)      |
+| Map              | `map[string]int`               | `{string: number}`          |
+| Concurrent queue | `chan int`                     | `[number]` (lazy list)      |
+| Optional         | null pointer (or _zero_ value) | `none`                      |
+| Function         | `func(int, bool) string`       | `\(number, boolean) string` |
+
 ## Technical details
 
 > WIP
