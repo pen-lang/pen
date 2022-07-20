@@ -41,13 +41,13 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Minimal language
 
-- Its [syntax][syntax] and [type system](/references/language/types.html) are small, simple, and easy to learn.
+- Its [syntax][syntax] and [type system](/references/language/types.md) are small, simple, and easy to learn.
 - Yet, the language supports all the modern features.
 
 ### Concurrent/parallel computation
 
 - The language and its runtime enables thread-safe concurrent/parallel computation.
-- For more information, see [Concurrency and parallelism](/guides/concurrency-and-parallelism.html).
+- For more information, see [Concurrency and parallelism](/guides/concurrency-and-parallelism.md).
 
 ### Reliable testing
 
@@ -74,13 +74,13 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Pure functions by default
 - [Errors as values][error-handling]
 - Asynchronous I/O
-- Cross compile
+- [Cross compile](/advanced-features/cross-compile.md)
 - [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
 
 ## License
 
 Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
-[error-handling]: /references/language/syntax.html#error-handling
-[syntax]: /references/language/syntax.html
-[system-packages]: /advanced-features/writing-system-packages.html
+[error-handling]: /references/language/syntax.md#error-handling
+[syntax]: /references/language/syntax.md
+[system-packages]: /advanced-features/writing-system-packages.md
