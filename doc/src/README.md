@@ -63,7 +63,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Security
 
-- No runtime exception
+- [No runtime exception][error-handling]
 - No undefined behavior
 - No data race
 
@@ -72,7 +72,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Static typing
 - Immutable values
 - Pure functions by default
-- Errors as values
+- [Errors as values][error-handling]
 - Asynchronous I/O
 - Cross compile
 - [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
@@ -81,5 +81,6 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
+[error-handling]: /references/language/syntax.html#error-handling
 [syntax]: /references/language/syntax.html
 [system-packages]: /advanced-features/writing-system-packages.html
