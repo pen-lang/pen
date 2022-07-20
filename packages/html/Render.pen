@@ -2,16 +2,16 @@ import Core'String
 
 import 'Node { Attribute, Node, Tag }
 
-Encode = \(n Node) string | error {
+Render = \(n Node) string | error {
   if n = n as string {
     n
   } else {
-    attrs = encodeAttributes(n.Attributes)
+    attrs = renderAttributes(n.Attributes)
 
     ns = if size(n.Children) == 0 {
       [string "/>"]
     } else {
-      ns = encodeChildren(n.Children)?
+      ns = renderChildren(n.Children)?
 
       [string ">", ...ns, "</", n.Tag, ">"]
     }
@@ -31,14 +31,14 @@ Encode = \(n Node) string | error {
   }
 }
 
-encodeAttributes = \(attrs [Attribute]) [string] {
+renderAttributes = \(attrs [Attribute]) [string] {
   [string String'Concatenate([string a().Key, "=\"", a().Value, "\""]) for a in attrs]
 }
 
-encodeChildren = \(ns [Node]) [string] | error {
+renderChildren = \(ns [Node]) [string] | error {
   if [n, ...ns] = ns {
-    n = Encode(n())?
-    ns = encodeChildren(ns)?
+    n = Render(n())?
+    ns = renderChildren(ns)?
 
     [string n, ...ns]
   } else {

@@ -1,11 +1,11 @@
 import Test'Assert
 
-import 'Encode { Encode }
+import 'Render { Render }
 import 'Node { Node, Attribute, Element }
 
-EncodeElement = \() none | error {
+RenderElement = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute],
@@ -16,9 +16,9 @@ EncodeElement = \() none | error {
   )
 }
 
-EncodeAttribute = \() none | error {
+RenderAttribute = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
@@ -29,9 +29,9 @@ EncodeAttribute = \() none | error {
   )
 }
 
-EncodeAttributes = \() none | error {
+RenderAttributes = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute
@@ -45,9 +45,9 @@ EncodeAttributes = \() none | error {
   )
 }
 
-EncodeAttributeWithChild = \() none | error {
+RenderAttributeWithChild = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
@@ -64,9 +64,9 @@ EncodeAttributeWithChild = \() none | error {
   )
 }
 
-EncodeChild = \() none | error {
+RenderChild = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute],
@@ -83,9 +83,9 @@ EncodeChild = \() none | error {
   )
 }
 
-EncodeChildren = \() none | error {
+RenderChildren = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute],
@@ -107,9 +107,9 @@ EncodeChildren = \() none | error {
   )
 }
 
-EncodeNestedChildren = \() none | error {
+RenderNestedChildren = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute],
@@ -132,9 +132,9 @@ EncodeNestedChildren = \() none | error {
   )
 }
 
-EncodeTextNode = \() none | error {
+RenderTextNode = \() none | error {
   Assert'True(
-    Encode(
+    Render(
       Element{
         Tag: "html",
         Attributes: [Attribute],
