@@ -42,57 +42,8 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
-## Vision
-
-Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
-
-- Maintainability
-  - Simplicity: The language is small and easy to learn but also full featured.
-  - Testability: Unit tests are always fast and reliable.
-  - Modifiability: Developers can change application logic independently from implementation details.
-- Portability
-  - Programs written in Pen can be ported to different platforms including [WebAssembly](https://webassembly.org/).
-
-## Features
-
-### Minimal language
-
-- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small, simple, and easy to learn.
-- Yet, the language supports all the modern features.
-
-### Concurrent/parallel computation
-
-- The language and its runtime enables thread-safe concurrent/parallel computation.
-- For more information, see [Concurrency and parallelism](https://pen-lang.org/guides/concurrency-and-parallelism.html).
-
-### System packages
-
-- [System packages](https://pen-lang.org/advanced-features/writing-system-packages.html) encapsulate side effects as separate packages.
-- No other packages have side effects unless injected them into explicitly.
-
-### Reliable testing
-
-- Unit tests are always deterministic and fast.
-- No flaky or slow tests bother developers.
-
-### Security
-
-- No runtime exception
-- No undefined behavior
-- No data race
-
-### Even more...
-
-- Static typing
-- Immutable values
-- Pure functions by default
-- Errors as values
-- Asynchronous I/O
-- Cross compile
-- [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
-
 ## License
 
-Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
+Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 [syntax]: https://pen-lang.org/references/language/syntax.html
