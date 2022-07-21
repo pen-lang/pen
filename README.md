@@ -42,7 +42,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
-## Difference from Go
+## Differences with Go
 
 ### Overview
 
@@ -55,6 +55,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Runtime              | None                    | Large                        |
 | Values               | Immutable               | Mutable                      |
 | Data race prevention | Built into GC           | Dynamic analysis             |
+| Context switch       | [Continuations][cps]    | Architecture-dependent codes |
 
 ### Types
 
@@ -84,5 +85,6 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
+[cps]: https://en.wikipedia.org/wiki/Continuation-passing_style
 [go]: https://go.dev/
 [syntax]: https://pen-lang.org/references/language/syntax.html
