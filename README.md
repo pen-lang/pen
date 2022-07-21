@@ -50,7 +50,8 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | ----------------- | ---------------------------- | ----------------------- |
 | Primary domain    | System programming           | Application programming |
 | Memory management | Concurrent mark-and-sweep GC | Reference counting      |
-| Runtime           | Large                        | Small                   |
+| System library    | Built-in                     | Your choice!            |
+| Runtime           | Large                        | None                    |
 
 ### Types
 
