@@ -53,7 +53,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Memory management | Reference counting      | Mark-and-sweep GC            |
 | System library    | Your choice!            | Built-in                     |
 | Runtime           | None                    | Large                        |
-| Immutablity       | None                    | Large                        |
+| Values            | Immutable               | Mutable                      |
 
 ### Types
 
