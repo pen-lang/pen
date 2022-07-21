@@ -74,13 +74,20 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [OCaml](https://ocaml.org) and [Haskell](https://haskell.org).
 
-## Technical details
+## Technical design
 
-### [Continuation passing style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style)
+### Context switch
 
-> WIP
+Like [Go][go], every function in Pen is suspendable and can be called asynchronously. This is realized by intermediate representation compiled into [Continuation passing style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style) which also enables proper tail calls. Therefore, Pen does not need any platform-dependent codes for this while context switch in Go is written in assembly languages.
 
-### [The Perceus reference counting][perceus]
+Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/wiki/Delimited_continuation) for the following reasons.
+
+- Traditional continuations are necessary For Pen's use cases
+- Delimited continuations require heap allocations although the second-class continuations used in Pen do not.
+
+### Reference counting GC
+
+[The Perceus reference counting][perceus]
 
 > WIP
 
