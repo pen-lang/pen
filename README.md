@@ -49,9 +49,11 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Feature           | Pen                     | Go                           |
 | ----------------- | ----------------------- | ---------------------------- |
 | Primary domain    | Application programming | System programming           |
-| Memory management | Reference counting      | Concurrent mark-and-sweep GC |
+| Paradigm          | Functional              | Imperative / object-oriented |
+| Memory management | Reference counting      | Mark-and-sweep GC            |
 | System library    | Your choice!            | Built-in                     |
 | Runtime           | None                    | Large                        |
+| Immutablity       | None                    | Large                        |
 
 ### Types
 
@@ -63,6 +65,10 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Concurrent queue | `[number]` (lazy list)      | `chan int`                     |
 | Optional value   | `none`                      | null pointer (or _zero_ value) |
 | Function         | `\(number, boolean) string` | `func(int, bool) string`       |
+| Union            | `a \| b`                    | Interface                      |
+| Top type         | `any`                       | `any` (`interface{}`)          |
+
+The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [OCaml](https://ocaml.org) and [Haskell](https://haskell.org).
 
 ## Technical details
 
