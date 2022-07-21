@@ -46,7 +46,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-| Feature           | Pen                     | Go                           |
+|                   | Pen                     | Go                           |
 | ----------------- | ----------------------- | ---------------------------- |
 | Primary domain    | Application programming | System programming           |
 | Paradigm          | Functional              | Imperative / object-oriented |
@@ -57,7 +57,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Types
 
-| Type             | Pen                         | Go                             |
+|                  | Pen                         | Go                             |
 | ---------------- | --------------------------- | ------------------------------ |
 | Number           | `number` (IEEE 754)         | `int`, `float64`, ...          |
 | Sequence         | `[number]` (lazy list)      | `[]int` (array or slice)       |
