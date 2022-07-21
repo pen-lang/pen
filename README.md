@@ -37,7 +37,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/introduction/getting-started.html)
-- [Language reference][syntax]
+- [Language reference](https://pen-lang.org/references/language/syntax.html)
 - Code examples
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
@@ -87,4 +87,3 @@ Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 [cps]: https://en.wikipedia.org/wiki/Continuation-passing_style
 [go]: https://go.dev/
-[syntax]: https://pen-lang.org/references/language/syntax.html
