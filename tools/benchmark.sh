@@ -36,7 +36,7 @@ run() {
 
 while getopts b option; do
   case $option in
-  x)
+  b)
     build=true
     ;;
   esac
