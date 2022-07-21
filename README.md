@@ -48,15 +48,15 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-|                      | Pen                     | Go                           |
-| -------------------- | ----------------------- | ---------------------------- |
-| Primary domain       | Application programming | System programming           |
-| Paradigm             | Functional              | Imperative / object-oriented |
-| Memory management    | Reference counting      | Concurrent mark-and-sweep    |
-| System library       | Your choice!            | Built-in                     |
-| Values               | Immutable               | Mutable                      |
-| Data race prevention | Built into GC           | Dynamic analysis             |
-| Context switch       | [Continuations][cps]    | Platform dependent           |
+|                      | Pen                      | Go                           |
+| -------------------- | ------------------------ | ---------------------------- |
+| Primary domain       | Application programming  | System programming           |
+| Paradigm             | Functional               | Imperative / object-oriented |
+| Memory management    | [Reference counting][gc] | Concurrent mark-and-sweep    |
+| System library       | Your choice!             | Built-in                     |
+| Values               | Immutable                | Mutable                      |
+| Data race prevention | Built into [GC][gc]      | Dynamic analysis             |
+| Context switch       | [Continuations][cps]     | Platform dependent           |
 
 ### Types
 
@@ -76,7 +76,7 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ## Technical details
 
-### [Continuation passing style (CPS)][cps]
+### [Continuation passing style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style)
 
 > WIP
 
@@ -92,7 +92,8 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[cps]: https://en.wikipedia.org/wiki/Continuation-passing_style
+[cps]: #continuation-passing-style-cps
+[gc]: #the-perceus-reference-counting
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
 [rust]: https://www.rust-lang.org/
