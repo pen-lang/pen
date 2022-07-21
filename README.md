@@ -52,10 +52,9 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Paradigm             | Functional              | Imperative / object-oriented |
 | Memory management    | Reference counting      | Concurrent mark-and-sweep    |
 | System library       | Your choice!            | Built-in                     |
-| Runtime              | None                    | Large                        |
 | Values               | Immutable               | Mutable                      |
 | Data race prevention | Built into GC           | Dynamic analysis             |
-| Context switch       | [Continuations][cps]    | Architecture-dependent codes |
+| Context switch       | [Continuations][cps]    | Platform dependent           |
 
 ### Types
 
