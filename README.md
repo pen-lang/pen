@@ -42,7 +42,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
-## Differences from Go
+## Differences from [Go][go]
 
 ### Overview
 
