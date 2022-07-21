@@ -74,6 +74,12 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ## Technical details
 
+### [Continuation passing style (CPS)][cps]
+
+> WIP
+
+### [The Perceus reference counting][perceus]
+
 > WIP
 
 ## Contributing
@@ -86,3 +92,4 @@ Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 [cps]: https://en.wikipedia.org/wiki/Continuation-passing_style
 [go]: https://go.dev/
+[perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
