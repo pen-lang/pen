@@ -60,17 +60,17 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Types
 
-|                  | Pen                               | Go                             |
-| ---------------- | --------------------------------- | ------------------------------ |
-| Number           | `number` (IEEE 754)               | `int`, `float64`, ...          |
-| Sequence         | `[number]` (lazy list)            | `[]int` (array or slice)       |
-| Map              | `{string: number}`                | `map[string]int`               |
-| Concurrent queue | `[number]`, concurrency built-ins | `chan int`                     |
-| Optional value   | `none`                            | null pointer (or _zero_ value) |
-| Function         | `\(number, boolean) string`       | `func(int, bool) string`       |
-| Union            | `number \| string`                | Interface                      |
-| Top type         | `any`                             | `any` (`interface{}`)          |
-| Interface        | Records                           | Interface                      |
+|                  | Pen                            | Go                             |
+| ---------------- | ------------------------------ | ------------------------------ |
+| Number           | `number` (IEEE 754)            | `int`, `float64`, ...          |
+| Sequence         | `[number]` (lazy list)         | `[]int` (array or slice)       |
+| Map              | `{string: number}`             | `map[string]int`               |
+| Concurrent queue | `[number]`, built-in functions | `chan int`                     |
+| Optional value   | `none`                         | null pointer (or _zero_ value) |
+| Function         | `\(number, boolean) string`    | `func(int, bool) string`       |
+| Union            | `number \| string`             | Interface                      |
+| Top type         | `any`                          | `any` (`interface{}`)          |
+| Interface        | Records                        | Interface                      |
 
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [OCaml](https://ocaml.org) and [Haskell](https://haskell.org).
 
