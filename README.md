@@ -82,7 +82,7 @@ Like [Go][go], every function in Pen is suspendable and can be called asynchrono
 
 Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/wiki/Delimited_continuation) for the following reasons.
 
-- Traditional continuations are necessary For Pen's use cases
+- Traditional continuations are sufficient for our use cases, such as asynchronous programming.
 - Delimited continuations require heap allocations although the second-class continuations do not.
 
 ### Reference counting GC
