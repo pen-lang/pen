@@ -8,6 +8,8 @@
 
 Pen is a **functional** variant of [the Go programming language][go] focused on application programming. It aims for further simplicity, testability, and portability to empower sustainable software development.
 
+Pen also provides [Rust][rust]/C FFI for developers to reuse existing resources written in the language. Pen has no built-in system library or runtime and can compile platform-independent programs.
+
 ```pen
 import Os'Context { Context }
 import Os'File
@@ -93,3 +95,4 @@ Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 [cps]: https://en.wikipedia.org/wiki/Continuation-passing_style
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
+[rust]: https://www.rust-lang.org/
