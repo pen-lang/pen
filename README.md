@@ -8,7 +8,7 @@
 
 Pen is a **functional** variant of [the Go programming language][go] focused on application programming. It aims for further simplicity, testability, and portability to empower sustainable software development.
 
-Pen also provides [Rust][rust]/C FFI for developers to reuse existing resources written in the language. Pen has no built-in system library or runtime and can compile platform-independent programs.
+Pen also provides [Rust][rust]/C FFI for developers to reuse existing resources written in those languages. Pen has no built-in system library or runtime and can compile platform-independent programs.
 
 ```pen
 import Os'Context { Context }
