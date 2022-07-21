@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a functional variant of the [Go][go] programming language focused on application programming. It aims for further simplicity, testability, and portability to empower sustainable software development.
+Pen is a **functional** variant of the [Go][go] programming language focused on application programming. It aims for further simplicity, testability, and portability to empower sustainable software development.
 
 ```pen
 import Os'Context { Context }
