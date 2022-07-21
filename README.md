@@ -99,7 +99,7 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[gc]: #the-perceus-reference-counting
+[gc]: #reference-counting-gc
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
 [rust]: https://www.rust-lang.org/
