@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a functional variant of the [Go][go] programming language focused on application programming. It aims for further simplicity, testability, and portability to empower sustainable software development.
+Pen is a functional variant of the [Go][go] programming language focused on application programming. It aims for further simplicity, testability, and portability to empower maintainable and sustainable software.
 
 ```pen
 import Os'Context { Context }
@@ -46,23 +46,23 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-| Feature           | Go                           | Pen                     |
-| ----------------- | ---------------------------- | ----------------------- |
-| Primary domain    | System programming           | Application programming |
-| Memory management | Concurrent mark-and-sweep GC | Reference counting      |
-| System library    | Built-in                     | Your choice!            |
-| Runtime           | Large                        | None                    |
+| Feature           | Pen                     | Go                           |
+| ----------------- | ----------------------- | ---------------------------- |
+| Primary domain    | Application programming | System programming           |
+| Memory management | Reference counting      | Concurrent mark-and-sweep GC |
+| System library    | Your choice!            | Built-in                     |
+| Runtime           | None                    | Large                        |
 
 ### Types
 
-| Type             | Go                             | Pen                         |
-| ---------------- | ------------------------------ | --------------------------- |
-| Number           | `int`, `float64`, ...          | `number` (IEEE 754)         |
-| Sequence         | `[]int` (array or slice)       | `[number]` (lazy list)      |
-| Map              | `map[string]int`               | `{string: number}`          |
-| Concurrent queue | `chan int`                     | `[number]` (lazy list)      |
-| Optional value   | null pointer (or _zero_ value) | `none`                      |
-| Function         | `func(int, bool) string`       | `\(number, boolean) string` |
+| Type             | Pen                         | Go                             |
+| ---------------- | --------------------------- | ------------------------------ |
+| Number           | `number` (IEEE 754)         | `int`, `float64`, ...          |
+| Sequence         | `[number]` (lazy list)      | `[]int` (array or slice)       |
+| Map              | `{string: number}`          | `map[string]int`               |
+| Concurrent queue | `[number]` (lazy list)      | `chan int`                     |
+| Optional value   | `none`                      | null pointer (or _zero_ value) |
+| Function         | `\(number, boolean) string` | `func(int, bool) string`       |
 
 ## Technical details
 
