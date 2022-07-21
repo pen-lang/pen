@@ -68,6 +68,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Function         | `\(number, boolean) string` | `func(int, bool) string`       |
 | Union            | `number \| string`          | Interface                      |
 | Top type         | `any`                       | `any` (`interface{}`)          |
+| Interface        | Records                     | Interface                      |
 
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [OCaml](https://ocaml.org) and [Haskell](https://haskell.org).
 
