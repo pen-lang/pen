@@ -48,15 +48,15 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-|                      | Pen                      | Go                           |
-| -------------------- | ------------------------ | ---------------------------- |
-| Primary domain       | Application programming  | System programming           |
-| Paradigm             | Functional               | Imperative / object-oriented |
-| Memory management    | [Reference counting][gc] | Concurrent mark-and-sweep    |
-| System library       | Your choice!             | Built-in                     |
-| Values               | Immutable                | Mutable                      |
-| Data race prevention | Built into [GC][gc]      | Dynamic analysis             |
-| Context switch       | [Continuations][cps]     | Platform dependent           |
+|                      | Pen                              | Go                           |
+| -------------------- | -------------------------------- | ---------------------------- |
+| Primary domain       | Application programming          | System programming           |
+| Paradigm             | Functional                       | Imperative / object-oriented |
+| Memory management    | [Reference counting][gc]         | Concurrent mark-and-sweep    |
+| System library       | Your choice!                     | Built-in                     |
+| Values               | Immutable                        | Mutable                      |
+| Data race prevention | Built into [GC][gc]              | Dynamic analysis             |
+| Context switch       | [Continuations](#context-switch) | Platform dependent           |
 
 ### Types
 
@@ -99,7 +99,6 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[cps]: #continuation-passing-style-cps
 [gc]: #the-perceus-reference-counting
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
