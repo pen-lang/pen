@@ -34,7 +34,7 @@ main = \(ctx context) none {
 
 See [Install](https://pen-lang.org/introduction/install.html).
 
-## [Documentation](https://pen-lang.org)
+## Documentation
 
 - [Getting started](https://pen-lang.org/introduction/getting-started.html)
 - [Language reference][syntax]
