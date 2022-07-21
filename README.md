@@ -46,14 +46,15 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-|                   | Pen                     | Go                           |
-| ----------------- | ----------------------- | ---------------------------- |
-| Primary domain    | Application programming | System programming           |
-| Paradigm          | Functional              | Imperative / object-oriented |
-| Memory management | Reference counting      | Mark-and-sweep GC            |
-| System library    | Your choice!            | Built-in                     |
-| Runtime           | None                    | Large                        |
-| Values            | Immutable               | Mutable                      |
+|                      | Pen                     | Go                           |
+| -------------------- | ----------------------- | ---------------------------- |
+| Primary domain       | Application programming | System programming           |
+| Paradigm             | Functional              | Imperative / object-oriented |
+| Memory management    | Reference counting      | Concurrent mark-and-sweep    |
+| System library       | Your choice!            | Built-in                     |
+| Runtime              | None                    | Large                        |
+| Values               | Immutable               | Mutable                      |
+| Data race prevention | Built into GC           | Dynamic analysis             |
 
 ### Types
 
