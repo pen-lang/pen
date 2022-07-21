@@ -44,6 +44,14 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ## Difference from Go
 
+### Overview
+
+| Feature           | Go                           | Pen                     |
+| ----------------- | ---------------------------- | ----------------------- |
+| Primary domain    | System programming           | Application programming |
+| Memory management | Concurrent mark-and-sweep GC | Reference counting      |
+| Runtime           | Large                        | Small                   |
+
 ### Types
 
 | Type             | Go                             | Pen                         |
@@ -52,7 +60,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Sequence         | `[]int` (array or slice)       | `[number]` (lazy list)      |
 | Map              | `map[string]int`               | `{string: number}`          |
 | Concurrent queue | `chan int`                     | `[number]` (lazy list)      |
-| Optional         | null pointer (or _zero_ value) | `none`                      |
+| Optional value   | null pointer (or _zero_ value) | `none`                      |
 | Function         | `func(int, bool) string`       | `\(number, boolean) string` |
 
 ## Technical details
