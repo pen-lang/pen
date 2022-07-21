@@ -33,7 +33,7 @@ Pen aims to make large-scale software development efficient where a number of pe
 - Maintainability
   - Simplicity: The language is small and easy to learn but also full featured.
   - Testability: Unit tests are always fast and reliable.
-  - Modifiability: Developers can change application logic independently from implementation details.
+  - Flexibility: Developers can make code changes easily without introducing bugs.
 - Portability
   - Programs written in Pen can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
