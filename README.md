@@ -48,29 +48,36 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Overview
 
-|                      | Pen                              | Go                           |
-| -------------------- | -------------------------------- | ---------------------------- |
-| Domain               | Application programming          | System programming           |
-| Paradigm             | Functional                       | Imperative / object-oriented |
-| Memory management    | [Reference counting][gc]         | Concurrent mark-and-sweep    |
-| System library       | Your choice!                     | Built-in                     |
-| Values               | Immutable                        | Mutable                      |
-| Data race prevention | Built into [GC][gc]              | Dynamic analysis             |
-| Context switch       | [Continuations](#context-switch) | Platform dependent           |
+|                   | Pen                      | Go                           |
+| ----------------- | ------------------------ | ---------------------------- |
+| Domain            | Application programming  | System programming           |
+| Paradigm          | Functional               | Imperative / object-oriented |
+| Memory management | [Reference counting][gc] | Concurrent mark-and-sweep    |
+| System library    | Your choice!             | Built-in                     |
+| Values            | Immutable                | Mutable                      |
+
+### Runtime
+
+|                        | Pen                               | Go                                   |
+| ---------------------- | --------------------------------- | ------------------------------------ |
+| Context switch         | [Continuations](#context-switch)  | Platform dependent                   |
+| Concurrent computation | [Built-in functions][concurrency] | `go` expression                      |
+| Synchronization        | Futures, lazy lists               | Channels, concurrent data structures |
+| Data race prevention   | Built into [GC][gc]               | Dynamic analysis                     |
 
 ### Types
 
-|                  | Pen                            | Go                             |
-| ---------------- | ------------------------------ | ------------------------------ |
-| Number           | `number` (IEEE 754)            | `int`, `float64`, ...          |
-| Sequence         | `[number]` (lazy list)         | `[]int` (array or slice)       |
-| Map              | `{string: number}`             | `map[string]int`               |
-| Concurrent queue | `[number]`, built-in functions | `chan int`                     |
-| Optional value   | `none`                         | null pointer (or _zero_ value) |
-| Function         | `\(number, boolean) string`    | `func(int, bool) string`       |
-| Union            | `number \| string`             | Interface                      |
-| Top type         | `any`                          | `any` (`interface{}`)          |
-| Interface        | Records                        | Interface                      |
+|                  | Pen                                           | Go                             |
+| ---------------- | --------------------------------------------- | ------------------------------ |
+| Number           | `number` (IEEE 754)                           | `int`, `float64`, ...          |
+| Sequence         | `[number]` (lazy list)                        | `[]int` (array or slice)       |
+| Map              | `{string: number}`                            | `map[string]int`               |
+| Concurrent queue | `[number]`, [built-in functions][concurrency] | `chan int`                     |
+| Optional value   | `none`                                        | null pointer (or _zero_ value) |
+| Function         | `\(number, boolean) string`                   | `func(int, bool) string`       |
+| Union            | `number \| string`                            | Interface                      |
+| Top type         | `any`                                         | `any` (`interface{}`)          |
+| Interface        | Records                                       | Interface                      |
 
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [Haskell](https://haskell.org).
 
@@ -146,6 +153,7 @@ tools/format.sh
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
+[concurrency]: https://pen-lang.org/guides/concurrency-and-parallelism.html
 [gc]: #reference-counting-gc
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
