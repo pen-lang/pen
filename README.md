@@ -110,7 +110,7 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 ### Reference counting GC
 
-Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art RC algorithm, programs written in Pen performs less than traditional reference counting where every data transfer or mutation requires counting operations. In addition, the algorithm reduces heap allocations significantly when records behind unique references, which brings practical performance without introducing unsafe mutability.
+Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art ownership-based RC algorithm, programs written in Pen performs much less than traditional RC where every data transfer or mutation requires counting operations. In addition, the algorithm reduces heap allocations significantly for records behind unique references, which brings practical performance without introducing unsafe mutability.
 
 See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
 
@@ -165,7 +165,22 @@ tools/format.sh
 
 ### Directory structure
 
-> WIP
+- [`cmd`](cmd): Commands
+  - [`pen`](cmd/pen): `pen` command
+- [`lib`](lib): Libraries for compiler, formatter, documentation generator, etc.
+  - [`app`](lib/app): Platform-agnostic application logic for `pen` command
+  - [`infra`](lib/infra): Platform-dependent logic for `pen` command
+  - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
+  - [`hir`](lib/hir): High-level Intermediate Representation (HIR) types and semantics
+  - [`mir`](lib/mir): Mid-level Intermediate Representation (MIR)
+  - [`ast-hir`](lib/ast-hir): AST to HIR compiler
+  - [`hir-mir`](lib/hir-mir): HIR to MIR compiler
+  - [`mir-fmm`](lib/mir-fmm): MIR to [F--](https://github.com/raviqqe/fmm) compiler
+- [`packages`](packages): Packages written in Pen
+  - [`core`](packages/core): Package for platform-independent algorithms and data structures
+  - [`os`](packages/os): Package for a common OS interface
+- [`tools`](tools): Developer and CI tools
+- [`doc`](doc): Documentation at [pen-lang.org](https://pen-lang.org/)
 
 ## License
 
