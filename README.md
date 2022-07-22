@@ -166,8 +166,10 @@ tools/format.sh
 ### Directory structure
 
 - [`cmd`](cmd): Commands
-  - [`pen`](cmd/pen): `pen` command crate
+  - [`pen`](cmd/pen): `pen` command
 - [`lib`](lib): Libraries for the compiler, formatter, documentation generator, etc.
+  - [`app`](lib/app): Platform-agnostic application logic for `pen` command
+  - [`infra`](lib/ast): Platform-dependent logic for `pen` command
   - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
   - [`hir`](lib/hir): High-level Intermediate Representation (HIR) types and semantics
   - [`mir`](lib/mir): Mid-level Intermediate Representation (MIR)
