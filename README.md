@@ -98,7 +98,7 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ### Context switch
 
-Like [Go][go], every function in Pen is suspendable and can be called asynchronously. This is realized by intermediate representation compiled into [Continuation passing style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style) which also enables proper tail calls. Therefore, Pen does not need any platform-dependent codes for this while context switch in Go is written in assembly languages.
+Like [Go][go], every function in Pen is suspendable and can be called asynchronously. This is realized by intermediate representation compiled into [Continuation Passing Style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style) which also enables proper tail calls. Therefore, Pen does not need any platform-dependent codes for this while context switch in Go is written in assembly languages.
 
 Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/wiki/Delimited_continuation) for the following reasons.
 
