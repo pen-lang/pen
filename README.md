@@ -75,7 +75,7 @@ See [the `examples` directory](examples).
 | Synchronization        | Futures, lazy lists                          | Channels, concurrent data structures |
 | Data race prevention   | Built into [GC][gc]                          | Dynamic analysis                     |
 | Resource management    | Built into [GC][gc]                          | `defer` statement                    |
-| Error handling         | `error` type, [`?` operator][error-handling] | `error` type, multiple-value return  |
+| Error handling         | `error` type, [`?` operator][error-handling] | `error` type, multi-value return     |
 | Exception              | None                                         | `panic` and `recover` functions      |
 
 ### Types
