@@ -8,7 +8,7 @@
 
 Pen is a **functional** programming language focused on **application programming** following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
 
-Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages. Pen's system libraries and runtime are detachable from applications and its compiler can compile platform-independent programs even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/).
+Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages. Pen's system libraries and runtime are detachable from applications and it can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/).
 
 ```pen
 import Os'Context { Context }
