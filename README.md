@@ -179,6 +179,8 @@ tools/format.sh
 - [`packages`](packages): Packages written in Pen
   - [`core`](packages/core): Package for platform-independent algorithms and data structures
   - [`os`](packages/os): Package for a common OS interface
+- [`tools`](tools): Developer and CI tools
+- [`doc`](doc): Documentation at [pen-lang.org](https://pen-lang.org/)
 
 ## License
 
