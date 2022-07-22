@@ -93,7 +93,7 @@ See also [How to Implement the Perceus Reference Counting Garbage Collection](ht
 
 ## Contributing
 
-### Common workflows
+### Workflows
 
 #### Installing from source
 
@@ -137,6 +137,10 @@ tools/lint.sh
 ```sh
 tools/format.sh
 ```
+
+### Directory structure
+
+> WIP
 
 ## License
 
