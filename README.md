@@ -44,7 +44,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
   - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
   - [Snippets](https://pen-lang.org/examples)
 
-## Differences from [Go][go]
+## Comparison with [Go][go]
 
 ### Overview
 
@@ -64,6 +64,8 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Concurrent computation | [Built-in functions][concurrency] | `go` expression                      |
 | Synchronization        | Futures, lazy lists               | Channels, concurrent data structures |
 | Data race prevention   | Built into [GC][gc]               | Dynamic analysis                     |
+| Error handling         | [`?` operator][error-handling]    | `foo`                                |
+| Exception              | None                              | `panic` and `recover`                |
 
 ### Types
 
@@ -99,6 +101,8 @@ Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to th
 See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
 
 ## Contributing
+
+Pen is under heavy development. Feel free to post [Issues](https://github.com/pen-lang/pen/issues) and [Discussions](https://github.com/pen-lang/pen/discussions)!
 
 ### Workflows
 
@@ -154,6 +158,7 @@ tools/format.sh
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
 [concurrency]: https://pen-lang.org/guides/concurrency-and-parallelism.html
+[error-handling]: https://pen-lang.org/references/language/syntax.html#error-handling
 [gc]: #reference-counting-gc
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
