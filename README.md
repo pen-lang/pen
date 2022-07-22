@@ -167,7 +167,7 @@ tools/format.sh
 
 - [`cmd`](cmd): Commands
   - [`pen`](cmd/pen): `pen` command
-- [`lib`](lib): Libraries for the compiler, formatter, documentation generator, etc.
+- [`lib`](lib): Libraries for compiler, formatter, documentation generator, etc.
   - [`app`](lib/app): Platform-agnostic application logic for `pen` command
   - [`infra`](lib/infra): Platform-dependent logic for `pen` command
   - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
