@@ -147,11 +147,8 @@
 
                 <div id="content" class="content">
                     <main><div class="sidetoc"><nav class="pagetoc"></nav></div>
-                        <p align="center"><img width="300px" src="https://pen-lang.org/favicon.svg" /></p>
+                        <p align="center"><img width="300px" src="/favicon.svg" /></p>
 <h1 id="pen-programming-language"><a class="header" href="#pen-programming-language">Pen programming language</a></h1>
-<p><a href="https://github.com/pen-lang/pen/actions"><img src="https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square" alt="GitHub Action" /></a>
-<a href="https://github.com/pen-lang/pen#license"><img src="https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square" alt="License" /></a>
-<a href="https://twitter.com/pen_language"><img src="https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square" alt="Twitter" /></a></p>
 <p>Pen is the programming language for <strong>scalable</strong> software development, focused on software maintainability and portability.</p>
 <pre><code class="language-pen">import Os'Context { Context }
 import Os'File
@@ -173,19 +170,6 @@ main = \(ctx context) none {
   }
 }
 </code></pre>
-<h2 id="install"><a class="header" href="#install">Install</a></h2>
-<p>See <a href="https://pen-lang.org/introduction/install.html">Install</a>.</p>
-<h2 id="documentation"><a class="header" href="#documentation">Documentation</a></h2>
-<ul>
-<li><a href="https://pen-lang.org/introduction/getting-started.html">Getting started</a></li>
-<li><a href="https://pen-lang.org/references/language/syntax.html">Language reference</a></li>
-<li>Code examples
-<ul>
-<li><a href="https://github.com/pen-lang/pen/tree/main/examples">Applications and libraries</a></li>
-<li><a href="https://pen-lang.org/examples">Snippets</a></li>
-</ul>
-</li>
-</ul>
 <h2 id="vision"><a class="header" href="#vision">Vision</a></h2>
 <p>Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software <strong>maintainability</strong> and <strong>portability</strong>.</p>
 <ul>
@@ -193,7 +177,7 @@ main = \(ctx context) none {
 <ul>
 <li>Simplicity: The language is small and easy to learn but also full featured.</li>
 <li>Testability: Unit tests are always fast and reliable.</li>
-<li>Modifiability: Developers can change application logic independently from implementation details.</li>
+<li>Flexibility: Developers can make code changes easily without introducing bugs.</li>
 </ul>
 </li>
 <li>Portability
@@ -205,27 +189,29 @@ main = \(ctx context) none {
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
 <h3 id="minimal-language"><a class="header" href="#minimal-language">Minimal language</a></h3>
 <ul>
-<li>Its <a href="https://pen-lang.org/references/language/syntax.html">syntax</a> and <a href="https://pen-lang.org/references/language/types.html">type system</a> are small, simple, and easy to learn.</li>
+<li>Its <a href="/references/language/syntax.html">syntax</a> and <a href="/references/language/types.html">type system</a> are small, simple, and easy to learn.</li>
 <li>Yet, the language supports all the modern features.</li>
 </ul>
 <h3 id="concurrentparallel-computation"><a class="header" href="#concurrentparallel-computation">Concurrent/parallel computation</a></h3>
 <ul>
 <li>The language and its runtime enables thread-safe concurrent/parallel computation.</li>
-<li>For more information, see <a href="https://pen-lang.org/guides/concurrency-and-parallelism.html">Concurrency and parallelism</a>.</li>
-</ul>
-<h3 id="system-packages"><a class="header" href="#system-packages">System packages</a></h3>
-<ul>
-<li><a href="https://pen-lang.org/advanced-features/writing-system-packages.html">System packages</a> encapsulate side effects as separate packages.</li>
-<li>No other packages have side effects unless injected them into explicitly.</li>
+<li>For more information, see <a href="/guides/concurrency-and-parallelism.html">Concurrency and parallelism</a>.</li>
 </ul>
 <h3 id="reliable-testing"><a class="header" href="#reliable-testing">Reliable testing</a></h3>
 <ul>
 <li>Unit tests are always deterministic and fast.</li>
 <li>No flaky or slow tests bother developers.</li>
 </ul>
+<h3 id="no-standard-system-library"><a class="header" href="#no-standard-system-library">No standard system library</a></h3>
+<ul>
+<li>There is no default platform-dependent system library.</li>
+<li>Developers choose <a href="/advanced-features/writing-system-packages.html">system packages</a> suitable for their applications.</li>
+<li><a href="/advanced-features/writing-system-packages.html">System packages</a> encapsulate platform-dependent codes and side effects.</li>
+<li>No package causes side effects without explicit injection.</li>
+</ul>
 <h3 id="security"><a class="header" href="#security">Security</a></h3>
 <ul>
-<li>No runtime exception</li>
+<li><a href="/references/language/syntax.html#error-handling">No runtime exception</a></li>
 <li>No undefined behavior</li>
 <li>No data race</li>
 </ul>
@@ -234,14 +220,14 @@ main = \(ctx context) none {
 <li>Static typing</li>
 <li>Immutable values</li>
 <li>Pure functions by default</li>
-<li>Errors as values</li>
+<li><a href="/references/language/syntax.html#error-handling">Errors as values</a></li>
 <li>Asynchronous I/O</li>
-<li>Cross compile</li>
+<li><a href="/advanced-features/cross-compile.html">Cross compile</a></li>
 <li><a href="https://www.rust-lang.org/">Rust</a>/C Foreign Function Interface (FFI)</li>
 </ul>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
 <p>Pen is dual-licensed under <a href="https://github.com/pen-lang/pen/blob/main/LICENSE-MIT">MIT</a> and <a href="https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE">Apache 2.0</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="install-1"><a class="header" href="#install-1">Install</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="install"><a class="header" href="#install">Install</a></h1>
 <h2 id="via-homebrew"><a class="header" href="#via-homebrew">Via Homebrew</a></h2>
 <p>On Linux, macOS and <a href="https://docs.microsoft.com/en-us/windows/wsl/about">WSL</a>, you can install Pen through <a href="https://brew.sh">Homebrew</a>.</p>
 <ol>
@@ -287,7 +273,7 @@ main = \(ctx context) none {
 </ol>
 <p>Now, you are ready to use the <code>pen</code> command built manually.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
-<h2 id="install-2"><a class="header" href="#install-2">Install</a></h2>
+<h2 id="install-1"><a class="header" href="#install-1">Install</a></h2>
 <p>See <a href="introduction/install.html">Install</a>.</p>
 <h2 id="creating-a-package"><a class="header" href="#creating-a-package">Creating a package</a></h2>
 <p>To create your first package, run a <code>pen create</code> command with your package's name in your terminal.</p>
@@ -889,7 +875,7 @@ Blah = \() number {
 <p>Every application package must specify one and only one <a href="references/language/packages.html#system-packages">system package</a> that links applications (e.g. the <code>Os</code> standard system package) in its <a href="references/language/packages.html#package-configuration">package configuration file</a>. However, application packages can specify system packages that do not link applications (e.g. the <code>Http</code> system package in the example above) as many as possible.</p>
 <h3 id="library-packages"><a class="header" href="#library-packages">Library packages</a></h3>
 <p>Library packages contain functions and types that have <em>no</em> side effects. They are imported and used by other packages.</p>
-<h3 id="system-packages-1"><a class="header" href="#system-packages-1">System packages</a></h3>
+<h3 id="system-packages"><a class="header" href="#system-packages">System packages</a></h3>
 <p>System packages contain functions and types that have side effects to provide system interfaces to application packages. The language currently provides the two standard system packages of <code>Os</code> and <code>OsSync</code>.</p>
 <p>Although they can be imported by library packages as well as application packages, then they are expected not to cause any side effects.</p>
 <p>If you want to write your own system packages, see <a href="references/language//advanced-features/writing-system-packages.html">Writing system packages</a>.</p>
@@ -961,7 +947,7 @@ Blah = \() number {
   &quot;type&quot;: &quot;library&quot;
 }
 </code></pre>
-<h2 id="install-3"><a class="header" href="#install-3">Install</a></h2>
+<h2 id="install-2"><a class="header" href="#install-2">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Core&quot;: &quot;pen:///core&quot;
@@ -1279,7 +1265,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;library&quot;
 }
 </code></pre>
-<h2 id="install-4"><a class="header" href="#install-4">Install</a></h2>
+<h2 id="install-3"><a class="header" href="#install-3">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Flag&quot;: &quot;pen:///flag&quot;
@@ -1313,7 +1299,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;library&quot;
 }
 </code></pre>
-<h2 id="install-5"><a class="header" href="#install-5">Install</a></h2>
+<h2 id="install-4"><a class="header" href="#install-4">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Json&quot;: &quot;pen:///json&quot;
@@ -1363,7 +1349,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;library&quot;
 }
 </code></pre>
-<h2 id="install-6"><a class="header" href="#install-6">Install</a></h2>
+<h2 id="install-5"><a class="header" href="#install-5">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Html&quot;: &quot;pen:///html&quot;
@@ -1407,7 +1393,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;system&quot;
 }
 </code></pre>
-<h2 id="install-7"><a class="header" href="#install-7">Install</a></h2>
+<h2 id="install-6"><a class="header" href="#install-6">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Http&quot;: &quot;pen:///http&quot;
@@ -1471,7 +1457,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;system&quot;
 }
 </code></pre>
-<h2 id="install-8"><a class="header" href="#install-8">Install</a></h2>
+<h2 id="install-7"><a class="header" href="#install-7">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Os&quot;: &quot;pen:///os&quot;
@@ -1745,7 +1731,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;system&quot;
 }
 </code></pre>
-<h2 id="install-9"><a class="header" href="#install-9">Install</a></h2>
+<h2 id="install-8"><a class="header" href="#install-8">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Sql&quot;: &quot;pen:///sql&quot;
@@ -1805,7 +1791,7 @@ By using those views, you can apply operations to strings without copying them.<
   &quot;type&quot;: &quot;library&quot;
 }
 </code></pre>
-<h2 id="install-10"><a class="header" href="#install-10">Install</a></h2>
+<h2 id="install-9"><a class="header" href="#install-9">Install</a></h2>
 <pre><code class="language-json">{
   &quot;dependencies&quot;: {
     &quot;Test&quot;: &quot;pen:///test&quot;
@@ -1832,6 +1818,7 @@ This function is useful to make unreachable codes fail.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <p>These are examples on how to write programs in Pen, and use its command line tools and standard packages.</p>
+<p>See also <a href="https://github.com/pen-lang/pen/tree/main/examples">our code repository</a> for examples of full applications and libraries.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="types-42"><a class="header" href="#types-42">Types</a></h1>
 <p>These are examples on how to use types and their values in Pen.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="number-2"><a class="header" href="#number-2">Number</a></h1>
@@ -3556,12 +3543,12 @@ Web browser interface</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="the-zen"><a class="header" href="#the-zen">The Zen</a></h1>
 <ul>
-<li>Steady value over momentary value</li>
 <li>Beautiful is better than ugly.</li>
 <li>Explicit is better than implicit.</li>
 <li>Simple is better than complex.</li>
 <li>One way to do one thing</li>
-<li>Single solution to solve multiple problems</li>
+<li>Single solution for multiple problems</li>
+<li>Steady value over volatile value</li>
 </ul>
 <h2 id="language-qualities"><a class="header" href="#language-qualities">Language qualities</a></h2>
 <p>In the order of priority,</p>

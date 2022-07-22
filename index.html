@@ -149,11 +149,8 @@
 
                 <div id="content" class="content">
                     <main><div class="sidetoc"><nav class="pagetoc"></nav></div>
-                        <p align="center"><img width="300px" src="https://pen-lang.org/favicon.svg" /></p>
+                        <p align="center"><img width="300px" src="/favicon.svg" /></p>
 <h1 id="pen-programming-language"><a class="header" href="#pen-programming-language">Pen programming language</a></h1>
-<p><a href="https://github.com/pen-lang/pen/actions"><img src="https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square" alt="GitHub Action" /></a>
-<a href="https://github.com/pen-lang/pen#license"><img src="https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square" alt="License" /></a>
-<a href="https://twitter.com/pen_language"><img src="https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square" alt="Twitter" /></a></p>
 <p>Pen is the programming language for <strong>scalable</strong> software development, focused on software maintainability and portability.</p>
 <pre><code class="language-pen">import Os'Context { Context }
 import Os'File
@@ -175,19 +172,6 @@ main = \(ctx context) none {
   }
 }
 </code></pre>
-<h2 id="install"><a class="header" href="#install">Install</a></h2>
-<p>See <a href="https://pen-lang.org/introduction/install.html">Install</a>.</p>
-<h2 id="documentation"><a class="header" href="#documentation">Documentation</a></h2>
-<ul>
-<li><a href="https://pen-lang.org/introduction/getting-started.html">Getting started</a></li>
-<li><a href="https://pen-lang.org/references/language/syntax.html">Language reference</a></li>
-<li>Code examples
-<ul>
-<li><a href="https://github.com/pen-lang/pen/tree/main/examples">Applications and libraries</a></li>
-<li><a href="https://pen-lang.org/examples">Snippets</a></li>
-</ul>
-</li>
-</ul>
 <h2 id="vision"><a class="header" href="#vision">Vision</a></h2>
 <p>Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software <strong>maintainability</strong> and <strong>portability</strong>.</p>
 <ul>
@@ -195,7 +179,7 @@ main = \(ctx context) none {
 <ul>
 <li>Simplicity: The language is small and easy to learn but also full featured.</li>
 <li>Testability: Unit tests are always fast and reliable.</li>
-<li>Modifiability: Developers can change application logic independently from implementation details.</li>
+<li>Flexibility: Developers can make code changes easily without introducing bugs.</li>
 </ul>
 </li>
 <li>Portability
@@ -207,27 +191,29 @@ main = \(ctx context) none {
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
 <h3 id="minimal-language"><a class="header" href="#minimal-language">Minimal language</a></h3>
 <ul>
-<li>Its <a href="https://pen-lang.org/references/language/syntax.html">syntax</a> and <a href="https://pen-lang.org/references/language/types.html">type system</a> are small, simple, and easy to learn.</li>
+<li>Its <a href="/references/language/syntax.html">syntax</a> and <a href="/references/language/types.html">type system</a> are small, simple, and easy to learn.</li>
 <li>Yet, the language supports all the modern features.</li>
 </ul>
 <h3 id="concurrentparallel-computation"><a class="header" href="#concurrentparallel-computation">Concurrent/parallel computation</a></h3>
 <ul>
 <li>The language and its runtime enables thread-safe concurrent/parallel computation.</li>
-<li>For more information, see <a href="https://pen-lang.org/guides/concurrency-and-parallelism.html">Concurrency and parallelism</a>.</li>
-</ul>
-<h3 id="system-packages"><a class="header" href="#system-packages">System packages</a></h3>
-<ul>
-<li><a href="https://pen-lang.org/advanced-features/writing-system-packages.html">System packages</a> encapsulate side effects as separate packages.</li>
-<li>No other packages have side effects unless injected them into explicitly.</li>
+<li>For more information, see <a href="/guides/concurrency-and-parallelism.html">Concurrency and parallelism</a>.</li>
 </ul>
 <h3 id="reliable-testing"><a class="header" href="#reliable-testing">Reliable testing</a></h3>
 <ul>
 <li>Unit tests are always deterministic and fast.</li>
 <li>No flaky or slow tests bother developers.</li>
 </ul>
+<h3 id="no-standard-system-library"><a class="header" href="#no-standard-system-library">No standard system library</a></h3>
+<ul>
+<li>There is no default platform-dependent system library.</li>
+<li>Developers choose <a href="/advanced-features/writing-system-packages.html">system packages</a> suitable for their applications.</li>
+<li><a href="/advanced-features/writing-system-packages.html">System packages</a> encapsulate platform-dependent codes and side effects.</li>
+<li>No package causes side effects without explicit injection.</li>
+</ul>
 <h3 id="security"><a class="header" href="#security">Security</a></h3>
 <ul>
-<li>No runtime exception</li>
+<li><a href="/references/language/syntax.html#error-handling">No runtime exception</a></li>
 <li>No undefined behavior</li>
 <li>No data race</li>
 </ul>
@@ -236,9 +222,9 @@ main = \(ctx context) none {
 <li>Static typing</li>
 <li>Immutable values</li>
 <li>Pure functions by default</li>
-<li>Errors as values</li>
+<li><a href="/references/language/syntax.html#error-handling">Errors as values</a></li>
 <li>Asynchronous I/O</li>
-<li>Cross compile</li>
+<li><a href="/advanced-features/cross-compile.html">Cross compile</a></li>
 <li><a href="https://www.rust-lang.org/">Rust</a>/C Foreign Function Interface (FFI)</li>
 </ul>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
