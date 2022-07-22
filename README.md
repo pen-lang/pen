@@ -36,6 +36,10 @@ main = \(ctx context) none {
 
 See [Install](https://pen-lang.org/introduction/install.html).
 
+## Examples
+
+See [the `examples` directory](examples).
+
 ## Documentation
 
 - [Getting started](https://pen-lang.org/introduction/getting-started.html)
