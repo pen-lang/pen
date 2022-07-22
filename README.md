@@ -49,10 +49,9 @@ See [the `examples` directory](examples).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/introduction/getting-started.html)
-- [Language reference](https://pen-lang.org/references/language/syntax.html)
-- Code examples
-  - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
-  - [Snippets](https://pen-lang.org/examples)
+- Language reference
+  - [Syntax](https://pen-lang.org/references/language/syntax.html)
+  - [Types](https://pen-lang.org/references/language/types.html)
 
 ## Comparison with [Go][go]
 
