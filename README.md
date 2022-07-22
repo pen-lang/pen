@@ -49,6 +49,10 @@ See [the `examples` directory](examples).
 ## Documentation
 
 - [Getting started](https://pen-lang.org/introduction/getting-started.html)
+- Guides
+  - [Building an executable](https://pen-lang.org/guides/building-an-executable.html)
+  - [Creating a library](https://pen-lang.org/guides/creating-a-library.html)
+  - [Using a library](https://pen-lang.org/guides/using-a-library.html)
 - Language reference
   - [Syntax](https://pen-lang.org/references/language/syntax.html)
   - [Types](https://pen-lang.org/references/language/types.html)
