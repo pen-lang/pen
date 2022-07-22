@@ -86,7 +86,7 @@ See [the `examples` directory](examples).
 | Sequence         | `[number]` (lazy list)                        | `[]int` (array or slice)       |
 | Map              | `{string: number}`                            | `map[string]int`               |
 | Concurrent queue | `[number]`, [built-in functions][concurrency] | `chan int`                     |
-| Optional value   | `none`                                        | null pointer (or _zero_ value) |
+| Optional value   | `none`, union types                           | null pointer (or _zero_ value) |
 | Function         | `\(number, boolean) string`                   | `func(int, bool) string`       |
 | Union            | `number \| string`                            | Interface                      |
 | Top type         | `any`                                         | `any` (`interface{}`)          |
