@@ -87,13 +87,55 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 ### Reference counting GC
 
-[The Perceus reference counting][perceus]
+Pen implements [the Perceus reference counting][perceus] for its reference counting GC. Thanks to the state-of-the-art RC algorithm, programs written in Pen performs less than traditional reference counting where every data transfer or mutation requires counting operations.
 
 > WIP
 
 ## Contributing
 
-> WIP
+### Common workflows
+
+#### Installing from source
+
+See [Install](https://pen-lang.org/introduction/install.html#building-from-source).
+
+#### Building crates
+
+```sh
+tools/build.sh
+```
+
+#### Runnning unit tests
+
+```sh
+tools/unit_test.sh
+```
+
+#### Runnning integration tests
+
+```sh
+tools/integration_test.sh
+```
+
+#### Runnning benchmarks
+
+Those benchmarks include ones written in both Pen and Rust.
+
+```sh
+tools/benchmark.sh
+```
+
+#### Linting crates
+
+```sh
+tools/lint.sh
+```
+
+#### Formatting crates
+
+```sh
+tools/format.sh
+```
 
 ## License
 
