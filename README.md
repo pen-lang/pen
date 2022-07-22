@@ -167,7 +167,7 @@ tools/format.sh
 
 - [`cmd`](cmd): It contains command crates
   - [`pen`](cmd/pen): `pen` command crate
-- [`lib`](lib)
+- [`lib`](lib): Libraries for the compiler, formatter, documentation generator, etc.
   - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
   - [`hir`](lib/hir): High-level Intermediate Representation (HIR) types and semantics
   - [`mir`](lib/mir): Mid-level Intermediate Representation (MIR)
