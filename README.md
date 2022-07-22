@@ -34,7 +34,13 @@ main = \(ctx context) none {
 
 ## Install
 
-See [Install](https://pen-lang.org/introduction/install.html).
+Pen is available via [Homebrew](https://brew.sh/).
+
+```sh
+brew install pen-lang/pen/pen
+```
+
+For more information, see [Install](https://pen-lang.org/introduction/install.html).
 
 ## Examples
 
