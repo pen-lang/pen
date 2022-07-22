@@ -72,7 +72,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 | Top type         | `any`                          | `any` (`interface{}`)          |
 | Interface        | Records                        | Interface                      |
 
-The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [OCaml](https://ocaml.org) and [Haskell](https://haskell.org).
+The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [Haskell](https://haskell.org).
 
 ## Technical design
 
