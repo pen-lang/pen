@@ -58,14 +58,15 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 ### Runtime
 
-|                        | Pen                               | Go                                   |
-| ---------------------- | --------------------------------- | ------------------------------------ |
-| Context switch         | [Continuations](#context-switch)  | Platform dependent                   |
-| Concurrent computation | [Built-in functions][concurrency] | `go` expression                      |
-| Synchronization        | Futures, lazy lists               | Channels, concurrent data structures |
-| Data race prevention   | Built into [GC][gc]               | Dynamic analysis                     |
-| Error handling         | [`?` operator][error-handling]    | `foo`                                |
-| Exception              | None                              | `panic` and `recover`                |
+|                        | Pen                                          | Go                                   |
+| ---------------------- | -------------------------------------------- | ------------------------------------ |
+| Context switch         | [Continuations](#context-switch)             | Platform dependent                   |
+| Concurrent computation | [Built-in functions][concurrency]            | `go` expression                      |
+| Synchronization        | Futures, lazy lists                          | Channels, concurrent data structures |
+| Data race prevention   | Built into [GC][gc]                          | Dynamic analysis                     |
+| Resource management    | Built into [GC][gc]                          | `defer` statement                    |
+| Error handling         | `error` type, [`?` operator][error-handling] | `error` type, multiple-value return  |
+| Exception              | None                                         | `panic` and `recover` functions      |
 
 ### Types
 
