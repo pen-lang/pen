@@ -50,7 +50,7 @@ See [Install](https://pen-lang.org/introduction/install.html).
 
 |                      | Pen                              | Go                           |
 | -------------------- | -------------------------------- | ---------------------------- |
-| Primary domain       | Application programming          | System programming           |
+| Domain               | Application programming          | System programming           |
 | Paradigm             | Functional                       | Imperative / object-oriented |
 | Memory management    | [Reference counting][gc]         | Concurrent mark-and-sweep    |
 | System library       | Your choice!                     | Built-in                     |
