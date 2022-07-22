@@ -114,6 +114,7 @@ tools/unit_test.sh
 #### Running integration tests
 
 ```sh
+tools/build.sh
 tools/integration_test.sh
 ```
 
