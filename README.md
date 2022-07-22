@@ -89,6 +89,8 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art RC algorithm, programs written in Pen performs less than traditional reference counting where every data transfer or mutation requires counting operations. In addition, the algorithm reduces heap allocations significantly when records behind unique references, which brings practical performance without introducing unsafe mutability.
 
+See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
+
 ## Contributing
 
 ### Common workflows
