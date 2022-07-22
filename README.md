@@ -165,7 +165,10 @@ tools/format.sh
 
 ### Directory structure
 
-> WIP
+- [`cmd`](cmd): It contains command crates
+  - [`pen`](cmd/pen): `pen` command crate
+- [`lib`](lib).
+  - [`lib`](lib) contains libraries written in Rust.
 
 ## License
 
