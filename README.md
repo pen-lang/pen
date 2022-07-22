@@ -105,19 +105,19 @@ See [Install](https://pen-lang.org/introduction/install.html#building-from-sourc
 tools/build.sh
 ```
 
-#### Runnning unit tests
+#### Running unit tests
 
 ```sh
 tools/unit_test.sh
 ```
 
-#### Runnning integration tests
+#### Running integration tests
 
 ```sh
 tools/integration_test.sh
 ```
 
-#### Runnning benchmarks
+#### Running benchmarks
 
 Those benchmarks include ones written in both Pen and Rust.
 
