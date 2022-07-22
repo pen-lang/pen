@@ -87,7 +87,7 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 
 ### Reference counting GC
 
-Pen implements [the Perceus reference counting][perceus] for its reference counting GC. Thanks to the state-of-the-art RC algorithm, programs written in Pen performs less than traditional reference counting where every data transfer or mutation requires counting operations.
+Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art RC algorithm, programs written in Pen performs less than traditional reference counting where every data transfer or mutation requires counting operations.
 
 > WIP
 
