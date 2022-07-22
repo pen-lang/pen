@@ -167,8 +167,15 @@ tools/format.sh
 
 - [`cmd`](cmd): It contains command crates
   - [`pen`](cmd/pen): `pen` command crate
-- [`lib`](lib).
-  - [`lib`](lib) contains libraries written in Rust.
+- [`lib`](lib)
+  - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
+  - [`hir`](lib/hir): High-level Intermediate Representation (HIR) types and semantics
+  - [`mir`](lib/mir): Mid-level Intermediate Representation (MIR)
+  - [`ast-hir`](lib/ast-hir): AST to HIR compiler
+  - [`hir-mir`](lib/hir-mir): HIR to MIR compiler
+  - [`mir-fmm`](lib/mir-fmm): MIR to [F--](https://github.com/raviqqe/fmm) compiler
+- [`packages`](packages): Packages written in Pen
+  - [`os`](packages/os): Package providing a common OS interface
 
 ## License
 
