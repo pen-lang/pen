@@ -165,7 +165,7 @@ tools/format.sh
 
 ### Directory structure
 
-- [`cmd`](cmd): It contains command crates
+- [`cmd`](cmd): Commands
   - [`pen`](cmd/pen): `pen` command crate
 - [`lib`](lib): Libraries for the compiler, formatter, documentation generator, etc.
   - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
@@ -175,7 +175,8 @@ tools/format.sh
   - [`hir-mir`](lib/hir-mir): HIR to MIR compiler
   - [`mir-fmm`](lib/mir-fmm): MIR to [F--](https://github.com/raviqqe/fmm) compiler
 - [`packages`](packages): Packages written in Pen
-  - [`os`](packages/os): Package providing a common OS interface
+  - [`core`](packages/core): Package for platform-independent algorithms and data structures
+  - [`os`](packages/os): Package for a common OS interface
 
 ## License
 
