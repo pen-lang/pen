@@ -5,7 +5,7 @@ type firstRest {
 }
 
 # Those functions need to be all synchronous and should not call any functions
-# inside them to be compatible async functions in Rust.
+# inside them to be compatible with async functions in Rust.
 
 foreign "c" _pen_os_first_rest = \(xs [any]) firstRest {
   if [x, ...xs] = xs {
