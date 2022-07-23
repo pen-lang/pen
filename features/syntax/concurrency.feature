@@ -28,7 +28,7 @@ Feature: Concurrency
     import Os'Process
 
     main = \(ctx context) none {
-      xs = go [none none]
+      xs = race([none none])
 
       if [x, ...xs] = xs {
         x()
