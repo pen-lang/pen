@@ -1,13 +1,12 @@
-use std::future::Future;
+use futures::future::FutureExt;
 use tokio::{spawn, task::yield_now};
 
 #[ffi::bindgen]
 fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
-    ffi::future::to_closure(spawn_and_unwrap(ffi::future::from_closure(closure)))
-}
-
-async fn spawn_and_unwrap(future: impl Future<Output = ffi::Any> + Send + 'static) -> ffi::Any {
-    spawn(future).await.unwrap()
+    ffi::future::to_closure(
+        spawn(async move { ffi::future::from_closure::<_, ffi::Any>(closure).await })
+            .map(Result::unwrap),
+    )
 }
 
 #[ffi::bindgen]
