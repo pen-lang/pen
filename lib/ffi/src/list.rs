@@ -2,6 +2,7 @@ use crate::{Any, Arc, BoxAny, Closure};
 
 extern "C" {
     fn pen_ffi_list_create() -> Arc<List>;
+    fn pen_ffi_list_lazy(xs: Arc<Closure>) -> Arc<List>;
     fn pen_ffi_list_prepend(x: BoxAny, xs: Arc<List>) -> Arc<List>;
 }
 
@@ -19,6 +20,10 @@ impl List {
 
     pub fn prepend(this: Arc<Self>, x: impl Into<Any>) -> Arc<Self> {
         unsafe { pen_ffi_list_prepend(x.into().into(), this) }
+    }
+
+    pub fn lazy(xs: Arc<Closure>) -> Arc<Self> {
+        unsafe { pen_ffi_list_lazy(xs) }
     }
 }
 
