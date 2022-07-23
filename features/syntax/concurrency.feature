@@ -10,7 +10,7 @@ Feature: Concurrency
     }
     """
 
-  Scenario: Use spawn function
+  Scenario: Use go function
     Given a file named "main.pen" with:
     """pen
     main = \(ctx context) none {
@@ -22,7 +22,7 @@ Feature: Concurrency
     When I successfully run `pen build`
     Then I successfully run `./app`
 
-  Scenario: Use join operation
+  Scenario: Use race function
     Given a file named "main.pen" with:
     """pen
     import Os'Process
