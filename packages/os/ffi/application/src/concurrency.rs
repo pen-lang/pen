@@ -39,7 +39,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     .await
 }
 
-// TODO We should not wait for the first element to be ready.
+// TODO Use List::lazy(). We should not wait for the first element to be ready.
 #[async_recursion]
 async fn convert_stream_to_list(
     stream: Arc<RwLock<Pin<Box<impl Stream<Item = ffi::Any> + Send + Sync + 'static>>>>,
