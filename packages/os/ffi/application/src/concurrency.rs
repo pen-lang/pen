@@ -33,7 +33,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
         ));
     }
 
-    convert_pinned_stream(Arc::new(RwLock::new(Box::pin(
+    convert_stream_to_list(Arc::new(RwLock::new(Box::pin(
         StreamMap::from_iter(streams).map(|(_, value)| value),
     ))))
     .await
@@ -41,11 +41,11 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
 
 // TODO We should not wait for the first element to be ready.
 #[async_recursion]
-async fn convert_pinned_stream(
+async fn convert_stream_to_list(
     stream: Arc<RwLock<Pin<Box<impl Stream<Item = ffi::Any> + Send + Sync + 'static>>>>,
 ) -> ffi::Arc<ffi::List> {
     if let Some(x) = stream.write().await.next().await {
-        ffi::List::prepend(convert_pinned_stream(stream.clone()).await, x)
+        ffi::List::prepend(convert_stream_to_list(stream.clone()).await, x)
     } else {
         ffi::List::new()
     }
