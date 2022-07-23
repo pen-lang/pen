@@ -27,15 +27,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
             .chain(if context.configuration().is_ok() {
                 utility_function_declaration::compile(context)?
-                    .into_iter()
-                    .map(Ok)
-                    .collect()
             } else {
                 vec![]
             })
-            .collect::<Result<_, _>>()?,
+            .collect(),
         module
             .function_definitions()
             .iter()
