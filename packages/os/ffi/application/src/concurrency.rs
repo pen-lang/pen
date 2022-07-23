@@ -1,9 +1,7 @@
 use async_recursion::async_recursion;
 use futures::Stream;
-use std::future::Future;
 use std::{future::Future, pin::Pin, sync::Arc};
-use tokio::{spawn, sync::RwLock};
-use tokio::{spawn, task::yield_now};
+use tokio::{spawn, sync::RwLock, task::yield_now};
 use tokio_stream::{StreamExt, StreamMap};
 
 #[ffi::bindgen]
