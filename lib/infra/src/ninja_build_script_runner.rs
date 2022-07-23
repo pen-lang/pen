@@ -20,7 +20,6 @@ impl NinjaBuildScriptRunner {
 
 impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
     fn run(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
-        // spell-checker:disable
         command_runner::run_command(
             Command::new("turtle")
                 .arg("--quiet")
@@ -32,7 +31,6 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
-        // spell-checker:enable
 
         Ok(())
     }

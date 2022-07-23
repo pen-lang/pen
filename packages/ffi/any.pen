@@ -1,0 +1,71 @@
+foreign "c" pen_ffi_any_is_boolean = \(x any) boolean {
+  if x = x as boolean { true } else { false }
+}
+
+foreign "c" pen_ffi_any_is_none = \(x any) boolean {
+  if x = x as none { true } else { false }
+}
+
+foreign "c" pen_ffi_any_is_list = \(x any) boolean {
+  if x = x as [any] { true } else { false }
+}
+
+foreign "c" pen_ffi_any_is_number = \(x any) boolean {
+  if x = x as number { true } else { false }
+}
+
+foreign "c" pen_ffi_any_is_string = \(x any) boolean {
+  if x = x as string { true } else { false }
+}
+
+foreign "c" pen_ffi_any_to_boolean = \(x any) boolean {
+  if x = x as boolean {
+    x
+  } else {
+    false
+  }
+}
+
+foreign "c" pen_ffi_any_to_list = \(x any) [any] {
+  if x = x as [any] {
+    x
+  } else {
+    [any]
+  }
+}
+
+foreign "c" pen_ffi_any_to_number = \(x any) number {
+  if x = x as number {
+    x
+  } else {
+    0
+  }
+}
+
+foreign "c" pen_ffi_any_to_string = \(x any) string {
+  if x = x as string {
+    x
+  } else {
+    ""
+  }
+}
+
+foreign "c" pen_ffi_any_from_boolean = \(x boolean) any {
+  x
+}
+
+foreign "c" pen_ffi_any_from_none = \() any {
+  none
+}
+
+foreign "c" pen_ffi_any_from_list = \(x [any]) any {
+  x
+}
+
+foreign "c" pen_ffi_any_from_number = \(x number) any {
+  x
+}
+
+foreign "c" pen_ffi_any_from_string = \(x string) any {
+  x
+}

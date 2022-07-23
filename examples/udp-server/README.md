@@ -1,6 +1,6 @@
 # UDP server
 
-A UDP server which echos received messages
+A UDP server that echos received messages
 
 ## Usage
 

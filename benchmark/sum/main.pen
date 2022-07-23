@@ -1,0 +1,20 @@
+import Core'Number
+import Os'File
+
+main = \(ctx context) none {
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    Number'String(sum(0, 100000000)),
+  )
+
+  none
+}
+
+sum = \(x number, i number) number {
+  if i == 0 {
+    x
+  } else {
+    sum(x + i, i - 1)
+  }
+}

@@ -16,4 +16,4 @@ Run `pen build --help` to see all supported targets.
 
 ## System package support
 
-Cross compile support of [system packages](/advanced-features/system-injection.md#system-packages) are totally up to their developers. For example, [the standard system package of `Os`](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support those targets because of their limited use cases.
+Cross compile support of [system packages](/references/language/packages.md#system-packages) are totally up to their developers. For example, [the `Os` standard system package](/references/standard-packages/os.md) supports most targets as long as their platforms expose OS-like APIs. However, some custom system packages might not support those targets because of their limited use cases.

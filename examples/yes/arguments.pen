@@ -11,7 +11,7 @@ Parse = \(xs [string]) Arguments {
     Message: if s == "" {
       "yes"
     } else {
-    	s
-    }
+      s
+    },
   }
 }

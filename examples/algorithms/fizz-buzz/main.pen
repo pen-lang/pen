@@ -1,0 +1,35 @@
+import Core'Number
+import Core'String
+import Os'Context { Context }
+import Os'File
+import Os'Process
+
+main = \(ctx context) none {
+  if e = printLines(ctx.Os, [string fizzBuzz(i()) for i in Number'Sequence(100)]) as none {
+    none
+  } else {
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+fizzBuzz = \(i number) string {
+  if Number'Remainder(i, 15) == 0 {
+    "fizz buzz"
+  } else if Number'Remainder(i, 5) == 0 {
+    "buzz"
+  } else if Number'Remainder(i, 3) == 0 {
+    "fizz"
+  } else {
+    Number'String(i)
+  }
+}
+
+printLines = \(ctx Context, ss [string]) none | error {
+  if [s, ...ss] = ss {
+    File'Write(ctx, File'StdOut(), String'Concatenate([string s(), "\n"]))?
+
+    printLines(ctx, ss)
+  } else {
+    none
+  }
+}

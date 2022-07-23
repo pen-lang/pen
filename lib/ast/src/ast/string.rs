@@ -1,20 +1,20 @@
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ByteString {
-    value: Vec<u8>,
+    value: String, // UTF-8 representation of byte string
     position: Position,
 }
 
 impl ByteString {
-    pub fn new(value: impl Into<Vec<u8>>, position: Position) -> Self {
+    pub fn new(value: impl Into<String>, position: Position) -> Self {
         Self {
             value: value.into(),
             position,
         }
     }
 
-    pub fn value(&self) -> &[u8] {
+    pub fn value(&self) -> &str {
         &self.value
     }
 

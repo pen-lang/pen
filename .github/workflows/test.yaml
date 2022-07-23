@@ -12,11 +12,12 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
+          - ubuntu-22.04
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: git diff --exit-code
@@ -25,15 +26,17 @@ jobs:
           name: build-${{ matrix.os }}
           path: target/release/pen
   unit_test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
   coverage:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v2
@@ -45,13 +48,15 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
-          - macos-latest
-        index: [0, 1]
-        total: [2]
+          - ubuntu-22.04
+          # TODO Enable integration tests on macOS.
+          # - macos-latest
+        index: [0, 1, 2, 3, 4, 5, 6, 7]
+        total: [8]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
       - uses: actions/download-artifact@v2

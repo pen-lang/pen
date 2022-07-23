@@ -1,0 +1,76 @@
+import Core'Number
+import Core'String
+
+type Item {
+  Cost number
+  Value number
+}
+
+type Bag {
+  Capacity number
+}
+
+Pack = \(b Bag, is [Item]) [Item] {
+  packItems(
+    {number: [Item] 0: [Item]},
+    b,
+    is,
+  )
+}
+
+packItems = \(states {number: [Item]}, b Bag, is [Item]) [Item] {
+  if [i, ...is] = is {
+    packItems(
+      packItem(b, i(), states, 0),
+      b,
+      is,
+    )
+  } else {
+    best(
+      [[Item] v for _, v in states],
+      [Item],
+    )
+  }
+}
+
+packItem = \(b Bag, i Item, states {number: [Item]}, cost number) {number: [Item]} {
+  newCost = cost + i.Cost
+
+  if newCost > b.Capacity {
+    states
+  } else {
+    states = if is = states[cost] {
+      is = [Item i, ...is]
+
+      if js = states[newCost] {
+        if totalValue(is) > totalValue(js) {
+          {number: [Item] ...states, newCost: is}
+        } else {
+          states
+        }
+      } else {
+        {number: [Item] ...states, newCost: is}
+      }
+    } else {
+      states
+    }
+
+    packItem(b, i, states, cost + 1)
+  }
+}
+
+best = \(iss [[Item]], is [Item]) [Item] {
+  if [js, ...iss] = iss {
+    if totalValue(js()) > totalValue(is) {
+      best(iss, js())
+    } else {
+      best(iss, is)
+    }
+  } else {
+    is
+  }
+}
+
+totalValue = \(is [Item]) number {
+  Number'Sum([number i().Value for i in is])
+}

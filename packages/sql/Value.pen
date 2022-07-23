@@ -1,0 +1,2 @@
+# A value in a column
+type Value = boolean | none | number | string

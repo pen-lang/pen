@@ -1,27 +1,24 @@
 use crate::{CompileConfiguration, CompileError};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::types::type_collector,
-    ir::*,
+    analysis::{type_collector, AnalysisContext},
+    ir::Module,
     types::{self, Type},
 };
 
 #[derive(Debug)]
 pub struct CompileContext {
-    types: FnvHashMap<String, Type>,
-    records: FnvHashMap<String, Vec<types::RecordField>>,
+    analysis_context: AnalysisContext,
     configuration: Option<CompileConfiguration>,
 }
 
 impl CompileContext {
     pub fn new(module: &Module, configuration: Option<CompileConfiguration>) -> Self {
         Self {
-            types: type_collector::collect(module),
-            records: module
-                .type_definitions()
-                .iter()
-                .map(|definition| (definition.name().into(), definition.fields().to_vec()))
-                .collect(),
+            analysis_context: AnalysisContext::new(
+                type_collector::collect(module),
+                type_collector::collect_records(module),
+            ),
             configuration,
         }
     }
@@ -34,18 +31,21 @@ impl CompileContext {
         use super::compile_configuration::COMPILE_CONFIGURATION;
 
         Self {
-            types,
-            records,
+            analysis_context: AnalysisContext::new(types, records),
             configuration: COMPILE_CONFIGURATION.clone().into(),
         }
     }
 
     pub fn types(&self) -> &FnvHashMap<String, Type> {
-        &self.types
+        self.analysis_context.types()
     }
 
     pub fn records(&self) -> &FnvHashMap<String, Vec<types::RecordField>> {
-        &self.records
+        self.analysis_context.records()
+    }
+
+    pub fn analysis(&self) -> &AnalysisContext {
+        &self.analysis_context
     }
 
     pub fn configuration(&self) -> Result<&CompileConfiguration, CompileError> {

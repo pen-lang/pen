@@ -1,0 +1,20 @@
+[package]
+name = "pen-http"
+version = "0.1.0"
+publish = false
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+ffi = { package = "pen-ffi", version = "*", features = ["runtime"] }
+futures = "0.3"
+hyper = { version = "0.14", features = [
+  "client",
+  "http1",
+  "http2",
+  "server",
+  "tcp",
+] }
+tokio = { version = "1", features = ["full"] }

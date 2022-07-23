@@ -3,14 +3,17 @@
 # Pen programming language
 
 [![GitHub Action](https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square)](https://github.com/pen-lang/pen/actions)
-[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](https://github.com/pen-lang/pen/blob/main/LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is the programming language that makes software development **scalable**, focusing on software maintainability and portability.
+Pen is a **functional** programming language focused on **application programming** following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
+
+Pen's system libraries and runtime are detachable from applications and it can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
 
 ```pen
 import Os'Context { Context }
 import Os'File
+import Os'Process
 
 sayHello = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), "Hello, world!\n")?
@@ -18,82 +21,174 @@ sayHello = \(ctx Context) none | error {
   none
 }
 
-main = \(ctx Context) number {
-  e = sayHello(ctx)
+main = \(ctx context) none {
+  e = sayHello(ctx.Os)
 
-  if e = e as none {
-    0
+  if _ = e as none {
+    none
   } else if error {
-    1
+    Process'Exit(ctx.Os, 1)
   }
 }
 ```
 
 ## Install
 
-See [Install](https://pen-lang.org/guides/install.html).
+Pen is available via [Homebrew](https://brew.sh/).
+
+```sh
+brew install pen-lang/pen/pen
+```
+
+For more information, see [Install](https://pen-lang.org/introduction/install.html).
+
+## Examples
+
+See [the `examples` directory](examples).
 
 ## Documentation
 
-- [Getting started](https://pen-lang.org/guides/getting-started.html)
-- [Language reference][syntax]
-- Code examples
-  - [Applications and libraries](https://github.com/pen-lang/pen/tree/main/examples)
-  - [Snippets](https://pen-lang.org/examples)
+- [Getting started](https://pen-lang.org/introduction/getting-started.html)
+- Guides
+  - [Building an executable](https://pen-lang.org/guides/building-an-executable.html)
+  - [Creating a library](https://pen-lang.org/guides/creating-a-library.html)
+  - [Using a library](https://pen-lang.org/guides/using-a-library.html)
+- Language reference
+  - [Syntax](https://pen-lang.org/references/language/syntax.html)
+  - [Types](https://pen-lang.org/references/language/types.html)
 
-## Vision
+## Comparison with [Go][go]
 
-Pen aims to make large-scale software development efficient where a number of people develop software together. To realize that, it focuses on software **maintainability** and **portability**.
+### Overview
 
-- Maintainability
-  - Simplicity: The language is small and easy to learn but also full featured.
-  - Testability: Unit tests are always reliable, fast, and independent with each other.
-  - Modifiability: Developers can change application logic without changing implementation details, and vice versa.
-- Portability
-  - Programs written in the language can be ported to different platforms including [WebAssembly](https://webassembly.org/).
+|                   | Pen                      | Go                           |
+| ----------------- | ------------------------ | ---------------------------- |
+| Domain            | Application programming  | System programming           |
+| Paradigm          | Functional               | Imperative / object-oriented |
+| Memory management | [Reference counting][gc] | Concurrent mark-and-sweep    |
+| System library    | Your choice!             | Built-in                     |
+| Values            | Immutable                | Mutable                      |
 
-## Features
+### Runtime
 
-### Minimal language
+|                        | Pen                                          | Go                                   |
+| ---------------------- | -------------------------------------------- | ------------------------------------ |
+| Context switch         | [Continuations](#context-switch)             | Platform dependent                   |
+| Concurrent computation | [Built-in functions][concurrency]            | `go` expression                      |
+| Synchronization        | Futures, lazy lists                          | Channels, concurrent data structures |
+| Data race prevention   | Built into [GC][gc]                          | Dynamic analysis                     |
+| Resource management    | Built into [GC][gc]                          | `defer` statement                    |
+| Error handling         | `error` type, [`?` operator][error-handling] | `error` type, multi-value return     |
+| Exception              | None                                         | `panic` and `recover` functions      |
 
-- Its [syntax][syntax] and [type system](https://pen-lang.org/references/language/types.html) are small, simple, and easy to learn.
-- Yet, the language supports all the modern features, such as:
-  - Functional programming
-  - Effect system
-  - Dependency injection
-  - Asynchronous operations
-  - Parallel computation
+### Types
 
-### Deterministic testing
+|                  | Pen                                           | Go                             |
+| ---------------- | --------------------------------------------- | ------------------------------ |
+| Number           | `number` (IEEE 754)                           | `int`, `float64`, ...          |
+| Sequence         | `[number]` (lazy list)                        | `[]int` (array or slice)       |
+| Map              | `{string: number}`                            | `map[string]int`               |
+| Concurrent queue | `[number]`, [built-in functions][concurrency] | `chan int`                     |
+| Optional value   | `none`, union types                           | null pointer (or _zero_ value) |
+| Function         | `\(number, boolean) string`                   | `func(int, bool) string`       |
+| Union            | `number \| string`                            | Interface                      |
+| Top type         | `any`                                         | `any` (`interface{}`)          |
+| Interface        | Records                                       | Interface                      |
 
-- All unit tests are deterministic.
-- Therefore, testing is always reliable and fast.
-- You never get bothered by flaky or slow tests.
+The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [Haskell](https://haskell.org).
 
-### System injection
+## Technical design
 
-- [System injection](https://pen-lang.org/advanced-features/system-injection.html) is a novel mechanism to isolate application logic from implementation details.
-- The language injects system functions into applications explicitly.
-- Developers can even define their own system functions.
+### Context switch
 
-### Others
+Like [Go][go], every function in Pen is suspendable and can be called asynchronously. This is realized by intermediate representation compiled into [Continuation Passing Style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style) which also enables proper tail calls. Thus, Pen implements context switch without any platform-dependent codes for slight sacrifice of performance while Go requires logic written in assembly languages.
 
-- Static typing
-- Immutable values
-- Pure functions by default
-- Errors as values (no runtime error)
-- Asynchronous operations
-- Cross compile
-- [Rust](https://www.rust-lang.org/)/C foreign function interface
+Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/wiki/Delimited_continuation) for the following reasons.
 
-### Work in progress...
+- Traditional continuations are sufficient for our use cases, such as asynchronous programming.
+- Delimited continuations require heap allocations although the second-class continuations do not.
 
-#### Parallel computation
+### Reference counting GC
 
-The runtime and library provide tools for thread-safe parallel computation that leverage multi-core CPUs.
+Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art ownership-based RC algorithm, programs written in Pen performs much less than traditional RC where every data transfer or mutation requires counting operations. In addition, the algorithm reduces heap allocations significantly for records behind unique references, which brings practical performance without introducing unsafe mutability.
+
+See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
+
+## Contributing
+
+Pen is under heavy development. Feel free to post [Issues](https://github.com/pen-lang/pen/issues) and [Discussions](https://github.com/pen-lang/pen/discussions)!
+
+### Workflows
+
+#### Installing from source
+
+See [Install](https://pen-lang.org/introduction/install.html#building-from-source).
+
+#### Building crates
+
+```sh
+tools/build.sh
+```
+
+#### Running unit tests
+
+```sh
+tools/unit_test.sh
+```
+
+#### Running integration tests
+
+```sh
+tools/build.sh
+tools/integration_test.sh
+```
+
+#### Running benchmarks
+
+Those benchmarks include ones written in both Pen and Rust.
+
+```sh
+tools/benchmark.sh
+```
+
+#### Linting crates
+
+```sh
+tools/lint.sh
+```
+
+#### Formatting crates
+
+```sh
+tools/format.sh
+```
+
+### Directory structure
+
+- [`cmd`](cmd): Commands
+  - [`pen`](cmd/pen): `pen` command
+- [`lib`](lib): Libraries for compiler, formatter, documentation generator, etc.
+  - [`app`](lib/app): Platform-agnostic application logic for `pen` command
+  - [`infra`](lib/infra): Platform-dependent logic for `pen` command
+  - [`ast`](lib/ast): Abstract Syntax Tree (AST) types
+  - [`hir`](lib/hir): High-level Intermediate Representation (HIR) types and semantics
+  - [`mir`](lib/mir): Mid-level Intermediate Representation (MIR)
+  - [`ast-hir`](lib/ast-hir): AST to HIR compiler
+  - [`hir-mir`](lib/hir-mir): HIR to MIR compiler
+  - [`mir-fmm`](lib/mir-fmm): MIR to [F--](https://github.com/raviqqe/fmm) compiler
+- [`packages`](packages): Packages written in Pen
+  - [`core`](packages/core): Package for platform-independent algorithms and data structures
+  - [`os`](packages/os): Package for a common OS interface
+- [`tools`](tools): Developer and CI tools
+- [`doc`](doc): Documentation at [pen-lang.org](https://pen-lang.org/)
 
 ## License
 
-Pen is released under open source licenses. See [its LICENSE file](https://github.com/pen-lang/pen/blob/main/LICENSE.md) for more information.
+Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[syntax]: https://pen-lang.org/references/language/syntax.html
+[concurrency]: https://pen-lang.org/guides/concurrency-and-parallelism.html
+[error-handling]: https://pen-lang.org/references/language/syntax.html#error-handling
+[gc]: #reference-counting-gc
+[go]: https://go.dev/
+[perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
+[rust]: https://www.rust-lang.org/

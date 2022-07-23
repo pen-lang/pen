@@ -1,0 +1,7 @@
+import 'Tcp'Stream { Stream }
+
+# A TCP stream accepted on a server with a client address
+type AcceptedStream {
+  Stream Stream
+  Address string
+}

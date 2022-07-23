@@ -1,0 +1,19 @@
+name: benchmark
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+concurrency:
+  group: benchmark-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  benchmark:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
+      - run: tools/ci/github/setup.sh
+      - run: tools/build.sh
+      - run: tools/benchmark.sh -b
+      - run: tools/benchmark.sh

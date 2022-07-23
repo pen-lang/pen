@@ -1,11 +1,14 @@
 [workspace]
 members = [
+  "benchmark/rust",
   "cmd/pen",
   "lib/app",
   "lib/ast",
   "lib/ast-hir",
+  "lib/doc",
   "lib/ffi",
   "lib/ffi-macro",
+  "lib/format",
   "lib/hir",
   "lib/hir-mir",
   "lib/infra",
@@ -16,15 +19,8 @@ members = [
   "lib/position",
   "lib/test-info",
 ]
-exclude = [
-  "cmd/test",
-  "examples",
-  "lib/core",
-  "lib/prelude",
-  "lib/os",
-  "lib/os-sync",
-  "tmp",
-]
+exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 
 [profile.release]
 lto = true
+strip = true

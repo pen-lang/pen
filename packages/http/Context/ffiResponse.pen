@@ -1,0 +1,7 @@
+import 'Context'ffiHeaderMap { FfiHeaderMap }
+
+type FfiResponse {
+  Status number
+  Headers FfiHeaderMap
+  Body string
+}

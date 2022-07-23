@@ -14,9 +14,10 @@ pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
         rest_function_name: "rest".into(),
         list_type_name: "GenericList".into(),
         first_rest_type_name: "FirstRest".into(),
+        size_function_name: "listSize".into(),
     });
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ListTypeConfiguration {
     pub empty_list_function_name: String,
     pub concatenate_function_name: String,
@@ -28,4 +29,5 @@ pub struct ListTypeConfiguration {
     pub rest_function_name: String,
     pub list_type_name: String,
     pub first_rest_type_name: String,
+    pub size_function_name: String,
 }

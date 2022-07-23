@@ -1,0 +1,47 @@
+import Test'Assert
+
+import 'String
+
+ConcatenateEmpty = \() none | error {
+  Assert'True(String'Concatenate([string]) == "")
+}
+
+ConcatenateString = \() none | error {
+  Assert'True(String'Concatenate([string "foo"]) == "foo")
+}
+
+ConcatenateTwoStrings = \() none | error {
+  Assert'True(String'Concatenate([string "foo", "bar"]) == "foobar")
+}
+
+ConcatenateThreeStrings = \() none | error {
+  Assert'True(String'Concatenate([string "lan", "gua", "ge"]) == "language")
+}
+
+JoinEmpty = \() none | error {
+  Assert'True(String'Join([string], "") == "")
+}
+
+JoinTwoStrings = \() none | error {
+  Assert'True(String'Join([string "foo", "bar"], "") == "foobar")
+}
+
+JoinTwoStringsWithSeparator = \() none | error {
+  Assert'True(String'Join([string "foo", "bar"], ",") == "foo,bar")
+}
+
+JoinThreeStringsWithSeparator = \() none | error {
+  Assert'True(String'Join([string "foo", "bar", "baz"], ",") == "foo,bar,baz")
+}
+
+HasPrefix = \() none | error {
+  Assert'True(String'HasPrefix("foobar", "foo"))
+}
+
+HasNoPrefix = \() none | error {
+  Assert'True(!String'HasPrefix("bar", "foo"))
+}
+
+HasNoPrefixWithSubString = \() none | error {
+  Assert'True(!String'HasPrefix("fo", "foo"))
+}

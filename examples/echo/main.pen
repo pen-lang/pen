@@ -8,7 +8,7 @@ main = \(ctx context) none {
   if e = run(ctx.Os) as none {
     none
   } else {
-    Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
+    _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
     Process'Exit(ctx.Os, 1)
   }
 }

@@ -1,20 +1,21 @@
 use crate::{
-    cps::{self, AsyncStack, ContinuationFunction, StepFunction},
+    cps::{AsyncStack, ContinuationFunction, StepFunction},
     Arc, Closure,
 };
 use core::{intrinsics::transmute, task::Poll};
 use futures::future::poll_fn;
 
-type InitialStepFunction<T, S> = extern "C" fn(
+type InitialStepFunction<T, V> = extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
-    closure: Arc<Closure<S>>,
-) -> cps::Result;
+    closure: Arc<Closure<V>>,
+);
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
-pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
-    let mut trampoline: Option<(StepFunction<(), S>, ContinuationFunction<(), S>)> = None;
+pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
+    let mut closure = Some(closure);
+    let mut trampoline: Option<(StepFunction<(), V>, ContinuationFunction<(), V>)> = None;
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
 
     poll_fn(move |context| {
@@ -22,11 +23,11 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
             if let Some((step, continue_)) = trampoline {
                 step(stack, continue_);
             } else {
-                unsafe {
-                    let entry_function =
-                        transmute::<_, InitialStepFunction<S, T>>(closure.entry_function());
-                    entry_function(stack, resolve, closure.clone());
-                }
+                let closure = closure.take().unwrap();
+                let entry_function =
+                    unsafe { transmute::<_, InitialStepFunction<V, T>>(closure.entry_function()) };
+
+                entry_function(stack, resolve, closure);
             }
         });
 
@@ -40,10 +41,8 @@ pub async fn from_closure<T, S>(closure: Arc<Closure<T>>) -> S {
     .await
 }
 
-extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) -> cps::Result {
+extern "C" fn resolve<T>(stack: &mut AsyncStack<T>, value: T) {
     stack.resolve(value);
-
-    cps::Result::new()
 }
 
 #[cfg(test)]
@@ -55,7 +54,7 @@ mod tests {
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
         closure: Arc<Closure<f64>>,
-    ) -> cps::Result {
+    ) {
         unsafe { continue_(stack, (*closure.payload()).into()) }
     }
 

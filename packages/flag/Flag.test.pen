@@ -1,0 +1,83 @@
+import Test'Assert
+
+import 'Flag
+
+ParseNone = \() none | error {
+  Assert'True(
+    Flag'Parse([string])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string],
+      },
+  )
+}
+
+ParseNamed = \() none | error {
+  Assert'True(
+    Flag'Parse([string "-foo", "bar"])?
+      == Flag'Set{
+        Named: {string: string "foo": "bar"},
+        Positional: [string],
+      },
+  )
+}
+
+ParseTwoNamed = \() none | error {
+  Assert'True(
+    Flag'Parse([string "-foo", "bar", "-baz", "blah"])?
+      == Flag'Set{
+        Named: {string: string "foo": "bar", "baz": "blah"},
+        Positional: [string],
+      },
+  )
+}
+
+ParsePositional = \() none | error {
+  Assert'True(
+    Flag'Parse([string "foo"])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string "foo"],
+      },
+  )
+}
+
+ParseTwoPositional = \() none | error {
+  Assert'True(
+    Flag'Parse([string "foo", "bar"])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string "foo", "bar"],
+      },
+  )
+}
+
+ParseSeparator = \() none | error {
+  Assert'True(
+    Flag'Parse([string "--"])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string],
+      },
+  )
+}
+
+ParseSeparatorWithPositional = \() none | error {
+  Assert'True(
+    Flag'Parse([string "--", "-foo"])?
+      == Flag'Set{
+        Named: {string: string},
+        Positional: [string "-foo"],
+      },
+  )
+}
+
+ParseSeparatorWithNamedAndPositional = \() none | error {
+  Assert'True(
+    Flag'Parse([string "-foo", "bar", "--", "-baz"])?
+      == Flag'Set{
+        Named: {string: string "foo": "bar"},
+        Positional: [string "-baz"],
+      },
+  )
+}

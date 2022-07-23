@@ -1,0 +1,129 @@
+import Test'Assert
+
+import 'Decode { Decode }
+import 'Value { Value }
+
+DecodeNull = \() none | error {
+  Assert'True(Decode("null")? == Value'New(none))
+}
+
+DecodeTrue = \() none | error {
+  Assert'True(Decode("true")? == Value'New(true))
+}
+
+DecodeFalse = \() none | error {
+  Assert'True(Decode("false")? == Value'New(false))
+}
+
+DecodeInteger = \() none | error {
+  Assert'True(Decode("0")? == Value'New(0))?
+  Assert'True(Decode("1")? == Value'New(1))?
+  Assert'True(Decode("9")? == Value'New(9))?
+  Assert'True(Decode("42")? == Value'New(42))
+}
+
+DecodeNegativeInteger = \() none | error {
+  Assert'True(Decode("-0")? == Value'New(-0))?
+  Assert'True(Decode("-1")? == Value'New(-1))?
+  Assert'True(Decode("-42")? == Value'New(-42))
+}
+
+DecodeDecimal = \() none | error {
+  Assert'True(Decode("0.05")? == Value'New(0.05))?
+  Assert'True(Decode("1.05")? == Value'New(1.05))?
+  Assert'True(Decode("42.05")? == Value'New(42.05))
+}
+
+DecodeEmptyString = \() none | error {
+  Assert'True(Decode("\"\"")? == Value'New(""))
+}
+
+DecodeString = \() none | error {
+  Assert'True(Decode("\"foo\"")? == Value'New("foo"))
+}
+
+FailToDecodeStringWithUnexpectedEnd = \() none | error {
+  Assert'True(
+    if r = Decode("\"") as error {
+      if s = source(r) as string {
+        s == "unexpected end of string"
+      } else {
+        false
+      }
+    } else {
+      false
+    },
+  )
+}
+
+DecodeStringWithDoubleQuote = \() none | error {
+  Assert'True(Decode("\"\\\"\"")? == Value'New("\""))
+}
+
+DecodeArray = \() none | error {
+  Assert'True(Decode("[]")? == Value'New([Value]))?
+  Assert'True(Decode("[42]")? == Value'New([Value Value'New(42)]))?
+  Assert'True(Decode("[ 42 ]")? == Value'New([Value Value'New(42)]))?
+  Assert'True(Decode("[0,1]")? == Value'New([Value Value'New(0), Value'New(1)]))?
+  Assert'True(Decode("[0 , 1]")? == Value'New([Value Value'New(0), Value'New(1)]))?
+  Assert'True(Decode("[0, 1, 2]")? == Value'New([Value Value'New(0), Value'New(1), Value'New(2)]))
+}
+
+DecodeNestedArray = \() none | error {
+  Assert'True(Decode("[[]]")? == Value'New([Value Value'New([Value])]))
+}
+
+FailToDecodeTrailingCommaInArray = \() none | error {
+  Assert'Error(Decode("[0,]"))
+}
+
+DecodeEmptyObject = \() none | error {
+  Assert'True(Decode("{}")? == Value'New({string: Value}))
+}
+
+DecodeObjectWithEntry = \() none | error {
+  Assert'True(Decode("{\"\": null}")? == Value'New({string: Value "": Value'New(none)}))
+}
+
+DecodeObjectWithTwoEntries = \() none | error {
+  Assert'True(
+    Decode("{\"foo\": null, \"bar\": null}")?
+      == Value'New({string: Value "foo": Value'New(none), "bar": Value'New(none)}),
+  )
+}
+
+DecodeObjectWithSpaces = \() none | error {
+  Assert'True(
+    Decode("{ \"foo\" : null , \"bar\" : null }")?
+      == Value'New(
+        {string: Value
+          "foo": Value'New(none),
+          "bar": Value'New(none),
+        },
+      ),
+  )?
+}
+
+SkipSpace = \() none | error {
+  Assert'True(Decode(" null")? == Value'New(none))
+}
+
+SkipTab = \() none | error {
+  Assert'True(Decode("\tnull")? == Value'New(none))
+}
+
+SkipNewline = \() none | error {
+  Assert'True(Decode("\nnull")? == Value'New(none))
+}
+
+SkipSpaces = \() none | error {
+  Assert'True(Decode("  null")? == Value'New(none))
+}
+
+SkipTrailingSpaces = \() none | error {
+  Assert'True(Decode("null  ")? == Value'New(none))
+}
+
+FailUnexpectedCharacter = \() none | error {
+  Assert'True(if r = Decode("null a") as error { true } else { false })
+}

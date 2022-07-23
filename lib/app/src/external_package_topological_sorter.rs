@@ -1,4 +1,4 @@
-use crate::PackageConfiguration;
+use crate::{error::ApplicationError, PackageConfiguration};
 use petgraph::{algo::toposort, Graph};
 use std::{collections::BTreeMap, error::Error};
 
@@ -21,9 +21,8 @@ pub fn sort(
         }
     }
 
-    // TODO Return an error on cycle.
     Ok(toposort(&graph, None)
-        .unwrap()
+        .map_err(|_| ApplicationError::PackageDependencyCycle)?
         .into_iter()
         .map(|index| graph[index].clone())
         .collect())

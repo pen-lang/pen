@@ -2,6 +2,7 @@ use super::{any::Any, arc::Arc};
 use core::ops::Deref;
 
 #[repr(C)]
+#[derive(Clone)]
 pub struct BoxAny {
     inner: Arc<BoxAnyInner>,
 }
@@ -23,5 +24,17 @@ impl Deref for BoxAny {
 
     fn deref(&self) -> &Any {
         &self.inner.value
+    }
+}
+
+impl From<Any> for BoxAny {
+    fn from(x: Any) -> Self {
+        Self::new(x)
+    }
+}
+
+impl From<BoxAny> for Any {
+    fn from(x: BoxAny) -> Self {
+        x.inner.value.clone()
     }
 }

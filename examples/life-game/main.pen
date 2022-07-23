@@ -4,20 +4,21 @@ import Core'Number
 import Core'String
 import Os'Context { Context }
 import Os'File
+import Os'Process
 import Os'Random
 import Os'Time
-import Os'Process
 
 import 'lifeGame
 
-rows = \() number { 20 }
-columns = \() number { 40 }
+rows = \() number { 40 }
+
+columns = \() number { 80 }
 
 main = \(ctx context) none {
   if e = run(ctx.Os) as none {
     none
   } else {
-    Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
+    _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
     Process'Exit(ctx.Os, 1)
   }
 }

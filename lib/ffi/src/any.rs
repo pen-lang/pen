@@ -1,3 +1,24 @@
+use crate::{Arc, Boolean, BoxAny, ByteString, List, None, Number};
+
+extern "C" {
+    fn pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_is_none(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_is_list(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_is_number(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_is_string(any: BoxAny) -> Boolean;
+
+    fn pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_to_list(any: BoxAny) -> Arc<List>;
+    fn pen_ffi_any_to_number(any: BoxAny) -> Number;
+    fn pen_ffi_any_to_string(any: BoxAny) -> ByteString;
+
+    fn pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
+    fn pen_ffi_any_from_none() -> BoxAny;
+    fn pen_ffi_any_from_list(value: Arc<List>) -> BoxAny;
+    fn pen_ffi_any_from_number(value: Number) -> BoxAny;
+    fn pen_ffi_any_from_string(value: ByteString) -> BoxAny;
+}
+
 #[repr(C)]
 pub struct Any {
     type_information: &'static TypeInformation,
@@ -18,6 +39,26 @@ impl Any {
 
     pub fn payload(&self) -> &u64 {
         &self.payload
+    }
+
+    pub fn is_boolean(&self) -> bool {
+        unsafe { pen_ffi_any_is_boolean(self.clone().into()) }.into()
+    }
+
+    pub fn is_none(&self) -> bool {
+        unsafe { pen_ffi_any_is_none(self.clone().into()) }.into()
+    }
+
+    pub fn is_list(&self) -> bool {
+        unsafe { pen_ffi_any_is_list(self.clone().into()) }.into()
+    }
+
+    pub fn is_number(&self) -> bool {
+        unsafe { pen_ffi_any_is_number(self.clone().into()) }.into()
+    }
+
+    pub fn is_string(&self) -> bool {
+        unsafe { pen_ffi_any_is_string(self.clone().into()) }.into()
     }
 }
 
@@ -40,22 +81,95 @@ impl Drop for Any {
 pub struct TypeInformation {
     pub clone: extern "C" fn(u64) -> u64,
     pub drop: extern "C" fn(u64),
+    pub synchronize: extern "C" fn(u64),
 }
-
-#[pen_ffi_macro::any(crate = "crate")]
-#[derive(Clone, Default)]
-struct Dummy {}
 
 impl Default for Any {
     fn default() -> Self {
-        Dummy::default().into()
+        None::default().into()
+    }
+}
+
+impl From<Boolean> for Any {
+    fn from(value: Boolean) -> Self {
+        unsafe { pen_ffi_any_from_boolean(value) }.into()
+    }
+}
+
+impl From<None> for Any {
+    fn from(_: None) -> Self {
+        unsafe { pen_ffi_any_from_none() }.into()
+    }
+}
+
+impl From<Arc<List>> for Any {
+    fn from(value: Arc<List>) -> Self {
+        unsafe { pen_ffi_any_from_list(value) }.into()
+    }
+}
+
+impl From<Number> for Any {
+    fn from(value: Number) -> Self {
+        unsafe { pen_ffi_any_from_number(value) }.into()
+    }
+}
+
+impl From<ByteString> for Any {
+    fn from(value: ByteString) -> Self {
+        unsafe { pen_ffi_any_from_string(value) }.into()
+    }
+}
+
+impl TryFrom<Any> for Boolean {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_boolean() {
+            Ok(unsafe { pen_ffi_any_to_boolean(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for Arc<List> {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_list() {
+            Ok(unsafe { pen_ffi_any_to_list(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for Number {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_number() {
+            Ok(unsafe { pen_ffi_any_to_number(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for ByteString {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_string() {
+            Ok(unsafe { pen_ffi_any_to_string(value.into()) })
+        } else {
+            Err(())
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::None;
-
     use super::*;
 
     mod box_ {
@@ -174,10 +288,18 @@ mod tests {
         }
     }
 
-    fn drop_send_and_sync(_: impl Send + Sync) {}
+    mod send_sync {
+        use super::*;
 
-    #[test]
-    fn implement_send_and_sync() {
-        drop_send_and_sync(Any::from(None::new()));
+        #[pen_ffi_macro::any(crate = "crate")]
+        #[derive(Clone, Default)]
+        struct Dummy {}
+
+        fn drop_send_and_sync(_: impl Send + Sync) {}
+
+        #[test]
+        fn implement_send_and_sync() {
+            drop_send_and_sync(Any::from(Dummy::default()));
+        }
     }
 }

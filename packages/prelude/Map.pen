@@ -1,0 +1,529 @@
+import foreign "c" _pen_prelude_combine_hashes \(number, number) number
+import foreign "c" _pen_prelude_hash_number \(number) number
+import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
+
+type Map {
+  hamt hamt
+  size_ number
+}
+
+type Empty {}
+
+type keyValue {
+  key any
+  value any
+}
+
+type MapContext {
+  equalKeys \(any, any) boolean
+  equalValues \(any, any) boolean
+  hashKey \(any) number
+  hashValue \(any) number
+}
+
+type MapIterator {
+  key any
+  value any
+  rest \() MapIterator | none
+}
+
+type hamtUpdate {
+  hamt hamt
+  resized boolean
+}
+
+type entry = keyValue | hamt | none
+
+type hamt {
+  entry1 entry
+  entry2 entry
+  entry3 entry
+  entry4 entry
+  entry5 entry
+  entry6 entry
+  entry7 entry
+  entry8 entry
+  entry9 entry
+  entry10 entry
+  entry11 entry
+  entry12 entry
+  entry13 entry
+  entry14 entry
+  entry15 entry
+  entry16 entry
+  entry17 entry
+  entry18 entry
+  entry19 entry
+  entry20 entry
+  entry21 entry
+  entry22 entry
+  entry23 entry
+  entry24 entry
+  entry25 entry
+  entry26 entry
+  entry27 entry
+  entry28 entry
+  entry29 entry
+  entry30 entry
+  entry31 entry
+  entry32 entry
+}
+
+maxLevel = \() number { 60 / 5 }
+
+NewMapContext = \(
+  ek \(any, any) boolean,
+  hk \(any) number,
+  ev \(any, any) boolean,
+  hv \(any) number,
+) MapContext {
+  MapContext{
+    equalKeys: ek,
+    equalValues: ev,
+    hashKey: hk,
+    hashValue: hv,
+  }
+}
+
+NewMap = \() Map {
+  Map{hamt: newHamt(), size_: 0}
+}
+
+newHamt = \() hamt {
+  hamt{
+    entry1: none,
+    entry2: none,
+    entry3: none,
+    entry4: none,
+    entry5: none,
+    entry6: none,
+    entry7: none,
+    entry8: none,
+    entry9: none,
+    entry10: none,
+    entry11: none,
+    entry12: none,
+    entry13: none,
+    entry14: none,
+    entry15: none,
+    entry16: none,
+    entry17: none,
+    entry18: none,
+    entry19: none,
+    entry20: none,
+    entry21: none,
+    entry22: none,
+    entry23: none,
+    entry24: none,
+    entry25: none,
+    entry26: none,
+    entry27: none,
+    entry28: none,
+    entry29: none,
+    entry30: none,
+    entry31: none,
+    entry32: none,
+  }
+}
+
+GetMap = \(ctx MapContext, map Map, key any) any {
+  getValue(ctx, map.hamt, key, 1, 1)
+}
+
+# A layer is composed of a tree of HAMT and used to re-hash keys.
+# A level is composed of a node of HAMT and used to segment hash values into entry indexes.
+getValue = \(ctx MapContext, hamt hamt, key any, layer number, level number) any {
+  if e = getEntry(hamt, hamtIndex(ctx, key, layer, level)) as keyValue {
+    if ctx.equalKeys(e.key, key) {
+      e.value
+    } else {
+      Empty{}
+    }
+  } else if hamt {
+    if level > maxLevel() {
+      getValue(ctx, e, key, layer + 1, 1)
+    } else {
+      getValue(ctx, e, key, layer, level + 1)
+    }
+  } else if none {
+    Empty{}
+  }
+}
+
+SetMap = \(
+  ctx MapContext,
+  map Map,
+  key any,
+  value any,
+) Map {
+  # Deconstruct a size for optimization.
+  s = map.size_
+  u = setKeyValue(ctx, map.hamt, key, value, 1, 1)
+
+  Map{
+    hamt: u.hamt,
+    size_: s + if u.resized { 1 } else { 0 },
+  }
+}
+
+setKeyValue = \(
+  ctx MapContext,
+  hamt hamt,
+  key any,
+  value any,
+  layer number,
+  level number,
+) hamtUpdate {
+  i = hamtIndex(ctx, key, layer, level)
+
+  # Deconstruct an entry and the rest for optimization.
+  e = getEntry(hamt, i)
+  hamt = setEntry(hamt, i, none)
+
+  update = \(e entry, b boolean) hamtUpdate {
+    hamtUpdate{hamt: setEntry(hamt, i, e), resized: b}
+  }
+
+  if e = e as keyValue {
+    if ctx.equalKeys(e.key, key) {
+      update(keyValue{key: key, value: value}, false)
+    } else {
+      l = level + 1
+      u = setKeyValue(ctx, newHamt(), e.key, e.value, layer, l)
+      u = setKeyValue(ctx, u.hamt, key, value, layer, l)
+
+      update(u.hamt, true)
+    }
+  } else if hamt {
+    u = if level > maxLevel() {
+      setKeyValue(ctx, e, key, value, layer + 1, 1)
+    } else {
+      setKeyValue(ctx, e, key, value, layer, level + 1)
+    }
+
+    update(u.hamt, u.resized)
+  } else if none {
+    update(keyValue{key: key, value: value}, true)
+  }
+}
+
+DeleteMap = \(
+  ctx MapContext,
+  map Map,
+  key any,
+) Map {
+  u = deleteKey(ctx, map.hamt, key, 1, 1)
+
+  Map{
+    hamt: u.hamt,
+    size_: map.size_ - if u.resized { 1 } else { 0 },
+  }
+}
+
+deleteKey = \(ctx MapContext, hamt hamt, key any, layer number, level number) hamtUpdate {
+  i = hamtIndex(ctx, key, layer, level)
+  update = \(e entry, b boolean) hamtUpdate {
+    hamtUpdate{hamt: setEntry(hamt, i, e), resized: b}
+  }
+
+  if e = getEntry(hamt, i) as keyValue {
+    if ctx.equalKeys(e.key, key) {
+      update(none, true)
+    } else {
+      hamtUpdate{hamt: hamt, resized: false}
+    }
+  } else if hamt {
+    u = if level > maxLevel() {
+      deleteKey(ctx, e, key, layer + 1, 1)
+    } else {
+      deleteKey(ctx, e, key, layer, level + 1)
+    }
+
+    update(normalizeHamt(u.hamt), u.resized)
+  } else if none {
+    hamtUpdate{hamt: hamt, resized: false}
+  }
+}
+
+normalizeHamt = \(h hamt) entry {
+  if e = getSingleEntry(h, 1, none) as none {
+    h
+  } else {
+    e
+  }
+}
+
+getSingleEntry = \(h hamt, i number, e entry) entry {
+  if i > 32 {
+    e
+  } else {
+    if ee = getEntry(h, i) as none {
+      getSingleEntry(h, i + 1, e)
+    } else {
+      if _ = e as none {
+        getSingleEntry(h, i + 1, ee)
+      } else {
+        none
+      }
+    }
+  }
+}
+
+MergeMaps = \(ctx MapContext, x Map, y Map) Map {
+  mergeHamt(ctx, x, y.hamt, 1)
+}
+
+mergeHamt = \(ctx MapContext, m Map, h hamt, i number) Map {
+  if i > 32 {
+    m
+  } else {
+    mergeHamt(
+      ctx,
+      if e = getEntry(h, i) as keyValue {
+        SetMap(ctx, m, e.key, e.value)
+      } else if hamt {
+        mergeHamt(ctx, m, e, 1)
+      } else if none {
+        m
+      },
+      h,
+      i + 1,
+    )
+  }
+}
+
+EqualMaps = \(ctx MapContext, x Map, y Map) boolean {
+  x.size_ == y.size_ & equalHamts(ctx, x.hamt, y.hamt, 1)
+}
+
+equalHamts = \(ctx MapContext, h1 hamt, h2 hamt, i number) boolean {
+  if i > 32 {
+    true
+  } else {
+    rest = \() boolean { equalHamts(ctx, h1, h2, i + 1) }
+
+    if e1 = getEntry(h1, i) as keyValue {
+      if e2 = getEntry(h2, i) as keyValue {
+        ctx.equalKeys(e1.key, e2.key) & ctx.equalValues(e1.value, e2.value) & rest()
+      } else {
+        false
+      }
+    } else if hamt {
+      if e2 = getEntry(h2, i) as hamt {
+        equalHamts(ctx, e1, e2, 1) & rest()
+      } else {
+        false
+      }
+    } else if none {
+      if _ = getEntry(h2, i) as none {
+        rest()
+      } else {
+        false
+      }
+    }
+  }
+}
+
+HashMap = \(ctx MapContext, m Map) number {
+  headerHash = 5
+
+  hashHamt(ctx, m.hamt, 1, headerHash)
+}
+
+hashHamt = \(ctx MapContext, h hamt, index number, hash number) number {
+  if index > 32 {
+    hash
+  } else {
+    if e = getEntry(h, index) as keyValue {
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashKey(e.key))
+      hash = _pen_prelude_combine_hashes(hash, ctx.hashValue(e.value))
+
+      hashHamt(ctx, h, index + 1, hash)
+    } else if hamt {
+      hashHamt(
+        ctx,
+        h,
+        index + 1,
+        _pen_prelude_combine_hashes(hash, hashHamt(ctx, e, 1, hash)),
+      )
+    } else if none {
+      hashHamt(ctx, h, index + 1, hash)
+    }
+  }
+}
+
+IterateMap = \(x Map) MapIterator | none {
+  iterateHamt(x.hamt, 1, \() MapIterator | none { none })
+}
+
+iterateHamt = \(h hamt, i number, rest \() MapIterator | none) MapIterator | none {
+  if i > 32 {
+    rest()
+  } else {
+    rest = \() MapIterator | none { iterateHamt(h, i + 1, rest) }
+
+    if e = getEntry(h, i) as keyValue {
+      MapIterator{
+        key: e.key,
+        value: e.value,
+        rest: rest,
+      }
+    } else if hamt {
+      iterateHamt(e, 1, rest)
+    } else if none {
+      rest()
+    }
+  }
+}
+
+MapIteratorKey = \(i MapIterator) any { i.key }
+
+MapIteratorValue = \(i MapIterator) any { i.value }
+
+MapIteratorRest = \(i MapIterator) MapIterator | none { i.rest() }
+
+MapSize = \(x Map) number { x.size_ }
+
+hamtIndex = \(ctx MapContext, key any, layer number, level number) number {
+  _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)
+}
+
+getEntry = \(hamt hamt, index number) entry {
+  if index == 1 {
+    hamt.entry1
+  } else if index == 2 {
+    hamt.entry2
+  } else if index == 3 {
+    hamt.entry3
+  } else if index == 4 {
+    hamt.entry4
+  } else if index == 5 {
+    hamt.entry5
+  } else if index == 6 {
+    hamt.entry6
+  } else if index == 7 {
+    hamt.entry7
+  } else if index == 8 {
+    hamt.entry8
+  } else if index == 9 {
+    hamt.entry9
+  } else if index == 10 {
+    hamt.entry10
+  } else if index == 11 {
+    hamt.entry11
+  } else if index == 12 {
+    hamt.entry12
+  } else if index == 13 {
+    hamt.entry13
+  } else if index == 14 {
+    hamt.entry14
+  } else if index == 15 {
+    hamt.entry15
+  } else if index == 16 {
+    hamt.entry16
+  } else if index == 17 {
+    hamt.entry17
+  } else if index == 18 {
+    hamt.entry18
+  } else if index == 19 {
+    hamt.entry19
+  } else if index == 20 {
+    hamt.entry20
+  } else if index == 21 {
+    hamt.entry21
+  } else if index == 22 {
+    hamt.entry22
+  } else if index == 23 {
+    hamt.entry23
+  } else if index == 24 {
+    hamt.entry24
+  } else if index == 25 {
+    hamt.entry25
+  } else if index == 26 {
+    hamt.entry26
+  } else if index == 27 {
+    hamt.entry27
+  } else if index == 28 {
+    hamt.entry28
+  } else if index == 29 {
+    hamt.entry29
+  } else if index == 30 {
+    hamt.entry30
+  } else if index == 31 {
+    hamt.entry31
+  } else if index == 32 {
+    hamt.entry32
+  } else {
+    none
+  }
+}
+
+setEntry = \(hamt hamt, index number, entry entry) hamt {
+  if index == 1 {
+    hamt{...hamt, entry1: entry}
+  } else if index == 2 {
+    hamt{...hamt, entry2: entry}
+  } else if index == 3 {
+    hamt{...hamt, entry3: entry}
+  } else if index == 4 {
+    hamt{...hamt, entry4: entry}
+  } else if index == 5 {
+    hamt{...hamt, entry5: entry}
+  } else if index == 6 {
+    hamt{...hamt, entry6: entry}
+  } else if index == 7 {
+    hamt{...hamt, entry7: entry}
+  } else if index == 8 {
+    hamt{...hamt, entry8: entry}
+  } else if index == 9 {
+    hamt{...hamt, entry9: entry}
+  } else if index == 10 {
+    hamt{...hamt, entry10: entry}
+  } else if index == 11 {
+    hamt{...hamt, entry11: entry}
+  } else if index == 12 {
+    hamt{...hamt, entry12: entry}
+  } else if index == 13 {
+    hamt{...hamt, entry13: entry}
+  } else if index == 14 {
+    hamt{...hamt, entry14: entry}
+  } else if index == 15 {
+    hamt{...hamt, entry15: entry}
+  } else if index == 16 {
+    hamt{...hamt, entry16: entry}
+  } else if index == 17 {
+    hamt{...hamt, entry17: entry}
+  } else if index == 18 {
+    hamt{...hamt, entry18: entry}
+  } else if index == 19 {
+    hamt{...hamt, entry19: entry}
+  } else if index == 20 {
+    hamt{...hamt, entry20: entry}
+  } else if index == 21 {
+    hamt{...hamt, entry21: entry}
+  } else if index == 22 {
+    hamt{...hamt, entry22: entry}
+  } else if index == 23 {
+    hamt{...hamt, entry23: entry}
+  } else if index == 24 {
+    hamt{...hamt, entry24: entry}
+  } else if index == 25 {
+    hamt{...hamt, entry25: entry}
+  } else if index == 26 {
+    hamt{...hamt, entry26: entry}
+  } else if index == 27 {
+    hamt{...hamt, entry27: entry}
+  } else if index == 28 {
+    hamt{...hamt, entry28: entry}
+  } else if index == 29 {
+    hamt{...hamt, entry29: entry}
+  } else if index == 30 {
+    hamt{...hamt, entry30: entry}
+  } else if index == 31 {
+    hamt{...hamt, entry31: entry}
+  } else if index == 32 {
+    hamt{...hamt, entry32: entry}
+  } else {
+    hamt
+  }
+}

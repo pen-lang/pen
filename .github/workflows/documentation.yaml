@@ -6,12 +6,11 @@ on:
   pull_request:
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@main
+      - run: tools/ci/github/setup.sh
       - run: tools/build_documents.sh
-      - uses: peaceiris/actions-mdbook@v1
-      - run: cd doc && mdbook build
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:

@@ -1,19 +1,15 @@
-use crate::{error::CompileError, reference_count, types};
-use fnv::FnvHashMap;
+use crate::{context::Context, error::CompileError, reference_count, type_};
 
-pub const TYPE_INFORMATION_CLONE_FUNCTION_FIELD_INDEX: usize = 0;
-pub const TYPE_INFORMATION_DROP_FUNCTION_FIELD_INDEX: usize = 1;
-
-pub fn compile_type_information_global_variable(
-    module_builder: &fmm::build::ModuleBuilder,
+pub fn compile_global_variable(
+    context: &Context,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
-    module_builder.define_variable(
-        types::compile_type_id(type_),
+    context.module_builder().define_variable(
+        type_::compile_id(type_),
         fmm::build::record(vec![
-            reference_count::compile_variant_clone_function(module_builder, type_, types)?,
-            reference_count::compile_variant_drop_function(module_builder, type_, types)?,
+            reference_count::variant::compile_clone_function(context, type_)?,
+            reference_count::variant::compile_drop_function(context, type_)?,
+            reference_count::variant::compile_synchronize_function(context, type_)?,
         ]),
         false,
         fmm::ir::Linkage::Weak,
@@ -21,4 +17,33 @@ pub fn compile_type_information_global_variable(
     );
 
     Ok(())
+}
+
+pub fn get_clone_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 0)
+}
+
+pub fn get_drop_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 1)
+}
+
+pub fn get_synchronize_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_function(builder, tag, 2)
+}
+
+fn get_function(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+    index: usize,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(builder.deconstruct_record(builder.load(tag)?, index)?)
 }

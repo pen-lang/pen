@@ -1,0 +1,11 @@
+[build]
+rustflags = ["-A", "improper_ctypes", "-D", "improper_ctypes_definitions"]
+
+[target.i686-unknown-linux-musl]
+linker = "rust-lld"
+
+[target.x86_64-unknown-linux-musl]
+linker = "rust-lld"
+
+[target.aarch64-unknown-linux-musl]
+linker = "rust-lld"

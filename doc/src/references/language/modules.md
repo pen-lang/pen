@@ -1,12 +1,12 @@
 # Modules
 
-Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks to make them comprehensive and reusable.
+Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks.
 
-Each source file suffixed with a `.pen` file extension composes a module. Modules are exported to and imported from other modules.
+Each source file suffixed with a `.pen` file extension composes a module. Modules can import functions and types from other modules.
 
 ## Exporting functions and types from modules
 
-You can name functions and types in an upper camel case for them to be accessible from other modules by [import statements](#importing-functions-and-types-from-modules).
+You can name functions and types in an upper camel case for them to be accessible from other modules.
 
 ```pen
 type Foo {
@@ -22,9 +22,9 @@ Foo = \() number {
 
 ## Importing functions and types from modules
 
-In order to import functions and types from other modules, place [import statements](/references/language/syntax.md#import-statement) at the top of the current module.
+In order to import functions and types from other modules, place [import statements](/references/language/syntax.md#import-statement) at the top of modules.
 
-The first components in the statements are names of external packages you declare in [package configuration files][package-configuration] (`Foo`.) They are omitted if the imported modules are in the same packages. The rest of the components are directory names where the modules exist (`Bar`) and the modules' filenames without their file extensions (`Baz` for `Baz.pen`.)
+The first components in the statements are names of external packages you declare in [package configuration files][package-configuration] (`Foo`.) They are omitted if imported modules are in the same packages. The rest of the components are directory names where the modules exist (`Bar`) and the modules' filenames without their file extensions (`Baz` for `Baz.pen`.)
 
 ```pen
 import Foo'Bar'Baz
@@ -64,11 +64,7 @@ import Foo'Bar'Baz
 
 #### Private modules
 
-For modules to be private and not accessible from other packages, you can give the modules names which start with lower case letters (e.g. `fooBar`).
-
-```pen
-import 'fooBar
-```
+For modules to be private and not accessible from other packages, you can name them in lower camel case (e.g. `fooBar`.)
 
 ### Custom prefixes
 
@@ -82,7 +78,7 @@ import Foo'Bar'Baz as Blah
 
 ### Unqualified import
 
-You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported entities have the same names like `import 'MyType { MyType }`.
+You can import functions and types without prefixes by putting their names between `{` and `}` in [import statements](/references/language/syntax.md#import-statement). This is especially useful when module names and imported functions or types have the same names like `import 'MyType { MyType }`.
 
 ```pen
 import Foo'Bar { Foo, Bar }

@@ -1,0 +1,54 @@
+# This module provides bitwise operations.
+#
+# Most functions defined in this module take arguments of 64-bit integers.
+# They can be converted from and into integers represented in IEEE-754 of a
+# `number` type.
+
+import foreign "c" _pen_core_bit_and \(number, number) number
+import foreign "c" _pen_core_bit_or \(number, number) number
+import foreign "c" _pen_core_bit_xor \(number, number) number
+import foreign "c" _pen_core_bit_not \(number) number
+import foreign "c" _pen_core_bit_left_shift \(number, number) number
+import foreign "c" _pen_core_bit_right_shift \(number, number) number
+import foreign "c" _pen_core_bit_to_integer_64 \(number) number
+import foreign "c" _pen_core_bit_from_integer_64 \(number) number
+
+# Calculate bitwise "and" given two 64-bit integers.
+And = \(x number, y number) number {
+  _pen_core_bit_and(x, y)
+}
+
+# Calculate bitwise "or" given two 64-bit integers.
+Or = \(x number, y number) number {
+  _pen_core_bit_or(x, y)
+}
+
+# Calculate bitwise exclusive-"or" given two 64-bit integers.
+Xor = \(x number, y number) number {
+  _pen_core_bit_xor(x, y)
+}
+
+# Calculate bitwise "not" given two 64-bit integers.
+Not = \(x number) number {
+  _pen_core_bit_not(x)
+}
+
+# Calculate unsigned left shift given a 64-bit integer.
+LeftShift = \(x number, n number) number {
+  _pen_core_bit_left_shift(x, n)
+}
+
+# Calculate unsigned right shift given a 64-bit integer.
+RightShift = \(x number, n number) number {
+  _pen_core_bit_right_shift(x, n)
+}
+
+# Convert an integer in IEEE-754 to a 64-bit integer.
+ToInteger64 = \(x number) number {
+  _pen_core_bit_to_integer_64(x)
+}
+
+# Convert a 64-bit integer to an integer in IEEE-754.
+FromInteger64 = \(x number) number {
+  _pen_core_bit_from_integer_64(x)
+}

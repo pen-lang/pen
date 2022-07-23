@@ -1,15 +1,17 @@
 mod error;
-mod import_compiler;
+mod import;
 mod imported_module;
-mod module_compiler;
-mod module_prefix_collector;
-mod name_qualifier;
-mod prelude_module_modifier;
+mod module;
+mod module_prefix;
+mod name;
+mod number;
+mod prelude_module;
+mod string;
 
 use error::CompileError;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::ir::{definition_qualifier, type_qualifier},
+    analysis::{function_definition_qualifier, type_qualifier},
     ir,
 };
 use imported_module::ImportedModule;
@@ -29,25 +31,25 @@ pub fn compile(
                     .get(import.module_path())
                     .ok_or_else(|| CompileError::ModuleNotFound(import.module_path().clone()))?
                     .clone(),
-                module_prefix_collector::calculate(import),
+                module_prefix::compile(import),
                 import.unqualified_names().iter().cloned().collect(),
             ))
         })
         .collect::<Result<Vec<_>, _>>()?;
-    let module = module_compiler::compile(module)?;
-    let module = import_compiler::compile(&module, &imported_modules, prelude_module_interfaces);
+    let module = module::compile(module)?;
+    let module = import::compile(&module, &imported_modules, prelude_module_interfaces);
 
-    let module = definition_qualifier::qualify(&module, prefix);
+    let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
 
     Ok(module)
 }
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
-    let module = module_compiler::compile(module)?;
-    let module = definition_qualifier::qualify(&module, prefix);
+    let module = module::compile(module)?;
+    let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
-    let module = prelude_module_modifier::modify(&module);
+    let module = prelude_module::modify(&module);
 
     Ok(module)
 }
@@ -78,7 +80,12 @@ mod tests {
         assert_eq!(
             compile(
                 &ast::Module::new(
-                    vec![ast::Import::new(path.clone(), None, vec![])],
+                    vec![ast::Import::new(
+                        path.clone(),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
                     vec![],
                     vec![],
                     vec![],

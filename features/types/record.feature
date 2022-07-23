@@ -105,3 +105,29 @@ Feature: Record
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Propagate openness of a record
+    Given a file named "Foo.pen" with:
+    """pen
+    type Foo {
+      X number
+    }
+    """
+    And a file named "Bar.pen" with:
+    """pen
+    import 'Foo
+
+    Bar = \() Foo'Foo {
+      Foo'Foo{X: 42}
+    }
+    """
+    And a file named "Baz.pen" with:
+    """pen
+    import 'Bar
+
+    f = \() number {
+      Bar'Bar().X
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

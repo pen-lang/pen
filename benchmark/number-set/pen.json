@@ -1,0 +1,6 @@
+{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os"
+  }
+}

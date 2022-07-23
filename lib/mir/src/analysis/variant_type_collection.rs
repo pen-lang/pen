@@ -3,13 +3,13 @@ use fnv::FnvHashSet;
 
 pub fn collect_variant_types(module: &Module) -> FnvHashSet<Type> {
     module
-        .definitions()
+        .function_definitions()
         .iter()
         .flat_map(collect_from_definition)
         .collect()
 }
 
-fn collect_from_definition(definition: &Definition) -> FnvHashSet<Type> {
+fn collect_from_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
     collect_from_expression(definition.body())
 }
 
@@ -27,7 +27,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(operation.rhs()))
             .collect(),
-        Expression::DropVariables(drop) => collect_from_expression(drop.expression()),
+        Expression::DropVariables(drop) => collect_from_drop_variables(drop),
         Expression::Call(call) => collect_from_expression(call.function())
             .iter()
             .cloned()
@@ -48,12 +48,18 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .into_iter()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
-        Expression::Record(record) => record
-            .fields()
-            .iter()
-            .flat_map(collect_from_expression)
-            .collect(),
+        Expression::Synchronize(synchronize) => collect_from_expression(synchronize.expression()),
+        Expression::Record(record) => collect_from_record(record),
         Expression::RecordField(field) => collect_from_expression(field.record()),
+        Expression::RecordUpdate(update) => collect_from_expression(update.record())
+            .into_iter()
+            .chain(
+                update
+                    .fields()
+                    .iter()
+                    .flat_map(|field| collect_from_expression(field.expression())),
+            )
+            .collect(),
         Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))
@@ -75,8 +81,10 @@ fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
     collect_from_expression(case.argument())
         .into_iter()
         .chain(case.alternatives().iter().flat_map(|alternative| {
-            [alternative.type_().clone()]
-                .into_iter()
+            alternative
+                .types()
+                .iter()
+                .cloned()
                 .chain(collect_from_expression(alternative.expression()))
         }))
         .chain(
@@ -87,26 +95,34 @@ fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
         .collect()
 }
 
+fn collect_from_drop_variables(drop: &DropVariables) -> FnvHashSet<Type> {
+    collect_from_expression(drop.expression())
+}
+
+fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
+    record
+        .fields()
+        .iter()
+        .flat_map(collect_from_expression)
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::Type;
+    use crate::{test::ModuleFake, types::Type};
 
     #[test]
     fn collect_from_case_argument() {
         assert_eq!(
-            collect_variant_types(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
+            collect_variant_types(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
                     "f",
                     vec![],
                     Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None),
                     Type::None,
-                )],
-            )),
+                )
+            ],)),
             [Type::Number].into_iter().collect()
         );
     }
@@ -114,12 +130,8 @@ mod tests {
     #[test]
     fn collect_from_try_operation_operand() {
         assert_eq!(
-            collect_variant_types(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
+            collect_variant_types(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -129,8 +141,8 @@ mod tests {
                         Variable::new("error"),
                     ),
                     Type::None,
-                )],
-            )),
+                )
+            ],)),
             [Type::Number].into_iter().collect()
         );
     }
@@ -138,12 +150,8 @@ mod tests {
     #[test]
     fn collect_from_try_operation_then_expression() {
         assert_eq!(
-            collect_variant_types(&Module::new(
-                vec![],
-                vec![],
-                vec![],
-                vec![],
-                vec![Definition::new(
+            collect_variant_types(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -153,8 +161,8 @@ mod tests {
                         Variant::new(Type::Boolean, Variable::new("error")),
                     ),
                     Type::None,
-                )],
-            )),
+                )
+            ],)),
             [Type::Boolean, Type::Number].into_iter().collect()
         );
     }

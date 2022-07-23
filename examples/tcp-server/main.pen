@@ -2,11 +2,11 @@ import Console'Print
 import Os'Context { Context }
 import Os'Environment
 import Os'File
+import Os'Process
 import Os'Tcp
 import Os'Tcp'AcceptedStream
 import Os'Tcp'Listener { Listener }
 import Os'Tcp'Stream { Stream }
-import Os'Process
 
 import 'arguments
 
@@ -14,7 +14,7 @@ main = \(ctx context) none {
   if e = run(ctx.Os) as none {
     none
   } else {
-    Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
+    _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
     Process'Exit(ctx.Os, 1)
   }
 }

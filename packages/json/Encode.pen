@@ -1,0 +1,67 @@
+import Core'String
+
+import 'Value { Value }
+
+import foreign "c" _pen_json_encode_number \(number) string
+
+type objectEntry {
+  key string
+  value Value
+}
+
+# Encode a JSON value.
+Encode = \(v Value) string {
+  String'Concatenate(value(v))
+}
+
+value = \(v Value) [string] {
+  if v = Value'Raw(v) as number {
+    [string _pen_json_encode_number(v)]
+  } else if boolean {
+    [string if v { "true" } else { "false" }]
+  } else if none {
+    [string "null"]
+  } else if string {
+    string_(v)
+  } else if [Value] {
+    array(v)
+  } else if {string: Value} {
+    object(v)
+  }
+}
+
+string_ = \(s string) [string] {
+  [string "\"", s, "\""]
+}
+
+array = \(vs [Value]) [string] {
+  if [_, ...ss] = arrayElements(vs) {
+    [string "[", ...ss, "]"]
+  } else {
+    [string "[]"]
+  }
+}
+
+arrayElements = \(vs [Value]) [string] {
+  if [v, ...vs] = vs {
+    [string ",", ...value(v()), ...arrayElements(vs)]
+  } else {
+    [string]
+  }
+}
+
+object = \(vs {string: Value}) [string] {
+  if [_, ...ss] = objectEntries([objectEntry objectEntry{key: k, value: v} for k, v in vs]) {
+    [string "{", ...ss, "}"]
+  } else {
+    [string "{}"]
+  }
+}
+
+objectEntries = \(es [objectEntry]) [string] {
+  if [e, ...es] = es {
+    [string ",", ...string_(e().key), ":", ...value(e().value), ...objectEntries(es)]
+  } else {
+    [string]
+  }
+}

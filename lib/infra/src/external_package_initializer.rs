@@ -7,6 +7,7 @@ pub struct ExternalPackageInitializer {
     file_path_converter: Arc<FilePathConverter>,
     language_root_scheme: &'static str,
     language_root_environment_variable: &'static str,
+    packages_directory: &'static str,
 }
 
 impl ExternalPackageInitializer {
@@ -15,12 +16,14 @@ impl ExternalPackageInitializer {
         file_path_converter: Arc<FilePathConverter>,
         language_root_scheme: &'static str,
         language_root_environment_variable: &'static str,
+        packages_directory: &'static str,
     ) -> Self {
         Self {
             file_system,
             file_path_converter,
             language_root_scheme,
             language_root_environment_variable,
+            packages_directory,
         }
     }
 }
@@ -71,7 +74,7 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
                             PathBuf::from(environment_variable_reader::read(
                                 self.language_root_environment_variable,
                             )?)
-                            .join("lib")
+                            .join(self.packages_directory)
                             .join(url.path().strip_prefix('/').unwrap_or_default()),
                         )
                         .arg(directory),

@@ -2,7 +2,7 @@ use super::calling_convention::CallingConvention;
 use crate::types::Type;
 use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ForeignDeclaration {
     name: String,
     foreign_name: String,

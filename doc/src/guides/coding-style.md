@@ -1,6 +1,6 @@
 # Coding style
 
-This page describes the common coding style used in codes written in the language.
+This page describes the common coding style of programs written in Pen.
 
 ## Spacing
 
@@ -31,7 +31,7 @@ Naming is important to keep codes consistent. The language currently has the fol
 
 ### Global and local names
 
-You should use descriptive names for top-level functions and types. But on the other hand, you are encouraged to use abbreviated names for function-local variables as long as that doesn't incur ambiguity. For example, you might use the following abbreviated names:
+You should use descriptive names for global functions and types. But, on the other hand, you are encouraged to use abbreviated names for local variables as long as that doesn't incur ambiguity. For example, you might use the following abbreviated names:
 
 - `i` for `index`
 - `c` for `requestCount`

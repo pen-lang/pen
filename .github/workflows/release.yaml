@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   tag_check:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     outputs:
       version: ${{ env.version }}
       should_release: ${{ env.should_release }}
@@ -27,11 +27,12 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
+          - ubuntu-22.04
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+      - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2
@@ -42,7 +43,9 @@ jobs:
     needs:
       - tag_check
       - build_asset
-    runs-on: ubuntu-18.04
+    permissions:
+      contents: write
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -58,25 +61,26 @@ jobs:
           body_path: changes.md
           files: artifacts/**
           fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   homebrew:
     needs:
       - tag_check
       - release
     if: needs.tag_check.outputs.should_release == 'true'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
         with:
           repository: pen-lang/homebrew-pen
-      - run: echo version=${{ needs.tag_check.outputs.version }} >> $GITHUB_ENV
-      - run: sed -i "s/version .*/version '$version'/" Formula/pen.rb
       - run: |
+          file=Formula/pen.rb
+          version=${{ needs.tag_check.outputs.version }}
           hash=$(curl -fsSL https://github.com/pen-lang/pen/archive/refs/tags/v$version.tar.gz | sha256sum | cut -f 1 -d ' ')
-          sed -i "s/sha256 .*/sha256 '$hash'/" Formula/pen.rb
-      - uses: peter-evans/create-pull-request@v3
+
+          sed -i "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" $file
+          sed -i "s/^  sha256 .*/  sha256 \"$hash\"/" $file
+          sed -i /revision/d $file
+      - uses: peter-evans/create-pull-request@v4
         with:
           title: Bump version
-          branch: chore/bump-version
+          branch: chore/version
           token: ${{ secrets.PR_CREATION_TOKEN }}

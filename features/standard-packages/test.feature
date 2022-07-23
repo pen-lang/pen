@@ -16,9 +16,19 @@ Feature: Test
     import Test'Assert
 
     Foo = \() none | error {
-      Assert'True(true)?
+      Assert'True(true)
+    }
+    """
+    When I run `pen test`
+    Then the exit status should be 0
 
-      none
+  Scenario: Check if a value is an error
+    Given a file named "foo.test.pen" with:
+    """pen
+    import Test'Assert
+
+    Foo = \() none | error {
+      Assert'Error(error(none))
     }
     """
     When I run `pen test`
@@ -30,38 +40,8 @@ Feature: Test
     import Test'Assert
 
     Foo = \() none | error {
-      Assert'Fail()?
-
-      none
+      Assert'Fail()
     }
     """
     When I run `pen test`
     Then the exit status should be 1
-
-  Scenario: Check if numbers are equal
-    Given a file named "foo.test.pen" with:
-    """pen
-    import Test'Assert
-
-    Foo = \() none | error {
-      Assert'EqualNumbers(42, 42)?
-
-      none
-    }
-    """
-    When I run `pen test`
-    Then the exit status should be 0
-
-  Scenario: Check if strings are equal
-    Given a file named "foo.test.pen" with:
-    """pen
-    import Test'Assert
-
-    Foo = \() none | error {
-      Assert'EqualStrings("foo", "foo")?
-
-      none
-    }
-    """
-    When I run `pen test`
-    Then the exit status should be 0

@@ -1,3 +1,0 @@
-type Socket {
-	inner any
-}

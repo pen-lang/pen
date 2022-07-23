@@ -1,0 +1,4 @@
+# UDP socket
+type Socket {
+  inner any
+}

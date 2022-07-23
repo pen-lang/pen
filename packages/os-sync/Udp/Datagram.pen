@@ -1,0 +1,4 @@
+type Datagram {
+  Data string
+  Address string
+}

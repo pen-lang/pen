@@ -1,0 +1,10 @@
+# This module provides an HTTP server.
+
+import 'Context'context { Context }
+import 'Request { Request }
+import 'Response { Response }
+
+# Run an HTTP service.
+Serve = \(ctx Context, address string, callback \(Request) Response) none | error {
+  context'Inner(ctx).Serve(address, callback)
+}

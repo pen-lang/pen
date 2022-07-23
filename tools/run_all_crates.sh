@@ -6,16 +6,22 @@ if [ $# -eq 0 ]; then
   exit 1
 fi
 
-root_directory=$(dirname $0)/..
+package_ffi_directories() {
+  for file in $(git ls-files 'packages/**/Cargo.lock'); do
+    dirname $file
+  done
+}
 
-for directory in . lib/core/ffi lib/prelude/ffi lib/os/ffi lib/os-sync/ffi; do
+cd $(dirname $0)/..
+
+for directory in . $(package_ffi_directories); do
   (
-    cd $root_directory/$directory
+    cd $directory
     "$@"
   )
 done
 
 (
-  cd $root_directory/cmd/test
+  cd cmd/test
   PEN_ARCHIVE_FILES= "$@"
 )

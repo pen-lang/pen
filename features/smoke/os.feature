@@ -16,7 +16,7 @@ Feature: OS
     """pen
     import Os'Context { Context }
     import Os'File
-    import Os'File'OpenOptions
+    import Os'File'OpenOptions { OpenOptions }
     import Os'Process
 
     main = \(ctx context) none {
@@ -115,7 +115,7 @@ Feature: OS
     import Os'Context { Context }
 
     main = \(ctx context) none {
-      f = go \() none { none }
+      f = go(\() none { none })
 
       f()
     }

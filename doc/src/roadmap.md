@@ -18,16 +18,16 @@ Items are ordered by priority.
 - [x] Parallel computation
 - [x] Binary operations
 - [x] List comprehension
-- [ ] Multiple system packages
-- [ ] Map type
-- [ ] Code formatter
-- [ ] Documentation generator
-- [ ] Vector type
-- [ ] Serialization / deserialization
-- [ ] Mutable state
-  - [ ] Thread safety
+- [x] Multiple system packages
+- [x] Map type
+- [x] Code formatter
+- [x] Documentation generator
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Reflection
+- [ ] Serialization / deserialization
 - [ ] Process management
+- [ ] Mutable state
+  - [ ] Thread safety
+- [ ] Vector type
 - [ ] Web browser interface
-- [ ] Self-hosting!?

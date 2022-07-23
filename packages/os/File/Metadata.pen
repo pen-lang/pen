@@ -1,0 +1,4 @@
+# File metadata
+type Metadata {
+  Size number
+}

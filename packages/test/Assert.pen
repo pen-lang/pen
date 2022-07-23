@@ -1,0 +1,25 @@
+# This module provides a collection of assertion logic for testing.
+
+# Assert that a condition is true.
+True = \(x boolean) none | error {
+  if x {
+    none
+  } else {
+    error("condition is false")
+  }
+}
+
+# Check if a value is an error.
+Error = \(x any) none | error {
+  if x = x as error {
+    none
+  } else {
+    error("error expected")
+  }
+}
+
+# Fail with an error immediately.
+# This function is useful to make unreachable codes fail.
+Fail = \() error {
+  error("assertion failed")
+}

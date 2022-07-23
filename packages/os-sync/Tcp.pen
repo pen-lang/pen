@@ -1,0 +1,54 @@
+import 'Context'context { Context }
+import 'Tcp'AcceptedStream { AcceptedStream }
+import 'Tcp'Listener { Listener }
+import 'Tcp'Stream { Stream }
+
+Bind = \(ctx Context, address string) Listener | error {
+  r = context'Inner(ctx).TcpBind(address)
+
+  if r.Error == "" {
+    r.Listener
+  } else {
+    error(r.Error)
+  }
+}
+
+Connect = \(ctx Context, address string) Stream | error {
+  r = context'Inner(ctx).TcpConnect(address)
+
+  if r.Error == "" {
+    r.Stream
+  } else {
+    error(r.Error)
+  }
+}
+
+Accept = \(ctx Context, l Listener) AcceptedStream | error {
+  r = context'Inner(ctx).TcpAccept(l)
+
+  if r.Error == "" {
+    r.Stream
+  } else {
+    error(r.Error)
+  }
+}
+
+Receive = \(ctx Context, s Stream, limit number) string | error {
+  r = context'Inner(ctx).TcpReceive(s, limit)
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+Send = \(ctx Context, s Stream, data string) number | error {
+  r = context'Inner(ctx).TcpSend(s, data)
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}

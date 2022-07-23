@@ -5,7 +5,7 @@ use std::process::exit;
 fn default_return_type() {}
 
 #[bindgen(crate = "pen_ffi")]
-fn async_default_return_type() {}
+async fn async_default_return_type() {}
 
 #[bindgen]
 fn sync_function() -> f64 {
@@ -21,4 +21,50 @@ async fn async_function() -> f64 {
 #[allow(unreachable_code)]
 fn unreachable_by_exit() {
     exit(0)
+}
+
+#[bindgen(crate = "pen_ffi")]
+fn result_function() -> Result<f64, String> {
+    Ok(42.0)
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_result_function() -> Result<f64, String> {
+    Ok(42.0)
+}
+
+#[bindgen(crate = "pen_ffi")]
+fn none_result_function() -> Result<(), String> {
+    Ok(())
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_none_result_function() -> Result<(), String> {
+    Ok(())
+}
+
+#[bindgen(crate = "pen_ffi")]
+fn mut_argument_function(mut x: f64) -> f64 {
+    x += 42.0;
+    x
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_mut_argument_function(mut x: f64) -> f64 {
+    x += 42.0;
+    x
+}
+
+#[bindgen(crate = "pen_ffi")]
+fn mut_argument_none_function(mut x: f64) {
+    x += 42.0;
+
+    println!("{}", x);
+}
+
+#[bindgen(crate = "pen_ffi")]
+async fn async_mut_argument_none_function(mut x: f64) {
+    x += 42.0;
+
+    println!("{}", x);
 }

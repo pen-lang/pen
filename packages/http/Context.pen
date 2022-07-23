@@ -1,0 +1,6 @@
+import 'Context'context
+
+# An HTTP context
+type Context = context'Context
+
+UnsafeNew = \() Context { context'New() }

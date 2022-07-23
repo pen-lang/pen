@@ -1,6 +1,10 @@
+*.data
 *.info
 *.new
+*.old
+*.svg
 *.tar.*
 .pen
+dhat-*
 target
 tmp

@@ -3,6 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
+    RecordUpdate, Synchronize,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -10,18 +11,20 @@ pub enum Expression {
     ArithmeticOperation(ArithmeticOperation),
     Boolean(bool),
     ByteString(ByteString),
+    Call(Call),
     Case(Case),
     CloneVariables(CloneVariables),
     ComparisonOperation(ComparisonOperation),
     DropVariables(DropVariables),
-    Call(Call),
     If(If),
     Let(Let),
     LetRecursive(LetRecursive),
+    Synchronize(Synchronize),
     None,
     Number(f64),
     Record(Record),
     RecordField(RecordField),
+    RecordUpdate(RecordUpdate),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -36,6 +39,24 @@ impl From<ArithmeticOperation> for Expression {
 impl From<bool> for Expression {
     fn from(bool: bool) -> Self {
         Self::Boolean(bool)
+    }
+}
+
+impl From<ByteString> for Expression {
+    fn from(string: ByteString) -> Self {
+        Self::ByteString(string)
+    }
+}
+
+impl From<Call> for Expression {
+    fn from(call: Call) -> Self {
+        Self::Call(call)
+    }
+}
+
+impl From<Case> for Expression {
+    fn from(case: Case) -> Self {
+        Self::Case(case)
     }
 }
 
@@ -57,9 +78,9 @@ impl From<DropVariables> for Expression {
     }
 }
 
-impl From<Call> for Expression {
-    fn from(call: Call) -> Self {
-        Self::Call(call)
+impl From<f64> for Expression {
+    fn from(number: f64) -> Self {
+        Self::Number(number)
     }
 }
 
@@ -81,15 +102,9 @@ impl From<Let> for Expression {
     }
 }
 
-impl From<f64> for Expression {
-    fn from(number: f64) -> Self {
-        Self::Number(number)
-    }
-}
-
-impl From<ByteString> for Expression {
-    fn from(string: ByteString) -> Self {
-        Self::ByteString(string)
+impl From<Synchronize> for Expression {
+    fn from(synchronize: Synchronize) -> Self {
+        Self::Synchronize(synchronize)
     }
 }
 
@@ -102,6 +117,12 @@ impl From<Record> for Expression {
 impl From<RecordField> for Expression {
     fn from(field: RecordField) -> Self {
         Self::RecordField(field)
+    }
+}
+
+impl From<RecordUpdate> for Expression {
+    fn from(field: RecordUpdate) -> Self {
+        Self::RecordUpdate(field)
     }
 }
 
@@ -120,11 +141,5 @@ impl From<Variable> for Expression {
 impl From<Variant> for Expression {
     fn from(variant: Variant) -> Self {
         Self::Variant(variant)
-    }
-}
-
-impl From<Case> for Expression {
-    fn from(case: Case) -> Self {
-        Self::Case(case)
     }
 }

@@ -12,12 +12,8 @@ done
 
 shift $(expr $OPTIND - 1)
 
-. $(dirname $0)/utilities.sh
-
-install_nightly_component clippy
-
 $(dirname $0)/run_all_crates.sh \
-  rustup run nightly cargo clippy $options -Z unstable-options -- \
+  cargo clippy $options -- \
   -D clippy::mod_module_files \
   -D clippy::use_self \
   "$@"

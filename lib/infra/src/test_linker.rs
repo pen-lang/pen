@@ -88,9 +88,9 @@ impl TestLinker {
             extern "C" {{ fn {foreign_name}() -> ffi::ByteString; }}
 
             let message = unsafe {{ {foreign_name}() }};
-            println!("\t{{}}\t{name}", if message.is_empty() {{ "OK" }} else {{ "FAIL" }});
+            println!("\t{{}}\t{name}", if message.as_slice().is_empty() {{ "OK" }} else {{ "FAIL" }});
 
-            if message.is_empty() {{
+            if message.as_slice().is_empty() {{
                 success += 1;
             }} else {{
                 println!("\t\tMessage: {{}}", String::from_utf8_lossy(message.as_slice()));

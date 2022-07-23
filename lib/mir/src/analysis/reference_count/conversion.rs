@@ -8,9 +8,9 @@ pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
         module.foreign_definitions().to_vec(),
-        module.declarations().to_vec(),
+        module.function_declarations().to_vec(),
         module
-            .definitions()
+            .function_definitions()
             .iter()
             .map(|definition| convert_definition(definition, true))
             .collect::<Result<_, _>>()?,
@@ -18,9 +18,9 @@ pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
 }
 
 fn convert_definition(
-    definition: &Definition,
+    definition: &FunctionDefinition,
     global: bool,
-) -> Result<Definition, ReferenceCountError> {
+) -> Result<FunctionDefinition, ReferenceCountError> {
     // Backend is expected to clone a function itself and its free variables at the
     // very beginning of the function.
     let owned_variables = if global {
@@ -41,7 +41,7 @@ fn convert_definition(
     let (expression, moved_variables) =
         convert_expression(definition.body(), &owned_variables, &Default::default())?;
 
-    Ok(Definition::with_options(
+    Ok(FunctionDefinition::with_options(
         definition.name(),
         definition.environment().to_vec(),
         definition.arguments().to_vec(),
@@ -129,7 +129,7 @@ fn convert_expression(
 
                     Ok((
                         Alternative::new(
-                            alternative.type_().clone(),
+                            alternative.types().to_vec(),
                             alternative.name(),
                             expression,
                         ),
@@ -178,7 +178,7 @@ fn convert_expression(
                         .into_iter()
                         .map(|(alternative, moved_variables)| {
                             Alternative::new(
-                                alternative.type_().clone(),
+                                alternative.types().to_vec(),
                                 alternative.name(),
                                 drop_variables(
                                     alternative.expression().clone(),
@@ -415,6 +415,15 @@ fn convert_expression(
                     .collect::<FnvHashSet<String>>(),
             )
         }
+        Expression::Synchronize(synchronize) => {
+            let (expression, moved_variables) =
+                convert_expression(synchronize.expression(), owned_variables, moved_variables)?;
+
+            (
+                Synchronize::new(synchronize.type_().clone(), expression).into(),
+                moved_variables,
+            )
+        }
         Expression::Record(record) => {
             let (fields, moved_variables) = record.fields().iter().rev().fold(
                 Ok((vec![], moved_variables.clone())),
@@ -438,6 +447,24 @@ fn convert_expression(
 
             (
                 RecordField::new(field.type_().clone(), field.index(), record).into(),
+                moved_variables,
+            )
+        }
+        Expression::RecordUpdate(update) => {
+            let (record, mut moved_variables) =
+                convert_expression(update.record(), owned_variables, moved_variables)?;
+            let mut fields = vec![];
+
+            for field in update.fields() {
+                let (expression, variables) =
+                    convert_expression(field.expression(), owned_variables, &moved_variables)?;
+
+                fields.push(RecordUpdateField::new(field.index(), expression));
+                moved_variables = variables;
+            }
+
+            (
+                RecordUpdate::new(update.type_().clone(), record, fields).into(),
                 moved_variables,
             )
         }
@@ -946,7 +973,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::new(
+                        FunctionDefinition::new(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
@@ -961,7 +988,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    Definition::new(
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -998,7 +1025,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::new(
+                        FunctionDefinition::new(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
@@ -1021,7 +1048,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    Definition::new(
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -1066,7 +1093,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::new(
+                        FunctionDefinition::new(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
@@ -1081,7 +1108,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    Definition::new(
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -1117,7 +1144,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::with_environment(
+                        FunctionDefinition::with_environment(
                             "f",
                             vec![Argument::new("y", Type::Number)],
                             vec![Argument::new("x", Type::Number)],
@@ -1133,7 +1160,7 @@ mod tests {
                 .unwrap(),
                 (
                     LetRecursive::new(
-                        Definition::with_environment(
+                        FunctionDefinition::with_environment(
                             "f",
                             vec![Argument::new("y", Type::Number)],
                             vec![Argument::new("x", Type::Number)],
@@ -1166,7 +1193,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::with_environment(
+                        FunctionDefinition::with_environment(
                             "f",
                             vec![Argument::new("y", Type::Number)],
                             vec![Argument::new("x", Type::Number)],
@@ -1188,7 +1215,7 @@ mod tests {
                     CloneVariables::new(
                         [("y".into(), Type::Number)].into_iter().collect(),
                         LetRecursive::new(
-                            Definition::with_environment(
+                            FunctionDefinition::with_environment(
                                 "f",
                                 vec![Argument::new("y", Type::Number)],
                                 vec![Argument::new("x", Type::Number)],
@@ -1231,7 +1258,7 @@ mod tests {
                         "g",
                         function_type.clone(),
                         LetRecursive::new(
-                            Definition::with_environment(
+                            FunctionDefinition::with_environment(
                                 "f",
                                 vec![Argument::new("f", Type::Number)],
                                 vec![Argument::new("x", Type::Number)],
@@ -1262,7 +1289,7 @@ mod tests {
                                 .into_iter()
                                 .collect(),
                             LetRecursive::new(
-                                Definition::with_environment(
+                                FunctionDefinition::with_environment(
                                     "f",
                                     vec![Argument::new("f", Type::Number)],
                                     vec![Argument::new("x", Type::Number)],
@@ -1292,7 +1319,7 @@ mod tests {
             assert_eq!(
                 convert_expression(
                     &LetRecursive::new(
-                        Definition::with_environment(
+                        FunctionDefinition::with_environment(
                             "x",
                             vec![Argument::new("x", Type::Number)],
                             vec![Argument::new("y", Type::Number)],
@@ -1310,7 +1337,7 @@ mod tests {
                     CloneVariables::new(
                         [("x".into(), Type::Number)].into_iter().collect(),
                         LetRecursive::new(
-                            Definition::with_environment(
+                            FunctionDefinition::with_environment(
                                 "x",
                                 vec![Argument::new("x", Type::Number)],
                                 vec![Argument::new("y", Type::Number)],
@@ -1348,7 +1375,7 @@ mod tests {
         fn convert_with_dropped_argument() {
             assert_eq!(
                 convert_definition(
-                    &Definition::new(
+                    &FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         42.0,
@@ -1357,7 +1384,7 @@ mod tests {
                     false
                 )
                 .unwrap(),
-                Definition::new(
+                FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     DropVariables::new(
@@ -1381,7 +1408,7 @@ mod tests {
         fn convert_with_dropped_free_variable() {
             assert_eq!(
                 convert_definition(
-                    &Definition::with_environment(
+                    &FunctionDefinition::with_environment(
                         "f",
                         vec![Argument::new("y", Type::Number)],
                         vec![Argument::new("x", Type::Number)],
@@ -1391,7 +1418,7 @@ mod tests {
                     false
                 )
                 .unwrap(),
-                Definition::with_environment(
+                FunctionDefinition::with_environment(
                     "f",
                     vec![Argument::new("y", Type::Number)],
                     vec![Argument::new("x", Type::Number)],
@@ -1416,6 +1443,7 @@ mod tests {
 
     mod if_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn convert_if() {
@@ -1494,8 +1522,8 @@ mod tests {
                     &Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Number, "x", Variable::new("x")),
-                            Alternative::new(Type::Boolean, "x", 42.0)
+                            Alternative::new(vec![Type::Number], "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Boolean], "x", 42.0)
                         ],
                         None
                     )
@@ -1508,9 +1536,9 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::Number, "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Number], "x", Variable::new("x")),
                             Alternative::new(
-                                Type::Boolean,
+                                vec![Type::Boolean],
                                 "x",
                                 DropVariables::new(
                                     [("x".into(), Type::Boolean)].into_iter().collect(),
@@ -1532,7 +1560,7 @@ mod tests {
                 convert_expression(
                     &Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::ByteString, "x", 42.0)],
+                        vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
                         Some(DefaultAlternative::new("x", 42.0))
                     )
                     .into(),
@@ -1544,7 +1572,7 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(
-                            Type::ByteString,
+                            vec![Type::ByteString],
                             "x",
                             DropVariables::new(
                                 [("x".into(), Type::ByteString)].into_iter().collect(),
@@ -1571,7 +1599,7 @@ mod tests {
                 convert_expression(
                     &Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::ByteString, "x", 42.0)],
+                        vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
                         Some(DefaultAlternative::new("x", 42.0))
                     )
                     .into(),
@@ -1586,7 +1614,7 @@ mod tests {
                             Variable::new("x")
                         ),
                         vec![Alternative::new(
-                            Type::ByteString,
+                            vec![Type::ByteString],
                             "x",
                             DropVariables::new(
                                 [("x".into(), Type::ByteString)].into_iter().collect(),

@@ -1,0 +1,142 @@
+import 'Context'context { Context }
+import 'File'Metadata { Metadata }
+import 'File'OpenOptions { OpenOptions }
+import 'normalFile { NormalFile }
+
+type File {
+  inner NormalFile | specialFile
+}
+
+type stdIn {}
+
+type stdOut {}
+
+type stdErr {}
+
+type specialFile = stdIn | stdOut | stdErr
+
+StdIn = \() File {
+  File{inner: stdIn{}}
+}
+
+StdOut = \() File {
+  File{inner: stdOut{}}
+}
+
+StdErr = \() File {
+  File{inner: stdErr{}}
+}
+
+OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {
+  r = context'Inner(ctx).OpenFile(path, opt)
+
+  if r.Error == "" {
+    File{inner: r.File}
+  } else {
+    error(r.Error)
+  }
+}
+
+Open = \(ctx Context, path string) File | error {
+  OpenWithOptions(
+    ctx,
+    path,
+    OpenOptions{...OpenOptions'Default(), Read: true},
+  )
+}
+
+Read = \(ctx Context, file File) string | error {
+  r = if f = file.inner as stdIn {
+    context'Inner(ctx).ReadStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    context'Inner(ctx).ReadFile(f)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+ReadLimit = \(ctx Context, file File, limit number) string | error {
+  r = if f = file.inner as stdIn {
+    context'Inner(ctx).ReadLimitStdIn(limit)
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    context'Inner(ctx).ReadLimitFile(f, limit)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+Write = \(ctx Context, file File, data string) number | error {
+  inner = context'Inner(ctx)
+
+  r = if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    inner.WriteStdErr(data)
+  } else {
+    inner.WriteFile(f, data)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+Copy = \(ctx Context, src string, dest string) none | error {
+  r = context'Inner(ctx).CopyFile(src, dest)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+Move = \(ctx Context, src string, dest string) none | error {
+  r = context'Inner(ctx).MoveFile(src, dest)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+Remove = \(ctx Context, path string) none | error {
+  r = context'Inner(ctx).RemoveFile(path)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+Metadata = \(ctx Context, path string) Metadata | error {
+  r = context'Inner(ctx).Metadata(path)
+
+  if r.Error == "" {
+    r.Metadata
+  } else {
+    error(r.Error)
+  }
+}

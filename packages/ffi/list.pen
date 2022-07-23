@@ -1,0 +1,21 @@
+type firstRest {
+  ok boolean
+  first \() any
+  rest [any]
+}
+
+foreign "c" pen_ffi_list_create = \() [any] {
+  [any]
+}
+
+foreign "c" pen_ffi_list_prepend = \(x any, xs [any]) [any] {
+  [any x, ...xs]
+}
+
+foreign pen_ffi_list_first_rest = \(xs [any]) firstRest {
+  if [x, ...xs] = xs {
+    firstRest{ok: true, first: x, rest: xs}
+  } else {
+    firstRest{ok: false, first: \() any { none }, rest: [any]}
+  }
+}

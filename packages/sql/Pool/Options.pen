@@ -1,0 +1,6 @@
+# Connection pool options
+type Options {
+  MinConnections number
+  MaxConnections number
+  ConnectTimeout number
+}

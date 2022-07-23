@@ -1,13 +1,17 @@
 mod application_configuration;
 mod compile_configuration;
 mod dependency_resolver;
+mod documentation_configuration;
 mod file_path_configuration;
 mod infrastructure;
 mod main_module_compiler;
 mod main_package_directory_finder;
 mod module_compiler;
+mod module_formatter;
 mod package_builder;
 mod package_creator;
+mod package_documentation_generator;
+mod package_formatter;
 mod package_test_information_compiler;
 mod prelude_module_compiler;
 mod test_configuration;
@@ -16,6 +20,7 @@ mod test_module_compiler;
 mod test_runner;
 
 use compile_configuration::CROSS_COMPILE_TARGETS;
+use std::ops::Deref;
 
 fn main() {
     if let Err(error) = run() {
@@ -33,33 +38,74 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .short('v')
                 .long("verbose")
                 .global(true)
-                .help("Uses verbose output"),
+                .help("Use verbose output"),
         )
-        .subcommand(
-            clap::Command::new("build")
-                .about("Builds a package")
-                .arg(build_target_triple_argument().possible_values(CROSS_COMPILE_TARGETS)),
-        )
-        .subcommand(clap::Command::new("test").about("Tests modules in a package"))
+        .subcommand(clap::Command::new("build").about("Build a package").arg(
+            build_target_triple_argument().value_parser(clap::builder::PossibleValuesParser::new(
+                CROSS_COMPILE_TARGETS,
+            )),
+        ))
+        .subcommand(clap::Command::new("test").about("Test modules in a package"))
         .subcommand(
             clap::Command::new("create")
-                .about("Creates a package")
+                .about("Create a package")
                 .arg(
                     clap::Arg::new("library")
                         .short('l')
                         .long("library")
-                        .help("Creates a library package instead of an application one"),
+                        .help("Create a library package instead of an application one"),
                 )
                 .arg(
                     clap::Arg::new("directory")
                         .required(true)
-                        .help("Sets a package directory"),
+                        .help("Set a package directory"),
+                ),
+        )
+        .subcommand(
+            clap::Command::new("format")
+                .about("Format a package")
+                .arg(
+                    clap::Arg::new("check")
+                        .long("check")
+                        .takes_value(false)
+                        .help("Check if module files are formatted"),
+                )
+                .arg(
+                    clap::Arg::new("stdin")
+                        .long("stdin")
+                        .takes_value(false)
+                        .help("Format stdin"),
+                ),
+        )
+        .subcommand(
+            clap::Command::new("document")
+                .about("Generate documentation for a package")
+                .arg(
+                    clap::Arg::new("name")
+                        .long("name")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set a package name"),
+                )
+                .arg(
+                    clap::Arg::new("url")
+                        .long("url")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set a package URL"),
+                )
+                .arg(
+                    clap::Arg::new("description")
+                        .long("description")
+                        .takes_value(true)
+                        .required(true)
+                        .help("Set package description"),
                 ),
         )
         .subcommand(
             clap::Command::new("compile")
                 .hide(true)
-                .about("Compiles a module")
+                .about("Compile a module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -69,13 +115,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-main")
                 .hide(true)
-                .about("Compiles a main module")
+                .about("Compile a main module")
                 .arg(
                     clap::Arg::new("context interface file")
                         .short('c')
                         .long("context-interface-file")
                         .required(true)
-                        .number_of_values(2),
+                        .number_of_values(2)
+                        .action(clap::ArgAction::Append),
                 )
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
@@ -85,7 +132,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-prelude")
                 .hide(true)
-                .about("Compiles a prelude module")
+                .about("Compile a prelude module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
                 .arg(clap::Arg::new("interface file").required(true))
@@ -94,7 +141,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-test")
                 .hide(true)
-                .about("Compiles a test module")
+                .about("Compile a test module")
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("dependency file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -104,7 +151,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("resolve-dependency")
                 .hide(true)
-                .about("Resolves module dependency")
+                .about("Resolve module dependency")
                 .arg(
                     clap::Arg::new("package directory")
                         .short('p')
@@ -123,7 +170,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("prelude interface file")
                         .short('i')
                         .long("prelude-interface-file")
-                        .multiple_occurrences(true)
+                        .action(clap::ArgAction::Append)
                         .number_of_values(1)
                         .takes_value(true),
                 )
@@ -135,19 +182,19 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             clap::Command::new("compile-package-test-information")
                 .hide(true)
-                .about("Compiles a package test information")
+                .about("Compile a package test information")
                 .arg(
                     clap::Arg::new("package test information file")
                         .short('o')
                         .required(true)
                         .takes_value(true),
                 )
-                .arg(clap::Arg::new("test information file").multiple_occurrences(true)),
+                .arg(clap::Arg::new("test information file").multiple_values(true)),
         )
         .subcommand(
             clap::Command::new("link-test")
                 .hide(true)
-                .about("Links tests")
+                .about("Link tests")
                 .arg(
                     clap::Arg::new("test file")
                         .short('o')
@@ -162,90 +209,112 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 )
                 .arg(
                     clap::Arg::new("archive file")
-                        .multiple_occurrences(true)
                         .required(true)
-                        .takes_value(true),
+                        .multiple_values(true),
                 ),
         )
         .get_matches()
         .subcommand()
         .unwrap()
     {
-        ("build", matches) => {
-            package_builder::build(matches.value_of("target"), matches.is_present("verbose"))
-        }
+        ("build", matches) => package_builder::build(
+            matches.get_one::<String>("target").map(Deref::deref),
+            matches.contains_id("verbose"),
+        ),
         ("test", _) => test_runner::run(),
         ("create", matches) => package_creator::create(
-            matches.value_of("directory").unwrap(),
-            matches.is_present("library"),
+            matches.get_one::<String>("directory").unwrap(),
+            matches.contains_id("library"),
+        ),
+        ("format", matches) => {
+            if matches.contains_id("stdin") {
+                module_formatter::format()
+            } else {
+                package_formatter::format(matches.contains_id("check"))
+            }
+        }
+        ("document", matches) => package_documentation_generator::generate(
+            matches.get_one::<String>("name").unwrap(),
+            matches.get_one::<String>("url").unwrap(),
+            matches.get_one::<String>("description").unwrap(),
         ),
         ("compile", matches) => module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("interface file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("interface file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("compile-main", matches) => {
             let context_options = matches
-                .values_of("context interface file")
+                .get_many::<String>("context interface file")
                 .unwrap()
+                .map(Deref::deref)
                 .collect::<Vec<_>>();
 
             main_module_compiler::compile(
-                matches.value_of("source file").unwrap(),
-                matches.value_of("dependency file").unwrap(),
-                matches.value_of("object file").unwrap(),
+                matches.get_one::<String>("source file").unwrap(),
+                matches.get_one::<String>("dependency file").unwrap(),
+                matches.get_one::<String>("object file").unwrap(),
                 &context_options
                     .iter()
                     .step_by(2)
-                    .cloned()
-                    .zip(context_options.iter().skip(1).step_by(2).cloned())
+                    .copied()
+                    .zip(context_options.iter().skip(1).step_by(2).copied())
                     .collect(),
-                matches.value_of("target"),
+                matches.get_one::<String>("target").map(Deref::deref),
             )
         }
         ("compile-prelude", matches) => prelude_module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("interface file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("interface file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("compile-test", matches) => test_module_compiler::compile(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("test information file").unwrap(),
-            matches.value_of("target"),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("test information file").unwrap(),
+            matches.get_one::<String>("target").map(Deref::deref),
         ),
         ("resolve-dependency", matches) => dependency_resolver::resolve(
-            matches.value_of("source file").unwrap(),
-            matches.value_of("object file").unwrap(),
-            matches.value_of("dependency file").unwrap(),
-            matches.value_of("build script dependency file").unwrap(),
+            matches.get_one::<String>("source file").unwrap(),
+            matches.get_one::<String>("object file").unwrap(),
+            matches.get_one::<String>("dependency file").unwrap(),
+            matches
+                .get_one::<String>("build script dependency file")
+                .unwrap(),
             &matches
-                .values_of("prelude interface file")
+                .get_many::<String>("prelude interface file")
                 .unwrap()
+                .map(Deref::deref)
                 .collect::<Vec<_>>(),
-            matches.value_of("package directory").unwrap(),
-            matches.value_of("output directory").unwrap(),
+            matches.get_one::<String>("package directory").unwrap(),
+            matches.get_one::<String>("output directory").unwrap(),
         ),
         ("compile-package-test-information", matches) => {
             package_test_information_compiler::compile(
                 &matches
-                    .values_of("test information file")
+                    .get_many::<String>("test information file")
                     .unwrap_or_default()
+                    .map(Deref::deref)
                     .collect::<Vec<_>>(),
-                matches.value_of("package test information file").unwrap(),
+                matches
+                    .get_one::<String>("package test information file")
+                    .unwrap(),
             )
         }
         ("link-test", matches) => test_linker::link(
             &matches
-                .values_of("archive file")
+                .get_many::<String>("archive file")
                 .unwrap()
+                .map(Deref::deref)
                 .collect::<Vec<_>>(),
-            matches.value_of("package test information file").unwrap(),
-            matches.value_of("test file").unwrap(),
+            matches
+                .get_one::<String>("package test information file")
+                .unwrap(),
+            matches.get_one::<String>("test file").unwrap(),
         ),
         _ => unreachable!(),
     }
@@ -256,5 +325,5 @@ fn build_target_triple_argument() -> clap::Arg<'static> {
         .short('t')
         .long("target")
         .takes_value(true)
-        .help("Sets a target triple")
+        .help("Set a target triple")
 }

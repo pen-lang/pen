@@ -1,0 +1,127 @@
+import foreign "c" _pen_prelude_combine_hashes \(number, number) number
+
+type List {
+  node \() node | none
+}
+
+type node {
+  first \() any
+  rest \() node | none
+}
+
+type FirstRest {
+  first \() any
+  rest List
+}
+
+First = \(fr FirstRest) \() any {
+  fr.first
+}
+
+Rest = \(fr FirstRest) List {
+  fr.rest
+}
+
+FirstRest = \(l List) FirstRest | none {
+  if n = l.node() as node {
+    FirstRest{
+      first: n.first,
+      rest: List{node: n.rest},
+    }
+  } else {
+    none
+  }
+}
+
+EmptyList = \() List {
+  List{node: \() node | none { none }}
+}
+
+PrependToList = \(x \() any, l List) List {
+  List{node: \() node | none { prependToNode(x, l.node) }}
+}
+
+prependToNode = \(x \() any, n \() node | none) node {
+  node{
+    first: x,
+    rest: n,
+  }
+}
+
+LazyList = \(x \() List) List {
+  List{
+    node: \() node | none {
+      x().node()
+    },
+  }
+}
+
+ConcatenateLists = \(x \() List, y List) List {
+  List{
+    node: \() node | none {
+      if x = x().node() as node {
+        prependToNode(x.first, concatenateNodes(x.rest, y.node))
+      } else {
+        y.node()
+      }
+    },
+  }
+}
+
+concatenateNodes = \(x \() node | none, y \() node | none) \() node | none {
+  \() node | none {
+    if x = x() as node {
+      prependToNode(x.first, concatenateNodes(x.rest, y))
+    } else {
+      y()
+    }
+  }
+}
+
+EqualLists = \(f \(any, any) boolean, x List, y List) boolean {
+  equalNodes(f, x.node(), y.node())
+}
+
+equalNodes = \(f \(any, any) boolean, x node | none, y node | none) boolean {
+  if x = x as node {
+    if y = y as node {
+      f(x.first(), y.first()) & equalNodes(f, x.rest(), y.rest())
+    } else {
+      false
+    }
+  } else {
+    if y = y as node {
+      false
+    } else {
+      true
+    }
+  }
+}
+
+HashList = \(f \(any) number, l List) number {
+  hashNode(f, l.node, 0)
+}
+
+hashNode = \(f \(any) number, node \() node | none, h number) number {
+  if n = node() as node {
+    hashNode(
+      f,
+      n.rest,
+      _pen_prelude_combine_hashes(h, f(n)),
+    )
+  } else {
+    h
+  }
+}
+
+ListSize = \(l List) number {
+  nodeSize(l.node(), 0)
+}
+
+nodeSize = \(n node | none, s number) number {
+  if n = n as node {
+    nodeSize(n.rest(), s + 1)
+  } else {
+    s
+  }
+}

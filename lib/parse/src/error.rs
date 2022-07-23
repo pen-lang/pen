@@ -2,7 +2,7 @@ use combine::{easy, stream::position::SourcePosition};
 use position::Position;
 use std::{error::Error, fmt, fmt::Display};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ParseError {
     message: String,
     expected: Vec<String>,

@@ -1,0 +1,4 @@
+# A TCP stream
+type Stream {
+  inner any
+}

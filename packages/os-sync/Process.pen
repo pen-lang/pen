@@ -1,0 +1,5 @@
+import 'Context'context { Context }
+
+Exit = \(ctx Context, code number) none {
+  context'Inner(ctx).Exit(code)
+}

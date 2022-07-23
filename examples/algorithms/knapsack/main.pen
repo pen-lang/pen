@@ -1,0 +1,34 @@
+import Core'Number
+import Core'String
+import Os'Context { Context }
+import Os'File
+
+import 'knapsack { Bag, Item }
+
+main = \(ctx context) none {
+  is = knapsack'Pack(
+    Bag{Capacity: 1},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+    ],
+  )
+
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    String'Join(
+      [string
+        String'Join([string showItem(i()) for i in is], ", "),
+        "\n",
+      ],
+      "",
+    ),
+  )
+
+  none
+}
+
+showItem = \(i Item) string {
+  String'Concatenate([string "(", Number'String(i.Cost), ", ", Number'String(i.Value), ")"])
+}

@@ -1,0 +1,5 @@
+import foreign "c" _pen_equal_strings \(string, string) boolean
+
+EqualStrings = \(x string, y string) boolean {
+  _pen_equal_strings(x, y)
+}

@@ -1,0 +1,155 @@
+import 'Context'context { Context }
+import 'File'Metadata { Metadata }
+import 'File'OpenOptions { OpenOptions }
+import 'normalFile { NormalFile }
+
+# A file on a file system.
+type File {
+  inner NormalFile | specialFile
+}
+
+type stdIn {}
+
+type stdOut {}
+
+type stdErr {}
+
+type specialFile = stdIn | stdOut | stdErr
+
+# A file of standard input.
+StdIn = \() File {
+  File{inner: stdIn{}}
+}
+
+# A file of standard output.
+StdOut = \() File {
+  File{inner: stdOut{}}
+}
+
+# A file of standard error.
+StdErr = \() File {
+  File{inner: stdErr{}}
+}
+
+# Open a file for read-only.
+Open = \(ctx Context, path string) File | error {
+  OpenWithOptions(
+    ctx,
+    path,
+    OpenOptions{...OpenOptions'Default(), Read: true},
+  )
+}
+
+# Open a file with options.
+OpenWithOptions = \(ctx Context, path string, opt OpenOptions) File | error {
+  r = context'Inner(ctx).OpenFile(path, opt)
+
+  if r.Error == "" {
+    File{inner: r.File}
+  } else {
+    error(r.Error)
+  }
+}
+
+# Read a file.
+Read = \(ctx Context, file File) string | error {
+  r = if f = file.inner as stdIn {
+    context'Inner(ctx).ReadStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    context'Inner(ctx).ReadFile(f)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+# Read a file until a size limit.
+ReadLimit = \(ctx Context, file File, limit number) string | error {
+  r = if f = file.inner as stdIn {
+    context'Inner(ctx).ReadLimitStdIn(limit)
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  } else if NormalFile {
+    context'Inner(ctx).ReadLimitFile(f, limit)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+# Write data to a file.
+Write = \(ctx Context, file File, data string) number | error {
+  inner = context'Inner(ctx)
+
+  r = if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    inner.WriteStdErr(data)
+  } else {
+    inner.WriteFile(f, data)
+  }?
+
+  if r.Error == "" {
+    r.Value
+  } else {
+    error(r.Error)
+  }
+}
+
+# Copy a file to another path.
+Copy = \(ctx Context, src string, dest string) none | error {
+  r = context'Inner(ctx).CopyFile(src, dest)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+# Move a file to another path.
+Move = \(ctx Context, src string, dest string) none | error {
+  r = context'Inner(ctx).MoveFile(src, dest)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+# Remove a file.
+Remove = \(ctx Context, path string) none | error {
+  r = context'Inner(ctx).RemoveFile(path)
+
+  if r.Error == "" {
+    none
+  } else {
+    error(r.Error)
+  }
+}
+
+# Get metadata of a file at a path.
+Metadata = \(ctx Context, path string) Metadata | error {
+  r = context'Inner(ctx).Metadata(path)
+
+  if r.Error == "" {
+    r.Metadata
+  } else {
+    error(r.Error)
+  }
+}

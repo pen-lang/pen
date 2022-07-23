@@ -1,10 +1,12 @@
 use super::module_path::ModulePath;
+use position::Position;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Import {
     module_path: ModulePath,
     prefix: Option<String>,
     unqualified_names: Vec<String>,
+    position: Position,
 }
 
 impl Import {
@@ -12,11 +14,13 @@ impl Import {
         module_path: impl Into<ModulePath>,
         prefix: Option<String>,
         unqualified_names: Vec<String>,
+        position: Position,
     ) -> Self {
         Self {
             module_path: module_path.into(),
             prefix,
             unqualified_names,
+            position,
         }
     }
 
@@ -30,5 +34,9 @@ impl Import {
 
     pub fn unqualified_names(&self) -> &[String] {
         &self.unqualified_names
+    }
+
+    pub fn position(&self) -> &Position {
+        &self.position
     }
 }

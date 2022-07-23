@@ -1,3 +1,5 @@
 *.svg
 book
-src/examples/**/*.md
+theme/index.hbs
+theme/pagetoc.css
+theme/pagetoc.js

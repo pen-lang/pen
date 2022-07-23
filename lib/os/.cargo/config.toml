@@ -1,2 +1,0 @@
-[build]
-rustflags = ["-A", "improper_ctypes", "-D", "improper_ctypes_definitions"]

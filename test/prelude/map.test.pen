@@ -1,0 +1,286 @@
+import Core'Number
+import Test'Assert
+
+type Foo {}
+
+type Bar {}
+
+type Union = Foo | Bar
+
+SetNoKey = \() none | error {
+  Assert'True(Number'Sum([number k for k, _ in {number: none}]) == 0)
+}
+
+SetKey = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+        }
+      ],
+    )
+      == 1,
+  )
+}
+
+Set2Keys = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+        }
+      ],
+    )
+      == 3,
+  )
+}
+
+Set3Keys = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+          3: none,
+        }
+      ],
+    )
+      == 6,
+  )
+}
+
+Set4Keys = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          2: none,
+          3: none,
+          4: none,
+        }
+      ],
+    )
+      == 10,
+  )
+}
+
+SetManyKeys = \() none | error {
+  ks = Number'Sequence(42)
+  xs = numberSet(ks)
+
+  assertKeys(xs, ks)
+}
+
+SetVeryManyKeys = \() none | error {
+  ks = Number'Sequence(1024)
+  xs = numberSet(ks)
+
+  assertKeys(xs, ks)
+}
+
+IterateKey = \() none | error {
+  Assert'True(
+    Number'Sum([number k for k, _ in {number: none 1: none}]) == 1,
+  )
+}
+
+Iterate2Keys = \() none | error {
+  Assert'True(
+    Number'Sum([number k for k, _ in {number: none 1: none, 2: none}]) == 3,
+  )
+}
+
+IterateManyKeys = \() none | error {
+  ks = Number'Sequence(42)
+
+  Assert'True(
+    Number'Sum([number k for k, _ in numberSet(ks)])
+      == Number'Sum(ks),
+  )
+}
+
+IterateVeryManyKeys = \() none | error {
+  ks = Number'Sequence(1024)
+
+  Assert'True(
+    Number'Sum([number k for k, _ in numberSet(ks)])
+      == Number'Sum(ks),
+  )
+}
+
+Set3KeysWith0 = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          0: none,
+          1: none,
+          2: none,
+        }
+      ],
+    )
+      == 3,
+  )
+}
+
+SetUnionKeys = \() none | error {
+  _ = {Union: none Foo{}: none, Bar{}: none}
+
+  none
+}
+
+RemoveKey = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          1: none,
+          1,
+        }
+      ],
+    )
+      == 0,
+  )
+}
+
+Merge2Maps = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          ...{number: none 1: none},
+          ...{number: none 2: none},
+        }
+      ],
+    )
+      == 3,
+  )
+}
+
+Merge3Maps = \() none | error {
+  Assert'True(
+    Number'Sum(
+      [number
+        k
+        for k, _ in {number: none
+          ...{number: none 1: none},
+          ...{number: none 2: none},
+          ...{number: none 3: none},
+        }
+      ],
+    )
+      == 6,
+  )
+}
+
+GetKey = \() none | error {
+  xs = {string: number "foo": 42}
+
+  Assert'True(if x = xs["foo"] { x == 42 } else { false })
+}
+
+Get2Keys = \() none | error {
+  xs = {string: number "foo": 0, "bar": 1}
+
+  Assert'True(if x = xs["foo"] { x == 0 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 1 } else { false })
+}
+
+Get3Keys = \() none | error {
+  xs = {string: number "foo": 0, "bar": 1, "baz": 2}
+
+  Assert'True(if x = xs["foo"] { x == 0 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 1 } else { false })?
+  Assert'True(if x = xs["baz"] { x == 2 } else { false })
+}
+
+GetUnionKeys = \() none | error {
+  xs = {string | none: none "foo": none, none: none}
+
+  Assert'True(if x = xs["foo"] { true } else { false })?
+  Assert'True(if x = xs[none] { true } else { false })
+}
+
+FailToGetKey = \() none | error {
+  xs = {string: number "foo": 42}
+
+  Assert'True(!if x = xs["bar"] { true } else { false })
+}
+
+GetKeyInMergedMap = \() none | error {
+  xs = {string: number
+    ...{string: number "foo": 1},
+    ...{string: number "bar": 2},
+  }
+
+  Assert'True(if x = xs["foo"] { x == 1 } else { false })?
+  Assert'True(if x = xs["bar"] { x == 2 } else { false })
+}
+
+CompareMaps = \() none | error {
+  Assert'True({string: number "foo": 1} == {string: number "foo": 1})
+}
+
+CompareMapsWithDifferentKeys = \() none | error {
+  Assert'True({string: none "foo": none} != {string: none "bar": none})
+}
+
+CompareMapsWithDifferentValues = \() none | error {
+  Assert'True({string: number "foo": 1} != {string: number "foo": 2})
+}
+
+CompareMapsWithMultipleKeys = \() none | error {
+  Assert'True({string: number "foo": 1, "bar": 2} == {string: number "foo": 1, "bar": 2})
+}
+
+CompareMapsWithMultipleDifferentKeys = \() none | error {
+  Assert'True({string: number "foo": 1, "bar": 2} != {string: number "foo": 1, "baz": 2})
+}
+
+SizeZero = \() none | error {
+  Assert'True(size({none: none}) == 0)
+}
+
+SizeOne = \() none | error {
+  Assert'True(size({number: none 1: none}) == 1)
+}
+
+SizeTwo = \() none | error {
+  Assert'True(size({number: none 1: none, 2: none}) == 2)
+}
+
+SizeMany = \() none | error {
+  Assert'True(size(numberSet(Number'Sequence(42))) == 42)
+}
+
+assertKeys = \(xs {number: none}, ks [number]) none | error {
+  if [k, ...ks] = ks {
+    if _ = xs[k()] {
+      assertKeys(xs, ks)
+    } else {
+      error("oh no")
+    }
+  } else {
+    none
+  }
+}
+
+numberSet = \(xs [number]) {number: none} {
+  if [x, ...xs] = xs {
+    {number: none ...numberSet(xs), x(): none}
+  } else {
+    {number: none}
+  }
+}

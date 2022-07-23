@@ -26,8 +26,16 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
         #type_
 
         mod #module_name {
-            use core::{mem, ptr};
+            use core::{alloc::Layout, mem, ptr};
             use super::#type_name;
+
+            #[test]
+            fn type_size() {
+                assert!(
+                    Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
+                    "type size too large",
+                );
+            }
 
             unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;
@@ -41,7 +49,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 ptr::read(&payload as *const u64 as *const T)
             }
 
-            #[allow(clippy::forget_copy)]
+            #[allow(clippy::forget_copy, clippy::forget_non_drop)]
             extern "C" fn clone(x: u64) -> u64 {
                 let x = unsafe { transmute_from_payload::<#type_name>(x) };
                 let payload = unsafe { transmute_into_payload(x.clone()) };
@@ -55,8 +63,12 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 unsafe { transmute_from_payload::<#type_name>(x) };
             }
 
+            extern "C" fn synchronize(_: u64) {
+                // Currently, all types in Rust are expected to implement Sync.
+            }
+
             static TYPE_INFORMATION: #crate_path::TypeInformation =
-                #crate_path::TypeInformation { clone, drop };
+                #crate_path::TypeInformation { clone, drop, synchronize };
 
             impl From<#type_name> for #crate_path::Any {
                 fn from(x: #type_name) -> Self {
@@ -82,6 +94,18 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
                 type Error = ();
 
                 fn try_from(any: &#crate_path::Any) -> Result<Self, ()> {
+                    if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
+                        Ok(unsafe { mem::transmute(any.payload()) })
+                    } else {
+                        Err(())
+                    }
+                }
+            }
+
+            impl<'a> TryFrom<&'a mut #crate_path::Any> for &'a mut #type_name {
+                type Error = ();
+
+                fn try_from(any: &mut #crate_path::Any) -> Result<Self, ()> {
                     if ptr::eq(any.type_information(), &TYPE_INFORMATION) {
                         Ok(unsafe { mem::transmute(any.payload()) })
                     } else {
