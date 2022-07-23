@@ -75,6 +75,7 @@ fn check_expression(
             }
 
             match call.function() {
+                BuiltInFunction::Race => todo!(),
                 BuiltInFunction::Size => {
                     if let [argument_type] = function_type.arguments() {
                         if !matches!(argument_type, Type::List(_) | Type::Map(_)) {

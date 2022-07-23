@@ -51,6 +51,7 @@ pub fn compile(
             &context.configuration()?.error_type.error_function_name,
         ))?
         .into(),
+        BuiltInFunction::Race => todo!(),
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
