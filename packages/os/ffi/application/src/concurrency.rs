@@ -1,16 +1,14 @@
 use async_recursion::async_recursion;
-use futures::{pin_mut, Stream};
-use std::{future::Future, pin::Pin, sync::Arc};
+use futures::{future::FutureExt, pin_mut, Stream};
+use std::{pin::Pin, sync::Arc};
 use tokio::{spawn, sync::RwLock, task::yield_now};
 use tokio_stream::{StreamExt, StreamMap};
 
 #[ffi::bindgen]
 fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
-    ffi::future::to_closure(spawn_and_unwrap(ffi::future::from_closure(closure)))
-}
-
-async fn spawn_and_unwrap(future: impl Future<Output = ffi::Any> + Send + 'static) -> ffi::Any {
-    spawn(future).await.unwrap()
+    ffi::future::to_closure(
+        spawn(ffi::future::from_closure::<_, ffi::Any>(closure)).map(Result::unwrap),
+    )
 }
 
 #[ffi::bindgen]
