@@ -16,7 +16,7 @@ async fn spawn_and_unwrap(future: impl Future<Output = ffi::Any> + Send + 'stati
 }
 
 #[ffi::bindgen]
-async fn _pen_join(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
+async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     let mut streams = vec![];
     let mut first_rest = unsafe { _pen_os_first_rest(list) };
 

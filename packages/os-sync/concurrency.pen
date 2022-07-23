@@ -1,6 +1,6 @@
-foreign "c" _pen_os_join = \(xss [[any]]) [any] {
+foreign "c" _pen_os_race = \(xss [[any]]) [any] {
   if [xs, ...xss] = xss {
-    [any ...xs(), ..._pen_os_join(xss)]
+    [any ...xs(), ..._pen_os_race(xss)]
   } else {
     [any]
   }
