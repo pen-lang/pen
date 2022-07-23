@@ -27,14 +27,13 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     let mut streams = vec![];
 
     while let Some(element) = list.next().await {
-        streams.push((
-            (),
-            Box::pin(ffi::future::stream::from_list(element.try_into().unwrap())),
-        ));
+        streams.push(Box::pin(ffi::future::stream::from_list(
+            element.try_into().unwrap(),
+        )));
     }
 
     convert_stream_to_list(Arc::new(RwLock::new(Box::pin(
-        StreamMap::from_iter(streams).map(|(_, value)| value),
+        StreamMap::from_iter(streams.into_iter().enumerate()).map(|(_, value)| value),
     ))))
     .await
 }
