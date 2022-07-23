@@ -8,6 +8,7 @@ pub fn qualify(
         map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
         spawn_function_name: configuration.spawn_function_name.clone(),
+        race_function_name: configuration.race_function_name.clone(),
         debug_function_name: configuration.debug_function_name.clone(),
     }
 }

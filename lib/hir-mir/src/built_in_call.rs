@@ -1,7 +1,9 @@
 use crate::{
     context::CompileContext,
     downcast, expression, type_,
-    utility_function_declaration::{LOCAL_DEBUG_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME},
+    utility_function_declaration::{
+        LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
+    },
     CompileError,
 };
 use hir::{
@@ -51,7 +53,9 @@ pub fn compile(
             &context.configuration()?.error_type.error_function_name,
         ))?
         .into(),
-        BuiltInFunction::Race => todo!(),
+        BuiltInFunction::Race => {
+            compile_call(mir::ir::Variable::new(LOCAL_RACE_FUNCTION_NAME))?.into()
+        }
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
