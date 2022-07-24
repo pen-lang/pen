@@ -58,7 +58,7 @@ pub fn compile(
             const ELEMENT_NAME: &str = "$element";
 
             let list_type =
-                type_canonicalizer::canonicalize_list(&function_type.result(), context.types())?
+                type_canonicalizer::canonicalize_list(function_type.result(), context.types())?
                     .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
             let any_list_type =
                 types::List::new(types::Any::new(position.clone()), position.clone());
@@ -69,10 +69,10 @@ pub fn compile(
                     context,
                     &ListComprehension::new(
                         Some(list_type.clone().into()),
-                        any_list_type.clone(),
+                        any_list_type,
                         Call::new(
                             Some(
-                                types::Function::new(vec![], list_type.clone(), position.clone())
+                                types::Function::new(vec![], list_type, position.clone())
                                     .into(),
                             ),
                             Variable::new(ELEMENT_NAME, position.clone()),
