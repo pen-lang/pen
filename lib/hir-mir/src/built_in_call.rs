@@ -71,10 +71,7 @@ pub fn compile(
                         Some(list_type.clone().into()),
                         any_list_type,
                         Call::new(
-                            Some(
-                                types::Function::new(vec![], list_type, position.clone())
-                                    .into(),
-                            ),
+                            Some(types::Function::new(vec![], list_type, position.clone()).into()),
                             Variable::new(ELEMENT_NAME, position.clone()),
                             vec![],
                             position.clone(),
