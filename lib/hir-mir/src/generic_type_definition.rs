@@ -3,6 +3,7 @@ use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
     ir::*,
+    types,
     types::Type,
 };
 
@@ -64,6 +65,13 @@ fn collect_types(
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
+        Expression::BuiltInCall(call) if call.function() == BuiltInFunction::Race => {
+            let position = call.position();
+
+            lower_types.insert(
+                types::List::new(types::Any::new(position.clone()), position.clone()).into(),
+            );
+        }
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
         }
@@ -83,13 +91,13 @@ fn collect_types(
         Expression::List(list) => {
             lower_types.insert(list.type_().clone());
         }
-        Expression::Map(map) => {
-            lower_types.insert(map.key_type().clone());
-            lower_types.insert(map.value_type().clone());
-        }
         Expression::ListComprehension(comprehension) => {
             lower_types.insert(comprehension.input_type().unwrap().clone());
             lower_types.insert(comprehension.output_type().clone());
+        }
+        Expression::Map(map) => {
+            lower_types.insert(map.key_type().clone());
+            lower_types.insert(map.value_type().clone());
         }
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());

@@ -29,7 +29,7 @@ pub fn compile(
         .iter()
         .map(|argument| expression::compile(context, argument))
         .collect::<Result<Vec<_>, _>>()?;
-    let compile_call = |function| -> Result<_, CompileError> {
+    let compile_call = |function, arguments| -> Result<_, CompileError> {
         Ok(mir::ir::Call::new(
             type_::compile_function(
                 context,
@@ -41,20 +41,52 @@ pub fn compile(
                 .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
             )?,
             function,
-            arguments.clone(),
+            arguments,
         ))
     };
 
     Ok(match call.function() {
         BuiltInFunction::Debug => {
-            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME))?.into()
+            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
         }
-        BuiltInFunction::Error => compile_call(mir::ir::Variable::new(
-            &context.configuration()?.error_type.error_function_name,
-        ))?
+        BuiltInFunction::Error => compile_call(
+            mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
+            arguments,
+        )?
         .into(),
         BuiltInFunction::Race => {
-            compile_call(mir::ir::Variable::new(LOCAL_RACE_FUNCTION_NAME))?.into()
+            const ELEMENT_NAME: &str = "$element";
+
+            let list_type =
+                type_canonicalizer::canonicalize_list(&function_type.result(), context.types())?
+                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+            let any_list_type =
+                types::List::new(types::Any::new(position.clone()), position.clone());
+
+            compile_call(
+                mir::ir::Variable::new(LOCAL_RACE_FUNCTION_NAME),
+                vec![expression::compile(
+                    context,
+                    &ListComprehension::new(
+                        Some(list_type.clone().into()),
+                        any_list_type.clone(),
+                        Call::new(
+                            Some(
+                                types::Function::new(vec![], list_type.clone(), position.clone())
+                                    .into(),
+                            ),
+                            Variable::new(ELEMENT_NAME, position.clone()),
+                            vec![],
+                            position.clone(),
+                        ),
+                        ELEMENT_NAME,
+                        call.arguments()[0].clone(),
+                        position.clone(),
+                    )
+                    .into(),
+                )?],
+            )?
+            .into()
         }
         BuiltInFunction::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
@@ -70,9 +102,10 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunction::Source => compile_call(mir::ir::Variable::new(
-            &context.configuration()?.error_type.source_function_name,
-        ))?
+        BuiltInFunction::Source => compile_call(
+            mir::ir::Variable::new(&context.configuration()?.error_type.source_function_name),
+            arguments,
+        )?
         .into(),
         BuiltInFunction::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
