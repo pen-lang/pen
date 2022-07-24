@@ -1,6 +1,6 @@
-foreign "c" _pen_os_race = \(xss [[any]]) [any] {
+foreign _pen_race = \(xss [[any]]) [any] {
   if [xs, ...xss] = xss {
-    [any ...xs(), ..._pen_os_race(xss)]
+    [any ...xs(), ..._pen_race(xss)]
   } else {
     [any]
   }

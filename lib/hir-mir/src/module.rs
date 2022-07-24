@@ -30,7 +30,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(if context.configuration().is_ok() {
-                utility_function_declaration::compile(context)?
+                utility_function_declaration::compile(context, module)?
             } else {
                 vec![]
             })
