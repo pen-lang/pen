@@ -133,6 +133,54 @@ mod tests {
     use position::{test::PositionFake, Position};
 
     #[test]
+    fn compile_race_function() {
+        let list_type = types::List::new(
+            types::List::new(types::None::new(Position::fake()), Position::fake()),
+            Position::fake(),
+        );
+        let context = CompileContext::dummy(Default::default(), Default::default());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::fake()),
+                        BuiltInCall::new(
+                            Some(
+                                types::Function::new(
+                                    vec![list_type.clone().into()],
+                                    list_type.element().clone(),
+                                    Position::fake()
+                                )
+                                .into()
+                            ),
+                            BuiltInFunction::Race,
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_::compile_concrete_list_name(
+                    &types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                    context.types()
+                )
+                .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
+
+    #[test]
     fn compile_function_type_definition() {
         let function_type =
             types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
