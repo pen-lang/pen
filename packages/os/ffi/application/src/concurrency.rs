@@ -30,10 +30,11 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
         )));
     }
 
-    convert_stream_to_list(Arc::new(RwLock::new(Box::pin(
-        StreamMap::from_iter(streams.into_iter().enumerate()).map(|(_, value)| value),
+    ffi::List::lazy(ffi::future::to_closure(convert_stream_to_list(Arc::new(
+        RwLock::new(Box::pin(
+            StreamMap::from_iter(streams.into_iter().enumerate()).map(|(_, value)| value),
+        )),
     ))))
-    .await
 }
 
 // TODO Use List::lazy(). We should not wait for the first element to be ready.
@@ -42,7 +43,12 @@ async fn convert_stream_to_list(
     stream: Arc<RwLock<Pin<Box<impl Stream<Item = ffi::Any> + Send + Sync + 'static>>>>,
 ) -> ffi::Arc<ffi::List> {
     if let Some(x) = stream.write().await.next().await {
-        ffi::List::prepend(convert_stream_to_list(stream.clone()).await, x)
+        ffi::List::prepend(
+            ffi::List::lazy(ffi::future::to_closure(convert_stream_to_list(
+                stream.clone(),
+            ))),
+            x,
+        )
     } else {
         ffi::List::new()
     }
