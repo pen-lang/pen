@@ -29,7 +29,7 @@ Feature: Examples
       | udp-server            |
       | yes                   |
 
-  Scenario: Build and test examples
+  Scenario: Run HTTP client and server
     Given I run the following script:
     """
     cp -r $PEN_ROOT/examples .
