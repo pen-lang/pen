@@ -5,7 +5,6 @@ publish = false
 edition = "2021"
 
 [dependencies]
-async-recursion = "1"
 async-stream = "0.3"
 ffi = { package = "pen-ffi", version = "*", features = ["runtime"] }
 futures = "0.3"

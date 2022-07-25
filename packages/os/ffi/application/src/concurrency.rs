@@ -1,4 +1,3 @@
-use async_recursion::async_recursion;
 use futures::{future::FutureExt, pin_mut, Stream};
 use std::{pin::Pin, sync::Arc};
 use tokio::{spawn, sync::RwLock, task::yield_now};
@@ -37,7 +36,6 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     ))))
 }
 
-#[async_recursion]
 async fn convert_stream_to_list(
     stream: Arc<RwLock<Pin<Box<impl Stream<Item = ffi::Any> + Send + Sync + 'static>>>>,
 ) -> ffi::Arc<ffi::List> {
