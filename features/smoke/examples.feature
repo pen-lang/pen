@@ -44,3 +44,4 @@ Feature: Examples
     And I successfully run `pen build`
     Then I successfully run `./app get http://localhost:8080 hello`
     And the stdout is "hello"
+    And I successfully run `pkill app`
