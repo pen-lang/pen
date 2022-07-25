@@ -96,7 +96,7 @@ impl NinjaBuildScriptCompiler {
             &format!(
                 "  command = {} \
                     -verify \
-                    -function-attrs -globalopt -gvn \
+                    -function-attrs -globalopt \
                     -adce -aggressive-instcombine \
                     -tailcallelim -inline -mergefunc \
                     -verify \
