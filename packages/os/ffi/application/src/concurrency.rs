@@ -23,6 +23,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
 
     let mut streams = vec![];
 
+    // TODO Let streams have a variadic length.
     while let Some(element) = list.next().await {
         streams.push(Box::pin(ffi::future::stream::from_list(
             element.try_into().unwrap(),
