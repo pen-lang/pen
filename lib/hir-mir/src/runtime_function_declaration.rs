@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, type_, CompileError};
 use fnv::FnvHashSet;
-use hir::ir::Module;
+use hir::ir::*;
 
 pub const LOCAL_DEBUG_FUNCTION_NAME: &str = "__debug";
 pub const LOCAL_RACE_FUNCTION_NAME: &str = "__race";
@@ -65,7 +65,8 @@ pub fn compile(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
+    use hir::{test::ModuleFake, types};
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn declare_runtime_functions() {
@@ -92,5 +93,28 @@ mod tests {
                 .any(|declaration| declaration.name() == local_name
                     && declaration.foreign_name() == foreign_name));
         }
+    }
+
+    #[test]
+    fn do_not_declare_runtime_function_if_defined_in_same_module() {
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+            "myDebug",
+            &COMPILE_CONFIGURATION.debug_function_name,
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake(),
+            ),
+            None,
+            false,
+            Position::fake(),
+        )]);
+        let context = CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone()));
+        let declarations = compile(&context, &module).unwrap();
+
+        assert!(declarations.iter().any(|declaration| declaration.name()
+            == LOCAL_DEBUG_FUNCTION_NAME
+            && declaration.foreign_name() == COMPILE_CONFIGURATION.debug_function_name));
     }
 }
