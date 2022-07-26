@@ -71,8 +71,11 @@ mod tests {
     #[test]
     fn declare_runtime_functions() {
         let module = Module::empty();
-        let context = CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone()));
-        let declarations = compile(&context, &module).unwrap();
+        let declarations = compile(
+            &CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone())),
+            &module,
+        )
+        .unwrap();
 
         for (local_name, foreign_name) in [
             (
@@ -110,8 +113,11 @@ mod tests {
             false,
             Position::fake(),
         )]);
-        let context = CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone()));
-        let declarations = compile(&context, &module).unwrap();
+        let declarations = compile(
+            &CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone())),
+            &module,
+        )
+        .unwrap();
 
         assert!(!declarations
             .iter()
