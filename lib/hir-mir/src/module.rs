@@ -27,15 +27,14 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     compile_calling_convention(declaration.calling_convention()),
                 ))
             })
-            .chain(
-                context
-                    .configuration()
-                    .ok()
-                    .into_iter()
-                    .flat_map(utility_function_declaration::compile)
-                    .map(Ok),
-            )
-            .collect::<Result<_, _>>()?,
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .chain(if context.configuration().is_ok() {
+                utility_function_declaration::compile(context, module)?
+            } else {
+                vec![]
+            })
+            .collect(),
         module
             .function_definitions()
             .iter()
@@ -135,35 +134,33 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    fn compile_module(module: &Module) -> Result<mir::ir::Module, CompileError> {
-        compile(
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
-            module,
-        )
+    fn create_context(module: &Module) -> CompileContext {
+        CompileContext::new(module, COMPILE_CONFIGURATION.clone().into())
     }
 
     #[test]
     fn compile_foreign_definition() {
-        assert_eq!(
-            compile_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::new(
-                    "foo",
-                    "bar",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::fake()))],
-                        types::None::new(Position::fake()),
-                        None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
-                    false,
-                    Position::fake(),
-                )])
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+            "foo",
+            "bar",
+            Lambda::new(
+                vec![Argument::new("x", types::None::new(Position::fake()))],
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake(),
             ),
+            ForeignDefinitionConfiguration::new(CallingConvention::Native).into(),
+            false,
+            Position::fake(),
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(utility_function_declaration::compile(
-                    &COMPILE_CONFIGURATION
-                ))
+                .set_foreign_declarations(
+                    utility_function_declaration::compile(&context, &module).unwrap()
+                )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -180,26 +177,27 @@ mod tests {
 
     #[test]
     fn compile_foreign_definition_with_c_calling_convention() {
-        assert_eq!(
-            compile_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::new(
-                    "foo",
-                    "bar",
-                    Lambda::new(
-                        vec![Argument::new("x", types::None::new(Position::fake()))],
-                        types::None::new(Position::fake()),
-                        None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
-                    false,
-                    Position::fake(),
-                )])
+        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+            "foo",
+            "bar",
+            Lambda::new(
+                vec![Argument::new("x", types::None::new(Position::fake()))],
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake(),
             ),
+            ForeignDefinitionConfiguration::new(CallingConvention::C).into(),
+            false,
+            Position::fake(),
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(utility_function_declaration::compile(
-                    &COMPILE_CONFIGURATION
-                ))
+                .set_foreign_declarations(
+                    utility_function_declaration::compile(&context, &module).unwrap()
+                )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",

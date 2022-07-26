@@ -102,6 +102,21 @@ fn infer_expression(
                             types::None::new(position.clone()),
                             position.clone(),
                         ),
+                        BuiltInFunction::Race => {
+                            let argument_type = type_canonicalizer::canonicalize_list(
+                                &argument_types.first().cloned().ok_or_else(|| {
+                                    AnalysisError::WrongArgumentCount(position.clone())
+                                })?,
+                                context.types(),
+                            )?
+                            .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+
+                            types::Function::new(
+                                argument_types,
+                                argument_type.element().clone(),
+                                position.clone(),
+                            )
+                        }
                         BuiltInFunction::Size => types::Function::new(
                             argument_types,
                             types::Number::new(position.clone()),
@@ -1726,6 +1741,58 @@ mod tests {
     mod built_in_call {
         use super::*;
         use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer_race() {
+            let list_type = types::List::new(
+                types::List::new(types::None::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            list_type.element().clone(),
+                            BuiltInCall::new(
+                                None,
+                                BuiltInFunction::Race,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                ),
+                Ok(
+                    Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            list_type.element().clone(),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![list_type.clone().into()],
+                                        list_type.element().clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::Race,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
 
         #[test]
         fn infer_size() {

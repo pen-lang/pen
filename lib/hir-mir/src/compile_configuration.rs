@@ -19,8 +19,9 @@ pub struct CompileConfiguration {
     pub map_type: MapTypeConfiguration,
     pub string_type: StringTypeConfiguration,
     pub error_type: ErrorTypeConfiguration,
-    pub spawn_function_name: String,
     pub debug_function_name: String,
+    pub race_function_name: String,
+    pub spawn_function_name: String,
 }
 
 #[cfg(test)]
@@ -29,6 +30,7 @@ pub static COMPILE_CONFIGURATION: Lazy<CompileConfiguration> = Lazy::new(|| Comp
     map_type: MAP_TYPE_CONFIGURATION.clone(),
     string_type: STRING_TYPE_CONFIGURATION.clone(),
     error_type: ERROR_TYPE_CONFIGURATION.clone(),
-    spawn_function_name: "spawn".into(),
     debug_function_name: "debug".into(),
+    race_function_name: "race".into(),
+    spawn_function_name: "spawn".into(),
 });

@@ -3,6 +3,7 @@ use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
     ir::*,
+    types,
     types::Type,
 };
 
@@ -64,6 +65,13 @@ fn collect_types(
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
+        Expression::BuiltInCall(call) if call.function() == BuiltInFunction::Race => {
+            let position = call.position();
+
+            lower_types.insert(
+                types::List::new(types::Any::new(position.clone()), position.clone()).into(),
+            );
+        }
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
         }
@@ -83,13 +91,13 @@ fn collect_types(
         Expression::List(list) => {
             lower_types.insert(list.type_().clone());
         }
-        Expression::Map(map) => {
-            lower_types.insert(map.key_type().clone());
-            lower_types.insert(map.value_type().clone());
-        }
         Expression::ListComprehension(comprehension) => {
             lower_types.insert(comprehension.input_type().unwrap().clone());
             lower_types.insert(comprehension.output_type().clone());
+        }
+        Expression::Map(map) => {
+            lower_types.insert(map.key_type().clone());
+            lower_types.insert(map.value_type().clone());
         }
         Expression::TypeCoercion(coercion) => {
             lower_types.insert(coercion.from().clone());
@@ -123,6 +131,54 @@ mod tests {
         types,
     };
     use position::{test::PositionFake, Position};
+
+    #[test]
+    fn compile_race_function() {
+        let list_type = types::List::new(
+            types::List::new(types::None::new(Position::fake()), Position::fake()),
+            Position::fake(),
+        );
+        let context = CompileContext::dummy(Default::default(), Default::default());
+
+        assert_eq!(
+            compile(
+                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    "foo",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        types::None::new(Position::fake()),
+                        BuiltInCall::new(
+                            Some(
+                                types::Function::new(
+                                    vec![list_type.clone().into()],
+                                    list_type.element().clone(),
+                                    Position::fake()
+                                )
+                                .into()
+                            ),
+                            BuiltInFunction::Race,
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+                &context,
+            ),
+            Ok(vec![mir::ir::TypeDefinition::new(
+                type_::compile_concrete_list_name(
+                    &types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                    context.types()
+                )
+                .unwrap(),
+                mir::types::RecordBody::new(vec![mir::types::Record::new(
+                    &context.configuration().unwrap().list_type.list_type_name
+                )
+                .into()]),
+            )])
+        );
+    }
 
     #[test]
     fn compile_function_type_definition() {
