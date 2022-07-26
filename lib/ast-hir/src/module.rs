@@ -211,6 +211,9 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 ast::Expression::Variable(variable) if variable.name() == "go" => {
                     built_in_call(ir::BuiltInFunction::Spawn).into()
                 }
+                ast::Expression::Variable(variable) if variable.name() == "race" => {
+                    built_in_call(ir::BuiltInFunction::Race).into()
+                }
                 ast::Expression::Variable(variable) if variable.name() == "size" => {
                     built_in_call(ir::BuiltInFunction::Size).into()
                 }

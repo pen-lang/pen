@@ -131,6 +131,17 @@ pub fn compile_concrete_map_name(
     ))
 }
 
+pub fn compile_race_function(
+    context: &CompileContext,
+) -> Result<mir::types::Function, CompileError> {
+    let list_type = compile_list(context)?;
+
+    Ok(mir::types::Function::new(
+        vec![list_type.clone().into()],
+        list_type,
+    ))
+}
+
 pub fn compile_spawn_function() -> mir::types::Function {
     let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 

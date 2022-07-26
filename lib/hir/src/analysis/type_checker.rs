@@ -75,6 +75,26 @@ fn check_expression(
             }
 
             match call.function() {
+                BuiltInFunction::Race => {
+                    let argument_type = type_canonicalizer::canonicalize_list(
+                        if let [argument_type] = function_type.arguments() {
+                            Ok(argument_type)
+                        } else {
+                            Err(AnalysisError::WrongArgumentCount(position.clone()))
+                        }?,
+                        context.types(),
+                    )?
+                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+
+                    if type_canonicalizer::canonicalize_list(
+                        argument_type.element(),
+                        context.types(),
+                    )?
+                    .is_none()
+                    {
+                        return Err(AnalysisError::ListExpected(position.clone()));
+                    }
+                }
                 BuiltInFunction::Size => {
                     if let [argument_type] = function_type.arguments() {
                         if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
@@ -3304,6 +3324,44 @@ mod tests {
                     ),
                     Err(AnalysisError::SpawnedFunctionArguments(_))
                 ));
+            }
+        }
+
+        mod race {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let list_type = types::List::new(
+                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    Position::fake(),
+                );
+
+                check_module(
+                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("x", list_type.clone())],
+                            list_type.element().clone(),
+                            BuiltInCall::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![list_type.clone().into()],
+                                        list_type.element().clone(),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::Race,
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+                )
+                .unwrap();
             }
         }
     }
