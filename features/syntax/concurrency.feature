@@ -64,13 +64,17 @@ Feature: Concurrency
     import Os'Process
 
     main = \(ctx context) none {
-      xs = race([[none]
-        [none (\() none { loop(0) none })()],
-        [none none],
+      xs = race([[boolean]
+        [boolean (\() boolean { loop(0) false })()],
+        [boolean true],
       ])
 
       if [x, ...xs] = xs {
-        x()
+        if x() {
+          none
+        } else {
+          Process'Exit(ctx.Os, 1)
+        }
       } else {
         Process'Exit(ctx.Os, 1)
       }
