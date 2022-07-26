@@ -67,8 +67,8 @@ mod tests {
     #[test]
     fn validate_none_type() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -83,8 +83,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            ),
+                )
+            ]),),
             Ok(()),
         );
     }
@@ -92,8 +92,8 @@ mod tests {
     #[test]
     fn validate_any_type() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -108,8 +108,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            ),
+                )
+            ]),),
             Ok(()),
         );
     }
@@ -117,8 +117,8 @@ mod tests {
     #[test]
     fn fail_to_validate_error_type() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Error::new(Position::fake()))],
@@ -133,8 +133,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            ),
+                )
+            ]),),
             Err(AnalysisError::UnusedErrorValue(Position::fake())),
         );
     }
@@ -148,8 +148,8 @@ mod tests {
         );
 
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", result_type.clone())],
@@ -164,8 +164,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            ),
+                )
+            ]),),
             Err(AnalysisError::UnusedErrorValue(Position::fake())),
         );
     }

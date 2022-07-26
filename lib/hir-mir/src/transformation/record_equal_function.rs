@@ -145,7 +145,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_definitions(vec![FunctionDefinition::new(
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "foo.$equal",
                     "foo.$equal",
                     Lambda::new(
@@ -226,7 +226,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition])
-                .set_declarations(vec![FunctionDeclaration::new(
+                .set_function_declarations(vec![FunctionDeclaration::new(
                     "foo.$equal",
                     types::Function::new(
                         vec![record_type.clone().into(), record_type.into()],
