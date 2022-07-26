@@ -106,15 +106,15 @@ mod tests {
                 None::new(Position::fake()),
                 Position::fake(),
             ),
-            None,
+            Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
             false,
             Position::fake(),
         )]);
         let context = CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone()));
         let declarations = compile(&context, &module).unwrap();
 
-        assert!(declarations.iter().any(|declaration| declaration.name()
-            == LOCAL_DEBUG_FUNCTION_NAME
-            && declaration.foreign_name() == COMPILE_CONFIGURATION.debug_function_name));
+        assert!(!declarations
+            .iter()
+            .any(|declaration| declaration.name() == LOCAL_DEBUG_FUNCTION_NAME));
     }
 }
