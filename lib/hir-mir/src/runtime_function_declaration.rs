@@ -10,7 +10,6 @@ pub const LOCAL_SPAWN_FUNCTION_NAME: &str = "__spawn";
 // because they might be defined in the same file. So we first alias them to use
 // them in code generation.
 //
-// TODO Rename this function runtime_function_declaration.
 // TODO Test this.
 pub fn compile(
     context: &CompileContext,
