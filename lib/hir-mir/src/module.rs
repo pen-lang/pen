@@ -158,7 +158,9 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(utility_function_declaration::compile(&context).unwrap())
+                .set_foreign_declarations(
+                    utility_function_declaration::compile(&context, &module).unwrap()
+                )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -193,7 +195,9 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(utility_function_declaration::compile(&context).unwrap())
+                .set_foreign_declarations(
+                    utility_function_declaration::compile(&context, &module).unwrap()
+                )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
