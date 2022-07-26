@@ -115,7 +115,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -154,7 +154,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -192,7 +192,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -228,7 +228,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -263,7 +263,7 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -303,7 +303,7 @@ mod tests {
                     false,
                     true,
                 )])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", record_type.clone())],
@@ -346,7 +346,7 @@ mod tests {
         validate_module(
             &Module::empty()
                 .set_type_definitions(vec![external_private_open_record_definition()])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -375,7 +375,7 @@ mod tests {
         validate_module(
             &Module::empty()
                 .set_type_definitions(vec![external_private_open_record_definition()])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("r", record_type.clone())],

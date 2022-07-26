@@ -490,7 +490,7 @@ mod tests {
                     false,
                     Position::fake()
                 )])
-                .set_definitions(vec![ir::FunctionDefinition::new(
+                .set_function_definitions(vec![ir::FunctionDefinition::new(
                     "Foo3",
                     "Foo3",
                     ir::Lambda::new(

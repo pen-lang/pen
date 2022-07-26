@@ -194,7 +194,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition.clone()])
-                .set_definitions(vec![FunctionDefinition::new(
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "foo.$hash",
                     "foo.$hash",
                     Lambda::new(
@@ -252,7 +252,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition.clone()])
-                .set_declarations(vec![FunctionDeclaration::new(
+                .set_function_declarations(vec![FunctionDeclaration::new(
                     "foo.$hash",
                     types::Function::new(
                         vec![types::Record::new(type_definition.name(), Position::fake()).into()],
