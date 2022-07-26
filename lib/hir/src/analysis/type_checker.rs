@@ -688,7 +688,7 @@ mod tests {
     #[test]
     fn check_definition() -> Result<(), AnalysisError> {
         check_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -712,7 +712,7 @@ mod tests {
         assert_eq!(
             check_module(
                 &Module::empty()
-                    .set_definitions(vec![FunctionDefinition::fake(
+                    .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -739,7 +739,7 @@ mod tests {
     #[test]
     fn check_thunk() {
         check_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -767,7 +767,7 @@ mod tests {
         #[test]
         fn check_subsumption_of_function_result_type() -> Result<(), AnalysisError> {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -787,8 +787,8 @@ mod tests {
         #[test]
         fn fail_to_check_function_result_type() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -797,8 +797,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -812,8 +812,8 @@ mod tests {
 
         #[test]
         fn check_let() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -828,16 +828,16 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_expression_in_let() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -852,8 +852,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -868,7 +868,7 @@ mod tests {
         #[test]
         fn check_if() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -890,7 +890,7 @@ mod tests {
         #[test]
         fn check_if_of_union_type() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -916,8 +916,8 @@ mod tests {
         #[test]
         fn fail_to_check_then_expression() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -931,8 +931,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -943,8 +943,8 @@ mod tests {
         #[test]
         fn fail_to_check_else_expression() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -958,8 +958,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -980,7 +980,7 @@ mod tests {
             );
 
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
@@ -1012,7 +1012,7 @@ mod tests {
         #[test]
         fn check_with_any() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::fake()))],
@@ -1042,7 +1042,7 @@ mod tests {
         #[test]
         fn check_result_of_union() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::fake()))],
@@ -1076,7 +1076,7 @@ mod tests {
         #[test]
         fn check_result_of_any() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::fake()))],
@@ -1107,7 +1107,7 @@ mod tests {
         #[should_panic]
         fn fail_to_check_due_to_wrong_argument_type() {
             check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -1133,8 +1133,8 @@ mod tests {
         #[test]
         #[should_panic]
         fn fail_to_check_union_due_to_missing_else() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new(
@@ -1159,16 +1159,16 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_any_due_to_missing_else() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new(
@@ -1193,16 +1193,16 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         #[should_panic]
         fn fail_to_check_due_to_any_type_branch() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", types::Any::new(Position::fake()))],
@@ -1224,8 +1224,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -1238,8 +1238,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
@@ -1261,8 +1261,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
     }
@@ -1272,7 +1272,7 @@ mod tests {
 
         #[test]
         fn check_call() {
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1301,7 +1301,7 @@ mod tests {
 
         #[test]
         fn check_call_with_arguments() {
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1331,7 +1331,7 @@ mod tests {
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_type() {
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1361,7 +1361,7 @@ mod tests {
         #[test]
         #[should_panic]
         fn fail_to_check_call_with_wrong_argument_count() {
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -1394,8 +1394,8 @@ mod tests {
 
         #[test]
         fn check_arithmetic_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1409,15 +1409,15 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn check_boolean_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1431,16 +1431,16 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_boolean_operation() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -1454,8 +1454,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )],)
-                ),
+                    )
+                ],)),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -1465,8 +1465,8 @@ mod tests {
 
         #[test]
         fn check_equality_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1481,14 +1481,14 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn check_equality_operation_with_subsumption() {
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -1519,8 +1519,8 @@ mod tests {
         #[test]
         fn fail_to_check_equality_operation() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -1542,16 +1542,16 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )]
+                )),
                 Err(AnalysisError::TypeNotComparable(Position::fake()))
             );
         }
 
         #[test]
         fn check_not_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1560,15 +1560,15 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn check_order_operation() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -1582,8 +1582,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -1595,8 +1595,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
@@ -1609,8 +1609,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -1622,8 +1622,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
@@ -1641,8 +1641,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -1650,8 +1650,8 @@ mod tests {
         fn fail_to_check_try_operation_with_any() {
             let any_type = types::Any::new(Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", any_type.clone())],
@@ -1664,8 +1664,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -1678,8 +1678,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
@@ -1692,8 +1692,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -1704,8 +1704,8 @@ mod tests {
         #[test]
         fn fail_to_check_try_operation_with_wrong_operand_type() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -1722,8 +1722,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -1751,7 +1751,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![FunctionDefinition::fake(
+                    .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -1789,7 +1789,7 @@ mod tests {
                             false,
                             false
                         )])
-                        .set_definitions(vec![FunctionDefinition::fake(
+                        .set_function_definitions(vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![],
@@ -1822,7 +1822,7 @@ mod tests {
                             false,
                             false
                         )])
-                        .set_definitions(vec![FunctionDefinition::fake(
+                        .set_function_definitions(vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![],
@@ -1861,7 +1861,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![FunctionDefinition::fake(
+                    .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", reference_type.clone())],
@@ -1899,7 +1899,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![FunctionDefinition::fake(
+                    .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", reference_type.clone())],
@@ -1934,7 +1934,7 @@ mod tests {
                             false,
                             false,
                         )])
-                        .set_definitions(vec![FunctionDefinition::fake(
+                        .set_function_definitions(vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![Argument::new("x", reference_type.clone())],
@@ -1963,7 +1963,7 @@ mod tests {
                             TypeDefinition::fake("r1", vec![], false, false, false,),
                             TypeDefinition::fake("r2", vec![], false, false, false,)
                         ])
-                        .set_definitions(vec![FunctionDefinition::fake(
+                        .set_function_definitions(vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![Argument::new(
@@ -1991,8 +1991,8 @@ mod tests {
 
         #[test]
         fn check_list_with_single_element() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -2005,8 +2005,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2014,8 +2014,8 @@ mod tests {
         fn check_list_with_multiple_element() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -2030,16 +2030,16 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn fail_to_check_list_with_single_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2054,8 +2054,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2066,8 +2066,8 @@ mod tests {
         #[test]
         fn fail_to_check_list_with_multiple_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -2088,8 +2088,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake(),
@@ -2105,8 +2105,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -2119,8 +2119,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2132,8 +2132,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new(
@@ -2151,8 +2151,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2160,7 +2160,7 @@ mod tests {
         fn check_list_comprehension() {
             let element_type = types::None::new(Position::fake());
 
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
@@ -2199,8 +2199,8 @@ mod tests {
             let element_type = types::None::new(Position::fake());
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -2234,8 +2234,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )]
+                )),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2251,8 +2251,8 @@ mod tests {
         #[test]
         fn check_no_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2270,8 +2270,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Ok(()),
             );
         }
@@ -2279,8 +2279,8 @@ mod tests {
         #[test]
         fn check_single_element() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2303,8 +2303,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Ok(()),
             );
         }
@@ -2312,8 +2312,8 @@ mod tests {
         #[test]
         fn fail_to_check_key_type() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2336,8 +2336,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2348,8 +2348,8 @@ mod tests {
         #[test]
         fn fail_to_check_value_type() {
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2372,8 +2372,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2390,8 +2390,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
@@ -2405,8 +2405,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Ok(()),
             );
         }
@@ -2420,8 +2420,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -2442,8 +2442,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2460,8 +2460,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -2482,8 +2482,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2500,8 +2500,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2515,8 +2515,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Ok(()),
             );
         }
@@ -2530,8 +2530,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -2547,8 +2547,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2561,8 +2561,8 @@ mod tests {
             let key_type = types::Number::new(Position::fake());
             let value_type = types::None::new(Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -2580,8 +2580,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2590,8 +2590,8 @@ mod tests {
             let key_type = types::Number::new(Position::fake());
             let value_type = types::None::new(Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -2609,8 +2609,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2619,8 +2619,8 @@ mod tests {
             let key_type = types::Number::new(Position::fake());
             let value_type = types::None::new(Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![],
@@ -2638,8 +2638,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
     }
@@ -2651,7 +2651,7 @@ mod tests {
         #[test]
         fn check_first_variable() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -2689,8 +2689,8 @@ mod tests {
         #[test]
         fn check_rest_variable() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -2707,15 +2707,15 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn check_union_type_result() {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-            check_module(&Module::empty().set_definitions(vec![
+            check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -2760,8 +2760,8 @@ mod tests {
                 types::List::new(types::Number::new(Position::fake()), Position::fake());
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", list_type)],
@@ -2778,8 +2778,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2792,8 +2792,8 @@ mod tests {
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", list_type)],
@@ -2810,8 +2810,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2832,8 +2832,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", map_type.clone())],
@@ -2851,8 +2851,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2864,8 +2864,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", map_type.clone())],
@@ -2887,8 +2887,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -2901,8 +2901,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -2927,8 +2927,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2945,8 +2945,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
@@ -2964,8 +2964,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                ),
+                    )
+                ]),),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -2982,8 +2982,8 @@ mod tests {
             );
 
             assert_eq!(
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
@@ -3001,8 +3001,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TypesNotMatched(
                     Position::fake(),
                     Position::fake()
@@ -3022,8 +3022,8 @@ mod tests {
                 Position::fake(),
             );
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -3037,15 +3037,15 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
         #[test]
         fn check_any() {
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -3059,8 +3059,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -3071,8 +3071,8 @@ mod tests {
             let any_list_type =
                 types::List::new(types::Any::new(Position::fake()), Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", none_list_type.clone())],
@@ -3086,8 +3086,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
 
@@ -3110,8 +3110,8 @@ mod tests {
             );
             let union_map_type = types::Map::new(key_type, value_type, Position::fake());
 
-            check_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", none_map_type.clone())],
@@ -3125,8 +3125,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-            )
+                ),
+            ]))
             .unwrap();
         }
     }
@@ -3142,8 +3142,8 @@ mod tests {
                 let list_type =
                     types::List::new(types::None::new(Position::fake()), Position::fake());
 
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
@@ -3164,8 +3164,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                )
+                    )],
+                ))
                 .unwrap();
             }
 
@@ -3177,8 +3177,8 @@ mod tests {
                     Position::fake(),
                 );
 
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
@@ -3199,16 +3199,16 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                )
+                    )],
+                ))
                 .unwrap();
             }
 
             #[test]
             fn fail_to_check_none() {
                 assert!(matches!(
-                    check_module(
-                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![Argument::new("x", types::None::new(Position::fake()),)],
@@ -3229,8 +3229,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )])
-                    ),
+                        )]
+                    )),
                     Err(AnalysisError::CollectionExpected(_)),
                 ));
             }
@@ -3247,8 +3247,8 @@ mod tests {
                     Position::fake(),
                 );
 
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -3275,8 +3275,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                )
+                    )],
+                ))
                 .unwrap();
             }
 
@@ -3289,8 +3289,8 @@ mod tests {
                 );
 
                 assert!(matches!(
-                    check_module(
-                        &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
                             "x",
                             Lambda::new(
                                 vec![],
@@ -3320,8 +3320,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )])
-                    ),
+                        )]
+                    )),
                     Err(AnalysisError::SpawnedFunctionArguments(_))
                 ));
             }
@@ -3337,8 +3337,8 @@ mod tests {
                     Position::fake(),
                 );
 
-                check_module(
-                    &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
@@ -3359,8 +3359,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                )
+                    )],
+                ))
                 .unwrap();
             }
         }

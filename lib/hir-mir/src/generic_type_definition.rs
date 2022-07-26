@@ -142,7 +142,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -193,7 +193,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", function_type.clone())],
@@ -234,7 +234,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -288,7 +288,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![definition.clone(), definition]),
+                &Module::empty().set_function_definitions(vec![definition.clone(), definition]),
                 &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
@@ -308,7 +308,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -351,7 +351,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
@@ -391,7 +391,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", union_type)],
@@ -429,7 +429,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
@@ -469,7 +469,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![],
@@ -510,7 +510,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![],
@@ -546,7 +546,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![],
@@ -585,7 +585,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![],
@@ -638,7 +638,7 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
                         vec![],

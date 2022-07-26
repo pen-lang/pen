@@ -140,7 +140,7 @@ mod tests {
 
     #[test]
     fn compile_foreign_definition() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "foo",
             "bar",
             Lambda::new(
@@ -177,7 +177,7 @@ mod tests {
 
     #[test]
     fn compile_foreign_definition_with_c_calling_convention() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "foo",
             "bar",
             Lambda::new(

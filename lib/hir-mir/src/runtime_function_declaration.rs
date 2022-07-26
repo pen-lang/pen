@@ -100,7 +100,7 @@ mod tests {
 
     #[test]
     fn do_not_declare_runtime_function_if_defined_in_same_module() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "myDebug",
             &COMPILE_CONFIGURATION.debug_function_name,
             Lambda::new(

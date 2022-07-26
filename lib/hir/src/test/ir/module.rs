@@ -14,10 +14,10 @@ pub trait ModuleFake {
     fn set_foreign_declarations(&self, declarations: Vec<ForeignDeclaration>) -> Self;
 
     #[must_use]
-    fn set_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self;
+    fn set_function_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self;
 
     #[must_use]
-    fn set_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
+    fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
 }
 
 impl ModuleFake for Module {
@@ -58,7 +58,7 @@ impl ModuleFake for Module {
         )
     }
 
-    fn set_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self {
+    fn set_function_declarations(&self, declarations: Vec<FunctionDeclaration>) -> Self {
         Self::new(
             self.type_definitions().to_vec(),
             self.type_aliases().to_vec(),
@@ -69,7 +69,7 @@ impl ModuleFake for Module {
         )
     }
 
-    fn set_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self {
+    fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self {
         Self::new(
             self.type_definitions().to_vec(),
             self.type_aliases().to_vec(),
