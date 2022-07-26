@@ -1,5 +1,5 @@
 use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
-use crate::utility_function_declaration;
+use crate::runtime_function_declaration;
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -30,7 +30,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(if context.configuration().is_ok() {
-                utility_function_declaration::compile(context, module)?
+                runtime_function_declaration::compile(context, module)?
             } else {
                 vec![]
             })
@@ -159,7 +159,7 @@ mod tests {
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
                 .set_foreign_declarations(
-                    utility_function_declaration::compile(&context, &module).unwrap()
+                    runtime_function_declaration::compile(&context, &module).unwrap()
                 )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
@@ -196,7 +196,7 @@ mod tests {
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
                 .set_foreign_declarations(
-                    utility_function_declaration::compile(&context, &module).unwrap()
+                    runtime_function_declaration::compile(&context, &module).unwrap()
                 )
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
