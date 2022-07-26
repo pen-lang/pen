@@ -1,6 +1,6 @@
 use crate::{context::CompileContext, type_, CompileError};
 use fnv::FnvHashSet;
-use hir::ir::Module;
+use hir::ir::*;
 
 pub const LOCAL_DEBUG_FUNCTION_NAME: &str = "__debug";
 pub const LOCAL_RACE_FUNCTION_NAME: &str = "__race";
@@ -9,9 +9,6 @@ pub const LOCAL_SPAWN_FUNCTION_NAME: &str = "__spawn";
 // We cannot use foreign function definitions for those built-in functions
 // because they might be defined in the same file. So we first alias them to use
 // them in code generation.
-//
-// TODO Rename this function runtime_function_declaration.
-// TODO Test this.
 pub fn compile(
     context: &CompileContext,
     module: &Module,
@@ -62,4 +59,68 @@ pub fn compile(
     .into_iter()
     .flatten()
     .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use hir::{test::ModuleFake, types};
+    use position::{test::PositionFake, Position};
+
+    #[test]
+    fn declare_runtime_functions() {
+        let module = Module::empty();
+        let declarations = compile(
+            &CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone())),
+            &module,
+        )
+        .unwrap();
+
+        for (local_name, foreign_name) in [
+            (
+                LOCAL_DEBUG_FUNCTION_NAME,
+                &COMPILE_CONFIGURATION.debug_function_name,
+            ),
+            (
+                LOCAL_RACE_FUNCTION_NAME,
+                &COMPILE_CONFIGURATION.race_function_name,
+            ),
+            (
+                LOCAL_SPAWN_FUNCTION_NAME,
+                &COMPILE_CONFIGURATION.spawn_function_name,
+            ),
+        ] {
+            assert!(declarations
+                .iter()
+                .any(|declaration| declaration.name() == local_name
+                    && declaration.foreign_name() == foreign_name));
+        }
+    }
+
+    #[test]
+    fn do_not_declare_runtime_function_if_defined_in_same_module() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "myDebug",
+            &COMPILE_CONFIGURATION.debug_function_name,
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake(),
+            ),
+            Some(ForeignDefinitionConfiguration::new(CallingConvention::C)),
+            false,
+            Position::fake(),
+        )]);
+        let declarations = compile(
+            &CompileContext::new(&module, Some(COMPILE_CONFIGURATION.clone())),
+            &module,
+        )
+        .unwrap();
+
+        assert!(!declarations
+            .iter()
+            .any(|declaration| declaration.name() == LOCAL_DEBUG_FUNCTION_NAME));
+    }
 }

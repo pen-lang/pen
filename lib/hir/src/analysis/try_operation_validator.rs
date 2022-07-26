@@ -215,7 +215,7 @@ mod tests {
                         false,
                         false
                     )])
-                    .set_definitions(vec![FunctionDefinition::fake(
+                    .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![Argument::new(
@@ -250,8 +250,8 @@ mod tests {
         );
 
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("x", union_type.clone())],
@@ -272,8 +272,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Ok(())
         );
     }
@@ -281,8 +281,8 @@ mod tests {
     #[test]
     fn fail_to_validate_thunk() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new(
@@ -310,8 +310,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Err(AnalysisError::InvalidTryOperation(Position::fake()))
         );
     }
@@ -319,8 +319,8 @@ mod tests {
     #[test]
     fn fail_to_validate_list() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new(
@@ -351,8 +351,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }
@@ -360,8 +360,8 @@ mod tests {
     #[test]
     fn fail_to_validate_element_of_list_comprehension() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -385,8 +385,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }
@@ -394,8 +394,8 @@ mod tests {
     #[test]
     fn fail_to_validate_list_of_list_comprehension() {
         assert_eq!(
-            validate_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            validate_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -419,8 +419,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Err(AnalysisError::TryOperationInList(Position::fake()))
         );
     }

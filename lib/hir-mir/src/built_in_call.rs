@@ -1,10 +1,10 @@
 use crate::{
     context::CompileContext,
-    downcast, expression, type_,
-    utility_function_declaration::{
+    downcast, expression,
+    runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
-    CompileError,
+    type_, CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},

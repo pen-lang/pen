@@ -69,8 +69,8 @@ mod tests {
     #[test]
     fn compile_without_private_declaration() {
         assert_eq!(
-            compile(
-                &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
+            compile(&ir::Module::empty().set_function_definitions(vec![
+                ir::FunctionDefinition::fake(
                     "foo",
                     ir::Lambda::new(
                         vec![],
@@ -79,8 +79,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Ok(interface::Module::new(vec![], vec![], vec![]))
         );
     }
