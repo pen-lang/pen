@@ -50,7 +50,7 @@ pub fn compile(
                 LOCAL_SPAWN_FUNCTION_NAME,
                 &configuration.spawn_function_name,
                 type_::compile_spawn_function(),
-                mir::ir::CallingConvention::Target,
+                mir::ir::CallingConvention::Source,
             ))
         } else {
             None
