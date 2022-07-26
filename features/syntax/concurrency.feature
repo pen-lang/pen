@@ -57,3 +57,28 @@ Feature: Concurrency
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
+
+  Scenario: Use race function to get the first result
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Process
+
+    main = \(ctx context) none {
+      xs = race([[none]
+        [none (\() none { loop(0) none })()],
+        [none none],
+      ])
+
+      if [x, ...xs] = xs {
+        x()
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+
+    loop = \(x number) none {
+      loop(x + 1)
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
