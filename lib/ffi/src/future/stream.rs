@@ -21,7 +21,7 @@ pub fn from_list(list: Arc<List>) -> impl Stream<Item = Any> {
 
         while first_rest.ok.into() {
             yield future::from_closure::<(), Any>(first_rest.first.clone()).await;
-            first_rest =  get_first_rest(first_rest.rest.clone()).await;
+            first_rest = get_first_rest(first_rest.rest.clone()).await;
         }
     }
 }
