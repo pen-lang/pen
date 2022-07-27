@@ -1,7 +1,17 @@
+import foreign "c" _pen_os_unreachable \() none
+
+foreign _pen_spawn = \(f \() any) \() any {
+  f
+}
+
 foreign _pen_race = \(xss [[any]]) [any] {
   if [xs, ...xss] = xss {
     [any ...xs(), ..._pen_race(xss)]
   } else {
     [any]
   }
+}
+
+foreign _pen_yield = \() none {
+  _pen_os_unreachable()
 }
