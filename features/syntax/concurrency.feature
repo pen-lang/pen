@@ -62,6 +62,7 @@ Feature: Concurrency
     Given a file named "main.pen" with:
     """pen
     import Os'Process
+    import Os'Time
 
     main = \(ctx context) none {
       xs = race([[boolean]
@@ -81,6 +82,7 @@ Feature: Concurrency
     }
 
     loop = \(x number) none {
+      Time'Sleep(1)
       loop(x + 1)
     }
     """
