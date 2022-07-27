@@ -4,7 +4,7 @@ use tokio::{spawn, sync::RwLock, task::yield_now};
 use tokio_stream::{StreamExt, StreamMap};
 
 #[ffi::bindgen]
-fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
+async fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
     ffi::future::to_closure(
         spawn(ffi::future::from_closure::<_, ffi::Any>(closure)).map(Result::unwrap),
     )

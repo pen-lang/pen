@@ -30,7 +30,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(if context.configuration().is_ok() {
-                runtime_function_declaration::compile(context, module)?
+                runtime_function_declaration::compile(context)?
             } else {
                 vec![]
             })
@@ -158,9 +158,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(
-                    runtime_function_declaration::compile(&context, &module).unwrap()
-                )
+                .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
@@ -195,9 +193,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_foreign_declarations(
-                    runtime_function_declaration::compile(&context, &module).unwrap()
-                )
+                .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
