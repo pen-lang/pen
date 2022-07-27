@@ -1,4 +1,4 @@
-import foreign "C" _pen_os_unreachable \() none
+import foreign "c" _pen_os_unreachable \() none
 
 foreign _pen_spawn = \(f \() any) \() any {
   f
