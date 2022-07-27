@@ -67,7 +67,7 @@ Feature: Concurrency
 
     main = \(ctx context) none {
       xs = race([[boolean]
-        [boolean (\() boolean { loop(ctx.Os, 0) false })()],
+        [boolean (\() boolean { loop(ctx.Os) false })()],
         [boolean true],
       ])
 
@@ -82,9 +82,9 @@ Feature: Concurrency
       }
     }
 
-    loop = \(ctx Context, x number) none {
+    loop = \(ctx Context) none {
       Time'Sleep(ctx, 1)
-      loop(ctx, x + 1)
+      loop(ctx)
     }
     """
     When I successfully run `pen build`
