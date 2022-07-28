@@ -10,7 +10,7 @@ use std::{
 use tokio::{spawn, sync::RwLock, task::yield_now};
 use tokio_stream::{StreamExt, StreamMap};
 
-// We hope keys never conflict until a key integer wraps.
+// We hope that keys never conflict until a key integer wraps.
 static STREAM_MAP_KEY: AtomicUsize = AtomicUsize::new(0);
 
 #[ffi::bindgen]
