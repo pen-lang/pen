@@ -1,10 +1,13 @@
 use futures::{future::FutureExt, pin_mut, stream::StreamExt};
-use std::num::NonZeroUsize;
-use std::sync::Arc;
-use std::thread::available_parallelism;
-use tokio::sync::mpsc::Receiver;
-use tokio::sync::RwLock;
-use tokio::{spawn, sync::mpsc::channel, task::yield_now};
+use std::{num::NonZeroUsize, sync::Arc, thread::available_parallelism};
+use tokio::{
+    spawn,
+    sync::{
+        mpsc::{channel, Receiver},
+        RwLock,
+    },
+    task::yield_now,
+};
 use waitgroup::WaitGroup;
 
 const PARALLELISM_MULTIPLIER: usize = 2;
