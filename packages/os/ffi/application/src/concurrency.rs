@@ -1,17 +1,10 @@
-use futures::{future::FutureExt, pin_mut, Stream};
-use std::{
-    pin::Pin,
-    sync::{
-        atomic::{AtomicUsize, Ordering},
-        Arc,
-    },
-    thread::available_parallelism,
-};
-use tokio::{spawn, sync::RwLock, task::yield_now};
-use tokio_stream::{StreamExt, StreamMap};
-
-// We hope that keys never conflict until a key integer wraps.
-static STREAM_MAP_KEY: AtomicUsize = AtomicUsize::new(0);
+use futures::{future::FutureExt, pin_mut, stream::StreamExt};
+use std::num::NonZeroUsize;
+use std::sync::Arc;
+use std::thread::available_parallelism;
+use tokio::sync::mpsc::Receiver;
+use tokio::sync::RwLock;
+use tokio::{spawn, sync::mpsc::channel, task::yield_now};
 
 #[ffi::bindgen]
 async fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
@@ -27,11 +20,13 @@ async fn _pen_yield() {
 
 #[ffi::bindgen]
 async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
-    let parallelism = available_parallelism().unwrap().get();
-    let stream_map = Arc::new(RwLock::new(Box::pin(StreamMap::with_capacity(
-        2 * parallelism,
-    ))));
-    let cloned_stream_map = stream_map.clone();
+    let (sender, receiver) = channel(
+        2 * available_parallelism()
+            .unwrap_or(NonZeroUsize::new(1).unwrap())
+            .get(),
+    );
+    let receiver = Arc::new(RwLock::new(receiver));
+    let cloned_receiver = receiver.clone();
 
     spawn(async move {
         let list = ffi::future::stream::from_list(list);
@@ -39,23 +34,33 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
         pin_mut!(list);
 
         while let Some(element) = list.next().await {
-            cloned_stream_map.write().await.insert(
-                STREAM_MAP_KEY.fetch_add(1, Ordering::Relaxed),
-                Box::pin(ffi::future::stream::from_list(element.try_into().unwrap())),
-            );
+            let cloned_sender = sender.clone();
+
+            spawn(async move {
+                let list = ffi::future::stream::from_list(element.try_into().unwrap());
+
+                pin_mut!(list);
+
+                while let Some(element) = list.next().await {
+                    // Ignore send errors.
+                    cloned_sender.send(element).await.unwrap_or_default();
+                }
+            });
         }
+
+        cloned_receiver.write().await.close();
     });
 
-    ffi::List::lazy(ffi::future::to_closure(convert_stream_to_list(stream_map)))
+    ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(receiver)))
 }
 
-async fn convert_stream_to_list(
-    stream: Arc<RwLock<Pin<Box<impl Stream<Item = (usize, ffi::Any)> + Send + Sync + 'static>>>>,
+async fn convert_receiver_to_list(
+    receiver: Arc<RwLock<Receiver<ffi::Any>>>,
 ) -> ffi::Arc<ffi::List> {
-    if let Some((_, x)) = stream.write().await.next().await {
+    if let Some(x) = receiver.write().await.recv().await {
         ffi::List::prepend(
-            ffi::List::lazy(ffi::future::to_closure(convert_stream_to_list(
-                stream.clone(),
+            ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(
+                receiver.clone(),
             ))),
             x,
         )
