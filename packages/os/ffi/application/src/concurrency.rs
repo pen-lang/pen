@@ -48,6 +48,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
             });
         }
 
+        // TODO Wait for spawned coroutines above.
         cloned_receiver.write().await.close();
     });
 
