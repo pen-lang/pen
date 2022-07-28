@@ -1,4 +1,3 @@
-use async_stream::stream;
 use futures::{future::FutureExt, pin_mut, Stream};
 use std::{
     pin::Pin,
@@ -11,7 +10,7 @@ use std::{
 use tokio::{spawn, sync::RwLock, task::yield_now};
 use tokio_stream::{StreamExt, StreamMap};
 
-static KEY: AtomicUsize = AtomicUsize::new(0);
+static STREAM_MAP_KEY: AtomicUsize = AtomicUsize::new(0);
 
 #[ffi::bindgen]
 async fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
@@ -40,7 +39,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
 
         while let Some(element) = list.next().await {
             cloned_stream_map.write().await.insert(
-                KEY.fetch_add(1, Ordering::Relaxed),
+                STREAM_MAP_KEY.fetch_add(1, Ordering::Relaxed),
                 Box::pin(ffi::future::stream::from_list(element.try_into().unwrap())),
             );
         }
