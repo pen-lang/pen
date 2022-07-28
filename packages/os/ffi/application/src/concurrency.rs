@@ -6,6 +6,8 @@ use tokio::sync::mpsc::Receiver;
 use tokio::sync::RwLock;
 use tokio::{spawn, sync::mpsc::channel, task::yield_now};
 
+const PARALLELISM_MULTIPLIER: usize = 2;
+
 #[ffi::bindgen]
 async fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
     ffi::future::to_closure(
@@ -21,9 +23,10 @@ async fn _pen_yield() {
 #[ffi::bindgen]
 async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     let (sender, receiver) = channel(
-        2 * available_parallelism()
-            .unwrap_or(NonZeroUsize::new(1).unwrap())
-            .get(),
+        PARALLELISM_MULTIPLIER
+            * available_parallelism()
+                .unwrap_or(NonZeroUsize::new(1).unwrap())
+                .get(),
     );
     let receiver = Arc::new(RwLock::new(receiver));
     let cloned_receiver = receiver.clone();
