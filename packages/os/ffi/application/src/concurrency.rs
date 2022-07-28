@@ -8,7 +8,7 @@ use tokio::{
     },
     task::yield_now,
 };
-use waitgroup::WaitGroup;
+use waitgroup::WaitGroup; // spell-checker: disable-line
 
 const PARALLELISM_MULTIPLIER: usize = 2;
 
