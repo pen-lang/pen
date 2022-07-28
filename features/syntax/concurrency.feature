@@ -61,11 +61,13 @@ Feature: Concurrency
   Scenario: Use race function to get the first result
     Given a file named "main.pen" with:
     """pen
+    import Os'Context { Context }
     import Os'Process
+    import Os'Time
 
     main = \(ctx context) none {
       xs = race([[boolean]
-        [boolean (\() boolean { loop(0) false })()],
+        [boolean (\() boolean { loop(ctx.Os) false })()],
         [boolean true],
       ])
 
@@ -80,8 +82,9 @@ Feature: Concurrency
       }
     }
 
-    loop = \(x number) none {
-      loop(x + 1)
+    loop = \(ctx Context) none {
+      Time'Sleep(ctx, 1)
+      loop(ctx)
     }
     """
     When I successfully run `pen build`
