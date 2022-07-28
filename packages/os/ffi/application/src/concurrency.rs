@@ -5,6 +5,7 @@ use std::thread::available_parallelism;
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::RwLock;
 use tokio::{spawn, sync::mpsc::channel, task::yield_now};
+use waitgroup::WaitGroup;
 
 const PARALLELISM_MULTIPLIER: usize = 2;
 
@@ -32,12 +33,14 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     let cloned_receiver = receiver.clone();
 
     spawn(async move {
+        let group = WaitGroup::new();
         let list = ffi::future::stream::from_list(list);
 
         pin_mut!(list);
 
         while let Some(element) = list.next().await {
             let cloned_sender = sender.clone();
+            let worker = group.worker();
 
             spawn(async move {
                 let list = ffi::future::stream::from_list(element.try_into().unwrap());
@@ -45,13 +48,15 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
                 pin_mut!(list);
 
                 while let Some(element) = list.next().await {
-                    // Ignore send errors.
                     cloned_sender.send(element).await.unwrap_or_default();
                 }
+
+                drop(worker);
             });
         }
 
-        // TODO Wait for spawned coroutines above.
+        group.wait().await;
+
         cloned_receiver.write().await.close();
     });
 
