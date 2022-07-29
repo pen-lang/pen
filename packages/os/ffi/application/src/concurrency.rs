@@ -1,14 +1,10 @@
 use futures::{future::FutureExt, pin_mut, stream::StreamExt};
-use std::{num::NonZeroUsize, sync::Arc, thread::available_parallelism};
+use std::{num::NonZeroUsize, thread::available_parallelism};
 use tokio::{
     spawn,
-    sync::{
-        mpsc::{channel, error::TryRecvError, Receiver},
-        RwLock,
-    },
+    sync::mpsc::{channel, Receiver},
     task::yield_now,
 };
-use waitgroup::WaitGroup; // spell-checker: disable-line
 
 const PARALLELISM_MULTIPLIER: usize = 2;
 
@@ -32,18 +28,14 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
                 .unwrap_or(NonZeroUsize::new(1).unwrap())
                 .get(),
     );
-    let receiver = Arc::new(RwLock::new(receiver));
-    let cloned_receiver = receiver.clone();
 
     spawn(async move {
-        let group = WaitGroup::new();
         let list = ffi::future::stream::from_list(list);
 
         pin_mut!(list);
 
         while let Some(element) = list.next().await {
             let cloned_sender = sender.clone();
-            let worker = group.worker();
 
             spawn(async move {
                 let list = ffi::future::stream::from_list(element.try_into().unwrap());
@@ -53,34 +45,20 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
                 while let Some(element) = list.next().await {
                     cloned_sender.send(element).await.unwrap_or_default();
                 }
-
-                drop(worker);
             });
         }
-
-        group.wait().await;
-
-        cloned_receiver.write().await.close();
     });
 
     ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(receiver)))
 }
 
-async fn convert_receiver_to_list(
-    receiver: Arc<RwLock<Receiver<ffi::Any>>>,
-) -> ffi::Arc<ffi::List> {
-    loop {
-        match receiver.write().await.try_recv() {
-            Ok(x) => {
-                return ffi::List::prepend(
-                    ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(
-                        receiver.clone(),
-                    ))),
-                    x,
-                )
-            }
-            Err(TryRecvError::Empty) => yield_now().await,
-            Err(TryRecvError::Disconnected) => return ffi::List::new(),
-        }
+async fn convert_receiver_to_list(mut receiver: Receiver<ffi::Any>) -> ffi::Arc<ffi::List> {
+    if let Some(x) = receiver.recv().await {
+        ffi::List::prepend(
+            ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(receiver))),
+            x,
+        )
+    } else {
+        ffi::List::new()
     }
 }
