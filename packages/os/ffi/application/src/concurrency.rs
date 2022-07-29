@@ -70,6 +70,7 @@ async fn convert_receiver_to_list(
     receiver: Arc<RwLock<Receiver<ffi::Any>>>,
 ) -> ffi::Arc<ffi::List> {
     loop {
+        // Spin lock is fine because the only other writer is a channel closer.
         if let Ok(mut guard) = receiver.try_write() {
             return if let Some(x) = guard.recv().await {
                 ffi::List::prepend(
