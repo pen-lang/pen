@@ -198,7 +198,7 @@ mod tests {
     fn rename_variable() {
         assert_eq!(
             compile_module(
-                &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
+                &ir::Module::empty().set_function_definitions(vec![ir::FunctionDefinition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -228,7 +228,7 @@ mod tests {
                 )],
             ),
             ir::Module::empty()
-                .set_declarations(vec![ir::FunctionDeclaration::new(
+                .set_function_declarations(vec![ir::FunctionDeclaration::new(
                     "RealBar",
                     types::Function::new(
                         vec![],
@@ -237,7 +237,7 @@ mod tests {
                     ),
                     Position::fake()
                 )])
-                .set_definitions(vec![ir::FunctionDefinition::fake(
+                .set_function_definitions(vec![ir::FunctionDefinition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -265,7 +265,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -314,7 +314,7 @@ mod tests {
                         false,
                     )
                 ])
-                .set_definitions(vec![ir::FunctionDefinition::fake(
+                .set_function_definitions(vec![ir::FunctionDefinition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -342,7 +342,7 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_definitions(vec![ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -387,7 +387,7 @@ mod tests {
                     true,
                     Position::fake(),
                 )])
-                .set_definitions(vec![ir::FunctionDefinition::fake(
+                .set_function_definitions(vec![ir::FunctionDefinition::fake(
                     "Foo",
                     ir::Lambda::new(
                         vec![],
@@ -427,7 +427,7 @@ mod tests {
             compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
-                    .set_definitions(vec![definition.clone()]),
+                    .set_function_definitions(vec![definition.clone()]),
                 &[ImportedModule::new(
                     interface::Module::new(
                         vec![interface::TypeDefinition::new(
@@ -458,7 +458,7 @@ mod tests {
                     ),
                     type_definition
                 ])
-                .set_definitions(vec![definition])
+                .set_function_definitions(vec![definition])
         );
     }
 
@@ -489,7 +489,7 @@ mod tests {
             compile_module(
                 &ir::Module::empty()
                     .set_type_definitions(vec![type_definition.clone()])
-                    .set_definitions(vec![definition.clone()]),
+                    .set_function_definitions(vec![definition.clone()]),
                 &[ImportedModule::new(
                     interface::Module::new(
                         vec![],
@@ -516,7 +516,7 @@ mod tests {
                     true,
                     Position::fake()
                 )])
-                .set_definitions(vec![definition])
+                .set_function_definitions(vec![definition])
         );
     }
 
@@ -597,16 +597,18 @@ mod tests {
         fn rename_variable() {
             assert_eq!(
                 compile_module(
-                    &ir::Module::empty().set_definitions(vec![ir::FunctionDefinition::fake(
-                        "Foo",
-                        ir::Lambda::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            ir::Variable::new("Bar", Position::fake()),
-                            Position::fake(),
-                        ),
-                        true,
-                    )]),
+                    &ir::Module::empty().set_function_definitions(vec![
+                        ir::FunctionDefinition::fake(
+                            "Foo",
+                            ir::Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                ir::Variable::new("Bar", Position::fake()),
+                                Position::fake(),
+                            ),
+                            true,
+                        )
+                    ]),
                     &[ImportedModule::new(
                         interface::Module::new(
                             vec![],
@@ -627,7 +629,7 @@ mod tests {
                     )],
                 ),
                 ir::Module::empty()
-                    .set_declarations(vec![ir::FunctionDeclaration::new(
+                    .set_function_declarations(vec![ir::FunctionDeclaration::new(
                         "RealBar",
                         types::Function::new(
                             vec![],
@@ -636,7 +638,7 @@ mod tests {
                         ),
                         Position::fake()
                     )])
-                    .set_definitions(vec![ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -664,7 +666,7 @@ mod tests {
                             false,
                             false,
                         )])
-                        .set_definitions(vec![ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![ir::FunctionDefinition::fake(
                             "Foo",
                             ir::Lambda::new(
                                 vec![],
@@ -713,7 +715,7 @@ mod tests {
                             false,
                         )
                     ])
-                    .set_definitions(vec![ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],
@@ -741,7 +743,7 @@ mod tests {
                             false,
                             false,
                         )])
-                        .set_definitions(vec![ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![ir::FunctionDefinition::fake(
                             "Foo",
                             ir::Lambda::new(
                                 vec![],
@@ -786,7 +788,7 @@ mod tests {
                         true,
                         Position::fake(),
                     )])
-                    .set_definitions(vec![ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
                         "Foo",
                         ir::Lambda::new(
                             vec![],

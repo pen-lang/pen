@@ -1,4 +1,3 @@
-mod concurrency;
 mod debug;
 mod heap;
 mod unreachable;
