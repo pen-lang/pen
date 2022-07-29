@@ -127,7 +127,37 @@ Feature: Concurrency
     }
     """
     When I successfully run `pen build`
-    Then I successfully run `./app`
+    Then I successfully run `check_memory_leak.sh ./app`
+
+    Examples:
+      | result |
+      | x()    |
+      | none   |
+
+  Scenario Outline: Use race function with a record
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Process
+
+    type foo {
+      x number
+      y number
+    }
+
+    main = \(ctx context) none {
+      xs = race([[foo] [foo foo{x: 0, y: 0}]])
+
+      if [x, ...xs] = xs {
+        _ = <result>
+
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak.sh ./app`
 
     Examples:
       | result |

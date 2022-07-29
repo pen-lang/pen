@@ -89,3 +89,21 @@ Feature: Concurrency
     """
     When I successfully run `pen build`
     Then I successfully run `./app`
+
+  Scenario: Use race function and get all elements
+    Given a file named "main.pen" with:
+    """pen
+    import Os'Process
+
+    main = \(ctx context) none {
+      xs = race([[none] [none none], [none none]])
+
+      if xs == [none none, none] {
+        none
+      } else {
+        Process'Exit(ctx.Os, 1)
+      }
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `./app`
