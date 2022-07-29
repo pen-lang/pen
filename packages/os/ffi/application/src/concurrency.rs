@@ -69,14 +69,18 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
 async fn convert_receiver_to_list(
     receiver: Arc<RwLock<Receiver<ffi::Any>>>,
 ) -> ffi::Arc<ffi::List> {
-    if let Some(x) = receiver.write().await.recv().await {
-        ffi::List::prepend(
-            ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(
-                receiver.clone(),
-            ))),
-            x,
-        )
-    } else {
-        ffi::List::new()
+    loop {
+        if let Ok(mut guard) = receiver.try_write() {
+            return if let Some(x) = guard.recv().await {
+                ffi::List::prepend(
+                    ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(
+                        receiver.clone(),
+                    ))),
+                    x,
+                )
+            } else {
+                ffi::List::new()
+            };
+        }
     }
 }
