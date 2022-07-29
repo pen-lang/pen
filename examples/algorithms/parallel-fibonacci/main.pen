@@ -1,0 +1,26 @@
+import Core'Number
+import Os'File
+
+main = \(ctx context) none {
+  _ = File'Write(
+    ctx.Os,
+    File'StdOut(),
+    Number'String(fibonacci(40)),
+  )
+
+  none
+}
+
+fibonacci = \(n number) number {
+  if n <= 0 {
+    0
+  } else if n == 1 {
+    1
+  } else if n > 30 {
+    f = go(\() number { fibonacci(n - 1) })
+
+    fibonacci(n - 2) + f()
+  } else {
+    fibonacci(n - 2) + fibonacci(n - 1)
+  }
+}
