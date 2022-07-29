@@ -17,8 +17,6 @@ Now, you should be able to run a `pen` command in your shell.
 pen --version
 ```
 
-[homebrew]: https://brew.sh
-
 ## Building from source
 
 You can also build Pen from source on your local machine.
@@ -49,3 +47,5 @@ You can also build Pen from source on your local machine.
    ```
 
 Now, you are ready to use the `pen` command built manually.
+
+[homebrew]: https://brew.sh

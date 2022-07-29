@@ -228,6 +228,7 @@ fn transform_equal_operation(
     })
 }
 
+// TODO Define this as a global function.
 pub fn transform_any_function(
     context: &CompileContext,
     type_: &Type,

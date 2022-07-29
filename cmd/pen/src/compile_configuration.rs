@@ -70,6 +70,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     source_function_name: "Source".into(),
                 },
                 spawn_function_name: "_pen_spawn".into(),
+                race_function_name: "_pen_race".into(),
                 debug_function_name: "_pen_debug".into(),
             },
         }

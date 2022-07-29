@@ -1,0 +1,146 @@
+import Test'Assert
+
+import 'Render { Render }
+import 'Node { Node, Attribute, Element }
+
+RenderElement = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node],
+      },
+    )?
+      == "<html/>",
+  )
+}
+
+RenderAttribute = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
+        Children: [Node],
+      },
+    )?
+      == "<html foo=\"bar\"/>",
+  )
+}
+
+RenderAttributes = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute
+          Attribute{Key: "foo", Value: "bar"},
+          Attribute{Key: "baz", Value: "blah"},
+        ],
+        Children: [Node],
+      },
+    )?
+      == "<html foo=\"bar\"baz=\"blah\"/>",
+  )
+}
+
+RenderAttributeWithChild = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
+        Children: [Node
+          Element{
+            Tag: "body",
+            Attributes: [Attribute],
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html foo=\"bar\"><body/></html>",
+  )
+}
+
+RenderChild = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node
+          Element{
+            Tag: "body",
+            Attributes: [Attribute],
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html><body/></html>",
+  )
+}
+
+RenderChildren = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node
+          Element{
+            Tag: "head",
+            Attributes: [Attribute],
+            Children: [Node],
+          },
+          Element{
+            Tag: "body",
+            Attributes: [Attribute],
+            Children: [Node],
+          },
+        ],
+      },
+    )?
+      == "<html><head/><body/></html>",
+  )
+}
+
+RenderNestedChildren = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node
+          Element{
+            Tag: "body",
+            Attributes: [Attribute],
+            Children: [Node
+              Element{
+                Tag: "div",
+                Attributes: [Attribute],
+                Children: [Node],
+              },
+            ],
+          },
+        ],
+      },
+    )?
+      == "<html><body><div/></body></html>",
+  )
+}
+
+RenderTextNode = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node "foo"],
+      },
+    )?
+      == "<html>foo</html>",
+  )
+}

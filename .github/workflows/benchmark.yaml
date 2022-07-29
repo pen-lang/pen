@@ -15,4 +15,5 @@ jobs:
       - uses: Swatinem/rust-cache@v1
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
+      - run: tools/benchmark.sh -b
       - run: tools/benchmark.sh

@@ -580,7 +580,7 @@ mod tests {
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
                     Variable::new("x"),
-                    vec![Alternative::new(Type::None, "y", Variable::new("y"))],
+                    vec![Alternative::new(vec![Type::None], "y", Variable::new("y"))],
                     None,
                 ),
                 Type::Variant,
@@ -598,7 +598,7 @@ mod tests {
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::None, "y", Expression::None)],
+                        vec![Alternative::new(vec![Type::None], "y", Expression::None)],
                         None,
                     ),
                     Type::Variant,
@@ -616,7 +616,7 @@ mod tests {
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
                     Variable::new("x"),
-                    vec![Alternative::new(Type::None, "y", Variable::new("y"))],
+                    vec![Alternative::new(vec![Type::None], "y", Variable::new("y"))],
                     Some(DefaultAlternative::new("y", Variable::new("y"))),
                 ),
                 Type::Variant,
@@ -634,7 +634,7 @@ mod tests {
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
                         Variable::new("x"),
-                        vec![Alternative::new(Type::None, "y", Expression::None)],
+                        vec![Alternative::new(vec![Type::None], "y", Expression::None)],
                         Some(DefaultAlternative::new("y", Variable::new("y"))),
                     ),
                     Type::Variant,
@@ -653,8 +653,8 @@ mod tests {
                 Case::new(
                     Variable::new("x"),
                     vec![
-                        Alternative::new(Type::None, "y", Variable::new("y")),
-                        Alternative::new(Type::None, "y", Variable::new("y")),
+                        Alternative::new(vec![Type::None], "y", Variable::new("y")),
+                        Alternative::new(vec![Type::None], "y", Variable::new("y")),
                     ],
                     Some(DefaultAlternative::new("y", Variable::new("y"))),
                 ),
@@ -674,8 +674,8 @@ mod tests {
                     Case::new(
                         Variable::new("x"),
                         vec![
-                            Alternative::new(Type::None, "y", Variable::new("y")),
-                            Alternative::new(Type::None, "y", Expression::None),
+                            Alternative::new(vec![Type::None], "y", Variable::new("y")),
+                            Alternative::new(vec![Type::None], "y", Expression::None),
                         ],
                         Some(DefaultAlternative::new("y", Variable::new("y"))),
                     ),
@@ -695,8 +695,8 @@ mod tests {
                 Case::new(
                     Variable::new("x"),
                     vec![
-                        Alternative::new(Type::None, "y", Variable::new("y")),
-                        Alternative::new(Type::None, "z", Variable::new("z")),
+                        Alternative::new(vec![Type::None], "y", Variable::new("y")),
+                        Alternative::new(vec![Type::None], "z", Variable::new("z")),
                     ],
                     None,
                 ),

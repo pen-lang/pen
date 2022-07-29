@@ -65,17 +65,22 @@ pub fn downcast(
     variant: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    unbox_payload(
-        context,
-        builder,
-        &bit_cast_from_opaque_payload(
+    // TODO Should we rather return errors for variants?
+    Ok(if matches!(type_, mir::types::Type::Variant) {
+        variant.clone()
+    } else {
+        unbox_payload(
+            context,
             builder,
-            &get_payload(builder, variant)?,
+            &bit_cast_from_opaque_payload(
+                builder,
+                &get_payload(builder, variant)?,
+                type_,
+                context.types(),
+            )?,
             type_,
-            context.types(),
-        )?,
-        type_,
-    )
+        )?
+    })
 }
 
 fn box_payload(

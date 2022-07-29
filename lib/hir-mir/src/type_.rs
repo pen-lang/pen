@@ -25,6 +25,26 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     )
 }
 
+pub fn compile_concrete(
+    context: &CompileContext,
+    type_: &Type,
+) -> Result<mir::types::Type, CompileError> {
+    Ok(match &type_ {
+        Type::Function(function_type) => {
+            compile_concrete_function(function_type, context.types())?.into()
+        }
+        Type::List(list_type) => compile_concrete_list(list_type, context.types())?.into(),
+        Type::Map(map_type) => compile_concrete_map(map_type, context.types())?.into(),
+        Type::Boolean(_)
+        | Type::Error(_)
+        | Type::None(_)
+        | Type::Number(_)
+        | Type::Record(_)
+        | Type::String(_) => compile(context, type_)?,
+        Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
+    })
+}
+
 pub fn compile_function(
     context: &CompileContext,
     function: &types::Function,
@@ -108,6 +128,17 @@ pub fn compile_concrete_map_name(
         "_map_{}_{}",
         type_id_calculator::calculate(map.key(), types)?,
         type_id_calculator::calculate(map.value(), types)?,
+    ))
+}
+
+pub fn compile_race_function(
+    context: &CompileContext,
+) -> Result<mir::types::Function, CompileError> {
+    let list_type = compile_list(context)?;
+
+    Ok(mir::types::Function::new(
+        vec![list_type.clone().into()],
+        list_type,
     ))
 }
 

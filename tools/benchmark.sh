@@ -34,6 +34,16 @@ run() {
   run_rust cargo bench -q
 }
 
+while getopts b option; do
+  case $option in
+  b)
+    build=true
+    ;;
+  esac
+done
+
+shift $(expr $OPTIND - 1)
+
 prepare_integration_test $(dirname $PWD/$0)/..
 
 cargo install hyperfine
@@ -41,4 +51,7 @@ cargo install hyperfine
 cd $(dirname $0)/../benchmark
 
 build
-run
+
+if [ -z "$build" ]; then
+  run
+fi

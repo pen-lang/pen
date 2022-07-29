@@ -6,8 +6,11 @@ use hir::{
     types::{self, Type},
 };
 use position::Position;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+};
 
-const RECORD_HEADER_HASH: f64 = 3.0;
 const RECORD_NAME: &str = "$r";
 
 pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
@@ -73,10 +76,7 @@ fn compile_hash_function_definition(
             vec![Argument::new(RECORD_NAME, record_type.clone())],
             hash_type.clone(),
             type_definition.fields().iter().rev().fold(
-                Ok(Expression::from(Number::new(
-                    RECORD_HEADER_HASH,
-                    position.clone(),
-                ))),
+                Ok(Expression::from(compile_identity_hash(type_definition))),
                 |expression, field| -> Result<_, CompileError> {
                     Ok(Call::new(
                         Some(
@@ -135,6 +135,19 @@ fn compile_hash_type(position: &Position) -> Type {
     types::Number::new(position.clone()).into()
 }
 
+// TODO Collision of these hashes might lead to infinite loop in built-in map
+// type insertion because they are treated as identities there.
+fn compile_identity_hash(type_definition: &TypeDefinition) -> Number {
+    let mut hasher = DefaultHasher::new();
+
+    type_definition.name().hash(&mut hasher);
+
+    Number::new(
+        f64::from_bits(hasher.finish()),
+        type_definition.position().clone(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,8 +193,8 @@ mod tests {
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
-                .set_type_definitions(vec![type_definition])
-                .set_definitions(vec![FunctionDefinition::new(
+                .set_type_definitions(vec![type_definition.clone()])
+                .set_function_definitions(vec![FunctionDefinition::new(
                     "foo.$hash",
                     "foo.$hash",
                     Lambda::new(
@@ -201,7 +214,7 @@ mod tests {
                                         Position::fake()
                                     ),
                                     vec![
-                                        Number::new(RECORD_HEADER_HASH, Position::fake()).into(),
+                                        compile_identity_hash(&type_definition).into(),
                                         Number::new(0.0, Position::fake()).into(),
                                     ],
                                     Position::fake()
@@ -239,7 +252,7 @@ mod tests {
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
             Ok(Module::empty()
                 .set_type_definitions(vec![type_definition.clone()])
-                .set_declarations(vec![FunctionDeclaration::new(
+                .set_function_declarations(vec![FunctionDeclaration::new(
                     "foo.$hash",
                     types::Function::new(
                         vec![types::Record::new(type_definition.name(), Position::fake()).into()],

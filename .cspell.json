@@ -42,6 +42,7 @@
     "mtriple",
     "optarg",
     "optind",
+    "perceus",
     "petgraph",
     "println",
     "raviqqe",

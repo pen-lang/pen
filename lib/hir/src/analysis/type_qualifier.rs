@@ -108,7 +108,7 @@ mod tests {
                         false,
                         false
                     )])
-                    .set_definitions(vec![]),
+                    .set_function_definitions(vec![]),
                 "foo."
             ),
             Module::empty()
@@ -119,7 +119,7 @@ mod tests {
                     false,
                     false
                 )])
-                .set_definitions(vec![])
+                .set_function_definitions(vec![])
         );
     }
 
@@ -138,7 +138,7 @@ mod tests {
                         false,
                         false
                     )])
-                    .set_definitions(vec![]),
+                    .set_function_definitions(vec![]),
                 "foo."
             ),
             Module::empty()
@@ -152,7 +152,7 @@ mod tests {
                     false,
                     false
                 )])
-                .set_definitions(vec![])
+                .set_function_definitions(vec![])
         );
     }
 

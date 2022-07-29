@@ -22,6 +22,7 @@
     - [`Core`](references/standard-packages/core.md)
     - [`Flag`](references/standard-packages/flag.md)
     - [`Json`](references/standard-packages/json.md)
+    - [`Html`](references/standard-packages/html.md)
     - [`Http`](references/standard-packages/http.md)
     - [`Os`](references/standard-packages/os.md)
     - [`Sql`](references/standard-packages/sql.md)

@@ -43,7 +43,9 @@ mod tests {
         );
 
         assert_eq!(
-            validate(&Module::empty().set_definitions(vec![definition.clone(), definition])),
+            validate(
+                &Module::empty().set_function_definitions(vec![definition.clone(), definition])
+            ),
             Err(AnalysisError::DuplicateFunctionNames(
                 Position::fake(),
                 Position::fake()

@@ -353,7 +353,7 @@ mod tests {
     fn transform_variable() {
         assert_eq!(
             transform(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -369,7 +369,7 @@ mod tests {
                     variable.clone().into()
                 }
             ),
-            Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -384,7 +384,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_argument() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![Argument::new("x", types::None::new(Position::fake()))],
@@ -407,7 +407,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_variable_shadowed_by_statement() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -436,7 +436,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_shadowed_variable_in_let() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],
@@ -465,7 +465,7 @@ mod tests {
 
     #[test]
     fn do_not_transform_shadowed_variable_in_list_comprehension() {
-        let module = Module::empty().set_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
                 vec![],

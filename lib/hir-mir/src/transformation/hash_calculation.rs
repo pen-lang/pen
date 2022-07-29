@@ -160,6 +160,7 @@ fn compile_concrete_hash_function_call(
     .into()
 }
 
+// TODO Define this as a global function.
 pub fn transform_any_function(
     context: &CompileContext,
     type_: &Type,

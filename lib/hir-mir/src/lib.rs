@@ -12,12 +12,12 @@ mod main_module_configuration;
 mod map_type_configuration;
 mod module;
 mod module_interface;
+mod runtime_function_declaration;
 mod string_type_configuration;
 mod test_function;
 mod test_module_configuration;
 mod transformation;
 mod type_;
-mod utility_function_declaration;
 
 pub use compile_configuration::CompileConfiguration;
 use context::CompileContext;
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn compile_boolean() -> Result<(), CompileError> {
         compile_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn compile_none() -> Result<(), CompileError> {
         compile_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn compile_number() -> Result<(), CompileError> {
         compile_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn compile_string() -> Result<(), CompileError> {
         compile_module(
-            &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
@@ -225,8 +225,8 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![],
@@ -264,8 +264,8 @@ mod tests {
                     false,
                     false,
                 )])
-                .set_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_definitions(vec![FunctionDefinition::fake(
+                .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new("r", reference_type)],
@@ -298,7 +298,9 @@ mod tests {
         );
 
         assert_eq!(
-            compile_module(&Module::empty().set_definitions(vec![definition.clone(), definition])),
+            compile_module(
+                &Module::empty().set_function_definitions(vec![definition.clone(), definition])
+            ),
             Err(AnalysisError::DuplicateFunctionNames(Position::fake(), Position::fake()).into())
         );
     }
@@ -306,8 +308,8 @@ mod tests {
     #[test]
     fn fail_to_compile_invalid_try_operator_in_function() {
         assert_eq!(
-            compile_module(
-                &Module::empty().set_definitions(vec![FunctionDefinition::fake(
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "x",
                     Lambda::new(
                         vec![Argument::new(
@@ -327,8 +329,8 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )])
-            ),
+                )
+            ])),
             Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
     }
