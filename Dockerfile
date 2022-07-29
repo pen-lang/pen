@@ -1,5 +1,7 @@
 from ubuntu:20.04
 
+env DEBIAN_FRONTEND=noninteractive	
+
 run apt update --fix-missing && apt install -y \
 	build-essential \
 	curl \
