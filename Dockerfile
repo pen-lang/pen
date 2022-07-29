@@ -1,4 +1,4 @@
-from ubuntu:22.04
+from ubuntu:20.04
 
 run apt update --fix-missing && apt install -y \
 	build-essential \
