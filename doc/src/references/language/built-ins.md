@@ -55,7 +55,7 @@ It executes a function concurrently. Its return value is a future represented as
 
 ### `race`
 
-It merges multiple lists into one evaluating elements from each list concurrently. This function corresponds to [the fan-in concurrency pattern](https://go.dev/blog/pipelines#fan-out-fan-in) in other languages where we merge results of concurrent computation nondeterministically.
+It merges multiple lists into one evaluating elements in each list concurrently. This function corresponds to [the fan-in concurrency pattern](https://go.dev/blog/pipelines#fan-out-fan-in) in other languages where we merge results of concurrent computation nondeterministically.
 
 ```pen
 \([[a]]) [a]
