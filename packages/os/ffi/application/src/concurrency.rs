@@ -3,7 +3,7 @@ use std::{num::NonZeroUsize, sync::Arc, thread::available_parallelism};
 use tokio::{
     spawn,
     sync::{
-        mpsc::{channel, Receiver},
+        mpsc::{channel, error::TryRecvError, Receiver},
         RwLock,
     },
     task::yield_now,
@@ -70,18 +70,17 @@ async fn convert_receiver_to_list(
     receiver: Arc<RwLock<Receiver<ffi::Any>>>,
 ) -> ffi::Arc<ffi::List> {
     loop {
-        // Spin lock is fine because the only other writer is a channel closer.
-        if let Ok(mut guard) = receiver.try_write() {
-            return if let Some(x) = guard.recv().await {
-                ffi::List::prepend(
+        match receiver.write().await.try_recv() {
+            Ok(x) => {
+                return ffi::List::prepend(
                     ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(
                         receiver.clone(),
                     ))),
                     x,
                 )
-            } else {
-                ffi::List::new()
-            };
+            }
+            Err(TryRecvError::Empty) => yield_now().await,
+            Err(TryRecvError::Disconnected) => return ffi::List::new(),
         }
     }
 }
