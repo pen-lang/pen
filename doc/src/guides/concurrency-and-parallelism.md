@@ -8,7 +8,7 @@ This page describes how to write concurrent and/or parallel programs in Pen.
 
 ### `go` function
 
-Pen provides some built-in functions for concurrent and parallel programming. [Its `go` built-in function](https://pen-lang.org/references/language/built-ins.html#go) runs a given function concurrently, and possibly in parallel.
+Pen provides some built-in functions for concurrent and parallel programming. [Its `go` built-in function](/references/language/built-ins.html#go) runs a given function concurrently, and possibly in parallel.
 
 ```pen
 f = go(\() number {
