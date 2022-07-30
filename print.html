@@ -791,6 +791,10 @@ false
 <p>It executes a function concurrently. Its return value is a future represented as a function that returns a result of the executed function.</p>
 <pre><code class="language-pen">\(\() a) \() a
 </code></pre>
+<h3 id="race"><a class="header" href="#race"><code>race</code></a></h3>
+<p>It merges multiple lists into one evaluating elements in each list concurrently. This function corresponds to <a href="https://go.dev/blog/pipelines#fan-out-fan-in">the fan-in concurrency pattern</a> in other languages where we merge results of concurrent computation in multiple concurrent queues.</p>
+<pre><code class="language-pen">\([[a]]) [a]
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
 <p>Modules are sets of functions and types. Using modules, you can split large programs into smaller chunks.</p>
 <p>Each source file suffixed with a <code>.pen</code> file extension composes a module. Modules can import functions and types from other modules.</p>
