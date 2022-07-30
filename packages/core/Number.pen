@@ -10,12 +10,17 @@ import foreign "c" _pen_core_fraction \(number) number
 import foreign "c" _pen_core_infinity \() number
 import foreign "c" _pen_core_is_nan \(number) boolean
 import foreign "c" _pen_core_nan \() number
-import foreign "c" _pen_core_parse_number \(string) number
+import foreign "c" _pen_core_parse_number \(string) numberResult
 import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
 import foreign "c" _pen_core_round \(number) number
 import foreign "c" _pen_core_square_root \(number) number
 import foreign "c" _pen_core_truncate \(number) number
+
+type numberResult {
+  Value number
+  Error string
+}
 
 # Calculate an absolute value.
 Absolute = \(x number) number {
@@ -86,13 +91,12 @@ Nan = \() number {
 
 # Parse a number.
 Parse = \(s string) number | error {
-  # TODO Propagate errors from Rust.
-  n = _pen_core_parse_number(s)
+  r = _pen_core_parse_number(s)
 
-  if IsNan(n) {
-    error("failed to parse number")
+  if r.Error == "" {
+    r.Value
   } else {
-    n
+    error(r.Error)
   }
 }
 
