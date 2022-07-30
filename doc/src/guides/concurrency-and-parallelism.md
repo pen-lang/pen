@@ -24,10 +24,12 @@ The `go` function may or may not run a given function immediately depending on i
 
 > WIP
 
-## Task parallelism
+## Patterns
+
+### Task parallelism
 
 > WIP
 
-## Data parallelism
+### Data parallelism
 
 > WIP
