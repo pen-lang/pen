@@ -8,8 +8,9 @@ pub struct Error {
 
 impl Error {
     pub fn new(source: impl Into<Any>) -> Arc<Self> {
-        Arc::new(Self {
+        Self {
             source: source.into(),
-        })
+        }
+        .into()
     }
 }
