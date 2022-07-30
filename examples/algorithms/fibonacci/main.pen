@@ -31,6 +31,12 @@ argument = \(ctx Context) number | error {
   }
 }
 
+print = \(ctx Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
+
+  none
+}
+
 fibonacci = \(n number) number {
   if n <= 0 {
     0
@@ -39,10 +45,4 @@ fibonacci = \(n number) number {
   } else {
     fibonacci(n - 1) + fibonacci(n - 2)
   }
-}
-
-print = \(ctx Context, s string) none | error {
-  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
-
-  none
 }
