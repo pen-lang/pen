@@ -1,4 +1,4 @@
-use pen_ffi::Number;
+use pen_ffi::{ByteString, Number};
 use pen_ffi_macro::bindgen;
 
 #[bindgen(crate = "pen_ffi")]
@@ -24,22 +24,22 @@ fn unreachable_by_exit() {
 }
 
 #[bindgen(crate = "pen_ffi")]
-fn result_function() -> Result<Number, String> {
+fn result_function() -> Result<Number, ByteString> {
     Ok(42.0.into())
 }
 
 #[bindgen(crate = "pen_ffi")]
-async fn async_result_function() -> Result<Number, String> {
+async fn async_result_function() -> Result<Number, ByteString> {
     Ok(42.0.into())
 }
 
 #[bindgen(crate = "pen_ffi")]
-fn none_result_function() -> Result<(), String> {
+fn none_result_function() -> Result<(), ByteString> {
     Ok(())
 }
 
 #[bindgen(crate = "pen_ffi")]
-async fn async_none_result_function() -> Result<(), String> {
+async fn async_none_result_function() -> Result<(), ByteString> {
     Ok(())
 }
 
