@@ -1,4 +1,5 @@
 use alloc::format;
+use core::str;
 
 #[ffi::bindgen]
 fn _pen_core_absolute(number: ffi::Number) -> ffi::Number {
@@ -49,6 +50,25 @@ fn _pen_core_is_nan(x: ffi::Number) -> ffi::Boolean {
 #[ffi::bindgen]
 fn _pen_core_nan() -> ffi::Number {
     f64::NAN.into()
+}
+
+#[ffi::bindgen]
+fn _pen_core_parse_number(x: ffi::ByteString) -> ffi::Number {
+    if let Some(x) = parse_number(x) {
+        x
+    } else {
+        f64::NAN.into()
+    }
+}
+
+fn parse_number(x: ffi::ByteString) -> Option<ffi::Number> {
+    Some(
+        str::from_utf8(x.as_slice())
+            .ok()?
+            .parse::<f64>()
+            .ok()?
+            .into(),
+    )
 }
 
 #[ffi::bindgen]

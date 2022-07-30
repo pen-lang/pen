@@ -1,16 +1,41 @@
 import Core'Number
+import Core'String
+import Os'Context { Context }
+import Os'Environment
 import Os'File
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = File'Write(
-    ctx.Os,
-    File'StdOut(),
-    Number'String(fibonacci(40)),
-  ) as error {
-    Process'Exit(ctx.Os, 1)
+  ctx = ctx.Os
+
+  if e = run(ctx) as error {
+    _ = File'Write(
+      ctx,
+      File'StdOut(),
+      String'Concatenate(
+        [string
+          if e = source(e) as string { e } else { "unexpected error" },
+          "\n",
+        ],
+      ),
+    )
+    Process'Exit(ctx, 1)
   } else {
     none
+  }
+}
+
+run = \(ctx Context) none | error {
+  File'Write(ctx, File'StdOut(), Number'String(fibonacci(argument(ctx)?)))?
+
+  none
+}
+
+argument = \(ctx Context) number | error {
+  if [x, ..._] = Environment'Arguments(ctx) {
+    Number'Parse(x())
+  } else {
+    error("wrong number of arguments")
   }
 }
 
