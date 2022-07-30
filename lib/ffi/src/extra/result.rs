@@ -1,5 +1,6 @@
 use crate::{Any, BoxAny, Error, None};
 
+// This type must be used only as a return type.
 #[repr(transparent)]
 pub struct Result(BoxAny);
 
