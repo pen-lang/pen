@@ -1,6 +1,5 @@
 use pen_ffi::Number;
 use pen_ffi_macro::bindgen;
-use std::process::exit;
 
 #[bindgen(crate = "pen_ffi")]
 fn default_return_type() {}
@@ -21,7 +20,7 @@ async fn async_function() -> f64 {
 #[bindgen(crate = "pen_ffi")]
 #[allow(unreachable_code)]
 fn unreachable_by_exit() {
-    exit(0)
+    unreachable!()
 }
 
 #[bindgen(crate = "pen_ffi")]
