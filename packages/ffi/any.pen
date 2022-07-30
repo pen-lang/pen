@@ -34,7 +34,7 @@ foreign "c" pen_ffi_any_to_error = \(x any) error {
   if x = x as error {
     x
   } else {
-    false
+    error("non-error type detected")
   }
 }
 
