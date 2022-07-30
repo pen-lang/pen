@@ -1,18 +1,21 @@
-use crate::{Arc, Boolean, BoxAny, ByteString, List, None, Number};
+use crate::{Arc, Boolean, BoxAny, ByteString, Error, List, None, Number};
 
 extern "C" {
     fn pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_is_error(any: BoxAny) -> Boolean;
     fn pen_ffi_any_is_none(any: BoxAny) -> Boolean;
     fn pen_ffi_any_is_list(any: BoxAny) -> Boolean;
     fn pen_ffi_any_is_number(any: BoxAny) -> Boolean;
     fn pen_ffi_any_is_string(any: BoxAny) -> Boolean;
 
     fn pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
+    fn pen_ffi_any_to_error(any: BoxAny) -> Error;
     fn pen_ffi_any_to_list(any: BoxAny) -> Arc<List>;
     fn pen_ffi_any_to_number(any: BoxAny) -> Number;
     fn pen_ffi_any_to_string(any: BoxAny) -> ByteString;
 
     fn pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
+    fn pen_ffi_any_from_error(value: Error) -> BoxAny;
     fn pen_ffi_any_from_none() -> BoxAny;
     fn pen_ffi_any_from_list(value: Arc<List>) -> BoxAny;
     fn pen_ffi_any_from_number(value: Number) -> BoxAny;
@@ -43,6 +46,10 @@ impl Any {
 
     pub fn is_boolean(&self) -> bool {
         unsafe { pen_ffi_any_is_boolean(self.clone().into()) }.into()
+    }
+
+    pub fn is_error(&self) -> bool {
+        unsafe { pen_ffi_any_is_error(self.clone().into()) }.into()
     }
 
     pub fn is_none(&self) -> bool {
@@ -96,6 +103,12 @@ impl From<Boolean> for Any {
     }
 }
 
+impl From<Error> for Any {
+    fn from(value: Error) -> Self {
+        unsafe { pen_ffi_any_from_error(value) }.into()
+    }
+}
+
 impl From<None> for Any {
     fn from(_: None) -> Self {
         unsafe { pen_ffi_any_from_none() }.into()
@@ -126,6 +139,18 @@ impl TryFrom<Any> for Boolean {
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_boolean() {
             Ok(unsafe { pen_ffi_any_to_boolean(value.into()) })
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<Any> for Error {
+    type Error = ();
+
+    fn try_from(value: Any) -> Result<Self, ()> {
+        if value.is_error() {
+            Ok(unsafe { pen_ffi_any_to_error(value.into()) })
         } else {
             Err(())
         }
