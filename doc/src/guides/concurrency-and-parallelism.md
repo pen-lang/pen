@@ -22,14 +22,14 @@ The `go` function may or may not run a given function immediately depending on i
 
 ### `race` function
 
-> WIP
+> TBD
 
 ## Patterns
 
 ### Task parallelism
 
-> WIP
+> TBD
 
 ### Data parallelism
 
-> WIP
+> TBD
