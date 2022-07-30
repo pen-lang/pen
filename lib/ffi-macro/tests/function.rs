@@ -1,3 +1,4 @@
+use pen_ffi::Number;
 use pen_ffi_macro::bindgen;
 use std::process::exit;
 
@@ -24,13 +25,13 @@ fn unreachable_by_exit() {
 }
 
 #[bindgen(crate = "pen_ffi")]
-fn result_function() -> Result<f64, String> {
-    Ok(42.0)
+fn result_function() -> Result<Number, String> {
+    Ok(42.0.into())
 }
 
 #[bindgen(crate = "pen_ffi")]
-async fn async_result_function() -> Result<f64, String> {
-    Ok(42.0)
+async fn async_result_function() -> Result<Number, String> {
+    Ok(42.0.into())
 }
 
 #[bindgen(crate = "pen_ffi")]

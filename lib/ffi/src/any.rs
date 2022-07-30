@@ -9,13 +9,13 @@ extern "C" {
     fn pen_ffi_any_is_string(any: BoxAny) -> Boolean;
 
     fn pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_to_error(any: BoxAny) -> Error;
+    fn pen_ffi_any_to_error(any: BoxAny) -> Arc<Error>;
     fn pen_ffi_any_to_list(any: BoxAny) -> Arc<List>;
     fn pen_ffi_any_to_number(any: BoxAny) -> Number;
     fn pen_ffi_any_to_string(any: BoxAny) -> ByteString;
 
     fn pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
-    fn pen_ffi_any_from_error(value: Error) -> BoxAny;
+    fn pen_ffi_any_from_error(value: Arc<Error>) -> BoxAny;
     fn pen_ffi_any_from_none() -> BoxAny;
     fn pen_ffi_any_from_list(value: Arc<List>) -> BoxAny;
     fn pen_ffi_any_from_number(value: Number) -> BoxAny;
@@ -103,21 +103,21 @@ impl From<Boolean> for Any {
     }
 }
 
-impl From<Error> for Any {
-    fn from(value: Error) -> Self {
+impl From<Arc<Error>> for Any {
+    fn from(value: Arc<Error>) -> Self {
         unsafe { pen_ffi_any_from_error(value) }.into()
-    }
-}
-
-impl From<None> for Any {
-    fn from(_: None) -> Self {
-        unsafe { pen_ffi_any_from_none() }.into()
     }
 }
 
 impl From<Arc<List>> for Any {
     fn from(value: Arc<List>) -> Self {
         unsafe { pen_ffi_any_from_list(value) }.into()
+    }
+}
+
+impl From<None> for Any {
+    fn from(_: None) -> Self {
+        unsafe { pen_ffi_any_from_none() }.into()
     }
 }
 
@@ -145,7 +145,7 @@ impl TryFrom<Any> for Boolean {
     }
 }
 
-impl TryFrom<Any> for Error {
+impl TryFrom<Any> for Arc<Error> {
     type Error = ();
 
     fn try_from(value: Any) -> Result<Self, ()> {
