@@ -9,16 +9,8 @@ main = \(ctx context) none {
   ctx = ctx.Os
 
   if e = run(ctx) as error {
-    _ = File'Write(
-      ctx,
-      File'StdOut(),
-      String'Concatenate(
-        [string
-          if e = source(e) as string { e } else { "unexpected error" },
-          "\n",
-        ],
-      ),
-    )
+    _ = print(ctx, if e = source(e) as string { e } else { "unexpected error" })
+
     Process'Exit(ctx, 1)
   } else {
     none
@@ -26,7 +18,7 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), Number'String(fibonacci(argument(ctx)?)))?
+  print(ctx, Number'String(fibonacci(argument(ctx)?)))?
 
   none
 }
@@ -47,4 +39,10 @@ fibonacci = \(n number) number {
   } else {
     fibonacci(n - 1) + fibonacci(n - 2)
   }
+}
+
+print = \(ctx Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
+
+  none
 }
