@@ -178,7 +178,8 @@
 <pre><code class="language-pen">\(\() a) \() a
 </code></pre>
 <h3 id="race"><a class="header" href="#race"><code>race</code></a></h3>
-<p>It merges multiple lists into one evaluating elements in each list concurrently. This function corresponds to <a href="https://go.dev/blog/pipelines#fan-out-fan-in">the fan-in concurrency pattern</a> in other languages where we merge results of concurrent computation in multiple concurrent queues.</p>
+<p>It merges multiple lists into one by evaluating elements in the lists concurrently. Elements in each list are evaluated in order sequentially.</p>
+<p>This function corresponds to <a href="https://go.dev/blog/pipelines#fan-out-fan-in">the fan-in concurrency pattern</a> in other languages where results of concurrent computation in multiple queues are merged into a queue.</p>
 <pre><code class="language-pen">\([[a]]) [a]
 </code></pre>
 
