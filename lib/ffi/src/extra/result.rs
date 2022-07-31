@@ -18,3 +18,23 @@ impl<T: Into<Any>, E: Into<Any>> From<core::result::Result<T, E>> for Result {
         }))
     }
 }
+
+#[cfg(feature = "std")]
+impl From<core::result::Result<(), alloc::boxed::Box<dyn std::error::Error>>> for Result {
+    fn from(result: core::result::Result<(), alloc::boxed::Box<dyn std::error::Error>>) -> Self {
+        result.map(|_| None::default()).into()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: Into<Any>> From<core::result::Result<T, alloc::boxed::Box<dyn std::error::Error>>>
+    for Result
+{
+    fn from(result: core::result::Result<T, alloc::boxed::Box<dyn std::error::Error>>) -> Self {
+        use alloc::string::ToString;
+
+        result
+            .map_err(|error| Error::new(crate::ByteString::from(error.to_string())))
+            .into()
+    }
+}
