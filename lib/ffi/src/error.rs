@@ -16,8 +16,8 @@ impl Error {
 }
 
 #[cfg(feature = "std")]
-impl From<alloc::boxed::Box<dyn std::error::Error>> for Arc<Error> {
-    fn from(error: alloc::boxed::Box<dyn std::error::Error>) -> Self {
+impl<T: std::error::Error> From<T> for Arc<Error> {
+    fn from(error: T) -> Self {
         use alloc::string::ToString;
 
         Error::new(crate::ByteString::from(error.to_string())).into()
