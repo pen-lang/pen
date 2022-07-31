@@ -2,20 +2,17 @@ use crate::{call_function, future, import, Any, Arc, Boolean, Closure, List};
 use futures::Stream;
 
 extern "C" {
-    import!(
-        pen_ffi_list_first_rest,
-        fn(list: Arc<List>) -> Arc<FirstRest>
-    );
+    import!(pen_ffi_list_first_rest, fn(list: List) -> Arc<FirstRest>);
 }
 
 #[repr(C)]
 struct FirstRest {
     ok: Boolean,
-    first: Arc<Closure>,
-    rest: Arc<List>,
+    first: Closure,
+    rest: List,
 }
 
-pub fn from_list(list: Arc<List>) -> impl Stream<Item = Any> {
+pub fn from_list(list: List) -> impl Stream<Item = Any> {
     async_stream::stream! {
         let mut first_rest = get_first_rest(list).await;
 
@@ -26,9 +23,9 @@ pub fn from_list(list: Arc<List>) -> impl Stream<Item = Any> {
     }
 }
 
-async fn get_first_rest(list: Arc<List>) -> Arc<FirstRest> {
+async fn get_first_rest(list: List) -> Arc<FirstRest> {
     call_function!(
-        fn(Arc<List>) -> Arc<FirstRest>,
+        fn(List) -> Arc<FirstRest>,
         pen_ffi_list_first_rest,
         list.clone(),
     )

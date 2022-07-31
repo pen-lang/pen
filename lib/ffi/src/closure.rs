@@ -12,6 +12,7 @@ struct ClosureMetadata<T> {
 }
 
 #[repr(C)]
+#[derive(Clone)]
 pub struct Closure<T = ()>(Arc<ClosureInner<T>>);
 
 #[repr(C)]

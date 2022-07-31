@@ -21,10 +21,10 @@ impl Error {
 }
 
 #[cfg(feature = "std")]
-impl<T: std::error::Error> From<T> for Arc<Error> {
+impl<T: std::error::Error> From<T> for Error {
     fn from(error: T) -> Self {
         use alloc::string::ToString;
 
-        Error::new(crate::ByteString::from(error.to_string())).into()
+        Error::new(crate::ByteString::from(error.to_string()))
     }
 }
