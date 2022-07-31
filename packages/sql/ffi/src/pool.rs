@@ -4,7 +4,7 @@ use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
 extern "C" {
-    fn _pen_sql_pool_to_any(pool: ffi::Arc<Pool>) -> ffi::Any;
+    fn _pen_sql_pool_to_any(pool: Pool) -> ffi::Any;
 }
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
@@ -20,20 +20,17 @@ struct PoolOptions {
 }
 
 #[repr(C)]
-#[derive(Default)]
-struct Pool {
-    inner: ffi::Any,
-}
+struct Pool(ffi::Arc<PoolInner>);
+
+struct PoolInner(ffi::Any);
 
 impl Pool {
     pub fn new(pool: AnyPool) -> Self {
-        Self {
-            inner: PoolInner { pool }.into(),
-        }
+        Self(PoolInner(SqlxPool { pool }.into()).into())
     }
 
     pub fn as_inner(&self) -> &AnyPool {
-        let pool: &PoolInner = TryFrom::try_from(&self.inner).unwrap();
+        let pool: &SqlxPool = TryFrom::try_from(&self.0 .0).unwrap();
 
         &pool.pool
     }
@@ -41,14 +38,14 @@ impl Pool {
 
 impl Into<ffi::Any> for Pool {
     fn into(self) -> ffi::Any {
-        unsafe { _pen_sql_pool_to_any(self.into()) }
+        unsafe { _pen_sql_pool_to_any(self) }
     }
 }
 
 #[ffi::any]
 #[repr(C)]
 #[derive(Clone)]
-struct PoolInner {
+struct SqlxPool {
     pool: AnyPool,
 }
 
@@ -71,9 +68,9 @@ async fn _pen_sql_pool_create(
 
 #[ffi::bindgen]
 async fn _pen_sql_pool_query(
-    pool: ffi::Arc<Pool>,
+    pool: Pool,
     query: ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
+    arguments: ffi::List,
 ) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
     let mut rows = ffi::List::new();
 
@@ -117,9 +114,9 @@ async fn _pen_sql_pool_query(
 
 #[ffi::bindgen]
 async fn _pen_sql_pool_execute(
-    pool: ffi::Arc<Pool>,
+    pool: Pool,
     query: ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
+    arguments: ffi::List,
 ) -> Result<ffi::Number, Box<dyn Error>> {
     Ok((pool
         .as_inner()
@@ -131,7 +128,7 @@ async fn _pen_sql_pool_execute(
 
 async fn build_query(
     query: &ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
+    arguments: ffi::List,
 ) -> Result<AnyQuery<'_>, Box<dyn Error>> {
     let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
     let arguments = ffi::future::stream::from_list(arguments);
