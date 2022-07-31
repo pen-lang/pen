@@ -1,5 +1,4 @@
-use crate::error::OsError;
-use crate::utilities;
+use crate::{error::OsError, utilities};
 use std::error::Error;
 use tokio::fs;
 

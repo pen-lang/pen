@@ -1,4 +1,4 @@
-use std::{str, sync::Arc, error::Error};
+use std::{error::Error, str, sync::Arc};
 use tokio::{
     net,
     sync::{RwLock, RwLockWriteGuard},
@@ -73,7 +73,9 @@ async fn _pen_os_udp_connect(
 }
 
 #[ffi::bindgen]
-async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, Box<dyn Error>> {
+async fn _pen_os_udp_receive(
+    socket: ffi::Arc<UdpSocket>,
+) -> Result<ffi::ByteString, Box<dyn Error>> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let size = socket.lock().await.recv(&mut buffer).await?;
 
