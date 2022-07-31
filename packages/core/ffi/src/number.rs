@@ -1,7 +1,4 @@
-use alloc::{
-    format,
-    string::{String, ToString},
-};
+use alloc::{format, string::ToString};
 use core::str;
 
 #[ffi::bindgen]
@@ -56,7 +53,7 @@ fn _pen_core_nan() -> ffi::Number {
 }
 
 #[ffi::bindgen]
-fn _pen_core_parse_number(x: ffi::ByteString) -> Result<ffi::Number, String> {
+fn _pen_core_parse_number(x: ffi::ByteString) -> Result<ffi::Number, ffi::ByteString> {
     Ok(str::from_utf8(x.as_slice())
         .map_err(|error| error.to_string())?
         .parse::<f64>()
