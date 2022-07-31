@@ -48,7 +48,7 @@ impl Default for Response {
 }
 
 impl Into<ffi::Any> for Response {
-    fn into(self: Self) -> ffi::Any {
+    fn into(self) -> ffi::Any {
         unsafe { _pen_http_response_to_any(self.into()) }
     }
 }
