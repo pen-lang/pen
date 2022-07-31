@@ -33,7 +33,7 @@ Render = \(n Node) string | error {
 }
 
 renderAttributes = \(attrs [Attribute]) [string] {
-  [string String'Concatenate([string a().Key, "=\"", a().Value, "\""]) for a in attrs]
+  [string a().Key + "=\"" + a().Value + "\"" for a in attrs]
 }
 
 renderChildren = \(ns [Node]) [string] | error {

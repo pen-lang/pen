@@ -1,5 +1,4 @@
 import Core'Number
-import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Random
@@ -25,7 +24,7 @@ main = \(ctx context) none {
 
 printNumbers = \(ctx Context, ns [number]) none | error {
   if [n, ...ns] = ns {
-    File'Write(ctx, File'StdOut(), String'Concatenate([string Number'String(n()), "\n"]))?
+    File'Write(ctx, File'StdOut(), Number'String(n()) + "\n")?
 
     printNumbers(ctx, ns)
   } else {

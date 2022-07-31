@@ -69,7 +69,7 @@ valueString = \(v Value) string {
   } else if number {
     Number'String(v)
   } else if string {
-    String'Concatenate([string "'", v, "'"])
+    "'" + v + "'"
   } else if none {
     "null"
   }

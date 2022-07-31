@@ -1,4 +1,3 @@
-import Core'String
 import Flag'Flag
 import Http'Client
 import Http'Request { Request }
@@ -22,7 +21,7 @@ main = \(ctx context) none {
     _ = File'Write(
       ctx.Os,
       File'StdOut(),
-      String'Concatenate([string if s = source(e) as string { s } else { "unknown error" }, "\n"]),
+      if s = source(e) as string { s } else { "unknown error" } + "\n",
     )
 
     Process'Exit(ctx.Os, 1)
@@ -42,7 +41,7 @@ run = \(ctx context) none | error {
     },
   )?
 
-  File'Write(ctx.Os, File'StdOut(), String'Concatenate([string r.Body, "\n"]))?
+  File'Write(ctx.Os, File'StdOut(), r.Body + "\n")?
 
   none
 }
