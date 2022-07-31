@@ -8,7 +8,7 @@ macro_rules! call {
         async {
             use core::{intrinsics::transmute, task::Poll};
             use $crate::future::__private::{INITIAL_STACK_CAPACITY, poll_fn};
-            use $crate::{cps, Arc, Closure};
+            use $crate::{cps, Closure};
 
             type AsyncStack = cps::AsyncStack<$result_type>;
 
@@ -19,7 +19,7 @@ macro_rules! call {
             type InitialStepFunction<C> = extern "C" fn(
                 stack: &mut AsyncStack,
                 continuation: ContinuationFunction,
-                closure: Arc<Closure<C>>,
+                closure: Closure<C>,
                 $($argument_type),*
             );
 
@@ -63,14 +63,14 @@ macro_rules! call {
 mod tests {
     use crate::{
         cps::{AsyncStack, ContinuationFunction},
-        Arc, ByteString, Closure, Number,
+        ByteString, Closure, Number,
     };
     use core::future::ready;
 
     extern "C" fn thunk_entry_function(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
-        closure: Arc<Closure<f64>>,
+        closure: Closure<f64>,
     ) {
         continue_(stack, unsafe { *closure.payload() }.into())
     }
@@ -82,7 +82,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn() -> Number,
-                Arc::new(Closure::new(thunk_entry_function as *const u8, value)),
+                Closure::new(thunk_entry_function as *const u8, value),
             )
             .await,
             value.into()
@@ -92,7 +92,7 @@ mod tests {
     extern "C" fn closure_entry_function(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
-        _closure: Arc<Closure<()>>,
+        _closure: Closure<()>,
         x: Number,
     ) {
         continue_(stack, x)
@@ -105,7 +105,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(Number) -> Number,
-                Arc::new(Closure::new(closure_entry_function as *const u8, ())),
+                Closure::new(closure_entry_function as *const u8, ()),
                 value.into(),
             )
             .await,
@@ -116,7 +116,7 @@ mod tests {
     extern "C" fn closure_2_arity_entry_function(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
-        _closure: Arc<Closure<()>>,
+        _closure: Closure<()>,
         x: Number,
         y: Number,
     ) {
@@ -128,10 +128,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(Number, Number) -> Number,
-                Arc::new(Closure::new(
-                    closure_2_arity_entry_function as *const u8,
-                    ()
-                )),
+                Closure::new(closure_2_arity_entry_function as *const u8, ()),
                 40.0.into(),
                 2.0.into(),
             )
@@ -145,7 +142,7 @@ mod tests {
     extern "C" fn closure_entry_function_with_suspension(
         stack: &mut AsyncStack<TestResult>,
         continue_: ContinuationFunction<TestResult, TestResult>,
-        _closure: Arc<Closure<()>>,
+        _closure: Closure<()>,
     ) {
         fn step(
             stack: &mut AsyncStack<TestResult>,
@@ -165,10 +162,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn() -> Number,
-                Arc::new(Closure::new(
-                    closure_entry_function_with_suspension as *const u8,
-                    ()
-                )),
+                Closure::new(closure_entry_function_with_suspension as *const u8, ()),
             )
             .await,
             42.0.into()
@@ -178,7 +172,7 @@ mod tests {
     extern "C" fn closure_entry_function_with_string(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<ByteString>,
-        _closure: Arc<Closure<()>>,
+        _closure: Closure<()>,
         x: ByteString,
     ) {
         continue_(stack, x)
@@ -191,10 +185,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(ByteString) -> ByteString,
-                Arc::new(Closure::new(
-                    closure_entry_function_with_string as *const u8,
-                    ()
-                )),
+                Closure::new(closure_entry_function_with_string as *const u8, ()),
                 value.into(),
             )
             .await,
@@ -209,10 +200,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(ByteString) -> ByteString,
-                Arc::new(Closure::new(
-                    closure_entry_function_with_string as *const u8,
-                    ()
-                )),
+                Closure::new(closure_entry_function_with_string as *const u8, ()),
                 value.clone(),
             )
             .await,

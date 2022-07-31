@@ -1,6 +1,6 @@
 use crate::{
     cps::{AsyncStack, ContinuationFunction, StepFunction},
-    Arc, Closure,
+    Closure,
 };
 use core::{intrinsics::transmute, task::Poll};
 use futures::future::poll_fn;
@@ -8,12 +8,12 @@ use futures::future::poll_fn;
 type InitialStepFunction<T, V> = extern "C" fn(
     stack: &mut AsyncStack<T>,
     continuation: ContinuationFunction<T, T>,
-    closure: Arc<Closure<V>>,
+    closure: Closure<V>,
 );
 
 const INITIAL_STACK_CAPACITY: usize = 64;
 
-pub async fn from_closure<T, V>(closure: Arc<Closure<T>>) -> V {
+pub async fn from_closure<T, V>(closure: Closure<T>) -> V {
     let mut closure = Some(closure);
     let mut trampoline: Option<(StepFunction<(), V>, ContinuationFunction<(), V>)> = None;
     let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
@@ -53,7 +53,7 @@ mod tests {
     extern "C" fn foo(
         stack: &mut AsyncStack,
         continue_: ContinuationFunction<Number>,
-        closure: Arc<Closure<f64>>,
+        closure: Closure<f64>,
     ) {
         unsafe { continue_(stack, (*closure.payload()).into()) }
     }
@@ -63,7 +63,7 @@ mod tests {
         let value = 42.0;
 
         assert_eq!(
-            from_closure::<_, Number>(Arc::new(Closure::new(foo as *const u8, value))).await,
+            from_closure::<_, Number>(Closure::new(foo as *const u8, value)).await,
             value.into()
         );
     }
