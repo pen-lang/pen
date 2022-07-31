@@ -8,7 +8,7 @@ async fn _pen_http_client_send(
     uri: ffi::ByteString,
     headers: ffi::Arc<HeaderMap>,
     body: ffi::ByteString,
-) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
+) -> Result<Response, Box<dyn Error>> {
     let mut builder = Some(
         hyper::Request::builder()
             .method(hyper::Method::from_bytes(method.as_slice())?)
@@ -49,6 +49,5 @@ async fn _pen_http_client_send(
         response.status().as_u16() as f64,
         headers,
         hyper::body::to_bytes(response.into_body()).await?.to_vec(),
-    )
-    .into())
+    ))
 }

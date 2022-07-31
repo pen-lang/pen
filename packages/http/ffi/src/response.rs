@@ -1,5 +1,9 @@
 use crate::header_map::HeaderMap;
 
+extern "C" {
+    fn _pen_http_response_to_any(response: ffi::Arc<Response>) -> ffi::Any;
+}
+
 #[repr(C)]
 pub struct Response {
     status: ffi::Number,
@@ -40,5 +44,11 @@ impl Default for Response {
             headers: HeaderMap::new(),
             body: Default::default(),
         }
+    }
+}
+
+impl Into<ffi::Any> for Response {
+    fn into(self: Self) -> ffi::Any {
+        unsafe { _pen_http_response_to_any(self.into()) }
     }
 }

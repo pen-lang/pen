@@ -3,8 +3,8 @@ import 'Context'ffiResponse { FfiResponse }
 import 'Request { Request }
 import 'Response { Response }
 
-import foreign _pen_http_client_send \(string, string, FfiHeaderMap, string) ffiResponseResult
-import foreign _pen_http_server_serve \(string, \(string, string, FfiHeaderMap, string) FfiResponse) string
+import foreign _pen_http_client_send \(string, string, FfiHeaderMap, string) FfiResponse | error
+import foreign _pen_http_server_serve \(string, \(string, string, FfiHeaderMap, string) FfiResponse) none | error
 
 type Context {
   inner Inner
@@ -13,11 +13,6 @@ type Context {
 type Inner {
   Send \(Request) Response | error
   Serve \(string, \(Request) Response) none | error
-}
-
-type ffiResponseResult {
-  response FfiResponse
-  error_ string
 }
 
 New = \() Context {
@@ -29,22 +24,16 @@ New = \() Context {
           r.Uri,
           ffiHeaderMap'New(r.Headers),
           r.Body,
-        )
+        )?
 
-        if r.error_ == "" {
-          r = r.response
-
-          Response{
-            Status: r.Status,
-            Headers: ffiHeaderMap'ToMap(r.Headers),
-            Body: r.Body,
-          }
-        } else {
-          error(r.error_)
+        Response{
+          Status: r.Status,
+          Headers: ffiHeaderMap'ToMap(r.Headers),
+          Body: r.Body,
         }
       },
       Serve: \(address string, callback \(Request) Response) none | error {
-        e = _pen_http_server_serve(
+        _pen_http_server_serve(
           address,
           \(m string, u string, hs FfiHeaderMap, b string) FfiResponse {
             r = callback(
@@ -63,7 +52,6 @@ New = \() Context {
             }
           },
         )
-        if e == "" { none } else { error(e) }
       },
     },
   }
