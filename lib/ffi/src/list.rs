@@ -1,10 +1,9 @@
+use crate::import;
 use crate::{Any, Arc, BoxAny, Closure};
 
-extern "C" {
-    fn pen_ffi_list_create() -> List;
-    fn pen_ffi_list_lazy(xs: Closure) -> List;
-    fn pen_ffi_list_prepend(x: BoxAny, xs: List) -> List;
-}
+import!(pen_ffi_list_create, fn() -> List);
+import!(pen_ffi_list_lazy, fn(xs: Closure) -> List);
+import!(pen_ffi_list_prepend, fn(x: BoxAny, xs: List) -> List);
 
 #[repr(C)]
 #[derive(Clone)]

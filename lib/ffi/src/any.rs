@@ -1,26 +1,24 @@
-use crate::{Boolean, BoxAny, ByteString, Error, List, None, Number};
+use crate::{import, Boolean, BoxAny, ByteString, Error, List, None, Number};
 
-extern "C" {
-    fn pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_is_error(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_is_none(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_is_list(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_is_number(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_is_string(any: BoxAny) -> Boolean;
+import!(pen_ffi_any_is_boolean, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_error, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_none, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_list, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_number, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_string, fn(any: BoxAny) -> Boolean);
 
-    fn pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_to_error(any: BoxAny) -> Error;
-    fn pen_ffi_any_to_list(any: BoxAny) -> List;
-    fn pen_ffi_any_to_number(any: BoxAny) -> Number;
-    fn pen_ffi_any_to_string(any: BoxAny) -> ByteString;
+import!(pen_ffi_any_to_boolean, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_to_error, fn(any: BoxAny) -> Error);
+import!(pen_ffi_any_to_list, fn(any: BoxAny) -> List);
+import!(pen_ffi_any_to_number, fn(any: BoxAny) -> Number);
+import!(pen_ffi_any_to_string, fn(any: BoxAny) -> ByteString);
 
-    fn pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
-    fn pen_ffi_any_from_error(value: Error) -> BoxAny;
-    fn pen_ffi_any_from_none() -> BoxAny;
-    fn pen_ffi_any_from_list(value: List) -> BoxAny;
-    fn pen_ffi_any_from_number(value: Number) -> BoxAny;
-    fn pen_ffi_any_from_string(value: ByteString) -> BoxAny;
-}
+import!(pen_ffi_any_from_boolean, fn(value: Boolean) -> BoxAny);
+import!(pen_ffi_any_from_error, fn(value: Error) -> BoxAny);
+import!(pen_ffi_any_from_none, fn() -> BoxAny);
+import!(pen_ffi_any_from_list, fn(value: List) -> BoxAny);
+import!(pen_ffi_any_from_number, fn(value: Number) -> BoxAny);
+import!(pen_ffi_any_from_string, fn(value: ByteString) -> BoxAny);
 
 #[repr(C)]
 pub struct Any {

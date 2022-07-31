@@ -1,9 +1,7 @@
 use crate::{call_function, future, import, Any, Arc, Boolean, Closure, List};
 use futures::Stream;
 
-extern "C" {
-    import!(pen_ffi_list_first_rest, fn(list: List) -> Arc<FirstRest>);
-}
+import!(pen_ffi_list_first_rest, async fn(list: List) -> Arc<FirstRest>);
 
 #[repr(C)]
 struct FirstRest {
