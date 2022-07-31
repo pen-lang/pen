@@ -16,7 +16,7 @@ struct ClosureMetadata<T> {
 pub struct Closure<T = ()>(Arc<ClosureInner<T>>);
 
 #[repr(C)]
-pub struct ClosureInner<T = ()> {
+pub struct ClosureInner<T> {
     entry_function: AtomicPtr<u8>,
     metadata: AtomicPtr<ClosureMetadata<T>>,
     payload: ManuallyDrop<T>,
