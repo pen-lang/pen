@@ -40,7 +40,7 @@ impl Pool {
 }
 
 impl Into<ffi::Any> for Pool {
-    fn into(self: Self) -> ffi::Any {
+    fn into(self) -> ffi::Any {
         unsafe { _pen_sql_pool_to_any(self.into()) }
     }
 }
