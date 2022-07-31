@@ -1,3 +1,4 @@
+use crate::Arc;
 use core::{
     mem::ManuallyDrop,
     ops::Deref,
@@ -5,13 +6,17 @@ use core::{
 };
 
 struct ClosureMetadata<T> {
-    drop: extern "C" fn(&mut Closure<T>),
+    drop: extern "C" fn(&mut ClosureInner<T>),
     #[allow(dead_code)]
-    synchronize: extern "C" fn(&mut Closure<T>),
+    synchronize: extern "C" fn(&mut ClosureInner<T>),
 }
 
 #[repr(C)]
-pub struct Closure<T = ()> {
+#[derive(Clone)]
+pub struct Closure<T = ()>(Arc<ClosureInner<T>>);
+
+#[repr(C)]
+struct ClosureInner<T> {
     entry_function: AtomicPtr<u8>,
     metadata: AtomicPtr<ClosureMetadata<T>>,
     payload: ManuallyDrop<T>,
@@ -24,30 +29,33 @@ impl<T> Closure<T> {
     };
 
     pub fn new(entry_function: *const u8, payload: T) -> Self {
-        Self {
-            entry_function: AtomicPtr::new(entry_function as *mut u8),
-            metadata: AtomicPtr::new(&Self::METADATA as *const _ as *mut _),
-            payload: ManuallyDrop::new(payload),
-        }
+        Self(
+            ClosureInner {
+                entry_function: AtomicPtr::new(entry_function as *mut u8),
+                metadata: AtomicPtr::new(&Self::METADATA as *const _ as *mut _),
+                payload: ManuallyDrop::new(payload),
+            }
+            .into(),
+        )
     }
 
     pub fn entry_function(&self) -> *const u8 {
-        self.entry_function.load(Ordering::Relaxed)
+        self.0.entry_function.load(Ordering::Relaxed)
     }
 
     pub fn payload(&self) -> *const T {
-        self.payload.deref()
+        self.0.payload.deref()
     }
 }
 
-extern "C" fn drop_closure<T>(closure: &mut Closure<T>) {
+extern "C" fn drop_closure<T>(closure: &mut ClosureInner<T>) {
     unsafe { ManuallyDrop::drop(&mut closure.payload) }
 }
 
 // All closures created in Rust should implement Sync already.
-extern "C" fn synchronize_closure<T>(_: &mut Closure<T>) {}
+extern "C" fn synchronize_closure<T>(_: &mut ClosureInner<T>) {}
 
-impl<T> Drop for Closure<T> {
+impl<T> Drop for ClosureInner<T> {
     fn drop(&mut self) {
         let metadata = unsafe { &*self.metadata.load(Ordering::Relaxed) };
 
@@ -58,7 +66,6 @@ impl<T> Drop for Closure<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Arc;
     use alloc::boxed::Box;
     use core::{ptr::null, sync::atomic::AtomicBool};
 
@@ -66,7 +73,7 @@ mod tests {
 
     #[test]
     fn send() {
-        let closure = Arc::new(Closure::new(null(), ()));
+        let closure = Closure::new(null(), ());
 
         spawn(move || {
             closure.entry_function();
@@ -85,7 +92,7 @@ mod tests {
             }
         }
 
-        Arc::new(Closure::new(null(), Foo {}));
+        Closure::new(null(), Foo {});
 
         assert!(FLAG.load(Ordering::SeqCst));
     }
