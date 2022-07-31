@@ -6,7 +6,6 @@ extern "C" {
     fn pen_ffi_list_prepend(x: BoxAny, xs: List) -> List;
 }
 
-#[pen_ffi_macro::any(crate = "crate")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct List {

@@ -145,7 +145,7 @@ impl TryFrom<Any> for Boolean {
     }
 }
 
-impl TryFrom<Any> for Arc<Error> {
+impl TryFrom<Any> for Error {
     type Error = ();
 
     fn try_from(value: Any) -> Result<Self, ()> {
@@ -157,12 +157,12 @@ impl TryFrom<Any> for Arc<Error> {
     }
 }
 
-impl TryFrom<Any> for Arc<List> {
+impl TryFrom<Any> for List {
     type Error = ();
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_list() {
-            Ok(unsafe { pen_ffi_any_to_list(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_list(value) })
         } else {
             Err(())
         }
