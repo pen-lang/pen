@@ -5,7 +5,6 @@ import 'Tcp'Listener as Tcp
 import 'Tcp'Stream as Tcp
 import 'Udp'Datagram as Udp
 import 'Udp'Socket as Udp
-import 'array
 import 'normalFile { NormalFile }
 
 import foreign _pen_os_read_stdin \() string | error
@@ -19,10 +18,10 @@ import foreign _pen_os_write_file \(NormalFile, string) number | error
 import foreign _pen_os_copy_file \(string, string) none | error
 import foreign _pen_os_move_file \(string, string) none | error
 import foreign _pen_os_remove_file \(string) none | error
-import foreign _pen_os_read_directory \(string) array'Array | error
+import foreign _pen_os_read_directory \(string) [string] | error
 import foreign _pen_os_create_directory \(string) none | error
 import foreign _pen_os_remove_directory \(string) none | error
-import foreign "c" _pen_os_get_arguments \() array'Array
+import foreign "c" _pen_os_get_arguments \() [string]
 import foreign "c" _pen_os_get_environment_variable \(string) string | error
 import foreign _pen_os_read_metadata \(string) Metadata | error
 import foreign _pen_os_tcp_bind \(string) Tcp'Listener | error
@@ -57,10 +56,10 @@ type InnerContext {
   CopyFile \(string, string) none | error
   MoveFile \(string, string) none | error
   RemoveFile \(string) none | error
-  ReadDirectory \(string) array'Array | error
+  ReadDirectory \(string) [string] | error
   CreateDirectory \(string) none | error
   RemoveDirectory \(string) none | error
-  GetArguments \() array'Array
+  GetArguments \() [string]
   GetEnvironmentVariable \(string) string | error
   Metadata \(string) Metadata | error
   TcpBind \(string) Tcp'Listener | error

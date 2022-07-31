@@ -1,39 +1,33 @@
-use crate::{error::OsError, utilities};
+use crate::error::OsError;
+use crate::utilities;
+use std::error::Error;
 use tokio::fs;
 
 #[ffi::bindgen]
 async fn _pen_os_read_directory(
     path: ffi::ByteString,
-) -> Result<ffi::Arc<ffi::extra::StringArray>, OsError> {
+) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
     let mut read_dir = fs::read_dir(utilities::decode_path(&path)?).await?;
     let mut entries = vec![];
 
     while let Some(entry) = read_dir.next_entry().await? {
-        entries.push(entry);
+        entries.push(ffi::ByteString::from(
+            entry
+                .file_name()
+                .into_string()
+                .map_err(|_| OsError::Other("cannot decode path".into()))?,
+        ));
     }
 
-    Ok(ffi::Arc::new(
-        entries
-            .into_iter()
-            .map(|entry| {
-                Ok(ffi::ByteString::from(
-                    entry
-                        .file_name()
-                        .into_string()
-                        .map_err(|_| OsError::Other("cannot decode path".into()))?,
-                ))
-            })
-            .collect::<Result<Vec<_>, OsError>>()?
-            .into(),
-    ))
+    Ok(entries.into())
 }
 
 #[ffi::bindgen]
-async fn _pen_os_create_directory(path: ffi::ByteString) -> Result<(), OsError> {
+async fn _pen_os_create_directory(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
     Ok(fs::create_dir(utilities::decode_path(&path)?).await?)
 }
 
 #[ffi::bindgen]
-async fn _pen_os_remove_directory(path: ffi::ByteString) -> Result<(), OsError> {
+async fn _pen_os_remove_directory(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
     Ok(fs::remove_dir(utilities::decode_path(&path)?).await?)
 }

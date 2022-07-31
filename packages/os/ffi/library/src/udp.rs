@@ -1,5 +1,4 @@
-use crate::error::OsError;
-use std::{str, sync::Arc};
+use std::{str, sync::Arc, error::Error};
 use tokio::{
     net,
     sync::{RwLock, RwLockWriteGuard},
@@ -53,7 +52,7 @@ pub struct UdpDatagram {
 }
 
 #[ffi::bindgen]
-async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, OsError> {
+async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket>, Box<dyn Error>> {
     Ok(UdpSocket::new(
         net::UdpSocket::bind(str::from_utf8(address.as_slice())?).await?,
     ))
@@ -63,7 +62,7 @@ async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<ffi::Arc<UdpSocket
 async fn _pen_os_udp_connect(
     socket: ffi::Arc<UdpSocket>,
     address: ffi::ByteString,
-) -> Result<(), OsError> {
+) -> Result<(), Box<dyn Error>> {
     socket
         .lock()
         .await
@@ -74,7 +73,7 @@ async fn _pen_os_udp_connect(
 }
 
 #[ffi::bindgen]
-async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, OsError> {
+async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteString, Box<dyn Error>> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let size = socket.lock().await.recv(&mut buffer).await?;
 
@@ -86,7 +85,7 @@ async fn _pen_os_udp_receive(socket: ffi::Arc<UdpSocket>) -> Result<ffi::ByteStr
 #[ffi::bindgen]
 async fn _pen_os_udp_receive_from(
     socket: ffi::Arc<UdpSocket>,
-) -> Result<ffi::Arc<UdpDatagram>, OsError> {
+) -> Result<ffi::Arc<UdpDatagram>, Box<dyn Error>> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let (size, address) = socket.lock().await.recv_from(&mut buffer).await?;
 
@@ -103,7 +102,7 @@ async fn _pen_os_udp_receive_from(
 async fn _pen_os_udp_send(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
-) -> Result<ffi::Number, OsError> {
+) -> Result<ffi::Number, Box<dyn Error>> {
     let size = socket.lock().await.send(data.as_slice()).await?;
 
     Ok((size as f64).into())
@@ -114,7 +113,7 @@ async fn _pen_os_udp_send_to(
     socket: ffi::Arc<UdpSocket>,
     data: ffi::ByteString,
     address: ffi::ByteString,
-) -> Result<ffi::Number, OsError> {
+) -> Result<ffi::Number, Box<dyn Error>> {
     let size = socket
         .lock()
         .await

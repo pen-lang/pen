@@ -1,9 +1,8 @@
 import 'Context'context { Context }
-import 'array
 
 # Get command line arguments.
 Arguments = \(ctx Context) [string] {
-  array'ConvertToStrings(context'Inner(ctx).GetArguments())
+  context'Inner(ctx).GetArguments()
 }
 
 # Get an environment variable.
