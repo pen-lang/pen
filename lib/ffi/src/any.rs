@@ -9,15 +9,15 @@ extern "C" {
     fn pen_ffi_any_is_string(any: BoxAny) -> Boolean;
 
     fn pen_ffi_any_to_boolean(any: BoxAny) -> Boolean;
-    fn pen_ffi_any_to_error(any: BoxAny) -> Arc<Error>;
-    fn pen_ffi_any_to_list(any: BoxAny) -> Arc<List>;
+    fn pen_ffi_any_to_error(any: BoxAny) -> Error;
+    fn pen_ffi_any_to_list(any: BoxAny) -> List;
     fn pen_ffi_any_to_number(any: BoxAny) -> Number;
     fn pen_ffi_any_to_string(any: BoxAny) -> ByteString;
 
     fn pen_ffi_any_from_boolean(value: Boolean) -> BoxAny;
-    fn pen_ffi_any_from_error(value: Arc<Error>) -> BoxAny;
+    fn pen_ffi_any_from_error(value: Error) -> BoxAny;
     fn pen_ffi_any_from_none() -> BoxAny;
-    fn pen_ffi_any_from_list(value: Arc<List>) -> BoxAny;
+    fn pen_ffi_any_from_list(value: List) -> BoxAny;
     fn pen_ffi_any_from_number(value: Number) -> BoxAny;
     fn pen_ffi_any_from_string(value: ByteString) -> BoxAny;
 }
