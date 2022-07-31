@@ -1,17 +1,24 @@
 use crate::{Any, Arc};
 
 #[repr(C)]
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Error {
+    inner: Arc<ErrorInner>,
+}
+
+#[repr(C)]
+struct ErrorInner {
     source: Any,
 }
 
 impl Error {
-    pub fn new(source: impl Into<Any>) -> Arc<Self> {
+    pub fn new(source: impl Into<Any>) -> Self {
         Self {
-            source: source.into(),
+            inner: ErrorInner {
+                source: source.into(),
+            }
+            .into(),
         }
-        .into()
     }
 }
 
