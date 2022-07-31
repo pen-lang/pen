@@ -31,7 +31,7 @@ impl List {
 
 impl Default for List {
     fn default() -> Self {
-        List::new()
+        Self::new()
     }
 }
 
@@ -40,10 +40,10 @@ where
     <I as IntoIterator>::IntoIter: DoubleEndedIterator,
 {
     fn from(xs: I) -> Self {
-        let mut list = List::new();
+        let mut list = Self::new();
 
         for x in xs.into_iter().rev() {
-            list = List::prepend(list, x);
+            list = Self::prepend(list, x);
         }
 
         list
