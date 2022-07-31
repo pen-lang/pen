@@ -8,9 +8,7 @@ extern "C" {
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct List {
-    inner: Arc<ListInner>,
-}
+pub struct List(Arc<ListInner>);
 
 #[repr(C)]
 struct ListInner {

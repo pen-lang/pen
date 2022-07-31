@@ -12,9 +12,7 @@ struct ClosureMetadata<T> {
 }
 
 #[repr(C)]
-pub struct Closure<T = ()> {
-    inner: Arc<ClosureInner<T>>,
-}
+pub struct Closure<T = ()>(Arc<ClosureInner<T>>);
 
 #[repr(C)]
 pub struct ClosureInner<T = ()> {
@@ -30,22 +28,22 @@ impl<T> Closure<T> {
     };
 
     pub fn new(entry_function: *const u8, payload: T) -> Self {
-        Self {
-            inner: ClosureInner {
+        Self(
+            ClosureInner {
                 entry_function: AtomicPtr::new(entry_function as *mut u8),
                 metadata: AtomicPtr::new(&Self::METADATA as *const _ as *mut _),
                 payload: ManuallyDrop::new(payload),
             }
             .into(),
-        }
+        )
     }
 
     pub fn entry_function(&self) -> *const u8 {
-        self.inner.entry_function.load(Ordering::Relaxed)
+        self.0.entry_function.load(Ordering::Relaxed)
     }
 
     pub fn payload(&self) -> *const T {
-        self.inner.payload.deref()
+        self.0.payload.deref()
     }
 }
 
