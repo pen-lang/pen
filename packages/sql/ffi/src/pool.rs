@@ -71,7 +71,7 @@ async fn _pen_sql_pool_query(
     pool: Pool,
     query: ffi::ByteString,
     arguments: ffi::List,
-) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
+) -> Result<ffi::List, Box<dyn Error>> {
     let mut rows = ffi::List::new();
 
     for row in pool
