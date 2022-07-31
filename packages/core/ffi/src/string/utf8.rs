@@ -97,10 +97,7 @@ fn _pen_core_utf8_slice(
 
 // TODO Split a string and collect sub-strings lazily.
 #[ffi::bindgen]
-fn _pen_core_utf8_split(
-    original: ffi::ByteString,
-    pattern: ffi::ByteString,
-) -> ffi::Arc<ffi::List> {
+fn _pen_core_utf8_split(original: ffi::ByteString, pattern: ffi::ByteString) -> ffi::List {
     if let Ok(string) = str::from_utf8(original.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string
