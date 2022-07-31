@@ -1,9 +1,9 @@
 use crate::{Any, Arc, BoxAny, Closure};
 
 extern "C" {
-    fn pen_ffi_list_create() -> Arc<List>;
-    fn pen_ffi_list_lazy(xs: Arc<Closure>) -> Arc<List>;
-    fn pen_ffi_list_prepend(x: BoxAny, xs: Arc<List>) -> Arc<List>;
+    fn pen_ffi_list_create() -> List;
+    fn pen_ffi_list_lazy(xs: Closure) -> List;
+    fn pen_ffi_list_prepend(x: BoxAny, xs: List) -> List;
 }
 
 #[pen_ffi_macro::any(crate = "crate")]
@@ -15,30 +15,30 @@ pub struct List {
 
 #[repr(C)]
 struct ListInner {
-    node: Arc<Closure>,
+    node: Closure,
 }
 
 impl List {
-    pub fn new() -> Arc<Self> {
+    pub fn new() -> Self {
         unsafe { pen_ffi_list_create() }
     }
 
-    pub fn prepend(this: Arc<Self>, x: impl Into<Any>) -> Arc<Self> {
-        unsafe { pen_ffi_list_prepend(x.into().into(), this) }
+    pub fn prepend(self, x: impl Into<Any>) -> Self {
+        unsafe { pen_ffi_list_prepend(x.into().into(), self) }
     }
 
-    pub fn lazy(xs: Arc<Closure>) -> Arc<Self> {
+    pub fn lazy(xs: Closure) -> Self {
         unsafe { pen_ffi_list_lazy(xs) }
     }
 }
 
-impl Default for Arc<List> {
+impl Default for List {
     fn default() -> Self {
         List::new()
     }
 }
 
-impl<T: Into<Any>, I: IntoIterator<Item = T>> From<I> for Arc<List>
+impl<T: Into<Any>, I: IntoIterator<Item = T>> From<I> for List
 where
     <I as IntoIterator>::IntoIter: DoubleEndedIterator,
 {
