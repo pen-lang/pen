@@ -88,14 +88,13 @@ pub fn compile_record(
     }
 }
 
+// Box large records. This logic needs to be simple because we also use exactly
+// the same one for FFI.
 pub fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
-    let body_type = &types[record.name()];
-
-    // TODO Unbox small records.
-    !body_type.fields().is_empty()
+    types[record.name()].fields().len() > 1
 }
 
 pub fn compile_boxed_record() -> fmm::types::Type {

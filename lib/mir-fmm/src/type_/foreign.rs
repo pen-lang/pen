@@ -55,5 +55,11 @@ fn is_record_boxed(
     record: &mir::types::Record,
     types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> bool {
+    // TODO Implement the full C calling convention and use the exactly the same
+    // strategy as native records.
+    //
+    // ```rust
+    // type_::is_record_boxed(record, types)
+    // ```
     !types[record.name()].fields().is_empty()
 }
