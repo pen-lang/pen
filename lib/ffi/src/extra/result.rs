@@ -26,9 +26,8 @@ impl<T: Into<Any>> From<core::result::Result<T, alloc::boxed::Box<dyn std::error
     fn from(result: core::result::Result<T, alloc::boxed::Box<dyn std::error::Error>>) -> Self {
         use alloc::string::ToString;
 
-        Self(BoxAny::from(match result {
-            Ok(value) => value.into(),
-            Err(error) => Error::new(crate::ByteString::from(error.to_string())).into(),
-        }))
+        result
+            .map_err(|error| Error::new(crate::ByteString::from(error.to_string())))
+            .into()
     }
 }
