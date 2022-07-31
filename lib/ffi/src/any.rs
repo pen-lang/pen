@@ -103,9 +103,9 @@ impl From<Boolean> for Any {
     }
 }
 
-impl From<Arc<Error>> for Any {
-    fn from(value: Arc<Error>) -> Self {
-        unsafe { pen_ffi_any_from_error(value) }.into()
+impl<T: Into<Arc<Error>>> From<T> for Any {
+    fn from(value: T) -> Self {
+        unsafe { pen_ffi_any_from_error(value.into()) }.into()
     }
 }
 
