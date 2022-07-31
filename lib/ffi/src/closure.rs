@@ -1,13 +1,14 @@
 use crate::Arc;
 use core::{
     mem::ManuallyDrop,
+    ops::Deref,
     sync::atomic::{AtomicPtr, Ordering},
 };
 
 struct ClosureMetadata<T> {
-    drop: extern "C" fn(&mut Closure<T>),
+    drop: extern "C" fn(&mut ClosureInner<T>),
     #[allow(dead_code)]
-    synchronize: extern "C" fn(&mut Closure<T>),
+    synchronize: extern "C" fn(&mut ClosureInner<T>),
 }
 
 #[repr(C)]
@@ -48,16 +49,16 @@ impl<T> Closure<T> {
     }
 }
 
-extern "C" fn drop_closure<T>(closure: &mut Closure<T>) {
-    unsafe { ManuallyDrop::drop(&mut closure.inner.payload) }
+extern "C" fn drop_closure<T>(closure: &mut ClosureInner<T>) {
+    unsafe { ManuallyDrop::drop(&mut closure.payload) }
 }
 
 // All closures created in Rust should implement Sync already.
-extern "C" fn synchronize_closure<T>(_: &mut Closure<T>) {}
+extern "C" fn synchronize_closure<T>(_: &mut ClosureInner<T>) {}
 
-impl<T> Drop for Closure<T> {
+impl<T> Drop for ClosureInner<T> {
     fn drop(&mut self) {
-        let metadata = unsafe { &*self.inner.metadata.load(Ordering::Relaxed) };
+        let metadata = unsafe { &*self.metadata.load(Ordering::Relaxed) };
 
         (metadata.drop)(self);
     }
