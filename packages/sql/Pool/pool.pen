@@ -1,3 +1,7 @@
 type Pool {
   inner any
 }
+
+foreign "c" _pen_sql_pool_to_any = \(p Pool) any {
+  p
+}

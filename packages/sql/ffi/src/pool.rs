@@ -3,6 +3,10 @@ use futures::{pin_mut, StreamExt};
 use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
+extern "C" {
+    fn _pen_sql_pool_to_any(pool: ffi::Arc<Pool>) -> ffi::Any;
+}
+
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
 type AnyQuery<'a> =
@@ -35,6 +39,12 @@ impl Pool {
     }
 }
 
+impl Into<ffi::Any> for Pool {
+    fn into(self: Self) -> ffi::Any {
+        unsafe { _pen_sql_pool_to_any(self.into()) }
+    }
+}
+
 #[ffi::any]
 #[repr(C)]
 #[derive(Clone)]
@@ -46,7 +56,7 @@ struct PoolInner {
 async fn _pen_sql_pool_create(
     uri: ffi::ByteString,
     options: ffi::Arc<PoolOptions>,
-) -> Result<ffi::Arc<Pool>, Box<dyn Error>> {
+) -> Result<Pool, Box<dyn Error>> {
     Ok(Pool::new(
         sqlx::any::AnyPoolOptions::new()
             .min_connections(f64::from(options.min_connections) as u32)
@@ -56,8 +66,7 @@ async fn _pen_sql_pool_create(
             ))
             .connect(str::from_utf8(uri.as_slice())?)
             .await?,
-    )
-    .into())
+    ))
 }
 
 #[ffi::bindgen]

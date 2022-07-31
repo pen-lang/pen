@@ -3,9 +3,7 @@ import 'array
 
 # Read a directory and return file paths it contains.
 Read = \(ctx Context, path string) [string] | error {
-  ss = context'Inner(ctx).ReadDirectory(path)?
-
-  array'ConvertToStrings(ss)
+  array'ConvertToStrings(context'Inner(ctx).ReadDirectory(path)?)
 }
 
 # Create a directory.
