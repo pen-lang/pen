@@ -1,4 +1,4 @@
-use crate::{Arc, Boolean, BoxAny, ByteString, Error, List, None, Number};
+use crate::{Boolean, BoxAny, ByteString, Error, List, None, Number};
 
 extern "C" {
     fn pen_ffi_any_is_boolean(any: BoxAny) -> Boolean;
