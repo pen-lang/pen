@@ -13,7 +13,7 @@ New = \(context Context, uri string, options Options) Pool | error {
 
 # Run a query and return its rows.
 Query = \(context Context, pool Pool, query string, arguments [Value]) [[Value]] | error {
-  if x = context'Inner(context).QueryPool(pool, query, [any x for x in arguments]) as error {
+  if x = context'Inner(context).QueryPool(pool, query, [any ...arguments]) as error {
     x
   } else {
     [[Value]
@@ -28,5 +28,5 @@ Query = \(context Context, pool Pool, query string, arguments [Value]) [[Value]]
 
 # Run a query and return a number of affected rows.
 Execute = \(context Context, pool Pool, query string, arguments [Value]) number | error {
-  context'Inner(context).ExecutePool(pool, query, [any x for x in arguments])
+  context'Inner(context).ExecutePool(pool, query, [any ...arguments])
 }

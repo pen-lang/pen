@@ -10,16 +10,6 @@ type BoxError = Box<dyn Error + Send + Sync + 'static>;
 async fn _pen_http_server_serve(
     address: ffi::ByteString,
     callback: ffi::Arc<ffi::Closure>,
-) -> ffi::ByteString {
-    match serve(address, callback).await {
-        Ok(_) => ffi::ByteString::default(),
-        Err(error) => error.to_string().into(),
-    }
-}
-
-async fn serve(
-    address: ffi::ByteString,
-    callback: ffi::Arc<ffi::Closure>,
 ) -> Result<(), Box<dyn Error>> {
     hyper::Server::try_bind(&str::from_utf8(address.as_slice())?.parse()?)?
         .serve(hyper::service::make_service_fn(|_| {
