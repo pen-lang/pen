@@ -5,13 +5,13 @@ use crate::{
 use alloc::boxed::Box;
 use core::{future::Future, intrinsics::transmute, pin::Pin, task::Poll};
 
-impl<T, F: Future<Output = T>> From<F> for Arc<Closure> {
+impl<T, F: Future<Output = T>> From<F> for Closure {
     fn from(future: F) -> Self {
         to_closure(future)
     }
 }
 
-pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure> {
+pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Closure {
     let closure = Arc::new(Closure::new(
         get_result::<O, F> as *const u8,
         Some(Box::pin(future)),
@@ -23,7 +23,7 @@ pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Arc<Closure> {
 extern "C" fn get_result<O, F: Future<Output = O>>(
     stack: &mut AsyncStack,
     continue_: ContinuationFunction<O>,
-    closure: Arc<Closure<Option<Pin<Box<F>>>>>,
+    closure: Closure<Option<Pin<Box<F>>>>,
 ) {
     poll(
         stack,
