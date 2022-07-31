@@ -103,14 +103,14 @@ impl From<Boolean> for Any {
     }
 }
 
-impl From<Arc<Error>> for Any {
-    fn from(value: Arc<Error>) -> Self {
+impl From<Error> for Any {
+    fn from(value: Error) -> Self {
         unsafe { pen_ffi_any_from_error(value) }.into()
     }
 }
 
-impl From<Arc<List>> for Any {
-    fn from(value: Arc<List>) -> Self {
+impl From<List> for Any {
+    fn from(value: List) -> Self {
         unsafe { pen_ffi_any_from_list(value) }.into()
     }
 }
@@ -162,7 +162,7 @@ impl TryFrom<Any> for List {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_list() {
-            Ok(unsafe { pen_ffi_any_to_list(value) })
+            Ok(unsafe { pen_ffi_any_to_list(value.into()) })
         } else {
             Err(())
         }
