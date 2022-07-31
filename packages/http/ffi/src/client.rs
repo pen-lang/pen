@@ -6,7 +6,7 @@ use std::error::Error;
 async fn _pen_http_client_send(
     method: ffi::ByteString,
     uri: ffi::ByteString,
-    headers: ffi::Arc<HeaderMap>,
+    headers: HeaderMap,
     body: ffi::ByteString,
 ) -> Result<Response, Box<dyn Error>> {
     let mut builder = Some(

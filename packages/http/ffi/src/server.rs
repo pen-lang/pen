@@ -9,7 +9,7 @@ type BoxError = Box<dyn Error + Send + Sync + 'static>;
 #[ffi::bindgen]
 async fn _pen_http_server_serve(
     address: ffi::ByteString,
-    callback: ffi::Arc<ffi::Closure>,
+    callback: ffi::Closure,
 ) -> Result<(), Box<dyn Error>> {
     hyper::Server::try_bind(&str::from_utf8(address.as_slice())?.parse()?)?
         .serve(hyper::service::make_service_fn(|_| {
@@ -26,7 +26,7 @@ async fn _pen_http_server_serve(
                             let mut headers = HeaderMap::new();
 
                             for (key, value) in request.headers() {
-                                headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
+                                headers = headers.set(key.as_str(), value.as_bytes());
                             }
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
@@ -35,9 +35,9 @@ async fn _pen_http_server_serve(
                                 fn(
                                     ffi::ByteString,
                                     ffi::ByteString,
-                                    ffi::Arc<HeaderMap>,
+                                    HeaderMap,
                                     ffi::ByteString,
-                                ) -> ffi::Arc<Response>,
+                                ) -> Response,
                                 callback,
                                 method.into(),
                                 uri.into(),

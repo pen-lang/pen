@@ -1,54 +1,51 @@
 use crate::header_map::HeaderMap;
 
-extern "C" {
-    fn _pen_http_response_to_any(response: ffi::Arc<Response>) -> ffi::Any;
-}
+ffi::import!(
+    _pen_http_response_to_any,
+    fn(response: Response) -> ffi::Any
+);
 
 #[repr(C)]
-pub struct Response {
+pub struct Response(ffi::Arc<ResponseInner>);
+
+#[repr(C)]
+struct ResponseInner {
     status: ffi::Number,
-    headers: ffi::Arc<HeaderMap>,
+    headers: HeaderMap,
     body: ffi::ByteString,
 }
 
 impl Response {
     pub fn new(
         status: impl Into<ffi::Number>,
-        headers: ffi::Arc<HeaderMap>,
+        headers: HeaderMap,
         body: impl Into<ffi::ByteString>,
     ) -> Self {
-        Self {
-            status: status.into(),
-            headers,
-            body: body.into(),
-        }
+        Self(
+            ResponseInner {
+                status: status.into(),
+                headers,
+                body: body.into(),
+            }
+            .into(),
+        )
     }
 
     pub fn status(&self) -> ffi::Number {
-        self.status
+        self.0.status
     }
 
-    pub fn headers(&self) -> ffi::Arc<HeaderMap> {
-        self.headers.clone()
+    pub fn headers(&self) -> HeaderMap {
+        self.0.headers.clone()
     }
 
     pub fn body(&self) -> ffi::ByteString {
-        self.body.clone()
-    }
-}
-
-impl Default for Response {
-    fn default() -> Self {
-        Self {
-            status: Default::default(),
-            headers: HeaderMap::new(),
-            body: Default::default(),
-        }
+        self.0.body.clone()
     }
 }
 
 impl Into<ffi::Any> for Response {
     fn into(self) -> ffi::Any {
-        unsafe { _pen_http_response_to_any(self.into()) }
+        unsafe { _pen_http_response_to_any(self) }
     }
 }

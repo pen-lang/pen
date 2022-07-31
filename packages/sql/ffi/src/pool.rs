@@ -20,17 +20,15 @@ struct PoolOptions {
 }
 
 #[repr(C)]
-struct Pool(ffi::Arc<PoolInner>);
-
-struct PoolInner(ffi::Any);
+struct Pool(ffi::Arc<ffi::Any>);
 
 impl Pool {
     pub fn new(pool: AnyPool) -> Self {
-        Self(PoolInner(SqlxPool { pool }.into()).into())
+        Self(ffi::Arc::new(PoolInner { pool }.into()))
     }
 
     pub fn as_inner(&self) -> &AnyPool {
-        let pool: &SqlxPool = TryFrom::try_from(&self.0 .0).unwrap();
+        let pool: &PoolInner = TryFrom::try_from(&*self.0).unwrap();
 
         &pool.pool
     }
@@ -45,7 +43,7 @@ impl Into<ffi::Any> for Pool {
 #[ffi::any]
 #[repr(C)]
 #[derive(Clone)]
-struct SqlxPool {
+struct PoolInner {
     pool: AnyPool,
 }
 
