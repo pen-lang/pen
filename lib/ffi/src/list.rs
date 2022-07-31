@@ -10,6 +10,11 @@ extern "C" {
 #[repr(C)]
 #[derive(Clone)]
 pub struct List {
+    inner: Arc<ListInner>,
+}
+
+#[repr(C)]
+struct ListInner {
     node: Arc<Closure>,
 }
 
