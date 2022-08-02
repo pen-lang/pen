@@ -6,4 +6,4 @@ type AcceptedStream {
   Address string
 }
 
-foreign "c" _pen_os_tcp_accepeted_stream_to_any = \(s AcceptedStream) any { s }
+foreign "c" _pen_os_tcp_accepted_stream_to_any = \(s AcceptedStream) any { s }
