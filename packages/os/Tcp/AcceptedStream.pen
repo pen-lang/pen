@@ -5,3 +5,5 @@ type AcceptedStream {
   Stream Stream
   Address string
 }
+
+foreign "c" _pen_os_tcp_accepeted_stream_to_any = \(s AcceptedStream) any { s }
