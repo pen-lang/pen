@@ -64,10 +64,10 @@ impl From<FileMetadata> for ffi::Any {
 #[ffi::bindgen]
 async fn _pen_os_open_file(
     path: ffi::ByteString,
-    options: ffi::Arc<OpenFileOptions>,
+    options: OpenFileOptions,
 ) -> Result<File, Box<dyn Error>> {
     Ok(File::new(
-        fs::OpenOptions::from(*options)
+        fs::OpenOptions::from(options)
             .open(&Path::new(&utilities::decode_path(&path)?))
             .await?,
     ))

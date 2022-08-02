@@ -1,8 +1,12 @@
 use tokio::fs::OpenOptions;
 
 #[repr(C)]
+#[derive(Clone, Debug)]
+pub struct OpenFileOptions(ffi::Arc<OpenFileOptionsInner>);
+
+#[repr(C)]
 #[derive(Clone, Copy, Debug)]
-pub struct OpenFileOptions {
+struct OpenFileOptionsInner {
     append: bool,
     create: bool,
     create_new: bool,
@@ -13,6 +17,7 @@ pub struct OpenFileOptions {
 
 impl From<OpenFileOptions> for OpenOptions {
     fn from(options: OpenFileOptions) -> Self {
+        let options = &options.0;
         let mut open_options = Self::new();
 
         // Set the create option after the create_new option because the latter is
