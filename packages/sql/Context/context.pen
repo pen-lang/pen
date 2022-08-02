@@ -2,7 +2,7 @@ import 'Pool'Options { Options }
 import 'Pool'pool { Pool }
 
 import foreign _pen_sql_pool_create \(string, Options) Pool | error
-import foreign _pen_sql_pool_query \(Pool, string, [any]) [[any]] | error
+import foreign _pen_sql_pool_query \(Pool, string, [any]) [any] | error
 import foreign _pen_sql_pool_execute \(Pool, string, [any]) number | error
 
 type Context {
@@ -19,7 +19,11 @@ New = \() Context {
   Context{
     inner: Inner{
       CreatePool: _pen_sql_pool_create,
-      QueryPool: _pen_sql_pool_query,
+      QueryPool: \(p Pool, q string, vs [any]) [[any]] | error {
+        rs = _pen_sql_pool_query(p, q, vs)?
+
+        [[any] if r = r() as [any] { r } else { [any] } for r in rs]
+      },
       ExecutePool: _pen_sql_pool_execute,
     },
   }
