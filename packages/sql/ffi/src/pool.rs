@@ -3,10 +3,6 @@ use futures::{pin_mut, StreamExt};
 use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
-extern "C" {
-    fn _pen_sql_pool_to_any(pool: Pool) -> ffi::Any;
-}
-
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
 type AnyQuery<'a> =
@@ -36,6 +32,8 @@ impl Pool {
 
 impl Into<ffi::Any> for Pool {
     fn into(self) -> ffi::Any {
+        ffi::import!(_pen_sql_pool_to_any, fn(pool: Pool) -> ffi::Any);
+
         unsafe { _pen_sql_pool_to_any(self) }
     }
 }
