@@ -6,6 +6,4 @@ type FfiResponse {
   Body string
 }
 
-foreign "c" _pen_http_response_to_any = \(r FfiResponse) any {
-  r
-}
+foreign "c" _pen_http_response_to_any = \(r FfiResponse) any { r }
