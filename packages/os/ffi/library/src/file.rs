@@ -54,10 +54,10 @@ impl From<FileMetadata> for ffi::Any {
     fn from(metadata: FileMetadata) -> ffi::Any {
         ffi::import!(
             _pen_os_file_metadata_to_any,
-            fn(metadata: FileMetadata) -> ffi::Any
+            fn(metadata: FileMetadata) -> ffi::BoxAny
         );
 
-        unsafe { _pen_os_file_metadata_to_any(metadata) }
+        unsafe { _pen_os_file_metadata_to_any(metadata) }.into()
     }
 }
 
