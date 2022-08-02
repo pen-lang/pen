@@ -5,7 +5,7 @@ use tokio::fs;
 #[ffi::bindgen]
 async fn _pen_os_read_directory(
     path: ffi::ByteString,
-) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
+) -> Result<ffi::List, Box<dyn Error>> {
     let mut read_dir = fs::read_dir(utilities::decode_path(&path)?).await?;
     let mut entries = vec![];
 

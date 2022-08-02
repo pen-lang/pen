@@ -3,12 +3,12 @@ use tokio::fs::OpenOptions;
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct OpenFileOptions {
-    pub append: bool,
-    pub create: bool,
-    pub create_new: bool,
-    pub read: bool,
-    pub truncate: bool,
-    pub write: bool,
+    append: bool,
+    create: bool,
+    create_new: bool,
+    read: bool,
+    truncate: bool,
+    write: bool,
 }
 
 impl From<OpenFileOptions> for OpenOptions {
