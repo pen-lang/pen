@@ -33,3 +33,9 @@ impl HeaderMap {
         unsafe { _pen_http_header_map_keys(self.clone()) }
     }
 }
+
+impl Default for HeaderMap {
+    fn default() -> Self {
+        Self::new()
+    }
+}
