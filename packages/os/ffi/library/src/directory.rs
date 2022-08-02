@@ -3,9 +3,7 @@ use std::error::Error;
 use tokio::fs;
 
 #[ffi::bindgen]
-async fn _pen_os_read_directory(
-    path: ffi::ByteString,
-) -> Result<ffi::List, Box<dyn Error>> {
+async fn _pen_os_read_directory(path: ffi::ByteString) -> Result<ffi::List, Box<dyn Error>> {
     let mut read_dir = fs::read_dir(utilities::decode_path(&path)?).await?;
     let mut entries = vec![];
 
