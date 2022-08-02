@@ -50,8 +50,7 @@ async fn _pen_http_server_serve(
                                 hyper::StatusCode::from_u16(f64::from(response.status()) as u16)?,
                             ));
 
-                            let keys =
-                                ffi::future::stream::from_list(HeaderMap::keys(response.headers()));
+                            let keys = ffi::future::stream::from_list(response.headers().keys());
 
                             futures::pin_mut!(keys);
 
@@ -64,8 +63,7 @@ async fn _pen_http_server_serve(
                                     .header(
                                         HeaderName::from_bytes(key.as_slice())?,
                                         HeaderValue::from_bytes(
-                                            HeaderMap::get(response.headers(), key.clone())
-                                                .as_slice(),
+                                            response.headers().get(key.clone()).as_slice(),
                                         )?,
                                     )
                                     .into();

@@ -15,7 +15,7 @@ async fn _pen_http_client_send(
             .uri(uri.as_slice()),
     );
 
-    let keys = ffi::future::stream::from_list(HeaderMap::keys(headers.clone()));
+    let keys = ffi::future::stream::from_list(headers.keys());
 
     futures::pin_mut!(keys);
 
@@ -25,10 +25,7 @@ async fn _pen_http_client_send(
         builder = builder
             .take()
             .unwrap()
-            .header(
-                key.as_slice(),
-                HeaderMap::get(headers.clone(), key.clone()).as_slice(),
-            )
+            .header(key.as_slice(), headers.get(key.clone()).as_slice())
             .into();
     }
 
@@ -42,7 +39,7 @@ async fn _pen_http_client_send(
     let mut headers = HeaderMap::new();
 
     for (key, value) in response.headers() {
-        headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
+        headers = headers.set(key.as_str(), value.as_bytes());
     }
 
     Ok(Response::new(
