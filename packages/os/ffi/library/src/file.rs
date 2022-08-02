@@ -29,7 +29,7 @@ impl File {
 }
 
 impl From<File> for ffi::Any {
-    fn from(file: File) -> ffi::Any {
+    fn from(file: File) -> Self {
         ffi::import!(_pen_os_file_to_any, fn(file: File) -> ffi::BoxAny);
 
         unsafe { _pen_os_file_to_any(file) }.into()
@@ -51,7 +51,7 @@ impl FileMetadata {
 }
 
 impl From<FileMetadata> for ffi::Any {
-    fn from(metadata: FileMetadata) -> ffi::Any {
+    fn from(metadata: FileMetadata) -> Self {
         ffi::import!(
             _pen_os_file_metadata_to_any,
             fn(metadata: FileMetadata) -> ffi::BoxAny
@@ -75,7 +75,7 @@ async fn _pen_os_open_file(
 
 #[ffi::bindgen]
 async fn _pen_os_read_file(file: File) -> Result<ffi::ByteString, Box<dyn Error>> {
-    Ok(utilities::read(file.lock().await.deref_mut()).await?)
+    utilities::read(file.lock().await.deref_mut()).await
 }
 
 #[ffi::bindgen]
@@ -83,7 +83,7 @@ async fn _pen_os_read_limit_file(
     file: File,
     limit: ffi::Number,
 ) -> Result<ffi::ByteString, Box<dyn Error>> {
-    Ok(utilities::read_limit(file.lock().await.deref_mut(), f64::from(limit) as usize).await?)
+    utilities::read_limit(file.lock().await.deref_mut(), f64::from(limit) as usize).await
 }
 
 #[ffi::bindgen]
@@ -91,7 +91,7 @@ async fn _pen_os_write_file(
     file: File,
     bytes: ffi::ByteString,
 ) -> Result<ffi::Number, Box<dyn Error>> {
-    Ok(utilities::write(file.lock().await.deref_mut(), bytes).await?)
+    utilities::write(file.lock().await.deref_mut(), bytes).await
 }
 
 #[ffi::bindgen]

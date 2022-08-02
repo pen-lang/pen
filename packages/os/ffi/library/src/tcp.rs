@@ -53,7 +53,6 @@ impl TcpStream {
         Self(ffi::Arc::new(
             TcpStreamInner(RwLock::new(socket).into()).into(),
         ))
-        .into()
     }
 
     pub async fn lock(&self) -> RwLockWriteGuard<'_, net::TcpStream> {
