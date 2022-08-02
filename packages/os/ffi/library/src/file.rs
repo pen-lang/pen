@@ -28,11 +28,11 @@ impl File {
     }
 }
 
-impl Into<ffi::Any> for File {
-    fn into(self) -> ffi::Any {
-        ffi::import!(_pen_os_file_to_any, fn(file: File) -> ffi::Any);
+impl From<File> for ffi::Any {
+    fn from(file: File) -> ffi::Any {
+        ffi::import!(_pen_os_file_to_any, fn(file: File) -> ffi::BoxAny);
 
-        unsafe { _pen_os_file_to_any(self) }
+        unsafe { _pen_os_file_to_any(file) }.into()
     }
 }
 

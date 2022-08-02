@@ -37,9 +37,12 @@ impl UdpSocket {
 
 impl From<UdpSocket> for ffi::Any {
     fn from(socket: UdpSocket) -> Self {
-        ffi::import!(_pen_os_udp_socket_to_any, fn(socket: UdpSocket) -> ffi::Any);
+        ffi::import!(
+            _pen_os_udp_socket_to_any,
+            fn(socket: UdpSocket) -> ffi::BoxAny
+        );
 
-        unsafe { _pen_os_udp_socket_to_any(socket) }
+        unsafe { _pen_os_udp_socket_to_any(socket) }.into()
     }
 }
 
@@ -70,10 +73,10 @@ impl From<UdpDatagram> for ffi::Any {
     fn from(datagram: UdpDatagram) -> Self {
         ffi::import!(
             _pen_os_udp_datagram_to_any,
-            fn(datagram: UdpDatagram) -> ffi::Any
+            fn(datagram: UdpDatagram) -> ffi::BoxAny
         );
 
-        unsafe { _pen_os_udp_datagram_to_any(datagram) }
+        unsafe { _pen_os_udp_datagram_to_any(datagram) }.into()
     }
 }
 

@@ -43,9 +43,9 @@ impl From<Response> for ffi::Any {
     fn from(response: Response) -> Self {
         ffi::import!(
             _pen_http_response_to_any,
-            fn(response: Response) -> ffi::Any
+            fn(response: Response) -> ffi::BoxAny
         );
 
-        unsafe { _pen_http_response_to_any(response) }
+        unsafe { _pen_http_response_to_any(response) }.into()
     }
 }

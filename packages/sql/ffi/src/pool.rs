@@ -30,11 +30,11 @@ impl Pool {
     }
 }
 
-impl Into<ffi::Any> for Pool {
-    fn into(self) -> ffi::Any {
-        ffi::import!(_pen_sql_pool_to_any, fn(pool: Pool) -> ffi::Any);
+impl From<Pool> for ffi::Any {
+    fn from(pool: Pool) -> Self {
+        ffi::import!(_pen_sql_pool_to_any, fn(pool: Pool) -> ffi::BoxAny);
 
-        unsafe { _pen_sql_pool_to_any(self) }
+        unsafe { _pen_sql_pool_to_any(pool) }.into()
     }
 }
 
