@@ -1011,6 +1011,7 @@ version = "0.2.2"
 dependencies = [
  "convert_case",
  "pen-ffi",
+ "proc-macro2",
  "quote",
  "syn",
 ]

@@ -1,4 +1,4 @@
-use crate::utilities::parse_crate_path;
+use crate::utilities::{generate_type_size_test, parse_crate_path};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
@@ -29,6 +29,7 @@ fn generate_type(
         type_.ident.span(),
     );
     let type_name = &type_.ident;
+    let type_size_test = generate_type_size_test(type_name);
 
     Ok(quote! {
         #type_
@@ -37,13 +38,7 @@ fn generate_type(
             use core::{alloc::Layout, mem, ptr};
             use super::#type_name;
 
-            #[test]
-            fn type_size() {
-                assert!(
-                    Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
-                    "type size too large",
-                );
-            }
+            #type_size_test
 
             unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;

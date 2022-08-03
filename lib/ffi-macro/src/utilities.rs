@@ -1,5 +1,7 @@
+use proc_macro2::TokenStream;
+use quote::quote;
 use std::error::Error;
-use syn::{parse::Parse, parse_str, AttributeArgs, Lit, Meta, NestedMeta, Path};
+use syn::{parse::Parse, parse_str, AttributeArgs, Ident, Lit, Meta, NestedMeta, Path};
 
 const DEFAULT_CRATE_NAME: &str = "ffi";
 
@@ -29,4 +31,18 @@ pub fn parse_string_attribute<T: Parse>(
         })
         .map(|string| parse_str(&string))
         .transpose()?)
+}
+
+pub fn generate_type_size_test(type_name: &Ident) -> TokenStream {
+    quote! {
+        #[test]
+        fn type_size() {
+            use core::alloc::Layout;
+
+            assert!(
+                Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
+                "type size too large",
+            );
+        }
+    }
 }

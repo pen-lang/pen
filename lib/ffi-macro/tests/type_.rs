@@ -12,4 +12,7 @@ struct PointerSized {
 }
 
 #[into_any(crate = "pen_ffi", fn = "foo_to_any")]
-struct Foo {}
+#[repr(C)]
+struct Foo {
+    x: usize,
+}
