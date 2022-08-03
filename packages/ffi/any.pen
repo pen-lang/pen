@@ -2,6 +2,10 @@ foreign "c" pen_ffi_any_is_boolean = \(x any) boolean {
   if x = x as boolean { true } else { false }
 }
 
+foreign "c" pen_ffi_any_is_error = \(x any) boolean {
+  if x = x as error { true } else { false }
+}
+
 foreign "c" pen_ffi_any_is_none = \(x any) boolean {
   if x = x as none { true } else { false }
 }
@@ -23,6 +27,14 @@ foreign "c" pen_ffi_any_to_boolean = \(x any) boolean {
     x
   } else {
     false
+  }
+}
+
+foreign "c" pen_ffi_any_to_error = \(x any) error {
+  if x = x as error {
+    x
+  } else {
+    error("non-error type detected")
   }
 }
 
@@ -51,6 +63,10 @@ foreign "c" pen_ffi_any_to_string = \(x any) string {
 }
 
 foreign "c" pen_ffi_any_from_boolean = \(x boolean) any {
+  x
+}
+
+foreign "c" pen_ffi_any_from_error = \(x error) any {
   x
 }
 

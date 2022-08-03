@@ -1,6 +1,8 @@
 #![no_std]
 
 extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 mod any;
 mod arc;
@@ -9,6 +11,7 @@ mod box_any;
 mod closure;
 mod constants;
 pub mod cps;
+mod error;
 pub mod extra;
 pub mod future;
 mod list;
@@ -22,6 +25,7 @@ pub use boolean::*;
 pub use box_any::*;
 pub use closure::*;
 pub use constants::*;
+pub use error::*;
 pub use list::*;
 pub use none::*;
 pub use number::*;

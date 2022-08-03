@@ -157,15 +157,13 @@ fn generate_output_type(function: &ItemFn, crate_path: &Path) -> Box<Type> {
             Type::Path(path) => {
                 if let Some(PathSegment {
                     ident,
-                    arguments: PathArguments::AngleBracketed(arguments),
+                    arguments: PathArguments::AngleBracketed(_),
                 }) = path.path.segments.first()
                 {
                     let result_ident: Ident = parse_quote!(Result);
 
                     if ident == &result_ident {
-                        let value_type = &arguments.args.first();
-
-                        parse_quote!(#crate_path::Arc<#crate_path::extra::Result<#value_type>>)
+                        parse_quote!(#crate_path::extra::Result)
                     } else {
                         type_.clone()
                     }

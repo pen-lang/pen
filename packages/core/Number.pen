@@ -10,6 +10,7 @@ import foreign "c" _pen_core_fraction \(number) number
 import foreign "c" _pen_core_infinity \() number
 import foreign "c" _pen_core_is_nan \(number) boolean
 import foreign "c" _pen_core_nan \() number
+import foreign "c" _pen_core_parse_number \(string) number | error
 import foreign "c" _pen_core_power \(number, number) number
 import foreign "c" _pen_core_remainder \(number, number) number
 import foreign "c" _pen_core_round \(number) number
@@ -81,6 +82,11 @@ Minimum = \(x number, y number) number {
 # NaN
 Nan = \() number {
   _pen_core_nan()
+}
+
+# Parse a number.
+Parse = \(s string) number | error {
+  _pen_core_parse_number(s)
 }
 
 # Calculate a power.

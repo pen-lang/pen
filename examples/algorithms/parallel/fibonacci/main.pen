@@ -1,0 +1,52 @@
+import Core'Number
+import Core'String
+import Os'Context { Context }
+import Os'Environment
+import Os'File
+import Os'Process
+
+main = \(ctx context) none {
+  ctx = ctx.Os
+
+  if e = run(ctx) as error {
+    _ = print(ctx, if e = source(e) as string { e } else { "unexpected error" })
+
+    Process'Exit(ctx, 1)
+  } else {
+    none
+  }
+}
+
+run = \(ctx Context) none | error {
+  print(ctx, Number'String(fibonacci(argument(ctx)?)))?
+
+  none
+}
+
+argument = \(ctx Context) number | error {
+  if [x, ..._] = Environment'Arguments(ctx) {
+    Number'Parse(x())
+  } else {
+    error("wrong number of arguments")
+  }
+}
+
+print = \(ctx Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
+
+  none
+}
+
+fibonacci = \(n number) number {
+  if n <= 0 {
+    0
+  } else if n == 1 {
+    1
+  } else if n > 30 {
+    f = go(\() number { fibonacci(n - 1) })
+
+    fibonacci(n - 2) + f()
+  } else {
+    fibonacci(n - 2) + fibonacci(n - 1)
+  }
+}
