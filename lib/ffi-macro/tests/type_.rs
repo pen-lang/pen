@@ -12,5 +12,4 @@ struct PointerSized {
 }
 
 #[into_any(crate = "pen_ffi", fn = "foo_to_any")]
-#[derive(Clone)]
 struct Foo {}
