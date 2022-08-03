@@ -2,3 +2,5 @@
 type Socket {
   inner any
 }
+
+foreign "c" _pen_os_udp_socket_to_any = \(s Socket) any { s }

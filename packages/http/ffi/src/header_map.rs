@@ -1,37 +1,41 @@
 #[repr(C)]
-pub struct HeaderMap {
-    headers: ffi::Any,
-}
-
-extern "C" {
-    fn _pen_http_header_map_create() -> ffi::Arc<HeaderMap>;
-    fn _pen_http_header_map_get(map: ffi::Arc<HeaderMap>, key: ffi::ByteString) -> ffi::ByteString;
-    fn _pen_http_header_map_set(
-        map: ffi::Arc<HeaderMap>,
-        key: ffi::ByteString,
-        value: ffi::ByteString,
-    ) -> ffi::Arc<HeaderMap>;
-    fn _pen_http_header_map_keys(map: ffi::Arc<HeaderMap>) -> ffi::Arc<ffi::List>;
-}
+#[derive(Clone)]
+pub struct HeaderMap(ffi::Arc<ffi::Any>);
 
 impl HeaderMap {
-    pub fn new() -> ffi::Arc<Self> {
+    pub fn new() -> Self {
+        ffi::import!(_pen_http_header_map_create, fn() -> HeaderMap);
+
         unsafe { _pen_http_header_map_create() }
     }
 
-    pub fn get(this: ffi::Arc<Self>, key: impl Into<ffi::ByteString>) -> ffi::ByteString {
-        unsafe { _pen_http_header_map_get(this, key.into()) }
+    pub fn get(&self, key: impl Into<ffi::ByteString>) -> ffi::ByteString {
+        ffi::import!(
+            _pen_http_header_map_get,
+            fn(map: HeaderMap, key: ffi::ByteString) -> ffi::ByteString
+        );
+
+        unsafe { _pen_http_header_map_get(self.clone(), key.into()) }
     }
 
-    pub fn set(
-        this: ffi::Arc<Self>,
-        key: impl Into<ffi::ByteString>,
-        value: impl Into<ffi::ByteString>,
-    ) -> ffi::Arc<Self> {
-        unsafe { _pen_http_header_map_set(this, key.into(), value.into()) }
+    pub fn set(&self, key: impl Into<ffi::ByteString>, value: impl Into<ffi::ByteString>) -> Self {
+        ffi::import!(
+            _pen_http_header_map_set,
+            fn(map: HeaderMap, key: ffi::ByteString, value: ffi::ByteString) -> HeaderMap
+        );
+
+        unsafe { _pen_http_header_map_set(self.clone(), key.into(), value.into()) }
     }
 
-    pub fn keys(this: ffi::Arc<Self>) -> ffi::Arc<ffi::List> {
-        unsafe { _pen_http_header_map_keys(this) }
+    pub fn keys(&self) -> ffi::List {
+        ffi::import!(_pen_http_header_map_keys, fn(map: HeaderMap) -> ffi::List);
+
+        unsafe { _pen_http_header_map_keys(self.clone()) }
+    }
+}
+
+impl Default for HeaderMap {
+    fn default() -> Self {
+        Self::new()
     }
 }

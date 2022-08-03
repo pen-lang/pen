@@ -2,3 +2,5 @@
 type Metadata {
   Size number
 }
+
+foreign "c" _pen_os_file_metadata_to_any = \(m Metadata) any { m }
