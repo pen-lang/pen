@@ -60,6 +60,7 @@ impl TcpStream {
 #[derive(Clone)]
 pub struct TcpAcceptedStream(ffi::Arc<TcpAcceptedStreamInner>);
 
+#[repr(C)]
 struct TcpAcceptedStreamInner {
     stream: TcpStream,
     address: ffi::ByteString,

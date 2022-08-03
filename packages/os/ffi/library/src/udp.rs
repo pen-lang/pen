@@ -41,6 +41,7 @@ impl UdpSocket {
 #[derive(Clone, Debug)]
 pub struct UdpDatagram(ffi::Arc<UdpDatagramInner>);
 
+#[repr(C)]
 #[derive(Clone, Debug)]
 struct UdpDatagramInner {
     data: ffi::ByteString,
