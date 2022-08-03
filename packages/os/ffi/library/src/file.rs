@@ -6,6 +6,7 @@ use tokio::{
     sync::{RwLock, RwLockWriteGuard},
 };
 
+#[ffi::into_any(fn = "_pen_os_file_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct File(ffi::Arc<ffi::Any>);
@@ -28,14 +29,7 @@ impl File {
     }
 }
 
-impl From<File> for ffi::Any {
-    fn from(file: File) -> Self {
-        ffi::import!(_pen_os_file_to_any, fn(file: File) -> ffi::BoxAny);
-
-        unsafe { _pen_os_file_to_any(file) }.into()
-    }
-}
-
+#[ffi::into_any(fn = "_pen_os_file_metadata_to_any")]
 #[repr(C)]
 struct FileMetadata(ffi::Arc<FileMetadataInner>);
 
@@ -47,17 +41,6 @@ struct FileMetadataInner {
 impl FileMetadata {
     pub fn new(size: ffi::Number) -> Self {
         Self(FileMetadataInner { size }.into())
-    }
-}
-
-impl From<FileMetadata> for ffi::Any {
-    fn from(metadata: FileMetadata) -> Self {
-        ffi::import!(
-            _pen_os_file_metadata_to_any,
-            fn(metadata: FileMetadata) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_file_metadata_to_any(metadata) }.into()
     }
 }
 

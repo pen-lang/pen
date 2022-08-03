@@ -6,6 +6,7 @@ use tokio::{
 
 const MAX_UDP_PAYLOAD_SIZE: usize = 512;
 
+#[ffi::into_any(fn = "_pen_os_udp_socket_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct UdpSocket(ffi::Arc<ffi::Any>);
@@ -35,17 +36,8 @@ impl UdpSocket {
     }
 }
 
-impl From<UdpSocket> for ffi::Any {
-    fn from(socket: UdpSocket) -> Self {
-        ffi::import!(
-            _pen_os_udp_socket_to_any,
-            fn(socket: UdpSocket) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_udp_socket_to_any(socket) }.into()
-    }
-}
-
+#[ffi::into_any(fn = "_pen_os_udp_datagram_to_any")]
+#[repr(C)]
 #[derive(Clone, Debug)]
 pub struct UdpDatagram(ffi::Arc<UdpDatagramInner>);
 
@@ -66,17 +58,6 @@ impl UdpDatagram {
 
     pub fn address(&self) -> &ffi::ByteString {
         &self.0.address
-    }
-}
-
-impl From<UdpDatagram> for ffi::Any {
-    fn from(datagram: UdpDatagram) -> Self {
-        ffi::import!(
-            _pen_os_udp_datagram_to_any,
-            fn(datagram: UdpDatagram) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_udp_datagram_to_any(datagram) }.into()
     }
 }
 
