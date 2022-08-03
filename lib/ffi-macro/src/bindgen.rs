@@ -1,20 +1,13 @@
-use crate::utilities::{convert_result, parse_crate_path};
+use crate::utilities::parse_crate_path;
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
 use syn::{
-    parse_macro_input, parse_quote, AttributeArgs, FnArg, Ident, ItemFn, Pat, Path, PathArguments,
-    PathSegment, ReturnType, Type,
+    parse_quote, AttributeArgs, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment,
+    ReturnType, Type,
 };
 
-pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = parse_macro_input!(attributes as AttributeArgs);
-    let function = parse_macro_input!(item as ItemFn);
-
-    convert_result(generate_function(&attributes, &function))
-}
-
-fn generate_function(
+pub fn generate(
     attributes: &AttributeArgs,
     function: &ItemFn,
 ) -> Result<TokenStream, Box<dyn Error>> {

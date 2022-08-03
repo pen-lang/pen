@@ -1,4 +1,3 @@
-use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
 use syn::{parse::Parse, parse_str, AttributeArgs, Ident, Lit, Meta, NestedMeta, Path};
@@ -45,12 +44,4 @@ pub fn generate_type_size_test(type_name: &Ident) -> proc_macro2::TokenStream {
             );
         }
     }
-}
-
-pub fn convert_result(result: Result<TokenStream, impl ToString>) -> TokenStream {
-    result.unwrap_or_else(|error| {
-        let message = error.to_string();
-
-        quote! { compile_error!(#message) }.into()
-    })
 }

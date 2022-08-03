@@ -1,20 +1,11 @@
-use crate::utilities::{
-    convert_result, generate_type_size_test, parse_crate_path, parse_string_attribute,
-};
+use crate::utilities::{generate_type_size_test, parse_crate_path, parse_string_attribute};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{parse_macro_input, AttributeArgs, Ident, ItemStruct};
+use syn::{AttributeArgs, Ident, ItemStruct};
 
-pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = parse_macro_input!(attributes as AttributeArgs);
-    let type_ = parse_macro_input!(item as ItemStruct);
-
-    convert_result(generate_type(&attributes, &type_))
-}
-
-fn generate_type(
+pub fn generate(
     attributes: &AttributeArgs,
     type_: &ItemStruct,
 ) -> Result<TokenStream, Box<dyn Error>> {
