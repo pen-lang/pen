@@ -1,4 +1,4 @@
-use pen_ffi_macro::any;
+use pen_ffi_macro::{any, into_any};
 
 #[any(crate = "pen_ffi")]
 #[derive(Clone)]
@@ -10,3 +10,7 @@ struct ZeroSized {}
 struct PointerSized {
     x: usize,
 }
+
+#[into_any(crate = "pen_ffi", fn = "foo_to_any")]
+#[derive(Clone)]
+struct Foo {}
