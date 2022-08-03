@@ -6,7 +6,7 @@ use syn::{
     PathSegment, ReturnType, Type,
 };
 
-pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
+pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let function = parse_macro_input!(item as ItemFn);
 

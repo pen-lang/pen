@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, AttributeArgs, Ident, ItemStruct};
 
-pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
+pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let type_ = parse_macro_input!(item as ItemStruct);
 
