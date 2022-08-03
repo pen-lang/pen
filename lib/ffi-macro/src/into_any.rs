@@ -35,7 +35,7 @@ fn generate_type(
         #type_
 
         mod #module_name {
-            use core::{alloc::Layout, mem, ptr};
+            use core::alloc::Layout;
             use super::#type_name;
 
             #[test]
