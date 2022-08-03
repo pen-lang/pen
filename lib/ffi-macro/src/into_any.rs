@@ -48,9 +48,9 @@ fn generate_type(
 
             impl From<#type_name> for #crate_path::Any {
                 fn from(x: #type_name) -> Self {
-                    #crate_path::import!(#function_name, fn(x: #type_name) -> #crate_path::Any);
+                    #crate_path::import!(#function_name, fn(x: #type_name) -> #crate_path::BoxAny);
 
-                    unsafe { #function_name(x) }
+                    unsafe { #function_name(x) }.into()
                 }
             }
         }
