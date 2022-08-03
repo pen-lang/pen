@@ -1,6 +1,6 @@
 use crate::{
     cps::{AsyncStack, ContinuationFunction},
-    Arc, Closure,
+    Closure,
 };
 use alloc::boxed::Box;
 use core::{future::Future, intrinsics::transmute, pin::Pin, task::Poll};
@@ -12,10 +12,7 @@ impl<T, F: Future<Output = T>> From<F> for Closure {
 }
 
 pub fn to_closure<O, F: Future<Output = O>>(future: F) -> Closure {
-    let closure = Arc::new(Closure::new(
-        get_result::<O, F> as *const u8,
-        Some(Box::pin(future)),
-    ));
+    let closure = Closure::new(get_result::<O, F> as *const u8, Some(Box::pin(future)));
 
     unsafe { transmute(closure) }
 }
