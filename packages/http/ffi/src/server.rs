@@ -9,17 +9,7 @@ type BoxError = Box<dyn Error + Send + Sync + 'static>;
 #[ffi::bindgen]
 async fn _pen_http_server_serve(
     address: ffi::ByteString,
-    callback: ffi::Arc<ffi::Closure>,
-) -> ffi::ByteString {
-    match serve(address, callback).await {
-        Ok(_) => ffi::ByteString::default(),
-        Err(error) => error.to_string().into(),
-    }
-}
-
-async fn serve(
-    address: ffi::ByteString,
-    callback: ffi::Arc<ffi::Closure>,
+    callback: ffi::Closure,
 ) -> Result<(), Box<dyn Error>> {
     hyper::Server::try_bind(&str::from_utf8(address.as_slice())?.parse()?)?
         .serve(hyper::service::make_service_fn(|_| {
@@ -36,7 +26,7 @@ async fn serve(
                             let mut headers = HeaderMap::new();
 
                             for (key, value) in request.headers() {
-                                headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
+                                headers = headers.set(key.as_str(), value.as_bytes());
                             }
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
@@ -45,9 +35,9 @@ async fn serve(
                                 fn(
                                     ffi::ByteString,
                                     ffi::ByteString,
-                                    ffi::Arc<HeaderMap>,
+                                    HeaderMap,
                                     ffi::ByteString,
-                                ) -> ffi::Arc<Response>,
+                                ) -> Response,
                                 callback,
                                 method.into(),
                                 uri.into(),
@@ -60,8 +50,7 @@ async fn serve(
                                 hyper::StatusCode::from_u16(f64::from(response.status()) as u16)?,
                             ));
 
-                            let keys =
-                                ffi::future::stream::from_list(HeaderMap::keys(response.headers()));
+                            let keys = ffi::future::stream::from_list(response.headers().keys());
 
                             futures::pin_mut!(keys);
 
@@ -74,8 +63,7 @@ async fn serve(
                                     .header(
                                         HeaderName::from_bytes(key.as_slice())?,
                                         HeaderValue::from_bytes(
-                                            HeaderMap::get(response.headers(), key.clone())
-                                                .as_slice(),
+                                            response.headers().get(key.clone()).as_slice(),
                                         )?,
                                     )
                                     .into();

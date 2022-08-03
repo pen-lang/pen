@@ -8,10 +8,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 #[cfg(not(test))]
-#[link(name = "main")]
-extern "C" {
-    ffi::import!(_pen_main, fn() -> ffi::None);
-}
+ffi::import!(_pen_main, async fn() -> ffi::None);
 
 #[cfg(test)]
 extern "C" fn _pen_main(
