@@ -10,24 +10,26 @@ Feature: Examples
     And I successfully run `pen test`
 
     Examples:
-      | example               |
-      | algorithms/fizz-buzz  |
-      | algorithms/knapsack   |
-      | algorithms/quick-sort |
-      | cat                   |
-      | console               |
-      | echo                  |
-      | hello-world           |
-      | http-client           |
-      | http-server           |
-      | life-game             |
-      | ls                    |
-      | sql-client            |
-      | tcp-client            |
-      | tcp-server            |
-      | udp-client            |
-      | udp-server            |
-      | yes                   |
+      | example                       |
+      | algorithms/fibonacci          |
+      | algorithms/fizz-buzz          |
+      | algorithms/knapsack           |
+      | algorithms/quick-sort         |
+      | algorithms/parallel/fibonacci |
+      | cat                           |
+      | console                       |
+      | echo                          |
+      | hello-world                   |
+      | http-client                   |
+      | http-server                   |
+      | life-game                     |
+      | ls                            |
+      | sql-client                    |
+      | tcp-client                    |
+      | tcp-server                    |
+      | udp-client                    |
+      | udp-server                    |
+      | yes                           |
 
   Scenario: Run HTTP client and server
     Given I run the following script:
