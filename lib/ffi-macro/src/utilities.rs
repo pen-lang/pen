@@ -1,9 +1,10 @@
+use std::error::Error;
 use syn::{parse_str, AttributeArgs, Lit, Meta, NestedMeta, Path};
 
 const DEFAULT_CRATE_NAME: &str = "ffi";
 
-pub fn parse_crate_path(attributes: &AttributeArgs) -> Result<Path, String> {
-    parse_str(
+pub fn parse_crate_path(attributes: &AttributeArgs) -> Result<Path, Box<dyn Error>> {
+    Ok(parse_str(
         &attributes
             .iter()
             .find_map(|attribute| match attribute {
@@ -21,6 +22,5 @@ pub fn parse_crate_path(attributes: &AttributeArgs) -> Result<Path, String> {
                 _ => None,
             })
             .unwrap_or_else(|| DEFAULT_CRATE_NAME.into()),
-    )
-    .map_err(|error| error.to_string())
+    )?)
 }

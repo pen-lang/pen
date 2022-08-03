@@ -2,6 +2,7 @@ use crate::utilities::parse_crate_path;
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
+use std::error::Error;
 use syn::{parse_macro_input, AttributeArgs, Ident, ItemStruct};
 
 pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
@@ -10,11 +11,18 @@ pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
 
     match generate_type(&attributes, &type_) {
         Ok(tokens) => tokens,
-        Err(message) => quote! { compile_error!(#message) }.into(),
+        Err(message) => {
+            let message = message.to_string();
+
+            quote! { compile_error!(#message) }.into()
+        }
     }
 }
 
-fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<TokenStream, String> {
+fn generate_type(
+    attributes: &AttributeArgs,
+    type_: &ItemStruct,
+) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
     let module_name = Ident::new(
         &(type_.ident.to_string().to_case(Case::Snake) + "_module"),

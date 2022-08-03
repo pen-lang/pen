@@ -1,6 +1,7 @@
 use crate::utilities::parse_crate_path;
 use proc_macro::TokenStream;
 use quote::quote;
+use std::error::Error;
 use syn::{
     parse_macro_input, parse_quote, AttributeArgs, FnArg, Ident, ItemFn, Pat, Path, PathArguments,
     PathSegment, ReturnType, Type,
@@ -12,11 +13,18 @@ pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
 
     match generate_function(&attributes, &function) {
         Ok(tokens) => tokens,
-        Err(message) => quote! { compile_error!(#message) }.into(),
+        Err(message) => {
+            let message = message.to_string();
+
+            quote! { compile_error!(#message) }.into()
+        }
     }
 }
 
-fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<TokenStream, String> {
+fn generate_function(
+    attributes: &AttributeArgs,
+    function: &ItemFn,
+) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
 
     if function
@@ -112,7 +120,10 @@ fn generate_function(attributes: &AttributeArgs, function: &ItemFn) -> Result<To
     .into())
 }
 
-fn generate_sync_function(function: &ItemFn, crate_path: &Path) -> Result<TokenStream, String> {
+fn generate_sync_function(
+    function: &ItemFn,
+    crate_path: &Path,
+) -> Result<TokenStream, Box<dyn Error>> {
     let function_name = &function.sig.ident;
     let arguments = &function.sig.inputs;
     let argument_names = generate_argument_names(function)?;
@@ -191,7 +202,7 @@ fn generate_argument_names(function: &ItemFn) -> Result<Vec<&Ident>, String> {
         .collect::<Result<Vec<_>, _>>()
 }
 
-fn generate_moved_arguments(function: &ItemFn) -> Result<Vec<FnArg>, String> {
+fn generate_moved_arguments(function: &ItemFn) -> Result<Vec<FnArg>, Box<dyn Error>> {
     function
         .sig
         .inputs
