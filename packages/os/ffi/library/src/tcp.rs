@@ -5,6 +5,7 @@ use tokio::{
     sync::{RwLock, RwLockWriteGuard},
 };
 
+#[ffi::into_any(fn = "_pen_os_tcp_listener_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct TcpListener(ffi::Arc<ffi::Any>);
@@ -29,17 +30,7 @@ impl TcpListener {
     }
 }
 
-impl From<TcpListener> for ffi::Any {
-    fn from(listener: TcpListener) -> Self {
-        ffi::import!(
-            _pen_os_tcp_listener_to_any,
-            fn(listener: TcpListener) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_tcp_listener_to_any(listener) }.into()
-    }
-}
-
+#[ffi::into_any(fn = "_pen_os_tcp_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct TcpStream(ffi::Arc<ffi::Any>);
@@ -64,17 +55,7 @@ impl TcpStream {
     }
 }
 
-impl From<TcpStream> for ffi::Any {
-    fn from(stream: TcpStream) -> Self {
-        ffi::import!(
-            _pen_os_tcp_stream_to_any,
-            fn(stream: TcpStream) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_tcp_stream_to_any(stream) }.into()
-    }
-}
-
+#[ffi::into_any(fn = "_pen_os_tcp_accepted_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct TcpAcceptedStream(ffi::Arc<TcpAcceptedStreamInner>);
@@ -96,17 +77,6 @@ impl TcpAcceptedStream {
 
     pub fn address(&self) -> &ffi::ByteString {
         &self.0.address
-    }
-}
-
-impl From<TcpAcceptedStream> for ffi::Any {
-    fn from(stream: TcpAcceptedStream) -> Self {
-        ffi::import!(
-            _pen_os_tcp_accepted_stream_to_any,
-            fn(acceptedStream: TcpAcceptedStream) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_os_tcp_accepted_stream_to_any(stream) }.into()
     }
 }
 

@@ -1,5 +1,6 @@
 use crate::header_map::HeaderMap;
 
+#[ffi::into_any(fn = "_pen_http_response_to_any")]
 #[repr(C)]
 pub struct Response(ffi::Arc<ResponseInner>);
 
@@ -36,16 +37,5 @@ impl Response {
 
     pub fn body(&self) -> ffi::ByteString {
         self.0.body.clone()
-    }
-}
-
-impl From<Response> for ffi::Any {
-    fn from(response: Response) -> Self {
-        ffi::import!(
-            _pen_http_response_to_any,
-            fn(response: Response) -> ffi::BoxAny
-        );
-
-        unsafe { _pen_http_response_to_any(response) }.into()
     }
 }

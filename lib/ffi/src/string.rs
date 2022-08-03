@@ -2,6 +2,7 @@ use super::arc::ArcBuffer;
 use alloc::{string::String, vec::Vec};
 use core::hash::{Hash, Hasher};
 
+#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_any_from_string")]
 #[repr(C)]
 #[derive(Clone, Debug, Default)]
 pub struct ByteString {
