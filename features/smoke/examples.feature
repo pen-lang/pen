@@ -49,7 +49,7 @@ Feature: Examples
     When I cd to "../tcp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
-    And the stdout from "./app localhost:4242" should contain exactly "hello"
+    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
 
   Scenario: Run UDP client and server
     Given I cd to "examples/udp-server"
@@ -58,4 +58,4 @@ Feature: Examples
     When I cd to "../udp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
-    And the stdout from "./app localhost:4242" should contain exactly "hello"
+    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
