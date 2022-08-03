@@ -59,6 +59,5 @@ fn generate_type(
 }
 
 fn parse_fn(attributes: &AttributeArgs) -> Result<Ident, Box<dyn Error>> {
-    Ok(parse_string_attribute(attributes, "fn")?
-        .ok_or(Box::<dyn Error>::from("missing or invalid fn"))?)
+    parse_string_attribute(attributes, "fn")?.ok_or_else(|| "missing or invalid fn".into())
 }
