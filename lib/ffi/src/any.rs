@@ -89,12 +89,6 @@ pub struct TypeInformation {
     pub synchronize: extern "C" fn(u64),
 }
 
-impl Default for Any {
-    fn default() -> Self {
-        None::default().into()
-    }
-}
-
 impl From<Boolean> for Any {
     fn from(value: Boolean) -> Self {
         unsafe { pen_ffi_any_from_boolean(value) }.into()

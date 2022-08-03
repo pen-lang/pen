@@ -1,6 +1,6 @@
 use crate::Arc;
 use core::{
-    mem::ManuallyDrop,
+    mem::{transmute, ManuallyDrop},
     ops::Deref,
     sync::atomic::{AtomicPtr, Ordering},
 };
@@ -45,6 +45,10 @@ impl<T> Closure<T> {
 
     pub fn payload(&self) -> *const T {
         self.0.payload.deref()
+    }
+
+    pub fn into_opaque(self) -> Closure<()> {
+        unsafe { transmute(self) }
     }
 }
 
