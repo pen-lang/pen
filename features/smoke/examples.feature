@@ -1,9 +1,11 @@
 Feature: Examples
-  Scenario Outline: Build and test examples
+  Background:
     Given I run the following script:
     """
     cp -r $PEN_ROOT/examples .
     """
+
+  Scenario Outline: Build and test examples
     When I cd to "examples/<example>"
     Then I successfully run `pen format --check`
     And I successfully run `pen build`
@@ -32,14 +34,28 @@ Feature: Examples
       | yes                           |
 
   Scenario: Run HTTP client and server
-    Given I run the following script:
-    """
-    cp -r $PEN_ROOT/examples .
-    """
-    And I cd to "examples/http-server"
+    Given I cd to "examples/http-server"
     And I successfully run `pen build`
     And I run `./app` in background
     When I cd to "../http-client"
     And I successfully run `pen build`
     Then I successfully run `./app get http://localhost:8080 hello`
     And the stdout from "./app get http://localhost:8080 hello" should contain exactly "hello"
+
+  Scenario: Run TCP client and server
+    Given I cd to "examples/tcp-server"
+    And I successfully run `pen build`
+    And I run `./app localhost:4242` in background
+    When I cd to "../tcp-client"
+    And I successfully run `pen build`
+    Then I successfully run `./app localhost:4242 hello`
+    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
+
+  Scenario: Run UDP client and server
+    Given I cd to "examples/udp-server"
+    And I successfully run `pen build`
+    And I run `./app localhost:4242` in background
+    When I cd to "../udp-client"
+    And I successfully run `pen build`
+    Then I successfully run `./app localhost:4242 hello`
+    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
