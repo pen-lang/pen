@@ -18,7 +18,7 @@ import foreign _pen_os_write_file \(NormalFile, string) number | error
 import foreign _pen_os_copy_file \(string, string) none | error
 import foreign _pen_os_move_file \(string, string) none | error
 import foreign _pen_os_remove_file \(string) none | error
-import foreign _pen_os_read_directory \(string) [string] | error
+import foreign _pen_os_read_directory \(string) [any] | error
 import foreign _pen_os_create_directory \(string) none | error
 import foreign _pen_os_remove_directory \(string) none | error
 import foreign "c" _pen_os_get_arguments \() [string]
@@ -93,7 +93,11 @@ UnsafeNew = \() Context {
       CopyFile: _pen_os_copy_file,
       MoveFile: _pen_os_move_file,
       RemoveFile: _pen_os_remove_file,
-      ReadDirectory: _pen_os_read_directory,
+      ReadDirectory: \(d string) [string] | error {
+        ss = _pen_os_read_directory(d)?
+
+        [string if s = s() as string { s } else { "" } for s in ss]
+      },
       CreateDirectory: _pen_os_create_directory,
       RemoveDirectory: _pen_os_remove_directory,
       GetArguments: _pen_os_get_arguments,
