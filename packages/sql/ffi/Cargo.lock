@@ -369,9 +369,9 @@ dependencies = [
 
 [[package]]
 name = "generic-array"
-version = "0.14.5"
+version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd48d33ec7f05fbfa152300fdad764757cbded343c1aa1cff2fbaf4134851803"
+checksum = "bff49e947297f3312447abdca79f45f4738097cc82b06e72054d2223f601f1b9"
 dependencies = [
  "typenum",
  "version_check",
@@ -742,9 +742,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8835712952fcd9f0a7eed1e4e66b4fafeea505d6f1694b89cdc0e74833d88cc6"
+checksum = "3e8f29313cb4dc4618339e7d5a402e52e0fee29cc5d9d0cb369bf4696ab57126"
 dependencies = [
  "async-stream",
  "futures",
@@ -962,9 +962,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-pemfile"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7522c9de787ff061458fe9a829dc790a3f5b22dc571694fc5883f448b94d9a9"
+checksum = "0864aeff53f8c05aa08d86e5ef839d3dfcf07aeba2db32f12db0ef716e87bd55"
 dependencies = [
  "base64",
 ]
@@ -993,18 +993,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc855a42c7967b7c369eb5860f7164ef1f6f81c20c7cc1141f2a604e18723b03"
+checksum = "7af873f2c95b99fcb0bd0fe622a43e29514658873c8ceba88c4cb88833a22500"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f2122636b9fe3b81f1cb25099fcf2d3f542cdb1d45940d56c713158884a05da"
+checksum = "75743a150d003dd863b51dc809bcad0d73f2102c53632f1e954e738192a3413f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1117,7 +1117,7 @@ dependencies = [
 [[package]]
 name = "sqlx"
 version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#9a6d07f10a118788959f1bba9fcdd4424d0fb3d2"
+source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -1126,7 +1126,7 @@ dependencies = [
 [[package]]
 name = "sqlx-core"
 version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#9a6d07f10a118788959f1bba9fcdd4424d0fb3d2"
+source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
 dependencies = [
  "ahash",
  "atoi",
@@ -1138,6 +1138,7 @@ dependencies = [
  "crossbeam-queue",
  "digest",
  "dirs",
+ "dotenvy",
  "either",
  "event-listener",
  "flume",
@@ -1184,7 +1185,7 @@ dependencies = [
 [[package]]
 name = "sqlx-macros"
 version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#9a6d07f10a118788959f1bba9fcdd4424d0fb3d2"
+source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
 dependencies = [
  "dotenvy",
  "either",
@@ -1202,7 +1203,7 @@ dependencies = [
 [[package]]
 name = "sqlx-rt"
 version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#9a6d07f10a118788959f1bba9fcdd4424d0fb3d2"
+source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
 dependencies = [
  "once_cell",
  "tokio",
