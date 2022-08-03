@@ -4,6 +4,7 @@ import!(pen_ffi_list_create, fn() -> List);
 import!(pen_ffi_list_lazy, fn(xs: Closure) -> List);
 import!(pen_ffi_list_prepend, fn(x: BoxAny, xs: List) -> List);
 
+#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_any_from_list")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct List(Arc<ListInner>);
