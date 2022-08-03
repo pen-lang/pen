@@ -20,7 +20,7 @@ run = \(ctx Context) none | error {
   args = arguments'Parse(Environment'Arguments(ctx))?
 
   s = Tcp'Connect(ctx, args.Host)?
-  Tcp'Send(ctx, s, "Hello, world!")?
+  Tcp'Send(ctx, s, args.Message)?
   Print'Line(ctx, Tcp'Receive(ctx, s, 1024)?)?
 
   none
