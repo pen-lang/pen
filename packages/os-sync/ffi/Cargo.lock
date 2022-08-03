@@ -188,6 +188,7 @@ name = "os"
 version = "0.1.0"
 dependencies = [
  "pen-ffi",
+ "pen-ffi-macro",
  "rand",
  "tempfile",
 ]
@@ -198,6 +199,7 @@ version = "0.1.0"
 dependencies = [
  "once_cell",
  "pen-ffi",
+ "pen-ffi-macro",
 ]
 
 [[package]]

@@ -9,7 +9,7 @@ use tokio::{
 const PARALLELISM_MULTIPLIER: usize = 2;
 
 #[ffi::bindgen]
-async fn _pen_spawn(closure: ffi::Arc<ffi::Closure>) -> ffi::Arc<ffi::Closure> {
+async fn _pen_spawn(closure: ffi::Closure) -> ffi::Closure {
     ffi::future::to_closure(
         spawn(ffi::future::from_closure::<_, ffi::Any>(closure)).map(Result::unwrap),
     )
@@ -21,7 +21,7 @@ async fn _pen_yield() {
 }
 
 #[ffi::bindgen]
-async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
+async fn _pen_race(list: ffi::List) -> ffi::List {
     let (sender, receiver) = channel(
         PARALLELISM_MULTIPLIER
             * available_parallelism()
@@ -52,7 +52,7 @@ async fn _pen_race(list: ffi::Arc<ffi::List>) -> ffi::Arc<ffi::List> {
     ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(receiver)))
 }
 
-async fn convert_receiver_to_list(mut receiver: Receiver<ffi::Any>) -> ffi::Arc<ffi::List> {
+async fn convert_receiver_to_list(mut receiver: Receiver<ffi::Any>) -> ffi::List {
     if let Some(x) = receiver.recv().await {
         ffi::List::prepend(
             ffi::List::lazy(ffi::future::to_closure(convert_receiver_to_list(receiver))),

@@ -1,44 +1,51 @@
 use crate::header_map::HeaderMap;
 
 #[repr(C)]
-pub struct Response {
+pub struct Response(ffi::Arc<ResponseInner>);
+
+#[repr(C)]
+struct ResponseInner {
     status: ffi::Number,
-    headers: ffi::Arc<HeaderMap>,
+    headers: HeaderMap,
     body: ffi::ByteString,
 }
 
 impl Response {
     pub fn new(
         status: impl Into<ffi::Number>,
-        headers: ffi::Arc<HeaderMap>,
+        headers: HeaderMap,
         body: impl Into<ffi::ByteString>,
     ) -> Self {
-        Self {
-            status: status.into(),
-            headers,
-            body: body.into(),
-        }
+        Self(
+            ResponseInner {
+                status: status.into(),
+                headers,
+                body: body.into(),
+            }
+            .into(),
+        )
     }
 
     pub fn status(&self) -> ffi::Number {
-        self.status
+        self.0.status
     }
 
-    pub fn headers(&self) -> ffi::Arc<HeaderMap> {
-        self.headers.clone()
+    pub fn headers(&self) -> HeaderMap {
+        self.0.headers.clone()
     }
 
     pub fn body(&self) -> ffi::ByteString {
-        self.body.clone()
+        self.0.body.clone()
     }
 }
 
-impl Default for Response {
-    fn default() -> Self {
-        Self {
-            status: Default::default(),
-            headers: HeaderMap::new(),
-            body: Default::default(),
-        }
+impl From<Response> for ffi::Any {
+    fn from(response: Response) -> Self {
+        ffi::import!(
+            _pen_http_response_to_any,
+            fn(response: Response) -> ffi::BoxAny
+        );
+
+        unsafe { _pen_http_response_to_any(response) }.into()
     }
 }

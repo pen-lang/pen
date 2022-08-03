@@ -2,3 +2,5 @@
 type Stream {
   inner any
 }
+
+foreign "c" _pen_os_tcp_stream_to_any = \(s Stream) any { s }

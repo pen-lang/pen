@@ -1,24 +1,9 @@
 import 'Pool'Options { Options }
 import 'Pool'pool { Pool }
 
-import foreign _pen_sql_pool_create \(string, Options) poolResult
-import foreign _pen_sql_pool_query \(Pool, string, [any]) listResult
-import foreign _pen_sql_pool_execute \(Pool, string, [any]) numberResult
-
-type poolResult {
-  pool Pool
-  error_ string
-}
-
-type listResult {
-  list [any]
-  error_ string
-}
-
-type numberResult {
-  value number
-  error_ string
-}
+import foreign _pen_sql_pool_create \(string, Options) Pool | error
+import foreign _pen_sql_pool_query \(Pool, string, [any]) [any] | error
+import foreign _pen_sql_pool_execute \(Pool, string, [any]) number | error
 
 type Context {
   inner Inner
@@ -33,33 +18,13 @@ type Inner {
 New = \() Context {
   Context{
     inner: Inner{
-      CreatePool: \(uri string, options Options) Pool | error {
-        r = _pen_sql_pool_create(uri, options)
+      CreatePool: _pen_sql_pool_create,
+      QueryPool: \(p Pool, q string, vs [any]) [[any]] | error {
+        rs = _pen_sql_pool_query(p, q, vs)?
 
-        if r.error_ == "" {
-          r.pool
-        } else {
-          error(r.error_)
-        }
+        [[any] if r = r() as [any] { r } else { [any] } for r in rs]
       },
-      QueryPool: \(pool Pool, query string, arguments [any]) [[any]] | error {
-        r = _pen_sql_pool_query(pool, query, arguments)
-
-        if r.error_ == "" {
-          [[any] if r = r() as [any] { r } else { [any] } for r in r.list]
-        } else {
-          error(r.error_)
-        }
-      },
-      ExecutePool: \(pool Pool, query string, arguments [any]) number | error {
-        r = _pen_sql_pool_execute(pool, query, arguments)
-
-        if r.error_ == "" {
-          r.value
-        } else {
-          error(r.error_)
-        }
-      },
+      ExecutePool: _pen_sql_pool_execute,
     },
   }
 }
