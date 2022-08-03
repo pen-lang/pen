@@ -1,4 +1,6 @@
-use crate::utilities::{generate_type_size_test, parse_crate_path, parse_string_attribute};
+use crate::utilities::{
+    convert_result, generate_type_size_test, parse_crate_path, parse_string_attribute,
+};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
@@ -9,14 +11,7 @@ pub fn generate(attributes: TokenStream, item: TokenStream) -> TokenStream {
     let attributes = parse_macro_input!(attributes as AttributeArgs);
     let type_ = parse_macro_input!(item as ItemStruct);
 
-    match generate_type(&attributes, &type_) {
-        Ok(tokens) => tokens,
-        Err(message) => {
-            let message = message.to_string();
-
-            quote! { compile_error!(#message) }.into()
-        }
-    }
+    convert_result(generate_type(&attributes, &type_))
 }
 
 fn generate_type(
