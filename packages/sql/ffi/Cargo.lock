@@ -847,18 +847,18 @@ checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.42"
+version = "1.0.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c278e965f1d8cf32d6e0e96de3d3e79712178ae67986d9cf9151f51e95aac89b"
+checksum = "0a2ca2c61bc9f3d74d2886294ab7b9853abd9c1ad903a3ac7815c58989bb7bab"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.20"
+version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bcdf212e9776fbcb2d23ab029360416bb1706b1aea2d1a5ba002727cbcab804"
+checksum = "bbe448f377a7d6961e30f5955f9b8d106c3f5e449d493ee1b125c1d43c2b5179"
 dependencies = [
  "proc-macro2",
 ]
@@ -1116,8 +1116,8 @@ dependencies = [
 
 [[package]]
 name = "sqlx"
-version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
+version = "0.6.1"
+source = "git+https://github.com/launchbadge/sqlx#7809ff4b86bd75181083cf2e8d2a5f0edb43e776"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -1125,8 +1125,8 @@ dependencies = [
 
 [[package]]
 name = "sqlx-core"
-version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
+version = "0.6.1"
+source = "git+https://github.com/launchbadge/sqlx#7809ff4b86bd75181083cf2e8d2a5f0edb43e776"
 dependencies = [
  "ahash",
  "atoi",
@@ -1184,8 +1184,8 @@ dependencies = [
 
 [[package]]
 name = "sqlx-macros"
-version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
+version = "0.6.1"
+source = "git+https://github.com/launchbadge/sqlx#7809ff4b86bd75181083cf2e8d2a5f0edb43e776"
 dependencies = [
  "dotenvy",
  "either",
@@ -1202,8 +1202,8 @@ dependencies = [
 
 [[package]]
 name = "sqlx-rt"
-version = "0.6.0"
-source = "git+https://github.com/launchbadge/sqlx#b630d5c748c042f6e08a50715e5cc25aec41c703"
+version = "0.6.1"
+source = "git+https://github.com/launchbadge/sqlx#7809ff4b86bd75181083cf2e8d2a5f0edb43e776"
 dependencies = [
  "once_cell",
  "tokio",
@@ -1228,9 +1228,9 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "syn"
-version = "1.0.98"
+version = "1.0.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c50aef8a904de4c23c788f104b7dddc7d6f79c647c7c8ce4cc8f73eb0ca773dd"
+checksum = "58dbef6ec655055e20b86b15a8cc6d439cca19b667537ac6a1369572d151ab13"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1239,18 +1239,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.31"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd829fe32373d27f76265620b5309d0340cb8550f523c1dda251d6298069069a"
+checksum = "f5f6586b7f764adc0231f4c79be7b920e766bb2f3e51b3661cdb263828f19994"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.31"
+version = "1.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0396bc89e626244658bef819e22d0cc459e795a5ebe878e6ec336d1674a8d79a"
+checksum = "12bafc5b54507e0149cdf1b145a5d80ab80a90bcd9275df43d4fff68460f6c21"
 dependencies = [
  "proc-macro2",
  "quote",
