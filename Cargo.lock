@@ -209,9 +209,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.15"
+version = "3.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44bbe24bbd31a185bc2c4f7c2abe80bea13a20d57ee4e55be70ac512bdc76417"
+checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
 dependencies = [
  "atty",
  "bitflags",
@@ -423,7 +423,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8d360993328314b8ed110bbada316d12da310e08"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8ddd27a3751228caa263f91546a27b48ef6b0104"
 dependencies = [
  "fnv",
  "hamt",
@@ -435,7 +435,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8d360993328314b8ed110bbada316d12da310e08"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8ddd27a3751228caa263f91546a27b48ef6b0104"
 dependencies = [
  "fmm",
  "fnv",
@@ -445,7 +445,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#8d360993328314b8ed110bbada316d12da310e08"
+source = "git+https://github.com/raviqqe/fmm?branch=main#8ddd27a3751228caa263f91546a27b48ef6b0104"
 dependencies = [
  "fmm",
  "hamt",
@@ -679,9 +679,9 @@ dependencies = [
 
 [[package]]
 name = "indoc"
-version = "1.0.6"
+version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05a0bd019339e5d968b37855180087b7b9d512c5046fbd244cf8c95687927d6e"
+checksum = "adab1eaa3408fb7f0c777a73e7465fd5656136fc93b670eb6df3c88c2c1344e3"
 
 [[package]]
 name = "infra"
@@ -723,9 +723,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.17.0"
+version = "1.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e21173d5699a654cf191b0c05b0a937bb4f7cf07ee2e32da2af07a963e31577"
+checksum = "1585a0f4924236ca3c8dac97bc6a3efaacc08b1ed9264ff2155ec7ab2906a8ea"
 dependencies = [
  "console",
  "once_cell",
@@ -987,7 +987,7 @@ name = "pen"
 version = "0.4.7"
 dependencies = [
  "app",
- "clap 3.2.15",
+ "clap 3.2.16",
  "indoc",
  "infra",
  "once_cell",
@@ -996,7 +996,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.8.1"
+version = "0.8.3"
 dependencies = [
  "async-stream",
  "futures",
@@ -1217,9 +1217,9 @@ checksum = "a2333e6df6d6598f2b1974829f853c2b4c5f4a6e503c10af918081aa6f8564e1"
 
 [[package]]
 name = "serde"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc855a42c7967b7c369eb5860f7164ef1f6f81c20c7cc1141f2a604e18723b03"
+checksum = "7af873f2c95b99fcb0bd0fe622a43e29514658873c8ceba88c4cb88833a22500"
 dependencies = [
  "serde_derive",
 ]
@@ -1236,9 +1236,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.140"
+version = "1.0.141"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f2122636b9fe3b81f1cb25099fcf2d3f542cdb1d45940d56c713158884a05da"
+checksum = "75743a150d003dd863b51dc809bcad0d73f2102c53632f1e954e738192a3413f"
 dependencies = [
  "proc-macro2",
  "quote",
