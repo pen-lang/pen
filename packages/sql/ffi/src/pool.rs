@@ -15,6 +15,7 @@ struct PoolOptions {
     connect_timeout: ffi::Number,
 }
 
+#[ffi::into_any(fn = "_pen_sql_pool_to_any")]
 #[repr(C)]
 struct Pool(ffi::Arc<ffi::Any>);
 
@@ -27,14 +28,6 @@ impl Pool {
         let pool: &PoolInner = TryFrom::try_from(&*self.0).unwrap();
 
         &pool.pool
-    }
-}
-
-impl From<Pool> for ffi::Any {
-    fn from(pool: Pool) -> Self {
-        ffi::import!(_pen_sql_pool_to_any, fn(pool: Pool) -> ffi::BoxAny);
-
-        unsafe { _pen_sql_pool_to_any(pool) }.into()
     }
 }
 
