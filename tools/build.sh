@@ -2,4 +2,4 @@
 
 set -e
 
-cargo build --release --locked -- -D warnings
+cargo build --release --locked
