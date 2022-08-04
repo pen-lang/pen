@@ -1,18 +1,23 @@
 use std::fs::OpenOptions;
 
 #[repr(C)]
+#[derive(Clone, Debug)]
+pub struct OpenFileOptions(ffi::Arc<OpenFileOptionsInner>);
+
+#[repr(C)]
 #[derive(Clone, Copy, Debug)]
-pub struct OpenFileOptions {
-    pub append: bool,
-    pub create: bool,
-    pub create_new: bool,
-    pub read: bool,
-    pub truncate: bool,
-    pub write: bool,
+struct OpenFileOptionsInner {
+    append: bool,
+    create: bool,
+    create_new: bool,
+    read: bool,
+    truncate: bool,
+    write: bool,
 }
 
 impl From<OpenFileOptions> for OpenOptions {
     fn from(options: OpenFileOptions) -> Self {
+        let options = &options.0;
         let mut open_options = Self::new();
 
         // Set the create option after the create_new option because the latter is

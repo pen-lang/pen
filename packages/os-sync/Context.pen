@@ -1,11 +1,8 @@
 import 'Context'context
 
-# Context type is a context for an operating system.
+# A context of an operating system.
 type Context = context'Context
 
-# Create a new context.
-#
-# This function is used internally and should not called directly.
 UnsafeNew = \() Context {
   context'UnsafeNew()
 }
