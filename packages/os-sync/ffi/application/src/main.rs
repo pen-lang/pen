@@ -27,6 +27,4 @@ fn main() {
     unsafe { _pen_main(&mut stack, do_nothing) };
 }
 
-extern "C" fn do_nothing(_: *mut ffi::cps::Stack, _: ffi::None) {
-    
-}
+extern "C" fn do_nothing(_: *mut ffi::cps::Stack, _: ffi::None) {}

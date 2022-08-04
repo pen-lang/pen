@@ -89,7 +89,10 @@ fn _pen_os_tcp_connect(address: ffi::ByteString) -> Result<TcpStream, Box<dyn Er
 fn _pen_os_tcp_accept(listener: TcpListener) -> Result<TcpAcceptedStream, Box<dyn Error>> {
     let (stream, address) = listener.lock()?.accept()?;
 
-    Ok(TcpAcceptedStream::new(TcpStream::new(stream), address.to_string().into()))
+    Ok(TcpAcceptedStream::new(
+        TcpStream::new(stream),
+        address.to_string().into(),
+    ))
 }
 
 #[ffi::bindgen]
