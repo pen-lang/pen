@@ -20,7 +20,6 @@ impl TcpListener {
         Self(ffi::Arc::new(
             TcpListenerInner(RwLock::new(listener).into()).into(),
         ))
-        .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpListener>, OsError> {
@@ -45,7 +44,6 @@ impl TcpStream {
         Self(ffi::Arc::new(
             TcpStreamInner(RwLock::new(socket).into()).into(),
         ))
-        .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpStream>, OsError> {
@@ -91,7 +89,7 @@ fn _pen_os_tcp_connect(address: ffi::ByteString) -> Result<TcpStream, Box<dyn Er
 fn _pen_os_tcp_accept(listener: TcpListener) -> Result<TcpAcceptedStream, Box<dyn Error>> {
     let (stream, address) = listener.lock()?.accept()?;
 
-    Ok(TcpAcceptedStream::new(TcpStream::new(stream), address.to_string().into()).into())
+    Ok(TcpAcceptedStream::new(TcpStream::new(stream), address.to_string().into()))
 }
 
 #[ffi::bindgen]

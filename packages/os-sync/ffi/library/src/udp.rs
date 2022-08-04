@@ -21,7 +21,6 @@ impl UdpSocket {
         Self(ffi::Arc::new(
             UdpSocketInner(RwLock::new(socket).into()).into(),
         ))
-        .into()
     }
 
     pub fn lock(&self) -> Result<RwLockWriteGuard<net::UdpSocket>, OsError> {
@@ -83,7 +82,7 @@ fn _pen_os_udp_receive_from(socket: UdpSocket) -> Result<UdpDatagram, Box<dyn Er
 
     buffer.truncate(size);
 
-    Ok(UdpDatagram::new(buffer.into(), address.to_string().into()).into())
+    Ok(UdpDatagram::new(buffer.into(), address.to_string().into()))
 }
 
 #[ffi::bindgen]

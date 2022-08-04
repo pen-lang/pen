@@ -103,5 +103,5 @@ fn _pen_os_remove_file(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
 fn _pen_os_read_metadata(path: ffi::ByteString) -> Result<FileMetadata, Box<dyn Error>> {
     let metadata = fs::metadata(utilities::decode_path(&path)?)?;
 
-    Ok(FileMetadata::new((metadata.len() as f64).into()).into())
+    Ok(FileMetadata::new((metadata.len() as f64).into()))
 }
