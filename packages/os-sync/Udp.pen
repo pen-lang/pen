@@ -2,62 +2,32 @@ import 'Context'context { Context }
 import 'Udp'Datagram { Datagram }
 import 'Udp'Socket { Socket }
 
+# Bind a socket with a server address.
 Bind = \(ctx Context, address string) Socket | error {
-  r = context'Inner(ctx).UdpBind(address)
-
-  if r.Error == "" {
-    r.Socket
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpBind(address)
 }
 
+# Connect a socket to a peer address.
 Connect = \(ctx Context, s Socket, address string) none | error {
-  r = context'Inner(ctx).UdpConnect(s, address)
-
-  if r.Error == "" {
-    none
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpConnect(s, address)
 }
 
+# Receive a datagram from a connected address.
 Receive = \(ctx Context, s Socket) string | error {
-  r = context'Inner(ctx).UdpReceive(s)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpReceive(s)
 }
 
+# Receive a datagram from any address.
 ReceiveFrom = \(ctx Context, s Socket) Datagram | error {
-  r = context'Inner(ctx).UdpReceiveFrom(s)
-
-  if r.Error == "" {
-    r.Datagram
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpReceiveFrom(s)
 }
 
+# Send a datagram to a connected address.
 Send = \(ctx Context, s Socket, data string) number | error {
-  r = context'Inner(ctx).UdpSend(s, data)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpSend(s, data)
 }
 
+# Send a datagram to a specified address.
 SendTo = \(ctx Context, s Socket, data string, address string) number | error {
-  r = context'Inner(ctx).UdpSendTo(s, data, address)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).UdpSendTo(s, data, address)
 }
