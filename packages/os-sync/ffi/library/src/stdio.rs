@@ -1,6 +1,8 @@
 use super::utilities;
-use std::error::Error;
-use std::io::{stderr, stdin, stdout};
+use std::{
+    error::Error,
+    io::{stderr, stdin, stdout},
+};
 
 #[ffi::bindgen]
 fn _pen_os_read_stdin() -> Result<ffi::ByteString, Box<dyn Error>> {

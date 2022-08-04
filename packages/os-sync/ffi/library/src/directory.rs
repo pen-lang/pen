@@ -1,6 +1,5 @@
 use crate::{error::OsError, utilities};
-use std::error::Error;
-use std::fs;
+use std::{error::Error, fs};
 
 #[ffi::bindgen]
 fn _pen_os_read_directory(path: ffi::ByteString) -> Result<ffi::List, Box<dyn Error>> {
