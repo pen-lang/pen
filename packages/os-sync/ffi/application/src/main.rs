@@ -28,5 +28,5 @@ fn main() {
 }
 
 extern "C" fn do_nothing(_: *mut ffi::cps::Stack, _: ffi::None) {
-    Default::default()
+    ()
 }

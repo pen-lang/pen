@@ -12,7 +12,7 @@ use tokio::{
 struct File(ffi::Arc<ffi::Any>);
 
 #[ffi::any]
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct FileInner(Arc<RwLock<fs::File>>);
 
 impl File {

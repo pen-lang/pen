@@ -167,9 +167,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
+checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
 
 [[package]]
 name = "memchr"
@@ -188,7 +188,6 @@ name = "os"
 version = "0.1.0"
 dependencies = [
  "pen-ffi",
- "pen-ffi-macro",
  "rand",
  "tempfile",
 ]
@@ -199,14 +198,13 @@ version = "0.1.0"
 dependencies = [
  "once_cell",
  "pen-ffi",
- "pen-ffi-macro",
 ]
 
 [[package]]
 name = "pen-ffi"
-version = "0.7.1"
+version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6537314496539c053362efddd99dafb9dce2acc77794e1c284f61fedcd1a66f"
+checksum = "5046df40813d6cc88972b7d036979845fac19593382faa1c00c77b60ad350bbe"
 dependencies = [
  "async-stream",
  "futures",
@@ -215,11 +213,12 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13a276f0aa67b4e0f6bb111208086c4a361749f41f6e19628b126c11eb73b3e0"
+checksum = "efd3171302c340ce850f97ed3c31c573d2c7c2f64f41e4cf6130cd3c0456df35"
 dependencies = [
  "convert_case",
+ "proc-macro2",
  "quote",
  "syn",
 ]

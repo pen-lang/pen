@@ -5,6 +5,5 @@ publish = false
 edition = "2021"
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "=0.7.1" }
-pen-ffi-macro = "=0.2.1"
+ffi = { package = "pen-ffi", version = "*" }
 once_cell = "1"

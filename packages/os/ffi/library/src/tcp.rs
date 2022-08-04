@@ -8,7 +8,7 @@ use tokio::{
 #[ffi::into_any(fn = "_pen_os_tcp_listener_to_any")]
 #[repr(C)]
 #[derive(Clone)]
-pub struct TcpListener(ffi::Arc<ffi::Any>);
+struct TcpListener(ffi::Arc<ffi::Any>);
 
 #[ffi::any]
 #[derive(Clone, Debug)]
@@ -33,11 +33,11 @@ impl TcpListener {
 #[ffi::into_any(fn = "_pen_os_tcp_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
-pub struct TcpStream(ffi::Arc<ffi::Any>);
+struct TcpStream(ffi::Arc<ffi::Any>);
 
 #[ffi::any]
 #[derive(Clone, Debug)]
-pub struct TcpStreamInner(Arc<RwLock<net::TcpStream>>);
+struct TcpStreamInner(Arc<RwLock<net::TcpStream>>);
 
 impl TcpStream {
     pub fn new(socket: net::TcpStream) -> Self {
@@ -58,7 +58,7 @@ impl TcpStream {
 #[ffi::into_any(fn = "_pen_os_tcp_accepted_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
-pub struct TcpAcceptedStream(ffi::Arc<TcpAcceptedStreamInner>);
+struct TcpAcceptedStream(ffi::Arc<TcpAcceptedStreamInner>);
 
 #[repr(C)]
 struct TcpAcceptedStreamInner {
@@ -69,14 +69,6 @@ struct TcpAcceptedStreamInner {
 impl TcpAcceptedStream {
     pub fn new(stream: TcpStream, address: ffi::ByteString) -> Self {
         Self(ffi::Arc::new(TcpAcceptedStreamInner { stream, address }))
-    }
-
-    pub fn stream(&self) -> &TcpStream {
-        &self.0.stream
-    }
-
-    pub fn address(&self) -> &ffi::ByteString {
-        &self.0.address
     }
 }
 
