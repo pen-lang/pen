@@ -37,7 +37,7 @@ It extracts source information from an error.
 
 ### `debug`
 
-It prints a debug message given as an argument if a `PEN_DEBUG` environment variable is set.
+It prints a debug message given as an argument.
 
 Note that behavior of this function can change among system packages. **You may not even see any messages with system packages whose systems do not have any consoles.**
 
