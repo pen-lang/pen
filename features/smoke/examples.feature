@@ -61,10 +61,10 @@ Feature: Examples
     And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
 
   Scenario: Run SQL client
-    Given I successfully run `sqlite3 foo.db 'create table foo (bar int);'`
-    And I cd to "examples/sql-client"
+    Given I cd to "examples/sql-client"
     And I successfully run `pen build`
+    And I successfully run `sqlite3 foo.db 'create table foo (bar int)'`
     When I successfully run `pen build`
-    Then I successfully run `./app sqlite://foo.db 'select * from foo'`
-    And I successfully run `./app sqlite://foo.db 'select * from foo'`
-    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
+    Then I successfully run `./app execute sqlite://foo.db 'insert into foo (bar) values (42)'`
+    And I successfully run `./app query sqlite://foo.db 'select * from foo'`
+    And the stdout from "./app query sqlite://foo.db 'select * from foo'" should contain exactly "42"
