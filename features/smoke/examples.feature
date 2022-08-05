@@ -59,3 +59,11 @@ Feature: Examples
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
     And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
+
+  Scenario: Run SQL client
+    Given I successfully run `sqlite3 foo.db 'create table foo (bar int);`
+    And I cd to "examples/sql-client"
+    And I successfully run `pen build`
+    When I successfully run `pen build`
+    Then I successfully run `./app localhost:4242 hello`
+    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
