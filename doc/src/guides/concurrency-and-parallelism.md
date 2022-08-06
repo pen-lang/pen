@@ -49,7 +49,7 @@ compute = \(x number, y number) number {
 
 ### Data parallelism
 
-To run the same computation against many pieces of the same kind of data, you can use recursion and the `go` function.
+To run the same computation against many values of the same type, you can use recursion and the `go` function.
 
 ```pen
 computeMany = \(xs [number]) [number] {
