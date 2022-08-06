@@ -50,11 +50,15 @@ compute = \(x number, y number) number {
 To run the same computation against many pieces of the same kind of data, you can use recursion and the `go` function.
 
 ```pen
-calculate = \(x [number]) [number] {
-  z = go(\() number { foo(x) })
-  v = bar(y)
+calculate = \(xs [number]) [number] {
+  if [x, ...xs] = xs {
+    y = go(\() number { foo(x()) })
+    ys = calculate(xs)
 
-  v + z
+    [number y(), ...ys]
+  } else {
+    [number]
+  }
 }
 ```
 
