@@ -30,7 +30,7 @@ The `go` function may or may not run a given function immediately depending on i
 zs = race([[number] xs, ys])
 ```
 
-This functionality is similar to concurrent queues in other imperative languages, such as [channels](https://go.dev/tour/concurrency/2) in [Go][go]. Input lists to the `race` function corresponds to producers of elements in the queue, and a consumer of the queue is codes that use elements in the output list.
+This functionality is similar to concurrent queues in other imperative languages, such as [channels](https://go.dev/tour/concurrency/2) in [Go][go]. Input lists to the `race` function correspond to producers of elements into the queue, and a consumer of the queue is codes that use elements in the output list.
 
 ## Patterns
 
@@ -64,7 +64,7 @@ computeMany = \(xs [number]) [number] {
 }
 ```
 
-The example above computes things in order of elements in the original list. However, you might want to use output values of concurrent computation in order of their finished times. By doing that, you can start using oiutput values as fast as possible without waiting for all computation to be completed. In this case, you can use `race` function to reorder elements in the output list by their finished times.
+The example above computes things in order of elements in the original list. However, you might want to see output values of concurrent computation in order of their finished times. By doing that, you can start using oiutput values as fast as possible without waiting for all computation to be completed. In this case, you can use `race` function to reorder elements in the output list by their finished times.
 
 ```pen
 compute = \(xs [number]) [number] {
