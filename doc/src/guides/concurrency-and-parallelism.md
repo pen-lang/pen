@@ -28,7 +28,7 @@ The `go` function may or may not run a given function immediately depending on i
 zs = race([[number] xs, ys])
 ```
 
-This functionality is similar to concurrent queues in other imperative languages, such as [channels](https://go.dev/tour/concurrency/2) in [Go][go]. Input lists to the `race` function corresponds to producers of elements in the queue, and a consumer of the queue is codes that use the output list.
+This functionality is similar to concurrent queues in other imperative languages, such as [channels](https://go.dev/tour/concurrency/2) in [Go][go]. Input lists to the `race` function corresponds to producers of elements in the queue, and a consumer of the queue is codes that use elements in the output list.
 
 ## Patterns
 
