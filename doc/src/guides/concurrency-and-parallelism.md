@@ -6,9 +6,11 @@ This page describes how to write concurrent and/or parallel programs in Pen.
 
 ## Built-ins
 
+Pen provides some built-in functions for concurrent and parallel programming.
+
 ### `go` function
 
-Pen provides some built-in functions for concurrent and parallel programming. [The `go` built-in function](/references/language/built-ins.html#go) runs a given function concurrently, and possibly in parallel.
+[The `go` built-in function](/references/language/built-ins.html#go) runs a given function concurrently, and possibly in parallel.
 
 ```pen
 future = go(\() number {
