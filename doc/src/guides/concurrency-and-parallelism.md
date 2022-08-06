@@ -34,7 +34,7 @@ This functionality is similar to concurrent queues in other imperative languages
 
 ### Task parallelism
 
-You can use the `go` function to run different codes concurrently. For example, the following code runs the functions, `computeA` and `computeB` concurrently. Runtimes of applications might execute those functions even in parallel if the runtimes of their system packages allow that,
+You can use the `go` function to run different codes concurrently. For example, the following code runs the functions, `computeA` and `computeB` concurrently. Runtimes of applications might execute those functions even in parallel if their system packages allow that,
 
 ```pen
 compute = \(x number, y number) number {
