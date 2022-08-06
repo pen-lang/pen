@@ -50,15 +50,31 @@ compute = \(x number, y number) number {
 To run the same computation against many pieces of the same kind of data, you can use recursion and the `go` function.
 
 ```pen
-calculate = \(xs [number]) [number] {
+computeMany = \(xs [number]) [number] {
   if [x, ...xs] = xs {
     y = go(\() number { foo(x()) })
-    ys = calculate(xs)
+    ys = computeMany(xs)
 
     [number y(), ...ys]
   } else {
     [number]
   }
+}
+```
+
+The example above computes things in order of elements in the original list. However, you might want to use output values of concurrent computation in order of their finished times. By doing that, you can start using oiutput values as fast as possible without waiting for all computation to be completed. In this case, you can use `race` function to reorder elements in the output list by their finished times.
+
+```pen
+compute = \(xs [number]) [number] {
+  race([[number] [number x()] for x in computeMany(xs)])
+}
+```
+
+If you want to evaluate elements in multiple lists concurrently, you can simply pass the lists as an argument to the `race` function.
+
+```pen
+compute = \(xs [number], ys [number]) [number] {
+  race([[number] computeMany(xs), computeMany(ys)])
 }
 ```
 
