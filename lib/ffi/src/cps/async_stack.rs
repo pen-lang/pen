@@ -205,7 +205,7 @@ mod tests {
 
     #[allow(dead_code)]
     extern "C" {
-        fn _test_async_stack_ffi_safety(_: &mut AsyncStack);
+        fn _test_async_stack_ffi_safety(_: &mut Stack);
     }
 
     #[test]

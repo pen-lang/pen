@@ -1,12 +1,8 @@
 import Console'Print
-import Core'Number
 import Os'Context { Context }
 import Os'Environment
-import Os'File
 import Os'Process
 import Os'Udp
-import Os'Udp'Datagram
-import Os'Udp'Socket { Socket }
 
 import 'arguments
 
@@ -24,14 +20,6 @@ run = \(ctx Context) none | error {
 
   s = Udp'Bind(ctx, "localhost:0")?
   Udp'Connect(ctx, s, args.Host)?
-
-  talk(ctx, s, 1)
-}
-
-talk = \(ctx Context, s Socket, count number) none | error {
-  Udp'Send(ctx, s, Number'String(count))?
-  d = Udp'Receive(ctx, s)?
-  Print'Line(ctx, d)?
-
-  talk(ctx, s, count + 1)
+  Udp'Send(ctx, s, args.Message)?
+  Print'Line(ctx, Udp'Receive(ctx, s)?)
 }

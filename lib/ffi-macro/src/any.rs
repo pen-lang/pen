@@ -1,26 +1,21 @@
-use crate::utilities::parse_crate_path;
+use crate::utilities::{generate_type_size_test, parse_crate_path};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, AttributeArgs, Ident, ItemStruct};
+use std::error::Error;
+use syn::{AttributeArgs, Ident, ItemStruct};
 
-pub fn generate_binding(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = parse_macro_input!(attributes as AttributeArgs);
-    let type_ = parse_macro_input!(item as ItemStruct);
-
-    match generate_type(&attributes, &type_) {
-        Ok(tokens) => tokens,
-        Err(message) => quote! { compile_error!(#message) }.into(),
-    }
-}
-
-fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<TokenStream, String> {
+pub fn generate(
+    attributes: &AttributeArgs,
+    type_: &ItemStruct,
+) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
     let module_name = Ident::new(
         &(type_.ident.to_string().to_case(Case::Snake) + "_module"),
         type_.ident.span(),
     );
     let type_name = &type_.ident;
+    let type_size_test = generate_type_size_test(type_name);
 
     Ok(quote! {
         #type_
@@ -29,13 +24,7 @@ fn generate_type(attributes: &AttributeArgs, type_: &ItemStruct) -> Result<Token
             use core::{alloc::Layout, mem, ptr};
             use super::#type_name;
 
-            #[test]
-            fn type_size() {
-                assert!(
-                    Layout::new::<#type_name>().size() <= Layout::new::<*const u8>().size(),
-                    "type size too large",
-                );
-            }
+            #type_size_test
 
             unsafe fn transmute_into_payload<T: Send + Sync>(data: T) -> u64 {
                 let mut payload = 0;

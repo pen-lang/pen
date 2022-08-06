@@ -1,3 +1,5 @@
 type NormalFile {
   inner any
 }
+
+foreign "c" _pen_os_file_to_any = \(f NormalFile) any { f }

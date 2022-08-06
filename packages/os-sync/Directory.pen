@@ -1,32 +1,16 @@
 import 'Context'context { Context }
-import 'array
 
+# Read a directory and return file paths it contains.
 Read = \(ctx Context, path string) [string] | error {
-  r = context'Inner(ctx).ReadDirectory(path)
-
-  if r.Error == "" {
-    array'ConvertToStrings(r.Paths)
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).ReadDirectory(path)
 }
 
+# Create a directory.
 Create = \(ctx Context, path string) none | error {
-  r = context'Inner(ctx).CreateDirectory(path)
-
-  if r.Error == "" {
-    none
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).CreateDirectory(path)
 }
 
+# Remove a directory.
 Remove = \(ctx Context, path string) none | error {
-  r = context'Inner(ctx).RemoveDirectory(path)
-
-  if r.Error == "" {
-    none
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).RemoveDirectory(path)
 }

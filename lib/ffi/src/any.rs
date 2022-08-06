@@ -1,4 +1,4 @@
-use crate::{import, Boolean, BoxAny, ByteString, Error, List, None, Number};
+use crate::{import, Boolean, BoxAny, ByteString, Error, List, Number};
 
 import!(pen_ffi_any_is_boolean, fn(any: BoxAny) -> Boolean);
 import!(pen_ffi_any_is_error, fn(any: BoxAny) -> Boolean);
@@ -12,13 +12,6 @@ import!(pen_ffi_any_to_error, fn(any: BoxAny) -> Error);
 import!(pen_ffi_any_to_list, fn(any: BoxAny) -> List);
 import!(pen_ffi_any_to_number, fn(any: BoxAny) -> Number);
 import!(pen_ffi_any_to_string, fn(any: BoxAny) -> ByteString);
-
-import!(pen_ffi_any_from_boolean, fn(value: Boolean) -> BoxAny);
-import!(pen_ffi_any_from_error, fn(value: Error) -> BoxAny);
-import!(pen_ffi_any_from_none, fn() -> BoxAny);
-import!(pen_ffi_any_from_list, fn(value: List) -> BoxAny);
-import!(pen_ffi_any_from_number, fn(value: Number) -> BoxAny);
-import!(pen_ffi_any_from_string, fn(value: ByteString) -> BoxAny);
 
 #[repr(C)]
 pub struct Any {
@@ -87,42 +80,6 @@ pub struct TypeInformation {
     pub clone: extern "C" fn(u64) -> u64,
     pub drop: extern "C" fn(u64),
     pub synchronize: extern "C" fn(u64),
-}
-
-impl From<Boolean> for Any {
-    fn from(value: Boolean) -> Self {
-        unsafe { pen_ffi_any_from_boolean(value) }.into()
-    }
-}
-
-impl From<Error> for Any {
-    fn from(value: Error) -> Self {
-        unsafe { pen_ffi_any_from_error(value) }.into()
-    }
-}
-
-impl From<List> for Any {
-    fn from(value: List) -> Self {
-        unsafe { pen_ffi_any_from_list(value) }.into()
-    }
-}
-
-impl From<None> for Any {
-    fn from(_: None) -> Self {
-        unsafe { pen_ffi_any_from_none() }.into()
-    }
-}
-
-impl From<Number> for Any {
-    fn from(value: Number) -> Self {
-        unsafe { pen_ffi_any_from_number(value) }.into()
-    }
-}
-
-impl From<ByteString> for Any {
-    fn from(value: ByteString) -> Self {
-        unsafe { pen_ffi_any_from_string(value) }.into()
-    }
 }
 
 impl TryFrom<Any> for Boolean {

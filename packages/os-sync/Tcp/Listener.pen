@@ -1,3 +1,6 @@
+# A TCP listener to listen for client connections
 type Listener {
   inner any
 }
+
+foreign "c" _pen_os_tcp_listener_to_any = \(l Listener) any { l }

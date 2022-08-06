@@ -1,18 +1,11 @@
 import 'Context'context { Context }
-import 'array
 
 # Get command line arguments.
 Arguments = \(ctx Context) [string] {
-  array'ConvertToStrings(context'Inner(ctx).GetArguments())
+  context'Inner(ctx).GetArguments()
 }
 
 # Get an environment variable.
 Variable = \(ctx Context, name string) string | error {
-  r = context'Inner(ctx).GetEnvironmentVariable(name)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).GetEnvironmentVariable(name)
 }
