@@ -1,6 +1,6 @@
 # Concurrency and parallelism
 
-Concurrent programs use CPU time efficiently without being blocked on I/O or concurrent data synchronization. And parallel programs leverage multi-core CPUs to compute things in parallel faster than sequential programs.
+Concurrent programs use CPU time efficiently without being blocked on I/O or data synchronization. And parallel programs leverage multi-core CPUs to compute things in parallel faster than sequential programs.
 
 This page describes how to write concurrent and/or parallel programs in Pen.
 
