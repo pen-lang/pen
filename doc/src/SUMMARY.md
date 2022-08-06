@@ -53,6 +53,7 @@
   - [Standard packages](examples/standard-packages/README.md)
     - [`Core`](examples/standard-packages/core.md)
     - [`Os`](examples/standard-packages/os.md)
+    - [`Random`](examples/standard-packages/random.md)
     - [`Test`](examples/standard-packages/test.md)
   - [Foreign Function Interface (FFI)](examples/ffi.md)
 - [Advanced features](advanced-features/README.md)
