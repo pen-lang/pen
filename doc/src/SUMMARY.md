@@ -25,6 +25,7 @@
     - [`Html`](references/standard-packages/html.md)
     - [`Http`](references/standard-packages/http.md)
     - [`Os`](references/standard-packages/os.md)
+    - [`Random`](references/standard-packages/random.md)
     - [`Sql`](references/standard-packages/sql.md)
     - [`Test`](references/standard-packages/test.md)
 - [Examples](examples/README.md)
