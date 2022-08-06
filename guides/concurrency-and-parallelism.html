@@ -169,7 +169,7 @@
 <p>This functionality is similar to concurrent queues in other imperative languages, such as <a href="https://go.dev/tour/concurrency/2">channels</a> in <a href="https://go.dev">Go</a>. Input lists to the <code>race</code> function correspond to producers of elements into the queue, and a consumer of the queue is codes that use elements in the output list.</p>
 <h2 id="patterns"><a class="header" href="#patterns">Patterns</a></h2>
 <h3 id="task-parallelism"><a class="header" href="#task-parallelism">Task parallelism</a></h3>
-<p>You can use the <code>go</code> function to run different codes concurrently. For example, the following code runs the functions, <code>computeA</code> and <code>computeB</code> concurrently. Runtimes of applications might execute those functions even in parallel if their system packages allow that,</p>
+<p>The <code>go</code> function can run different codes concurrently. For example, the following code runs the functions, <code>computeA</code> and <code>computeB</code> concurrently. Runtimes of applications might execute those functions even in parallel if their system packages allow that.</p>
 <pre><code class="language-pen">compute = \(x number, y number) number {
   z = go(\() number { computeA(x) })
   v = computeB(y)
@@ -178,7 +178,7 @@
 }
 </code></pre>
 <h3 id="data-parallelism"><a class="header" href="#data-parallelism">Data parallelism</a></h3>
-<p>To run the same computation against many pieces of the same kind of data, you can use recursion and the <code>go</code> function.</p>
+<p>To run the same computation against many values of the same type, you can use recursion and the <code>go</code> function.</p>
 <pre><code class="language-pen">computeMany = \(xs [number]) [number] {
   if [x, ...xs] = xs {
     y = go(\() number { foo(x()) })
