@@ -184,9 +184,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.126"
+version = "0.2.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
+checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
 
 [[package]]
 name = "lock_api"
@@ -277,9 +277,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5046df40813d6cc88972b7d036979845fac19593382faa1c00c77b60ad350bbe"
+checksum = "6662349d0fb345f80909555d42bf4135f96e72ff791e6ed34cde2fcaa8e9be5a"
 dependencies = [
  "async-stream",
  "futures",
