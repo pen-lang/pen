@@ -64,7 +64,7 @@ computeMany = \(xs [number]) [number] {
 }
 ```
 
-The example above computes things in order of elements in the original list. However, you might want to see output values of concurrent computation in order of their finished times. By doing that, you can start using the output values as fast as possible without waiting for all computation to be completed. In this case, you can use `race` function to reorder elements in the output list by their finished times.
+The example above computes things in order of elements in the original list. However, you might want to see output values of concurrent computation in order of their finished times. By doing that, you can start using the output values as fast as possible without waiting for all computation to be completed. In this case, you can use the `race` function to reorder elements in the output list by their finished times.
 
 ```pen
 compute = \(xs [number]) [number] {
