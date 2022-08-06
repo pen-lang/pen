@@ -34,12 +34,12 @@ This is similar to concurrent queues in other imperative languages, such as chan
 
 ### Task parallelism
 
-You can use the `go` function to run different codes concurrently. For examlpe, the following code runs the functions, `calculateA` and `calculateB` concurrently. Runtimes of applications might execute those functions even in parallel if runtimes of their system packages allow that,
+You can use the `go` function to run different codes concurrently. For examlpe, the following code runs the functions, `computeA` and `computeB` concurrently. Runtimes of applications might execute those functions even in parallel if runtimes of their system packages allow that,
 
 ```pen
-calculate = \(x number, y number) number {
-  z = go(\() number { calculateA(x) })
-  v = calculateB(y)
+compute = \(x number, y number) number {
+  z = go(\() number { computeA(x) })
+  v = computeB(y)
 
   v + z
 }
