@@ -5,7 +5,6 @@ mod error;
 mod file;
 mod open_file_options;
 mod process;
-mod random;
 mod stdio;
 mod tcp;
 mod time;
