@@ -72,7 +72,7 @@ compute = \(xs [number]) [number] {
 }
 ```
 
-If you want to evaluate elements in multiple lists concurrently, you can simply pass the lists as an argument to the `race` function. Note that elements in each list are not evaluated concurrently although elements in different lists are evaluated concurrently.
+If you want to evaluate elements in multiple lists concurrently, you can simply pass the lists as an argument to the `race` function. Note that elements in the same lists are not evaluated concurrently although elements in different lists are evaluated concurrently.
 
 ```pen
 compute = \(xs [number], ys [number]) [number] {
