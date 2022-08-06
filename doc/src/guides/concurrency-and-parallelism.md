@@ -34,10 +34,28 @@ This is similar to concurrent queues in other imperative languages, such as chan
 
 ### Task parallelism
 
-> TBD
+You can use the `go` function to run different codes concurrently. For examlpe, the following code runs the functions, `calculateA` and `calculateB` concurrently. Runtimes of applications might execute those functions even in parallel if runtimes of their system packages allow that,
+
+```pen
+calculate = \(x number, y number) number {
+  z = go(\() number { calculateA(x) })
+  v = calculateB(y)
+
+  v + z
+}
+```
 
 ### Data parallelism
 
-> TBD
+To run the same computation against many pieces of the same kind of data, you can use recursion and the `go` function.
+
+```pen
+calculate = \(x [number]) [number] {
+  z = go(\() number { foo(x) })
+  v = bar(y)
+
+  v + z
+}
+```
 
 [go]: https://go.dev
