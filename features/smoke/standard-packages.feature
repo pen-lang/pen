@@ -10,12 +10,13 @@ Feature: Standard packages
     And I successfully run `pen test`
 
     Examples:
-      | package      |
-      | core         |
-      | html         |
-      | http         |
-      | json         |
-      | os           |
-      | os-sync      |
-      | sql          |
-      | test         |
+      | package |
+      | core    |
+      | html    |
+      | http    |
+      | json    |
+      | os      |
+      | os-sync |
+      | random  |
+      | sql     |
+      | test    |
