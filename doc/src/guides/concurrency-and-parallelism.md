@@ -16,7 +16,7 @@ f = go(\() number {
 })
 ```
 
-The `go` function returns a function of the same type as the given argument (a.k.a. futures or promises in other languages.) The returned function returns a resulting value of the function execution.
+The `go` function returns a function of the same type as the given argument. The returned function returns a resulting value of the function execution. In other languages, such functions are also known as [futures](https://doc.rust-lang.org/std/future/trait.Future.html) or [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 The `go` function may or may not run a given function immediately depending on its implementation. For example, the standard `Os` system package runs the given function in parallel if multiple CPU cores are available.
 
