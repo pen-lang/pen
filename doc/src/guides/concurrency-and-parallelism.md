@@ -6,7 +6,7 @@ This page describes how to write concurrent and/or parallel programs in Pen.
 
 ## Built-ins
 
-Pen provides some built-in functions for concurrent and parallel programming.
+Pen provides several built-in functions for concurrent and parallel programming.
 
 ### `go` function
 
