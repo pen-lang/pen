@@ -1,4 +1,4 @@
-use crate::{call_function, future, import, Any, Arc, Boolean, Closure, List};
+use crate::{future, import, Any, Arc, Boolean, Closure, List};
 use futures::Stream;
 
 import!(pen_ffi_list_first_rest, async fn(list: List) -> Arc<FirstRest>);
@@ -22,10 +22,5 @@ pub fn from_list(list: List) -> impl Stream<Item = Any> {
 }
 
 async fn get_first_rest(list: List) -> Arc<FirstRest> {
-    call_function!(
-        fn(List) -> Arc<FirstRest>,
-        pen_ffi_list_first_rest,
-        list.clone(),
-    )
-    .await
+    pen_ffi_list_first_rest(list).await
 }
