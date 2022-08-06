@@ -2,7 +2,7 @@ import Core'Number
 import Core'String
 import Os'Context { Context }
 import Os'File
-import Os'Random
+import Random'Random
 
 import 'sort
 
@@ -15,7 +15,7 @@ main = \(ctx context) none {
     ctx.Os,
     sort'Sort(
       [number
-        Number'Floor(Random'Number(ctx.Os) * max())
+        Number'Floor(Random'Number(ctx.Random) * max())
         for _ in Number'Sequence(total())
       ],
     ),
