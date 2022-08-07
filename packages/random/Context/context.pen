@@ -1,0 +1,21 @@
+import foreign "c" _pen_random_number \() number
+
+type Context {
+  inner InnerContext
+}
+
+type InnerContext {
+  Number \() number
+}
+
+UnsafeNew = \() Context {
+  Context{
+    inner: InnerContext{
+      Number: _pen_random_number,
+    },
+  }
+}
+
+Inner = \(ctx Context) InnerContext {
+  ctx.inner
+}
