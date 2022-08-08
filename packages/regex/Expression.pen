@@ -1,3 +1,5 @@
+# This module provides functions to compile and match regular expressions.
+
 import 'Match'Match
 
 import foreign "c" _pen_regex_expression_new \(string) Expression
@@ -7,10 +9,12 @@ type Expression {
   inner any
 }
 
+# Compile a regular expression.
 New = \(s string) Expression {
   _pen_regex_expression_new(s)
 }
 
+# Match a regular expression with a string and return matched groups.
 Match = \(e Expression, s string) Match {
   ss = _pen_regex_expression_match(e, s)
 
