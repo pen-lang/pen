@@ -1,0 +1,18 @@
+import 'Match'Match
+
+import foreign "c" _pen_regex_expression_new \(string) Expression
+import foreign "c" _pen_regex_expression_match \(Expression, string) [string]
+
+type Expression {
+  inner any
+}
+
+New = \(s string) Expression {
+  _pen_regex_expression_new(s)
+}
+
+Match = \(e Expression, s string) Match {
+  ss = _pen_regex_expression_match(e, s)
+
+  Match{Groups: ss}
+}
