@@ -1,3 +1,4 @@
+# A match of a regular expression with a string.
 type Match {
   Groups [string]
 }
