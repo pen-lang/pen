@@ -1,10 +1,10 @@
 # This module provides functions to compile and match regular expressions.
 
-import 'Match'Match
+import 'Match { Match }
 
 import foreign "c" _pen_regex_expression_new \(string) Expression
 import foreign "c" _pen_regex_expression_is_match \(Expression, string) boolean
-import foreign "c" _pen_regex_expression_match \(Expression, string) [string]
+import foreign "c" _pen_regex_expression_match \(Expression, string) [string] | none
 
 type Expression {
   inner any
@@ -21,8 +21,10 @@ IsMatch = \(e Expression, s string) boolean {
 }
 
 # Match a regular expression with a string and return matched groups.
-Match = \(e Expression, s string) Match {
-  ss = _pen_regex_expression_match(e, s)
-
-  Match{Groups: ss}
+Match = \(e Expression, s string) Match | none {
+  if ss = _pen_regex_expression_match(e, s) as none {
+    none
+  } else {
+    Match{Groups: ss}
+  }
 }
