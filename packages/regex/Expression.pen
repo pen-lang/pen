@@ -4,6 +4,7 @@ import foreign "c" _pen_regex_expression_new \(string) Expression | error
 import foreign "c" _pen_regex_expression_is_match \(Expression, string) boolean
 import foreign "c" _pen_regex_expression_match \(Expression, string) [string | none]
 
+# A regular expression.
 type Expression {
   inner any
 }
