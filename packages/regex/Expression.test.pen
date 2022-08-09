@@ -31,3 +31,15 @@ MatchGroups = \() none | error {
 
   Assert'True(Expression'Match(e, "foobar") == [string | none "foobar", "foo", "bar"])
 }
+
+MatchSuccessfulAndFailedGroups = \() none | error {
+  e = Expression'New("(foo)(bar)?")?
+
+  Assert'True(Expression'Match(e, "foo") == [string | none "foo", "foo", none])
+}
+
+MatchFail = \() none | error {
+  e = Expression'New("foo")?
+
+  Assert'True(Expression'Match(e, "bar") == none)
+}
