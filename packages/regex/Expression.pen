@@ -13,7 +13,7 @@ New = \(s string) Expression | error {
   _pen_regex_expression_new(s)
 }
 
-# Match a regular expression with a string and return matched groups.
+# Check if a regular expression matches with a string or not.
 IsMatch = \(e Expression, s string) boolean {
   _pen_regex_expression_is_match(e, s)
 }
