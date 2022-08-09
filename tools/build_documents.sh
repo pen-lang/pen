@@ -56,6 +56,11 @@ build_package_document \
   "This package provides random number generation."
 
 build_package_document \
+  regex \
+  Regex \
+  "This package provides regular expressions."
+
+build_package_document \
   sql \
   Sql \
   "This package provides a SQL database client."
