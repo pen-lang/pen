@@ -1,7 +1,5 @@
 use regex::Regex;
-use std::error::Error;
-use std::str;
-use std::sync::Arc;
+use std::{error::Error, str, sync::Arc};
 
 #[ffi::into_any(fn = "_pen_regex_expression_to_any")]
 #[repr(C)]
