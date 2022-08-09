@@ -1,0 +1,228 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js rust">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Regex - Pen programming language</title>
+        <!-- Custom HTML head -->
+<script
+  defer
+  data-domain="pen-lang.org"
+  src="https://plausible.io/js/plausible.js"
+></script>
+<style>
+  code { border-radius: 3px; }
+</style>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="The programming language for scalable development">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../theme/pagetoc.css">
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../../index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../introduction/install.html"><strong aria-hidden="true">1.1.</strong> Install</a></li><li class="chapter-item expanded "><a href="../../introduction/getting-started.html"><strong aria-hidden="true">1.2.</strong> Getting started</a></li></ol></li><li class="chapter-item expanded "><a href="../../guides/index.html"><strong aria-hidden="true">2.</strong> Guides</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../guides/building-an-executable.html"><strong aria-hidden="true">2.1.</strong> Building an executable</a></li><li class="chapter-item expanded "><a href="../../guides/creating-a-library.html"><strong aria-hidden="true">2.2.</strong> Creating a library</a></li><li class="chapter-item expanded "><a href="../../guides/using-a-library.html"><strong aria-hidden="true">2.3.</strong> Using a library</a></li><li class="chapter-item expanded "><a href="../../guides/testing.html"><strong aria-hidden="true">2.4.</strong> Testing</a></li><li class="chapter-item expanded "><a href="../../guides/concurrency-and-parallelism.html"><strong aria-hidden="true">2.5.</strong> Concurrency and parallelism</a></li><li class="chapter-item expanded "><a href="../../guides/coding-style.html"><strong aria-hidden="true">2.6.</strong> Coding style</a></li></ol></li><li class="chapter-item expanded "><a href="../../references/index.html"><strong aria-hidden="true">3.</strong> References</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../references/language/index.html"><strong aria-hidden="true">3.1.</strong> Language</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../references/language/syntax.html"><strong aria-hidden="true">3.1.1.</strong> Syntax</a></li><li class="chapter-item expanded "><a href="../../references/language/types.html"><strong aria-hidden="true">3.1.2.</strong> Types</a></li><li class="chapter-item expanded "><a href="../../references/language/built-ins.html"><strong aria-hidden="true">3.1.3.</strong> Built-ins</a></li><li class="chapter-item expanded "><a href="../../references/language/modules.html"><strong aria-hidden="true">3.1.4.</strong> Modules</a></li><li class="chapter-item expanded "><a href="../../references/language/packages.html"><strong aria-hidden="true">3.1.5.</strong> Packages</a></li></ol></li><li class="chapter-item expanded "><a href="../../references/command-line-tools.html"><strong aria-hidden="true">3.2.</strong> Command line tools</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/index.html"><strong aria-hidden="true">3.3.</strong> Standard packages</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../references/standard-packages/core.html"><strong aria-hidden="true">3.3.1.</strong> Core</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/flag.html"><strong aria-hidden="true">3.3.2.</strong> Flag</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/json.html"><strong aria-hidden="true">3.3.3.</strong> Json</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/html.html"><strong aria-hidden="true">3.3.4.</strong> Html</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/http.html"><strong aria-hidden="true">3.3.5.</strong> Http</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/os.html"><strong aria-hidden="true">3.3.6.</strong> Os</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/random.html"><strong aria-hidden="true">3.3.7.</strong> Random</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/regex.html" class="active"><strong aria-hidden="true">3.3.8.</strong> Regex</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/sql.html"><strong aria-hidden="true">3.3.9.</strong> Sql</a></li><li class="chapter-item expanded "><a href="../../references/standard-packages/test.html"><strong aria-hidden="true">3.3.10.</strong> Test</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../../examples/index.html"><strong aria-hidden="true">4.</strong> Examples</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../examples/types/index.html"><strong aria-hidden="true">4.1.</strong> Types</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../examples/types/number.html"><strong aria-hidden="true">4.1.1.</strong> Number</a></li><li class="chapter-item expanded "><a href="../../examples/types/boolean.html"><strong aria-hidden="true">4.1.2.</strong> Boolean</a></li><li class="chapter-item expanded "><a href="../../examples/types/none.html"><strong aria-hidden="true">4.1.3.</strong> None</a></li><li class="chapter-item expanded "><a href="../../examples/types/string.html"><strong aria-hidden="true">4.1.4.</strong> String</a></li><li class="chapter-item expanded "><a href="../../examples/types/function.html"><strong aria-hidden="true">4.1.5.</strong> Function</a></li><li class="chapter-item expanded "><a href="../../examples/types/record.html"><strong aria-hidden="true">4.1.6.</strong> Record</a></li><li class="chapter-item expanded "><a href="../../examples/types/union.html"><strong aria-hidden="true">4.1.7.</strong> Union</a></li><li class="chapter-item expanded "><a href="../../examples/types/list.html"><strong aria-hidden="true">4.1.8.</strong> List</a></li><li class="chapter-item expanded "><a href="../../examples/types/error.html"><strong aria-hidden="true">4.1.9.</strong> Error</a></li><li class="chapter-item expanded "><a href="../../examples/types/any.html"><strong aria-hidden="true">4.1.10.</strong> Any</a></li><li class="chapter-item expanded "><a href="../../examples/types/polymorphism.html"><strong aria-hidden="true">4.1.11.</strong> Polymorphism</a></li></ol></li><li class="chapter-item expanded "><a href="../../examples/syntax/index.html"><strong aria-hidden="true">4.2.</strong> Syntax</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../examples/syntax/block.html"><strong aria-hidden="true">4.2.1.</strong> Block</a></li></ol></li><li class="chapter-item expanded "><a href="../../examples/module.html"><strong aria-hidden="true">4.3.</strong> Modules</a></li><li class="chapter-item expanded "><a href="../../examples/package.html"><strong aria-hidden="true">4.4.</strong> Packages</a></li><li class="chapter-item expanded "><a href="../../examples/commands/index.html"><strong aria-hidden="true">4.5.</strong> Commands</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../examples/commands/build.html"><strong aria-hidden="true">4.5.1.</strong> Building packages</a></li><li class="chapter-item expanded "><a href="../../examples/commands/create.html"><strong aria-hidden="true">4.5.2.</strong> Creating packages</a></li><li class="chapter-item expanded "><a href="../../examples/commands/test.html"><strong aria-hidden="true">4.5.3.</strong> Testing packages</a></li><li class="chapter-item expanded "><a href="../../examples/commands/format.html"><strong aria-hidden="true">4.5.4.</strong> Formatting module files</a></li></ol></li><li class="chapter-item expanded "><a href="../../examples/standard-packages/index.html"><strong aria-hidden="true">4.6.</strong> Standard packages</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../examples/standard-packages/core.html"><strong aria-hidden="true">4.6.1.</strong> Core</a></li><li class="chapter-item expanded "><a href="../../examples/standard-packages/os.html"><strong aria-hidden="true">4.6.2.</strong> Os</a></li><li class="chapter-item expanded "><a href="../../examples/standard-packages/random.html"><strong aria-hidden="true">4.6.3.</strong> Random</a></li><li class="chapter-item expanded "><a href="../../examples/standard-packages/test.html"><strong aria-hidden="true">4.6.4.</strong> Test</a></li></ol></li><li class="chapter-item expanded "><a href="../../examples/ffi.html"><strong aria-hidden="true">4.7.</strong> Foreign Function Interface (FFI)</a></li></ol></li><li class="chapter-item expanded "><a href="../../advanced-features/index.html"><strong aria-hidden="true">5.</strong> Advanced features</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../../advanced-features/cross-compile.html"><strong aria-hidden="true">5.1.</strong> Cross compile</a></li><li class="chapter-item expanded "><a href="../../advanced-features/ffi.html"><strong aria-hidden="true">5.2.</strong> Foreign Function Interface (FFI)</a></li><li class="chapter-item expanded "><a href="../../advanced-features/writing-system-packages.html"><strong aria-hidden="true">5.3.</strong> Writing system packages</a></li></ol></li><li class="chapter-item expanded "><a href="../../roadmap.html"><strong aria-hidden="true">6.</strong> Roadmap</a></li><li class="chapter-item expanded "><a href="../../the-zen.html"><strong aria-hidden="true">7.</strong> The Zen</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Pen programming language</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/pen-lang/pen" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/pen-lang/pen/edit/main/doc/src/references/standard-packages/regex.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main><div class="sidetoc"><nav class="pagetoc"></nav></div>
+                        <h1 id="regex-package"><a class="header" href="#regex-package"><code>Regex</code> package</a></h1>
+<p>This package provides regular expressions.</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
+<h2 id="install"><a class="header" href="#install">Install</a></h2>
+<pre><code class="language-json">{
+  &quot;dependencies&quot;: {
+    &quot;Regex&quot;: &quot;pen:///regex&quot;
+  } 
+}
+</code></pre>
+<h2 id="regexexpression-module"><a class="header" href="#regexexpression-module"><code>Regex'Expression</code> module</a></h2>
+<p>This module provides functions to compile and match regular expressions.</p>
+<h3 id="types"><a class="header" href="#types">Types</a></h3>
+<h4 id="expression"><a class="header" href="#expression"><code>Expression</code></a></h4>
+<p>A regular expression.</p>
+<pre><code class="language-pen">type Expression {
+  # ...
+}
+</code></pre>
+<h3 id="functions"><a class="header" href="#functions">Functions</a></h3>
+<h4 id="new"><a class="header" href="#new"><code>New</code></a></h4>
+<p>Compile a regular expression.</p>
+<pre><code class="language-pen">\(s string) Expression | error
+</code></pre>
+<h4 id="ismatch"><a class="header" href="#ismatch"><code>IsMatch</code></a></h4>
+<p>Check if a regular expression matches with a string or not.</p>
+<pre><code class="language-pen">\(e Expression, s string) boolean
+</code></pre>
+<h4 id="match"><a class="header" href="#match"><code>Match</code></a></h4>
+<p>Match a regular expression with a string and return matched groups.</p>
+<pre><code class="language-pen">\(e Expression, s string) [string | none] | none
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../references/standard-packages/random.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="../../references/standard-packages/sql.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../references/standard-packages/random.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="../../references/standard-packages/sql.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="../../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        <script type="text/javascript" src="../../theme/pagetoc.js"></script>
+        <script type="text/javascript" src="../../theme/custom-highlight.js"></script>
+    </body>
+</html>
