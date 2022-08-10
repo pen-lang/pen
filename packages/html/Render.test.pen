@@ -144,3 +144,16 @@ RenderTextNode = \() none | error {
       == "<html>foo</html>",
   )
 }
+
+RenderEscapedTextNode = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node "<html />"],
+      },
+    )?
+      == "<html>foo</html>",
+  )
+}
