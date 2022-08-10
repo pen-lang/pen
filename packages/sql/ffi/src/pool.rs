@@ -15,21 +15,17 @@ struct PoolOptions {
     connect_timeout: ffi::Number,
 }
 
+#[ffi::into_any(fn = "_pen_sql_pool_to_any")]
 #[repr(C)]
-#[derive(Default)]
-struct Pool {
-    inner: ffi::Any,
-}
+struct Pool(ffi::Arc<ffi::Any>);
 
 impl Pool {
     pub fn new(pool: AnyPool) -> Self {
-        Self {
-            inner: PoolInner { pool }.into(),
-        }
+        Self(ffi::Arc::new(PoolInner { pool }.into()))
     }
 
     pub fn as_inner(&self) -> &AnyPool {
-        let pool: &PoolInner = TryFrom::try_from(&self.inner).unwrap();
+        let pool: &PoolInner = TryFrom::try_from(&*self.0).unwrap();
 
         &pool.pool
     }
@@ -46,7 +42,7 @@ struct PoolInner {
 async fn _pen_sql_pool_create(
     uri: ffi::ByteString,
     options: ffi::Arc<PoolOptions>,
-) -> Result<ffi::Arc<Pool>, Box<dyn Error>> {
+) -> Result<Pool, Box<dyn Error>> {
     Ok(Pool::new(
         sqlx::any::AnyPoolOptions::new()
             .min_connections(f64::from(options.min_connections) as u32)
@@ -56,16 +52,15 @@ async fn _pen_sql_pool_create(
             ))
             .connect(str::from_utf8(uri.as_slice())?)
             .await?,
-    )
-    .into())
+    ))
 }
 
 #[ffi::bindgen]
 async fn _pen_sql_pool_query(
-    pool: ffi::Arc<Pool>,
+    pool: Pool,
     query: ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
-) -> Result<ffi::Arc<ffi::List>, Box<dyn Error>> {
+    arguments: ffi::List,
+) -> Result<ffi::List, Box<dyn Error>> {
     let mut rows = ffi::List::new();
 
     for row in pool
@@ -82,16 +77,16 @@ async fn _pen_sql_pool_query(
                 columns,
                 if row.try_get_raw(index)?.is_null() {
                     ffi::None::default().into()
-                } else if let Ok(boolean) = row.try_get::<bool, _>(index) {
-                    ffi::Boolean::from(boolean).into()
-                } else if let Ok(number) = row.try_get::<i32, _>(index) {
+                } else if let Ok(number) = row.try_get::<f64, _>(index) {
+                    ffi::Number::from(number).into()
+                } else if let Ok(number) = row.try_get::<f32, _>(index) {
                     ffi::Number::from(number as f64).into()
                 } else if let Ok(number) = row.try_get::<i64, _>(index) {
                     ffi::Number::from(number as f64).into()
-                } else if let Ok(number) = row.try_get::<f32, _>(index) {
+                } else if let Ok(number) = row.try_get::<i32, _>(index) {
                     ffi::Number::from(number as f64).into()
-                } else if let Ok(number) = row.try_get::<f64, _>(index) {
-                    ffi::Number::from(number).into()
+                } else if let Ok(boolean) = row.try_get::<bool, _>(index) {
+                    ffi::Boolean::from(boolean).into()
                 } else if let Ok(string) = row.try_get::<&str, _>(index) {
                     ffi::Any::from(ffi::ByteString::from(string))
                 } else {
@@ -108,9 +103,9 @@ async fn _pen_sql_pool_query(
 
 #[ffi::bindgen]
 async fn _pen_sql_pool_execute(
-    pool: ffi::Arc<Pool>,
+    pool: Pool,
     query: ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
+    arguments: ffi::List,
 ) -> Result<ffi::Number, Box<dyn Error>> {
     Ok((pool
         .as_inner()
@@ -122,7 +117,7 @@ async fn _pen_sql_pool_execute(
 
 async fn build_query(
     query: &ffi::ByteString,
-    arguments: ffi::Arc<ffi::List>,
+    arguments: ffi::List,
 ) -> Result<AnyQuery<'_>, Box<dyn Error>> {
     let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
     let arguments = ffi::future::stream::from_list(arguments);

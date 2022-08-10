@@ -3,52 +3,27 @@ import 'Tcp'AcceptedStream { AcceptedStream }
 import 'Tcp'Listener { Listener }
 import 'Tcp'Stream { Stream }
 
+# Create a listener bound to a server address.
 Bind = \(ctx Context, address string) Listener | error {
-  r = context'Inner(ctx).TcpBind(address)
-
-  if r.Error == "" {
-    r.Listener
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).TcpBind(address)
 }
 
+# Create a stream connected to a peer address.
 Connect = \(ctx Context, address string) Stream | error {
-  r = context'Inner(ctx).TcpConnect(address)
-
-  if r.Error == "" {
-    r.Stream
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).TcpConnect(address)
 }
 
+# Accept a client connection and create its stream.
 Accept = \(ctx Context, l Listener) AcceptedStream | error {
-  r = context'Inner(ctx).TcpAccept(l)
-
-  if r.Error == "" {
-    r.Stream
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).TcpAccept(l)
 }
 
+# Receive data from a peer through a stream with a size limit in bytes.
 Receive = \(ctx Context, s Stream, limit number) string | error {
-  r = context'Inner(ctx).TcpReceive(s, limit)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).TcpReceive(s, limit)
 }
 
+# Send data to a peer through a stream.
 Send = \(ctx Context, s Stream, data string) number | error {
-  r = context'Inner(ctx).TcpSend(s, data)
-
-  if r.Error == "" {
-    r.Value
-  } else {
-    error(r.Error)
-  }
+  context'Inner(ctx).TcpSend(s, data)
 }

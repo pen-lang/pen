@@ -8,8 +8,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "*" }
-rand = "0.8"
+ffi = { package = "pen-ffi", version = "*", features = ["std"] }
 
 [dev-dependencies]
 tempfile = "3"

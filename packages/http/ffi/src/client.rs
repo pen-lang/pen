@@ -6,16 +6,16 @@ use std::error::Error;
 async fn _pen_http_client_send(
     method: ffi::ByteString,
     uri: ffi::ByteString,
-    headers: ffi::Arc<HeaderMap>,
+    headers: HeaderMap,
     body: ffi::ByteString,
-) -> Result<ffi::Arc<Response>, Box<dyn Error>> {
+) -> Result<Response, Box<dyn Error>> {
     let mut builder = Some(
         hyper::Request::builder()
             .method(hyper::Method::from_bytes(method.as_slice())?)
             .uri(uri.as_slice()),
     );
 
-    let keys = ffi::future::stream::from_list(HeaderMap::keys(headers.clone()));
+    let keys = ffi::future::stream::from_list(headers.keys());
 
     futures::pin_mut!(keys);
 
@@ -25,10 +25,7 @@ async fn _pen_http_client_send(
         builder = builder
             .take()
             .unwrap()
-            .header(
-                key.as_slice(),
-                HeaderMap::get(headers.clone(), key.clone()).as_slice(),
-            )
+            .header(key.as_slice(), headers.get(key.clone()).as_slice())
             .into();
     }
 
@@ -42,13 +39,12 @@ async fn _pen_http_client_send(
     let mut headers = HeaderMap::new();
 
     for (key, value) in response.headers() {
-        headers = HeaderMap::set(headers, key.as_str(), value.as_bytes());
+        headers = headers.set(key.as_str(), value.as_bytes());
     }
 
     Ok(Response::new(
         response.status().as_u16() as f64,
         headers,
         hyper::body::to_bytes(response.into_body()).await?.to_vec(),
-    )
-    .into())
+    ))
 }
