@@ -64,6 +64,19 @@ RenderAttributeWithChild = \() none | error {
   )
 }
 
+RenderEscapedAttribute = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute Attribute{Key: "foo", Value: "\"<foo />"}],
+        Children: [Node],
+      },
+    )?
+      == "<html foo=\"&quot;&lt;foo /&gt;\"/>",
+  )
+}
+
 RenderChild = \() none | error {
   Assert'True(
     Render(

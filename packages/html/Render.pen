@@ -2,6 +2,7 @@ import Core'String
 
 import 'Node { Attribute, Node, Tag }
 
+import foreign "c" _pen_html_encode_attribute \(string) string
 import foreign "c" _pen_html_encode_text \(string) string
 
 # Render an HTML node.
@@ -35,7 +36,10 @@ Render = \(n Node) string | error {
 }
 
 renderAttributes = \(attrs [Attribute]) [string] {
-  [string String'Concatenate([string a().Key, "=\"", a().Value, "\""]) for a in attrs]
+  [string
+    String'Concatenate([string a().Key, "=\"", _pen_html_encode_attribute(a().Value), "\""])
+    for a in attrs
+  ]
 }
 
 renderChildren = \(ns [Node]) [string] | error {
