@@ -2,10 +2,12 @@ import Core'String
 
 import 'Node { Attribute, Node, Tag }
 
+import foreign "c" _pen_html_encode_text \(string) string
+
 # Render an HTML node.
 Render = \(n Node) string | error {
   if n = n as string {
-    n
+    _pen_html_encode_text(n)
   } else {
     attrs = renderAttributes(n.Attributes)
 
