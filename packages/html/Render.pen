@@ -23,6 +23,7 @@ Render = \(n Node) string | error {
     String'Concatenate(
       [string
         "<",
+        # TODO Validate tag names.
         n.Tag,
         ...if size(attrs) == 0 {
           [string]
@@ -37,6 +38,7 @@ Render = \(n Node) string | error {
 
 renderAttributes = \(attrs [Attribute]) [string] {
   [string
+    # TODO Validate attribute keys.
     String'Concatenate([string a().Key, "=\"", _pen_html_encode_attribute(a().Value), "\""])
     for a in attrs
   ]
