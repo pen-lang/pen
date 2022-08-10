@@ -1,7 +1,7 @@
 import Test'Assert
 
-import 'Render { Render }
 import 'Node { Node, Attribute, Element }
+import 'Render { Render }
 
 RenderElement = \() none | error {
   Assert'True(
