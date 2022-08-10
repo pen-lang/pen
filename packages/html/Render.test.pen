@@ -154,6 +154,6 @@ RenderEscapedTextNode = \() none | error {
         Children: [Node "<html />"],
       },
     )?
-      == "<html>foo</html>",
+      == "<html>&lt;html /&gt;</html>",
   )
 }
