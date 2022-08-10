@@ -5,6 +5,7 @@ import foreign "c" _pen_core_utf8_find \(string, string) number
 import foreign "c" _pen_core_utf8_length \(string) number
 import foreign "c" _pen_core_utf8_has_prefix \(string, string) boolean
 import foreign "c" _pen_core_utf8_has_suffix \(string, string) boolean
+import foreign "c" _pen_core_utf8_replace \(string, string, string) string
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_split \(string, string) [string]
 import foreign "c" _pen_core_utf8_to_lowercase \(string) string
@@ -40,6 +41,11 @@ HasSuffix = \(s string, pat string) boolean {
 # Return a length of a string.
 Length = \(s string) number {
   _pen_core_utf8_length(s)
+}
+
+# Replace a pattern in a string.
+Replace = \(s string, pattern string, replacement string) string {
+  _pen_core_utf8_replace(s, pattern, replacement)
 }
 
 # Slice a string.
