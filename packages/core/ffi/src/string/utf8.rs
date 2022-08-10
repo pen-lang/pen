@@ -122,6 +122,27 @@ fn get_utf8_byte_index(string: &str, index: usize) -> usize {
 }
 
 #[ffi::bindgen]
+fn _pen_core_utf8_replace(
+    original: ffi::ByteString,
+    pattern: ffi::ByteString,
+    replacement: ffi::ByteString,
+) -> ffi::ByteString {
+    if let Ok(string) = str::from_utf8(original.as_slice()) {
+        if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
+            if let Ok(replacement) = str::from_utf8(replacement.as_slice()) {
+                string.replace(pattern, replacement).into()
+            } else {
+                original
+            }
+        } else {
+            original
+        }
+    } else {
+        original
+    }
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_to_lowercase(string: ffi::ByteString) -> ffi::ByteString {
     convert_string(string, |string| string.to_lowercase())
 }
