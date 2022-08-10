@@ -1,4 +1,5 @@
 import Core'String
+import Core'String'Utf8
 
 import 'Value { Value }
 
@@ -31,6 +32,9 @@ value = \(v Value) [string] {
 }
 
 string_ = \(s string) [string] {
+  s = Utf8'Replace(s, "\\", "\\\\")
+  s = Utf8'Replace(s, "\"", "\\\"")
+
   [string "\"", s, "\""]
 }
 
