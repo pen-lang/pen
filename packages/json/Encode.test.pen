@@ -23,7 +23,13 @@ EncodeString = \() none | error {
   Assert'True(Encode(Value'New("foo")) == "\"foo\"")
 }
 
-# TODO Escape special characters in strings.
+EncodeEscapedDoubleQuoteInstring = \() none | error {
+  Assert'True(Encode(Value'New("\"")) == "\"\\\"\"")
+}
+
+EncodeEscapedBackSlashInstring = \() none | error {
+  Assert'True(Encode(Value'New("\\")) == "\"\\\\\"")
+}
 
 EncodeArrayWithNoElement = \() none | error {
   Assert'True(Encode(Value'New([Value])) == "[]")
