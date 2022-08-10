@@ -1,5 +1,8 @@
+import Core'Boolean
 import Core'Character
 import Core'Number
+import Core'String'Byte'View { View }
+import Core'Utf8
 
 Tag = \(s string) boolean {
   true
@@ -9,9 +12,26 @@ Key = \(s string) boolean {
   Tag(s)
 }
 
+name = \(s string) boolean {
+  if Utf8'Length(s) == 0 {
+    false
+  } else {
+    nameView(View'New(s))
+  }
+}
+
+nameView = \(v View) boolean {
+  if View'Length(v) == 0 {
+    true
+  } else {
+    Boolean'Any([boolean View'HasPrefix(v, s) for s in validCharacters()])
+      & nameView(View'Seek(v, 1))
+  }
+}
+
 validCharacters = \() [string] {
   [string
-    [string
+    ...[string
       Character'FromCodePoint(n)
       for n in Number'Range(Character'ToCodePoint("a"), Character'ToCodePoint("z"))
     ],
