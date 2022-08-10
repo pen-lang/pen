@@ -23,11 +23,11 @@ EncodeString = \() none | error {
   Assert'True(Encode(Value'New("foo")) == "\"foo\"")
 }
 
-EncodeEscapedDoubleQuoteInstring = \() none | error {
+EncodeEscapedDoubleQuoteInString = \() none | error {
   Assert'True(Encode(Value'New("\"")) == "\"\\\"\"")
 }
 
-EncodeEscapedBackSlashInstring = \() none | error {
+EncodeEscapedBackSlashInString = \() none | error {
   Assert'True(Encode(Value'New("\\")) == "\"\\\\\"")
 }
 
