@@ -1,0 +1,7 @@
+Tag = \(s string) boolean {
+  true
+}
+
+Key = \(s string) boolean {
+  true
+}
