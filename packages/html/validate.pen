@@ -4,13 +4,9 @@ import Core'Number
 import Core'String'Byte'View { View }
 import Core'Utf8
 
-Tag = \(s string) boolean {
-  true
-}
+Tag = \(s string) boolean { name(s) }
 
-Key = \(s string) boolean {
-  Tag(s)
-}
+Key = \(s string) boolean { name(s) }
 
 name = \(s string) boolean {
   if Utf8'Length(s) == 0 {
