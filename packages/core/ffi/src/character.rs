@@ -6,7 +6,7 @@ const INVALID_CODE_POINT: ffi::Number = ffi::Number::new(f64::NAN);
 fn _pen_core_character_from_code_point(code_point: ffi::Number) -> ffi::ByteString {
     char::from_u32(f64::from(code_point) as u32)
         .map(ffi::ByteString::from)
-        .unwrap_or_else(|| ffi::ByteString::default())
+        .unwrap_or_else(ffi::ByteString::default)
 }
 
 #[ffi::bindgen]
@@ -17,7 +17,6 @@ fn _pen_core_character_to_code_point(string: ffi::ByteString) -> ffi::Number {
             .next()
             .map(|character| (character as u32 as f64).into())
             .unwrap_or(INVALID_CODE_POINT)
-            .into()
     } else {
         INVALID_CODE_POINT
     }
