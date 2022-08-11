@@ -16,6 +16,18 @@ RenderElement = \() none | error {
   )
 }
 
+RenderInvalidElement = \() none | error {
+  Assert'Error(
+    Render(
+      Element{
+        Tag: "<html/>",
+        Attributes: [Attribute],
+        Children: [Node],
+      },
+    ),
+  )
+}
+
 RenderAttribute = \() none | error {
   Assert'True(
     Render(
@@ -61,6 +73,20 @@ RenderAttributeWithChild = \() none | error {
       },
     )?
       == "<html foo=\"bar\"><body/></html>",
+  )
+}
+
+RenderInvalidAttribute = \() none | error {
+  Assert'Error(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute
+          Attribute{Key: "<foo/>", Value: "bar"},
+        ],
+        Children: [Node],
+      },
+    ),
   )
 }
 
