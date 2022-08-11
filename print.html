@@ -1054,11 +1054,21 @@ They can be converted from and into integers represented in IEEE-754 of a
 <p>Return true if all of given booleans are true or false otherwise.</p>
 <pre><code class="language-pen">\(bs [boolean]) boolean
 </code></pre>
-<h2 id="corelist-module"><a class="header" href="#corelist-module"><code>Core'List</code> module</a></h2>
-<p>This module provides common list operations.</p>
+<h2 id="corecharacter-module"><a class="header" href="#corecharacter-module"><code>Core'Character</code> module</a></h2>
 <h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
+<h4 id="fromcodepoint"><a class="header" href="#fromcodepoint"><code>FromCodePoint</code></a></h4>
+<pre><code class="language-pen">\(n number) string
+</code></pre>
+<h4 id="tocodepoint"><a class="header" href="#tocodepoint"><code>ToCodePoint</code></a></h4>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h2 id="corelist-module"><a class="header" href="#corelist-module"><code>Core'List</code> module</a></h2>
+<p>This module provides common list operations.</p>
+<h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
+<p>No types are defined.</p>
+<h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
 <h4 id="first"><a class="header" href="#first"><code>First</code></a></h4>
 <p>Get the first element in a list. If a list is empty, it returns a fallback value.</p>
 <pre><code class="language-pen">\(xs [any], fallback any) any
@@ -1081,9 +1091,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corenumber-module"><a class="header" href="#corenumber-module"><code>Core'Number</code> module</a></h2>
 <p>This module provides common number operations.</p>
-<h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
+<h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
+<h3 id="functions-6"><a class="header" href="#functions-6">Functions</a></h3>
 <h4 id="absolute"><a class="header" href="#absolute"><code>Absolute</code></a></h4>
 <p>Calculate an absolute value.</p>
 <pre><code class="language-pen">\(x number) number
@@ -1170,9 +1180,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corestring-module"><a class="header" href="#corestring-module"><code>Core'String</code> module</a></h2>
 <p>This module provides common string operations.</p>
-<h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
+<h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-6"><a class="header" href="#functions-6">Functions</a></h3>
+<h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
 <h4 id="concatenate"><a class="header" href="#concatenate"><code>Concatenate</code></a></h4>
 <p>Concatenate strings.</p>
 <pre><code class="language-pen">\(strings [string]) string
@@ -1187,9 +1197,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corestringbyte-module"><a class="header" href="#corestringbyte-module"><code>Core'String'Byte</code> module</a></h2>
 <p>This module provides operations for strings as byte arrays.</p>
-<h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
+<h3 id="types-8"><a class="header" href="#types-8">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
+<h3 id="functions-8"><a class="header" href="#functions-8">Functions</a></h3>
 <h4 id="length"><a class="header" href="#length"><code>Length</code></a></h4>
 <p>Return a length of a string.</p>
 <pre><code class="language-pen">\(s string) number
@@ -1201,14 +1211,14 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h2 id="corestringbyteview-module"><a class="header" href="#corestringbyteview-module"><code>Core'String'Byte'View</code> module</a></h2>
 <p>This module provides views of strings as byte arrays.
 By using those views, you can apply operations to strings without copying them.</p>
-<h3 id="types-8"><a class="header" href="#types-8">Types</a></h3>
+<h3 id="types-9"><a class="header" href="#types-9">Types</a></h3>
 <h4 id="view"><a class="header" href="#view"><code>View</code></a></h4>
 <p>A view of a string</p>
 <pre><code class="language-pen">type View {
   # ...
 }
 </code></pre>
-<h3 id="functions-8"><a class="header" href="#functions-8">Functions</a></h3>
+<h3 id="functions-9"><a class="header" href="#functions-9">Functions</a></h3>
 <h4 id="new"><a class="header" href="#new"><code>New</code></a></h4>
 <p>Create a view of a string.</p>
 <pre><code class="language-pen">\(s string) View
@@ -1247,9 +1257,9 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="corestringutf8-module"><a class="header" href="#corestringutf8-module"><code>Core'String'Utf8</code> module</a></h2>
 <p>This module provides operations for strings encoded in UTF-8.</p>
-<h3 id="types-9"><a class="header" href="#types-9">Types</a></h3>
+<h3 id="types-10"><a class="header" href="#types-10">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-9"><a class="header" href="#functions-9">Functions</a></h3>
+<h3 id="functions-10"><a class="header" href="#functions-10">Functions</a></h3>
 <h4 id="contains"><a class="header" href="#contains"><code>Contains</code></a></h4>
 <p>Check if a string contains a pattern.</p>
 <pre><code class="language-pen">\(s string, pat string) boolean
@@ -1335,7 +1345,7 @@ By using those views, you can apply operations to strings without copying them.<
 <li><code>foo</code>: a positional flag of a value <code>foo</code></li>
 </ul>
 <p>Named flags and positional flags are separated by <code>--</code> optionally.</p>
-<h3 id="types-10"><a class="header" href="#types-10">Types</a></h3>
+<h3 id="types-11"><a class="header" href="#types-11">Types</a></h3>
 <h4 id="set"><a class="header" href="#set"><code>Set</code></a></h4>
 <p>A set of flags</p>
 <pre><code class="language-pen">type Set {
@@ -1343,7 +1353,7 @@ By using those views, you can apply operations to strings without copying them.<
   Positional [string]
 }
 </code></pre>
-<h3 id="functions-10"><a class="header" href="#functions-10">Functions</a></h3>
+<h3 id="functions-11"><a class="header" href="#functions-11">Functions</a></h3>
 <h4 id="parse-1"><a class="header" href="#parse-1"><code>Parse</code></a></h4>
 <p>Parse flags.</p>
 <pre><code class="language-pen">\(ss [string]) Set | error
@@ -1362,23 +1372,23 @@ By using those views, you can apply operations to strings without copying them.<
 }
 </code></pre>
 <h2 id="jsondecode-module"><a class="header" href="#jsondecode-module"><code>Json'Decode</code> module</a></h2>
-<h3 id="types-11"><a class="header" href="#types-11">Types</a></h3>
+<h3 id="types-12"><a class="header" href="#types-12">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-11"><a class="header" href="#functions-11">Functions</a></h3>
+<h3 id="functions-12"><a class="header" href="#functions-12">Functions</a></h3>
 <h4 id="decode"><a class="header" href="#decode"><code>Decode</code></a></h4>
 <p>Decode a string into a JSON value.</p>
 <pre><code class="language-pen">\(s string) Value | error
 </code></pre>
 <h2 id="jsonencode-module"><a class="header" href="#jsonencode-module"><code>Json'Encode</code> module</a></h2>
-<h3 id="types-12"><a class="header" href="#types-12">Types</a></h3>
+<h3 id="types-13"><a class="header" href="#types-13">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-12"><a class="header" href="#functions-12">Functions</a></h3>
+<h3 id="functions-13"><a class="header" href="#functions-13">Functions</a></h3>
 <h4 id="encode"><a class="header" href="#encode"><code>Encode</code></a></h4>
 <p>Encode a JSON value.</p>
 <pre><code class="language-pen">\(v Value) string
 </code></pre>
 <h2 id="jsonvalue-module"><a class="header" href="#jsonvalue-module"><code>Json'Value</code> module</a></h2>
-<h3 id="types-13"><a class="header" href="#types-13">Types</a></h3>
+<h3 id="types-14"><a class="header" href="#types-14">Types</a></h3>
 <h4 id="value"><a class="header" href="#value"><code>Value</code></a></h4>
 <p>A JSON value</p>
 <pre><code class="language-pen">type Value {
@@ -1389,7 +1399,7 @@ By using those views, you can apply operations to strings without copying them.<
 <p>A raw JSON value represented by built-in types</p>
 <pre><code class="language-pen">type Raw = boolean | none | number | string | [Value] | {string: Value}
 </code></pre>
-<h3 id="functions-13"><a class="header" href="#functions-13">Functions</a></h3>
+<h3 id="functions-14"><a class="header" href="#functions-14">Functions</a></h3>
 <h4 id="new-1"><a class="header" href="#new-1"><code>New</code></a></h4>
 <p>Create a JSON value.</p>
 <pre><code class="language-pen">\(r Raw) Value
@@ -1412,7 +1422,7 @@ By using those views, you can apply operations to strings without copying them.<
 }
 </code></pre>
 <h2 id="htmlnode-module"><a class="header" href="#htmlnode-module"><code>Html'Node</code> module</a></h2>
-<h3 id="types-14"><a class="header" href="#types-14">Types</a></h3>
+<h3 id="types-15"><a class="header" href="#types-15">Types</a></h3>
 <h4 id="node"><a class="header" href="#node"><code>Node</code></a></h4>
 <p>An HTML node</p>
 <pre><code class="language-pen">type Node = Element | string
@@ -1432,12 +1442,12 @@ By using those views, you can apply operations to strings without copying them.<
   Value string
 }
 </code></pre>
-<h3 id="functions-14"><a class="header" href="#functions-14">Functions</a></h3>
+<h3 id="functions-15"><a class="header" href="#functions-15">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="htmlrender-module"><a class="header" href="#htmlrender-module"><code>Html'Render</code> module</a></h2>
-<h3 id="types-15"><a class="header" href="#types-15">Types</a></h3>
+<h3 id="types-16"><a class="header" href="#types-16">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-15"><a class="header" href="#functions-15">Functions</a></h3>
+<h3 id="functions-16"><a class="header" href="#functions-16">Functions</a></h3>
 <h4 id="render"><a class="header" href="#render"><code>Render</code></a></h4>
 <p>Render an HTML node.</p>
 <pre><code class="language-pen">\(n Node) string | error
@@ -1457,23 +1467,23 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="httpclient-module"><a class="header" href="#httpclient-module"><code>Http'Client</code> module</a></h2>
 <p>This module provides an HTTP client.</p>
-<h3 id="types-16"><a class="header" href="#types-16">Types</a></h3>
+<h3 id="types-17"><a class="header" href="#types-17">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-16"><a class="header" href="#functions-16">Functions</a></h3>
+<h3 id="functions-17"><a class="header" href="#functions-17">Functions</a></h3>
 <h4 id="send"><a class="header" href="#send"><code>Send</code></a></h4>
 <p>Send an HTTP request.</p>
 <pre><code class="language-pen">\(ctx Context, r Request) Response | error
 </code></pre>
 <h2 id="httpcontext-module"><a class="header" href="#httpcontext-module"><code>Http'Context</code> module</a></h2>
-<h3 id="types-17"><a class="header" href="#types-17">Types</a></h3>
+<h3 id="types-18"><a class="header" href="#types-18">Types</a></h3>
 <h4 id="context"><a class="header" href="#context"><code>Context</code></a></h4>
 <p>An HTTP context</p>
 <pre><code class="language-pen">type Context = context'Context
 </code></pre>
-<h3 id="functions-17"><a class="header" href="#functions-17">Functions</a></h3>
+<h3 id="functions-18"><a class="header" href="#functions-18">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httprequest-module"><a class="header" href="#httprequest-module"><code>Http'Request</code> module</a></h2>
-<h3 id="types-18"><a class="header" href="#types-18">Types</a></h3>
+<h3 id="types-19"><a class="header" href="#types-19">Types</a></h3>
 <h4 id="request"><a class="header" href="#request"><code>Request</code></a></h4>
 <p>An HTTP request</p>
 <pre><code class="language-pen">type Request {
@@ -1483,10 +1493,10 @@ By using those views, you can apply operations to strings without copying them.<
   Body string
 }
 </code></pre>
-<h3 id="functions-18"><a class="header" href="#functions-18">Functions</a></h3>
+<h3 id="functions-19"><a class="header" href="#functions-19">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httpresponse-module"><a class="header" href="#httpresponse-module"><code>Http'Response</code> module</a></h2>
-<h3 id="types-19"><a class="header" href="#types-19">Types</a></h3>
+<h3 id="types-20"><a class="header" href="#types-20">Types</a></h3>
 <h4 id="response"><a class="header" href="#response"><code>Response</code></a></h4>
 <p>An HTTP response</p>
 <pre><code class="language-pen">type Response {
@@ -1495,13 +1505,13 @@ By using those views, you can apply operations to strings without copying them.<
   Body string
 }
 </code></pre>
-<h3 id="functions-19"><a class="header" href="#functions-19">Functions</a></h3>
+<h3 id="functions-20"><a class="header" href="#functions-20">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="httpserver-module"><a class="header" href="#httpserver-module"><code>Http'Server</code> module</a></h2>
 <p>This module provides an HTTP server.</p>
-<h3 id="types-20"><a class="header" href="#types-20">Types</a></h3>
+<h3 id="types-21"><a class="header" href="#types-21">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-20"><a class="header" href="#functions-20">Functions</a></h3>
+<h3 id="functions-21"><a class="header" href="#functions-21">Functions</a></h3>
 <h4 id="serve"><a class="header" href="#serve"><code>Serve</code></a></h4>
 <p>Run an HTTP service.</p>
 <pre><code class="language-pen">\(ctx Context, address string, callback \(Request) Response) none | error
@@ -1520,17 +1530,17 @@ By using those views, you can apply operations to strings without copying them.<
 }
 </code></pre>
 <h2 id="oscontext-module"><a class="header" href="#oscontext-module"><code>Os'Context</code> module</a></h2>
-<h3 id="types-21"><a class="header" href="#types-21">Types</a></h3>
+<h3 id="types-22"><a class="header" href="#types-22">Types</a></h3>
 <h4 id="context-1"><a class="header" href="#context-1"><code>Context</code></a></h4>
 <p>A context of an operating system.</p>
 <pre><code class="language-pen">type Context = context'Context
 </code></pre>
-<h3 id="functions-21"><a class="header" href="#functions-21">Functions</a></h3>
+<h3 id="functions-22"><a class="header" href="#functions-22">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="osdirectory-module"><a class="header" href="#osdirectory-module"><code>Os'Directory</code> module</a></h2>
-<h3 id="types-22"><a class="header" href="#types-22">Types</a></h3>
+<h3 id="types-23"><a class="header" href="#types-23">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-22"><a class="header" href="#functions-22">Functions</a></h3>
+<h3 id="functions-23"><a class="header" href="#functions-23">Functions</a></h3>
 <h4 id="read"><a class="header" href="#read"><code>Read</code></a></h4>
 <p>Read a directory and return file paths it contains.</p>
 <pre><code class="language-pen">\(ctx Context, path string) [string] | error
@@ -1544,9 +1554,9 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, path string) none | error
 </code></pre>
 <h2 id="osenvironment-module"><a class="header" href="#osenvironment-module"><code>Os'Environment</code> module</a></h2>
-<h3 id="types-23"><a class="header" href="#types-23">Types</a></h3>
+<h3 id="types-24"><a class="header" href="#types-24">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-23"><a class="header" href="#functions-23">Functions</a></h3>
+<h3 id="functions-24"><a class="header" href="#functions-24">Functions</a></h3>
 <h4 id="arguments"><a class="header" href="#arguments"><code>Arguments</code></a></h4>
 <p>Get command line arguments.</p>
 <pre><code class="language-pen">\(ctx Context) [string]
@@ -1556,14 +1566,14 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, name string) string | error
 </code></pre>
 <h2 id="osfile-module"><a class="header" href="#osfile-module"><code>Os'File</code> module</a></h2>
-<h3 id="types-24"><a class="header" href="#types-24">Types</a></h3>
+<h3 id="types-25"><a class="header" href="#types-25">Types</a></h3>
 <h4 id="file"><a class="header" href="#file"><code>File</code></a></h4>
 <p>A file on a file system.</p>
 <pre><code class="language-pen">type File {
   # ...
 }
 </code></pre>
-<h3 id="functions-24"><a class="header" href="#functions-24">Functions</a></h3>
+<h3 id="functions-25"><a class="header" href="#functions-25">Functions</a></h3>
 <h4 id="stdin"><a class="header" href="#stdin"><code>StdIn</code></a></h4>
 <p>A file of standard input.</p>
 <pre><code class="language-pen">\() File
@@ -1613,17 +1623,17 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, path string) Metadata | error
 </code></pre>
 <h2 id="osfilemetadata-module"><a class="header" href="#osfilemetadata-module"><code>Os'File'Metadata</code> module</a></h2>
-<h3 id="types-25"><a class="header" href="#types-25">Types</a></h3>
+<h3 id="types-26"><a class="header" href="#types-26">Types</a></h3>
 <h4 id="metadata-1"><a class="header" href="#metadata-1"><code>Metadata</code></a></h4>
 <p>File metadata</p>
 <pre><code class="language-pen">type Metadata {
   Size number
 }
 </code></pre>
-<h3 id="functions-25"><a class="header" href="#functions-25">Functions</a></h3>
+<h3 id="functions-26"><a class="header" href="#functions-26">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="osfileopenoptions-module"><a class="header" href="#osfileopenoptions-module"><code>Os'File'OpenOptions</code> module</a></h2>
-<h3 id="types-26"><a class="header" href="#types-26">Types</a></h3>
+<h3 id="types-27"><a class="header" href="#types-27">Types</a></h3>
 <h4 id="openoptions"><a class="header" href="#openoptions"><code>OpenOptions</code></a></h4>
 <p>Options to open a file</p>
 <ul>
@@ -1643,23 +1653,23 @@ By using those views, you can apply operations to strings without copying them.<
   Write boolean
 }
 </code></pre>
-<h3 id="functions-26"><a class="header" href="#functions-26">Functions</a></h3>
+<h3 id="functions-27"><a class="header" href="#functions-27">Functions</a></h3>
 <h4 id="default"><a class="header" href="#default"><code>Default</code></a></h4>
 <p>Get default options to open a file. They do not include any permission.</p>
 <pre><code class="language-pen">\() OpenOptions
 </code></pre>
 <h2 id="osprocess-module"><a class="header" href="#osprocess-module"><code>Os'Process</code> module</a></h2>
-<h3 id="types-27"><a class="header" href="#types-27">Types</a></h3>
+<h3 id="types-28"><a class="header" href="#types-28">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-27"><a class="header" href="#functions-27">Functions</a></h3>
+<h3 id="functions-28"><a class="header" href="#functions-28">Functions</a></h3>
 <h4 id="exit"><a class="header" href="#exit"><code>Exit</code></a></h4>
 <p>Exit a current process.</p>
 <pre><code class="language-pen">\(ctx Context, code number) none
 </code></pre>
 <h2 id="ostcp-module"><a class="header" href="#ostcp-module"><code>Os'Tcp</code> module</a></h2>
-<h3 id="types-28"><a class="header" href="#types-28">Types</a></h3>
+<h3 id="types-29"><a class="header" href="#types-29">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-28"><a class="header" href="#functions-28">Functions</a></h3>
+<h3 id="functions-29"><a class="header" href="#functions-29">Functions</a></h3>
 <h4 id="bind"><a class="header" href="#bind"><code>Bind</code></a></h4>
 <p>Create a listener bound to a server address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Listener | error
@@ -1681,7 +1691,7 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, s Stream, data string) number | error
 </code></pre>
 <h2 id="ostcpacceptedstream-module"><a class="header" href="#ostcpacceptedstream-module"><code>Os'Tcp'AcceptedStream</code> module</a></h2>
-<h3 id="types-29"><a class="header" href="#types-29">Types</a></h3>
+<h3 id="types-30"><a class="header" href="#types-30">Types</a></h3>
 <h4 id="acceptedstream"><a class="header" href="#acceptedstream"><code>AcceptedStream</code></a></h4>
 <p>A TCP stream accepted on a server with a client address</p>
 <pre><code class="language-pen">type AcceptedStream {
@@ -1689,32 +1699,32 @@ By using those views, you can apply operations to strings without copying them.<
   Address string
 }
 </code></pre>
-<h3 id="functions-29"><a class="header" href="#functions-29">Functions</a></h3>
+<h3 id="functions-30"><a class="header" href="#functions-30">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="ostcplistener-module"><a class="header" href="#ostcplistener-module"><code>Os'Tcp'Listener</code> module</a></h2>
-<h3 id="types-30"><a class="header" href="#types-30">Types</a></h3>
+<h3 id="types-31"><a class="header" href="#types-31">Types</a></h3>
 <h4 id="listener"><a class="header" href="#listener"><code>Listener</code></a></h4>
 <p>A TCP listener to listen for client connections</p>
 <pre><code class="language-pen">type Listener {
   # ...
 }
 </code></pre>
-<h3 id="functions-30"><a class="header" href="#functions-30">Functions</a></h3>
+<h3 id="functions-31"><a class="header" href="#functions-31">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="ostcpstream-module"><a class="header" href="#ostcpstream-module"><code>Os'Tcp'Stream</code> module</a></h2>
-<h3 id="types-31"><a class="header" href="#types-31">Types</a></h3>
+<h3 id="types-32"><a class="header" href="#types-32">Types</a></h3>
 <h4 id="stream"><a class="header" href="#stream"><code>Stream</code></a></h4>
 <p>A TCP stream</p>
 <pre><code class="language-pen">type Stream {
   # ...
 }
 </code></pre>
-<h3 id="functions-31"><a class="header" href="#functions-31">Functions</a></h3>
+<h3 id="functions-32"><a class="header" href="#functions-32">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="ostime-module"><a class="header" href="#ostime-module"><code>Os'Time</code> module</a></h2>
-<h3 id="types-32"><a class="header" href="#types-32">Types</a></h3>
+<h3 id="types-33"><a class="header" href="#types-33">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-32"><a class="header" href="#functions-32">Functions</a></h3>
+<h3 id="functions-33"><a class="header" href="#functions-33">Functions</a></h3>
 <h4 id="now"><a class="header" href="#now"><code>Now</code></a></h4>
 <p>Fetch a current system time in milliseconds.</p>
 <pre><code class="language-pen">\(ctx Context) number
@@ -1724,9 +1734,9 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, milliseconds number) none
 </code></pre>
 <h2 id="osudp-module"><a class="header" href="#osudp-module"><code>Os'Udp</code> module</a></h2>
-<h3 id="types-33"><a class="header" href="#types-33">Types</a></h3>
+<h3 id="types-34"><a class="header" href="#types-34">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-33"><a class="header" href="#functions-33">Functions</a></h3>
+<h3 id="functions-34"><a class="header" href="#functions-34">Functions</a></h3>
 <h4 id="bind-1"><a class="header" href="#bind-1"><code>Bind</code></a></h4>
 <p>Bind a socket with a server address.</p>
 <pre><code class="language-pen">\(ctx Context, address string) Socket | error
@@ -1752,7 +1762,7 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(ctx Context, s Socket, data string, address string) number | error
 </code></pre>
 <h2 id="osudpdatagram-module"><a class="header" href="#osudpdatagram-module"><code>Os'Udp'Datagram</code> module</a></h2>
-<h3 id="types-34"><a class="header" href="#types-34">Types</a></h3>
+<h3 id="types-35"><a class="header" href="#types-35">Types</a></h3>
 <h4 id="datagram"><a class="header" href="#datagram"><code>Datagram</code></a></h4>
 <p>UDP datagram</p>
 <pre><code class="language-pen">type Datagram {
@@ -1760,17 +1770,17 @@ By using those views, you can apply operations to strings without copying them.<
   Address string
 }
 </code></pre>
-<h3 id="functions-34"><a class="header" href="#functions-34">Functions</a></h3>
+<h3 id="functions-35"><a class="header" href="#functions-35">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="osudpsocket-module"><a class="header" href="#osudpsocket-module"><code>Os'Udp'Socket</code> module</a></h2>
-<h3 id="types-35"><a class="header" href="#types-35">Types</a></h3>
+<h3 id="types-36"><a class="header" href="#types-36">Types</a></h3>
 <h4 id="socket"><a class="header" href="#socket"><code>Socket</code></a></h4>
 <p>UDP socket</p>
 <pre><code class="language-pen">type Socket {
   # ...
 }
 </code></pre>
-<h3 id="functions-35"><a class="header" href="#functions-35">Functions</a></h3>
+<h3 id="functions-36"><a class="header" href="#functions-36">Functions</a></h3>
 <p>No functions are defined.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="random-package"><a class="header" href="#random-package"><code>Random</code> package</a></h1>
 <p>This package provides random number generation.</p>
@@ -1786,17 +1796,17 @@ By using those views, you can apply operations to strings without copying them.<
 }
 </code></pre>
 <h2 id="randomcontext-module"><a class="header" href="#randomcontext-module"><code>Random'Context</code> module</a></h2>
-<h3 id="types-36"><a class="header" href="#types-36">Types</a></h3>
+<h3 id="types-37"><a class="header" href="#types-37">Types</a></h3>
 <h4 id="context-2"><a class="header" href="#context-2"><code>Context</code></a></h4>
 <p>A context of random number generation.</p>
 <pre><code class="language-pen">type Context = context'Context
 </code></pre>
-<h3 id="functions-36"><a class="header" href="#functions-36">Functions</a></h3>
+<h3 id="functions-37"><a class="header" href="#functions-37">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="randomrandom-module"><a class="header" href="#randomrandom-module"><code>Random'Random</code> module</a></h2>
-<h3 id="types-37"><a class="header" href="#types-37">Types</a></h3>
+<h3 id="types-38"><a class="header" href="#types-38">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-37"><a class="header" href="#functions-37">Functions</a></h3>
+<h3 id="functions-38"><a class="header" href="#functions-38">Functions</a></h3>
 <h4 id="number-1"><a class="header" href="#number-1"><code>Number</code></a></h4>
 <p>Generate a random number in a range of [0, 1).</p>
 <pre><code class="language-pen">\(ctx Context) number
@@ -1816,14 +1826,14 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="regexexpression-module"><a class="header" href="#regexexpression-module"><code>Regex'Expression</code> module</a></h2>
 <p>This module provides functions to compile and match regular expressions.</p>
-<h3 id="types-38"><a class="header" href="#types-38">Types</a></h3>
+<h3 id="types-39"><a class="header" href="#types-39">Types</a></h3>
 <h4 id="expression"><a class="header" href="#expression"><code>Expression</code></a></h4>
 <p>A regular expression.</p>
 <pre><code class="language-pen">type Expression {
   # ...
 }
 </code></pre>
-<h3 id="functions-38"><a class="header" href="#functions-38">Functions</a></h3>
+<h3 id="functions-39"><a class="header" href="#functions-39">Functions</a></h3>
 <h4 id="new-2"><a class="header" href="#new-2"><code>New</code></a></h4>
 <p>Compile a regular expression.</p>
 <pre><code class="language-pen">\(s string) Expression | error
@@ -1850,20 +1860,20 @@ By using those views, you can apply operations to strings without copying them.<
 }
 </code></pre>
 <h2 id="sqlcontext-module"><a class="header" href="#sqlcontext-module"><code>Sql'Context</code> module</a></h2>
-<h3 id="types-39"><a class="header" href="#types-39">Types</a></h3>
+<h3 id="types-40"><a class="header" href="#types-40">Types</a></h3>
 <h4 id="context-3"><a class="header" href="#context-3"><code>Context</code></a></h4>
 <p>A SQL database context</p>
 <pre><code class="language-pen">type Context = context'Context
 </code></pre>
-<h3 id="functions-39"><a class="header" href="#functions-39">Functions</a></h3>
+<h3 id="functions-40"><a class="header" href="#functions-40">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="sqlpool-module"><a class="header" href="#sqlpool-module"><code>Sql'Pool</code> module</a></h2>
-<h3 id="types-40"><a class="header" href="#types-40">Types</a></h3>
+<h3 id="types-41"><a class="header" href="#types-41">Types</a></h3>
 <h4 id="pool"><a class="header" href="#pool"><code>Pool</code></a></h4>
 <p>A connection pool</p>
 <pre><code class="language-pen">type Pool = pool'Pool
 </code></pre>
-<h3 id="functions-40"><a class="header" href="#functions-40">Functions</a></h3>
+<h3 id="functions-41"><a class="header" href="#functions-41">Functions</a></h3>
 <h4 id="new-3"><a class="header" href="#new-3"><code>New</code></a></h4>
 <p>Create a connection pool.</p>
 <pre><code class="language-pen">\(context Context, uri string, options Options) Pool | error
@@ -1877,7 +1887,7 @@ By using those views, you can apply operations to strings without copying them.<
 <pre><code class="language-pen">\(context Context, pool Pool, query string, arguments [Value]) number | error
 </code></pre>
 <h2 id="sqlpooloptions-module"><a class="header" href="#sqlpooloptions-module"><code>Sql'Pool'Options</code> module</a></h2>
-<h3 id="types-41"><a class="header" href="#types-41">Types</a></h3>
+<h3 id="types-42"><a class="header" href="#types-42">Types</a></h3>
 <h4 id="options"><a class="header" href="#options"><code>Options</code></a></h4>
 <p>Connection pool options</p>
 <pre><code class="language-pen">type Options {
@@ -1886,15 +1896,15 @@ By using those views, you can apply operations to strings without copying them.<
   ConnectTimeout number
 }
 </code></pre>
-<h3 id="functions-41"><a class="header" href="#functions-41">Functions</a></h3>
+<h3 id="functions-42"><a class="header" href="#functions-42">Functions</a></h3>
 <p>No functions are defined.</p>
 <h2 id="sqlvalue-module"><a class="header" href="#sqlvalue-module"><code>Sql'Value</code> module</a></h2>
-<h3 id="types-42"><a class="header" href="#types-42">Types</a></h3>
+<h3 id="types-43"><a class="header" href="#types-43">Types</a></h3>
 <h4 id="value-1"><a class="header" href="#value-1"><code>Value</code></a></h4>
 <p>A value in a column</p>
 <pre><code class="language-pen">type Value = boolean | none | number | string
 </code></pre>
-<h3 id="functions-42"><a class="header" href="#functions-42">Functions</a></h3>
+<h3 id="functions-43"><a class="header" href="#functions-43">Functions</a></h3>
 <p>No functions are defined.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="test-package"><a class="header" href="#test-package"><code>Test</code> package</a></h1>
 <p>This package provides test utilities.</p>
@@ -1911,9 +1921,9 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="testassert-module"><a class="header" href="#testassert-module"><code>Test'Assert</code> module</a></h2>
 <p>This module provides a collection of assertion logic for testing.</p>
-<h3 id="types-43"><a class="header" href="#types-43">Types</a></h3>
+<h3 id="types-44"><a class="header" href="#types-44">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-43"><a class="header" href="#functions-43">Functions</a></h3>
+<h3 id="functions-44"><a class="header" href="#functions-44">Functions</a></h3>
 <h4 id="true"><a class="header" href="#true"><code>True</code></a></h4>
 <p>Assert that a condition is true.</p>
 <pre><code class="language-pen">\(x boolean) none | error
@@ -1930,7 +1940,7 @@ This function is useful to make unreachable codes fail.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <p>These are examples on how to write programs in Pen, and use its command line tools and standard packages.</p>
 <p>See also <a href="https://github.com/pen-lang/pen/tree/main/examples">our code repository</a> for examples of full applications and libraries.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="types-44"><a class="header" href="#types-44">Types</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="types-45"><a class="header" href="#types-45">Types</a></h1>
 <p>These are examples on how to use types and their values in Pen.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="number-2"><a class="header" href="#number-2">Number</a></h1>
 <h2 id="background"><a class="header" href="#background">Background</a></h2>

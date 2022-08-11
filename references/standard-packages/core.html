@@ -215,11 +215,21 @@ They can be converted from and into integers represented in IEEE-754 of a
 <p>Return true if all of given booleans are true or false otherwise.</p>
 <pre><code class="language-pen">\(bs [boolean]) boolean
 </code></pre>
-<h2 id="corelist-module"><a class="header" href="#corelist-module"><code>Core'List</code> module</a></h2>
-<p>This module provides common list operations.</p>
+<h2 id="corecharacter-module"><a class="header" href="#corecharacter-module"><code>Core'Character</code> module</a></h2>
 <h3 id="types-2"><a class="header" href="#types-2">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-2"><a class="header" href="#functions-2">Functions</a></h3>
+<h4 id="fromcodepoint"><a class="header" href="#fromcodepoint"><code>FromCodePoint</code></a></h4>
+<pre><code class="language-pen">\(n number) string
+</code></pre>
+<h4 id="tocodepoint"><a class="header" href="#tocodepoint"><code>ToCodePoint</code></a></h4>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h2 id="corelist-module"><a class="header" href="#corelist-module"><code>Core'List</code> module</a></h2>
+<p>This module provides common list operations.</p>
+<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<p>No types are defined.</p>
+<h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
 <h4 id="first"><a class="header" href="#first"><code>First</code></a></h4>
 <p>Get the first element in a list. If a list is empty, it returns a fallback value.</p>
 <pre><code class="language-pen">\(xs [any], fallback any) any
@@ -242,9 +252,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corenumber-module"><a class="header" href="#corenumber-module"><code>Core'Number</code> module</a></h2>
 <p>This module provides common number operations.</p>
-<h3 id="types-3"><a class="header" href="#types-3">Types</a></h3>
+<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-3"><a class="header" href="#functions-3">Functions</a></h3>
+<h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
 <h4 id="absolute"><a class="header" href="#absolute"><code>Absolute</code></a></h4>
 <p>Calculate an absolute value.</p>
 <pre><code class="language-pen">\(x number) number
@@ -331,9 +341,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corestring-module"><a class="header" href="#corestring-module"><code>Core'String</code> module</a></h2>
 <p>This module provides common string operations.</p>
-<h3 id="types-4"><a class="header" href="#types-4">Types</a></h3>
+<h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-4"><a class="header" href="#functions-4">Functions</a></h3>
+<h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
 <h4 id="concatenate"><a class="header" href="#concatenate"><code>Concatenate</code></a></h4>
 <p>Concatenate strings.</p>
 <pre><code class="language-pen">\(strings [string]) string
@@ -348,9 +358,9 @@ They can be converted from and into integers represented in IEEE-754 of a
 </code></pre>
 <h2 id="corestringbyte-module"><a class="header" href="#corestringbyte-module"><code>Core'String'Byte</code> module</a></h2>
 <p>This module provides operations for strings as byte arrays.</p>
-<h3 id="types-5"><a class="header" href="#types-5">Types</a></h3>
+<h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-5"><a class="header" href="#functions-5">Functions</a></h3>
+<h3 id="functions-6"><a class="header" href="#functions-6">Functions</a></h3>
 <h4 id="length"><a class="header" href="#length"><code>Length</code></a></h4>
 <p>Return a length of a string.</p>
 <pre><code class="language-pen">\(s string) number
@@ -362,14 +372,14 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h2 id="corestringbyteview-module"><a class="header" href="#corestringbyteview-module"><code>Core'String'Byte'View</code> module</a></h2>
 <p>This module provides views of strings as byte arrays.
 By using those views, you can apply operations to strings without copying them.</p>
-<h3 id="types-6"><a class="header" href="#types-6">Types</a></h3>
+<h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
 <h4 id="view"><a class="header" href="#view"><code>View</code></a></h4>
 <p>A view of a string</p>
 <pre><code class="language-pen">type View {
   # ...
 }
 </code></pre>
-<h3 id="functions-6"><a class="header" href="#functions-6">Functions</a></h3>
+<h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
 <h4 id="new"><a class="header" href="#new"><code>New</code></a></h4>
 <p>Create a view of a string.</p>
 <pre><code class="language-pen">\(s string) View
@@ -408,9 +418,9 @@ By using those views, you can apply operations to strings without copying them.<
 </code></pre>
 <h2 id="corestringutf8-module"><a class="header" href="#corestringutf8-module"><code>Core'String'Utf8</code> module</a></h2>
 <p>This module provides operations for strings encoded in UTF-8.</p>
-<h3 id="types-7"><a class="header" href="#types-7">Types</a></h3>
+<h3 id="types-8"><a class="header" href="#types-8">Types</a></h3>
 <p>No types are defined.</p>
-<h3 id="functions-7"><a class="header" href="#functions-7">Functions</a></h3>
+<h3 id="functions-8"><a class="header" href="#functions-8">Functions</a></h3>
 <h4 id="contains"><a class="header" href="#contains"><code>Contains</code></a></h4>
 <p>Check if a string contains a pattern.</p>
 <pre><code class="language-pen">\(s string, pat string) boolean
