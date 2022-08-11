@@ -29,7 +29,7 @@ pub fn reduce_operations(
                     pairs
                         .iter()
                         .position(&|pair: &(_, _, _)| {
-                            operator_priority(pair.0) < operator_priority(*operator)
+                            operator_priority(pair.0) <= operator_priority(*operator)
                         })
                         .unwrap_or(pairs.len()),
                 );
