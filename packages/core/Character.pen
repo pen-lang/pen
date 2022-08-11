@@ -1,0 +1,6 @@
+import foreign "c" _pen_core_character_to_code_point \(string) number
+import foreign "c" _pen_core_character_from_code_point \(number) string
+
+FromCodePoint = \(n number) string { _pen_core_character_from_code_point(n) }
+
+ToCodePoint = \(s string) number { _pen_core_character_to_code_point(s) }

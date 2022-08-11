@@ -1,6 +1,7 @@
 import Core'String
 
 import 'Node { Attribute, Node, Tag }
+import 'validate
 
 import foreign "c" _pen_html_encode_attribute \(string) string
 import foreign "c" _pen_html_encode_text \(string) string
@@ -10,7 +11,7 @@ Render = \(n Node) string | error {
   if n = n as string {
     _pen_html_encode_text(n)
   } else {
-    attrs = renderAttributes(n.Attributes)
+    ats = renderAttributes(n.Attributes)?
 
     ns = if size(n.Children) == 0 {
       [string "/>"]
@@ -20,15 +21,20 @@ Render = \(n Node) string | error {
       [string ">", ...ns, "</", n.Tag, ">"]
     }
 
+    tag = if validate'Name(n.Tag) {
+      n.Tag
+    } else {
+      error(String'Concatenate([string "invalid tag: ", n.Tag]))
+    }?
+
     String'Concatenate(
       [string
         "<",
-        # TODO Validate tag names.
-        n.Tag,
-        ...if size(attrs) == 0 {
+        tag,
+        ...if size(ats) == 0 {
           [string]
         } else {
-          [string " ", ...attrs]
+          [string " ", ...ats]
         },
         ...ns,
       ],
@@ -36,12 +42,27 @@ Render = \(n Node) string | error {
   }
 }
 
-renderAttributes = \(attrs [Attribute]) [string] {
-  [string
-    # TODO Validate attribute keys.
-    String'Concatenate([string a().Key, "=\"", _pen_html_encode_attribute(a().Value), "\""])
-    for a in attrs
-  ]
+renderAttributes = \(ats [Attribute]) [string] | error {
+  if [a, ...ats] = ats {
+    k = a().Key
+    k = if validate'Name(k) {
+      k
+    } else {
+      error(String'Concatenate([string "invalid attribute key: ", k]))
+    }?
+
+    ats = renderAttributes(ats)?
+
+    [string
+      k,
+      "=\"",
+      _pen_html_encode_attribute(a().Value),
+      "\"",
+      ...ats,
+    ]
+  } else {
+    [string]
+  }
 }
 
 renderChildren = \(ns [Node]) [string] | error {

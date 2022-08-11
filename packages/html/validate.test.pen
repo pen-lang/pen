@@ -1,0 +1,15 @@
+import Test'Assert
+
+import 'validate
+
+ValidateName = \() none | error {
+  Assert'True(validate'Name("foo"))
+}
+
+ValidateHyphenatedName = \() none | error {
+  Assert'True(validate'Name("foo-bar"))
+}
+
+ValidateInvalidName = \() none | error {
+  Assert'True(!validate'Name("<foo/>"))
+}
