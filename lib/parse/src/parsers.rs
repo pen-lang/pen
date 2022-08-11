@@ -2698,6 +2698,26 @@ mod tests {
                     .into(),
                 ),
                 (
+                    "true|true&true|true",
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
+                        BinaryOperation::new(
+                            BinaryOperator::Or,
+                            Boolean::new(true, Position::fake()),
+                            BinaryOperation::new(
+                                BinaryOperator::And,
+                                Boolean::new(true, Position::fake()),
+                                Boolean::new(true, Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Boolean::new(true, Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
                     "x+x",
                     BinaryOperation::new(
                         BinaryOperator::Add,

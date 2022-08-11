@@ -28,8 +28,8 @@ pub fn reduce_operations(
                 let (head, tail) = pairs.split_at(
                     pairs
                         .iter()
-                        .position(&|pair: &(_, _, _)| {
-                            operator_priority(pair.0) < operator_priority(*operator)
+                        .position(|pair: &(_, _, _)| {
+                            operator_priority(pair.0) <= operator_priority(*operator)
                         })
                         .unwrap_or(pairs.len()),
                 );
@@ -130,6 +130,39 @@ mod tests {
                     Position::fake()
                 ),
                 BinaryOperation::new(BinaryOperator::And, none.clone(), none, Position::fake()),
+                Position::fake()
+            )
+            .into(),
+        );
+    }
+
+    #[test]
+    fn reduce_three_operations_with_high_priority_operator_in_middle() {
+        let none = None::new(Position::fake());
+
+        assert_eq!(
+            reduce_operations(
+                none.clone(),
+                &[
+                    (BinaryOperator::Or, none.clone().into(), Position::fake()),
+                    (BinaryOperator::And, none.clone().into(), Position::fake()),
+                    (BinaryOperator::Or, none.clone().into(), Position::fake())
+                ]
+            ),
+            BinaryOperation::new(
+                BinaryOperator::Or,
+                BinaryOperation::new(
+                    BinaryOperator::Or,
+                    none.clone(),
+                    BinaryOperation::new(
+                        BinaryOperator::And,
+                        none.clone(),
+                        none.clone(),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+                none,
                 Position::fake()
             )
             .into(),
