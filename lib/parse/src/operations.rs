@@ -28,7 +28,7 @@ pub fn reduce_operations(
                 let (head, tail) = pairs.split_at(
                     pairs
                         .iter()
-                        .position(&|pair: &(_, _, _)| {
+                        .position(|pair: &(_, _, _)| {
                             operator_priority(pair.0) <= operator_priority(*operator)
                         })
                         .unwrap_or(pairs.len()),
