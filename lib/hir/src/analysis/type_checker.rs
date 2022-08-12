@@ -63,29 +63,29 @@ fn check_expression(
             ))
         }
         Expression::Call(call) => {
-            if let Expression::BuiltInFunction(function) = call.function() {
-                check_built_in_call(context, call, function, variables)?
-            } else {
-                let type_ = call
-                    .function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
-                let function_type =
-                    type_canonicalizer::canonicalize_function(type_, context.types())?.ok_or_else(
-                        || AnalysisError::FunctionExpected(call.function().position().clone()),
-                    )?;
+            let type_ = call
+                .function_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+            let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
+                .ok_or_else(|| {
+                    AnalysisError::FunctionExpected(call.function().position().clone())
+                })?;
 
-                check_subsumption(&check_expression(call.function(), variables)?, type_)?;
-
-                if call.arguments().len() != function_type.arguments().len() {
-                    return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
-                }
-
-                for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-                    check_subsumption(&check_expression(argument, variables)?, type_)?;
-                }
-
-                function_type.result().clone()
+            if call.arguments().len() != function_type.arguments().len() {
+                return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
             }
+
+            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                check_subsumption(&check_expression(argument, variables)?, type_)?;
+            }
+
+            if let Expression::BuiltInFunction(function) = call.function() {
+                check_built_in_call(context, call, function, &function_type)?;
+            } else {
+                check_subsumption(&check_expression(call.function(), variables)?, type_)?;
+            }
+
+            function_type.result().clone()
         }
         Expression::If(if_) => {
             check_subsumption(
@@ -505,27 +505,9 @@ fn check_built_in_call(
     context: &AnalysisContext,
     call: &Call,
     function: &BuiltInFunction,
-    variables: &FnvHashMap<String, Type>,
-) -> Result<Type, AnalysisError> {
+    function_type: &types::Function,
+) -> Result<(), AnalysisError> {
     let position = call.position();
-    let function_type = type_canonicalizer::canonicalize_function(
-        call.function_type()
-            .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-        context.types(),
-    )?
-    .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-
-    if call.arguments().len() != function_type.arguments().len() {
-        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-    }
-
-    for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-        check_subsumption(
-            &check_expression(context, argument, variables)?,
-            type_,
-            context.types(),
-        )?;
-    }
 
     match function.name() {
         BuiltInFunctionName::Race => {
@@ -572,7 +554,7 @@ fn check_built_in_call(
         BuiltInFunctionName::Debug | BuiltInFunctionName::Error | BuiltInFunctionName::Source => {}
     }
 
-    Ok(function_type.result().clone())
+    Ok(())
 }
 
 fn check_operation(
