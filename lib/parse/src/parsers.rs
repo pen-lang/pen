@@ -20,14 +20,9 @@ use position::Position;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_FUNCTIONS: &[&str] = &["debug", "error", "go", "size", "source"];
-static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
-    [
-        "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
-    ]
-    .iter()
-    .copied()
-    .collect()
-});
+static KEYWORDS: &[&str] = [
+    "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
+];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());

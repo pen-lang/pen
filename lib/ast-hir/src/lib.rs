@@ -5,7 +5,6 @@ mod module;
 mod module_prefix;
 mod name;
 mod number;
-mod prelude_module;
 mod string;
 
 use error::CompileError;
@@ -41,16 +40,17 @@ pub fn compile(
 
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
-    let module = built_in_type_transformer::transform(module);
+    let module = built_in_type_transformer::transform(&module);
 
     Ok(module)
 }
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
     let module = module::compile(module)?;
+
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
-    let module = prelude_module::modify(&module);
+    let module = built_in_type_transformer::transform(&module);
 
     Ok(module)
 }

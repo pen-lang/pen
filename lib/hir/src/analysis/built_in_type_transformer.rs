@@ -21,12 +21,10 @@ pub fn transform(module: &Module) -> Module {
         Type::Reference(reference) => {
             if types.contains(reference.name()) {
                 type_.clone()
+            } else if let Some(type_) = built_in_type(reference.name(), reference.position()) {
+                type_
             } else {
-                if let Some(type_) = built_in_type(reference.name(), reference.position()) {
-                    type_.clone()
-                } else {
-                    type_.clone()
-                }
+                type_.clone()
             }
         }
         _ => type_.clone(),
