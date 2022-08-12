@@ -11,7 +11,7 @@ mod string;
 use error::CompileError;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{function_definition_qualifier, type_qualifier},
+    analysis::{built_in_type_transformer, function_definition_qualifier, type_qualifier},
     ir,
 };
 use imported_module::ImportedModule;
