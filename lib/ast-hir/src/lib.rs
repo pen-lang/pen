@@ -46,7 +46,7 @@ pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module,
 }
 
 fn transform_module(module: &ir::Module, prefix: &str) -> Result<ir::Module, CompileError> {
-    let module = function_definition_qualifier::qualify(&module, prefix);
+    let module = function_definition_qualifier::qualify(module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
     let module = built_in_type_transformer::transform(&module);
 

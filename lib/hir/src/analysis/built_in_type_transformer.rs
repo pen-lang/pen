@@ -6,10 +6,11 @@ use crate::{
 use fnv::FnvHashSet;
 use position::Position;
 
+// We replace reference types to built-in types if they are not overridden.
+//
+// Although another approach might be to append built-in type definitions, it would provide
+// slightly worse code position information.
 pub fn transform(module: &Module) -> Module {
-    // This code should never be hit in the current implementation as all type
-    // definitions' names have some kind of prefixes after conversion from AST
-    // to HIR.
     let types = module
         .type_definitions()
         .iter()
@@ -20,6 +21,9 @@ pub fn transform(module: &Module) -> Module {
     type_transformer::transform(module, |type_| match type_ {
         Type::Reference(reference) => {
             if types.contains(reference.name()) {
+                // This code should never be hit in the current implementation as all type
+                // definitions' names have some kind of prefixes after conversion from AST
+                // to HIR.
                 type_.clone()
             } else if let Some(type_) = built_in_type(reference.name(), reference.position()) {
                 type_
