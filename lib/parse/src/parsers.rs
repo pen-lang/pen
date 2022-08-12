@@ -18,20 +18,9 @@ use fnv::FnvHashSet;
 use once_cell::sync::Lazy;
 use position::Position;
 
-const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
-const BUILT_IN_TYPES: &[&str] = &["any", "boolean", "error", "none", "number", "string"];
-const BUILT_IN_FUNCTIONS: &[&str] = &["debug", "error", "go", "size", "source"];
-static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
-    [
-        "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
-    ]
-    .iter()
-    .chain(BUILT_IN_LITERALS)
-    .chain(BUILT_IN_TYPES)
-    .chain(BUILT_IN_FUNCTIONS)
-    .copied()
-    .collect()
-});
+static KEYWORDS: &[&str] = &[
+    "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
+];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
@@ -275,53 +264,11 @@ fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
 
 fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
     choice((
-        boolean_type().map(Type::from),
-        error_type().map(Type::from),
-        none_type().map(Type::from),
-        number_type().map(Type::from),
-        string_type().map(Type::from),
-        any_type().map(Type::from),
         reference_type().map(Type::from),
         list_type().map(Type::from),
         map_type().map(Type::from),
         between(sign("("), sign(")"), type_()),
     ))
-}
-
-fn boolean_type<'a>() -> impl Parser<Stream<'a>, Output = types::Boolean> {
-    attempt(position().skip(keyword("boolean")))
-        .map(types::Boolean::new)
-        .expected("boolean type")
-}
-
-fn error_type<'a>() -> impl Parser<Stream<'a>, Output = types::Error> {
-    attempt(position().skip(keyword("error")))
-        .map(types::Error::new)
-        .expected("error type")
-}
-
-fn none_type<'a>() -> impl Parser<Stream<'a>, Output = types::None> {
-    attempt(position().skip(keyword("none")))
-        .map(types::None::new)
-        .expected("none type")
-}
-
-fn number_type<'a>() -> impl Parser<Stream<'a>, Output = types::Number> {
-    attempt(position().skip(keyword("number")))
-        .map(types::Number::new)
-        .expected("number type")
-}
-
-fn string_type<'a>() -> impl Parser<Stream<'a>, Output = types::ByteString> {
-    attempt(position().skip(keyword("string")))
-        .map(types::ByteString::new)
-        .expected("string type")
-}
-
-fn any_type<'a>() -> impl Parser<Stream<'a>, Output = types::Any> {
-    attempt(position().skip(keyword("any")))
-        .map(types::Any::new)
-        .expected("any type")
 }
 
 fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
@@ -492,21 +439,6 @@ fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
         .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
 }
 
-fn built_in_call<'a>() -> impl Parser<Stream<'a>, Output = Call> {
-    (
-        attempt((position(), built_in_function())),
-        between(sign("("), sign(")"), sep_end_by(expression(), sign(","))),
-    )
-        .map(|((position, function), arguments)| {
-            Call::new(
-                Variable::new(function, position.clone()),
-                arguments,
-                position,
-            )
-        })
-        .expected("built-in function call")
-}
-
 fn record_field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
     (attempt(position().skip(sign("."))), identifier())
         .map(|(position, identifier)| SuffixOperator::RecordField(identifier, position))
@@ -528,11 +460,8 @@ fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
             list_comprehension().map(Expression::from),
             list_literal().map(Expression::from),
             map_literal().map(Expression::from),
-            boolean_literal().map(Expression::from),
-            none_literal().map(Expression::from),
             number_literal().map(Expression::from),
             string_literal().map(Expression::from),
-            built_in_call().map(Expression::from),
             variable().map(Expression::from),
             between(sign("("), sign(")"), expression()),
         )))
@@ -693,20 +622,6 @@ fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
 fn record_field<'a>() -> impl Parser<Stream<'a>, Output = RecordField> {
     (attempt((position(), identifier())), sign(":"), expression())
         .map(|((position, name), _, expression)| RecordField::new(name, expression, position))
-}
-
-fn boolean_literal<'a>() -> impl Parser<Stream<'a>, Output = Boolean> {
-    token(choice((
-        attempt(position().skip(keyword("false"))).map(|position| Boolean::new(false, position)),
-        attempt(position().skip(keyword("true"))).map(|position| Boolean::new(true, position)),
-    )))
-    .expected("boolean literal")
-}
-
-fn none_literal<'a>() -> impl Parser<Stream<'a>, Output = None> {
-    token(attempt(position().skip(keyword("none"))))
-        .map(None::new)
-        .expected("none literal")
 }
 
 fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
@@ -891,18 +806,6 @@ fn unchecked_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
         .map(|(head, tail): (char, String)| [head.into(), tail].concat())
 }
 
-fn built_in_function<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    token(attempt(unchecked_identifier()))
-        .then(|identifier| {
-            if BUILT_IN_FUNCTIONS.contains(&identifier.as_str()) {
-                value(identifier).right()
-            } else {
-                unexpected_any("identifier").left()
-            }
-        })
-        .silent()
-}
-
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
     if !KEYWORDS.contains(&name) {
         unreachable!("undefined keyword");
@@ -1021,7 +924,7 @@ mod tests {
                     vec![],
                     vec![TypeAlias::new(
                         "foo",
-                        types::Number::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
                         Position::fake()
                     )
                     .into()],
@@ -1041,8 +944,11 @@ mod tests {
                     vec![FunctionDefinition::new(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", types::Number::new(Position::fake()))],
-                            types::Number::new(Position::fake()),
+                            vec![Argument::new(
+                                "x",
+                                types::Reference::new("number", Position::fake())
+                            )],
+                            types::Reference::new("number", Position::fake()),
                             Block::new(
                                 vec![],
                                 Number::new(
@@ -1075,8 +981,11 @@ mod tests {
                         FunctionDefinition::new(
                             "x",
                             Lambda::new(
-                                vec![Argument::new("x", types::Number::new(Position::fake()))],
-                                types::Number::new(Position::fake()),
+                                vec![Argument::new(
+                                    "x",
+                                    types::Reference::new("number", Position::fake())
+                                )],
+                                types::Reference::new("number", Position::fake()),
                                 Block::new(
                                     vec![],
                                     Number::new(
@@ -1093,8 +1002,11 @@ mod tests {
                         FunctionDefinition::new(
                             "y",
                             Lambda::new(
-                                vec![Argument::new("y", types::Number::new(Position::fake()))],
-                                types::Number::new(Position::fake()),
+                                vec![Argument::new(
+                                    "y",
+                                    types::Reference::new("number", Position::fake())
+                                )],
+                                types::Reference::new("number", Position::fake()),
                                 Block::new(
                                     vec![],
                                     Number::new(
@@ -1133,7 +1045,7 @@ mod tests {
                         CallingConvention::Native,
                         types::Function::new(
                             vec![],
-                            types::Number::new(Position::fake()),
+                            types::Reference::new("number", Position::fake()),
                             Position::fake()
                         ),
                         Position::fake()
@@ -1158,7 +1070,7 @@ mod tests {
                     vec![
                         TypeAlias::new(
                             "foo",
-                            types::Number::new(Position::fake()),
+                            types::Reference::new("number", Position::fake()),
                             Position::fake()
                         )
                         .into(),
@@ -1312,8 +1224,8 @@ mod tests {
                 "foo",
                 CallingConvention::Native,
                 types::Function::new(
-                    vec![types::Number::new(Position::fake()).into()],
-                    types::Number::new(Position::fake()),
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
                     Position::fake()
                 ),
                 Position::fake()
@@ -1329,8 +1241,8 @@ mod tests {
                 "foo",
                 CallingConvention::C,
                 types::Function::new(
-                    vec![types::Number::new(Position::fake()).into()],
-                    types::Number::new(Position::fake()),
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
                     Position::fake()
                 ),
                 Position::fake()
@@ -1352,8 +1264,11 @@ mod tests {
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", types::Number::new(Position::fake()))],
-                        types::Number::new(Position::fake()),
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
                         Block::new(
                             vec![],
                             Number::new(
@@ -1380,8 +1295,11 @@ mod tests {
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", types::Number::new(Position::fake()))],
-                        types::Number::new(Position::fake()),
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
                         Block::new(
                             vec![],
                             Number::new(
@@ -1408,8 +1326,11 @@ mod tests {
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", types::Number::new(Position::fake()))],
-                        types::Number::new(Position::fake()),
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
                         Block::new(
                             vec![],
                             Number::new(
@@ -1437,7 +1358,7 @@ mod tests {
                     "importA",
                     Lambda::new(
                         vec![],
-                        types::Number::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
                         Block::new(
                             vec![],
                             Number::new(
@@ -1468,7 +1389,7 @@ mod tests {
                     "Foo",
                     vec![types::RecordField::new(
                         "foo",
-                        types::Number::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
                     )],
                     Position::fake(),
                 ),
@@ -1478,8 +1399,14 @@ mod tests {
                 RecordDefinition::new(
                     "Foo",
                     vec![
-                        types::RecordField::new("foo", types::Number::new(Position::fake())),
-                        types::RecordField::new("bar", types::Number::new(Position::fake())),
+                        types::RecordField::new(
+                            "foo",
+                            types::Reference::new("number", Position::fake()),
+                        ),
+                        types::RecordField::new(
+                            "bar",
+                            types::Reference::new("number", Position::fake()),
+                        ),
                     ],
                     Position::fake(),
                 ),
@@ -1499,7 +1426,7 @@ mod tests {
                 "type foo=number",
                 TypeAlias::new(
                     "foo",
-                    types::Number::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
                     Position::fake(),
                 ),
             ),
@@ -1507,7 +1434,7 @@ mod tests {
                 "type foo = number",
                 TypeAlias::new(
                     "foo",
-                    types::Number::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
                     Position::fake(),
                 ),
             ),
@@ -1516,8 +1443,8 @@ mod tests {
                 TypeAlias::new(
                     "foo",
                     types::Union::new(
-                        types::Number::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         Position::fake(),
                     ),
                     Position::fake(),
@@ -1537,15 +1464,15 @@ mod tests {
             assert!(type_().parse(stream("", "")).is_err());
             assert_eq!(
                 type_().parse(stream("boolean", "")).unwrap().0,
-                types::Boolean::new(Position::fake()).into()
+                types::Reference::new("boolean", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("none", "")).unwrap().0,
-                types::None::new(Position::fake()).into()
+                types::Reference::new("none", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("number", "")).unwrap().0,
-                types::Number::new(Position::fake()).into()
+                types::Reference::new("number", Position::fake()).into()
             );
             assert_eq!(
                 type_().parse(stream("Foo", "")).unwrap().0,
@@ -1558,8 +1485,8 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("\\(number)number", "")).unwrap().0,
                 types::Function::new(
-                    vec![types::Number::new(Position::fake()).into()],
-                    types::Number::new(Position::fake()),
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1571,10 +1498,10 @@ mod tests {
                     .0,
                 types::Function::new(
                     vec![
-                        types::Number::new(Position::fake()).into(),
-                        types::Number::new(Position::fake()).into(),
+                        types::Reference::new("number", Position::fake()).into(),
+                        types::Reference::new("number", Position::fake()).into(),
                     ],
-                    types::Number::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1586,12 +1513,12 @@ mod tests {
                     .0,
                 types::Function::new(
                     vec![types::Function::new(
-                        vec![types::Number::new(Position::fake()).into()],
-                        types::Number::new(Position::fake()),
+                        vec![types::Reference::new("number", Position::fake()).into()],
+                        types::Reference::new("number", Position::fake()),
                         Position::fake()
                     )
                     .into()],
-                    types::Number::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1599,8 +1526,8 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("number|none", "")).unwrap().0,
                 types::Union::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1609,11 +1536,11 @@ mod tests {
                 type_().parse(stream("boolean|number|none", "")).unwrap().0,
                 types::Union::new(
                     types::Union::new(
-                        types::Boolean::new(Position::fake()),
-                        types::Number::new(Position::fake()),
+                        types::Reference::new("boolean", Position::fake()),
+                        types::Reference::new("number", Position::fake()),
                         Position::fake()
                     ),
-                    types::None::new(Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1624,10 +1551,10 @@ mod tests {
                     .unwrap()
                     .0,
                 types::Function::new(
-                    vec![types::Number::new(Position::fake()).into()],
+                    vec![types::Reference::new("number", Position::fake()).into()],
                     types::Union::new(
-                        types::Number::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         Position::fake()
                     ),
                     Position::fake()
@@ -1641,22 +1568,14 @@ mod tests {
                     .0,
                 types::Union::new(
                     types::Function::new(
-                        vec![types::Number::new(Position::fake()).into()],
-                        types::Number::new(Position::fake()),
+                        vec![types::Reference::new("number", Position::fake()).into()],
+                        types::Reference::new("number", Position::fake()),
                         Position::fake()
                     ),
-                    types::None::new(Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     Position::fake()
                 )
                 .into()
-            );
-        }
-
-        #[test]
-        fn parse_any_type() {
-            assert_eq!(
-                any_type().parse(stream("any", "")).unwrap().0,
-                types::Any::new(Position::fake())
             );
         }
 
@@ -1677,13 +1596,20 @@ mod tests {
         fn parse_list_type() {
             assert_eq!(
                 type_().parse(stream("[number]", "")).unwrap().0,
-                types::List::new(types::Number::new(Position::fake()), Position::fake()).into()
+                types::List::new(
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                )
+                .into()
             );
 
             assert_eq!(
                 type_().parse(stream("[[number]]", "")).unwrap().0,
                 types::List::new(
-                    types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                    types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake()
                 )
                 .into()
@@ -1692,8 +1618,14 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("[number]|[none]", "")).unwrap().0,
                 types::Union::new(
-                    types::List::new(types::Number::new(Position::fake()), Position::fake()),
-                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
+                    types::List::new(
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake()
                 )
                 .into()
@@ -1702,11 +1634,15 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("\\([number])[none]", "")).unwrap().0,
                 types::Function::new(
-                    vec![
-                        types::List::new(types::Number::new(Position::fake()), Position::fake())
-                            .into()
-                    ],
-                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    vec![types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    types::List::new(
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake()
                 )
                 .into()
@@ -1718,8 +1654,8 @@ mod tests {
             assert_eq!(
                 type_().parse(stream("{number:none}", "")).unwrap().0,
                 types::Map::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     Position::fake()
                 )
                 .into()
@@ -1830,8 +1766,11 @@ mod tests {
                     .unwrap()
                     .0,
                 Lambda::new(
-                    vec![Argument::new("x", types::Number::new(Position::fake()))],
-                    types::Number::new(Position::fake()),
+                    vec![Argument::new(
+                        "x",
+                        types::Reference::new("number", Position::fake())
+                    )],
+                    types::Reference::new("number", Position::fake()),
                     Block::new(
                         vec![],
                         Number::new(
@@ -1851,10 +1790,10 @@ mod tests {
                     .0,
                 Lambda::new(
                     vec![
-                        Argument::new("x", types::Number::new(Position::fake())),
-                        Argument::new("y", types::Number::new(Position::fake()))
+                        Argument::new("x", types::Reference::new("number", Position::fake())),
+                        Argument::new("y", types::Reference::new("number", Position::fake()))
                     ],
-                    types::Number::new(Position::fake()),
+                    types::Reference::new("number", Position::fake()),
                     Block::new(
                         vec![],
                         Number::new(
@@ -1892,17 +1831,21 @@ mod tests {
         fn parse_block() {
             assert_eq!(
                 block().parse(stream("{none}", "")).unwrap().0,
-                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                Block::new(
+                    vec![],
+                    Variable::new("none", Position::fake()),
+                    Position::fake()
+                ),
             );
             assert_eq!(
                 block().parse(stream("{none none}", "")).unwrap().0,
                 Block::new(
                     vec![Statement::new(
                         None,
-                        None::new(Position::fake()),
+                        Variable::new("none", Position::fake()),
                         Position::fake()
                     )],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 ),
             );
@@ -1910,10 +1853,18 @@ mod tests {
                 block().parse(stream("{none none none}", "")).unwrap().0,
                 Block::new(
                     vec![
-                        Statement::new(None, None::new(Position::fake()), Position::fake()),
-                        Statement::new(None, None::new(Position::fake()), Position::fake())
+                        Statement::new(
+                            None,
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
+                        Statement::new(
+                            None,
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        )
                     ],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 ),
             );
@@ -1922,10 +1873,10 @@ mod tests {
                 Block::new(
                     vec![Statement::new(
                         Some("x".into()),
-                        None::new(Position::fake()),
+                        Variable::new("none", Position::fake()),
                         Position::fake()
                     )],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 ),
             );
@@ -1970,7 +1921,7 @@ mod tests {
                     .0,
                 If::new(
                     vec![IfBranch::new(
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
                         Block::new(
                             vec![],
                             Number::new(
@@ -2000,16 +1951,16 @@ mod tests {
                     vec![IfBranch::new(
                         If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, Position::fake()),
+                                Variable::new("true", Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Boolean::new(true, Position::fake()),
+                                    Variable::new("true", Position::fake()),
                                     Position::fake()
                                 ),
                             )],
                             Block::new(
                                 vec![],
-                                Boolean::new(true, Position::fake()),
+                                Variable::new("true", Position::fake()),
                                 Position::fake()
                             ),
                             Position::fake(),
@@ -2042,7 +1993,7 @@ mod tests {
                 If::new(
                     vec![
                         IfBranch::new(
-                            Boolean::new(true, Position::fake()),
+                            Variable::new("true", Position::fake()),
                             Block::new(
                                 vec![],
                                 Number::new(
@@ -2053,7 +2004,7 @@ mod tests {
                             ),
                         ),
                         IfBranch::new(
-                            Boolean::new(true, Position::fake()),
+                            Variable::new("true", Position::fake()),
                             Block::new(
                                 vec![],
                                 Number::new(
@@ -2092,9 +2043,17 @@ mod tests {
                             Variable::new("y", Position::fake()),
                             Position::fake()
                         ),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                     )],
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake(),
                 )
                 .into()
@@ -2112,12 +2071,16 @@ mod tests {
                     "x",
                     Variable::new("y", Position::fake()),
                     vec![IfTypeBranch::new(
-                        types::Boolean::new(Position::fake()),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        types::Reference::new("boolean", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                     )],
                     Some(Block::new(
                         vec![],
-                        None::new(Position::fake()),
+                        Variable::new("none", Position::fake()),
                         Position::fake()
                     )),
                     Position::fake(),
@@ -2137,17 +2100,25 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     vec![
                         IfTypeBranch::new(
-                            types::Boolean::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            types::Reference::new("boolean", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                         ),
                         IfTypeBranch::new(
-                            types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            types::Reference::new("none", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                         )
                     ],
                     Some(Block::new(
                         vec![],
-                        None::new(Position::fake()),
+                        Variable::new("none", Position::fake()),
                         Position::fake()
                     )),
                     Position::fake()
@@ -2164,12 +2135,20 @@ mod tests {
                     Variable::new("y", Position::fake()),
                     vec![
                         IfTypeBranch::new(
-                            types::Boolean::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            types::Reference::new("boolean", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                         ),
                         IfTypeBranch::new(
-                            types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            types::Reference::new("none", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                         )
                     ],
                     None,
@@ -2189,8 +2168,16 @@ mod tests {
                     Variable::new("xs", Position::fake()),
                     "x",
                     "xs",
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake(),
                 )
             );
@@ -2210,8 +2197,16 @@ mod tests {
                         NumberRepresentation::FloatingPoint("42".into()),
                         Position::fake()
                     ),
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
                     Position::fake(),
                 )
             );
@@ -2329,54 +2324,6 @@ mod tests {
             }
         }
 
-        mod built_in_call {
-            use super::*;
-            use pretty_assertions::assert_eq;
-
-            #[test]
-            fn parse() {
-                for &name in BUILT_IN_FUNCTIONS {
-                    let source = name.to_owned() + "()";
-
-                    assert_eq!(
-                        built_in_call().parse(stream(&source, "")).unwrap().0,
-                        Call::new(
-                            Variable::new(name, Position::fake()),
-                            vec![],
-                            Position::fake()
-                        )
-                    );
-                }
-            }
-
-            #[test]
-            fn parse_as_expression() {
-                for &name in BUILT_IN_FUNCTIONS {
-                    let source = name.to_owned() + "()";
-
-                    assert_eq!(
-                        expression().parse(stream(&source, "")).unwrap().0,
-                        Call::new(
-                            Variable::new(name, Position::fake()),
-                            vec![],
-                            Position::fake()
-                        )
-                        .into()
-                    );
-                }
-            }
-
-            #[test]
-            fn fail_to_parse_call() {
-                let source = "f()";
-
-                insta::assert_debug_snapshot!(built_in_call()
-                    .parse(stream(source, ""))
-                    .map_err(|error| ParseError::new(source, "", error))
-                    .err());
-            }
-        }
-
         #[test]
         fn parse_try_operation() {
             assert_eq!(
@@ -2428,16 +2375,16 @@ mod tests {
                         UnaryOperator::Not,
                         If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, Position::fake()),
+                                Variable::new("true", Position::fake()),
                                 Block::new(
                                     vec![],
-                                    Boolean::new(true, Position::fake()),
+                                    Variable::new("true", Position::fake()),
                                     Position::fake(),
                                 ),
                             )],
                             Block::new(
                                 vec![],
-                                Boolean::new(true, Position::fake()),
+                                Variable::new("true", Position::fake()),
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -2645,8 +2592,8 @@ mod tests {
                     "true&true",
                     BinaryOperation::new(
                         BinaryOperator::And,
-                        Boolean::new(true, Position::fake()),
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
+                        Variable::new("true", Position::fake()),
                         Position::fake(),
                     )
                     .into(),
@@ -2655,8 +2602,8 @@ mod tests {
                     "true|true",
                     BinaryOperation::new(
                         BinaryOperator::Or,
-                        Boolean::new(true, Position::fake()),
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
+                        Variable::new("true", Position::fake()),
                         Position::fake(),
                     )
                     .into(),
@@ -2665,7 +2612,7 @@ mod tests {
                     "true&1<2",
                     BinaryOperation::new(
                         BinaryOperator::And,
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::LessThan,
                             Number::new(
@@ -2686,11 +2633,11 @@ mod tests {
                     "true|true&true",
                     BinaryOperation::new(
                         BinaryOperator::Or,
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::And,
-                            Boolean::new(true, Position::fake()),
-                            Boolean::new(true, Position::fake()),
+                            Variable::new("true", Position::fake()),
+                            Variable::new("true", Position::fake()),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2703,16 +2650,16 @@ mod tests {
                         BinaryOperator::Or,
                         BinaryOperation::new(
                             BinaryOperator::Or,
-                            Boolean::new(true, Position::fake()),
+                            Variable::new("true", Position::fake()),
                             BinaryOperation::new(
                                 BinaryOperator::And,
-                                Boolean::new(true, Position::fake()),
-                                Boolean::new(true, Position::fake()),
+                                Variable::new("true", Position::fake()),
+                                Variable::new("true", Position::fake()),
                                 Position::fake(),
                             ),
                             Position::fake(),
                         ),
-                        Boolean::new(true, Position::fake()),
+                        Variable::new("true", Position::fake()),
                         Position::fake(),
                     )
                     .into(),
@@ -2965,28 +2912,6 @@ mod tests {
         }
 
         #[test]
-        fn parse_boolean_literal() {
-            assert!(boolean_literal().parse(stream("", "")).is_err());
-            assert_eq!(
-                boolean_literal().parse(stream("false", "")).unwrap().0,
-                Boolean::new(false, Position::fake())
-            );
-            assert_eq!(
-                boolean_literal().parse(stream("true", "")).unwrap().0,
-                Boolean::new(true, Position::fake())
-            );
-        }
-
-        #[test]
-        fn parse_none_literal() {
-            assert!(none_literal().parse(stream("", "")).is_err());
-            assert_eq!(
-                none_literal().parse(stream("none", "")).unwrap().0,
-                None::new(Position::fake())
-            );
-        }
-
-        #[test]
         fn parse_number_literal() {
             assert!(number_literal().parse(stream("", "")).is_err());
             assert!(number_literal().parse(stream("foo", "")).is_err());
@@ -3044,31 +2969,39 @@ mod tests {
             for (source, target) in vec![
                 (
                     "[none]",
-                    List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
                 ),
                 (
                     "[none none]",
                     List::new(
-                        types::None::new(Position::fake()),
-                        vec![ListElement::Single(None::new(Position::fake()).into())],
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Single(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
                         Position::fake(),
                     ),
                 ),
                 (
                     "[none none,]",
                     List::new(
-                        types::None::new(Position::fake()),
-                        vec![ListElement::Single(None::new(Position::fake()).into())],
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Single(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
                         Position::fake(),
                     ),
                 ),
                 (
                     "[none none,none]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
-                            ListElement::Single(None::new(Position::fake()).into()),
-                            ListElement::Single(None::new(Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
                         ],
                         Position::fake(),
                     ),
@@ -3076,10 +3009,10 @@ mod tests {
                 (
                     "[none none,none,]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
-                            ListElement::Single(None::new(Position::fake()).into()),
-                            ListElement::Single(None::new(Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
                         ],
                         Position::fake(),
                     ),
@@ -3087,7 +3020,7 @@ mod tests {
                 (
                     "[none ...foo]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![ListElement::Multiple(
                             Variable::new("foo", Position::fake()).into(),
                         )],
@@ -3097,7 +3030,7 @@ mod tests {
                 (
                     "[none ...foo,]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![ListElement::Multiple(
                             Variable::new("foo", Position::fake()).into(),
                         )],
@@ -3107,7 +3040,7 @@ mod tests {
                 (
                     "[none ...foo,...bar]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
                             ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
                             ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
@@ -3118,7 +3051,7 @@ mod tests {
                 (
                     "[none ...foo,...bar,]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
                             ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
                             ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
@@ -3129,7 +3062,7 @@ mod tests {
                 (
                     "[none foo,...bar]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
                             ListElement::Single(Variable::new("foo", Position::fake()).into()),
                             ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
@@ -3140,7 +3073,7 @@ mod tests {
                 (
                     "[none ...foo,bar]",
                     List::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
                             ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
                             ListElement::Single(Variable::new("bar", Position::fake()).into()),
@@ -3162,7 +3095,7 @@ mod tests {
                 (
                     "[none x for x in xs]",
                     ListComprehension::new(
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         Variable::new("x", Position::fake()),
                         "x",
                         Variable::new("xs", Position::fake()),
@@ -3172,7 +3105,7 @@ mod tests {
                 (
                     "[number x + 42 for x in xs]",
                     ListComprehension::new(
-                        types::Number::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
                         BinaryOperation::new(
                             BinaryOperator::Add,
                             Variable::new("x", Position::fake()),
@@ -3201,8 +3134,8 @@ mod tests {
                 (
                     "{none:none}",
                     Map::new(
-                        types::None::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![],
                         Position::fake(),
                     )
@@ -3211,11 +3144,11 @@ mod tests {
                 (
                     "{none:none none:none}",
                     Map::new(
-                        types::None::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![MapEntry::new(
-                            None::new(Position::fake()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
+                            Variable::new("none", Position::fake()),
                             Position::fake(),
                         )
                         .into()],
@@ -3226,15 +3159,15 @@ mod tests {
                 (
                     "{number:none 1:none,2:none}",
                     Map::new(
-                        types::Number::new(Position::fake()),
-                        types::None::new(Position::fake()),
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
                         vec![
                             MapEntry::new(
                                 Number::new(
                                     NumberRepresentation::FloatingPoint("1".into()),
                                     Position::fake(),
                                 ),
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake(),
                             )
                             .into(),
@@ -3243,7 +3176,7 @@ mod tests {
                                     NumberRepresentation::FloatingPoint("2".into()),
                                     Position::fake(),
                                 ),
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake(),
                             )
                             .into(),
@@ -3255,9 +3188,11 @@ mod tests {
                 (
                     "{none:none ...none}",
                     Map::new(
-                        types::None::new(Position::fake()),
-                        types::None::new(Position::fake()),
-                        vec![MapElement::Map(None::new(Position::fake()).into())],
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![MapElement::Map(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
                         Position::fake(),
                     )
                     .into(),
@@ -3265,9 +3200,11 @@ mod tests {
                 (
                     "{none:none none}",
                     Map::new(
-                        types::None::new(Position::fake()),
-                        types::None::new(Position::fake()),
-                        vec![MapElement::Removal(None::new(Position::fake()).into())],
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![MapElement::Removal(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
                         Position::fake(),
                     )
                     .into(),
@@ -3285,7 +3222,7 @@ mod tests {
                     .unwrap()
                     .0,
                 MapIterationComprehension::new(
-                    types::None::new(Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
                     "k",
                     "v",
