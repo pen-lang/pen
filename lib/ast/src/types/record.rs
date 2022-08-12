@@ -1,7 +1,6 @@
 use position::Position;
-use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct Record {
     name: String,
     position: Position,
@@ -21,10 +20,5 @@ impl Record {
 
     pub fn position(&self) -> &Position {
         &self.position
-    }
-
-    pub fn set_position(mut self, position: Position) -> Self {
-        self.position = position;
-        self
     }
 }

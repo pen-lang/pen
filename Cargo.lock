@@ -63,6 +63,7 @@ name = "ast"
 version = "0.1.0"
 dependencies = [
  "position",
+ "serde",
 ]
 
 [[package]]
