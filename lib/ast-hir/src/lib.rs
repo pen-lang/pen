@@ -10,7 +10,10 @@ mod string;
 use error::CompileError;
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{built_in_type_transformer, function_definition_qualifier, type_qualifier},
+    analysis::{
+        built_in_type_transformer, built_in_variable_transformer, function_definition_qualifier,
+        type_qualifier,
+    },
     ir,
 };
 use imported_module::ImportedModule;
@@ -49,6 +52,7 @@ fn transform_module(module: &ir::Module, prefix: &str) -> Result<ir::Module, Com
     let module = function_definition_qualifier::qualify(module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
     let module = built_in_type_transformer::transform(&module);
+    let module = built_in_variable_transformer::transform(&module);
 
     Ok(module)
 }
