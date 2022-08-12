@@ -191,49 +191,16 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         ast::Expression::Boolean(boolean) => {
             ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
         }
-        ast::Expression::Call(call) => {
-            let arguments = call
-                .arguments()
+        ast::Expression::Call(call) => ir::Call::new(
+            None,
+            compile_expression(call.function())?,
+            call.arguments()
                 .iter()
                 .map(compile_expression)
-                .collect::<Result<Vec<_>, _>>()?;
-            let built_in_call = |function| {
-                ir::Call::new(
-                    None,
-                    ir::BuiltInFunction::new(function, call.function().position().clone()),
-                    arguments.clone(),
-                    call.position().clone(),
-                )
-            };
-
-            match call.function() {
-                ast::Expression::Variable(variable) if variable.name() == "debug" => {
-                    built_in_call(ir::BuiltInFunctionName::Debug).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "error" => {
-                    built_in_call(ir::BuiltInFunctionName::Error).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "go" => {
-                    built_in_call(ir::BuiltInFunctionName::Spawn).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "race" => {
-                    built_in_call(ir::BuiltInFunctionName::Race).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "size" => {
-                    built_in_call(ir::BuiltInFunctionName::Size).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "source" => {
-                    built_in_call(ir::BuiltInFunctionName::Source).into()
-                }
-                _ => ir::Call::new(
-                    None,
-                    compile_expression(call.function())?,
-                    arguments,
-                    call.position().clone(),
-                )
-                .into(),
-            }
-        }
+                .collect::<Result<Vec<_>, _>>()?,
+            call.position().clone(),
+        )
+        .into(),
         ast::Expression::RecordDeconstruction(operation) => ir::RecordDeconstruction::new(
             None,
             compile_expression(operation.expression())?,
