@@ -5,9 +5,4 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-hir = { path = "../hir" }
 position = { path = "../position" }
-serde = { version = "1", features = ["derive", "rc"] }
-
-[dev-dependencies]
-pretty_assertions = "1.2"
