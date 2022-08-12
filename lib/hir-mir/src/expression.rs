@@ -26,22 +26,31 @@ pub fn compile(
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
-        Expression::BuiltInCall(call) => built_in_call::compile(context, call)?,
-        Expression::Call(call) => mir::ir::Call::new(
-            type_::compile(
-                context,
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-            )?
-            .into_function()
-            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?,
-            compile(call.function())?,
-            call.arguments()
-                .iter()
-                .map(compile)
-                .collect::<Result<_, _>>()?,
-        )
-        .into(),
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into())
+        }
+        Expression::Call(call) => {
+            if let Expression::BuiltInFunction(function) = call.function() {
+                built_in_call::compile(context, call, function)?
+            } else {
+                mir::ir::Call::new(
+                    type_::compile(
+                        context,
+                        call.function_type().ok_or_else(|| {
+                            AnalysisError::TypeNotInferred(call.position().clone())
+                        })?,
+                    )?
+                    .into_function()
+                    .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?,
+                    compile(call.function())?,
+                    call.arguments()
+                        .iter()
+                        .map(compile)
+                        .collect::<Result<_, _>>()?,
+                )
+                .into()
+            }
+        }
         Expression::If(if_) => mir::ir::If::new(
             compile(if_.condition())?,
             compile(if_.then())?,
