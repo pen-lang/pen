@@ -6,7 +6,7 @@ use crate::{
 use fnv::FnvHashSet;
 use position::Position;
 
-// We replace reference types to built-in types if they are not overridden.
+// We replace reference types with built-in types if they are not overridden.
 //
 // Although another approach might be to append built-in type definitions, it
 // would provide slightly worse code position information.
