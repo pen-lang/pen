@@ -38,16 +38,14 @@ pub fn compile(
     let module = module::compile(module)?;
     let module = import::compile(&module, &imported_modules, prelude_module_interfaces);
 
-    let module = function_definition_qualifier::qualify(&module, prefix);
-    let module = type_qualifier::qualify(&module, prefix);
-    let module = built_in_type_transformer::transform(&module);
-
-    Ok(module)
+    transform_module(&module, prefix)
 }
 
 pub fn compile_prelude(module: &ast::Module, prefix: &str) -> Result<ir::Module, CompileError> {
-    let module = module::compile(module)?;
+    transform_module(&module::compile(module)?, prefix)
+}
 
+fn transform_module(module: &ir::Module, prefix: &str) -> Result<ir::Module, CompileError> {
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
     let module = built_in_type_transformer::transform(&module);
