@@ -324,7 +324,6 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             coercion.position().clone(),
         )
         .into(),
-
         Expression::Boolean(_)
         | Expression::BuiltInFunction(_)
         | Expression::String(_)
