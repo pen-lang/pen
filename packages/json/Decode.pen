@@ -14,7 +14,7 @@ type result {
 }
 
 type stringResult {
-  string_ string
+  string string
   input View
 }
 
@@ -38,7 +38,7 @@ result = \(v Value, i View) result {
 }
 
 stringResult = \(s string, i View) stringResult {
-  stringResult{string_: s, input: i}
+  stringResult{string: s, input: i}
 }
 
 arrayResult = \(vs [Value], i View) arrayResult {
@@ -66,17 +66,17 @@ value = \(v View) result | error {
   if View'HasPrefix(v, "n") {
     null(v)
   } else if View'HasPrefix(v, "t") {
-    true_(v)
+    booleanTrue(v)
   } else if View'HasPrefix(v, "f") {
-    false_(v)
+    booleanFalse(v)
   } else if View'HasPrefix(v, "\"") {
-    string_(v)
+    string(v)
   } else if View'HasPrefix(v, "[") {
     array(v)
   } else if View'HasPrefix(v, "{") {
     object(v)
   } else {
-    number_(v)
+    number(v)
   }
 }
 
@@ -90,7 +90,7 @@ null = \(v View) result | error {
   }
 }
 
-true_ = \(v View) result | error {
+booleanTrue = \(v View) result | error {
   s = "true"
 
   if View'HasPrefix(v, s) {
@@ -100,7 +100,7 @@ true_ = \(v View) result | error {
   }
 }
 
-false_ = \(v View) result | error {
+booleanFalse = \(v View) result | error {
   s = "false"
 
   if View'HasPrefix(v, s) {
@@ -110,10 +110,10 @@ false_ = \(v View) result | error {
   }
 }
 
-string_ = \(v View) result | error {
+string = \(v View) result | error {
   r = stringCharacters(View'Seek(v, 1), [string])?
 
-  result(Value'New(r.string_), View'Seek(r.input, 1))
+  result(Value'New(r.string), View'Seek(r.input, 1))
 }
 
 stringCharacters = \(v View, ss [string]) stringResult | error {
@@ -123,7 +123,7 @@ stringCharacters = \(v View, ss [string]) stringResult | error {
     r = stringCharacter(v)?
 
     # TODO Optimize appending string elements.
-    stringCharacters(r.input, [string ...ss, r.string_])
+    stringCharacters(r.input, [string ...ss, r.string])
   }
 }
 
@@ -137,7 +137,7 @@ stringCharacter = \(v View) stringResult | error {
   }
 }
 
-number_ = \(v View) result | error {
+number = \(v View) result | error {
   i = View'Start(v)
 
   v = if View'HasPrefix(v, "-") { View'Seek(v, 1) } else { v }
@@ -245,7 +245,7 @@ object = \(v View) result | error {
 objectEntries = \(v View, es [objectEntry]) objectResult | error {
   v = blank(v)
 
-  if r = string_(v) as result {
+  if r = string(v) as result {
     k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
     v = blank(r.input)
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?

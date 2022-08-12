@@ -5,16 +5,18 @@ static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
     Lazy::new(|| regex::Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
 
 pub fn compile(string: &str) -> Vec<u8> {
-    let string = string
-        .replace("\\\\", "\\")
-        .replace("\\\"", "\"")
-        .replace("\\n", "\n")
-        .replace("\\r", "\r")
-        .replace("\\t", "\t");
     HEX_CHARACTER_REGEX
-        .replace_all(&string, |captures: &regex::Captures| {
-            String::from_utf8(vec![u8::from_str_radix(&captures[1], 16).unwrap()]).unwrap()
-        })
+        .replace_all(
+            &string
+                .replace("\\\\", "\\")
+                .replace("\\\"", "\"")
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+                .replace("\\t", "\t"),
+            |captures: &regex::Captures| {
+                String::from_utf8(vec![u8::from_str_radix(&captures[1], 16).unwrap()]).unwrap()
+            },
+        )
         .to_string()
         .into()
 }

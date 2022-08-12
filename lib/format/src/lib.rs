@@ -447,7 +447,6 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 ")".into(),
             ])
         }
-        Expression::Boolean(boolean) => if boolean.value() { "true" } else { "false" }.into(),
         Expression::If(if_) => compile_if(context, if_),
         Expression::IfList(if_) => sequence([
             sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
@@ -535,7 +534,6 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 "]".into(),
             ])
         }
-        Expression::None(_) => "none".into(),
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
             NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
@@ -1354,7 +1352,11 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         ),
                         None,
@@ -1373,7 +1375,11 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::fake()),
-                    Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake(),
+                    ),
                     Position::fake(),
                 ),
                 None,
@@ -1410,7 +1416,11 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", types::None::new(Position::fake()))],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         ),
                         None,
@@ -1437,10 +1447,10 @@ mod tests {
                             Block::new(
                                 vec![Statement::new(
                                     None,
-                                    None::new(Position::fake()),
+                                    Variable::new("none", Position::fake()),
                                     Position::fake()
                                 )],
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake()
                             ),
                             Position::fake(),
@@ -1484,7 +1494,7 @@ mod tests {
                                     types::None::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     ),
                                     Position::fake(),
@@ -1514,7 +1524,11 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         ),
                         Some(ForeignExport::new(CallingConvention::Native)),
@@ -1538,7 +1552,11 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         ),
                         Some(ForeignExport::new(CallingConvention::C)),
@@ -1567,7 +1585,7 @@ mod tests {
             assert_eq!(
                 format(&Block::new(
                     vec![],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 )),
                 indoc!(
@@ -1593,7 +1611,7 @@ mod tests {
                         ),
                         Position::fake()
                     )],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 )),
                 indoc!(
@@ -1620,7 +1638,7 @@ mod tests {
                         ),
                         Position::fake()
                     )],
-                    None::new(Position::fake()),
+                    Variable::new("none", Position::fake()),
                     Position::fake()
                 )),
                 indoc!(
@@ -1647,7 +1665,7 @@ mod tests {
                         ),
                         line_position(1)
                     )],
-                    None::new(line_position(2)),
+                    Variable::new("none", line_position(2)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1674,7 +1692,7 @@ mod tests {
                         ),
                         line_position(1)
                     )],
-                    None::new(line_position(3)),
+                    Variable::new("none", line_position(3)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1702,7 +1720,7 @@ mod tests {
                         ),
                         line_position(1)
                     )],
-                    None::new(line_position(4)),
+                    Variable::new("none", line_position(4)),
                     Position::fake()
                 )),
                 indoc!(
@@ -1739,7 +1757,7 @@ mod tests {
                                     ),
                                     line_position(1)
                                 )],
-                                None::new(line_position(3)),
+                                Variable::new("none", line_position(3)),
                                 Position::fake()
                             ),
                             Position::fake(),
@@ -1768,10 +1786,10 @@ mod tests {
                     &Block::new(
                         vec![Statement::new(
                             Some("x".into()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
                             line_position(2)
                         )],
-                        None::new(line_position(3)),
+                        Variable::new("none", line_position(3)),
                         Position::fake()
                     ),
                     &[Comment::new("foo", line_position(1))]
@@ -1792,7 +1810,11 @@ mod tests {
         fn format_result_expression_in_block() {
             assert_eq!(
                 format_with_comments(
-                    &Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                    &Block::new(
+                        vec![],
+                        Variable::new("none", line_position(2)),
+                        Position::fake()
+                    ),
                     &[Comment::new("foo", line_position(1))]
                 ),
                 indoc!(
@@ -1810,7 +1832,11 @@ mod tests {
         fn format_suffix_comment_of_last_expression() {
             assert_eq!(
                 format_with_comments(
-                    &Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                    &Block::new(
+                        vec![],
+                        Variable::new("none", line_position(2)),
+                        Position::fake()
+                    ),
                     &[Comment::new("foo", line_position(2))]
                 ),
                 indoc!(
@@ -1830,10 +1856,10 @@ mod tests {
                     &Block::new(
                         vec![Statement::new(
                             Some("x".into()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
                             line_position(1)
                         )],
-                        None::new(line_position(3)),
+                        Variable::new("none", line_position(3)),
                         Position::fake()
                     ),
                     &[Comment::new("foo", line_position(2))]
@@ -1857,10 +1883,10 @@ mod tests {
                     &Block::new(
                         vec![Statement::new(
                             Some("x".into()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
                             line_position(2)
                         )],
-                        None::new(line_position(3)),
+                        Variable::new("none", line_position(3)),
                         Position::fake()
                     ),
                     &[Comment::new("foo", line_position(2))]
@@ -1884,16 +1910,16 @@ mod tests {
                         vec![
                             Statement::new(
                                 Some("x".into()),
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(3)
                             ),
                             Statement::new(
                                 Some("y".into()),
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(6)
                             )
                         ],
-                        None::new(line_position(7)),
+                        Variable::new("none", line_position(7)),
                         Position::fake()
                     ),
                     &[
@@ -2092,10 +2118,18 @@ mod tests {
                     format(
                         &If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake())
+                                Variable::new("true", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                )
                             )],
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -2110,10 +2144,18 @@ mod tests {
                     format(
                         &If::new(
                             vec![IfBranch::new(
-                                Boolean::new(true, Position::fake()),
-                                Block::new(vec![], None::new(line_position(2)), Position::fake())
+                                Variable::new("true", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", line_position(2)),
+                                    Position::fake()
+                                )
                             )],
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             line_position(1)
                         )
                         .into()
@@ -2138,23 +2180,27 @@ mod tests {
                         &If::new(
                             vec![
                                 IfBranch::new(
-                                    Boolean::new(true, Position::fake()),
+                                    Variable::new("true", Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 ),
                                 IfBranch::new(
-                                    Boolean::new(false, Position::fake()),
+                                    Variable::new("false", Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 )
                             ],
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -2188,7 +2234,11 @@ mod tests {
                             Variable::new("x", Position::fake()),
                             Position::fake()
                         ),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )
                     .into()
@@ -2219,7 +2269,11 @@ mod tests {
                             Variable::new("x", Position::fake()),
                             Position::fake()
                         ),
-                        Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                         Position::fake()
                     )
                     .into()
@@ -2252,7 +2306,7 @@ mod tests {
                                     types::None::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 ),
@@ -2260,7 +2314,7 @@ mod tests {
                                     types::Number::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 )
@@ -2286,7 +2340,7 @@ mod tests {
                                     types::None::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(line_position(2)),
+                                        Variable::new("none", line_position(2)),
                                         Position::fake()
                                     )
                                 ),
@@ -2294,7 +2348,7 @@ mod tests {
                                     types::Number::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 )
@@ -2329,7 +2383,7 @@ mod tests {
                                     types::None::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 ),
@@ -2337,14 +2391,14 @@ mod tests {
                                     types::Number::new(Position::fake()),
                                     Block::new(
                                         vec![],
-                                        None::new(Position::fake()),
+                                        Variable::new("none", Position::fake()),
                                         Position::fake()
                                     )
                                 )
                             ],
                             Some(Block::new(
                                 vec![],
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake()
                             )),
                             Position::fake(),
@@ -2377,7 +2431,11 @@ mod tests {
                         &Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         )
                         .into()
@@ -2396,10 +2454,10 @@ mod tests {
                             Block::new(
                                 vec![Statement::new(
                                     Some("x".into()),
-                                    None::new(Position::fake()),
+                                    Variable::new("none", Position::fake()),
                                     Position::fake()
                                 )],
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -2425,7 +2483,11 @@ mod tests {
                         &Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(line_position(2)), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", line_position(2)),
+                                Position::fake()
+                            ),
                             line_position(1)
                         )
                         .into()
@@ -2448,7 +2510,11 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new("x", types::None::new(line_position(2)))],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             line_position(1)
                         )
                         .into()
@@ -2476,7 +2542,11 @@ mod tests {
                                 Argument::new("y", types::None::new(Position::fake()))
                             ],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             line_position(1)
                         )
                         .into()
@@ -2502,7 +2572,11 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new("x", types::None::new(line_position(2)))],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         )
                         .into(),
@@ -2528,7 +2602,11 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new("x", types::None::new(line_position(3)))],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake(),
                         )
                         .into(),
@@ -2755,8 +2833,8 @@ mod tests {
                             UnaryOperator::Not,
                             BinaryOperation::new(
                                 BinaryOperator::And,
-                                Boolean::new(true, Position::fake()),
-                                Boolean::new(false, Position::fake()),
+                                Variable::new("true", Position::fake()),
+                                Variable::new("false", Position::fake()),
                                 Position::fake()
                             ),
                             Position::fake()
@@ -2803,7 +2881,9 @@ mod tests {
                     format(
                         &List::new(
                             types::None::new(Position::fake()),
-                            vec![ListElement::Single(None::new(Position::fake()).into())],
+                            vec![ListElement::Single(
+                                Variable::new("none", Position::fake()).into()
+                            )],
                             Position::fake()
                         )
                         .into()
@@ -2819,8 +2899,8 @@ mod tests {
                         &List::new(
                             types::None::new(Position::fake()),
                             vec![
-                                ListElement::Single(None::new(Position::fake()).into()),
-                                ListElement::Single(None::new(Position::fake()).into())
+                                ListElement::Single(Variable::new("none", Position::fake()).into()),
+                                ListElement::Single(Variable::new("none", Position::fake()).into())
                             ],
                             Position::fake()
                         )
@@ -2836,7 +2916,9 @@ mod tests {
                     format(
                         &List::new(
                             types::None::new(Position::fake()),
-                            vec![ListElement::Single(None::new(line_position(2)).into())],
+                            vec![ListElement::Single(
+                                Variable::new("none", line_position(2)).into()
+                            )],
                             line_position(1)
                         )
                         .into()
@@ -2896,7 +2978,7 @@ mod tests {
                     format(
                         &ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
                             "x",
                             Variable::new("xs", Position::fake()),
                             Position::fake()
@@ -2913,7 +2995,7 @@ mod tests {
                     format(
                         &ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None::new(line_position(2)),
+                            Variable::new("none", line_position(2)),
                             "x",
                             Variable::new("xs", Position::fake()),
                             line_position(1)
@@ -3127,7 +3209,7 @@ mod tests {
                     format(
                         &MapIterationComprehension::new(
                             types::None::new(Position::fake()),
-                            None::new(Position::fake()),
+                            Variable::new("none", Position::fake()),
                             "k",
                             "v",
                             Variable::new("xs", Position::fake()),
@@ -3145,7 +3227,7 @@ mod tests {
                     format(
                         &MapIterationComprehension::new(
                             types::None::new(Position::fake()),
-                            None::new(line_position(2)),
+                            Variable::new("none", line_position(2)),
                             "k",
                             "v",
                             Variable::new("xs", Position::fake()),
@@ -3186,7 +3268,7 @@ mod tests {
                             None,
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake()
                             )],
                             Position::fake()
@@ -3239,7 +3321,7 @@ mod tests {
                             Some(Variable::new("r", Position::fake()).into()),
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 Position::fake()
                             )],
                             Position::fake()
@@ -3259,7 +3341,7 @@ mod tests {
                             Some(Variable::new("r", Position::fake()).into()),
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(2)
                             )],
                             line_position(1)
@@ -3279,7 +3361,7 @@ mod tests {
                             None,
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(2)
                             )],
                             line_position(1)
@@ -3307,12 +3389,12 @@ mod tests {
                             vec![
                                 RecordField::new(
                                     "x",
-                                    None::new(Position::fake()),
+                                    Variable::new("none", Position::fake()),
                                     line_position(2)
                                 ),
                                 RecordField::new(
                                     "y",
-                                    None::new(Position::fake()),
+                                    Variable::new("none", Position::fake()),
                                     line_position(2)
                                 )
                             ],
@@ -3341,7 +3423,7 @@ mod tests {
                             None,
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(3)
                             )],
                             line_position(1)
@@ -3370,7 +3452,7 @@ mod tests {
                             None,
                             vec![RecordField::new(
                                 "x",
-                                None::new(Position::fake()),
+                                Variable::new("none", Position::fake()),
                                 line_position(2)
                             )],
                             line_position(1)
@@ -3650,7 +3732,11 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake(),
                             ),
                             None,
