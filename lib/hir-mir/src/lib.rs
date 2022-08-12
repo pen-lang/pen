@@ -80,7 +80,6 @@ fn compile_module(
     context: &CompileContext,
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    let module = hir::analysis::built_in_type_transformer::transform(module);
     let module = hir::analysis::analyze(context.analysis(), &module)?;
     let module = record_equal_function::transform(context, &module)?;
     let module = record_hash_function::transform(context, &module)?;

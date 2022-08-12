@@ -41,6 +41,7 @@ pub fn compile(
 
     let module = function_definition_qualifier::qualify(&module, prefix);
     let module = type_qualifier::qualify(&module, prefix);
+    let module = built_in_type_transformer::transform(module);
 
     Ok(module)
 }
