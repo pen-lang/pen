@@ -20,7 +20,7 @@ use position::Position;
 
 const BUILT_IN_LITERALS: &[&str] = &["false", "none", "true"];
 const BUILT_IN_FUNCTIONS: &[&str] = &["debug", "error", "go", "size", "source"];
-static KEYWORDS: &[&str] = [
+static KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
 ];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
