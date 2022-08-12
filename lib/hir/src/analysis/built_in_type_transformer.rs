@@ -28,7 +28,7 @@ pub fn transform(module: &Module) -> Module {
     })
 }
 
-fn built_in_types() -> FnvHashMap<String, Type> {
+fn built_in_types() -> FnvHashMap<&'static str, Type> {
     let position = Position::new("<built-in>", 1, 1, "");
 
     [
@@ -40,6 +40,5 @@ fn built_in_types() -> FnvHashMap<String, Type> {
         ("string", types::ByteString::new(position.clone()).into()),
     ]
     .into_iter()
-    .map(|(name, type_)| (name.into(), type_))
     .collect()
 }
