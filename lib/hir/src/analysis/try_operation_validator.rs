@@ -21,11 +21,6 @@ fn validate_expression(
     let validate = |expression| validate_expression(context, expression, result_type);
 
     match expression {
-        Expression::BuiltInCall(call) => {
-            for argument in call.arguments() {
-                validate(argument)?;
-            }
-        }
         Expression::Call(call) => {
             validate(call.function())?;
 
@@ -167,6 +162,7 @@ fn validate_expression(
             )?;
         }
         Expression::Boolean(_)
+        | Expression::BuiltInFunction(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)

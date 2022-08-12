@@ -57,96 +57,35 @@ fn check_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => {
-            let position = call.position();
-            let function_type = type_canonicalizer::canonicalize_function(
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-
-            if call.arguments().len() != function_type.arguments().len() {
-                return Err(AnalysisError::WrongArgumentCount(position.clone()));
-            }
-
-            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-                check_subsumption(&check_expression(argument, variables)?, type_)?;
-            }
-
-            match call.function() {
-                BuiltInFunction::Race => {
-                    let argument_type = type_canonicalizer::canonicalize_list(
-                        if let [argument_type] = function_type.arguments() {
-                            Ok(argument_type)
-                        } else {
-                            Err(AnalysisError::WrongArgumentCount(position.clone()))
-                        }?,
-                        context.types(),
-                    )?
-                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
-
-                    if type_canonicalizer::canonicalize_list(
-                        argument_type.element(),
-                        context.types(),
-                    )?
-                    .is_none()
-                    {
-                        return Err(AnalysisError::ListExpected(position.clone()));
-                    }
-                }
-                BuiltInFunction::Size => {
-                    if let [argument_type] = function_type.arguments() {
-                        if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
-                            return Err(AnalysisError::CollectionExpected(
-                                call.arguments()[0].position().clone(),
-                            ));
-                        }
-                    } else {
-                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-                    }
-                }
-                BuiltInFunction::Spawn => {
-                    if let [argument_type] = function_type.arguments() {
-                        if !type_canonicalizer::canonicalize_function(
-                            argument_type,
-                            context.types(),
-                        )?
-                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
-                        .arguments()
-                        .is_empty()
-                        {
-                            return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
-                        }
-                    } else {
-                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-                    }
-                }
-                BuiltInFunction::Debug | BuiltInFunction::Error | BuiltInFunction::Source => {}
-            }
-
-            function_type.result().clone()
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(
+                function.position().clone(),
+            ))
         }
         Expression::Call(call) => {
-            let type_ = call
-                .function_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
-            let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
-                .ok_or_else(|| {
-                    AnalysisError::FunctionExpected(call.function().position().clone())
-                })?;
+            if let Expression::BuiltInFunction(function) = call.function() {
+                check_built_in_call(context, call, function, variables)?
+            } else {
+                let type_ = call
+                    .function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+                let function_type =
+                    type_canonicalizer::canonicalize_function(type_, context.types())?.ok_or_else(
+                        || AnalysisError::FunctionExpected(call.function().position().clone()),
+                    )?;
 
-            check_subsumption(&check_expression(call.function(), variables)?, type_)?;
+                check_subsumption(&check_expression(call.function(), variables)?, type_)?;
 
-            if call.arguments().len() != function_type.arguments().len() {
-                return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
+                if call.arguments().len() != function_type.arguments().len() {
+                    return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
+                }
+
+                for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+                    check_subsumption(&check_expression(argument, variables)?, type_)?;
+                }
+
+                function_type.result().clone()
             }
-
-            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-                check_subsumption(&check_expression(argument, variables)?, type_)?;
-            }
-
-            function_type.result().clone()
         }
         Expression::If(if_) => {
             check_subsumption(
@@ -560,6 +499,80 @@ fn check_expression(
             .ok_or_else(|| AnalysisError::VariableNotFound(variable.clone()))?
             .clone(),
     })
+}
+
+fn check_built_in_call(
+    context: &AnalysisContext,
+    call: &Call,
+    function: &BuiltInFunction,
+    variables: &FnvHashMap<String, Type>,
+) -> Result<Type, AnalysisError> {
+    let position = call.position();
+    let function_type = type_canonicalizer::canonicalize_function(
+        call.function_type()
+            .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
+        context.types(),
+    )?
+    .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
+
+    if call.arguments().len() != function_type.arguments().len() {
+        return Err(AnalysisError::WrongArgumentCount(position.clone()));
+    }
+
+    for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
+        check_subsumption(
+            &check_expression(context, argument, variables)?,
+            type_,
+            context.types(),
+        )?;
+    }
+
+    match function.name() {
+        BuiltInFunctionName::Race => {
+            let argument_type = type_canonicalizer::canonicalize_list(
+                if let [argument_type] = function_type.arguments() {
+                    Ok(argument_type)
+                } else {
+                    Err(AnalysisError::WrongArgumentCount(position.clone()))
+                }?,
+                context.types(),
+            )?
+            .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+
+            if type_canonicalizer::canonicalize_list(argument_type.element(), context.types())?
+                .is_none()
+            {
+                return Err(AnalysisError::ListExpected(position.clone()));
+            }
+        }
+        BuiltInFunctionName::Size => {
+            if let [argument_type] = function_type.arguments() {
+                if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
+                    return Err(AnalysisError::CollectionExpected(
+                        call.arguments()[0].position().clone(),
+                    ));
+                }
+            } else {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+        }
+        BuiltInFunctionName::Spawn => {
+            if let [argument_type] = function_type.arguments() {
+                if !type_canonicalizer::canonicalize_function(argument_type, context.types())?
+                    .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
+                    .arguments()
+                    .is_empty()
+                {
+                    return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
+                }
+            } else {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+        }
+        BuiltInFunctionName::Debug | BuiltInFunctionName::Error | BuiltInFunctionName::Source => {}
+    }
+
+    Ok(function_type.result().clone())
 }
 
 fn check_operation(

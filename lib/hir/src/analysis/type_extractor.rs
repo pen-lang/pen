@@ -5,7 +5,6 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashMap;
-use position::Position;
 
 pub fn extract_from_expression(
     context: &AnalysisContext,
@@ -17,18 +16,19 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => extract_from_call_like(
-            context,
-            call.function_type(),
-            call.position(),
-            call.position(),
-        )?,
-        Expression::Call(call) => extract_from_call_like(
-            context,
-            call.function_type(),
-            call.position(),
-            call.function().position(),
-        )?,
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(
+                function.position().clone(),
+            ))
+        }
+        Expression::Call(call) => type_canonicalizer::canonicalize_function(
+            call.function_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
+            context.types(),
+        )?
+        .ok_or_else(|| AnalysisError::FunctionExpected(call.function().position().clone()))?
+        .result()
+        .clone(),
         Expression::If(if_) => types::Union::new(
             extract_from_expression(if_.then(), variables)?,
             extract_from_expression(if_.else_(), variables)?,
@@ -216,21 +216,6 @@ pub fn extract_from_expression(
             .cloned()
             .ok_or_else(|| AnalysisError::VariableNotFound(variable.clone()))?,
     })
-}
-
-fn extract_from_call_like(
-    context: &AnalysisContext,
-    type_: Option<&Type>,
-    call_position: &Position,
-    function_position: &Position,
-) -> Result<Type, AnalysisError> {
-    Ok(type_canonicalizer::canonicalize_function(
-        type_.ok_or_else(|| AnalysisError::TypeNotInferred(call_position.clone()))?,
-        context.types(),
-    )?
-    .ok_or_else(|| AnalysisError::FunctionExpected(function_position.clone()))?
-    .result()
-    .clone())
 }
 
 pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {

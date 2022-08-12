@@ -75,89 +75,25 @@ fn infer_expression(
         |expression, variables: &_| infer_expression(context, expression, variables);
 
     Ok(match expression {
-        Expression::BuiltInCall(call) => {
-            let position = call.position();
-            let arguments = call
-                .arguments()
-                .iter()
-                .map(|argument| infer_expression(argument, variables))
-                .collect::<Result<Vec<_>, _>>()?;
-            let argument_types = arguments
-                .iter()
-                .map(|argument| {
-                    type_extractor::extract_from_expression(context, argument, variables)
-                })
-                .collect::<Result<Vec<_>, _>>()?;
-
-            BuiltInCall::new(
-                Some(
-                    match call.function() {
-                        BuiltInFunction::Error => types::Function::new(
-                            vec![types::Any::new(position.clone()).into()],
-                            types::Error::new(position.clone()),
-                            position.clone(),
-                        ),
-                        BuiltInFunction::Debug => types::Function::new(
-                            vec![types::ByteString::new(position.clone()).into()],
-                            types::None::new(position.clone()),
-                            position.clone(),
-                        ),
-                        BuiltInFunction::Race => {
-                            let argument_type = type_canonicalizer::canonicalize_list(
-                                &argument_types.first().cloned().ok_or_else(|| {
-                                    AnalysisError::WrongArgumentCount(position.clone())
-                                })?,
-                                context.types(),
-                            )?
-                            .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
-
-                            types::Function::new(
-                                argument_types,
-                                argument_type.element().clone(),
-                                position.clone(),
-                            )
-                        }
-                        BuiltInFunction::Size => types::Function::new(
-                            argument_types,
-                            types::Number::new(position.clone()),
-                            position.clone(),
-                        ),
-                        BuiltInFunction::Source => types::Function::new(
-                            vec![types::Error::new(position.clone()).into()],
-                            types::Any::new(position.clone()),
-                            position.clone(),
-                        ),
-                        BuiltInFunction::Spawn => {
-                            let result_type = argument_types.first().cloned().ok_or_else(|| {
-                                AnalysisError::WrongArgumentCount(position.clone())
-                            })?;
-
-                            types::Function::new(argument_types, result_type, position.clone())
-                        }
-                    }
-                    .into(),
-                ),
-                call.function(),
-                arguments,
-                position.clone(),
-            )
-            .into()
-        }
         Expression::Call(call) => {
-            let function = infer_expression(call.function(), variables)?;
+            if let Expression::BuiltInFunction(function) = call.function() {
+                infer_built_in_call(context, call, function, variables)?.into()
+            } else {
+                let function = infer_expression(call.function(), variables)?;
 
-            Call::new(
-                Some(type_extractor::extract_from_expression(
-                    context, &function, variables,
-                )?),
-                function.clone(),
-                call.arguments()
-                    .iter()
-                    .map(|argument| infer_expression(argument, variables))
-                    .collect::<Result<_, _>>()?,
-                call.position().clone(),
-            )
-            .into()
+                Call::new(
+                    Some(type_extractor::extract_from_expression(
+                        context, &function, variables,
+                    )?),
+                    function.clone(),
+                    call.arguments()
+                        .iter()
+                        .map(|argument| infer_expression(argument, variables))
+                        .collect::<Result<_, _>>()?,
+                    call.position().clone(),
+                )
+                .into()
+            }
         }
         Expression::If(if_) => {
             let then = infer_expression(if_.then(), variables)?;
@@ -573,11 +509,85 @@ fn infer_expression(
         )
         .into(),
         Expression::Boolean(_)
+        | Expression::BuiltInFunction(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)
         | Expression::Variable(_) => expression.clone(),
     })
+}
+
+fn infer_built_in_call(
+    context: &AnalysisContext,
+    call: &Call,
+    function: &BuiltInFunction,
+    variables: &FnvHashMap<String, Type>,
+) -> Result<Call, AnalysisError> {
+    let position = call.position();
+    let arguments = call
+        .arguments()
+        .iter()
+        .map(|argument| infer_expression(context, argument, variables))
+        .collect::<Result<Vec<_>, _>>()?;
+    let argument_types = arguments
+        .iter()
+        .map(|argument| type_extractor::extract_from_expression(context, argument, variables))
+        .collect::<Result<Vec<_>, _>>()?;
+
+    Ok(Call::new(
+        Some(
+            match function.name() {
+                BuiltInFunctionName::Error => types::Function::new(
+                    vec![types::Any::new(position.clone()).into()],
+                    types::Error::new(position.clone()),
+                    position.clone(),
+                ),
+                BuiltInFunctionName::Debug => types::Function::new(
+                    vec![types::ByteString::new(position.clone()).into()],
+                    types::None::new(position.clone()),
+                    position.clone(),
+                ),
+                BuiltInFunctionName::Race => {
+                    let argument_type = type_canonicalizer::canonicalize_list(
+                        &argument_types
+                            .first()
+                            .cloned()
+                            .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?,
+                        context.types(),
+                    )?
+                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+
+                    types::Function::new(
+                        argument_types,
+                        argument_type.element().clone(),
+                        position.clone(),
+                    )
+                }
+                BuiltInFunctionName::Size => types::Function::new(
+                    argument_types,
+                    types::Number::new(position.clone()),
+                    position.clone(),
+                ),
+                BuiltInFunctionName::Source => types::Function::new(
+                    vec![types::Error::new(position.clone()).into()],
+                    types::Any::new(position.clone()),
+                    position.clone(),
+                ),
+                BuiltInFunctionName::Spawn => {
+                    let result_type = argument_types
+                        .first()
+                        .cloned()
+                        .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?;
+
+                    types::Function::new(argument_types, result_type, position.clone())
+                }
+            }
+            .into(),
+        ),
+        call.function().clone(),
+        arguments,
+        position.clone(),
+    ))
 }
 
 #[cfg(test)]
