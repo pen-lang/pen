@@ -8,6 +8,7 @@ use std::{
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AnalysisError {
     AnyTypeBranch(Position),
+    BuiltInFunctionNotCalled(Position),
     CollectionExpected(Position),
     DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
@@ -46,6 +47,13 @@ impl Display for AnalysisError {
                 write!(
                     formatter,
                     "any type cannot be used for downcast\n{}",
+                    position
+                )
+            }
+            Self::BuiltInFunctionNotCalled(position) => {
+                write!(
+                    formatter,
+                    "built-in function must be called directly\n{}",
                     position
                 )
             }

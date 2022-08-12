@@ -91,28 +91,6 @@ fn transform_expression(
     };
 
     Ok(match expression {
-        Expression::BuiltInCall(call) => {
-            let function_type = type_canonicalizer::canonicalize_function(
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?;
-
-            BuiltInCall::new(
-                call.function_type().cloned(),
-                call.function(),
-                call.arguments()
-                    .iter()
-                    .zip(function_type.arguments())
-                    .map(|(argument, type_)| {
-                        transform_and_coerce_expression(argument, type_, variables)
-                    })
-                    .collect::<Result<_, _>>()?,
-                call.position().clone(),
-            )
-            .into()
-        }
         Expression::Call(call) => {
             let function_type = type_canonicalizer::canonicalize_function(
                 call.function_type()
@@ -524,6 +502,7 @@ fn transform_expression(
         )
         .into(),
         Expression::Boolean(_)
+        | Expression::BuiltInFunction(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)
@@ -695,7 +674,7 @@ mod tests {
             Lambda::new(
                 vec![Argument::new("x", list_type.clone())],
                 types::Number::new(Position::fake()),
-                BuiltInCall::new(
+                Call::new(
                     Some(
                         types::Function::new(
                             vec![list_type.into()],
@@ -704,7 +683,7 @@ mod tests {
                         )
                         .into(),
                     ),
-                    BuiltInFunction::Size,
+                    BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                     vec![Variable::new("x", Position::fake()).into()],
                     Position::fake(),
                 ),

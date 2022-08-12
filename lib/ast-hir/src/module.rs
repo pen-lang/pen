@@ -198,27 +198,32 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .map(compile_expression)
                 .collect::<Result<Vec<_>, _>>()?;
             let built_in_call = |function| {
-                ir::BuiltInCall::new(None, function, arguments.clone(), call.position().clone())
+                ir::Call::new(
+                    None,
+                    ir::BuiltInFunction::new(function, call.function().position().clone()),
+                    arguments.clone(),
+                    call.position().clone(),
+                )
             };
 
             match call.function() {
                 ast::Expression::Variable(variable) if variable.name() == "debug" => {
-                    built_in_call(ir::BuiltInFunction::Debug).into()
+                    built_in_call(ir::BuiltInFunctionName::Debug).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "error" => {
-                    built_in_call(ir::BuiltInFunction::Error).into()
+                    built_in_call(ir::BuiltInFunctionName::Error).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "go" => {
-                    built_in_call(ir::BuiltInFunction::Spawn).into()
+                    built_in_call(ir::BuiltInFunctionName::Spawn).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "race" => {
-                    built_in_call(ir::BuiltInFunction::Race).into()
+                    built_in_call(ir::BuiltInFunctionName::Race).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "size" => {
-                    built_in_call(ir::BuiltInFunction::Size).into()
+                    built_in_call(ir::BuiltInFunctionName::Size).into()
                 }
                 ast::Expression::Variable(variable) if variable.name() == "source" => {
-                    built_in_call(ir::BuiltInFunction::Source).into()
+                    built_in_call(ir::BuiltInFunctionName::Source).into()
                 }
                 _ => ir::Call::new(
                     None,

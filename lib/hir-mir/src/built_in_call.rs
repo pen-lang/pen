@@ -15,7 +15,8 @@ use hir::{
 
 pub fn compile(
     context: &CompileContext,
-    call: &BuiltInCall,
+    call: &Call,
+    function: &BuiltInFunction,
 ) -> Result<mir::ir::Expression, CompileError> {
     let position = call.position();
     let function_type = type_canonicalizer::canonicalize_function(
@@ -45,16 +46,16 @@ pub fn compile(
         ))
     };
 
-    Ok(match call.function() {
-        BuiltInFunction::Debug => {
+    Ok(match function.name() {
+        BuiltInFunctionName::Debug => {
             compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
         }
-        BuiltInFunction::Error => compile_call(
+        BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
             arguments,
         )?
         .into(),
-        BuiltInFunction::Race => {
+        BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
             let list_type =
@@ -85,7 +86,7 @@ pub fn compile(
             )?
             .into()
         }
-        BuiltInFunction::Size => mir::ir::Call::new(
+        BuiltInFunctionName::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
                 Type::List(_) => {
@@ -99,12 +100,12 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunction::Source => compile_call(
+        BuiltInFunctionName::Source => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.source_function_name),
             arguments,
         )?
         .into(),
-        BuiltInFunction::Spawn => {
+        BuiltInFunctionName::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";
 
@@ -186,17 +187,22 @@ mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
 
-    fn compile_call(call: &BuiltInCall) -> Result<mir::ir::Expression, CompileError> {
+    fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
             &CompileContext::dummy(Default::default(), Default::default()),
             call,
+            if let Expression::BuiltInFunction(function) = call.function() {
+                function
+            } else {
+                unreachable!()
+            },
         )
     }
 
     #[test]
     fn compile_debug() {
         assert_eq!(
-            compile_call(&BuiltInCall::new(
+            compile_call(&Call::new(
                 Some(
                     types::Function::new(
                         vec![types::ByteString::new(Position::fake()).into()],
@@ -205,7 +211,7 @@ mod tests {
                     )
                     .into()
                 ),
-                BuiltInFunction::Debug,
+                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                 vec![ByteString::new(vec![], Position::fake()).into()],
                 Position::fake(),
             ),),
@@ -235,7 +241,7 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(&BuiltInCall::new(
+                compile_call(&Call::new(
                     Some(
                         types::Function::new(
                             vec![function_type.clone().into()],
@@ -244,7 +250,7 @@ mod tests {
                         )
                         .into()
                     ),
-                    BuiltInFunction::Spawn,
+                    BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                     vec![Lambda::new(
                         vec![],
                         types::Number::new(Position::fake()),
@@ -321,7 +327,7 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(&BuiltInCall::new(
+                compile_call(&Call::new(
                     Some(
                         types::Function::new(
                             vec![function_type.clone().into()],
@@ -330,7 +336,7 @@ mod tests {
                         )
                         .into()
                     ),
-                    BuiltInFunction::Spawn,
+                    BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                     vec![Lambda::new(
                         vec![],
                         types::Any::new(Position::fake()),
