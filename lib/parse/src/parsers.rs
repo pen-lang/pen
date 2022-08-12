@@ -25,7 +25,6 @@ static KEYWORDS: Lazy<Vec<&str>> = Lazy::new(|| {
         "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
     ]
     .iter()
-    .chain(BUILT_IN_FUNCTIONS)
     .copied()
     .collect()
 });
@@ -859,7 +858,10 @@ fn built_in_function<'a>() -> impl Parser<Stream<'a>, Output = String> {
 }
 
 fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
-    if !KEYWORDS.contains(&name) && !BUILT_IN_LITERALS.contains(&name) {
+    if !KEYWORDS.contains(&name)
+        && !BUILT_IN_LITERALS.contains(&name)
+        && !BUILT_IN_FUNCTIONS.contains(&name)
+    {
         unreachable!("undefined keyword");
     }
 
