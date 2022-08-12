@@ -188,9 +188,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .into(),
             }
         }
-        ast::Expression::Boolean(boolean) => {
-            ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
-        }
         ast::Expression::Call(call) => ir::Call::new(
             None,
             compile_expression(call.function())?,
@@ -321,7 +318,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             )
             .into()
         }
-        ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number::compile(number)?, number.position().clone()).into()
         }
@@ -436,7 +432,11 @@ mod tests {
                     ast::Lambda::new(
                         vec![],
                         types::None::new(Position::fake()),
-                        ast::Block::new(vec![], ast::None::new(Position::fake()), Position::fake()),
+                        ast::Block::new(
+                            vec![],
+                            ast::Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                         Position::fake(),
                     ),
                     None,
@@ -468,7 +468,7 @@ mod tests {
                     ir::Lambda::new(
                         vec![],
                         types::None::new(Position::fake()),
-                        ir::None::new(Position::fake()),
+                        ir::Variable::new("none", Position::fake()),
                         Position::fake(),
                     ),
                     None,

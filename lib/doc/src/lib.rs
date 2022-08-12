@@ -714,7 +714,11 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             None,
@@ -785,7 +789,11 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             None,
@@ -935,7 +943,11 @@ mod tests {
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         None,
