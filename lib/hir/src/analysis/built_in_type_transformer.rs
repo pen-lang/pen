@@ -6,7 +6,7 @@ use crate::{
 use fnv::FnvHashMap;
 use position::Position;
 
-pub fn replace(module: &Module) -> Module {
+pub fn transform(module: &Module) -> Module {
     let mut types = built_in_types();
 
     // This code should never be hit in the current implementation as all type
