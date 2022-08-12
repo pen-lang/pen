@@ -674,7 +674,7 @@ mod tests {
             Lambda::new(
                 vec![Argument::new("x", list_type.clone())],
                 types::Number::new(Position::fake()),
-                BuiltInCall::new(
+                Call::new(
                     Some(
                         types::Function::new(
                             vec![list_type.into()],
@@ -683,7 +683,7 @@ mod tests {
                         )
                         .into(),
                     ),
-                    BuiltInFunction::Size,
+                    BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                     vec![Variable::new("x", Position::fake()).into()],
                     Position::fake(),
                 ),

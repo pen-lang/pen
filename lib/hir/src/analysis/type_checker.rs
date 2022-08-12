@@ -3161,7 +3161,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
                             types::Number::new(Position::fake()),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![list_type.into()],
@@ -3170,7 +3170,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Size,
+                                BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),
@@ -3196,7 +3196,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
                             types::Number::new(Position::fake()),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![map_type.into()],
@@ -3205,7 +3205,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Size,
+                                BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),
@@ -3226,7 +3226,7 @@ mod tests {
                             Lambda::new(
                                 vec![Argument::new("x", types::None::new(Position::fake()),)],
                                 types::Number::new(Position::fake()),
-                                BuiltInCall::new(
+                                Call::new(
                                     Some(
                                         types::Function::new(
                                             vec![types::None::new(Position::fake()).into()],
@@ -3235,7 +3235,10 @@ mod tests {
                                         )
                                         .into(),
                                     ),
-                                    BuiltInFunction::Size,
+                                    BuiltInFunction::new(
+                                        BuiltInFunctionName::Size,
+                                        Position::fake()
+                                    ),
                                     vec![Variable::new("x", Position::fake()).into()],
                                     Position::fake(),
                                 ),
@@ -3266,7 +3269,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             function_type.clone(),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![function_type.clone().into()],
@@ -3275,7 +3278,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Spawn,
+                                BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                                 vec![Lambda::new(
                                     vec![],
                                     types::None::new(Position::fake()),
@@ -3308,7 +3311,7 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 function_type.clone(),
-                                BuiltInCall::new(
+                                Call::new(
                                     Some(
                                         types::Function::new(
                                             vec![function_type.clone().into()],
@@ -3317,7 +3320,10 @@ mod tests {
                                         )
                                         .into()
                                     ),
-                                    BuiltInFunction::Spawn,
+                                    BuiltInFunction::new(
+                                        BuiltInFunctionName::Spawn,
+                                        Position::fake()
+                                    ),
                                     vec![Lambda::new(
                                         vec![Argument::new(
                                             "x",
@@ -3356,7 +3362,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
                             list_type.element().clone(),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![list_type.clone().into()],
@@ -3365,7 +3371,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Race,
+                                BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),

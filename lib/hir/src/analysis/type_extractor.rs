@@ -319,7 +319,7 @@ mod tests {
             assert_eq!(
                 extract_from_expression(
                     &empty_context(),
-                    &BuiltInCall::new(
+                    &Call::new(
                         Some(
                             types::Function::new(
                                 vec![types::List::new(
@@ -332,7 +332,7 @@ mod tests {
                             )
                             .into()
                         ),
-                        BuiltInFunction::Size,
+                        BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                         vec![List::new(
                             types::None::new(Position::fake()),
                             vec![],
@@ -356,7 +356,7 @@ mod tests {
             assert_eq!(
                 extract_from_expression(
                     &empty_context(),
-                    &BuiltInCall::new(
+                    &Call::new(
                         Some(
                             types::Function::new(
                                 vec![function_type.clone().into()],
@@ -365,7 +365,7 @@ mod tests {
                             )
                             .into()
                         ),
-                        BuiltInFunction::Spawn,
+                        BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                         vec![Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
