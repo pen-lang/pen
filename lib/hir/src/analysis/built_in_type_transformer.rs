@@ -4,7 +4,6 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashSet;
-use position::Position;
 
 // We replace reference types with built-in types if they are not overridden.
 //
@@ -25,25 +24,21 @@ pub fn transform(module: &Module) -> Module {
                 // definitions' names have some kind of prefixes after conversion from AST
                 // to HIR.
                 type_.clone()
-            } else if let Some(type_) = built_in_type(reference.name(), reference.position()) {
-                type_
             } else {
-                type_.clone()
+                let position = reference.position();
+
+                match reference.name() {
+                    "any" => types::Any::new(position.clone()).into(),
+                    "boolean" => types::Boolean::new(position.clone()).into(),
+                    "error" => types::Error::new(position.clone()).into(),
+                    "none" => types::None::new(position.clone()).into(),
+                    "number" => types::Number::new(position.clone()).into(),
+                    "string" => types::ByteString::new(position.clone()).into(),
+                    _ => type_.clone(),
+                }
             }
         }
         _ => type_.clone(),
-    })
-}
-
-fn built_in_type(name: &str, position: &Position) -> Option<Type> {
-    Some(match name {
-        "any" => types::Any::new(position.clone()).into(),
-        "boolean" => types::Boolean::new(position.clone()).into(),
-        "error" => types::Error::new(position.clone()).into(),
-        "none" => types::None::new(position.clone()).into(),
-        "number" => types::Number::new(position.clone()).into(),
-        "string" => types::ByteString::new(position.clone()).into(),
-        _ => return None,
     })
 }
 
