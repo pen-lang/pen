@@ -59,54 +59,54 @@ impl Type {
 
     pub fn into_function(self) -> Option<Function> {
         match self {
-            Type::Function(function) => Some(function),
+            Self::Function(function) => Some(function),
             _ => None,
         }
     }
 
     pub fn into_list(self) -> Option<List> {
         match self {
-            Type::List(list) => Some(list),
+            Self::List(list) => Some(list),
             _ => None,
         }
     }
 
     pub fn into_map(self) -> Option<Map> {
         match self {
-            Type::Map(map) => Some(map),
+            Self::Map(map) => Some(map),
             _ => None,
         }
     }
 
     pub fn into_record(self) -> Option<Record> {
         match self {
-            Type::Record(record) => Some(record),
+            Self::Record(record) => Some(record),
             _ => None,
         }
     }
 
     pub fn is_any(&self) -> bool {
-        matches!(self, Type::Any(_))
+        matches!(self, Self::Any(_))
     }
 
     pub fn is_function(&self) -> bool {
-        matches!(self, Type::Function(_))
+        matches!(self, Self::Function(_))
     }
 
     pub fn is_list(&self) -> bool {
-        matches!(self, Type::List(_))
+        matches!(self, Self::List(_))
     }
 
     pub fn is_map(&self) -> bool {
-        matches!(self, Type::Map(_))
+        matches!(self, Self::Map(_))
     }
 
     pub fn is_record(&self) -> bool {
-        matches!(self, Type::Record(_))
+        matches!(self, Self::Record(_))
     }
 
     pub fn is_union(&self) -> bool {
-        matches!(self, Type::Union(_))
+        matches!(self, Self::Union(_))
     }
 
     pub fn is_variant(&self) -> bool {
