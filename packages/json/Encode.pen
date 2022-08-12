@@ -23,7 +23,7 @@ value = \(v Value) [string] {
   } else if none {
     [string "null"]
   } else if string {
-    string_(v)
+    string(v)
   } else if [Value] {
     array(v)
   } else if {string: Value} {
@@ -31,7 +31,7 @@ value = \(v Value) [string] {
   }
 }
 
-string_ = \(s string) [string] {
+string = \(s string) [string] {
   s = Utf8'Replace(s, "\\", "\\\\")
   s = Utf8'Replace(s, "\"", "\\\"")
 
@@ -64,7 +64,7 @@ object = \(vs {string: Value}) [string] {
 
 objectEntries = \(es [objectEntry]) [string] {
   if [e, ...es] = es {
-    [string ",", ...string_(e().key), ":", ...value(e().value), ...objectEntries(es)]
+    [string ",", ...string(e().key), ":", ...value(e().value), ...objectEntries(es)]
   } else {
     [string]
   }
