@@ -8,16 +8,16 @@ Pen is the parallel, concurrent, and functional programming language for [**scal
 import Core'Number
 import Os'File
 
-computeExpensive = \(x number) number {
+findAnswer = \(kind string) number {
   # Do something expensive...
 
-  42
+  21
 }
 
 main = \(ctx context) none {
   # x is a future for a value computed in parallel.
-  x = go(\() number { computeExpensive(1) })
-  y = computeExpensive(2)
+  x = go(\() number { findAnswer("humanity") })
+  y = findAnswer("dolphins")
 
   _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
 
