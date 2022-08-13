@@ -22,7 +22,7 @@ findAnswer = \(kind string) number {
 }
 
 main = \(ctx context) none {
-  # The `go` function runs a function in parallel.
+  # The `go` function runs a given function in parallel.
   # `x` is a future for the computed value.
   x = go(\() number { findAnswer("humanity") })
   y = findAnswer("dolphins")
