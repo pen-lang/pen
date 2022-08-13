@@ -10,7 +10,7 @@ Pen is the parallel, concurrent, and functional programming language focused on 
 
 Pen provides [the two built-in functions of `go` and `race`][concurrency] to construct concurrent/parallel computation. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always data-race free.
 
-Pen's system libraries and runtime are detachable from applications and it compiles the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
+System libraries and runtime in Pen are detachable from applications and it compiles the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
 
 ```pen
 import Core'Number
