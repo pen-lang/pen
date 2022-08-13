@@ -282,12 +282,24 @@ foo{x: 0} == foo{x: 1}
 }
 </code></pre>
 <h4 id="if-list-expression"><a class="header" href="#if-list-expression">If-list expression</a></h4>
-<p>It deconstructs a list and evaluates one of <a href="#block">blocks</a> depending on if the list is empty or not.</p>
+<p>It deconstructs a list and evaluates one of two <a href="#block">blocks</a> depending on if the list is empty or not.</p>
 <ul>
 <li>If a given list has 1 or more element, it evaluates the first block with <strong>a function that returns its first element</strong> (<code>x</code>) and rest of elements as a list (<code>xs</code>).</li>
-<li>If it has no element, it evaluates the second block.</li>
+<li>If the list has no element, it evaluates the second block.</li>
 </ul>
 <pre><code class="language-pen">if [x, ...xs] = ... {
+  ...
+} else {
+  ...
+}
+</code></pre>
+<h4 id="if-map-expression"><a class="header" href="#if-map-expression">If-map expression</a></h4>
+<p>It gets a value for a key in a map and evaluates one of two <a href="#block">blocks</a> depending on if the map has the key or not.</p>
+<ul>
+<li>If a value for a key (<code>key</code>) is found, it evaluates the first block with the value (<code>value</code>).</li>
+<li>If the map has no such key, it evaluates the second block.</li>
+</ul>
+<pre><code class="language-pen">if value = xs[key] {
   ...
 } else {
   ...
