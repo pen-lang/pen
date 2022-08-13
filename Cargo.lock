@@ -62,9 +62,7 @@ dependencies = [
 name = "ast"
 version = "0.1.0"
 dependencies = [
- "hir",
  "position",
- "pretty_assertions",
  "serde",
 ]
 
