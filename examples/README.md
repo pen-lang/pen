@@ -18,6 +18,7 @@ Those are examples of applications and libraries written in Pen.
 - HTTP
   - [Client](http-client)
   - [Server](http-server)
+- [SQL client](sql-client)
 - [Conway's game of life](life-game)
 
 ## Algorithms
