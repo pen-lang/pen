@@ -9,7 +9,7 @@ import Core'Number
 import Os'File
 
 findAnswer = \(kind string) number {
-  # Do something expensive...
+  # Secret source...
 
   21
 }
