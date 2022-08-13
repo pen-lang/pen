@@ -5,24 +5,24 @@
 Pen is the parallel, concurrent, and functional programming language for [**scalable** software development](#vision), focused on software maintainability and portability.
 
 ```pen
-import Os'Context { Context }
+import Core'Number
 import Os'File
-import Os'Process
 
-sayHello = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+computeExpensive = \(x number) number {
+  # Do something expensive...
 
-  none
+  42
 }
 
 main = \(ctx context) none {
-  e = sayHello(ctx.Os)
+  # x is a future for a value computed in parallel.
+  x = go(\() number { computeExpensive(1) })
 
-  if _ = e as none {
-    none
-  } else if error {
-    Process'Exit(ctx.Os, 1)
-  }
+  y = computeExpensive(2)
+
+  _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
+
+  none
 }
 ```
 
