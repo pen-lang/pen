@@ -11,24 +11,23 @@ Pen is a **functional** programming language focused on **application programmin
 Pen's system libraries and runtime are detachable from applications and it can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
 
 ```pen
-import Os'Context { Context }
+import Core'Number
 import Os'File
-import Os'Process
 
-sayHello = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+findAnswer = \(kind string) number {
+  # Do something expensive...
 
-  none
+  21
 }
 
 main = \(ctx context) none {
-  e = sayHello(ctx.Os)
+  # x is a future for a value computed in parallel.
+  x = go(\() number { findAnswer("humanity") })
+  y = findAnswer("dolphins")
 
-  if _ = e as none {
-    none
-  } else if error {
-    Process'Exit(ctx.Os, 1)
-  }
+  _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
+
+  none
 }
 ```
 
