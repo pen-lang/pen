@@ -22,9 +22,12 @@ Those are examples of applications and libraries written in Pen.
 
 ## Algorithms
 
+- [Fibonacci](algorithms/fibonacci)
 - [Fizz buzz](algorithms/fizz-buzz)
 - [Quick sort](algorithms/quick-sort)
 - [The knapsack problem](algorithms/knapsack)
+- Parallel computation
+  - [Fibonacci](algorithms/parallel/fibonacci)
 
 ## Libraries
 
