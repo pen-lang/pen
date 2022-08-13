@@ -2,7 +2,7 @@
 
 # Pen programming language
 
-Pen is the programming language for **scalable** software development, focused on software maintainability and portability.
+Pen is the programming language for [**scalable** software development](#vision), focused on software maintainability and portability.
 
 ```pen
 import Os'Context { Context }
