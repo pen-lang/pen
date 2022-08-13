@@ -22,7 +22,7 @@ pub fn compile(
         return Err(AnalysisError::VariantExpected(expression.position().clone()).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
         return Err(
-            AnalysisError::TypesNotMatched(to.position().clone(), from.position().clone()).into(),
+            AnalysisError::TypesNotMatched(to.clone(), from.clone()).into(),
         );
     }
 
