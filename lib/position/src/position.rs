@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
-    fmt::Display,
+    fmt::{self, Display, Formatter},
     hash::{Hash, Hasher},
 };
 
@@ -38,7 +38,7 @@ impl Position {
 }
 
 impl Display for Position {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         let line_information = format!("{}:{}:", self.line_number, self.column_number);
 
         write!(
@@ -47,8 +47,8 @@ impl Display for Position {
             self.path,
             &line_information,
             self.line,
-            str::repeat(" ", line_information.len()),
-            str::repeat(" ", self.column_number - 1),
+            " ".repeat(line_information.len()),
+            " ".repeat(self.column_number - 1),
         )
     }
 }
