@@ -36,7 +36,7 @@ mod tests {
     fn format_function() {
         assert_eq!(
             format(&Function::new(vec![], None::new(Position::fake()), Position::fake()).into(),),
-            "\\() none".into()
+            "\\() none"
         );
     }
 
@@ -51,7 +51,7 @@ mod tests {
                 )
                 .into(),
             ),
-            "\\(none) none".into()
+            "\\(none) none"
         );
     }
 
@@ -69,7 +69,7 @@ mod tests {
                 )
                 .into(),
             ),
-            "\\(number, none) none".into()
+            "\\(number, none) none"
         );
     }
 
@@ -77,7 +77,7 @@ mod tests {
     fn format_list() {
         assert_eq!(
             format(&List::new(None::new(Position::fake()), Position::fake()).into(),),
-            "[none]".into()
+            "[none]"
         );
     }
 
@@ -92,7 +92,7 @@ mod tests {
                 )
                 .into(),
             ),
-            "number | none".into()
+            "number | none"
         );
     }
 
@@ -111,23 +111,20 @@ mod tests {
                 )
                 .into(),
             ),
-            "none | boolean | number".into()
+            "none | boolean | number"
         );
     }
 
     #[test]
     fn format_record() {
-        assert_eq!(
-            format(&Record::new("foo", Position::fake()).into(),),
-            "foo".into()
-        );
+        assert_eq!(format(&Record::new("foo", Position::fake()).into(),), "foo");
     }
 
     #[test]
     fn format_reference() {
         assert_eq!(
             format(&Reference::new("foo", Position::fake()).into(),),
-            "foo".into()
+            "foo"
         );
     }
 
@@ -142,7 +139,7 @@ mod tests {
                 )
                 .into(),
             ),
-            "{number: none}".into()
+            "{number: none}"
         );
     }
 }
