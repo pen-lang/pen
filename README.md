@@ -117,6 +117,10 @@ Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to th
 
 See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
 
+### Inductive values
+
+> TBD
+
 ## Contributing
 
 Pen is under heavy development. Feel free to post [Issues](https://github.com/pen-lang/pen/issues) and [Discussions](https://github.com/pen-lang/pen/discussions)!
