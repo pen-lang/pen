@@ -54,7 +54,7 @@ Pen aims to make large-scale software development efficient where many engineers
 - Tests are always deterministic and fast.
 - Tests are side-effect free and independent from test environment.
 
-### No standard system library
+### No built-in system library
 
 - There is no built-in system library dependent on platforms.
 - Developers choose [system packages][system-packages] suitable for their applications.
