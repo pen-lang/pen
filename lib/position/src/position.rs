@@ -1,3 +1,4 @@
+use crate::format;
 use serde::{Deserialize, Serialize};
 use std::{
     cmp::Ordering,
@@ -35,21 +36,19 @@ impl Position {
     pub fn line_number(&self) -> usize {
         self.line_number
     }
+
+    pub fn column_number(&self) -> usize {
+        self.column_number
+    }
+
+    pub fn line(&self) -> &str {
+        &self.line
+    }
 }
 
 impl Display for Position {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        let line_information = format!("{}:{}:", self.line_number, self.column_number);
-
-        write!(
-            formatter,
-            "{}\n{}\t{}\n{}\t{}^",
-            self.path,
-            &line_information,
-            self.line,
-            " ".repeat(line_information.len()),
-            " ".repeat(self.column_number - 1),
-        )
+        write!(formatter, "{}", format(self))
     }
 }
 
