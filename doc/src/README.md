@@ -31,9 +31,9 @@ main = \(ctx context) none {
 Pen aims to make large-scale software development efficient where many engineers develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Simplicity: The language is small and easy to learn but also full featured.
-  - Testability: Unit tests are always fast and reliable.
-  - Flexibility: Developers can make code changes easily without introducing bugs.
+  - Simplicity: The language is small and easy to learn yet full featured.
+  - Testability: Tests are always fast and reliable.
+  - Flexibility: Developers can change codes easily without introducing bugs.
 - Portability
   - Programs written in Pen can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
