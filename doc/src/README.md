@@ -8,6 +8,7 @@ Pen is the parallel, concurrent, and functional programming language for [**scal
 import Core'Number
 import Os'File
 
+# The `\` prefix for λ denotes a function.
 findAnswer = \(kind string) number {
   # Secret source...
 
