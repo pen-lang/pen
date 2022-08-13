@@ -21,9 +21,7 @@ pub fn compile(
     if !from.is_variant() {
         return Err(AnalysisError::VariantExpected(expression.position().clone()).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
-        return Err(
-            AnalysisError::TypesNotMatched(to.clone(), from.clone()).into(),
-        );
+        return Err(AnalysisError::TypesNotMatched(from.clone(), to.clone()).into());
     }
 
     Ok(

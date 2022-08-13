@@ -147,11 +147,17 @@ impl Display for AnalysisError {
             Self::TypeNotInferred(position) => {
                 write!(formatter, "type not inferred\n{}", position)
             }
-            Self::TypesNotMatched(lhs_type, rhs_type) => write!(
+            Self::TypesNotMatched(found_type, expected_type) => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                position::format_message(lhs_type.position(), &type_formatter::format(lhs_type)),
-                position::format_message(rhs_type.position(), &type_formatter::format(rhs_type)),
+                position::format_message(
+                    found_type.position(),
+                    &format!("found `{}`", type_formatter::format(found_type))
+                ),
+                position::format_message(
+                    expected_type.position(),
+                    &format!("expected `{}`", type_formatter::format(expected_type))
+                ),
             ),
             Self::UnionExpected(position) => {
                 write!(formatter, "union type expected\n{}", position)
