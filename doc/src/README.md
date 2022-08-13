@@ -15,7 +15,7 @@ findAnswer = \(kind string) number {
 }
 
 main = \(ctx context) none {
-  # x is a future for a value computed in parallel.
+  # `x` is a future for a value computed in parallel.
   x = go(\() number { findAnswer("humanity") })
   y = findAnswer("dolphins")
 
