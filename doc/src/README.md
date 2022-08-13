@@ -17,7 +17,6 @@ computeExpensive = \(x number) number {
 main = \(ctx context) none {
   # x is a future for a value computed in parallel.
   x = go(\() number { computeExpensive(1) })
-
   y = computeExpensive(2)
 
   _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
