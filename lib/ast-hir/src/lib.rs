@@ -6,6 +6,7 @@ mod module_prefix;
 mod name;
 mod number;
 mod string;
+mod type_;
 
 use error::CompileError;
 use fnv::FnvHashMap;
