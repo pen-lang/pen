@@ -121,6 +121,10 @@ See also [How to Implement the Perceus Reference Counting Garbage Collection](ht
 
 > TBD
 
+### Dynamic effect system
+
+> TBD
+
 ## Contributing
 
 Pen is under heavy development. Feel free to post [Issues](https://github.com/pen-lang/pen/issues) and [Discussions](https://github.com/pen-lang/pen/discussions)!
