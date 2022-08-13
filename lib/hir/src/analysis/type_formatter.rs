@@ -23,7 +23,7 @@ pub fn format(
             format(function.result())?,
         ),
         Type::List(list) => format!("[{}]", format(list.element())?),
-        Type::Map(map) => format!("{{ {}: {} }}", format(map.key())?, format(map.value())?),
+        Type::Map(map) => format!("{{{}: {}}}", format(map.key())?, format(map.value())?),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
         Type::Record(record) => original_names
@@ -157,6 +157,22 @@ mod tests {
                 &[("foo".into(), "bar".into())].into_iter().collect(),
             ),
             Ok("bar".into())
+        );
+    }
+
+    #[test]
+    fn format_map() {
+        assert_eq!(
+            format(
+                &Map::new(
+                    Number::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+                &Default::default(),
+            ),
+            Ok("{number: none}".into())
         );
     }
 }
