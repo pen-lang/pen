@@ -18,13 +18,17 @@ Those are examples of applications and libraries written in Pen.
 - HTTP
   - [Client](http-client)
   - [Server](http-server)
+- [SQL client](sql-client)
 - [Conway's game of life](life-game)
 
 ## Algorithms
 
+- [Fibonacci](algorithms/fibonacci)
 - [Fizz buzz](algorithms/fizz-buzz)
 - [Quick sort](algorithms/quick-sort)
 - [The knapsack problem](algorithms/knapsack)
+- Parallel computation
+  - [Fibonacci](algorithms/parallel/fibonacci)
 
 ## Libraries
 
