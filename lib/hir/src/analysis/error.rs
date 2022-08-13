@@ -1,3 +1,4 @@
+use super::type_formatter;
 use crate::{ir::*, types::*};
 use position::Position;
 use std::{
@@ -30,7 +31,7 @@ pub enum AnalysisError {
     TypeNotFound(Reference),
     TypeNotInferred(Position),
     TypeNotComparable(Position),
-    TypesNotMatched(Position, Position),
+    TypesNotMatched(Type, Type),
     UnionExpected(Position),
     UnknownRecordField(Position),
     UnreachableCode(Position),
@@ -146,10 +147,11 @@ impl Display for AnalysisError {
             Self::TypeNotInferred(position) => {
                 write!(formatter, "type not inferred\n{}", position)
             }
-            Self::TypesNotMatched(lhs_position, rhs_position) => write!(
+            Self::TypesNotMatched(lhs_type, rhs_type) => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                lhs_position, rhs_position
+                position::format_message(lhs_type.position(), &type_formatter::format(lhs_type)),
+                position::format_message(rhs_type.position(), &type_formatter::format(rhs_type)),
             ),
             Self::UnionExpected(position) => {
                 write!(formatter, "union type expected\n{}", position)

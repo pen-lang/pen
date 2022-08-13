@@ -649,10 +649,7 @@ fn check_subsumption(
     if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())
     } else {
-        Err(AnalysisError::TypesNotMatched(
-            lower.position().clone(),
-            upper.position().clone(),
-        ))
+        Err(AnalysisError::TypesNotMatched(lower.clone(), upper.clone()))
     }
 }
 
