@@ -28,7 +28,7 @@ main = \(ctx context) none {
 
 ## Vision
 
-Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
+Pen aims to make large-scale software development efficient where many engineers develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
   - Simplicity: The language is small and easy to learn but also full featured.
