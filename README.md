@@ -14,6 +14,7 @@ Pen's system libraries and runtime are detachable from applications and it can c
 import Core'Number
 import Os'File
 
+# The `\` prefix for λ denotes a function.
 findAnswer = \(kind string) number {
   # Secret source...
 
