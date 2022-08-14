@@ -102,7 +102,7 @@ pub fn compile(
 
             let function_type = &function_type.arguments()[0];
             let function_type =
-                type_canonicalizer::canonicalize_function(&function_type, context.types())?
+                type_canonicalizer::canonicalize_function(function_type, context.types())?
                     .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
             let result_type = function_type.result();
             let any_type = Type::from(types::Any::new(position.clone()));

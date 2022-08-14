@@ -19,7 +19,7 @@ pub fn compile(
     let from = type_canonicalizer::canonicalize(from, context.types())?;
 
     if !from.is_variant() {
-        return Err(AnalysisError::VariantExpected(from.clone()).into());
+        return Err(AnalysisError::VariantExpected(from).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
         return Err(AnalysisError::TypesNotMatched(to.clone(), from).into());
     }
