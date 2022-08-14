@@ -2898,6 +2898,21 @@ Add = \() none | error {
 <p><em>When</em> I run <code>pen test</code></p>
 <p><em>Then</em> the exit status should not be 0</p>
 <p><em>And</em> the stdout should contain &quot;FAIL&quot;.</p>
+<h2 id="run-multiple-tests"><a class="header" href="#run-multiple-tests">Run multiple tests</a></h2>
+<p><em>Given</em> a file named &quot;Foo.test.pen&quot; with:</p>
+<pre><code class="language-pen">import Test'Assert
+import 'Foo
+
+Add = \() none | error {
+  Assert'True(Foo'Add(41, 1) == 42)
+}
+
+AddMore = \() none | error {
+  Assert'True(Foo'Add(40, 2) == 42)
+}
+</code></pre>
+<p><em>When</em> I successfully run <code>pen test</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
 <h2 id="run-no-test"><a class="header" href="#run-no-test">Run no test</a></h2>
 <p><em>When</em> I run <code>pen test</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
