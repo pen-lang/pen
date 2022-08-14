@@ -44,6 +44,23 @@ Feature: Testing packages
     Then the exit status should not be 0
     And the stdout should contain "FAIL"
 
+  Scenario: Run multiple tests
+    Given a file named "Foo.test.pen" with:
+    """pen
+    import Test'Assert
+    import 'Foo
+
+    Add = \() none | error {
+      Assert'True(Foo'Add(41, 1) == 42)
+    }
+
+    AddMore = \() none | error {
+      Assert'True(Foo'Add(40, 2) == 42)
+    }
+    """
+    When I successfully run `pen test`
+    Then the exit status should be 0
+
   Scenario: Run no test
     When I run `pen test`
     Then the exit status should be 0
