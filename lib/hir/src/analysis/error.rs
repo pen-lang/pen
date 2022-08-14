@@ -1,5 +1,8 @@
 use super::type_formatter;
-use crate::{ir::*, types::*};
+use crate::{
+    ir::*,
+    types::{self, *},
+};
 use position::Position;
 use std::{
     error::Error,
@@ -182,9 +185,10 @@ impl Display for AnalysisError {
                     position::format_message(
                         type_.position(),
                         &format!(
-                            "{} might include error, function, or {} types",
+                            "{} might include function, {}, or {} types",
                             Self::format_type(type_),
-                            Self::format_type(&Any::new(type_.position().clone()).into())
+                            Self::format_type(&types::Error::new(type_.position().clone()).into()),
+                            Self::format_type(&Any::new(type_.position().clone()).into()),
                         ),
                     )
                 )
