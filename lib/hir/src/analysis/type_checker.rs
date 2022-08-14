@@ -661,6 +661,7 @@ mod tests {
         test::{ForeignDeclarationFake, FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
     };
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn check_module(module: &Module) -> Result<(), AnalysisError> {
         check_types(
@@ -722,8 +723,8 @@ mod tests {
                     .set_foreign_declarations(vec![ForeignDeclaration::fake("y", function_type,)])
             ),
             Err(AnalysisError::TypesNotMatched(
-                Position::fake(),
-                Position::fake()
+                types::Number::new(Position::fake()).into(),
+                types::None::new(Position::fake()).into(),
             ))
         );
     }
@@ -755,6 +756,7 @@ mod tests {
 
     mod lambda {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_subsumption_of_function_result_type() -> Result<(), AnalysisError> {
@@ -792,8 +794,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Number::new(Position::fake()).into(),
                 ))
             );
         }
@@ -801,6 +803,7 @@ mod tests {
 
     mod let_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_let() {
@@ -847,8 +850,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -856,6 +859,7 @@ mod tests {
 
     mod if_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_if() {
@@ -926,8 +930,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -953,8 +957,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1383,6 +1387,7 @@ mod tests {
 
     mod operations {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_arithmetic_operation() {
@@ -1449,8 +1454,8 @@ mod tests {
                     )
                 ],)),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1675,7 +1680,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
-                            union_type,
+                            union_type.clone(),
                             TryOperation::new(
                                 Some(types::Number::new(Position::fake()).into()),
                                 Variable::new("x", Position::fake()),
@@ -1687,8 +1692,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    union_type.into()
                 ))
             );
         }
@@ -1717,8 +1722,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Error::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1726,6 +1731,7 @@ mod tests {
 
     mod record {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_record() -> Result<(), AnalysisError> {
@@ -1970,8 +1976,8 @@ mod tests {
                         )])
                 ),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Reference::new("r1", Position::fake()).into(),
+                    types::Reference::new("r2", Position::fake()).into(),
                 ))
             );
         }
@@ -2049,8 +2055,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2083,8 +2089,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake(),
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2229,8 +2235,8 @@ mod tests {
                     )]
                 )),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2331,8 +2337,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2367,8 +2373,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2410,21 +2416,19 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::Number::new(Position::fake()),
-                                    types::None::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
-                            map_type,
+                            vec![Argument::new("x", wrong_map_type.clone(),)],
+                            map_type.clone(),
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
@@ -2437,8 +2441,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2450,21 +2454,19 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::None::new(Position::fake()),
-                                    types::Number::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
-                            map_type,
+                            vec![Argument::new("x", wrong_map_type.clone(),)],
+                            map_type.clone(),
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
@@ -2477,8 +2479,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2542,8 +2544,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2763,7 +2765,7 @@ mod tests {
                                 Variable::new("x", Position::fake()),
                                 "y",
                                 "ys",
-                                Variable::new("y", Position::fake()),
+                                None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 Position::fake(),
                             ),
@@ -2773,8 +2775,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::List::new(types::Number::new(Position::fake()), Position::fake()).into(),
+                    types::List::new(types::None::new(Position::fake()), Position::fake()).into(),
                 ))
             );
         }
@@ -2805,8 +2807,17 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Union::new(
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2891,20 +2902,18 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::Number::new(Position::fake()),
-                                    types::None::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
+                            vec![Argument::new("x", wrong_map_type.clone())],
                             types::None::new(Position::fake()),
                             IfMap::new(
                                 Some(map_type.key().clone()),
@@ -2922,8 +2931,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    wrong_map_type.into(),
+                    map_type.into(),
                 ))
             );
         }
@@ -2959,8 +2968,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2996,8 +3005,13 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Union::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
