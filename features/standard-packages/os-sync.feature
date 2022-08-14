@@ -410,32 +410,6 @@ Feature: OS (synchronous version)
     When I successfully run `pen build`
     Then I successfully run `./app`
 
-  Scenario: Generate a random number
-    Given a file named "main.pen" with:
-    """pen
-    import Core'Number
-    import Os'Context { Context }
-    import Os'File
-    import Os'Process
-    import Os'Random
-
-    main = \(ctx context) none {
-      if m = run(ctx.Os) as none {
-        none
-      } else {
-        Process'Exit(ctx.Os, 1)
-      }
-    }
-
-    run = \(ctx Context) none | error {
-      File'Write(ctx, File'StdOut(), Number'String(Random'Number(ctx)))?
-
-      none
-    }
-    """
-    When I successfully run `pen build`
-    Then I successfully run `./app`
-
   Scenario: Exit a process
     Given a file named "main.pen" with:
     """pen

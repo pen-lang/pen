@@ -42,6 +42,10 @@ DecodeString = \() none | error {
   Assert'True(Decode("\"foo\"")? == Value'New("foo"))
 }
 
+DecodeEscapedString = \() none | error {
+  Assert'True(Decode("\"\\\"\"")? == Value'New("\""))
+}
+
 FailToDecodeStringWithUnexpectedEnd = \() none | error {
   Assert'True(
     if r = Decode("\"") as error {

@@ -223,7 +223,7 @@ fn transform_equal_operation(
             position,
         )?,
         Type::Any(_) | Type::Error(_) | Type::Function(_) => {
-            return Err(AnalysisError::TypeNotComparable(position.clone()).into())
+            return Err(AnalysisError::TypeNotComparable(type_.clone()).into())
         }
     })
 }
@@ -419,31 +419,27 @@ mod tests {
                     Position::fake()
                 ),
             ),
-            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+            Err(AnalysisError::TypeNotComparable(types::Any::new(Position::fake()).into()).into())
         );
     }
 
     #[test]
     fn fail_to_transform_with_function() {
+        let function_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
         assert_eq!(
             transform(
                 &CompileContext::dummy(Default::default(), Default::default()),
                 &EqualityOperation::new(
-                    Some(
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake()
-                        )
-                        .into()
-                    ),
+                    Some(function_type.clone().into()),
                     EqualityOperator::Equal,
                     Variable::new("x", Position::fake()),
                     Variable::new("y", Position::fake()),
                     Position::fake()
                 ),
             ),
-            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+            Err(AnalysisError::TypeNotComparable(function_type.into()).into())
         );
     }
 }

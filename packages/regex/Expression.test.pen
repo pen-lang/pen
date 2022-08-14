@@ -1,0 +1,45 @@
+import Test'Assert
+
+import 'Expression
+
+IsMatch = \() none | error {
+  e = Expression'New("foo")?
+
+  Assert'True(Expression'IsMatch(e, "foo"))
+}
+
+IsNotMatch = \() none | error {
+  e = Expression'New("foo")?
+
+  Assert'True(!Expression'IsMatch(e, "bar"))
+}
+
+Match = \() none | error {
+  e = Expression'New("foo")?
+
+  Assert'True(Expression'Match(e, "foo") == [string | none "foo"])
+}
+
+MatchGroup = \() none | error {
+  e = Expression'New("(foo)")?
+
+  Assert'True(Expression'Match(e, "foo") == [string | none "foo", "foo"])
+}
+
+MatchGroups = \() none | error {
+  e = Expression'New("(foo)(bar)")?
+
+  Assert'True(Expression'Match(e, "foobar") == [string | none "foobar", "foo", "bar"])
+}
+
+MatchSuccessfulAndFailedGroups = \() none | error {
+  e = Expression'New("(foo)(bar)?")?
+
+  Assert'True(Expression'Match(e, "foo") == [string | none "foo", "foo", none])
+}
+
+MatchFail = \() none | error {
+  e = Expression'New("foo")?
+
+  Assert'True(Expression'Match(e, "bar") == none)
+}

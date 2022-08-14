@@ -713,8 +713,12 @@ mod tests {
                             "foo",
                             Lambda::new(
                                 vec![],
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                types::Reference::new("none", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             None,
@@ -784,8 +788,12 @@ mod tests {
                             "Foo",
                             Lambda::new(
                                 vec![],
-                                types::None::new(Position::fake()),
-                                Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                                types::Reference::new("none", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("none", Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
                             ),
                             None,
@@ -849,7 +857,10 @@ mod tests {
                 generate(
                     &RecordDefinition::new(
                         "Foo",
-                        vec![RecordField::new("Bar", types::None::new(Position::fake()))],
+                        vec![RecordField::new(
+                            "Bar",
+                            types::Reference::new("none", Position::fake())
+                        )],
                         Position::fake()
                     )
                     .into(),
@@ -875,7 +886,10 @@ mod tests {
                 generate(
                     &RecordDefinition::new(
                         "Foo",
-                        vec![RecordField::new("bar", types::None::new(Position::fake()))],
+                        vec![RecordField::new(
+                            "bar",
+                            types::Reference::new("none", Position::fake())
+                        )],
                         Position::fake()
                     )
                     .into(),
@@ -899,8 +913,12 @@ mod tests {
         fn generate_type_alias() {
             assert_eq!(
                 generate(
-                    &TypeAlias::new("Foo", types::None::new(Position::fake()), Position::fake())
-                        .into(),
+                    &TypeAlias::new(
+                        "Foo",
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
                     &[]
                 ),
                 indoc!(
@@ -934,8 +952,12 @@ mod tests {
                         "Foo",
                         Lambda::new(
                             vec![],
-                            types::None::new(Position::fake()),
-                            Block::new(vec![], None::new(Position::fake()), Position::fake()),
+                            types::Reference::new("none", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
                             Position::fake()
                         ),
                         None,

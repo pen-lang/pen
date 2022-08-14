@@ -4,7 +4,7 @@ import foreign "c" _pen_prelude_hash_to_index \(number, number, number) number
 
 type Map {
   hamt hamt
-  size_ number
+  size number
 }
 
 type Empty {}
@@ -86,7 +86,7 @@ NewMapContext = \(
 }
 
 NewMap = \() Map {
-  Map{hamt: newHamt(), size_: 0}
+  Map{hamt: newHamt(), size: 0}
 }
 
 newHamt = \() hamt {
@@ -157,12 +157,12 @@ SetMap = \(
   value any,
 ) Map {
   # Deconstruct a size for optimization.
-  s = map.size_
+  s = map.size
   u = setKeyValue(ctx, map.hamt, key, value, 1, 1)
 
   Map{
     hamt: u.hamt,
-    size_: s + if u.resized { 1 } else { 0 },
+    size: s + if u.resized { 1 } else { 0 },
   }
 }
 
@@ -216,7 +216,7 @@ DeleteMap = \(
 
   Map{
     hamt: u.hamt,
-    size_: map.size_ - if u.resized { 1 } else { 0 },
+    size: map.size - if u.resized { 1 } else { 0 },
   }
 }
 
@@ -293,7 +293,7 @@ mergeHamt = \(ctx MapContext, m Map, h hamt, i number) Map {
 }
 
 EqualMaps = \(ctx MapContext, x Map, y Map) boolean {
-  x.size_ == y.size_ & equalHamts(ctx, x.hamt, y.hamt, 1)
+  x.size == y.size & equalHamts(ctx, x.hamt, y.hamt, 1)
 }
 
 equalHamts = \(ctx MapContext, h1 hamt, h2 hamt, i number) boolean {
@@ -382,7 +382,7 @@ MapIteratorValue = \(i MapIterator) any { i.value }
 
 MapIteratorRest = \(i MapIterator) MapIterator | none { i.rest() }
 
-MapSize = \(x Map) number { x.size_ }
+MapSize = \(x Map) number { x.size }
 
 hamtIndex = \(ctx MapContext, key any, layer number, level number) number {
   _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)

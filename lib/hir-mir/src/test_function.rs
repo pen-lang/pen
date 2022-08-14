@@ -60,9 +60,12 @@ pub fn compile(
                                             None,
                                             IfType::new(
                                                 MESSAGE_VARIABLE_NAME,
-                                                BuiltInCall::new(
+                                                Call::new(
                                                     None,
-                                                    BuiltInFunction::Source,
+                                                    BuiltInFunction::new(
+                                                        BuiltInFunctionName::Source,
+                                                        position.clone(),
+                                                    ),
                                                     vec![Variable::new(
                                                         RESULT_VARIABLE_NAME,
                                                         position.clone(),

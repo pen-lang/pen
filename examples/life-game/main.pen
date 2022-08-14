@@ -5,8 +5,8 @@ import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Process
-import Os'Random
 import Os'Time
+import Random'Random
 
 import 'lifeGame
 
@@ -15,7 +15,7 @@ rows = \() number { 40 }
 columns = \() number { 80 }
 
 main = \(ctx context) none {
-  if e = run(ctx.Os) as none {
+  if e = run(ctx) as none {
     none
   } else {
     _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
@@ -23,11 +23,11 @@ main = \(ctx context) none {
   }
 }
 
-run = \(ctx Context) none | error {
+run = \(ctx context) none | error {
   step(
-    ctx,
+    ctx.Os,
     lifeGame'Initialize(
-      lifeGame'NewContext(\() number { Random'Number(ctx) }),
+      lifeGame'NewContext(\() number { Random'Number(ctx.Random) }),
       rows(),
       columns(),
     ),

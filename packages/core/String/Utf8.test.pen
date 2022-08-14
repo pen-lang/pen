@@ -39,6 +39,10 @@ LengthTwoEmojis = \() none | error {
   Assert'True(Utf8'Length("😄🗿") == 2)
 }
 
+Replace = \() none | error {
+  Assert'True(Utf8'Replace("🗿😄🐶", "😄", "smile") == "🗿smile🐶")
+}
+
 SliceStart = \() none | error {
   Assert'True(Utf8'Slice("🗿😄🐶", 1, 2) == "🗿😄")
 }

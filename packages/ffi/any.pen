@@ -62,26 +62,14 @@ foreign "c" pen_ffi_any_to_string = \(x any) string {
   }
 }
 
-foreign "c" pen_ffi_any_from_boolean = \(x boolean) any {
-  x
-}
+foreign "c" pen_ffi_boolean_to_any = \(x boolean) any { x }
 
-foreign "c" pen_ffi_any_from_error = \(x error) any {
-  x
-}
+foreign "c" pen_ffi_error_to_any = \(x error) any { x }
 
-foreign "c" pen_ffi_any_from_none = \() any {
-  none
-}
+foreign "c" pen_ffi_none_to_any = \() any { none }
 
-foreign "c" pen_ffi_any_from_list = \(x [any]) any {
-  x
-}
+foreign "c" pen_ffi_list_to_any = \(x [any]) any { x }
 
-foreign "c" pen_ffi_any_from_number = \(x number) any {
-  x
-}
+foreign "c" pen_ffi_number_to_any = \(x number) any { x }
 
-foreign "c" pen_ffi_any_from_string = \(x string) any {
-  x
-}
+foreign "c" pen_ffi_string_to_any = \(x string) any { x }

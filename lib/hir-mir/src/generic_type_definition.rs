@@ -65,12 +65,17 @@ fn collect_types(
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
     expression_visitor::visit(module, |expression| match expression {
-        Expression::BuiltInCall(call) if call.function() == BuiltInFunction::Race => {
-            let position = call.position();
+        Expression::Call(call) => {
+            if let Expression::BuiltInFunction(function) = call.function() {
+                if function.name() == BuiltInFunctionName::Race {
+                    let position = call.position();
 
-            lower_types.insert(
-                types::List::new(types::Any::new(position.clone()), position.clone()).into(),
-            );
+                    lower_types.insert(
+                        types::List::new(types::Any::new(position.clone()), position.clone())
+                            .into(),
+                    );
+                }
+            }
         }
         Expression::IfList(if_) => {
             lower_types.insert(if_.type_().unwrap().clone());
@@ -147,7 +152,7 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
                         types::None::new(Position::fake()),
-                        BuiltInCall::new(
+                        Call::new(
                             Some(
                                 types::Function::new(
                                     vec![list_type.clone().into()],
@@ -156,7 +161,7 @@ mod tests {
                                 )
                                 .into()
                             ),
-                            BuiltInFunction::Race,
+                            BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
                             vec![Variable::new("x", Position::fake()).into()],
                             Position::fake()
                         ),

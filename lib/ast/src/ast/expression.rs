@@ -1,14 +1,12 @@
 use super::{
-    if_list::IfList, BinaryOperation, Boolean, ByteString, Call, If, IfMap, IfType, Lambda, List,
-    ListComprehension, Map, MapIterationComprehension, None, Number, Record, RecordDeconstruction,
-    UnaryOperation, Variable,
+    BinaryOperation, ByteString, Call, If, IfList, IfMap, IfType, Lambda, List, ListComprehension,
+    Map, MapIterationComprehension, Number, Record, RecordDeconstruction, UnaryOperation, Variable,
 };
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     BinaryOperation(BinaryOperation),
-    Boolean(Boolean),
     Call(Call),
     If(If),
     IfList(IfList),
@@ -19,7 +17,6 @@ pub enum Expression {
     ListComprehension(ListComprehension),
     Map(Map),
     MapIterationComprehension(MapIterationComprehension),
-    None(None),
     Number(Number),
     Record(Record),
     RecordDeconstruction(RecordDeconstruction),
@@ -32,7 +29,6 @@ impl Expression {
     pub fn position(&self) -> &Position {
         match self {
             Self::BinaryOperation(operation) => operation.position(),
-            Self::Boolean(boolean) => boolean.position(),
             Self::Call(call) => call.position(),
             Self::If(if_) => if_.position(),
             Self::IfList(if_) => if_.position(),
@@ -43,7 +39,6 @@ impl Expression {
             Self::ListComprehension(comprehension) => comprehension.position(),
             Self::Map(map) => map.position(),
             Self::MapIterationComprehension(comprehension) => comprehension.position(),
-            Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
             Self::RecordDeconstruction(operation) => operation.position(),
@@ -57,12 +52,6 @@ impl Expression {
 impl From<BinaryOperation> for Expression {
     fn from(operation: BinaryOperation) -> Self {
         Self::BinaryOperation(operation)
-    }
-}
-
-impl From<Boolean> for Expression {
-    fn from(boolean: Boolean) -> Self {
-        Self::Boolean(boolean)
     }
 }
 
@@ -129,12 +118,6 @@ impl From<Map> for Expression {
 impl From<MapIterationComprehension> for Expression {
     fn from(comprehension: MapIterationComprehension) -> Self {
         Self::MapIterationComprehension(comprehension)
-    }
-}
-
-impl From<None> for Expression {
-    fn from(none: None) -> Self {
-        Self::None(none)
     }
 }
 

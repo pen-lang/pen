@@ -1,13 +1,14 @@
 type Arguments {
   Host string
+  Message string
 }
 
 Parse = \(ss [string]) Arguments | error {
   if [s, ...ss] = ss {
-    if [_, ..._] = ss {
-      error("too many arguments")
+    if [m, ..._] = ss {
+      Arguments{Host: s(), Message: m()}
     } else {
-      Arguments{Host: s()}
+      error("too few arguments")
     }
   } else {
     error("too few arguments")

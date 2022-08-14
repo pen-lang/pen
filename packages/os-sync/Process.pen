@@ -1,5 +1,6 @@
 import 'Context'context { Context }
 
+# Exit a current process.
 Exit = \(ctx Context, code number) none {
   context'Inner(ctx).Exit(code)
 }

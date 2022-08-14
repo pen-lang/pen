@@ -2,6 +2,7 @@ use super::arc::ArcBuffer;
 use alloc::{string::String, vec::Vec};
 use core::hash::{Hash, Hasher};
 
+#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_string_to_any")]
 #[repr(C)]
 #[derive(Clone, Debug, Default)]
 pub struct ByteString {
@@ -25,6 +26,12 @@ impl Eq for ByteString {}
 impl Hash for ByteString {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         self.as_slice().hash(hasher)
+    }
+}
+
+impl From<char> for ByteString {
+    fn from(character: char) -> Self {
+        String::from(character).into()
     }
 }
 

@@ -22,7 +22,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
                     type_::compile(context, declaration.type_())?
                         .into_function()
                         .ok_or_else(|| {
-                            AnalysisError::FunctionExpected(declaration.position().clone())
+                            AnalysisError::FunctionExpected(declaration.type_().clone())
                         })?,
                     compile_calling_convention(declaration.calling_convention()),
                 ))

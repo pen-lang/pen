@@ -1,7 +1,7 @@
 import Test'Assert
 
-import 'Render { Render }
 import 'Node { Node, Attribute, Element }
+import 'Render { Render }
 
 RenderElement = \() none | error {
   Assert'True(
@@ -13,6 +13,18 @@ RenderElement = \() none | error {
       },
     )?
       == "<html/>",
+  )
+}
+
+RenderInvalidElement = \() none | error {
+  Assert'Error(
+    Render(
+      Element{
+        Tag: "<html/>",
+        Attributes: [Attribute],
+        Children: [Node],
+      },
+    ),
   )
 }
 
@@ -61,6 +73,33 @@ RenderAttributeWithChild = \() none | error {
       },
     )?
       == "<html foo=\"bar\"><body/></html>",
+  )
+}
+
+RenderInvalidAttribute = \() none | error {
+  Assert'Error(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute
+          Attribute{Key: "<foo/>", Value: "bar"},
+        ],
+        Children: [Node],
+      },
+    ),
+  )
+}
+
+RenderEscapedAttribute = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute Attribute{Key: "foo", Value: "\"<foo />"}],
+        Children: [Node],
+      },
+    )?
+      == "<html foo=\"&quot;&lt;foo /&gt;\"/>",
   )
 }
 
@@ -142,5 +181,18 @@ RenderTextNode = \() none | error {
       },
     )?
       == "<html>foo</html>",
+  )
+}
+
+RenderEscapedTextNode = \() none | error {
+  Assert'True(
+    Render(
+      Element{
+        Tag: "html",
+        Attributes: [Attribute],
+        Children: [Node "<html />"],
+      },
+    )?
+      == "<html>&lt;html /&gt;</html>",
   )
 }

@@ -3,3 +3,5 @@ type Datagram {
   Data string
   Address string
 }
+
+foreign "c" _pen_os_udp_datagram_to_any = \(d Datagram) any { d }

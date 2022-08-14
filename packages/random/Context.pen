@@ -1,0 +1,8 @@
+import 'Context'context
+
+# A context of random number generation.
+type Context = context'Context
+
+UnsafeNew = \() Context {
+  context'UnsafeNew()
+}
