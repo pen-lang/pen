@@ -188,7 +188,7 @@ impl Display for AnalysisError {
                             "{} might include function, {}, or {} types",
                             Self::format_type(type_),
                             Self::format_type(&types::Error::new(type_.position().clone()).into()),
-                            Self::format_type(&Any::new(type_.position().clone()).into()),
+                            Self::format_type(&types::Any::new(type_.position().clone()).into()),
                         ),
                     )
                 )
