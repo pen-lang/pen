@@ -21,7 +21,7 @@ pub fn compile(
     if !from.is_variant() {
         return Err(AnalysisError::VariantExpected(expression.position().clone()).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
-        return Err(AnalysisError::TypesNotMatched(from.clone(), to.clone()).into());
+        return Err(AnalysisError::TypesNotMatched(to.clone(), from).into());
     }
 
     Ok(
@@ -137,7 +137,16 @@ mod tests {
                 &types::Any::new(Position::fake()).into(),
                 &Variable::new("x", Position::fake()).into(),
             ),
-            Err(AnalysisError::TypesNotMatched(Position::fake(), Position::fake()).into())
+            Err(AnalysisError::TypesNotMatched(
+                types::Any::new(Position::fake()).into(),
+                types::Union::new(
+                    types::None::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+            )
+            .into())
         );
     }
 
