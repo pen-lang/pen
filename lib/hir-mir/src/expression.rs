@@ -26,22 +26,30 @@ pub fn compile(
 
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
-        Expression::BuiltInCall(call) => built_in_call::compile(context, call)?,
-        Expression::Call(call) => mir::ir::Call::new(
-            type_::compile(
-                context,
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-            )?
-            .into_function()
-            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?,
-            compile(call.function())?,
-            call.arguments()
-                .iter()
-                .map(compile)
-                .collect::<Result<_, _>>()?,
-        )
-        .into(),
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into())
+        }
+        Expression::Call(call) => {
+            if let Expression::BuiltInFunction(function) = call.function() {
+                built_in_call::compile(context, call, function)?
+            } else {
+                let type_ = call
+                    .function_type()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+
+                mir::ir::Call::new(
+                    type_::compile(context, type_)?
+                        .into_function()
+                        .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?,
+                    compile(call.function())?,
+                    call.arguments()
+                        .iter()
+                        .map(compile)
+                        .collect::<Result<_, _>>()?,
+                )
+                .into()
+            }
+        }
         Expression::If(if_) => mir::ir::If::new(
             compile(if_.condition())?,
             compile(if_.then())?,
@@ -123,7 +131,6 @@ pub fn compile(
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
-                construction.position(),
                 context.types(),
                 context.records(),
             )?;
@@ -147,15 +154,10 @@ pub fn compile(
 
             mir::ir::RecordField::new(
                 type_::compile(context, type_)?.into_record().unwrap(),
-                record_field_resolver::resolve(
-                    type_,
-                    deconstruction.position(),
-                    context.types(),
-                    context.records(),
-                )?
-                .iter()
-                .position(|field_type| field_type.name() == deconstruction.field_name())
-                .unwrap(),
+                record_field_resolver::resolve(type_, context.types(), context.records())?
+                    .iter()
+                    .position(|field_type| field_type.name() == deconstruction.field_name())
+                    .unwrap(),
                 compile(deconstruction.record())?,
             )
             .into()
@@ -172,7 +174,6 @@ pub fn compile(
                     Ok(mir::ir::RecordUpdateField::new(
                         record_field_resolver::resolve(
                             update.type_(),
-                            update.position(),
                             context.types(),
                             context.records(),
                         )?

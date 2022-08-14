@@ -57,86 +57,17 @@ fn check_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => {
-            let position = call.position();
-            let function_type = type_canonicalizer::canonicalize_function(
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-
-            if call.arguments().len() != function_type.arguments().len() {
-                return Err(AnalysisError::WrongArgumentCount(position.clone()));
-            }
-
-            for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
-                check_subsumption(&check_expression(argument, variables)?, type_)?;
-            }
-
-            match call.function() {
-                BuiltInFunction::Race => {
-                    let argument_type = type_canonicalizer::canonicalize_list(
-                        if let [argument_type] = function_type.arguments() {
-                            Ok(argument_type)
-                        } else {
-                            Err(AnalysisError::WrongArgumentCount(position.clone()))
-                        }?,
-                        context.types(),
-                    )?
-                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
-
-                    if type_canonicalizer::canonicalize_list(
-                        argument_type.element(),
-                        context.types(),
-                    )?
-                    .is_none()
-                    {
-                        return Err(AnalysisError::ListExpected(position.clone()));
-                    }
-                }
-                BuiltInFunction::Size => {
-                    if let [argument_type] = function_type.arguments() {
-                        if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
-                            return Err(AnalysisError::CollectionExpected(
-                                call.arguments()[0].position().clone(),
-                            ));
-                        }
-                    } else {
-                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-                    }
-                }
-                BuiltInFunction::Spawn => {
-                    if let [argument_type] = function_type.arguments() {
-                        if !type_canonicalizer::canonicalize_function(
-                            argument_type,
-                            context.types(),
-                        )?
-                        .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?
-                        .arguments()
-                        .is_empty()
-                        {
-                            return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
-                        }
-                    } else {
-                        return Err(AnalysisError::WrongArgumentCount(position.clone()));
-                    }
-                }
-                BuiltInFunction::Debug | BuiltInFunction::Error | BuiltInFunction::Source => {}
-            }
-
-            function_type.result().clone()
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(
+                function.position().clone(),
+            ))
         }
         Expression::Call(call) => {
             let type_ = call
                 .function_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
             let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
-                .ok_or_else(|| {
-                    AnalysisError::FunctionExpected(call.function().position().clone())
-                })?;
-
-            check_subsumption(&check_expression(call.function(), variables)?, type_)?;
+                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?;
 
             if call.arguments().len() != function_type.arguments().len() {
                 return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
@@ -144,6 +75,12 @@ fn check_expression(
 
             for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
                 check_subsumption(&check_expression(argument, variables)?, type_)?;
+            }
+
+            if let Expression::BuiltInFunction(function) = call.function() {
+                check_built_in_call(context, call, function, &function_type)?;
+            } else {
+                check_subsumption(&check_expression(call.function(), variables)?, type_)?;
             }
 
             function_type.result().clone()
@@ -231,9 +168,7 @@ fn check_expression(
             )?;
 
             if !argument_type.is_variant() {
-                return Err(AnalysisError::VariantExpected(
-                    if_.argument().position().clone(),
-                ));
+                return Err(AnalysisError::VariantExpected(argument_type));
             }
 
             for branch in if_.branches() {
@@ -322,15 +257,12 @@ fn check_expression(
             for element in list.elements() {
                 match element {
                     ListElement::Multiple(expression) => {
+                        let type_ = check_expression(expression, variables)?;
+
                         check_subsumption(
-                            type_canonicalizer::canonicalize_list(
-                                &check_expression(expression, variables)?,
-                                context.types(),
-                            )?
-                            .ok_or_else(|| {
-                                AnalysisError::ListExpected(expression.position().clone())
-                            })?
-                            .element(),
+                            type_canonicalizer::canonicalize_list(&type_, context.types())?
+                                .ok_or(AnalysisError::ListExpected(type_))?
+                                .element(),
                             list.type_(),
                         )?;
                     }
@@ -385,11 +317,10 @@ fn check_expression(
                         )?;
                     }
                     MapElement::Map(expression) => {
-                        let map_type = type_canonicalizer::canonicalize_map(
-                            &check_expression(expression, variables)?,
-                            context.types(),
-                        )?
-                        .ok_or_else(|| AnalysisError::MapExpected(expression.position().clone()))?;
+                        let type_ = check_expression(expression, variables)?;
+                        let map_type =
+                            type_canonicalizer::canonicalize_map(&type_, context.types())?
+                                .ok_or(AnalysisError::MapExpected(type_))?;
 
                         check_subsumption(map_type.key(), map.key_type())?;
                         check_subsumption(map_type.value(), map.value_type())?;
@@ -447,7 +378,6 @@ fn check_expression(
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
-                construction.position(),
                 context.types(),
                 context.records(),
             )?;
@@ -489,12 +419,8 @@ fn check_expression(
                 type_,
             )?;
 
-            let field_types = record_field_resolver::resolve(
-                type_,
-                deconstruction.position(),
-                context.types(),
-                context.records(),
-            )?;
+            let field_types =
+                record_field_resolver::resolve(type_, context.types(), context.records())?;
 
             field_types
                 .iter()
@@ -511,12 +437,8 @@ fn check_expression(
                 update.type_(),
             )?;
 
-            let field_types = record_field_resolver::resolve(
-                update.type_(),
-                update.position(),
-                context.types(),
-                context.records(),
-            )?;
+            let field_types =
+                record_field_resolver::resolve(update.type_(), context.types(), context.records())?;
 
             for field in update.fields() {
                 check_subsumption(
@@ -562,6 +484,59 @@ fn check_expression(
     })
 }
 
+fn check_built_in_call(
+    context: &AnalysisContext,
+    call: &Call,
+    function: &BuiltInFunction,
+    function_type: &types::Function,
+) -> Result<(), AnalysisError> {
+    let position = call.position();
+
+    match function.name() {
+        BuiltInFunctionName::Race => {
+            let argument_type = if let [argument_type] = function_type.arguments() {
+                Ok(argument_type)
+            } else {
+                Err(AnalysisError::WrongArgumentCount(position.clone()))
+            }?;
+            let argument_type =
+                type_canonicalizer::canonicalize_list(argument_type, context.types())?
+                    .ok_or_else(|| AnalysisError::ListExpected(argument_type.clone()))?;
+
+            if type_canonicalizer::canonicalize_list(argument_type.element(), context.types())?
+                .is_none()
+            {
+                return Err(AnalysisError::ListExpected(argument_type.element().clone()));
+            }
+        }
+        BuiltInFunctionName::Size => {
+            if let [argument_type] = function_type.arguments() {
+                if !matches!(argument_type, Type::List(_) | Type::Map(_)) {
+                    return Err(AnalysisError::CollectionExpected(argument_type.clone()));
+                }
+            } else {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+        }
+        BuiltInFunctionName::Spawn => {
+            if let [argument_type] = function_type.arguments() {
+                if !type_canonicalizer::canonicalize_function(argument_type, context.types())?
+                    .ok_or_else(|| AnalysisError::FunctionExpected(argument_type.clone()))?
+                    .arguments()
+                    .is_empty()
+                {
+                    return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
+                }
+            } else {
+                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+            }
+        }
+        BuiltInFunctionName::Debug | BuiltInFunctionName::Error | BuiltInFunctionName::Source => {}
+    }
+
+    Ok(())
+}
+
 fn check_operation(
     context: &AnalysisContext,
     operation: &Operation,
@@ -603,9 +578,7 @@ fn check_operation(
             if !type_subsumption_checker::check(&lhs_type, &rhs_type, context.types())?
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, context.types())?
             {
-                return Err(AnalysisError::TypeNotComparable(
-                    operation.position().clone(),
-                ));
+                return Err(AnalysisError::TypesNotMatched(lhs_type, rhs_type));
             }
 
             types::Boolean::new(operation.position().clone()).into()
@@ -654,10 +627,7 @@ fn check_subsumption(
     if type_subsumption_checker::check(lower, upper, types)? {
         Ok(())
     } else {
-        Err(AnalysisError::TypesNotMatched(
-            lower.position().clone(),
-            upper.position().clone(),
-        ))
+        Err(AnalysisError::TypesNotMatched(lower.clone(), upper.clone()))
     }
 }
 
@@ -669,6 +639,7 @@ mod tests {
         test::{ForeignDeclarationFake, FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
     };
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn check_module(module: &Module) -> Result<(), AnalysisError> {
         check_types(
@@ -730,8 +701,8 @@ mod tests {
                     .set_foreign_declarations(vec![ForeignDeclaration::fake("y", function_type,)])
             ),
             Err(AnalysisError::TypesNotMatched(
-                Position::fake(),
-                Position::fake()
+                types::Number::new(Position::fake()).into(),
+                types::None::new(Position::fake()).into(),
             ))
         );
     }
@@ -763,6 +734,7 @@ mod tests {
 
     mod lambda {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_subsumption_of_function_result_type() -> Result<(), AnalysisError> {
@@ -800,8 +772,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Number::new(Position::fake()).into(),
                 ))
             );
         }
@@ -809,6 +781,7 @@ mod tests {
 
     mod let_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_let() {
@@ -855,8 +828,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -864,6 +837,7 @@ mod tests {
 
     mod if_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_if() {
@@ -934,8 +908,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -961,8 +935,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::None::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1391,6 +1365,7 @@ mod tests {
 
     mod operations {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_arithmetic_operation() {
@@ -1457,8 +1432,8 @@ mod tests {
                     )
                 ],)),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1544,7 +1519,10 @@ mod tests {
                         false,
                     )]
                 )),
-                Err(AnalysisError::TypeNotComparable(Position::fake()))
+                Err(AnalysisError::TypesNotMatched(
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into()
+                ))
             );
         }
 
@@ -1683,7 +1661,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![Argument::new("x", union_type.clone())],
-                            union_type,
+                            union_type.clone(),
                             TryOperation::new(
                                 Some(types::Number::new(Position::fake()).into()),
                                 Variable::new("x", Position::fake()),
@@ -1695,8 +1673,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    union_type.into()
                 ))
             );
         }
@@ -1725,8 +1703,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Error::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -1734,6 +1712,7 @@ mod tests {
 
     mod record {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn check_record() -> Result<(), AnalysisError> {
@@ -1978,8 +1957,8 @@ mod tests {
                         )])
                 ),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Reference::new("r1", Position::fake()).into(),
+                    types::Reference::new("r2", Position::fake()).into(),
                 ))
             );
         }
@@ -2057,8 +2036,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2091,8 +2070,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake(),
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2237,8 +2216,8 @@ mod tests {
                     )]
                 )),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2339,8 +2318,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2375,8 +2354,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2418,20 +2397,18 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::Number::new(Position::fake()),
-                                    types::None::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
+                            vec![Argument::new("x", wrong_map_type,)],
                             map_type,
                             Map::new(
                                 types::None::new(Position::fake()),
@@ -2445,8 +2422,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2458,20 +2435,18 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::None::new(Position::fake()),
-                                    types::Number::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
+                            vec![Argument::new("x", wrong_map_type,)],
                             map_type,
                             Map::new(
                                 types::None::new(Position::fake()),
@@ -2485,8 +2460,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2550,8 +2525,8 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
                 )),
             );
         }
@@ -2771,7 +2746,7 @@ mod tests {
                                 Variable::new("x", Position::fake()),
                                 "y",
                                 "ys",
-                                Variable::new("y", Position::fake()),
+                                None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 Position::fake(),
                             ),
@@ -2781,8 +2756,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::List::new(types::Number::new(Position::fake()), Position::fake()).into(),
+                    types::List::new(types::None::new(Position::fake()), Position::fake()).into(),
                 ))
             );
         }
@@ -2813,8 +2788,17 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Union::new(
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -2899,20 +2883,18 @@ mod tests {
                 types::None::new(Position::fake()),
                 Position::fake(),
             );
+            let wrong_map_type = types::Map::new(
+                types::Number::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Map::new(
-                                    types::Number::new(Position::fake()),
-                                    types::None::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                            )],
+                            vec![Argument::new("x", wrong_map_type.clone())],
                             types::None::new(Position::fake()),
                             IfMap::new(
                                 Some(map_type.key().clone()),
@@ -2930,8 +2912,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    wrong_map_type.into(),
+                    map_type.into(),
                 ))
             );
         }
@@ -2967,8 +2949,8 @@ mod tests {
                     )
                 ]),),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Number::new(Position::fake()).into(),
+                    types::Boolean::new(Position::fake()).into(),
                 ))
             );
         }
@@ -3004,8 +2986,13 @@ mod tests {
                     )
                 ])),
                 Err(AnalysisError::TypesNotMatched(
-                    Position::fake(),
-                    Position::fake()
+                    types::Union::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into(),
+                    types::None::new(Position::fake()).into(),
                 ))
             );
         }
@@ -3148,7 +3135,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
                             types::Number::new(Position::fake()),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![list_type.into()],
@@ -3157,7 +3144,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Size,
+                                BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),
@@ -3183,7 +3170,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", map_type.clone())],
                             types::Number::new(Position::fake()),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![map_type.into()],
@@ -3192,7 +3179,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Size,
+                                BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),
@@ -3213,7 +3200,7 @@ mod tests {
                             Lambda::new(
                                 vec![Argument::new("x", types::None::new(Position::fake()),)],
                                 types::Number::new(Position::fake()),
-                                BuiltInCall::new(
+                                Call::new(
                                     Some(
                                         types::Function::new(
                                             vec![types::None::new(Position::fake()).into()],
@@ -3222,7 +3209,10 @@ mod tests {
                                         )
                                         .into(),
                                     ),
-                                    BuiltInFunction::Size,
+                                    BuiltInFunction::new(
+                                        BuiltInFunctionName::Size,
+                                        Position::fake()
+                                    ),
                                     vec![Variable::new("x", Position::fake()).into()],
                                     Position::fake(),
                                 ),
@@ -3253,7 +3243,7 @@ mod tests {
                         Lambda::new(
                             vec![],
                             function_type.clone(),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![function_type.clone().into()],
@@ -3262,7 +3252,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Spawn,
+                                BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                                 vec![Lambda::new(
                                     vec![],
                                     types::None::new(Position::fake()),
@@ -3295,7 +3285,7 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 function_type.clone(),
-                                BuiltInCall::new(
+                                Call::new(
                                     Some(
                                         types::Function::new(
                                             vec![function_type.clone().into()],
@@ -3304,7 +3294,10 @@ mod tests {
                                         )
                                         .into()
                                     ),
-                                    BuiltInFunction::Spawn,
+                                    BuiltInFunction::new(
+                                        BuiltInFunctionName::Spawn,
+                                        Position::fake()
+                                    ),
                                     vec![Lambda::new(
                                         vec![Argument::new(
                                             "x",
@@ -3343,7 +3336,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new("x", list_type.clone())],
                             list_type.element().clone(),
-                            BuiltInCall::new(
+                            Call::new(
                                 Some(
                                     types::Function::new(
                                         vec![list_type.clone().into()],
@@ -3352,7 +3345,7 @@ mod tests {
                                     )
                                     .into(),
                                 ),
-                                BuiltInFunction::Race,
+                                BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),

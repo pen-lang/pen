@@ -5,7 +5,6 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashMap;
-use position::Position;
 
 pub fn extract_from_expression(
     context: &AnalysisContext,
@@ -17,18 +16,21 @@ pub fn extract_from_expression(
 
     Ok(match expression {
         Expression::Boolean(boolean) => types::Boolean::new(boolean.position().clone()).into(),
-        Expression::BuiltInCall(call) => extract_from_call_like(
-            context,
-            call.function_type(),
-            call.position(),
-            call.position(),
-        )?,
-        Expression::Call(call) => extract_from_call_like(
-            context,
-            call.function_type(),
-            call.position(),
-            call.function().position(),
-        )?,
+        Expression::BuiltInFunction(function) => {
+            return Err(AnalysisError::BuiltInFunctionNotCalled(
+                function.position().clone(),
+            ))
+        }
+        Expression::Call(call) => {
+            let type_ = call
+                .function_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+
+            type_canonicalizer::canonicalize_function(type_, context.types())?
+                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?
+                .result()
+                .clone()
+        }
         Expression::If(if_) => types::Union::new(
             extract_from_expression(if_.then(), variables)?,
             extract_from_expression(if_.else_(), variables)?,
@@ -36,11 +38,9 @@ pub fn extract_from_expression(
         )
         .into(),
         Expression::IfList(if_) => {
-            let list_type = type_canonicalizer::canonicalize_list(
-                &extract_from_expression(if_.list(), variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::ListExpected(if_.list().position().clone()))?;
+            let type_ = extract_from_expression(if_.list(), variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
+                .ok_or(AnalysisError::ListExpected(type_))?;
 
             types::Union::new(
                 extract_from_expression(
@@ -68,11 +68,9 @@ pub fn extract_from_expression(
             .into()
         }
         Expression::IfMap(if_) => {
-            let map_type = type_canonicalizer::canonicalize_map(
-                &extract_from_expression(if_.map(), variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::MapExpected(if_.map().position().clone()))?;
+            let type_ = extract_from_expression(if_.map(), variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
+                .ok_or(AnalysisError::MapExpected(type_))?;
 
             types::Union::new(
                 extract_from_expression(
@@ -190,7 +188,6 @@ pub fn extract_from_expression(
             deconstruction
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?,
-            deconstruction.position(),
             context.types(),
             context.records(),
         )?
@@ -216,21 +213,6 @@ pub fn extract_from_expression(
             .cloned()
             .ok_or_else(|| AnalysisError::VariableNotFound(variable.clone()))?,
     })
-}
-
-fn extract_from_call_like(
-    context: &AnalysisContext,
-    type_: Option<&Type>,
-    call_position: &Position,
-    function_position: &Position,
-) -> Result<Type, AnalysisError> {
-    Ok(type_canonicalizer::canonicalize_function(
-        type_.ok_or_else(|| AnalysisError::TypeNotInferred(call_position.clone()))?,
-        context.types(),
-    )?
-    .ok_or_else(|| AnalysisError::FunctionExpected(function_position.clone()))?
-    .result()
-    .clone())
 }
 
 pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
@@ -334,7 +316,7 @@ mod tests {
             assert_eq!(
                 extract_from_expression(
                     &empty_context(),
-                    &BuiltInCall::new(
+                    &Call::new(
                         Some(
                             types::Function::new(
                                 vec![types::List::new(
@@ -347,7 +329,7 @@ mod tests {
                             )
                             .into()
                         ),
-                        BuiltInFunction::Size,
+                        BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                         vec![List::new(
                             types::None::new(Position::fake()),
                             vec![],
@@ -371,7 +353,7 @@ mod tests {
             assert_eq!(
                 extract_from_expression(
                     &empty_context(),
-                    &BuiltInCall::new(
+                    &Call::new(
                         Some(
                             types::Function::new(
                                 vec![function_type.clone().into()],
@@ -380,7 +362,7 @@ mod tests {
                             )
                             .into()
                         ),
-                        BuiltInFunction::Spawn,
+                        BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                         vec![Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),

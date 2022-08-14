@@ -6,29 +6,32 @@
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
-Pen is a **functional** programming language focused on **application programming** following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
+Pen is the parallel, concurrent, and functional programming language focused on application programming following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
 
-Pen's system libraries and runtime are detachable from applications and it can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
+Pen provides [the two built-in functions of `go` and `race`][concurrency] to construct concurrent/parallel computation. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always data-race free.
+
+System libraries and runtime in Pen are detachable from applications. Therefore, Pen can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
 
 ```pen
-import Os'Context { Context }
+import Core'Number
 import Os'File
-import Os'Process
 
-sayHello = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+# The `\` prefix for λ denotes a function.
+findAnswer = \(kind string) number {
+  # Secret source...
 
-  none
+  21
 }
 
 main = \(ctx context) none {
-  e = sayHello(ctx.Os)
+  # The `go` function runs a given function in parallel.
+  # `x` is a future for the computed value.
+  x = go(\() number { findAnswer("humanity") })
+  y = findAnswer("dolphins")
 
-  if _ = e as none {
-    none
-  } else if error {
-    Process'Exit(ctx.Os, 1)
-  }
+  _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
+
+  none
 }
 ```
 
@@ -113,6 +116,18 @@ Currently, Pen does not use [delimited continuations](https://en.wikipedia.org/w
 Pen implements [the Perceus reference counting][perceus] as its GC. Thanks to the state-of-the-art ownership-based RC algorithm, programs written in Pen performs much less than traditional RC where every data transfer or mutation requires counting operations. In addition, the algorithm reduces heap allocations significantly for records behind unique references, which brings practical performance without introducing unsafe mutability.
 
 See also [How to Implement the Perceus Reference Counting Garbage Collection](https://hackernoon.com/how-to-implement-the-perceus-reference-counting-garbage-collection).
+
+### Inductive values
+
+> TBD
+
+### Dynamic effect system
+
+> TBD
+
+### Stackful coroutines
+
+> TBD
 
 ## Contributing
 

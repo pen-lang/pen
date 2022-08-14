@@ -1,5 +1,5 @@
 use super::error::CompileError;
-use crate::{number, string};
+use crate::{number, string, type_};
 use hir::{ir, types};
 use position::Position;
 
@@ -12,7 +12,13 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                 ast::TypeDefinition::RecordDefinition(definition) => Some(ir::TypeDefinition::new(
                     definition.name(),
                     definition.name(),
-                    definition.fields().to_vec(),
+                    definition
+                        .fields()
+                        .iter()
+                        .map(|field| {
+                            types::RecordField::new(field.name(), type_::compile(field.type_()))
+                        })
+                        .collect(),
                     ast::analysis::is_record_open(definition),
                     ast::analysis::is_name_public(definition.name()),
                     false,
@@ -29,7 +35,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                 ast::TypeDefinition::TypeAlias(alias) => Some(ir::TypeAlias::new(
                     alias.name(),
                     alias.name(),
-                    alias.type_().clone(),
+                    type_::compile(alias.type_()),
                     ast::analysis::is_name_public(alias.name()),
                     false,
                     alias.position().clone(),
@@ -44,7 +50,7 @@ pub fn compile(module: &ast::Module) -> Result<ir::Module, CompileError> {
                     import.name(),
                     import.name(),
                     compile_calling_convention(import.calling_convention()),
-                    import.type_().clone(),
+                    type_::compile(import.type_()),
                     import.position().clone(),
                 )
             })
@@ -88,9 +94,9 @@ fn compile_lambda(lambda: &ast::Lambda) -> Result<ir::Lambda, CompileError> {
         lambda
             .arguments()
             .iter()
-            .map(|argument| ir::Argument::new(argument.name(), argument.type_().clone()))
+            .map(|argument| ir::Argument::new(argument.name(), type_::compile(argument.type_())))
             .collect(),
-        lambda.result_type().clone(),
+        type_::compile(lambda.result_type()),
         compile_block(lambda.body())?,
         lambda.position().clone(),
     ))
@@ -188,47 +194,16 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .into(),
             }
         }
-        ast::Expression::Boolean(boolean) => {
-            ir::Boolean::new(boolean.value(), boolean.position().clone()).into()
-        }
-        ast::Expression::Call(call) => {
-            let arguments = call
-                .arguments()
+        ast::Expression::Call(call) => ir::Call::new(
+            None,
+            compile_expression(call.function())?,
+            call.arguments()
                 .iter()
                 .map(compile_expression)
-                .collect::<Result<Vec<_>, _>>()?;
-            let built_in_call = |function| {
-                ir::BuiltInCall::new(None, function, arguments.clone(), call.position().clone())
-            };
-
-            match call.function() {
-                ast::Expression::Variable(variable) if variable.name() == "debug" => {
-                    built_in_call(ir::BuiltInFunction::Debug).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "error" => {
-                    built_in_call(ir::BuiltInFunction::Error).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "go" => {
-                    built_in_call(ir::BuiltInFunction::Spawn).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "race" => {
-                    built_in_call(ir::BuiltInFunction::Race).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "size" => {
-                    built_in_call(ir::BuiltInFunction::Size).into()
-                }
-                ast::Expression::Variable(variable) if variable.name() == "source" => {
-                    built_in_call(ir::BuiltInFunction::Source).into()
-                }
-                _ => ir::Call::new(
-                    None,
-                    compile_expression(call.function())?,
-                    arguments,
-                    call.position().clone(),
-                )
-                .into(),
-            }
-        }
+                .collect::<Result<Vec<_>, _>>()?,
+            call.position().clone(),
+        )
+        .into(),
         ast::Expression::RecordDeconstruction(operation) => ir::RecordDeconstruction::new(
             None,
             compile_expression(operation.expression())?,
@@ -265,7 +240,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .iter()
                 .map(|branch| {
                     Ok(ir::IfTypeBranch::new(
-                        branch.type_().clone(),
+                        type_::compile(branch.type_()),
                         compile_block(branch.block())?,
                     ))
                 })
@@ -284,7 +259,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         .into(),
         ast::Expression::Lambda(lambda) => compile_lambda(lambda)?.into(),
         ast::Expression::List(list) => ir::List::new(
-            list.type_().clone(),
+            type_::compile(list.type_()),
             list.elements()
                 .iter()
                 .map(|element| {
@@ -303,7 +278,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         .into(),
         ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
             None,
-            comprehension.type_().clone(),
+            type_::compile(comprehension.type_()),
             compile_expression(comprehension.element())?,
             comprehension.element_name(),
             compile_expression(comprehension.list())?,
@@ -311,8 +286,8 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         )
         .into(),
         ast::Expression::Map(map) => ir::Map::new(
-            map.key_type().clone(),
-            map.value_type().clone(),
+            type_::compile(map.key_type()),
+            type_::compile(map.value_type()),
             map.elements()
                 .iter()
                 .map(|element| {
@@ -340,7 +315,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             ir::MapIterationComprehension::new(
                 None,
                 None,
-                comprehension.element_type().clone(),
+                type_::compile(comprehension.element_type()),
                 compile_expression(comprehension.element())?,
                 comprehension.key_name(),
                 comprehension.value_name(),
@@ -349,7 +324,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             )
             .into()
         }
-        ast::Expression::None(none) => ir::None::new(none.position().clone()).into(),
         ast::Expression::Number(number) => {
             ir::Number::new(number::compile(number)?, number.position().clone()).into()
         }
@@ -425,7 +399,6 @@ fn compile_if(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ast::types;
     use hir::test::ModuleFake;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -454,7 +427,7 @@ mod tests {
                     ast::RecordDefinition::new("Foo1", vec![], Position::fake()).into(),
                     ast::TypeAlias::new(
                         "Foo2",
-                        types::None::new(Position::fake()),
+                        ast::types::Reference::new("none", Position::fake()),
                         Position::fake(),
                     )
                     .into()
@@ -463,8 +436,12 @@ mod tests {
                     "Foo3",
                     ast::Lambda::new(
                         vec![],
-                        types::None::new(Position::fake()),
-                        ast::Block::new(vec![], ast::None::new(Position::fake()), Position::fake()),
+                        ast::types::Reference::new("none", Position::fake()),
+                        ast::Block::new(
+                            vec![],
+                            ast::Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
                         Position::fake(),
                     ),
                     None,
@@ -485,7 +462,7 @@ mod tests {
                 .set_type_aliases(vec![ir::TypeAlias::new(
                     "Foo2",
                     "Foo2",
-                    types::None::new(Position::fake()),
+                    types::Reference::new("none", Position::fake()),
                     true,
                     false,
                     Position::fake()
@@ -495,8 +472,8 @@ mod tests {
                     "Foo3",
                     ir::Lambda::new(
                         vec![],
-                        types::None::new(Position::fake()),
-                        ir::None::new(Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        ir::Variable::new("none", Position::fake()),
                         Position::fake(),
                     ),
                     None,

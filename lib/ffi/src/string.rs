@@ -29,6 +29,12 @@ impl Hash for ByteString {
     }
 }
 
+impl From<char> for ByteString {
+    fn from(character: char) -> Self {
+        String::from(character).into()
+    }
+}
+
 impl From<&[u8]> for ByteString {
     fn from(bytes: &[u8]) -> Self {
         Self {

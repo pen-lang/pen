@@ -8,7 +8,6 @@ use crate::{
     types::{self, Type},
 };
 use fnv::FnvHashMap;
-use position::Position;
 
 pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
     let variables = module_environment_creator::create(module);
@@ -91,35 +90,12 @@ fn transform_expression(
     };
 
     Ok(match expression {
-        Expression::BuiltInCall(call) => {
-            let function_type = type_canonicalizer::canonicalize_function(
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?;
-
-            BuiltInCall::new(
-                call.function_type().cloned(),
-                call.function(),
-                call.arguments()
-                    .iter()
-                    .zip(function_type.arguments())
-                    .map(|(argument, type_)| {
-                        transform_and_coerce_expression(argument, type_, variables)
-                    })
-                    .collect::<Result<_, _>>()?,
-                call.position().clone(),
-            )
-            .into()
-        }
         Expression::Call(call) => {
-            let function_type = type_canonicalizer::canonicalize_function(
-                call.function_type()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(call.position().clone()))?;
+            let type_ = call
+                .function_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+            let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
+                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?;
 
             Call::new(
                 call.function_type().cloned(),
@@ -476,7 +452,6 @@ fn transform_expression(
             construction.type_().clone(),
             transform_record_fields(
                 construction.fields(),
-                construction.position(),
                 construction.type_(),
                 variables,
                 context,
@@ -494,13 +469,7 @@ fn transform_expression(
         Expression::RecordUpdate(update) => RecordUpdate::new(
             update.type_().clone(),
             transform_expression(update.record(), variables)?,
-            transform_record_fields(
-                update.fields(),
-                update.position(),
-                update.type_(),
-                variables,
-                context,
-            )?,
+            transform_record_fields(update.fields(), update.type_(), variables, context)?,
             update.position().clone(),
         )
         .into(),
@@ -524,6 +493,7 @@ fn transform_expression(
         )
         .into(),
         Expression::Boolean(_)
+        | Expression::BuiltInFunction(_)
         | Expression::None(_)
         | Expression::Number(_)
         | Expression::String(_)
@@ -533,13 +503,12 @@ fn transform_expression(
 
 fn transform_record_fields(
     fields: &[RecordField],
-    position: &Position,
     record_type: &Type,
     variables: &FnvHashMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
     let field_types =
-        record_field_resolver::resolve(record_type, position, context.types(), context.records())?;
+        record_field_resolver::resolve(record_type, context.types(), context.records())?;
 
     fields
         .iter()
@@ -695,7 +664,7 @@ mod tests {
             Lambda::new(
                 vec![Argument::new("x", list_type.clone())],
                 types::Number::new(Position::fake()),
-                BuiltInCall::new(
+                Call::new(
                     Some(
                         types::Function::new(
                             vec![list_type.into()],
@@ -704,7 +673,7 @@ mod tests {
                         )
                         .into(),
                     ),
-                    BuiltInFunction::Size,
+                    BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
                     vec![Variable::new("x", Position::fake()).into()],
                     Position::fake(),
                 ),

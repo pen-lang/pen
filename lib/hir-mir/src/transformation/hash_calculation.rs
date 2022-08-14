@@ -133,7 +133,7 @@ pub fn transform(
             position,
         )?,
         Type::Any(_) | Type::Error(_) | Type::Function(_) => {
-            return Err(AnalysisError::TypeNotComparable(position.clone()).into())
+            return Err(AnalysisError::TypeNotComparable(type_.clone()).into())
         }
     })
 }
@@ -305,28 +305,32 @@ mod tests {
 
     #[test]
     fn fail_to_transform_with_any() {
+        let any_type = types::Any::new(Position::fake());
+
         assert_eq!(
             transform(
                 &CompileContext::dummy(Default::default(), Default::default()),
                 &Variable::new("x", Position::fake()).into(),
-                &types::Any::new(Position::fake()).into(),
+                &any_type.clone().into(),
                 &Position::fake(),
             ),
-            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+            Err(AnalysisError::TypeNotComparable(any_type.into()).into())
         );
     }
 
     #[test]
     fn fail_to_transform_with_function() {
+        let function_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
         assert_eq!(
             transform(
                 &CompileContext::dummy(Default::default(), Default::default()),
                 &Variable::new("x", Position::fake()).into(),
-                &types::Function::new(vec![], types::None::new(Position::fake()), Position::fake())
-                    .into(),
+                &function_type.clone().into(),
                 &Position::fake(),
             ),
-            Err(AnalysisError::TypeNotComparable(Position::fake()).into())
+            Err(AnalysisError::TypeNotComparable(function_type.into()).into())
         );
     }
 }

@@ -45,6 +45,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb4a24b1aaf0fd0ce8b45161144d6f42cd91677fd5940fd431183eb023b3a2b8"
 
 [[package]]
+name = "ffi"
+version = "0.1.0"
+dependencies = [
+ "pen-ffi",
+ "regex",
+]
+
+[[package]]
 name = "futures"
 version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -141,9 +149,9 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "pen-ffi"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6662349d0fb345f80909555d42bf4135f96e72ff791e6ed34cde2fcaa8e9be5a"
+checksum = "e5f0272e5ab17998da574e66d3bee39ec9fbe8b526fc9be648f3e0aa85c76283"
 dependencies = [
  "async-stream",
  "futures",
@@ -190,14 +198,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbe448f377a7d6961e30f5955f9b8d106c3f5e449d493ee1b125c1d43c2b5179"
 dependencies = [
  "proc-macro2",
-]
-
-[[package]]
-name = "regex"
-version = "0.1.0"
-dependencies = [
- "pen-ffi",
- "regex 1.6.0",
 ]
 
 [[package]]

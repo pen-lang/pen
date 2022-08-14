@@ -15,15 +15,15 @@ use hir::{
 
 pub fn compile(
     context: &CompileContext,
-    call: &BuiltInCall,
+    call: &Call,
+    function: &BuiltInFunction,
 ) -> Result<mir::ir::Expression, CompileError> {
     let position = call.position();
-    let function_type = type_canonicalizer::canonicalize_function(
-        call.function_type()
-            .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-        context.types(),
-    )?
-    .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
+    let function_type = call
+        .function_type()
+        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+    let function_type = type_canonicalizer::canonicalize_function(function_type, context.types())?
+        .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
     let arguments = call
         .arguments()
         .iter()
@@ -31,35 +31,27 @@ pub fn compile(
         .collect::<Result<Vec<_>, _>>()?;
     let compile_call = |function, arguments| -> Result<_, CompileError> {
         Ok(mir::ir::Call::new(
-            type_::compile_function(
-                context,
-                &type_canonicalizer::canonicalize_function(
-                    call.function_type()
-                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                    context.types(),
-                )?
-                .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
-            )?,
+            type_::compile_function(context, &function_type)?,
             function,
             arguments,
         ))
     };
 
-    Ok(match call.function() {
-        BuiltInFunction::Debug => {
+    Ok(match function.name() {
+        BuiltInFunctionName::Debug => {
             compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
         }
-        BuiltInFunction::Error => compile_call(
+        BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
             arguments,
         )?
         .into(),
-        BuiltInFunction::Race => {
+        BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
             let list_type =
                 type_canonicalizer::canonicalize_list(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+                    .ok_or_else(|| AnalysisError::ListExpected(function_type.result().clone()))?;
             let any_list_type =
                 types::List::new(types::Any::new(position.clone()), position.clone());
 
@@ -85,7 +77,7 @@ pub fn compile(
             )?
             .into()
         }
-        BuiltInFunction::Size => mir::ir::Call::new(
+        BuiltInFunctionName::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
                 Type::List(_) => {
@@ -99,21 +91,20 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunction::Source => compile_call(
+        BuiltInFunctionName::Source => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.source_function_name),
             arguments,
         )?
         .into(),
-        BuiltInFunction::Spawn => {
+        BuiltInFunctionName::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";
 
-            let spawned_function_type = type_canonicalizer::canonicalize_function(
-                &function_type.arguments()[0],
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-            let result_type = spawned_function_type.result();
+            let function_type = &function_type.arguments()[0];
+            let function_type =
+                type_canonicalizer::canonicalize_function(function_type, context.types())?
+                    .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+            let result_type = function_type.result();
             let any_type = Type::from(types::Any::new(position.clone()));
             let thunk_type =
                 types::Function::new(vec![], any_type.clone(), position.clone()).into();
@@ -134,7 +125,7 @@ pub fn compile(
                                     result_type.clone(),
                                     any_type.clone(),
                                     Call::new(
-                                        Some(spawned_function_type.clone().into()),
+                                        Some(function_type.clone().into()),
                                         call.arguments()[0].clone(),
                                         vec![],
                                         position.clone(),
@@ -186,17 +177,22 @@ mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
 
-    fn compile_call(call: &BuiltInCall) -> Result<mir::ir::Expression, CompileError> {
+    fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
             &CompileContext::dummy(Default::default(), Default::default()),
             call,
+            if let Expression::BuiltInFunction(function) = call.function() {
+                function
+            } else {
+                unreachable!()
+            },
         )
     }
 
     #[test]
     fn compile_debug() {
         assert_eq!(
-            compile_call(&BuiltInCall::new(
+            compile_call(&Call::new(
                 Some(
                     types::Function::new(
                         vec![types::ByteString::new(Position::fake()).into()],
@@ -205,7 +201,7 @@ mod tests {
                     )
                     .into()
                 ),
-                BuiltInFunction::Debug,
+                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                 vec![ByteString::new(vec![], Position::fake()).into()],
                 Position::fake(),
             ),),
@@ -235,7 +231,7 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(&BuiltInCall::new(
+                compile_call(&Call::new(
                     Some(
                         types::Function::new(
                             vec![function_type.clone().into()],
@@ -244,7 +240,7 @@ mod tests {
                         )
                         .into()
                     ),
-                    BuiltInFunction::Spawn,
+                    BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                     vec![Lambda::new(
                         vec![],
                         types::Number::new(Position::fake()),
@@ -321,7 +317,7 @@ mod tests {
             let thunk_type = mir::types::Function::new(vec![], mir::types::Type::Variant);
 
             assert_eq!(
-                compile_call(&BuiltInCall::new(
+                compile_call(&Call::new(
                     Some(
                         types::Function::new(
                             vec![function_type.clone().into()],
@@ -330,7 +326,7 @@ mod tests {
                         )
                         .into()
                     ),
-                    BuiltInFunction::Spawn,
+                    BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
                     vec![Lambda::new(
                         vec![],
                         types::Any::new(Position::fake()),

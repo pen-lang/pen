@@ -1,14 +1,7 @@
-use super::AnalysisError;
 use crate::types::Type;
-use fnv::FnvHashMap;
 
-pub fn format(
-    type_: &Type,
-    original_names: &FnvHashMap<String, String>,
-) -> Result<String, AnalysisError> {
-    let format = |type_| format(type_, original_names);
-
-    Ok(match type_ {
+pub fn format(type_: &Type) -> String {
+    match type_ {
         Type::Any(_) => "any".into(),
         Type::Boolean(_) => "boolean".into(),
         Type::Error(_) => "error".into(),
@@ -18,25 +11,19 @@ pub fn format(
                 .arguments()
                 .iter()
                 .map(format)
-                .collect::<Result<Vec<_>, _>>()?
+                .collect::<Vec<_>>()
                 .join(", "),
-            format(function.result())?,
+            format(function.result()),
         ),
-        Type::List(list) => format!("[{}]", format(list.element())?),
-        Type::Map(map) => format!("{{ {}: {} }}", format(map.key())?, format(map.value())?),
+        Type::List(list) => format!("[{}]", format(list.element())),
+        Type::Map(map) => format!("{{{}: {}}}", format(map.key()), format(map.value())),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
-        Type::Record(record) => original_names
-            .get(record.name())
-            .ok_or_else(|| AnalysisError::RecordNotFound(record.clone()))?
-            .clone(),
-        Type::Reference(reference) => original_names
-            .get(reference.name())
-            .ok_or_else(|| AnalysisError::TypeNotFound(reference.clone()))?
-            .clone(),
+        Type::Record(record) => record.name().into(),
+        Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
-        Type::Union(union) => format!("{} | {}", format(union.lhs())?, format(union.rhs())?),
-    })
+        Type::Union(union) => format!("{} | {}", format(union.lhs()), format(union.rhs())),
+    }
 }
 
 #[cfg(test)]
@@ -48,11 +35,8 @@ mod tests {
     #[test]
     fn format_function() {
         assert_eq!(
-            format(
-                &Function::new(vec![], None::new(Position::fake()), Position::fake()).into(),
-                &Default::default()
-            ),
-            Ok("\\() none".into())
+            format(&Function::new(vec![], None::new(Position::fake()), Position::fake()).into(),),
+            "\\() none"
         );
     }
 
@@ -66,9 +50,8 @@ mod tests {
                     Position::fake()
                 )
                 .into(),
-                &Default::default()
             ),
-            Ok("\\(none) none".into())
+            "\\(none) none"
         );
     }
 
@@ -85,20 +68,16 @@ mod tests {
                     Position::fake()
                 )
                 .into(),
-                &Default::default()
             ),
-            Ok("\\(number, none) none".into())
+            "\\(number, none) none"
         );
     }
 
     #[test]
     fn format_list() {
         assert_eq!(
-            format(
-                &List::new(None::new(Position::fake()), Position::fake()).into(),
-                &Default::default()
-            ),
-            Ok("[none]".into())
+            format(&List::new(None::new(Position::fake()), Position::fake()).into(),),
+            "[none]"
         );
     }
 
@@ -112,9 +91,8 @@ mod tests {
                     Position::fake()
                 )
                 .into(),
-                &Default::default()
             ),
-            Ok("number | none".into())
+            "number | none"
         );
     }
 
@@ -132,31 +110,36 @@ mod tests {
                     Position::fake()
                 )
                 .into(),
-                &Default::default()
             ),
-            Ok("none | boolean | number".into())
+            "none | boolean | number"
         );
     }
 
     #[test]
     fn format_record() {
-        assert_eq!(
-            format(
-                &Record::new("foo", Position::fake()).into(),
-                &[("foo".into(), "bar".into())].into_iter().collect(),
-            ),
-            Ok("bar".into())
-        );
+        assert_eq!(format(&Record::new("foo", Position::fake()).into(),), "foo");
     }
 
     #[test]
     fn format_reference() {
         assert_eq!(
+            format(&Reference::new("foo", Position::fake()).into(),),
+            "foo"
+        );
+    }
+
+    #[test]
+    fn format_map() {
+        assert_eq!(
             format(
-                &Reference::new("foo", Position::fake()).into(),
-                &[("foo".into(), "bar".into())].into_iter().collect(),
+                &Map::new(
+                    Number::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
             ),
-            Ok("bar".into())
+            "{number: none}"
         );
     }
 }

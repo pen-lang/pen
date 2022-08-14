@@ -12,6 +12,7 @@ Feature: Standard packages
     Examples:
       | package |
       | core    |
+      | flag    |
       | html    |
       | http    |
       | json    |

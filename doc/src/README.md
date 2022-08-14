@@ -2,38 +2,39 @@
 
 # Pen programming language
 
-Pen is the programming language for **scalable** software development, focused on software maintainability and portability.
+Pen is the parallel, concurrent, and functional programming language for [**scalable** software development](#vision), focused on software maintainability and portability.
 
 ```pen
-import Os'Context { Context }
+import Core'Number
 import Os'File
-import Os'Process
 
-sayHello = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), "Hello, world!\n")?
+# The `\` prefix for λ denotes a function.
+findAnswer = \(kind string) number {
+  # Secret source...
 
-  none
+  21
 }
 
 main = \(ctx context) none {
-  e = sayHello(ctx.Os)
+  # The `go` function runs a given function in parallel.
+  # `x` is a future for the computed value.
+  x = go(\() number { findAnswer("humanity") })
+  y = findAnswer("dolphins")
 
-  if _ = e as none {
-    none
-  } else if error {
-    Process'Exit(ctx.Os, 1)
-  }
+  _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
+
+  none
 }
 ```
 
 ## Vision
 
-Pen aims to make large-scale software development efficient where a number of people develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
+Pen aims to make large-scale software development efficient where many engineers develop software together for a long time. To realize that, it focuses on software **maintainability** and **portability**.
 
 - Maintainability
-  - Simplicity: The language is small and easy to learn but also full featured.
-  - Testability: Unit tests are always fast and reliable.
-  - Flexibility: Developers can make code changes easily without introducing bugs.
+  - Simplicity: The language is small and easy to learn yet full featured.
+  - Testability: Tests are always fast and reliable.
+  - Flexibility: Developers can change codes easily without regression.
 - Portability
   - Programs written in Pen can be ported to different platforms including [WebAssembly](https://webassembly.org/).
 
@@ -51,15 +52,15 @@ Pen aims to make large-scale software development efficient where a number of pe
 
 ### Reliable testing
 
-- Unit tests are always deterministic and fast.
-- No flaky or slow tests bother developers.
+- Tests are always deterministic and fast.
+- Tests are side-effect free and independent from test environment.
 
-### No standard system library
+### No built-in system library
 
-- There is no default platform-dependent system library.
+- There is no built-in system library dependent on platforms.
 - Developers choose [system packages][system-packages] suitable for their applications.
 - [System packages][system-packages] encapsulate platform-dependent codes and side effects.
-- No package causes side effects without explicit injection.
+- No other kind of package causes side effects without explicit injection.
 
 ### Security
 

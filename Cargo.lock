@@ -62,9 +62,7 @@ dependencies = [
 name = "ast"
 version = "0.1.0"
 dependencies = [
- "hir",
  "position",
- "pretty_assertions",
  "serde",
 ]
 
@@ -209,9 +207,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.16"
+version = "3.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
+checksum = "29e724a68d9319343bb3328c9cc2dfde263f4b3142ee1059a9980580171c954b"
 dependencies = [
  "atty",
  "bitflags",
@@ -423,7 +421,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a981d4e8fbe0e789e43326c74c849ea7f7068988"
+source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
 dependencies = [
  "fnv",
  "hamt",
@@ -435,7 +433,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a981d4e8fbe0e789e43326c74c849ea7f7068988"
+source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
 dependencies = [
  "fmm",
  "fnv",
@@ -445,7 +443,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a981d4e8fbe0e789e43326c74c849ea7f7068988"
+source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
 dependencies = [
  "fmm",
  "hamt",
@@ -723,9 +721,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.18.0"
+version = "1.18.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49de01ff8a0781c5414e674b4469b81f6693d6bda6a4d405600c2acd06ebc6d3"
+checksum = "57a9aec10c9a062ef0454fd49ebaefa59239f836d1b30891d9cc2289978dd970"
 dependencies = [
  "console",
  "linked-hash-map",
@@ -791,9 +789,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.127"
+version = "0.2.129"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "505e71a4706fa491e9b1b55f51b95d4037d0821ee40131190475f692b35b009b"
+checksum = "64de3cc433455c14174d42e554d4027ee631c4d046d43e3ecc6efc4636cdc7a7"
 
 [[package]]
 name = "linked-hash-map"
@@ -984,10 +982,10 @@ dependencies = [
 
 [[package]]
 name = "pen"
-version = "0.4.8"
+version = "0.4.9"
 dependencies = [
  "app",
- "clap 3.2.16",
+ "clap 3.2.17",
  "indoc",
  "infra",
  "once_cell",
@@ -996,7 +994,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.8.6"
+version = "0.8.7"
 dependencies = [
  "async-stream",
  "futures",
