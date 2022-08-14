@@ -91,9 +91,11 @@ fn infer_in_expression(
         Expression::If(if_) => infer_in_if(if_, variables).into(),
         Expression::Let(let_) => infer_in_let(let_, variables).into(),
         Expression::LetRecursive(let_) => infer_in_let_recursive(let_, variables).into(),
-        Expression::Synchronize(synchronize) => {
-            infer_in_expression(synchronize.expression(), variables)
-        }
+        Expression::Synchronize(synchronize) => Synchronize::new(
+            synchronize.type_().clone(),
+            infer_in_expression(synchronize.expression(), variables),
+        )
+        .into(),
         Expression::Record(record) => infer_in_record(record, variables).into(),
         Expression::RecordField(field) => infer_in_record_field(field, variables).into(),
         Expression::RecordUpdate(update) => infer_in_record_update(update, variables).into(),
