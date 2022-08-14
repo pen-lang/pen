@@ -41,7 +41,7 @@ fn check_with_cache(
                     .chain([record.name().into()])
                     .collect();
 
-                record_field_resolver::resolve(type_, type_.position(), types, record_types)?
+                record_field_resolver::resolve(type_, types, record_types)?
                     .iter()
                     .map(|field| check_with_cache(field.type_(), &record_names))
                     .collect::<Result<Vec<_>, _>>()?

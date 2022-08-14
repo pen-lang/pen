@@ -19,7 +19,7 @@ pub fn compile(
     let from = type_canonicalizer::canonicalize(from, context.types())?;
 
     if !from.is_variant() {
-        return Err(AnalysisError::VariantExpected(expression.position().clone()).into());
+        return Err(AnalysisError::VariantExpected(from.clone()).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
         return Err(AnalysisError::TypesNotMatched(to.clone(), from).into());
     }
@@ -158,7 +158,7 @@ mod tests {
                 &types::None::new(Position::fake()).into(),
                 &None::new(Position::fake()).into(),
             ),
-            Err(AnalysisError::VariantExpected(Position::fake()).into())
+            Err(AnalysisError::VariantExpected(types::None::new(Position::fake()).into()).into())
         );
     }
 }

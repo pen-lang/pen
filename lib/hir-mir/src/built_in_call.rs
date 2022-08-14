@@ -19,12 +19,11 @@ pub fn compile(
     function: &BuiltInFunction,
 ) -> Result<mir::ir::Expression, CompileError> {
     let position = call.position();
-    let function_type = type_canonicalizer::canonicalize_function(
-        call.function_type()
-            .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-        context.types(),
-    )?
-    .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
+    let function_type = call
+        .function_type()
+        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+    let function_type = type_canonicalizer::canonicalize_function(function_type, context.types())?
+        .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
     let arguments = call
         .arguments()
         .iter()
@@ -32,15 +31,7 @@ pub fn compile(
         .collect::<Result<Vec<_>, _>>()?;
     let compile_call = |function, arguments| -> Result<_, CompileError> {
         Ok(mir::ir::Call::new(
-            type_::compile_function(
-                context,
-                &type_canonicalizer::canonicalize_function(
-                    call.function_type()
-                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                    context.types(),
-                )?
-                .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?,
-            )?,
+            type_::compile_function(context, &function_type)?,
             function,
             arguments,
         ))
@@ -60,7 +51,7 @@ pub fn compile(
 
             let list_type =
                 type_canonicalizer::canonicalize_list(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+                    .ok_or_else(|| AnalysisError::ListExpected(function_type.result().clone()))?;
             let any_list_type =
                 types::List::new(types::Any::new(position.clone()), position.clone());
 
@@ -109,12 +100,11 @@ pub fn compile(
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";
 
-            let spawned_function_type = type_canonicalizer::canonicalize_function(
-                &function_type.arguments()[0],
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::FunctionExpected(position.clone()))?;
-            let result_type = spawned_function_type.result();
+            let function_type = &function_type.arguments()[0];
+            let function_type =
+                type_canonicalizer::canonicalize_function(&function_type, context.types())?
+                    .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+            let result_type = function_type.result();
             let any_type = Type::from(types::Any::new(position.clone()));
             let thunk_type =
                 types::Function::new(vec![], any_type.clone(), position.clone()).into();
@@ -135,7 +125,7 @@ pub fn compile(
                                     result_type.clone(),
                                     any_type.clone(),
                                     Call::new(
-                                        Some(spawned_function_type.clone().into()),
+                                        Some(function_type.clone().into()),
                                         call.arguments()[0].clone(),
                                         vec![],
                                         position.clone(),
