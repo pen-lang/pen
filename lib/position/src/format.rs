@@ -28,7 +28,6 @@ fn offset(position: &Position) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::Position;
     use super::*;
 
     #[test]
