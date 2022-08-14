@@ -61,6 +61,7 @@
     "sccp",
     "siphasher",
     "sqlx",
+    "stackful",
     "srcdep",
     "subninja",
     "subtyping",
