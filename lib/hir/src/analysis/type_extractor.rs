@@ -21,14 +21,16 @@ pub fn extract_from_expression(
                 function.position().clone(),
             ))
         }
-        Expression::Call(call) => type_canonicalizer::canonicalize_function(
-            call.function_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?,
-            context.types(),
-        )?
-        .ok_or_else(|| AnalysisError::FunctionExpected(call.function().position().clone()))?
-        .result()
-        .clone(),
+        Expression::Call(call) => {
+            let type_ = call
+                .function_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
+
+            type_canonicalizer::canonicalize_function(type_, context.types())?
+                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?
+                .result()
+                .clone()
+        }
         Expression::If(if_) => types::Union::new(
             extract_from_expression(if_.then(), variables)?,
             extract_from_expression(if_.else_(), variables)?,
@@ -36,11 +38,9 @@ pub fn extract_from_expression(
         )
         .into(),
         Expression::IfList(if_) => {
-            let list_type = type_canonicalizer::canonicalize_list(
-                &extract_from_expression(if_.list(), variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::ListExpected(if_.list().position().clone()))?;
+            let type_ = extract_from_expression(if_.list(), variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
+                .ok_or(AnalysisError::ListExpected(type_))?;
 
             types::Union::new(
                 extract_from_expression(
@@ -68,11 +68,9 @@ pub fn extract_from_expression(
             .into()
         }
         Expression::IfMap(if_) => {
-            let map_type = type_canonicalizer::canonicalize_map(
-                &extract_from_expression(if_.map(), variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::MapExpected(if_.map().position().clone()))?;
+            let type_ = extract_from_expression(if_.map(), variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
+                .ok_or(AnalysisError::MapExpected(type_))?;
 
             types::Union::new(
                 extract_from_expression(
@@ -190,7 +188,6 @@ pub fn extract_from_expression(
             deconstruction
                 .type_()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?,
-            deconstruction.position(),
             context.types(),
             context.records(),
         )?

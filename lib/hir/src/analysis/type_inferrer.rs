@@ -109,11 +109,9 @@ fn infer_expression(
         }
         Expression::IfList(if_) => {
             let list = infer_expression(if_.list(), variables)?;
-            let list_type = type_canonicalizer::canonicalize_list(
-                &type_extractor::extract_from_expression(context, &list, variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::ListExpected(if_.list().position().clone()))?;
+            let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
+                .ok_or(AnalysisError::ListExpected(type_))?;
 
             let then = infer_expression(
                 if_.then(),
@@ -150,11 +148,9 @@ fn infer_expression(
         Expression::IfMap(if_) => {
             let map = infer_expression(if_.map(), variables)?;
             let key = infer_expression(if_.key(), variables)?;
-            let map_type = type_canonicalizer::canonicalize_map(
-                &type_extractor::extract_from_expression(context, &map, variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::MapExpected(if_.map().position().clone()))?;
+            let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
+                .ok_or(AnalysisError::MapExpected(type_))?;
 
             let then = infer_expression(
                 if_.then(),
@@ -281,11 +277,9 @@ fn infer_expression(
         .into(),
         Expression::ListComprehension(comprehension) => {
             let list = infer_expression(comprehension.list(), variables)?;
-            let list_type = type_canonicalizer::canonicalize_list(
-                &type_extractor::extract_from_expression(context, &list, variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::ListExpected(comprehension.list().position().clone()))?;
+            let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
+            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
+                .ok_or(AnalysisError::ListExpected(type_))?;
 
             ListComprehension::new(
                 Some(list_type.element().clone()),
@@ -336,11 +330,9 @@ fn infer_expression(
         .into(),
         Expression::MapIterationComprehension(comprehension) => {
             let map = infer_expression(comprehension.map(), variables)?;
-            let map_type = type_canonicalizer::canonicalize_map(
-                &type_extractor::extract_from_expression(context, &map, variables)?,
-                context.types(),
-            )?
-            .ok_or_else(|| AnalysisError::MapExpected(comprehension.map().position().clone()))?;
+            let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
+            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
+                .ok_or(AnalysisError::MapExpected(type_))?;
 
             MapIterationComprehension::new(
                 Some(map_type.key().clone()),
@@ -414,29 +406,23 @@ fn infer_expression(
             Operation::Try(operation) => {
                 let position = operation.position();
                 let expression = infer_expression(operation.expression(), variables)?;
+                let type_ =
+                    type_extractor::extract_from_expression(context, &expression, variables)?;
 
                 TryOperation::new(
                     Some(
                         if let Some(type_) = type_difference_calculator::calculate(
-                            &type_extractor::extract_from_expression(
-                                context,
-                                &expression,
-                                variables,
-                            )?,
+                            &type_,
                             &types::Error::new(position.clone()).into(),
                             context.types(),
                         )? {
                             if type_.is_any() {
-                                return Err(AnalysisError::UnionExpected(
-                                    expression.position().clone(),
-                                ));
+                                return Err(AnalysisError::UnionExpected(type_));
                             } else {
                                 type_
                             }
                         } else {
-                            return Err(AnalysisError::UnionExpected(
-                                expression.position().clone(),
-                            ));
+                            return Err(AnalysisError::UnionExpected(type_));
                         },
                     ),
                     expression,
@@ -548,14 +534,12 @@ fn infer_built_in_call(
                     position.clone(),
                 ),
                 BuiltInFunctionName::Race => {
-                    let argument_type = type_canonicalizer::canonicalize_list(
-                        &argument_types
-                            .first()
-                            .cloned()
-                            .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?,
-                        context.types(),
-                    )?
-                    .ok_or_else(|| AnalysisError::ListExpected(position.clone()))?;
+                    let argument_type = argument_types
+                        .first()
+                        .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?;
+                    let argument_type =
+                        type_canonicalizer::canonicalize_list(argument_type, context.types())?
+                            .ok_or_else(|| AnalysisError::ListExpected(argument_type.clone()))?;
 
                     types::Function::new(
                         argument_types,
@@ -1432,7 +1416,9 @@ mod tests {
                         false,
                     )
                 ],)),
-                Err(AnalysisError::UnionExpected(Position::fake()))
+                Err(AnalysisError::UnionExpected(
+                    types::Error::new(Position::fake()).into()
+                ))
             );
         }
     }
