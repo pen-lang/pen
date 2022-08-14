@@ -2427,8 +2427,8 @@ mod tests {
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", wrong_map_type.clone(),)],
-                            map_type.clone(),
+                            vec![Argument::new("x", wrong_map_type,)],
+                            map_type,
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
@@ -2465,8 +2465,8 @@ mod tests {
                     FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new("x", wrong_map_type.clone(),)],
-                            map_type.clone(),
+                            vec![Argument::new("x", wrong_map_type,)],
+                            map_type,
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
