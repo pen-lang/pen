@@ -182,7 +182,7 @@ impl Display for AnalysisError {
                     position::format_message(
                         type_.position(),
                         &format!(
-                            "{} might include function or {} types",
+                            "{} might include error, function, or {} types",
                             Self::format_type(type_),
                             Self::format_type(&Any::new(type_.position().clone()).into())
                         ),
