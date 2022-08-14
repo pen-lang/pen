@@ -181,8 +181,10 @@ fn global_closure_name(name: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::ModuleFake;
-    use crate::types::{self, Type};
+    use crate::{
+        test::ModuleFake,
+        types::{self, Type},
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
