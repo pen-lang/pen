@@ -1,4 +1,4 @@
-use crate::ir::FunctionDefinition;
+use crate::ir::*;
 
 pub struct Context {
     function_definitions: Vec<FunctionDefinition>,
@@ -23,7 +23,12 @@ impl Context {
                 &name,
                 definition.environment().to_vec(),
                 definition.arguments().to_vec(),
-                definition.body().clone(),
+                Let::new(
+                    definition.name(),
+                    definition.type_().clone(),
+                    Variable::new(&name),
+                    definition.body().clone(),
+                ),
                 definition.result_type().clone(),
                 definition.is_thunk() || definition.arguments().is_empty(),
             ));

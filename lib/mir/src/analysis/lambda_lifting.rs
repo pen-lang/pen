@@ -190,6 +190,8 @@ mod tests {
 
     #[test]
     fn lift_closure_without_argument_and_free_variable() {
+        let function_type = types::Function::new(vec![], Type::Number);
+
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
@@ -208,19 +210,25 @@ mod tests {
                     vec![],
                     Let::new(
                         "g",
-                        types::Function::new(vec![], Type::Number),
+                        function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::thunk("mir:lift:0:g", 42.0, Type::Number)
+                FunctionDefinition::thunk(
+                    "mir:lift:0:g",
+                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
+                    Type::Number
+                )
             ])
         );
     }
 
     #[test]
     fn lift_closure_with_argument_and_no_free_variable() {
+        let function_type = types::Function::new(vec![Type::None], Type::Number);
+
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
@@ -244,7 +252,7 @@ mod tests {
                     vec![],
                     Let::new(
                         "g",
-                        types::Function::new(vec![Type::None], Type::Number),
+                        function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
                     ),
@@ -253,7 +261,7 @@ mod tests {
                 FunctionDefinition::new(
                     "mir:lift:0:g",
                     vec![Argument::new("x", Type::None)],
-                    42.0,
+                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
                     Type::Number,
                 )
             ])
@@ -280,5 +288,61 @@ mod tests {
         )]);
 
         assert_eq!(transform(&module), module);
+    }
+
+    #[test]
+    fn lift_recursive_closure_with_no_free_variable() {
+        let function_type = types::Function::new(vec![Type::None], Type::Number);
+
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    LetRecursive::new(
+                        FunctionDefinition::new(
+                            "g",
+                            vec![Argument::new("x", Type::None)],
+                            Call::new(
+                                function_type.clone(),
+                                Variable::new("g"),
+                                vec![Variable::new("x").into()]
+                            ),
+                            Type::Number,
+                        ),
+                        42.0
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        42.0
+                    ),
+                    Type::Number,
+                ),
+                FunctionDefinition::new(
+                    "mir:lift:0:g",
+                    vec![Argument::new("x", Type::None)],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        Call::new(
+                            function_type,
+                            Variable::new("g"),
+                            vec![Variable::new("x").into()]
+                        )
+                    ),
+                    Type::Number,
+                )
+            ])
+        );
     }
 }
