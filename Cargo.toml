@@ -1,6 +1,10 @@
 [workspace]
 members = [
-  "benchmark/rust",
+  "benchmark/rust/fibonacci",
+  "benchmark/rust/im_hash_map_insert",
+  "benchmark/rust/im_hash_map_update",
+  "benchmark/rust/std_hash_map_insert",
+  "benchmark/rust/sum",
   "cmd/pen",
   "lib/app",
   "lib/ast",
