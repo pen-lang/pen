@@ -11,7 +11,7 @@ pub enum CompileError {
     CompileConfigurationNotProvided,
     InvalidRecordEqualOperation(Position),
     MainFunctionNotFound(Position),
-    MirTypeCheck(mir::analysis::TypeCheckError),
+    MirTypeCheck(mir::analysis::type_check::TypeCheckError),
     NewContextFunctionNotFound(Position),
     VariantTypeInFfi(Position),
 }
@@ -52,8 +52,8 @@ impl Display for CompileError {
 
 impl Error for CompileError {}
 
-impl From<mir::analysis::TypeCheckError> for CompileError {
-    fn from(error: mir::analysis::TypeCheckError) -> Self {
+impl From<mir::analysis::type_check::TypeCheckError> for CompileError {
+    fn from(error: mir::analysis::type_check::TypeCheckError) -> Self {
         Self::MirTypeCheck(error)
     }
 }

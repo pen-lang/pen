@@ -7,8 +7,8 @@ use std::{
 pub enum CompileError {
     FmmBuild(fmm::build::BuildError),
     NestedVariant,
-    ReferenceCount(mir::analysis::ReferenceCountError),
-    TypeCheck(mir::analysis::TypeCheckError),
+    ReferenceCount(mir::analysis::reference_count::ReferenceCountError),
+    TypeCheck(mir::analysis::type_check::TypeCheckError),
     UnboxedRecord,
 }
 
@@ -26,14 +26,14 @@ impl From<fmm::build::BuildError> for CompileError {
     }
 }
 
-impl From<mir::analysis::ReferenceCountError> for CompileError {
-    fn from(error: mir::analysis::ReferenceCountError) -> Self {
+impl From<mir::analysis::reference_count::ReferenceCountError> for CompileError {
+    fn from(error: mir::analysis::reference_count::ReferenceCountError) -> Self {
         Self::ReferenceCount(error)
     }
 }
 
-impl From<mir::analysis::TypeCheckError> for CompileError {
-    fn from(error: mir::analysis::TypeCheckError) -> Self {
+impl From<mir::analysis::type_check::TypeCheckError> for CompileError {
+    fn from(error: mir::analysis::type_check::TypeCheckError) -> Self {
         Self::TypeCheck(error)
     }
 }
