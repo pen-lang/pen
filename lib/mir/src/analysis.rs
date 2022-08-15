@@ -1,5 +1,6 @@
 mod environment_inference;
 mod free_variable;
+pub mod lambda_lifting;
 mod reference_count;
 mod type_check;
 mod variant_type_collection;

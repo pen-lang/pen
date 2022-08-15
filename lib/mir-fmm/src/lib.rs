@@ -31,6 +31,7 @@ pub fn compile(
     mir::analysis::check_types(module)?;
 
     let module = mir::analysis::infer_environment(module);
+    let module = mir::analysis::lambda_lifting::transform(&module);
     let module = mir::analysis::count_references(&module)?;
 
     mir::analysis::check_types(&module)?;
