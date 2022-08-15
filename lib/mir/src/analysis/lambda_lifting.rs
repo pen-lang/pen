@@ -1,13 +1,10 @@
+mod context;
+
+use self::context::Context;
 use crate::ir::*;
 
-struct Context {
-    function_definitions: Vec<FunctionDefinition>,
-}
-
 pub fn transform(module: &Module) -> Module {
-    let mut context = Context {
-        function_definitions: vec![],
-    };
+    let mut context = Context::new();
 
     // TODO Is this a bug of clippy?
     #[allow(clippy::needless_collect)]
@@ -24,7 +21,7 @@ pub fn transform(module: &Module) -> Module {
         module.function_declarations().to_vec(),
         function_definitions
             .into_iter()
-            .chain(context.function_definitions)
+            .chain(context.into_function_definitions())
             .collect(),
     )
 }
@@ -104,18 +101,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             let expression = transform_expression(context, let_.expression());
 
             if definition.environment().is_empty() {
-                let name = global_closure_name(definition.name());
-
-                context
-                    .function_definitions
-                    .push(FunctionDefinition::with_options(
-                        &name,
-                        definition.environment().to_vec(),
-                        definition.arguments().to_vec(),
-                        definition.body().clone(),
-                        definition.result_type().clone(),
-                        definition.arguments().is_empty(),
-                    ));
+                let name = context.add_function_definition(definition.clone());
 
                 Let::new(
                     definition.name(),
@@ -174,10 +160,6 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
     }
 }
 
-fn global_closure_name(name: &str) -> String {
-    "closure:".to_owned() + name
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -206,8 +188,6 @@ mod tests {
 
     #[test]
     fn lift_closure_without_argument_and_free_variable() {
-        let closure_name = global_closure_name("g");
-
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
@@ -227,20 +207,18 @@ mod tests {
                     Let::new(
                         "g",
                         types::Function::new(vec![], Type::Number),
-                        Variable::new(&closure_name),
+                        Variable::new("mir:lifted:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::thunk(closure_name, 42.0, Type::Number)
+                FunctionDefinition::thunk("mir:lifted:0:g", 42.0, Type::Number)
             ])
         );
     }
 
     #[test]
     fn lift_closure_with_argument_and_no_free_variable() {
-        let closure_name = global_closure_name("g");
-
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
@@ -265,13 +243,13 @@ mod tests {
                     Let::new(
                         "g",
                         types::Function::new(vec![Type::None], Type::Number),
-                        Variable::new(&closure_name),
+                        Variable::new("mir:lifted:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::new(
-                    closure_name,
+                    "mir:lifted:0:g",
                     vec![Argument::new("x", Type::None)],
                     42.0,
                     Type::Number,
