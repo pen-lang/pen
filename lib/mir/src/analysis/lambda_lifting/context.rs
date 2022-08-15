@@ -37,7 +37,7 @@ impl Context {
                     definition.body().clone(),
                 ),
                 definition.result_type().clone(),
-                definition.is_thunk() || definition.arguments().is_empty(),
+                definition.is_thunk(),
             ));
 
         name

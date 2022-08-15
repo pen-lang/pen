@@ -224,8 +224,9 @@ mod tests {
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::thunk(
+                FunctionDefinition::new(
                     "mir:lift:f:0:g",
+                    vec![],
                     Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
                     Type::Number
                 )
@@ -349,6 +350,40 @@ mod tests {
                         )
                     ),
                     Type::Number,
+                )
+            ])
+        );
+    }
+
+    #[test]
+    fn lift_thunk_without_free_variable() {
+        let function_type = types::Function::new(vec![], Type::Number);
+
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    LetRecursive::new(FunctionDefinition::thunk("g", 42.0, Type::Number,), 42.0),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:f:0:g"),
+                        42.0
+                    ),
+                    Type::Number,
+                ),
+                FunctionDefinition::thunk(
+                    "mir:lift:f:0:g",
+                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
+                    Type::Number
                 )
             ])
         );
