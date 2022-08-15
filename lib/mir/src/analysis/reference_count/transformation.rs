@@ -3,7 +3,7 @@ use crate::{ir::*, types::Type};
 use fnv::{FnvHashMap, FnvHashSet};
 
 // Closure environments need to be inferred before reference counting.
-pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
+pub fn transform(module: &Module) -> Result<Module, ReferenceCountError> {
     Ok(Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
@@ -12,12 +12,12 @@ pub fn convert_module(module: &Module) -> Result<Module, ReferenceCountError> {
         module
             .function_definitions()
             .iter()
-            .map(|definition| convert_definition(definition, true))
+            .map(|definition| transform_definition(definition, true))
             .collect::<Result<_, _>>()?,
     ))
 }
 
-fn convert_definition(
+fn transform_definition(
     definition: &FunctionDefinition,
     global: bool,
 ) -> Result<FunctionDefinition, ReferenceCountError> {
@@ -39,7 +39,7 @@ fn convert_definition(
     .collect();
 
     let (expression, moved_variables) =
-        convert_expression(definition.body(), &owned_variables, &Default::default())?;
+        transform_expression(definition.body(), &owned_variables, &Default::default())?;
 
     Ok(FunctionDefinition::with_options(
         definition.name(),
@@ -59,7 +59,7 @@ fn convert_definition(
     ))
 }
 
-// Here, we convert expressions tracking moved variables and cloning variables
+// Here, we transform expressions tracking moved variables and cloning variables
 // moved already. The basic rules are listed below.
 //
 // - The returned values of functions are moved.
@@ -67,7 +67,7 @@ fn convert_definition(
 //   and records of record field operations.
 // - Newly bound variables in let expressions are dropped if they are not moved
 //   in their expressions.
-fn convert_expression(
+fn transform_expression(
     expression: &Expression,
     owned_variables: &FnvHashMap<String, Type>,
     moved_variables: &FnvHashSet<String>,
@@ -75,9 +75,9 @@ fn convert_expression(
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (rhs, moved_variables) =
-                convert_expression(operation.rhs(), owned_variables, moved_variables)?;
+                transform_expression(operation.rhs(), owned_variables, moved_variables)?;
             let (lhs, moved_variables) =
-                convert_expression(operation.lhs(), owned_variables, &moved_variables)?;
+                transform_expression(operation.lhs(), owned_variables, &moved_variables)?;
 
             (
                 ArithmeticOperation::new(operation.operator(), lhs, rhs).into(),
@@ -87,7 +87,7 @@ fn convert_expression(
         Expression::Case(case) => {
             let (default_alternative, default_alternative_moved_variables) =
                 if let Some(alternative) = case.default_alternative() {
-                    let (expression, moved_variables) = convert_expression(
+                    let (expression, moved_variables) = transform_expression(
                         alternative.expression(),
                         &owned_variables
                             .clone()
@@ -113,7 +113,7 @@ fn convert_expression(
                 .alternatives()
                 .iter()
                 .map(|alternative| {
-                    let (expression, moved_variables) = convert_expression(
+                    let (expression, moved_variables) = transform_expression(
                         alternative.expression(),
                         &owned_variables
                             .clone()
@@ -161,7 +161,7 @@ fn convert_expression(
                 )
                 .collect::<FnvHashSet<_>>();
 
-            let (argument, moved_variables) = convert_expression(
+            let (argument, moved_variables) = transform_expression(
                 case.argument(),
                 owned_variables,
                 &moved_variables
@@ -229,9 +229,9 @@ fn convert_expression(
         }
         Expression::ComparisonOperation(operation) => {
             let (rhs, moved_variables) =
-                convert_expression(operation.rhs(), owned_variables, moved_variables)?;
+                transform_expression(operation.rhs(), owned_variables, moved_variables)?;
             let (lhs, moved_variables) =
-                convert_expression(operation.lhs(), owned_variables, &moved_variables)?;
+                transform_expression(operation.lhs(), owned_variables, &moved_variables)?;
 
             (
                 ComparisonOperation::new(operation.operator(), lhs, rhs).into(),
@@ -244,7 +244,7 @@ fn convert_expression(
                 |result, argument| {
                     let (arguments, moved_variables) = result?;
                     let (argument, moved_variables) =
-                        convert_expression(argument, owned_variables, &moved_variables)?;
+                        transform_expression(argument, owned_variables, &moved_variables)?;
 
                     Ok((
                         [argument].into_iter().chain(arguments).collect(),
@@ -254,7 +254,7 @@ fn convert_expression(
             )?;
 
             let (function, moved_variables) =
-                convert_expression(call.function(), owned_variables, &moved_variables)?;
+                transform_expression(call.function(), owned_variables, &moved_variables)?;
 
             (
                 Call::new(call.type_().clone(), function, arguments).into(),
@@ -263,9 +263,9 @@ fn convert_expression(
         }
         Expression::If(if_) => {
             let (then, then_moved_variables) =
-                convert_expression(if_.then(), owned_variables, moved_variables)?;
+                transform_expression(if_.then(), owned_variables, moved_variables)?;
             let (else_, else_moved_variables) =
-                convert_expression(if_.else_(), owned_variables, moved_variables)?;
+                transform_expression(if_.else_(), owned_variables, moved_variables)?;
 
             let all_moved_variables = then_moved_variables
                 .clone()
@@ -274,7 +274,7 @@ fn convert_expression(
                 .collect();
 
             let (condition, moved_variables) =
-                convert_expression(if_.condition(), owned_variables, &all_moved_variables)?;
+                transform_expression(if_.condition(), owned_variables, &all_moved_variables)?;
 
             (
                 If::new(
@@ -306,7 +306,7 @@ fn convert_expression(
                 .into_iter()
                 .chain([(let_.name().into(), let_.type_().clone())])
                 .collect();
-            let (expression, expression_moved_variables) = convert_expression(
+            let (expression, expression_moved_variables) = transform_expression(
                 let_.expression(),
                 &let_owned_variables,
                 &moved_variables
@@ -315,7 +315,7 @@ fn convert_expression(
                     .filter(|variable| variable != let_.name())
                     .collect(),
             )?;
-            let (bound_expression, moved_variables) = convert_expression(
+            let (bound_expression, moved_variables) = transform_expression(
                 let_.bound_expression(),
                 owned_variables,
                 &moved_variables
@@ -358,7 +358,7 @@ fn convert_expression(
                     let_.definition().type_().clone().into(),
                 )])
                 .collect();
-            let (expression, expression_moved_variables) = convert_expression(
+            let (expression, expression_moved_variables) = transform_expression(
                 let_.expression(),
                 &let_owned_variables,
                 &moved_variables
@@ -390,7 +390,7 @@ fn convert_expression(
             (
                 clone_variables(
                     LetRecursive::new(
-                        convert_definition(let_.definition(), false)?,
+                        transform_definition(let_.definition(), false)?,
                         if expression_moved_variables.contains(let_.definition().name()) {
                             expression
                         } else {
@@ -417,7 +417,7 @@ fn convert_expression(
         }
         Expression::Synchronize(synchronize) => {
             let (expression, moved_variables) =
-                convert_expression(synchronize.expression(), owned_variables, moved_variables)?;
+                transform_expression(synchronize.expression(), owned_variables, moved_variables)?;
 
             (
                 Synchronize::new(synchronize.type_().clone(), expression).into(),
@@ -430,7 +430,7 @@ fn convert_expression(
                 |result, field| {
                     let (fields, moved_variables) = result?;
                     let (field, moved_variables) =
-                        convert_expression(field, owned_variables, &moved_variables)?;
+                        transform_expression(field, owned_variables, &moved_variables)?;
 
                     Ok(([field].into_iter().chain(fields).collect(), moved_variables))
                 },
@@ -443,7 +443,7 @@ fn convert_expression(
         }
         Expression::RecordField(field) => {
             let (record, moved_variables) =
-                convert_expression(field.record(), owned_variables, moved_variables)?;
+                transform_expression(field.record(), owned_variables, moved_variables)?;
 
             (
                 RecordField::new(field.type_().clone(), field.index(), record).into(),
@@ -452,12 +452,12 @@ fn convert_expression(
         }
         Expression::RecordUpdate(update) => {
             let (record, mut moved_variables) =
-                convert_expression(update.record(), owned_variables, moved_variables)?;
+                transform_expression(update.record(), owned_variables, moved_variables)?;
             let mut fields = vec![];
 
             for field in update.fields() {
                 let (expression, variables) =
-                    convert_expression(field.expression(), owned_variables, &moved_variables)?;
+                    transform_expression(field.expression(), owned_variables, &moved_variables)?;
 
                 fields.push(RecordUpdateField::new(field.index(), expression));
                 moved_variables = variables;
@@ -470,7 +470,7 @@ fn convert_expression(
         }
         Expression::TryOperation(operation) => {
             let (then, then_moved_variables) =
-                convert_expression(operation.then(), owned_variables, &Default::default())?;
+                transform_expression(operation.then(), owned_variables, &Default::default())?;
             let then_moved_variables = then_moved_variables
                 .into_iter()
                 .filter(|name| name != operation.name())
@@ -483,7 +483,7 @@ fn convert_expression(
                 .collect();
 
             let (operand, operand_moved_variables) =
-                convert_expression(operation.operand(), owned_variables, &all_moved_variables)?;
+                transform_expression(operation.operand(), owned_variables, &all_moved_variables)?;
 
             (
                 drop_variables(
@@ -532,7 +532,7 @@ fn convert_expression(
         }
         Expression::Variant(variant) => {
             let (expression, moved_variables) =
-                convert_expression(variant.payload(), owned_variables, moved_variables)?;
+                transform_expression(variant.payload(), owned_variables, moved_variables)?;
 
             (
                 Variant::new(variant.type_().clone(), expression).into(),
@@ -609,9 +609,9 @@ mod tests {
     use crate::types::{self, Type};
 
     #[test]
-    fn convert_record() {
+    fn transform_record() {
         assert_eq!(
-            convert_expression(
+            transform_expression(
                 &Record::new(
                     types::Record::new("a"),
                     vec![Variable::new("x").into(), Variable::new("x").into()]
@@ -644,9 +644,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_single() {
+        fn transform_single() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Call::new(
                         types::Function::new(vec![Type::Number], Type::Number),
                         Variable::new("f"),
@@ -690,9 +690,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_nested() {
+        fn transform_nested() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Call::new(
                         types::Function::new(vec![Type::Number], Type::Number),
                         Call::new(
@@ -746,9 +746,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_2_arguments() {
+        fn transform_2_arguments() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Call::new(
                         types::Function::new(vec![Type::Number, Type::Boolean], Type::Number),
                         Variable::new("f"),
@@ -810,9 +810,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_with_moved_variable() {
+        fn transform_with_moved_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new("x", Type::Number, 42.0, Variable::new("x")).into(),
                     &Default::default(),
                     &Default::default()
@@ -824,9 +824,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_cloned_variable() {
+        fn transform_with_cloned_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new(
                         "x",
                         Type::Number,
@@ -861,9 +861,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_dropped_variable() {
+        fn transform_with_dropped_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new("x", Type::Number, 42.0, 42.0,).into(),
                     &Default::default(),
                     &Default::default()
@@ -881,9 +881,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_moved_variable_in_bound_expression() {
+        fn transform_with_moved_variable_in_bound_expression() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new("x", Type::Number, Variable::new("y"), Variable::new("x")).into(),
                     &[("y".into(), Type::Number)].into_iter().collect(),
                     &Default::default()
@@ -897,9 +897,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_cloned_variable_in_bound_expression() {
+        fn transform_with_cloned_variable_in_bound_expression() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new("x", Type::Number, Variable::new("y"), Variable::new("y")).into(),
                     &[("y".into(), Type::Number)].into_iter().collect(),
                     &Default::default()
@@ -925,9 +925,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_nested_let() {
+        fn transform_nested_let() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new(
                         "y",
                         Type::Number,
@@ -969,9 +969,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_with_moved_variable() {
+        fn transform_with_moved_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
                             "f",
@@ -1012,7 +1012,7 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_cloned_variable() {
+        fn transform_with_cloned_variable() {
             let f_type = types::Function::new(vec![Type::Number], Type::Number);
             let g_type = types::Function::new(
                 vec![types::Function::new(vec![Type::Number], Type::Number).into()],
@@ -1023,7 +1023,7 @@ mod tests {
             );
 
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
                             "f",
@@ -1089,9 +1089,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_dropped_variable() {
+        fn transform_with_dropped_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
                             "f",
@@ -1140,9 +1140,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_moved_variable_in_environment() {
+        fn transform_with_moved_variable_in_environment() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::with_environment(
                             "f",
@@ -1189,9 +1189,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_cloned_variable_in_environment() {
+        fn transform_with_cloned_variable_in_environment() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::with_environment(
                             "f",
@@ -1249,11 +1249,11 @@ mod tests {
         }
 
         #[test]
-        fn convert_let_recursive_in_let() {
+        fn transform_let_recursive_in_let() {
             let function_type = types::Function::new(vec![Type::Number], Type::Number);
 
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new(
                         "g",
                         function_type.clone(),
@@ -1315,9 +1315,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_moved_free_variable() {
+        fn transform_with_moved_free_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::with_environment(
                             "x",
@@ -1372,9 +1372,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_with_dropped_argument() {
+        fn transform_with_dropped_argument() {
             assert_eq!(
-                convert_definition(
+                transform_definition(
                     &FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
@@ -1405,9 +1405,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_with_dropped_free_variable() {
+        fn transform_with_dropped_free_variable() {
             assert_eq!(
-                convert_definition(
+                transform_definition(
                     &FunctionDefinition::with_environment(
                         "f",
                         vec![Argument::new("y", Type::Number)],
@@ -1446,9 +1446,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_if() {
+        fn transform_if() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &If::new(Variable::new("x"), Variable::new("y"), Variable::new("z")).into(),
                     &[
                         ("x".into(), Type::Number),
@@ -1484,9 +1484,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_case_with_default_alternative() {
+        fn transform_case_with_default_alternative() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Case::new(
                         Variable::new("x"),
                         vec![],
@@ -1516,9 +1516,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_case_with_alternatives() {
+        fn transform_case_with_alternatives() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Case::new(
                         Variable::new("x"),
                         vec![
@@ -1555,9 +1555,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_case_with_alternatives_and_default_alternative() {
+        fn transform_case_with_alternatives_and_default_alternative() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
@@ -1594,9 +1594,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_case_with_moved_argument() {
+        fn transform_case_with_moved_argument() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(vec![Type::ByteString], "x", 42.0)],
@@ -1636,9 +1636,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_case_in_let() {
+        fn transform_case_in_let() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new(
                         "y",
                         Type::Variant,
@@ -1678,9 +1678,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_case_in_let_with_shadowed_variable() {
+        fn transform_case_in_let_with_shadowed_variable() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &Let::new(
                         "x",
                         Type::Variant,
@@ -1719,9 +1719,9 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn convert_try_operation() {
+        fn transform_try_operation() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &TryOperation::new(
                         Variable::new("x"),
                         "y",
@@ -1747,9 +1747,9 @@ mod tests {
         }
 
         #[test]
-        fn convert_try_operation_with_moved_operand() {
+        fn transform_try_operation_with_moved_operand() {
             assert_eq!(
-                convert_expression(
+                transform_expression(
                     &TryOperation::new(
                         Variable::new("x"),
                         "y",
