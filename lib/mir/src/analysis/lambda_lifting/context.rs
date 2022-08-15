@@ -13,7 +13,7 @@ impl Context {
 
     pub fn add_function_definition(&mut self, definition: FunctionDefinition) -> String {
         let name = format!(
-            "mir:lifted:{}:{}",
+            "mir:lift:{}:{}",
             self.function_definitions.len(),
             definition.name()
         );
