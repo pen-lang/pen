@@ -24,6 +24,7 @@ pub fn transform(
     let context_type = collection_type::transform_map_context(context, position)?;
 
     // This thunk is lifted as a global function definition by lambda lifting later.
+    // TODO Define only one map context per type.
     Ok(Call::new(
         Some(types::Function::new(vec![], context_type.clone(), position.clone()).into()),
         Thunk::new(
