@@ -30,11 +30,13 @@ fn transform_function_definition(
     context: &mut Context,
     definition: &FunctionDefinition,
 ) -> FunctionDefinition {
-    FunctionDefinition::new(
+    FunctionDefinition::with_options(
         definition.name(),
+        definition.environment().to_vec(),
         definition.arguments().to_vec(),
         transform_expression(context, definition.body()),
         definition.result_type().clone(),
+        definition.is_thunk(),
     )
 }
 
@@ -256,5 +258,27 @@ mod tests {
                 )
             ])
         );
+    }
+
+    #[test]
+    fn do_not_lift_closure_with_free_variable() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f",
+            vec![],
+            LetRecursive::new(
+                FunctionDefinition::with_options(
+                    "g",
+                    vec![Argument::new("x", Type::None)],
+                    vec![],
+                    42.0,
+                    Type::Number,
+                    false,
+                ),
+                42.0,
+            ),
+            Type::Number,
+        )]);
+
+        assert_eq!(transform(&module), module);
     }
 }
