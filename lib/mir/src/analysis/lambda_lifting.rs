@@ -11,7 +11,15 @@ pub fn transform(module: &Module) -> Module {
     let function_definitions = module
         .function_definitions()
         .iter()
-        .map(|definition| transform_function_definition(&mut context, definition))
+        .map(|definition| {
+            context.set_scope(Some(definition.name().into()));
+
+            let definition = transform_function_definition(&mut context, definition);
+
+            context.set_scope(None);
+
+            definition
+        })
         .collect::<Vec<_>>();
 
     Module::new(
@@ -211,14 +219,14 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:0:g"),
+                        Variable::new("mir:lift:f:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::thunk(
-                    "mir:lift:0:g",
-                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
+                    "mir:lift:f:0:g",
+                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
                     Type::Number
                 )
             ])
@@ -253,15 +261,15 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:0:g"),
+                        Variable::new("mir:lift:f:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::new(
-                    "mir:lift:0:g",
+                    "mir:lift:f:0:g",
                     vec![Argument::new("x", Type::None)],
-                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
+                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
                     Type::Number,
                 )
             ])
@@ -322,18 +330,18 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:0:g"),
+                        Variable::new("mir:lift:f:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::new(
-                    "mir:lift:0:g",
+                    "mir:lift:f:0:g",
                     vec![Argument::new("x", Type::None)],
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:0:g"),
+                        Variable::new("mir:lift:f:0:g"),
                         Call::new(
                             function_type,
                             Variable::new("g"),

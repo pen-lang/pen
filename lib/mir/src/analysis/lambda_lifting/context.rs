@@ -1,19 +1,26 @@
 use crate::ir::*;
 
 pub struct Context {
+    scope: Option<String>,
     function_definitions: Vec<FunctionDefinition>,
 }
 
 impl Context {
     pub fn new() -> Self {
         Self {
+            scope: None,
             function_definitions: vec![],
         }
     }
 
+    pub fn set_scope(&mut self, scope: Option<String>) {
+        self.scope = scope;
+    }
+
     pub fn add_function_definition(&mut self, definition: FunctionDefinition) -> String {
         let name = format!(
-            "mir:lift:{}:{}",
+            "mir:lift:{}:{}:{}",
+            self.scope.as_deref().unwrap_or(""),
             self.function_definitions.len(),
             definition.name()
         );
