@@ -8,10 +8,12 @@ use hir::{
 };
 
 pub fn compile(
-    module: &Module,
     context: &CompileContext,
+    module: &Module,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    Ok(collect_types(module, context.types())?
+    let types = collect_types(module, context.types())?;
+
+    Ok(types
         .into_iter()
         .map(|type_| compile_type_definition(&type_, context))
         .collect::<Result<Vec<_>, _>>()?

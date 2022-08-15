@@ -7,10 +7,10 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
         module
             .type_definitions()
             .iter()
-            .map(|type_definition| compile_type_definition(type_definition, context))
+            .map(|type_definition| compile_type_definition(context, type_definition))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
-            .chain(generic_type_definition::compile(module, context)?)
+            .chain(generic_type_definition::compile(context, module)?)
             .collect(),
         module
             .foreign_declarations()
@@ -53,12 +53,12 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
         module
             .function_declarations()
             .iter()
-            .map(|declaration| compile_function_declaration(declaration, context))
+            .map(|declaration| compile_function_declaration(context, declaration))
             .collect::<Result<_, _>>()?,
         module
             .function_definitions()
             .iter()
-            .map(|definition| compile_function_definition(definition, context))
+            .map(|definition| compile_function_definition(context, definition))
             .collect::<Result<Vec<_>, CompileError>>()?,
     ))
 }
@@ -71,8 +71,8 @@ fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir:
 }
 
 fn compile_type_definition(
-    type_definition: &TypeDefinition,
     context: &CompileContext,
+    type_definition: &TypeDefinition,
 ) -> Result<mir::ir::TypeDefinition, CompileError> {
     Ok(mir::ir::TypeDefinition::new(
         type_definition.name(),
@@ -87,8 +87,8 @@ fn compile_type_definition(
 }
 
 fn compile_function_declaration(
-    declaration: &FunctionDeclaration,
     context: &CompileContext,
+    declaration: &FunctionDeclaration,
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
         declaration.name(),
@@ -97,8 +97,8 @@ fn compile_function_declaration(
 }
 
 fn compile_function_definition(
-    definition: &FunctionDefinition,
     context: &CompileContext,
+    definition: &FunctionDefinition,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     let body = expression::compile(context, definition.lambda().body())?;
     let result_type = type_::compile(context, definition.lambda().result_type())?;
