@@ -2,7 +2,7 @@ use super::free_variable::find_free_variables;
 use crate::{ir::*, types::Type};
 use fnv::FnvHashMap;
 
-pub fn infer_environment(module: &Module) -> Module {
+pub fn transform(module: &Module) -> Module {
     Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
@@ -278,7 +278,10 @@ fn transform_record_update(
     )
 }
 
-fn transform_record_field(field: &RecordField, variables: &FnvHashMap<String, Type>) -> RecordField {
+fn transform_record_field(
+    field: &RecordField,
+    variables: &FnvHashMap<String, Type>,
+) -> RecordField {
     RecordField::new(
         field.type_().clone(),
         field.index(),

@@ -87,7 +87,7 @@ fn compile_module(
     Ok((
         {
             let module = module::compile(context, &module)?;
-            mir::analysis::check_types(&module)?;
+            mir::analysis::type_check::check(&module)?;
             module
         },
         module_interface::compile(&module)?,

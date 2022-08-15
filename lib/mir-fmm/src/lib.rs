@@ -28,17 +28,17 @@ pub fn compile(
     module: &mir::ir::Module,
     configuration: &Configuration,
 ) -> Result<fmm::ir::Module, CompileError> {
-    mir::analysis::check_types(module)?;
+    mir::analysis::type_check::check(module)?;
 
-    let module = mir::analysis::infer_environment(module);
+    let module = mir::analysis::environment_inference::transform(module);
     let module = mir::analysis::lambda_lifting::transform(&module);
-    let module = mir::analysis::count_references(&module)?;
+    let module = mir::analysis::reference_count::transform(&module)?;
 
-    mir::analysis::check_types(&module)?;
+    mir::analysis::type_check::check(&module)?;
 
     let context = Context::new(&module, configuration.clone());
 
-    for type_ in &mir::analysis::collect_variant_types(&module) {
+    for type_ in &mir::analysis::variant_type_collection::collect(&module) {
         type_information::compile_global_variable(&context, type_)?;
     }
 
