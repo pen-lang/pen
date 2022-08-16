@@ -1482,6 +1482,7 @@ mod tests {
                             "g",
                             mir::ir::Expression::None,
                             mir::types::Type::None,
+                            false,
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::None),
@@ -1490,6 +1491,7 @@ mod tests {
                         ),
                     ),
                     mir::types::Type::None,
+                    false,
                 ),
             ]));
         }
@@ -1505,6 +1507,7 @@ mod tests {
                             "g",
                             mir::ir::Variable::new("x"),
                             mir::types::Type::Number,
+                            false,
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::Number),
@@ -1513,6 +1516,7 @@ mod tests {
                         ),
                     ),
                     mir::types::Type::Number,
+                    false,
                 ),
             ]));
         }

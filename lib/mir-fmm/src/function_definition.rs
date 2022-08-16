@@ -16,7 +16,11 @@ pub fn compile(
             fmm::ir::Undefined::new(type_::compile_closure_payload(definition, context.types())),
         ))?,
         definition.is_thunk(),
-        fmm::ir::Linkage::External,
+        if definition.is_public() {
+            fmm::ir::Linkage::External
+        } else {
+            fmm::ir::Linkage::Internal
+        },
         None,
     );
 
