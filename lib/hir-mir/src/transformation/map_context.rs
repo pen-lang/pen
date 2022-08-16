@@ -3,9 +3,6 @@ use crate::{context::CompileContext, transformation::equal_operation, CompileErr
 use hir::{analysis::type_comparability_checker, ir::*, types, types::Type};
 use position::Position;
 
-// TODO Do not generate equal functions dynamically but define them once
-// globally.
-// Can we simply lift them up to global functions as optimization in MIR?
 pub fn transform(
     context: &CompileContext,
     key_type: &Type,
@@ -24,41 +21,61 @@ pub fn transform(
         types::Number::new(position.clone()),
         position.clone(),
     ));
+    let context_type = collection_type::transform_map_context(context, position)?;
 
+    // This thunk is lifted as a global function definition by lambda lifting later.
+    // TODO Define only one map context per type.
     Ok(Call::new(
-        Some(
-            types::Function::new(
-                vec![
-                    equal_function_type.clone(),
-                    hash_function_type.clone(),
-                    equal_function_type,
-                    hash_function_type,
-                ],
-                collection_type::transform_map_context(context, position)?,
+        Some(types::Function::new(vec![], context_type.clone(), position.clone()).into()),
+        Thunk::new(
+            Some(context_type.clone()),
+            Call::new(
+                Some(
+                    types::Function::new(
+                        vec![
+                            equal_function_type.clone(),
+                            hash_function_type.clone(),
+                            equal_function_type,
+                            hash_function_type,
+                        ],
+                        context_type,
+                        position.clone(),
+                    )
+                    .into(),
+                ),
+                Variable::new(&configuration.context_function_name, position.clone()),
+                [
+                    equal_operation::transform_any_function(context, key_type, position)?.into(),
+                    hash_calculation::transform_any_function(context, key_type, position)?.into(),
+                ]
+                .into_iter()
+                .chain(
+                    if type_comparability_checker::check(
+                        value_type,
+                        context.types(),
+                        context.records(),
+                    )? {
+                        [
+                            equal_operation::transform_any_function(context, value_type, position)?
+                                .into(),
+                            hash_calculation::transform_any_function(
+                                context, value_type, position,
+                            )?
+                            .into(),
+                        ]
+                    } else {
+                        [
+                            compile_fake_equal_function(position).into(),
+                            compile_fake_hash_function(position).into(),
+                        ]
+                    },
+                )
+                .collect(),
                 position.clone(),
-            )
-            .into(),
+            ),
+            position.clone(),
         ),
-        Variable::new(&configuration.context_function_name, position.clone()),
-        [
-            equal_operation::transform_any_function(context, key_type, position)?.into(),
-            hash_calculation::transform_any_function(context, key_type, position)?.into(),
-        ]
-        .into_iter()
-        .chain(
-            if type_comparability_checker::check(value_type, context.types(), context.records())? {
-                [
-                    equal_operation::transform_any_function(context, value_type, position)?.into(),
-                    hash_calculation::transform_any_function(context, value_type, position)?.into(),
-                ]
-            } else {
-                [
-                    compile_fake_equal_function(position).into(),
-                    compile_fake_hash_function(position).into(),
-                ]
-            },
-        )
-        .collect(),
+        vec![],
         position.clone(),
     )
     .into())
