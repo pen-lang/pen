@@ -12,6 +12,7 @@ pub struct FunctionDefinition {
     body: Expression,
     result_type: Type,
     type_: types::Function,
+    public: bool,
     is_thunk: bool,
 }
 
@@ -21,16 +22,18 @@ impl FunctionDefinition {
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type, false)
+        Self::with_options(name, vec![], arguments, body, result_type, public, false)
     }
 
     pub fn thunk(
         name: impl Into<String>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
     ) -> Self {
-        Self::with_options(name, vec![], vec![], body, result_type, true)
+        Self::with_options(name, vec![], vec![], body, result_type, public, true)
     }
 
     #[cfg(test)]
@@ -41,7 +44,15 @@ impl FunctionDefinition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(name, environment, arguments, body, result_type, false)
+        Self::with_options(
+            name,
+            environment,
+            arguments,
+            body,
+            result_type,
+            false,
+            false,
+        )
     }
 
     pub(crate) fn with_options(
@@ -50,6 +61,7 @@ impl FunctionDefinition {
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
         is_thunk: bool,
     ) -> Self {
         let result_type = result_type.into();
@@ -68,6 +80,7 @@ impl FunctionDefinition {
             arguments,
             body: body.into(),
             result_type,
+            public,
             is_thunk,
         }
     }
