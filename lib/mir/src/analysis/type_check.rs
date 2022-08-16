@@ -370,7 +370,7 @@ fn check_equality(one: &Type, other: &Type) -> Result<(), TypeCheckError> {
 mod tests {
     use super::{error::*, *};
     use crate::{
-        test::ModuleFake,
+        test::{FunctionDefinitionFake, ModuleFake},
         types::{self, Type},
     };
 
@@ -381,7 +381,7 @@ mod tests {
 
     #[test]
     fn check_types_of_variables() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             Variable::new("x"),
@@ -393,13 +393,13 @@ mod tests {
     #[test]
     fn fail_to_check_types_of_variables() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 42.0,
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("f"),
@@ -415,7 +415,7 @@ mod tests {
 
     #[test]
     fn check_types_of_functions() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             42.0,
@@ -428,13 +428,13 @@ mod tests {
     #[test]
     fn fail_to_check_types_of_functions() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 42.0,
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("f"),
@@ -451,13 +451,13 @@ mod tests {
     #[test]
     fn check_types_of_calls() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 42.0,
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
@@ -475,7 +475,7 @@ mod tests {
     #[test]
     fn check_call_with_2_arguments() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![
                     Argument::new("x", Type::Number),
@@ -484,7 +484,7 @@ mod tests {
                 42.0,
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
@@ -501,7 +501,7 @@ mod tests {
 
     #[test]
     fn fail_to_check_types_of_calls() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             Call::new(
@@ -520,7 +520,7 @@ mod tests {
 
     #[test]
     fn fail_to_check_types_because_of_missing_variables() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             Variable::new("y"),
@@ -535,7 +535,7 @@ mod tests {
 
     #[test]
     fn check_types_of_nested_let_expressions() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             Let::new(
@@ -553,13 +553,13 @@ mod tests {
     #[test]
     fn fail_to_check_types_of_let_expression() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 42.0,
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Let::new("y", Type::Number, Variable::new("f"), Variable::new("y")),
@@ -575,11 +575,11 @@ mod tests {
 
     #[test]
     fn check_types_of_let_recursive() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             LetRecursive::new(
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "g",
                     vec![Argument::new("y", Type::Number)],
                     ArithmeticOperation::new(
@@ -603,11 +603,11 @@ mod tests {
 
     #[test]
     fn check_types_of_recursive_let_recursive() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![Argument::new("x", Type::Number)],
             LetRecursive::new(
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "g",
                     vec![Argument::new("y", Type::Number)],
                     Call::new(
@@ -636,7 +636,7 @@ mod tests {
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
             )])
-            .set_function_definitions(vec![FunctionDefinition::new(
+            .set_function_definitions(vec![FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
@@ -656,7 +656,7 @@ mod tests {
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
             )])
-            .set_function_definitions(vec![FunctionDefinition::new(
+            .set_function_definitions(vec![FunctionDefinition::fake(
                 "g",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("f"),
@@ -676,7 +676,7 @@ mod tests {
         fn check_() {
             assert_eq!(
                 check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         If::new(true, 42.0, 42.0),
@@ -695,7 +695,7 @@ mod tests {
         fn check_only_default_alternative() {
             assert_eq!(
                 check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
@@ -714,7 +714,7 @@ mod tests {
         fn check_one_alternative() {
             assert_eq!(
                 check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
@@ -735,7 +735,7 @@ mod tests {
 
         #[test]
         fn check_no_alternative() {
-            let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(Variable::new("x"), vec![], None),
@@ -825,7 +825,7 @@ mod tests {
         fn check_multiple_type_alternative() {
             assert_eq!(
                 check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Case::new(
@@ -1101,7 +1101,7 @@ mod tests {
                     types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
                 )])
-                .set_function_definitions(vec![FunctionDefinition::new(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "g",
                     vec![Argument::new("x", Type::Number)],
                     Call::new(
@@ -1124,7 +1124,7 @@ mod tests {
                     types::Function::new(vec![Type::Number], Type::Number),
                     CallingConvention::Target,
                 )])
-                .set_function_definitions(vec![FunctionDefinition::new(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "g",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("f"),
@@ -1165,7 +1165,7 @@ mod tests {
                     "g",
                     CallingConvention::Source,
                 )])
-                .set_function_definitions(vec![FunctionDefinition::new(
+                .set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("x"),
@@ -1179,13 +1179,13 @@ mod tests {
     #[test]
     fn check_duplicate_function_names() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),
                 Type::Number,
             ),
-            FunctionDefinition::new(
+            FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 Variable::new("x"),

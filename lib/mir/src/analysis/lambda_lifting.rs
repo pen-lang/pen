@@ -175,7 +175,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
 mod tests {
     use super::*;
     use crate::{
-        test::ModuleFake,
+        test::{FunctionDefinitionFake, ModuleFake},
         types::{self, Type},
     };
     use pretty_assertions::assert_eq;
@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn transform_function_definition_without_closure() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![],
             42.0,
@@ -203,18 +203,18 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![],
                     LetRecursive::new(
-                        FunctionDefinition::new("g", vec![], 42.0, Type::Number,),
+                        FunctionDefinition::fake("g", vec![], 42.0, Type::Number,),
                         42.0
                     ),
                     Type::Number,
                 )])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "f",
                     vec![],
                     Let::new(
@@ -225,11 +225,11 @@ mod tests {
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "mir:lift:f:0:g",
                     vec![],
                     Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
-                    Type::Number
+                    Type::Number,
                 )
             ])
         );
@@ -241,11 +241,11 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![],
                     LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             42.0,
@@ -257,7 +257,7 @@ mod tests {
                 )])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "f",
                     vec![],
                     Let::new(
@@ -268,7 +268,7 @@ mod tests {
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "mir:lift:f:0:g",
                     vec![Argument::new("x", Type::None)],
                     Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
@@ -280,7 +280,7 @@ mod tests {
 
     #[test]
     fn do_not_lift_closure_with_free_variable() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             vec![],
             LetRecursive::new(
@@ -290,6 +290,7 @@ mod tests {
                     vec![],
                     42.0,
                     Type::Number,
+                    false,
                     false,
                 ),
                 42.0,
@@ -306,11 +307,11 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![],
                     LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             Call::new(
@@ -326,7 +327,7 @@ mod tests {
                 )])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "f",
                     vec![],
                     Let::new(
@@ -337,7 +338,7 @@ mod tests {
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "mir:lift:f:0:g",
                     vec![Argument::new("x", Type::None)],
                     Let::new(
@@ -362,15 +363,18 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![],
-                    LetRecursive::new(FunctionDefinition::thunk("g", 42.0, Type::Number,), 42.0),
+                    LetRecursive::new(
+                        FunctionDefinition::fake_thunk("g", 42.0, Type::Number,),
+                        42.0
+                    ),
                     Type::Number,
                 )])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "f",
                     vec![],
                     Let::new(
@@ -381,7 +385,7 @@ mod tests {
                     ),
                     Type::Number,
                 ),
-                FunctionDefinition::thunk(
+                FunctionDefinition::fake_thunk(
                     "mir:lift:f:0:g",
                     Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
                     Type::Number

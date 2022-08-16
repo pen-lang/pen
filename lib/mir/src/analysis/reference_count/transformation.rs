@@ -607,6 +607,7 @@ fn should_clone_variable(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test::FunctionDefinitionFake;
     use crate::types::{self, Type};
 
     #[test]
@@ -974,11 +975,11 @@ mod tests {
             assert_eq!(
                 transform_expression(
                     &LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
-                            Type::Number
+                            Type::Number,
                         ),
                         Variable::new("f")
                     )
@@ -989,7 +990,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -1004,7 +1005,7 @@ mod tests {
                             .collect(),
                             42.0,
                         ),
-                        Type::Number
+                        Type::Number,
                     ),
                     Variable::new("f")
                 )
@@ -1026,11 +1027,11 @@ mod tests {
             assert_eq!(
                 transform_expression(
                     &LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
-                            Type::Number
+                            Type::Number,
                         ),
                         Call::new(
                             f_type.clone(),
@@ -1049,7 +1050,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -1064,7 +1065,7 @@ mod tests {
                             .collect(),
                             42.0,
                         ),
-                        Type::Number
+                        Type::Number,
                     ),
                     Call::new(
                         f_type,
@@ -1094,11 +1095,11 @@ mod tests {
             assert_eq!(
                 transform_expression(
                     &LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "f",
                             vec![Argument::new("x", Type::Number)],
                             42.0,
-                            Type::Number
+                            Type::Number,
                         ),
                         42.0,
                     )
@@ -1109,7 +1110,7 @@ mod tests {
                 .unwrap()
                 .0,
                 LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         DropVariables::new(
@@ -1124,7 +1125,7 @@ mod tests {
                             .collect(),
                             42.0,
                         ),
-                        Type::Number
+                        Type::Number,
                     ),
                     DropVariables::new(
                         [(
@@ -1369,6 +1370,7 @@ mod tests {
     }
 
     mod definitions {
+
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -1376,16 +1378,16 @@ mod tests {
         fn transform_with_dropped_argument() {
             assert_eq!(
                 transform_definition(
-                    &FunctionDefinition::new(
+                    &FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         42.0,
-                        Type::Number
+                        Type::Number,
                     ),
                     false
                 )
                 .unwrap(),
-                FunctionDefinition::new(
+                FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     DropVariables::new(
@@ -1400,7 +1402,7 @@ mod tests {
                         .collect(),
                         42.0
                     ),
-                    Type::Number
+                    Type::Number,
                 ),
             );
         }

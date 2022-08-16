@@ -2,6 +2,7 @@ use super::{argument::Argument, expression::Expression};
 use crate::types::{self, Type};
 
 // TODO Consider splitting function and thunk definitions.
+// TODO Consider splitting global and local function definitions.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FunctionDefinition {
     name: String,
