@@ -607,8 +607,10 @@ fn should_clone_variable(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::FunctionDefinitionFake;
-    use crate::types::{self, Type};
+    use crate::{
+        test::FunctionDefinitionFake,
+        types::{self, Type},
+    };
 
     #[test]
     fn transform_record() {

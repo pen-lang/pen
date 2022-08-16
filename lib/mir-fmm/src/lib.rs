@@ -148,8 +148,7 @@ fn compile_global_variables(
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::FunctionDefinitionFake;
-    use mir::test::ModuleFake;
+    use mir::test::{FunctionDefinitionFake, ModuleFake};
     use once_cell::sync::Lazy;
 
     static FOREIGN_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
