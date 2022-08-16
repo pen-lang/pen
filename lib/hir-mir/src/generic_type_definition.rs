@@ -13,7 +13,7 @@ pub fn compile(
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
     Ok(collect_types(module, context.types())?
         .into_iter()
-        .map(|type_| compile_type_definition(&type_, context))
+        .map(|type_| compile_type_definition(context, &type_))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
         .flatten()
@@ -21,8 +21,8 @@ pub fn compile(
 }
 
 fn compile_type_definition(
-    type_: &Type,
     context: &CompileContext,
+    type_: &Type,
 ) -> Result<Option<mir::ir::TypeDefinition>, CompileError> {
     Ok(match type_ {
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
