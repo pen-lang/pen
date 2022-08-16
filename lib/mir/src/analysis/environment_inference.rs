@@ -11,12 +11,12 @@ pub fn transform(module: &Module) -> Module {
         module
             .function_definitions()
             .iter()
-            .map(transform_global_definition)
+            .map(transform_global_function_definition)
             .collect(),
     )
 }
 
-fn transform_global_definition(definition: &FunctionDefinition) -> FunctionDefinition {
+fn transform_global_function_definition(definition: &FunctionDefinition) -> FunctionDefinition {
     FunctionDefinition::with_options(
         definition.name(),
         vec![],
@@ -30,11 +30,12 @@ fn transform_global_definition(definition: &FunctionDefinition) -> FunctionDefin
                 .collect(),
         ),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     )
 }
 
-fn transform_local_definition(
+fn transform_local_function_definition(
     definition: &FunctionDefinition,
     variables: &FnvHashMap<String, Type>,
 ) -> FunctionDefinition {
@@ -69,6 +70,7 @@ fn transform_local_definition(
                 .collect(),
         ),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     )
 }
@@ -232,7 +234,7 @@ fn transform_let_recursive(
     variables: &FnvHashMap<String, Type>,
 ) -> LetRecursive {
     LetRecursive::new(
-        transform_local_definition(let_.definition(), variables),
+        transform_local_function_definition(let_.definition(), variables),
         transform_expression(
             let_.expression(),
             &variables
@@ -324,7 +326,7 @@ mod tests {
     #[test]
     fn infer_empty_environment() {
         assert_eq!(
-            transform_local_definition(
+            transform_local_function_definition(
                 &FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
@@ -346,7 +348,7 @@ mod tests {
     #[test]
     fn infer_environment() {
         assert_eq!(
-            transform_local_definition(
+            transform_local_function_definition(
                 &FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],
@@ -370,8 +372,8 @@ mod tests {
         let variables = vec![("y".into(), Type::Number)].drain(..).collect();
 
         assert_eq!(
-            transform_local_definition(
-                &transform_local_definition(
+            transform_local_function_definition(
+                &transform_local_function_definition(
                     &FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
@@ -538,7 +540,7 @@ mod tests {
     #[test]
     fn infer_environment_with_shadowed_variable() {
         assert_eq!(
-            transform_local_definition(
+            transform_local_function_definition(
                 &FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Number)],

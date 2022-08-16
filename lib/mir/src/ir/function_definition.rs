@@ -1,6 +1,7 @@
 use super::{argument::Argument, expression::Expression};
 use crate::types::{self, Type};
 
+// TODO Consider splitting function and thunk definitions.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FunctionDefinition {
     name: String,
@@ -13,7 +14,7 @@ pub struct FunctionDefinition {
     result_type: Type,
     type_: types::Function,
     public: bool,
-    is_thunk: bool,
+    thunk: bool,
 }
 
 impl FunctionDefinition {
@@ -81,7 +82,7 @@ impl FunctionDefinition {
             body: body.into(),
             result_type,
             public,
-            is_thunk,
+            thunk: is_thunk,
         }
     }
 
@@ -109,7 +110,11 @@ impl FunctionDefinition {
         &self.type_
     }
 
+    pub fn is_public(&self) -> bool {
+        self.public
+    }
+
     pub fn is_thunk(&self) -> bool {
-        self.is_thunk
+        self.thunk
     }
 }

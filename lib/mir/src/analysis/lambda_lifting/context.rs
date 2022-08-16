@@ -37,6 +37,7 @@ impl Context {
                     definition.body().clone(),
                 ),
                 definition.result_type().clone(),
+                false,
                 definition.is_thunk(),
             ));
 

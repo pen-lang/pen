@@ -44,6 +44,7 @@ fn transform_function_definition(
         definition.arguments().to_vec(),
         transform_expression(context, definition.body()),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     )
 }

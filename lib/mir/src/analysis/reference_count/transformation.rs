@@ -55,6 +55,7 @@ fn transform_definition(
             &owned_variables,
         ),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     ))
 }
