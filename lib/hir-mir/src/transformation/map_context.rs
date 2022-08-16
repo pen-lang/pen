@@ -192,7 +192,7 @@ fn collect_map_types(
         _ => {}
     });
 
-    Ok(map_types
+    map_types
         .into_iter()
         .map(|type_| {
             Ok(types::Map::new(
@@ -201,7 +201,7 @@ fn collect_map_types(
                 type_.position().clone(),
             ))
         })
-        .collect::<Result<_, _>>()?)
+        .collect::<Result<_, _>>()
 }
 
 fn context_function_name(
