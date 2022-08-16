@@ -38,25 +38,6 @@ impl FunctionDefinition {
         Self::with_options(name, vec![], vec![], body, result_type, public, true)
     }
 
-    #[cfg(test)]
-    pub(crate) fn with_environment(
-        name: impl Into<String>,
-        environment: Vec<Argument>,
-        arguments: Vec<Argument>,
-        body: impl Into<Expression>,
-        result_type: impl Into<Type>,
-    ) -> Self {
-        Self::with_options(
-            name,
-            environment,
-            arguments,
-            body,
-            result_type,
-            false,
-            false,
-        )
-    }
-
     pub(crate) fn with_options(
         name: impl Into<String>,
         environment: Vec<Argument>,

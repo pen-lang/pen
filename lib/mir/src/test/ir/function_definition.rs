@@ -13,6 +13,14 @@ pub trait FunctionDefinitionFake {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self;
+
+    fn fake_with_environment(
+        name: impl Into<String>,
+        environment: Vec<Argument>,
+        arguments: Vec<Argument>,
+        body: impl Into<Expression>,
+        result_type: impl Into<Type>,
+    ) -> Self;
 }
 
 impl FunctionDefinitionFake for FunctionDefinition {
@@ -31,5 +39,23 @@ impl FunctionDefinitionFake for FunctionDefinition {
         result_type: impl Into<Type>,
     ) -> Self {
         Self::thunk(name, body, result_type, false)
+    }
+
+    fn fake_with_environment(
+        name: impl Into<String>,
+        environment: Vec<Argument>,
+        arguments: Vec<Argument>,
+        body: impl Into<Expression>,
+        result_type: impl Into<Type>,
+    ) -> Self {
+        Self::with_options(
+            name,
+            environment,
+            arguments,
+            body,
+            result_type,
+            false,
+            false,
+        )
     }
 }

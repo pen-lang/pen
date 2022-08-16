@@ -419,7 +419,7 @@ mod tests {
                 "f",
                 vec![Argument::new("x", Type::None)],
                 LetRecursive::new(
-                    FunctionDefinition::with_options(
+                    FunctionDefinition::fake_with_environment(
                         "g",
                         vec![Argument::new("x", Type::None)],
                         vec![],
@@ -430,8 +430,6 @@ mod tests {
                             Variable::new("x"),
                         ),
                         Type::None,
-                        false,
-                        false,
                     ),
                     Variable::new("g"),
                 ),
@@ -449,7 +447,7 @@ mod tests {
                     "f",
                     vec![Argument::new("x", Type::None)],
                     LetRecursive::new(
-                        FunctionDefinition::with_options(
+                        FunctionDefinition::fake_with_environment(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             vec![],
@@ -460,8 +458,6 @@ mod tests {
                                 Variable::new("x"),
                             ),
                             Type::None,
-                            false,
-                            false,
                         ),
                         Expression::None,
                     ),

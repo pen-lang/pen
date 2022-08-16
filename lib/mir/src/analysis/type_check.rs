@@ -751,7 +751,7 @@ mod tests {
         #[test]
         fn check_inconsistent_alternative_types() {
             let module = Module::empty().set_function_definitions(vec![
-                FunctionDefinition::with_environment(
+                FunctionDefinition::fake_with_environment(
                     "f",
                     vec![],
                     vec![Argument::new("x", Type::Variant)],
@@ -777,7 +777,7 @@ mod tests {
         fn check_unmatched_case_type() {
             assert!(matches!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Variant)],
@@ -801,7 +801,7 @@ mod tests {
         fn check_variant_alternative() {
             assert!(matches!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Variant)],
@@ -852,7 +852,7 @@ mod tests {
         fn check_() {
             assert_eq!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
@@ -868,7 +868,7 @@ mod tests {
         fn fail_to_check() {
             assert!(matches!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
@@ -895,7 +895,7 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::with_environment(
+                        .set_function_definitions(vec![FunctionDefinition::fake_with_environment(
                             "f",
                             vec![],
                             vec![Argument::new("x", Type::Number)],
@@ -918,7 +918,7 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![Type::Number])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::with_environment(
+                        .set_function_definitions(vec![FunctionDefinition::fake_with_environment(
                             "f",
                             vec![],
                             vec![Argument::new("x", Type::Number)],
@@ -939,7 +939,7 @@ mod tests {
                     "foo",
                     types::RecordBody::new(vec![Type::Number]),
                 )])
-                .set_function_definitions(vec![FunctionDefinition::with_environment(
+                .set_function_definitions(vec![FunctionDefinition::fake_with_environment(
                     "f",
                     vec![],
                     vec![Argument::new("x", Type::Number)],
@@ -962,7 +962,7 @@ mod tests {
                     "foo",
                     types::RecordBody::new(vec![Type::Number]),
                 )])
-                .set_function_definitions(vec![FunctionDefinition::with_environment(
+                .set_function_definitions(vec![FunctionDefinition::fake_with_environment(
                     "f",
                     vec![],
                     vec![Argument::new("x", Type::Number)],
@@ -987,7 +987,7 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![Type::Number])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::with_environment(
+                        .set_function_definitions(vec![FunctionDefinition::fake_with_environment(
                             "f",
                             vec![],
                             vec![Argument::new("x", Type::Number)],
@@ -1011,7 +1011,7 @@ mod tests {
         fn check_variant() {
             assert_eq!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Number)],
@@ -1027,7 +1027,7 @@ mod tests {
         fn fail_to_check_variant_in_variant() {
             assert!(matches!(
                 check(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::with_environment(
+                    FunctionDefinition::fake_with_environment(
                         "f",
                         vec![],
                         vec![Argument::new("x", Type::Variant)],
@@ -1042,27 +1042,29 @@ mod tests {
 
     #[test]
     fn check_add_operator() {
-        let module =
-            Module::empty().set_function_definitions(vec![FunctionDefinition::with_environment(
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
                 ArithmeticOperation::new(ArithmeticOperator::Add, 42.0, 42.0),
                 Type::Number,
-            )]);
+            ),
+        ]);
         assert_eq!(check(&module), Ok(()));
     }
 
     #[test]
     fn check_equality_operator() {
-        let module =
-            Module::empty().set_function_definitions(vec![FunctionDefinition::with_environment(
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
                 ComparisonOperation::new(ComparisonOperator::Equal, 42.0, 42.0),
                 Type::Boolean,
-            )]);
+            ),
+        ]);
         assert_eq!(check(&module), Ok(()));
     }
 
@@ -1072,7 +1074,7 @@ mod tests {
         #[test]
         fn check_try_operation() {
             let module = Module::empty().set_function_definitions(vec![
-                FunctionDefinition::with_environment(
+                FunctionDefinition::fake_with_environment(
                     "f",
                     vec![],
                     vec![Argument::new("x", Type::Variant)],
