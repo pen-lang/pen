@@ -1,50 +1,94 @@
 ---
 source: lib/hir-mir/src/transformation/map_context.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &types::None::new(Position::fake()).into(),\n    &types::None::new(Position::fake()).into(), &Position::fake())"
+expression: "transform_module(&context,\n    &Module::empty().set_function_definitions(vec![FunctionDefinition ::\n                fake(\"f\", Lambda ::\n                new(vec! [], collection_type ::\n                transform_map_context(& context, & Position ::\n                fake()).unwrap(), Map ::\n                new(types :: None :: new(Position :: fake()), types :: None ::\n                new(Position :: fake()), vec! [], Position :: fake()),\n                Position :: fake()), false)]))"
 ---
 Ok(
-    Call(
-        Call {
-            function_type: Some(
-                Function(
-                    Function {
-                        arguments: [],
-                        result: Reference(
-                            Reference {
-                                name: "mapContext",
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
-                                },
+    Module {
+        type_definitions: [],
+        type_aliases: [],
+        foreign_declarations: [],
+        function_declarations: [],
+        function_definitions: [
+            FunctionDefinition {
+                name: "f",
+                original_name: "",
+                lambda: Lambda {
+                    arguments: [],
+                    result_type: Reference(
+                        Reference {
+                            name: "mapContext",
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
                             },
-                        ),
-                        position: Position {
-                            path: "",
-                            line_number: 1,
-                            column_number: 1,
-                            line: "",
                         },
-                    },
-                ),
-            ),
-            function: Thunk(
-                Thunk {
-                    type_: Some(
-                        Reference(
-                            Reference {
-                                name: "mapContext",
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
-                                },
-                            },
-                        ),
                     ),
-                    expression: Call(
+                    body: Map(
+                        Map {
+                            key_type: None(
+                                None {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            value_type: None(
+                                None {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            elements: [],
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    position: Position {
+                        path: "",
+                        line_number: 1,
+                        column_number: 1,
+                        line: "",
+                    },
+                },
+                foreign_definition_configuration: None,
+                public: false,
+                position: Position {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
+            },
+            FunctionDefinition {
+                name: "hir:map:context:829f738c8f9ee2f4",
+                original_name: "hir:map:context:829f738c8f9ee2f4",
+                lambda: Lambda {
+                    arguments: [],
+                    result_type: Reference(
+                        Reference {
+                            name: "mapContext",
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    body: Call(
                         Call {
                             function_type: Some(
                                 Function(
@@ -679,14 +723,21 @@ Ok(
                         line: "",
                     },
                 },
-            ),
-            arguments: [],
-            position: Position {
-                path: "",
-                line_number: 1,
-                column_number: 1,
-                line: "",
+                foreign_definition_configuration: None,
+                public: false,
+                position: Position {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
             },
+        ],
+        position: Position {
+            path: "",
+            line_number: 1,
+            column_number: 1,
+            line: "",
         },
-    ),
+    },
 )
