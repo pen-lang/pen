@@ -11,9 +11,7 @@ pub fn compile(
     context: &CompileContext,
     module: &Module,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    let types = collect_types(module, context.types())?;
-
-    Ok(types
+    Ok(collect_types(module, context.types())?
         .into_iter()
         .map(|type_| compile_type_definition(&type_, context))
         .collect::<Result<Vec<_>, _>>()?
@@ -149,6 +147,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -171,7 +170,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(
@@ -200,6 +198,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -215,7 +214,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_function_name(&function_type, context.types()).unwrap(),
@@ -241,6 +239,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -256,7 +255,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -295,8 +293,8 @@ mod tests {
 
         assert_eq!(
             compile(
-                &Module::empty().set_function_definitions(vec![definition.clone(), definition]),
                 &context,
+                &Module::empty().set_function_definitions(vec![definition.clone(), definition]),
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -315,6 +313,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -334,7 +333,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -358,6 +356,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -374,7 +373,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -398,6 +396,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -412,7 +411,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -436,6 +434,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -452,7 +451,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -476,6 +474,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -493,7 +492,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -517,6 +515,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -534,7 +533,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -553,6 +551,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -571,7 +570,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
@@ -592,6 +590,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -616,7 +615,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![
                 mir::ir::TypeDefinition::new(
@@ -645,6 +643,7 @@ mod tests {
 
         assert_eq!(
             compile(
+                &context,
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "foo",
                     Lambda::new(
@@ -660,7 +659,6 @@ mod tests {
                     ),
                     false,
                 )]),
-                &context,
             ),
             Ok(vec![
                 mir::ir::TypeDefinition::new(
