@@ -28,7 +28,7 @@ pub fn transform(
     Ok(Call::new(
         Some(types::Function::new(vec![], context_type.clone(), position.clone()).into()),
         Thunk::new(
-            Some(context_type.clone().into()),
+            Some(context_type.clone()),
             Call::new(
                 Some(
                     types::Function::new(
@@ -38,7 +38,7 @@ pub fn transform(
                             equal_function_type,
                             hash_function_type,
                         ],
-                        context_type.clone(),
+                        context_type,
                         position.clone(),
                     )
                     .into(),
