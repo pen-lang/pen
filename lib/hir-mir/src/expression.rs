@@ -114,10 +114,7 @@ pub fn compile(
             compile(let_.expression())?,
         )
         .into(),
-        Expression::List(list) => compile(&list_literal::transform(
-            list,
-            &context.configuration()?.list_type,
-        ))?,
+        Expression::List(list) => compile(&list_literal::transform(context, list)?)?,
         Expression::ListComprehension(comprehension) => {
             compile_list_comprehension(context, comprehension)?
         }
