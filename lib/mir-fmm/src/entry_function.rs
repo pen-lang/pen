@@ -397,7 +397,7 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::ModuleFake;
+    use mir::test::{FunctionDefinitionFake, ModuleFake};
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {
@@ -406,11 +406,11 @@ mod tests {
 
         compile(
             &context,
-            &mir::ir::FunctionDefinition::new(
+            &mir::ir::FunctionDefinition::fake(
                 "f",
                 vec![],
                 mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::new(
+                    mir::ir::FunctionDefinition::fake(
                         "g",
                         vec![],
                         mir::ir::Call::new(
