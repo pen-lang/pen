@@ -107,6 +107,7 @@ impl NinjaBuildScriptCompiler {
             "rule llc",
             &format!(
                 "  command = {} -O3 -tailcallopt --relocation-model pic \
+                    --lto-embed-bitcode optimized \
                     -mtriple $target {} -filetype obj -o $out $in",
                 llc.display(),
                 if target_triple
