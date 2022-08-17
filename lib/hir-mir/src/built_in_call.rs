@@ -135,6 +135,7 @@ pub fn compile(
                                 .into(),
                             )?,
                             type_::compile(context, &any_type)?,
+                            false,
                         ),
                         mir::ir::Synchronize::new(
                             mir_thunk_type,
@@ -163,6 +164,7 @@ pub fn compile(
                             )?,
                         )?,
                         type_::compile(context, result_type)?,
+                        false,
                     ),
                     mir::ir::Variable::new(THUNK_NAME),
                 ),
@@ -268,14 +270,16 @@ mod tests {
                                                 "$closure",
                                                 vec![],
                                                 mir::ir::Expression::Number(42.0),
-                                                mir::types::Type::Number
+                                                mir::types::Type::Number,
+                                                false
                                             ),
                                             mir::ir::Variable::new("$closure")
                                         ),
                                         vec![]
                                     ),
                                 ),
-                                mir::types::Type::Variant
+                                mir::types::Type::Variant,
+                                false
                             ),
                             mir::ir::Synchronize::new(
                                 thunk_type.clone(),
@@ -301,7 +305,8 @@ mod tests {
                                 )],
                                 None,
                             ),
-                            mir::types::Type::Number
+                            mir::types::Type::Number,
+                            false
                         ),
                         mir::ir::Variable::new("$thunk"),
                     ),
@@ -352,13 +357,15 @@ mod tests {
                                             "$closure",
                                             vec![],
                                             mir::ir::Variable::new("x"),
-                                            mir::types::Type::Variant
+                                            mir::types::Type::Variant,
+                                            false
                                         ),
                                         mir::ir::Variable::new("$closure")
                                     ),
                                     vec![]
                                 ),
-                                mir::types::Type::Variant
+                                mir::types::Type::Variant,
+                                false,
                             ),
                             mir::ir::Synchronize::new(
                                 thunk_type.clone(),
@@ -376,7 +383,8 @@ mod tests {
                                 mir::ir::Variable::new("$any_thunk"),
                                 vec![]
                             ),
-                            mir::types::Type::Variant
+                            mir::types::Type::Variant,
+                            false
                         ),
                         mir::ir::Variable::new("$thunk"),
                     ),

@@ -268,7 +268,7 @@ fn drop_variable(name: impl AsRef<str>, variables: &mut FnvHashMap<String, isize
 mod tests {
     use super::*;
     use crate::{
-        test::ModuleFake,
+        test::{FunctionDefinitionFake, ModuleFake},
         types::{self, Type},
     };
 
@@ -280,7 +280,7 @@ mod tests {
     #[test]
     fn validate_none() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![],
                 Expression::None,
@@ -293,7 +293,7 @@ mod tests {
     #[test]
     fn validate_variable_clone() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Number)],
                 CloneVariables::new(
@@ -313,7 +313,7 @@ mod tests {
     #[test]
     fn validate_variable_drop() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 DropVariables::new(
@@ -330,7 +330,7 @@ mod tests {
     fn fail_to_validate_variable_drop() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Expression::None,
@@ -346,7 +346,7 @@ mod tests {
     #[test]
     fn validate_variable_move() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Variable::new("x"),
@@ -359,7 +359,7 @@ mod tests {
     #[test]
     fn validate_let() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Let::new("y", Type::None, Variable::new("x"), Variable::new("y")),
@@ -373,7 +373,7 @@ mod tests {
     fn fail_to_validate_let_with_leaked_bound_variable() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Let::new("y", Type::None, Variable::new("x"), Expression::None),
@@ -387,7 +387,7 @@ mod tests {
     #[test]
     fn validate_let_with_shadowed_variable() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 Let::new("x", Type::None, Variable::new("x"), Variable::new("x")),
@@ -401,7 +401,7 @@ mod tests {
     fn fail_to_validate_let_with_shadowed_variable() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     Let::new("x", Type::None, Variable::new("x"), Expression::None),
@@ -414,29 +414,28 @@ mod tests {
 
     #[test]
     fn validate_let_recursive() {
-        validate(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::None)],
-                    LetRecursive::new(
-                        FunctionDefinition::with_options(
-                            "g",
-                            vec![Argument::new("x", Type::None)],
-                            vec![],
-                            DropVariables::new(
-                                [("g".into(), types::Function::new(vec![], Type::None).into())]
-                                    .into_iter()
-                                    .collect(),
-                                Variable::new("x"),
-                            ),
-                            Type::None,
-                            false,
+        validate(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                LetRecursive::new(
+                    FunctionDefinition::fake_with_environment(
+                        "g",
+                        vec![Argument::new("x", Type::None)],
+                        vec![],
+                        DropVariables::new(
+                            [("g".into(), types::Function::new(vec![], Type::None).into())]
+                                .into_iter()
+                                .collect(),
+                            Variable::new("x"),
                         ),
-                        Variable::new("g"),
+                        Type::None,
                     ),
-                    Type::None,
+                    Variable::new("g"),
                 ),
-            ]))
+                Type::None,
+            )]),
+        )
         .unwrap();
     }
 
@@ -444,11 +443,11 @@ mod tests {
     fn fail_to_validate_let_recursive_with_leaked_function() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     LetRecursive::new(
-                        FunctionDefinition::with_options(
+                        FunctionDefinition::fake_with_environment(
                             "g",
                             vec![Argument::new("x", Type::None)],
                             vec![],
@@ -459,7 +458,6 @@ mod tests {
                                 Variable::new("x"),
                             ),
                             Type::None,
-                            false,
                         ),
                         Expression::None,
                     ),
@@ -474,7 +472,7 @@ mod tests {
     fn fail_to_validate_definition_in_let_recursive() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     LetRecursive::new(
@@ -484,6 +482,7 @@ mod tests {
                             vec![],
                             Variable::new("x"),
                             Type::None,
+                            false,
                             false,
                         ),
                         Variable::new("g"),
@@ -500,7 +499,7 @@ mod tests {
     #[test]
     fn validate_if() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::None)],
                 If::new(
@@ -518,7 +517,7 @@ mod tests {
     fn fail_to_validate_if() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::None)],
                     If::new(
@@ -539,7 +538,7 @@ mod tests {
     #[test]
     fn validate_case_with_default_alternative() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -557,7 +556,7 @@ mod tests {
     fn fail_to_validate_case_with_default_alternative() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -575,7 +574,7 @@ mod tests {
     #[test]
     fn validate_case_with_alternative() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -593,7 +592,7 @@ mod tests {
     fn fail_to_validate_case_with_alternative() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -611,7 +610,7 @@ mod tests {
     #[test]
     fn validate_case_with_alternative_and_default_alternative() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -629,7 +628,7 @@ mod tests {
     fn fail_to_validate_case_with_alternative_and_default_alternative() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -647,7 +646,7 @@ mod tests {
     #[test]
     fn validate_case_with_two_alternatives_and_default_alternative() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -668,7 +667,7 @@ mod tests {
     fn fail_to_validate_case_with_two_alternatives_and_default_alternative() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     Case::new(
@@ -689,7 +688,7 @@ mod tests {
     #[test]
     fn validate_case_with_different_bound_variables() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Case::new(
@@ -709,7 +708,7 @@ mod tests {
     #[test]
     fn validate_try_operation() {
         validate(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 TryOperation::new(
@@ -728,7 +727,7 @@ mod tests {
     fn fail_to_validate_try_operation() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -748,7 +747,7 @@ mod tests {
     fn fail_to_validate_try_operation_with_double_drops() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -773,7 +772,7 @@ mod tests {
     fn fail_to_validate_try_operation_with_unused_outer_variable() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -795,7 +794,7 @@ mod tests {
     fn fail_to_validate_try_operation_with_shadowed_variable() {
         assert_eq!(
             validate(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
                     TryOperation::new(
@@ -817,8 +816,8 @@ mod tests {
     fn validate_global_variable() {
         assert_eq!(
             validate(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::new("f", vec![], Expression::None, Type::None,),
-                FunctionDefinition::new(
+                FunctionDefinition::fake("f", vec![], Expression::None, Type::None,),
+                FunctionDefinition::fake(
                     "g",
                     vec![],
                     Call::new(
