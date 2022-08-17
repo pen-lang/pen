@@ -111,7 +111,7 @@ fn compile_hash_function_definition(
             position.clone(),
         ),
         None,
-        false,
+        true,
         position.clone(),
     ))
 }

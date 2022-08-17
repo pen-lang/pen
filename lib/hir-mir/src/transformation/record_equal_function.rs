@@ -90,7 +90,7 @@ fn compile_equal_function_definition(type_definition: &TypeDefinition) -> Functi
             position.clone(),
         ),
         None,
-        false,
+        true,
         position.clone(),
     )
 }
