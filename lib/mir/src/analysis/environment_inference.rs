@@ -11,12 +11,12 @@ pub fn transform(module: &Module) -> Module {
         module
             .function_definitions()
             .iter()
-            .map(transform_global_definition)
+            .map(transform_global_function_definition)
             .collect(),
     )
 }
 
-fn transform_global_definition(definition: &FunctionDefinition) -> FunctionDefinition {
+fn transform_global_function_definition(definition: &FunctionDefinition) -> FunctionDefinition {
     FunctionDefinition::with_options(
         definition.name(),
         vec![],
@@ -30,11 +30,12 @@ fn transform_global_definition(definition: &FunctionDefinition) -> FunctionDefin
                 .collect(),
         ),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     )
 }
 
-fn transform_local_definition(
+fn transform_local_function_definition(
     definition: &FunctionDefinition,
     variables: &FnvHashMap<String, Type>,
 ) -> FunctionDefinition {
@@ -69,6 +70,7 @@ fn transform_local_definition(
                 .collect(),
         ),
         definition.result_type().clone(),
+        definition.is_public(),
         definition.is_thunk(),
     )
 }
@@ -232,7 +234,7 @@ fn transform_let_recursive(
     variables: &FnvHashMap<String, Type>,
 ) -> LetRecursive {
     LetRecursive::new(
-        transform_local_definition(let_.definition(), variables),
+        transform_local_function_definition(let_.definition(), variables),
         transform_expression(
             let_.expression(),
             &variables
@@ -318,22 +320,22 @@ fn transform_variant(variant: &Variant, variables: &FnvHashMap<String, Type>) ->
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
+    use crate::{test::FunctionDefinitionFake, types};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn infer_empty_environment() {
         assert_eq!(
-            transform_local_definition(
-                &FunctionDefinition::new(
+            transform_local_function_definition(
+                &FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     42.0,
-                    Type::Number
+                    Type::Number,
                 ),
                 &Default::default()
             ),
-            FunctionDefinition::with_environment(
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
@@ -346,16 +348,16 @@ mod tests {
     #[test]
     fn infer_environment() {
         assert_eq!(
-            transform_local_definition(
-                &FunctionDefinition::new(
+            transform_local_function_definition(
+                &FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("y"),
-                    Type::Number
+                    Type::Number,
                 ),
                 &vec![("y".into(), Type::Number)].drain(..).collect()
             ),
-            FunctionDefinition::with_environment(
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![Argument::new("y", Type::Number)],
                 vec![Argument::new("x", Type::Number)],
@@ -370,19 +372,19 @@ mod tests {
         let variables = vec![("y".into(), Type::Number)].drain(..).collect();
 
         assert_eq!(
-            transform_local_definition(
-                &transform_local_definition(
-                    &FunctionDefinition::new(
+            transform_local_function_definition(
+                &transform_local_function_definition(
+                    &FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Variable::new("y"),
-                        Type::Number
+                        Type::Number,
                     ),
                     &variables
                 ),
                 &variables
             ),
-            FunctionDefinition::with_environment(
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![Argument::new("y", Type::Number)],
                 vec![Argument::new("x", Type::Number)],
@@ -397,7 +399,7 @@ mod tests {
         assert_eq!(
             transform_let_recursive(
                 &LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Call::new(
@@ -405,14 +407,14 @@ mod tests {
                             Variable::new("f"),
                             vec![Variable::new("x").into()]
                         ),
-                        Type::Number
+                        Type::Number,
                     ),
                     Expression::Number(42.0)
                 ),
                 &Default::default(),
             )
             .definition(),
-            &FunctionDefinition::with_environment(
+            &FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
@@ -431,13 +433,13 @@ mod tests {
         assert_eq!(
             transform_let_recursive(
                 &LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Call::new(
                             types::Function::new(vec![Type::Number], Type::Number),
                             LetRecursive::new(
-                                FunctionDefinition::new(
+                                FunctionDefinition::fake(
                                     "f",
                                     vec![Argument::new("x", Type::Number)],
                                     Call::new(
@@ -445,27 +447,27 @@ mod tests {
                                         Variable::new("f"),
                                         vec![Variable::new("x").into()]
                                     ),
-                                    Type::Number
+                                    Type::Number,
                                 ),
                                 Variable::new("f")
                             ),
                             vec![Variable::new("x").into()]
                         ),
-                        Type::Number
+                        Type::Number,
                     ),
                     Expression::Number(42.0)
                 ),
                 &Default::default(),
             )
             .definition(),
-            &FunctionDefinition::with_environment(
+            &FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],
                 Call::new(
                     types::Function::new(vec![Type::Number], Type::Number),
                     LetRecursive::new(
-                        FunctionDefinition::with_environment(
+                        FunctionDefinition::fake_with_environment(
                             "f",
                             vec![],
                             vec![Argument::new("x", Type::Number)],
@@ -490,14 +492,14 @@ mod tests {
         assert_eq!(
             transform_let_recursive(
                 &LetRecursive::new(
-                    FunctionDefinition::new(
+                    FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         42.0,
-                        Type::Number
+                        Type::Number,
                     ),
                     LetRecursive::new(
-                        FunctionDefinition::new(
+                        FunctionDefinition::fake(
                             "g",
                             vec![Argument::new("x", Type::Number)],
                             Call::new(
@@ -505,7 +507,7 @@ mod tests {
                                 Variable::new("f"),
                                 vec![Variable::new("x").into()]
                             ),
-                            Type::Number
+                            Type::Number,
                         ),
                         42.0,
                     )
@@ -514,7 +516,7 @@ mod tests {
             )
             .expression(),
             &LetRecursive::new(
-                FunctionDefinition::with_options(
+                FunctionDefinition::fake_with_environment(
                     "g",
                     vec![Argument::new(
                         "f",
@@ -527,7 +529,6 @@ mod tests {
                         vec![Variable::new("x").into()]
                     ),
                     Type::Number,
-                    false
                 ),
                 42.0,
             )
@@ -538,16 +539,16 @@ mod tests {
     #[test]
     fn infer_environment_with_shadowed_variable() {
         assert_eq!(
-            transform_local_definition(
-                &FunctionDefinition::new(
+            transform_local_function_definition(
+                &FunctionDefinition::fake(
                     "f",
                     vec![Argument::new("x", Type::Number)],
                     Variable::new("x"),
-                    Type::Number
+                    Type::Number,
                 ),
                 &vec![("x".into(), Type::Number)].drain(..).collect()
             ),
-            FunctionDefinition::with_environment(
+            FunctionDefinition::fake_with_environment(
                 "f",
                 vec![],
                 vec![Argument::new("x", Type::Number)],

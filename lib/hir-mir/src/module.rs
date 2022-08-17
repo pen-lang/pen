@@ -104,7 +104,12 @@ fn compile_function_definition(
     let result_type = type_::compile(context, definition.lambda().result_type())?;
 
     Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
+        mir::ir::FunctionDefinition::thunk(
+            definition.name(),
+            body,
+            result_type,
+            definition.is_public(),
+        )
     } else {
         mir::ir::FunctionDefinition::new(
             definition.name(),
@@ -121,6 +126,7 @@ fn compile_function_definition(
                 .collect::<Result<_, _>>()?,
             body,
             result_type,
+            definition.is_public(),
         )
     })
 }
@@ -169,6 +175,7 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
+                    false,
                 )],))
         );
     }
@@ -204,6 +211,7 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
+                    false,
                 )],))
         );
     }

@@ -1,6 +1,8 @@
 use super::{argument::Argument, expression::Expression};
 use crate::types::{self, Type};
 
+// TODO Consider splitting function and thunk definitions.
+// TODO Consider splitting global and local function definitions.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FunctionDefinition {
     name: String,
@@ -12,7 +14,8 @@ pub struct FunctionDefinition {
     body: Expression,
     result_type: Type,
     type_: types::Function,
-    is_thunk: bool,
+    public: bool,
+    thunk: bool,
 }
 
 impl FunctionDefinition {
@@ -21,27 +24,18 @@ impl FunctionDefinition {
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type, false)
+        Self::with_options(name, vec![], arguments, body, result_type, public, false)
     }
 
     pub fn thunk(
         name: impl Into<String>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
     ) -> Self {
-        Self::with_options(name, vec![], vec![], body, result_type, true)
-    }
-
-    #[cfg(test)]
-    pub(crate) fn with_environment(
-        name: impl Into<String>,
-        environment: Vec<Argument>,
-        arguments: Vec<Argument>,
-        body: impl Into<Expression>,
-        result_type: impl Into<Type>,
-    ) -> Self {
-        Self::with_options(name, environment, arguments, body, result_type, false)
+        Self::with_options(name, vec![], vec![], body, result_type, public, true)
     }
 
     pub(crate) fn with_options(
@@ -50,6 +44,7 @@ impl FunctionDefinition {
         arguments: Vec<Argument>,
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        public: bool,
         is_thunk: bool,
     ) -> Self {
         let result_type = result_type.into();
@@ -68,7 +63,8 @@ impl FunctionDefinition {
             arguments,
             body: body.into(),
             result_type,
-            is_thunk,
+            public,
+            thunk: is_thunk,
         }
     }
 
@@ -96,7 +92,11 @@ impl FunctionDefinition {
         &self.type_
     }
 
+    pub fn is_public(&self) -> bool {
+        self.public
+    }
+
     pub fn is_thunk(&self) -> bool {
-        self.is_thunk
+        self.thunk
     }
 }
