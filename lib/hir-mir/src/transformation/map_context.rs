@@ -168,6 +168,7 @@ fn compile_fake_hash_function(position: &Position) -> Lambda {
     )
 }
 
+// TODO Collect from equal operations and record fields.
 fn collect_map_types(
     context: &CompileContext,
     module: &Module,
