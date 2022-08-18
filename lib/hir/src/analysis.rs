@@ -28,6 +28,7 @@ pub mod type_qualifier;
 pub mod type_resolver;
 pub mod type_subsumption_checker;
 pub mod type_transformer;
+pub mod type_visitor;
 pub mod union_type_creator;
 pub mod union_type_member_calculator;
 pub mod unused_error_validator;

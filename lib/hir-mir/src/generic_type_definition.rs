@@ -56,6 +56,7 @@ fn compile_type_definition(
     })
 }
 
+// Collect generic types potentially up-casted to union types.
 fn collect_types(
     module: &Module,
     types: &FnvHashMap<String, Type>,
