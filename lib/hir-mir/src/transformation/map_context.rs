@@ -4,7 +4,7 @@ use fnv::{FnvHashMap, FnvHashSet};
 use hir::{
     analysis::{
         expression_visitor, type_canonicalizer, type_comparability_checker, type_id_calculator,
-        AnalysisError,
+        type_visitor, AnalysisError,
     },
     ir::*,
     types,
@@ -169,12 +169,18 @@ fn compile_fake_hash_function(position: &Position) -> Lambda {
     )
 }
 
-// TODO Collect from equal operations and record fields.
 fn collect_map_types(
     context: &CompileContext,
     module: &Module,
 ) -> Result<FnvHashSet<types::Map>, AnalysisError> {
     let mut map_types = FnvHashSet::default();
+
+    type_visitor::visit(module, |expression| match expression {
+        Type::Map(map_type) => {
+            map_types.insert(map_type.clone());
+        }
+        _ => {}
+    });
 
     expression_visitor::visit(module, |expression| match expression {
         Expression::IfMap(if_) => {
