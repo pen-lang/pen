@@ -60,11 +60,11 @@ pub fn transform_module(context: &CompileContext, module: &Module) -> Result<Mod
 
 fn transform_map_context_function_definition(
     context: &CompileContext,
-    type_: &types::Map,
+    map_type: &types::Map,
 ) -> Result<FunctionDefinition, CompileError> {
-    let position = type_.position();
+    let position = map_type.position();
     let context_type = collection_type::transform_map_context(context, position)?;
-    let name = context_function_name(type_, context.types())?;
+    let name = context_function_name(map_type, context.types())?;
 
     Ok(FunctionDefinition::new(
         &name,
@@ -79,27 +79,28 @@ fn transform_map_context_function_definition(
                     position.clone(),
                 ),
                 [
-                    equal_operation::transform_any_function(context, type_.key(), position)?.into(),
-                    hash_calculation::transform_any_function(context, type_.key(), position)?
+                    equal_operation::transform_any_function(context, map_type.key(), position)?
+                        .into(),
+                    hash_calculation::transform_any_function(context, map_type.key(), position)?
                         .into(),
                 ]
                 .into_iter()
                 .chain(
                     if type_comparability_checker::check(
-                        type_.value(),
+                        map_type.value(),
                         context.types(),
                         context.records(),
                     )? {
                         [
                             equal_operation::transform_any_function(
                                 context,
-                                type_.value(),
+                                map_type.value(),
                                 position,
                             )?
                             .into(),
                             hash_calculation::transform_any_function(
                                 context,
-                                type_.value(),
+                                map_type.value(),
                                 position,
                             )?
                             .into(),
