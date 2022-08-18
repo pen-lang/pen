@@ -1,4 +1,6 @@
-use super::{super::error::CompileError, expression, pointer};
+use super::{
+    super::error::CompileError, expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
+};
 use crate::{context::Context, type_, variant};
 
 const FUNCTION_PREFIX: &str = "mir:variant:";
@@ -14,6 +16,7 @@ pub fn compile_clone_function(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
         )],
+        type_::compile_variant_payload(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
                 &builder,
@@ -31,9 +34,7 @@ pub fn compile_clone_function(
                 },
             )?))
         },
-        type_::compile_variant_payload(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -47,6 +48,7 @@ pub fn compile_drop_function(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
         )],
+        fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
                 &builder,
@@ -70,9 +72,7 @@ pub fn compile_drop_function(
 
             Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -86,6 +86,7 @@ pub fn compile_synchronize_function(
             ARGUMENT_NAME,
             type_::compile_variant_payload(),
         )],
+        fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
                 &builder,
@@ -109,9 +110,7 @@ pub fn compile_synchronize_function(
 
             Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 

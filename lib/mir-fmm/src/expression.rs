@@ -192,8 +192,10 @@ pub fn compile(
                                 )
                                 .collect(),
                             ))?,
-                            false,
-                            None,
+                            fmm::ir::VariableDefinitionOptions::new()
+                                .set_address_named(false)
+                                .set_linkage(fmm::ir::Linkage::Internal)
+                                .set_mutable(false),
                         ),
                         1,
                     )?,
