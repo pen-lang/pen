@@ -17,9 +17,10 @@ pub fn compile(
             fmm::ir::Undefined::new(type_::compile_closure_metadata()),
             fmm::build::record(vec![]),
         ))?,
-        false,
-        fmm::ir::Linkage::Internal,
-        None,
+        fmm::ir::VariableDefinitionOptions::new()
+            .set_address_named(false)
+            .set_linkage(fmm::ir::Linkage::Internal)
+            .set_mutable(false),
     );
 
     Ok(())
@@ -51,6 +52,7 @@ fn compile_entry_function(
 
     context.module_builder().define_anonymous_function(
         arguments.clone(),
+        type_::compile(declaration.type_().result(), context.types()),
         |instruction_builder| {
             Ok(
                 instruction_builder.return_(foreign_value::convert_from_foreign(
@@ -82,7 +84,8 @@ fn compile_entry_function(
                 )?),
             )
         },
-        type_::compile(declaration.type_().result(), context.types()),
-        fmm::types::CallingConvention::Source,
+        fmm::ir::FunctionDefinitionOptions::new()
+            .set_address_named(false)
+            .set_calling_convention(fmm::types::CallingConvention::Source),
     )
 }

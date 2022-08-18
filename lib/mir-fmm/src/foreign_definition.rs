@@ -21,6 +21,7 @@ pub fn compile(
     context.module_builder().define_function(
         definition.foreign_name(),
         arguments.clone(),
+        foreign_function_type.result().clone(),
         |instruction_builder| -> Result<_, CompileError> {
             Ok(
                 instruction_builder.return_(foreign_value::convert_to_foreign(
@@ -46,9 +47,10 @@ pub fn compile(
                 )?),
             )
         },
-        foreign_function_type.result().clone(),
-        foreign_function_type.calling_convention(),
-        fmm::ir::Linkage::External,
+        fmm::ir::FunctionDefinitionOptions::new()
+            .set_address_named(false)
+            .set_calling_convention(foreign_function_type.calling_convention())
+            .set_linkage(fmm::ir::Linkage::External),
     )?;
 
     Ok(())
