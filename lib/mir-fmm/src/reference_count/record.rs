@@ -2,7 +2,7 @@ pub(super) mod utilities;
 
 use super::{
     super::{error::CompileError, type_},
-    expression, pointer,
+    expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
 };
 use crate::{context::Context, record};
 
@@ -21,6 +21,7 @@ pub fn compile_clone_function(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
         )],
+        fmm_record_type.clone(),
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
@@ -32,9 +33,7 @@ pub fn compile_clone_function(
                 }),
             )
         },
-        fmm_record_type.clone(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )?;
 
     Ok(())
@@ -84,6 +83,7 @@ pub fn compile_drop_function(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
         )],
+        fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
@@ -95,9 +95,7 @@ pub fn compile_drop_function(
 
             Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )?;
 
     Ok(())
@@ -154,6 +152,7 @@ pub fn compile_synchronize_function(
             ARGUMENT_NAME,
             fmm_record_type.clone(),
         )],
+        fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
@@ -165,9 +164,7 @@ pub fn compile_synchronize_function(
 
             Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Target,
-        fmm::ir::Linkage::Weak,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )?;
 
     Ok(())

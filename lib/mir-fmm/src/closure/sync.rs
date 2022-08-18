@@ -1,4 +1,8 @@
-use crate::{context::Context, reference_count, type_, CompileError};
+use crate::{
+    context::Context,
+    reference_count::{self, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS},
+    type_, CompileError,
+};
 use once_cell::sync::Lazy;
 
 static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
@@ -63,6 +67,7 @@ fn compile_with_builder(
 
     context.module_builder().define_anonymous_function(
         vec![argument.clone()],
+        fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             compile_body(
                 &builder,
@@ -77,7 +82,6 @@ fn compile_with_builder(
 
             Ok(builder.return_(fmm::ir::void_value()))
         },
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Target,
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }

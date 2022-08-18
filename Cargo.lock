@@ -278,7 +278,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
+source = "git+https://github.com/raviqqe/fmm?branch=main#a38ce96b2b4fbbeb50176bf49ee8f9c7abdd0851"
 dependencies = [
  "fnv",
  "hamt",
@@ -290,7 +290,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
+source = "git+https://github.com/raviqqe/fmm?branch=main#a38ce96b2b4fbbeb50176bf49ee8f9c7abdd0851"
 dependencies = [
  "fmm",
  "fnv",
@@ -300,7 +300,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0236885dbc6b03248f1d9aa42153cff9efea7a97"
+source = "git+https://github.com/raviqqe/fmm?branch=main#a38ce96b2b4fbbeb50176bf49ee8f9c7abdd0851"
 dependencies = [
  "fmm",
  "hamt",
@@ -444,7 +444,7 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 [[package]]
 name = "hamt"
 version = "0.3.1"
-source = "git+https://github.com/raviqqe/hamt-rs?branch=main#e700f4dfcbc84a7dc6bb57fc648b692bb264262d"
+source = "git+https://github.com/raviqqe/hamt-rs?branch=main#6579752d5da4b25c3fb39690de544097bb0f81f7"
 
 [[package]]
 name = "hashbrown"
@@ -641,9 +641,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.129"
+version = "0.2.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64de3cc433455c14174d42e554d4027ee631c4d046d43e3ecc6efc4636cdc7a7"
+checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
 
 [[package]]
 name = "linked-hash-map"
@@ -766,9 +766,9 @@ dependencies = [
 
 [[package]]
 name = "os_str_bytes"
-version = "6.2.0"
+version = "6.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "648001efe5d5c0102d8cea768e348da85d90af8ba91f0bea908f157951493cd4"
+checksum = "9ff7415e9ae3fff1225851df9e0d9e4e5479f947619774677a63572e55e80eff"
 
 [[package]]
 name = "output_vt100"
