@@ -175,11 +175,10 @@ fn collect_map_types(
 ) -> Result<FnvHashSet<types::Map>, AnalysisError> {
     let mut map_types = FnvHashSet::default();
 
-    type_visitor::visit(module, |expression| match expression {
-        Type::Map(map_type) => {
+    type_visitor::visit(module, |type_| {
+        if let Type::Map(map_type) = type_ {
             map_types.insert(map_type.clone());
         }
-        _ => {}
     });
 
     expression_visitor::visit(module, |expression| match expression {
