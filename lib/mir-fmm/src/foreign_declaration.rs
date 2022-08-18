@@ -86,6 +86,7 @@ fn compile_entry_function(
         },
         fmm::ir::FunctionDefinitionOptions::new()
             .set_address_named(false)
-            .set_calling_convention(fmm::types::CallingConvention::Source),
+            .set_calling_convention(fmm::types::CallingConvention::Source)
+            .set_linkage(fmm::ir::Linkage::Internal),
     )
 }

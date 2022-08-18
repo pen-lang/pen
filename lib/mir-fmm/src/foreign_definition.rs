@@ -22,30 +22,28 @@ pub fn compile(
         definition.foreign_name(),
         arguments.clone(),
         foreign_function_type.result().clone(),
-        |instruction_builder| -> Result<_, CompileError> {
-            Ok(
-                instruction_builder.return_(foreign_value::convert_to_foreign(
-                    &instruction_builder,
-                    call::compile(
-                        &instruction_builder,
-                        global_variable,
-                        &arguments
-                            .iter()
-                            .zip(function_type.arguments())
-                            .map(|(argument, type_)| {
-                                foreign_value::convert_from_foreign(
-                                    &instruction_builder,
-                                    fmm::build::variable(argument.name(), argument.type_().clone()),
-                                    type_,
-                                    context.types(),
-                                )
-                            })
-                            .collect::<Result<Vec<_>, _>>()?,
-                    )?,
-                    function_type.result(),
-                    context.types(),
-                )?),
-            )
+        |builder| -> Result<_, CompileError> {
+            Ok(builder.return_(foreign_value::convert_to_foreign(
+                &builder,
+                call::compile(
+                    &builder,
+                    global_variable,
+                    &arguments
+                        .iter()
+                        .zip(function_type.arguments())
+                        .map(|(argument, type_)| {
+                            foreign_value::convert_from_foreign(
+                                &builder,
+                                fmm::build::variable(argument.name(), argument.type_().clone()),
+                                type_,
+                                context.types(),
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()?,
+                )?,
+                function_type.result(),
+                context.types(),
+            )?))
         },
         fmm::ir::FunctionDefinitionOptions::new()
             .set_address_named(false)
