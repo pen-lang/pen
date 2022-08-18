@@ -39,28 +39,22 @@ pub fn compile_main(
     main_module_configuration: &MainModuleConfiguration,
 ) -> Result<mir::ir::Module, CompileError> {
     let module = main_function::compile(module, main_module_configuration)?;
-    let (module, _) = compile_module(
-        &CompileContext::new(&module, compile_configuration.clone().into()),
-        &module,
-    )?;
+    let (module, _) = compile_module(&module, Some(compile_configuration))?;
 
     Ok(module)
 }
 
 pub fn compile(
     module: &Module,
-    compile_configuration: &CompileConfiguration,
+    configuration: &CompileConfiguration,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    compile_module(
-        &CompileContext::new(module, compile_configuration.clone().into()),
-        module,
-    )
+    compile_module(module, Some(configuration))
 }
 
 pub fn compile_prelude(
     module: &Module,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    compile_module(&CompileContext::new(module, None), module)
+    compile_module(module, None)
 }
 
 pub fn compile_test(
@@ -68,26 +62,26 @@ pub fn compile_test(
     compile_configuration: &CompileConfiguration,
     test_module_configuration: &TestModuleConfiguration,
 ) -> Result<(mir::ir::Module, test_info::Module), CompileError> {
-    let context = CompileContext::new(module, compile_configuration.clone().into());
-
     let (module, test_information) = test_function::compile(module, test_module_configuration)?;
-    let (module, _) = compile_module(&context, &module)?;
+    let (module, _) = compile_module(&module, Some(compile_configuration))?;
 
     Ok((module, test_information))
 }
 
 fn compile_module(
-    context: &CompileContext,
     module: &Module,
+    configuration: Option<&CompileConfiguration>,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+    let context = CompileContext::new(module, configuration.cloned());
+
     let module = hir::analysis::analyze(context.analysis(), module)?;
-    let module = record_equal_function::transform(context, &module)?;
-    let module = record_hash_function::transform(context, &module)?;
-    let module = map_context::transform_module(context, &module)?;
+    let module = record_equal_function::transform(&context, &module)?;
+    let module = record_hash_function::transform(&context, &module)?;
+    let module = map_context::transform_module(&context, &module)?;
 
     Ok((
         {
-            let module = module::compile(context, &module)?;
+            let module = module::compile(&context, &module)?;
             mir::analysis::type_check::check(&module)?;
             module
         },
