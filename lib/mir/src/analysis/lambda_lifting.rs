@@ -212,15 +212,15 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:f:0:g"),
+                        Variable::new("mir:lift:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::fake(
-                    "mir:lift:f:0:g",
+                    "mir:lift:0:g",
                     vec![],
-                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
+                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
                     Type::Number,
                 )
             ])
@@ -255,15 +255,15 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:f:0:g"),
+                        Variable::new("mir:lift:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::fake(
-                    "mir:lift:f:0:g",
+                    "mir:lift:0:g",
                     vec![Argument::new("x", Type::None)],
-                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
+                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
                     Type::Number,
                 )
             ])
@@ -325,18 +325,18 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:f:0:g"),
+                        Variable::new("mir:lift:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::fake(
-                    "mir:lift:f:0:g",
+                    "mir:lift:0:g",
                     vec![Argument::new("x", Type::None)],
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:f:0:g"),
+                        Variable::new("mir:lift:0:g"),
                         Call::new(
                             function_type,
                             Variable::new("g"),
@@ -372,14 +372,14 @@ mod tests {
                     Let::new(
                         "g",
                         function_type.clone(),
-                        Variable::new("mir:lift:f:0:g"),
+                        Variable::new("mir:lift:0:g"),
                         42.0
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::fake_thunk(
-                    "mir:lift:f:0:g",
-                    Let::new("g", function_type, Variable::new("mir:lift:f:0:g"), 42.0),
+                    "mir:lift:0:g",
+                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
                     Type::Number
                 )
             ])

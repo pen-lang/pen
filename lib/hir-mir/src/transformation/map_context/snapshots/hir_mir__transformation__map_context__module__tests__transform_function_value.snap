@@ -1,6 +1,6 @@
 ---
-source: lib/hir-mir/src/transformation/map_context.rs
-expression: "transform_module(&context,\n    &Module::empty().set_function_definitions(vec![FunctionDefinition ::\n                fake(\"f\", Lambda ::\n                new(vec! [], collection_type ::\n                transform_map_context(& context, & Position ::\n                fake()).unwrap(), Map ::\n                new(types :: None :: new(Position :: fake()), types :: None ::\n                new(Position :: fake()), vec! [], Position :: fake()),\n                Position :: fake()), false)]))"
+source: lib/hir-mir/src/transformation/map_context/module.rs
+expression: "transform(&context,\n    &Module::empty().set_function_definitions(vec![FunctionDefinition ::\n                fake(\"f\", Lambda ::\n                new(vec! [], collection_type ::\n                transform_map_context(& context, & Position ::\n                fake()).unwrap(), Map ::\n                new(types :: None :: new(Position :: fake()), types ::\n                Function ::\n                new(vec! [], types :: None :: new(Position :: fake()),\n                Position :: fake()), vec! [], Position :: fake()), Position ::\n                fake()), false)]))"
 ---
 Ok(
     Module {
@@ -37,8 +37,19 @@ Ok(
                                     },
                                 },
                             ),
-                            value_type: None(
-                                None {
+                            value_type: Function(
+                                Function {
+                                    arguments: [],
+                                    result: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
                                     position: Position {
                                         path: "",
                                         line_number: 1,
@@ -73,8 +84,8 @@ Ok(
                 },
             },
             FunctionDefinition {
-                name: "hir:map:context:829f738c8f9ee2f4",
-                original_name: "hir:map:context:829f738c8f9ee2f4",
+                name: "hir:map:context:8bbb62926defb736",
+                original_name: "hir:map:context:8bbb62926defb736",
                 lambda: Lambda {
                     arguments: [],
                     result_type: Reference(
@@ -495,7 +506,7 @@ Ok(
                                     Lambda {
                                         arguments: [
                                             Argument {
-                                                name: "$lhs",
+                                                name: "",
                                                 type_: Any(
                                                     Any {
                                                         position: Position {
@@ -508,7 +519,7 @@ Ok(
                                                 ),
                                             },
                                             Argument {
-                                                name: "$rhs",
+                                                name: "",
                                                 type_: Any(
                                                     Any {
                                                         position: Position {
@@ -531,83 +542,9 @@ Ok(
                                                 },
                                             },
                                         ),
-                                        body: IfType(
-                                            IfType {
-                                                name: "$lhs",
-                                                argument: Variable(
-                                                    Variable {
-                                                        name: "$lhs",
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                                branches: [
-                                                    IfTypeBranch {
-                                                        type_: None(
-                                                            None {
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                        expression: IfType(
-                                                            IfType {
-                                                                name: "$rhs",
-                                                                argument: Variable(
-                                                                    Variable {
-                                                                        name: "$rhs",
-                                                                        position: Position {
-                                                                            path: "",
-                                                                            line_number: 1,
-                                                                            column_number: 1,
-                                                                            line: "",
-                                                                        },
-                                                                    },
-                                                                ),
-                                                                branches: [
-                                                                    IfTypeBranch {
-                                                                        type_: None(
-                                                                            None {
-                                                                                position: Position {
-                                                                                    path: "",
-                                                                                    line_number: 1,
-                                                                                    column_number: 1,
-                                                                                    line: "",
-                                                                                },
-                                                                            },
-                                                                        ),
-                                                                        expression: Boolean(
-                                                                            Boolean {
-                                                                                value: true,
-                                                                                position: Position {
-                                                                                    path: "",
-                                                                                    line_number: 1,
-                                                                                    column_number: 1,
-                                                                                    line: "",
-                                                                                },
-                                                                            },
-                                                                        ),
-                                                                    },
-                                                                ],
-                                                                else_: None,
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                    },
-                                                ],
-                                                else_: None,
+                                        body: Boolean(
+                                            Boolean {
+                                                value: false,
                                                 position: Position {
                                                     path: "",
                                                     line_number: 1,
@@ -628,7 +565,7 @@ Ok(
                                     Lambda {
                                         arguments: [
                                             Argument {
-                                                name: "$x",
+                                                name: "",
                                                 type_: Any(
                                                     Any {
                                                         position: Position {
@@ -651,46 +588,9 @@ Ok(
                                                 },
                                             },
                                         ),
-                                        body: IfType(
-                                            IfType {
-                                                name: "$x",
-                                                argument: Variable(
-                                                    Variable {
-                                                        name: "$x",
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                                branches: [
-                                                    IfTypeBranch {
-                                                        type_: None(
-                                                            None {
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                        expression: Number(
-                                                            Number {
-                                                                value: 0.0,
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                    },
-                                                ],
-                                                else_: None,
+                                        body: Number(
+                                            Number {
+                                                value: 0.0,
                                                 position: Position {
                                                     path: "",
                                                     line_number: 1,
