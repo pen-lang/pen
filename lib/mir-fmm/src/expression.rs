@@ -285,39 +285,34 @@ fn compile_alternatives(
                     .into())
                 },
             )?,
-            |instruction_builder| -> Result<_, CompileError> {
-                Ok(instruction_builder.branch(compile(
+            |builder| -> Result<_, CompileError> {
+                Ok(builder.branch(compile(
                     context,
-                    &instruction_builder,
+                    &builder,
                     alternative.expression(),
                     &variables
                         .clone()
                         .into_iter()
                         .chain([(
                             alternative.name().into(),
-                            variant::downcast(
-                                context,
-                                &instruction_builder,
-                                &argument,
-                                alternative.type_(),
-                            )?,
+                            variant::downcast(context, &builder, &argument, alternative.type_())?,
                         )])
                         .collect(),
                 )?))
             },
-            |instruction_builder| {
+            |builder| {
                 Ok(
                     if let Some(expression) = compile_alternatives(
                         context,
-                        &instruction_builder,
+                        &builder,
                         argument.clone(),
                         &alternatives[1..],
                         default_alternative,
                         variables,
                     )? {
-                        instruction_builder.branch(expression)
+                        builder.branch(expression)
                     } else {
-                        instruction_builder.unreachable()
+                        builder.unreachable()
                     },
                 )
             },
@@ -560,26 +555,21 @@ fn compile_try_operation(
 
     builder.if_(
         compile_tag_comparison(builder, &operand, operation.type_())?,
-        |instruction_builder| -> Result<_, CompileError> {
-            Ok(instruction_builder.return_(compile(
+        |builder| -> Result<_, CompileError> {
+            Ok(builder.return_(compile(
                 context,
-                &instruction_builder,
+                &builder,
                 operation.then(),
                 &variables
                     .clone()
                     .into_iter()
                     .chain([(
                         operation.name().into(),
-                        variant::downcast(
-                            context,
-                            &instruction_builder,
-                            &operand,
-                            operation.type_(),
-                        )?,
+                        variant::downcast(context, &builder, &operand, operation.type_())?,
                     )])
                     .collect(),
             )?))
         },
-        |instruction_builder| Ok(instruction_builder.branch(operand.clone())),
+        |builder| Ok(builder.branch(operand.clone())),
     )
 }
