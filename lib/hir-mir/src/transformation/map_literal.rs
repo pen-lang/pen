@@ -18,7 +18,10 @@ pub fn transform(context: &CompileContext, map: &Map) -> Result<Expression, Comp
     Ok(Let::new(
         Some(CONTEXT_VARIABLE_NAME.into()),
         Some(map_context_type.clone()),
-        map_context::transform(context, key_type, value_type, position)?,
+        map_context::transform_expression(
+            context,
+            &types::Map::new(key_type.clone(), value_type.clone(), position.clone()),
+        )?,
         transform_map(
             context,
             &Variable::new(CONTEXT_VARIABLE_NAME, position.clone()).into(),

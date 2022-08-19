@@ -1,19 +1,13 @@
-use crate::{context::CompileContext, CompileError, ListTypeConfiguration};
+use crate::{context::CompileContext, CompileError};
 use hir::types::{self, Type};
 use position::Position;
 
 pub fn transform_list(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {
-    Ok(transform_list_from_configuration(
-        &context.configuration()?.list_type,
-        position,
-    ))
-}
-
-pub fn transform_list_from_configuration(
-    configuration: &ListTypeConfiguration,
-    position: &Position,
-) -> Type {
-    types::Reference::new(&configuration.list_type_name, position.clone()).into()
+    Ok(types::Reference::new(
+        &context.configuration()?.list_type.list_type_name,
+        position.clone(),
+    )
+    .into())
 }
 
 pub fn transform_map(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {

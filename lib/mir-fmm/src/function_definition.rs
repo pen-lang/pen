@@ -15,9 +15,14 @@ pub fn compile(
             closure::metadata::compile(context, definition)?,
             fmm::ir::Undefined::new(type_::compile_closure_payload(definition, context.types())),
         ))?,
-        definition.is_thunk(),
-        fmm::ir::Linkage::External,
-        None,
+        fmm::ir::VariableDefinitionOptions::new()
+            .set_address_named(false)
+            .set_linkage(if definition.is_public() {
+                fmm::ir::Linkage::External
+            } else {
+                fmm::ir::Linkage::Internal
+            })
+            .set_mutable(definition.is_thunk()),
     );
 
     Ok(())

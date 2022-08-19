@@ -114,10 +114,7 @@ pub fn compile(
             compile(let_.expression())?,
         )
         .into(),
-        Expression::List(list) => compile(&list_literal::transform(
-            list,
-            &context.configuration()?.list_type,
-        ))?,
+        Expression::List(list) => compile(&list_literal::transform(context, list)?)?,
         Expression::ListComprehension(comprehension) => {
             compile_list_comprehension(context, comprehension)?
         }
@@ -200,6 +197,7 @@ pub fn compile(
                             AnalysisError::TypeNotInferred(thunk.position().clone())
                         })?,
                     )?,
+                    false,
                 ),
                 mir::ir::Variable::new(THUNK_NAME),
             )
@@ -285,6 +283,7 @@ fn compile_lambda(
                 .collect::<Result<_, _>>()?,
             compile(context, lambda.body())?,
             type_::compile(context, lambda.result_type())?,
+            false,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
     )
@@ -424,6 +423,7 @@ fn compile_list_comprehension(
                             .into(),
                         )?,
                         list_type.clone(),
+                        false,
                     ),
                     mir::ir::Call::new(
                         mir::types::Function::new(
@@ -435,6 +435,7 @@ fn compile_list_comprehension(
                     ),
                 ),
                 list_type,
+                false,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
         )
@@ -489,6 +490,7 @@ fn compile_map_iteration_comprehension(
                     ),
                 ),
                 list_type,
+                false,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
         )
@@ -630,6 +632,7 @@ fn compile_map_iteration_function_definition(
             .into(),
         )?,
         type_::compile_list(context)?,
+        false,
     ))
 }
 
