@@ -69,7 +69,7 @@ pub fn transform(
                 position.clone(),
             ),
             vec![
-                map_context::transform(context, map_type.key(), map_type.value(), position)?,
+                map_context::transform_expression(context, map_type)?,
                 value.clone(),
             ],
             position.clone(),

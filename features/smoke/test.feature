@@ -16,24 +16,6 @@ Feature: Testing
     }
     """
 
-  # TODO Move this to commands/test.feature when pen test is fixed on macOS.
-  Scenario: Run multiple tests
-    Given a file named "Foo.test.pen" with:
-    """pen
-    import Test'Assert
-    import 'Foo
-
-    Add = \() none | error {
-      Assert'True(Foo'Add(41, 1) == 42)
-    }
-
-    AddMore = \() none | error {
-      Assert'True(Foo'Add(40, 2) == 42)
-    }
-    """
-    When I successfully run `pen test`
-    Then the exit status should be 0
-
   Scenario: Run a test referencing an Os package
     Given a file named "pen.json" with:
     """json

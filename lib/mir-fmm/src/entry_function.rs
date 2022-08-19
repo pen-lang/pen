@@ -3,8 +3,17 @@ use crate::{
     closure, context::Context, expression, reference_count, type_, yield_::yield_function_type,
 };
 use fnv::FnvHashMap;
+use once_cell::sync::Lazy;
 
 const CLOSURE_NAME: &str = "_closure";
+
+static ENTRY_FUNCTION_DEFINITION_OPTIONS: Lazy<fmm::ir::FunctionDefinitionOptions> =
+    Lazy::new(|| {
+        fmm::ir::FunctionDefinitionOptions::new()
+            .set_address_named(false)
+            .set_calling_convention(fmm::types::CallingConvention::Source)
+            .set_linkage(fmm::ir::Linkage::Internal)
+    });
 
 pub fn compile(
     context: &Context,
@@ -27,13 +36,13 @@ fn compile_non_thunk(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
+        type_::compile(definition.result_type(), context.types()),
         |builder| {
             Ok(builder.return_(compile_body(
                 context, &builder, definition, global, variables,
             )?))
         },
-        type_::compile(definition.result_type(), context.types()),
-        fmm::types::CallingConvention::Source,
+        ENTRY_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -130,6 +139,7 @@ fn compile_initial_thunk_entry(
     context.module_builder().define_function(
         &entry_function_name,
         arguments.clone(),
+        type_::compile(definition.result_type(), context.types()),
         |builder| {
             let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
             let entry_function_pointer =
@@ -242,9 +252,7 @@ fn compile_initial_thunk_entry(
 
             Ok(builder.return_(value))
         },
-        type_::compile(definition.result_type(), context.types()),
-        fmm::types::CallingConvention::Source,
-        fmm::ir::Linkage::Internal,
+        ENTRY_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -254,6 +262,7 @@ fn compile_normal_thunk_entry(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
         compile_arguments(definition, context.types()),
+        type_::compile(definition.result_type(), context.types()),
         |builder| {
             let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
 
@@ -286,8 +295,7 @@ fn compile_normal_thunk_entry(
 
             Ok(builder.return_(value))
         },
-        type_::compile(definition.result_type(), context.types()),
-        fmm::types::CallingConvention::Source,
+        ENTRY_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -300,6 +308,7 @@ fn compile_locked_thunk_entry(
     context.module_builder().define_function(
         &context.module_builder().generate_name(),
         arguments.clone(),
+        type_::compile(definition.result_type(), context.types()),
         |builder| {
             builder.call(
                 fmm::build::variable(
@@ -320,9 +329,7 @@ fn compile_locked_thunk_entry(
                 compile_argument_variables(&arguments),
             )?))
         },
-        type_::compile(definition.result_type(), context.types()),
-        fmm::types::CallingConvention::Source,
-        fmm::ir::Linkage::Internal,
+        ENTRY_FUNCTION_DEFINITION_OPTIONS.clone(),
     )
 }
 
@@ -397,7 +404,7 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::ModuleFake;
+    use mir::test::{FunctionDefinitionFake, ModuleFake};
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {
@@ -406,11 +413,11 @@ mod tests {
 
         compile(
             &context,
-            &mir::ir::FunctionDefinition::new(
+            &mir::ir::FunctionDefinition::fake(
                 "f",
                 vec![],
                 mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::new(
+                    mir::ir::FunctionDefinition::fake(
                         "g",
                         vec![],
                         mir::ir::Call::new(

@@ -1,31 +1,26 @@
-use crate::ListTypeConfiguration;
+use super::collection_type;
+use crate::{context::CompileContext, CompileError};
 use hir::{
     ir::*,
     types::{self, Type},
 };
 use position::Position;
 
-use super::collection_type;
-
-pub fn transform(list: &List, configuration: &ListTypeConfiguration) -> Expression {
-    transform_list(
-        list.type_(),
-        list.elements(),
-        list.position(),
-        configuration,
-    )
+pub fn transform(context: &CompileContext, list: &List) -> Result<Expression, CompileError> {
+    transform_list(context, list.type_(), list.elements(), list.position())
 }
 
 fn transform_list(
+    context: &CompileContext,
     type_: &Type,
     elements: &[ListElement],
     position: &Position,
-    configuration: &ListTypeConfiguration,
-) -> Expression {
-    let rest_expression = || transform_list(type_, &elements[1..], position, configuration);
-    let any_list_type = collection_type::transform_list_from_configuration(configuration, position);
+) -> Result<Expression, CompileError> {
+    let rest_expression = || transform_list(context, type_, &elements[1..], position);
+    let configuration = &context.configuration()?.list_type;
+    let any_list_type = collection_type::transform_list(context, position)?;
 
-    match elements {
+    Ok(match elements {
         [] => Call::new(
             Some(types::Function::new(vec![], any_list_type, position.clone()).into()),
             Variable::new(&configuration.empty_list_function_name, position.clone()),
@@ -66,7 +61,7 @@ fn transform_list(
             Variable::new(&configuration.concatenate_function_name, position.clone()),
             vec![
                 Thunk::new(Some(any_list_type), expression.clone(), position.clone()).into(),
-                rest_expression(),
+                rest_expression()?,
             ],
             position.clone(),
         )
@@ -101,12 +96,12 @@ fn transform_list(
                     position.clone(),
                 )
                 .into(),
-                rest_expression(),
+                rest_expression()?,
             ],
             position.clone(),
         )
         .into(),
-    }
+    })
 }
 
 #[cfg(test)]
@@ -166,10 +161,10 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &List::new(types::None::new(Position::fake()), vec![], Position::fake()),
-                &LIST_TYPE_CONFIGURATION,
             ),
-            Call::new(
+            Ok(Call::new(
                 Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.empty_list_function_name,
@@ -178,7 +173,7 @@ mod tests {
                 vec![],
                 Position::fake()
             )
-            .into()
+            .into())
         );
     }
 
@@ -188,14 +183,14 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![ListElement::Single(None::new(Position::fake()).into())],
                     Position::fake()
                 ),
-                &LIST_TYPE_CONFIGURATION,
             ),
-            Call::new(
+            Ok(Call::new(
                 Some(get_prepend_function_type().into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.prepend_function_name,
@@ -226,7 +221,7 @@ mod tests {
                 ],
                 Position::fake(),
             )
-            .into(),
+            .into()),
         );
     }
 
@@ -237,6 +232,7 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![
@@ -245,9 +241,8 @@ mod tests {
                     ],
                     Position::fake()
                 ),
-                &LIST_TYPE_CONFIGURATION,
             ),
-            Call::new(
+            Ok(Call::new(
                 Some(prepend_function_type.clone().into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.prepend_function_name,
@@ -303,7 +298,7 @@ mod tests {
                 ],
                 Position::fake(),
             )
-            .into(),
+            .into()),
         );
     }
 
@@ -313,6 +308,7 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![ListElement::Multiple(
@@ -320,9 +316,8 @@ mod tests {
                     )],
                     Position::fake()
                 ),
-                &LIST_TYPE_CONFIGURATION,
             ),
-            Call::new(
+            Ok(Call::new(
                 Some(get_lazy_function_type().into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.lazy_function_name,
@@ -336,7 +331,7 @@ mod tests {
                 .into()],
                 Position::fake(),
             )
-            .into(),
+            .into()),
         );
     }
 
@@ -346,6 +341,7 @@ mod tests {
 
         assert_eq!(
             transform(
+                &CompileContext::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![
@@ -354,9 +350,8 @@ mod tests {
                     ],
                     Position::fake()
                 ),
-                &LIST_TYPE_CONFIGURATION,
             ),
-            Call::new(
+            Ok(Call::new(
                 Some(get_concatenate_function_type().into()),
                 Variable::new(
                     &LIST_TYPE_CONFIGURATION.concatenate_function_name,
@@ -387,7 +382,7 @@ mod tests {
                 ],
                 Position::fake(),
             )
-            .into(),
+            .into()),
         );
     }
 }

@@ -4,12 +4,16 @@ set -e
 
 . $(dirname $0)/utilities.sh
 
-run_packages() {
+print_directory() {
+  echo '>>>' "$@"
+}
+
+pen_packages() {
   for package_file in $(git ls-files | grep pen.json); do
     (
       directory=$(dirname $package_file)
 
-      echo package: $directory
+      print_directory $directory
       cd $directory
 
       "$@"
@@ -17,21 +21,41 @@ run_packages() {
   done
 }
 
-run_rust() {
+rust_crates() {
+  for cargo_file in $(git ls-files | grep Cargo.toml); do
+    (
+      directory=$(dirname $cargo_file)
+
+      print_directory $directory
+      cd $directory
+
+      "$@"
+    )
+  done
+}
+
+benchmark() {
+  hyperfine -w 3 "$@"
+}
+
+benchmark_rust() {
+  command=$(basename $(pwd) | tr _ -)
+
   (
-    cd rust
-    "$@"
+    cd $(cargo metadata --format-version 1 | jq -r .target_directory)/release
+
+    benchmark ./$command
   )
 }
 
 build() {
-  run_packages pen build
-  run_rust cargo bench --no-run
+  pen_packages pen build
+  rust_crates cargo build --release
 }
 
 run() {
-  run_packages hyperfine -w 3 ./app
-  run_rust cargo bench -q
+  pen_packages benchmark ./app
+  rust_crates benchmark_rust
 }
 
 while getopts b option; do
