@@ -11,15 +11,7 @@ pub fn transform(module: &Module) -> Module {
     let function_definitions = module
         .function_definitions()
         .iter()
-        .map(|definition| {
-            context.set_scope(Some(definition.name().into()));
-
-            let definition = transform_function_definition(&mut context, definition);
-
-            context.set_scope(None);
-
-            definition
-        })
+        .map(|definition| transform_function_definition(&mut context, definition))
         .collect::<Vec<_>>();
 
     Module::new(
