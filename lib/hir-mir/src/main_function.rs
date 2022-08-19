@@ -17,7 +17,6 @@ pub fn compile(
         .ok_or_else(|| CompileError::MainFunctionNotFound(module.position().clone()))?;
     let position = main_function_definition.position();
 
-    // TODO Mangle a context type name.
     let context_type_definition = TypeDefinition::new(
         &main_module_configuration.context_type_name,
         &main_module_configuration.context_type_name,
