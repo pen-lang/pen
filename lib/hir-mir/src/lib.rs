@@ -77,7 +77,7 @@ fn compile_module(
     let module = hir::analysis::analyze(context.analysis(), module)?;
     let module = record_equal_function::transform(&context, &module)?;
     let module = record_hash_function::transform(&context, &module)?;
-    let module = map_context::transform_module(&context, &module)?;
+    let module = map_context::module::transform(&context, &module)?;
 
     Ok((
         {

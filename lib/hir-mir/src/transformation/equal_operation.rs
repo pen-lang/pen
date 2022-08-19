@@ -110,7 +110,7 @@ fn transform_equal_operation(
                     position.clone(),
                 ),
                 vec![
-                    map_context::transform_expression(context, map_type)?,
+                    map_context::expression::transform(context, map_type)?,
                     lhs.clone(),
                     rhs.clone(),
                 ],
