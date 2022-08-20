@@ -259,15 +259,9 @@ objectEntries = \(v View) objectResult | error {
     v = blank(r.input)
 
     if View'HasPrefix(v, ",") {
-      v = blank(View'Seek(v, 1))
+      r = objectEntries(blank(View'Seek(v, 1)))?
 
-      if View'HasPrefix(v, "}") {
-        error("unexpected }")
-      } else {
-        r = objectEntries(v)?
-
-        objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
-      }
+      objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
     } else {
       objectResult{entries: [objectEntry e], input: r.input}
     }
