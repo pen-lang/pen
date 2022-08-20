@@ -233,7 +233,7 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
 
 object = \(v View) valueResult | error {
   if View'HasPrefix(v, "{") {
-    r = objectEntries(View'Seek(v, 1), [objectEntry])?
+    r = objectEntries(View'Seek(v, 1))?
     v = blank(r.input)
 
     if View'HasPrefix(v, "}") {
@@ -246,7 +246,7 @@ object = \(v View) valueResult | error {
   }
 }
 
-objectEntries = \(v View, es [objectEntry]) objectResult | error {
+objectEntries = \(v View) objectResult | error {
   v = blank(v)
 
   if r = string(v) as valueResult {
@@ -255,23 +255,24 @@ objectEntries = \(v View, es [objectEntry]) objectResult | error {
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
     r = value(v)?
 
-    # TODO Optimize appending list elements. This is O(n^2).
-    es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
+    e = objectEntry{key: k, value: r.value}
     v = blank(r.input)
 
     if View'HasPrefix(v, ",") {
       v = blank(View'Seek(v, 1))
 
-      if View'HasPrefix(v, "]") {
-        error("unexpected ]")
+      if View'HasPrefix(v, "}") {
+        error("unexpected }")
       } else {
-        objectEntries(v, es)
+        r = objectEntries(v)?
+
+        objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
       }
     } else {
-      objectResult{entries: es, input: r.input}
+      objectResult{entries: [objectEntry e], input: r.input}
     }
   } else {
-    objectResult{entries: es, input: v}
+    objectResult{entries: [objectEntry], input: v}
   }
 }
 
