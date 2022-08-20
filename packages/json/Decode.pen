@@ -144,7 +144,7 @@ number = \(v View) valueResult | error {
 
   v = if w = sign(v, "-") as View { w } else { v }
   v = integer(v)?
-  v = if w = sign(v, ".") as View { digits(w) } else { v }
+  v = if w = raw(v, ".") as View { digits(w) } else { v }
 
   valueResult{
     value: Value'New(
@@ -195,31 +195,30 @@ nonZeroDigit = \(v View) View | none {
 }
 
 array = \(v View) valueResult | error {
-  r = arrayElements(sign(v, "[")?, [Value])?
+  r = arrayElements(sign(v, "[")?)?
   v = blank(r.input)
 
   valueResult{value: Value'New(r.array), input: sign(v, "]")?}
 }
 
-arrayElements = \(v View, vs [Value]) arrayResult | error {
+arrayElements = \(v View) arrayResult | error {
   if r = value(v) as valueResult {
-    # TODO Optimize appending list elements. This is O(n^2).
-    vs = [Value ...vs, r.value]
+    x = r.value
     v = blank(r.input)
 
-    if View'HasPrefix(v, ",") {
-      v = blank(View'Seek(v, 1))
+    if w = sign(v, ",") as View {
+      r = arrayElements(blank(w))?
 
-      if View'HasPrefix(v, "]") {
-        error("unexpected ]")
+      if r.array == [Value] {
+        error("unexpected trailing , in array")
       } else {
-        arrayElements(v, vs)
+        arrayResult{array: [Value x, ...r.array], input: r.input}
       }
     } else {
-      arrayResult{array: vs, input: v}
+      arrayResult{array: [Value x], input: v}
     }
   } else {
-    arrayResult{array: vs, input: v}
+    arrayResult{array: [Value], input: v}
   }
 }
 
@@ -242,12 +241,16 @@ objectEntries = \(v View) objectResult | error {
     e = objectEntry{key: k, value: r.value}
     v = blank(r.input)
 
-    if v = sign(v, ",") as View {
-      r = objectEntries(v)?
+    if w = sign(v, ",") as View {
+      r = objectEntries(w)?
 
-      objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
+      if r.entries == [objectEntry] {
+        error("unexpected trailing , in object")
+      } else {
+        objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
+      }
     } else {
-      objectResult{entries: [objectEntry e], input: r.input}
+      objectResult{entries: [objectEntry e], input: v}
     }
   } else {
     objectResult{entries: [objectEntry], input: v}
