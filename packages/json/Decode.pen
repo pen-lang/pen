@@ -103,12 +103,14 @@ stringCharacters = \(v View) stringsResult | error {
 }
 
 stringCharacter = \(v View) stringResult | error {
-  if View'HasPrefix(v, "\\\"") {
-    stringResult{string: "\"", input: View'Seek(v, 2)}
-  } else if View'Length(v) == 0 {
-    error("unexpected end of string")
+  if w = raw(v, "\\\"") as View {
+    stringResult{string: "\"", input: w}
   } else {
-    stringResult{string: Byte'Slice(View'ToString(v), 1, 1), input: View'Seek(v, 1)}
+    if View'Length(v) == 0 {
+      error("unexpected end of string")
+    } else {
+      stringResult{string: View'ToString(View'Slice(v, 1, 1)), input: View'Seek(v, 1)}
+    }
   }
 }
 
