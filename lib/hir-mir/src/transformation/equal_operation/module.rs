@@ -1,5 +1,4 @@
-use super::expression::transform_equal_operation;
-use super::function;
+use super::{function, operation};
 use crate::context::CompileContext;
 use crate::error::CompileError;
 use fnv::FnvHashSet;
@@ -59,7 +58,7 @@ fn compile_function_definition(
                         Variable::new(RHS_NAME, position.clone()),
                         vec![IfTypeBranch::new(
                             type_.clone(),
-                            transform_equal_operation(
+                            operation::transform(
                                 context,
                                 type_,
                                 &Variable::new(LHS_NAME, position.clone()).into(),
