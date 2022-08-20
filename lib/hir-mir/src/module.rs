@@ -105,7 +105,7 @@ fn compile_function_definition(
 
     Ok(mir::ir::GlobalFunctionDefinition::new(
         if definition.lambda().arguments().is_empty() {
-            mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
+            mir::ir::FunctionDefinition::thunk(definition.name(), result_type, body)
         } else {
             mir::ir::FunctionDefinition::new(
                 definition.name(),
@@ -120,8 +120,8 @@ fn compile_function_definition(
                         ))
                     })
                     .collect::<Result<_, _>>()?,
-                body,
                 result_type,
+                body,
             )
         },
         definition.is_public(),
@@ -170,8 +170,8 @@ mod tests {
                 .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::ir::Expression::None,
                     mir::types::Type::None,
+                    mir::ir::Expression::None,
                 )]))
         );
     }
@@ -205,8 +205,8 @@ mod tests {
                 .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                     "foo",
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::ir::Expression::None,
                     mir::types::Type::None,
+                    mir::ir::Expression::None,
                 )]))
         );
     }

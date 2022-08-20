@@ -39,8 +39,8 @@ fn transform_function_definition(
         definition.name(),
         definition.environment().to_vec(),
         definition.arguments().to_vec(),
-        transform_expression(context, definition.body()),
         definition.result_type().clone(),
+        transform_expression(context, definition.body()),
         definition.is_thunk(),
     )
 }
@@ -284,8 +284,8 @@ mod tests {
                     "g",
                     vec![Argument::new("x", Type::None)],
                     vec![],
-                    42.0,
                     Type::Number,
+                    42.0,
                     false,
                 ),
                 42.0,

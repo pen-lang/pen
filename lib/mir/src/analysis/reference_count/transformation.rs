@@ -50,6 +50,7 @@ fn transform_function_definition(
         definition.name(),
         definition.environment().to_vec(),
         definition.arguments().to_vec(),
+        definition.result_type().clone(),
         drop_variables(
             expression,
             owned_variables
@@ -59,7 +60,6 @@ fn transform_function_definition(
                 .collect(),
             &owned_variables,
         ),
-        definition.result_type().clone(),
         definition.is_thunk(),
     ))
 }

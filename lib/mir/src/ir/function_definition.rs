@@ -10,8 +10,8 @@ pub struct FunctionDefinition {
     // module and use it on creation of another module.
     environment: Vec<Argument>,
     arguments: Vec<Argument>,
-    body: Expression,
     result_type: Type,
+    body: Expression,
     type_: types::Function,
     thunk: bool,
 }
@@ -20,26 +20,26 @@ impl FunctionDefinition {
     pub fn new(
         name: impl Into<String>,
         arguments: Vec<Argument>,
-        body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        body: impl Into<Expression>,
     ) -> Self {
-        Self::with_options(name, vec![], arguments, body, result_type, false)
+        Self::with_options(name, vec![], arguments, result_type, body, false)
     }
 
     pub fn thunk(
         name: impl Into<String>,
-        body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        body: impl Into<Expression>,
     ) -> Self {
-        Self::with_options(name, vec![], vec![], body, result_type, true)
+        Self::with_options(name, vec![], vec![], result_type, body, true)
     }
 
     pub(crate) fn with_options(
         name: impl Into<String>,
         environment: Vec<Argument>,
         arguments: Vec<Argument>,
-        body: impl Into<Expression>,
         result_type: impl Into<Type>,
+        body: impl Into<Expression>,
         is_thunk: bool,
     ) -> Self {
         let result_type = result_type.into();
@@ -56,8 +56,8 @@ impl FunctionDefinition {
             name: name.into(),
             environment,
             arguments,
-            body: body.into(),
             result_type,
+            body: body.into(),
             thunk: is_thunk,
         }
     }

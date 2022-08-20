@@ -27,6 +27,7 @@ fn transform_global_function_definition(
             definition.name(),
             vec![],
             definition.arguments().to_vec(),
+            definition.result_type().clone(),
             transform_expression(
                 definition.body(),
                 &definition
@@ -35,7 +36,6 @@ fn transform_global_function_definition(
                     .map(|argument| (argument.name().into(), argument.type_().clone()))
                     .collect(),
             ),
-            definition.result_type().clone(),
             definition.is_thunk(),
         ),
         public,
@@ -68,6 +68,7 @@ fn transform_local_function_definition(
             })
             .collect(),
         definition.arguments().to_vec(),
+        definition.result_type().clone(),
         transform_expression(
             definition.body(),
             &variables
@@ -76,7 +77,6 @@ fn transform_local_function_definition(
                 .chain(local_variables)
                 .collect(),
         ),
-        definition.result_type().clone(),
         definition.is_thunk(),
     )
 }

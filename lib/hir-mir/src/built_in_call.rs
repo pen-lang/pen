@@ -119,6 +119,7 @@ pub fn compile(
                     vec![mir::ir::LetRecursive::new(
                         mir::ir::FunctionDefinition::thunk(
                             ANY_THUNK_NAME,
+                            type_::compile(context, &any_type)?,
                             expression::compile(
                                 context,
                                 &TypeCoercion::new(
@@ -134,7 +135,6 @@ pub fn compile(
                                 )
                                 .into(),
                             )?,
-                            type_::compile(context, &any_type)?,
                         ),
                         mir::ir::Synchronize::new(
                             mir_thunk_type,
@@ -147,6 +147,7 @@ pub fn compile(
                     mir::ir::FunctionDefinition::new(
                         THUNK_NAME,
                         vec![],
+                        type_::compile(context, result_type)?,
                         expression::compile(
                             context,
                             &downcast::compile(
@@ -162,7 +163,6 @@ pub fn compile(
                                 .into(),
                             )?,
                         )?,
-                        type_::compile(context, result_type)?,
                     ),
                     mir::ir::Variable::new(THUNK_NAME),
                 ),
@@ -259,6 +259,7 @@ mod tests {
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
+                                mir::types::Type::Variant,
                                 mir::ir::Variant::new(
                                     mir::types::Type::Number,
                                     mir::ir::Call::new(
@@ -267,15 +268,14 @@ mod tests {
                                             mir::ir::FunctionDefinition::new(
                                                 "$closure",
                                                 vec![],
-                                                mir::ir::Expression::Number(42.0),
                                                 mir::types::Type::Number,
+                                                mir::ir::Expression::Number(42.0),
                                             ),
                                             mir::ir::Variable::new("$closure")
                                         ),
                                         vec![]
                                     ),
                                 ),
-                                mir::types::Type::Variant,
                             ),
                             mir::ir::Synchronize::new(
                                 thunk_type.clone(),
@@ -288,6 +288,7 @@ mod tests {
                         mir::ir::FunctionDefinition::new(
                             "$thunk",
                             vec![],
+                            mir::types::Type::Number,
                             mir::ir::Case::new(
                                 mir::ir::Call::new(
                                     thunk_type,
@@ -301,7 +302,6 @@ mod tests {
                                 )],
                                 None,
                             ),
-                            mir::types::Type::Number,
                         ),
                         mir::ir::Variable::new("$thunk"),
                     ),
@@ -345,20 +345,20 @@ mod tests {
                         vec![mir::ir::LetRecursive::new(
                             mir::ir::FunctionDefinition::thunk(
                                 "$any_thunk",
+                                mir::types::Type::Variant,
                                 mir::ir::Call::new(
                                     thunk_type.clone(),
                                     mir::ir::LetRecursive::new(
                                         mir::ir::FunctionDefinition::new(
                                             "$closure",
                                             vec![],
-                                            mir::ir::Variable::new("x"),
                                             mir::types::Type::Variant,
+                                            mir::ir::Variable::new("x"),
                                         ),
                                         mir::ir::Variable::new("$closure")
                                     ),
                                     vec![]
                                 ),
-                                mir::types::Type::Variant,
                             ),
                             mir::ir::Synchronize::new(
                                 thunk_type.clone(),
@@ -371,12 +371,12 @@ mod tests {
                         mir::ir::FunctionDefinition::new(
                             "$thunk",
                             vec![],
+                            mir::types::Type::Variant,
                             mir::ir::Call::new(
                                 thunk_type,
                                 mir::ir::Variable::new("$any_thunk"),
                                 vec![]
                             ),
-                            mir::types::Type::Variant,
                         ),
                         mir::ir::Variable::new("$thunk"),
                     ),
