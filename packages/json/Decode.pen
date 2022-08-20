@@ -8,13 +8,18 @@ import 'Value { Value }
 
 import foreign "c" _pen_json_decode_number \(string) number
 
-type result {
+type valueResult {
   value Value
   input View
 }
 
 type stringResult {
   string string
+  input View
+}
+
+type stringsResult {
+  strings [string]
   input View
 }
 
@@ -33,12 +38,16 @@ type objectEntry {
   value Value
 }
 
-result = \(v Value, i View) result {
-  result{value: v, input: i}
+valueResult = \(v Value, i View) valueResult {
+  valueResult{value: v, input: i}
 }
 
 stringResult = \(s string, i View) stringResult {
   stringResult{string: s, input: i}
+}
+
+stringsResult = \(ss [string], i View) stringsResult {
+  stringsResult{strings: ss, input: i}
 }
 
 arrayResult = \(vs [Value], i View) arrayResult {
@@ -60,7 +69,7 @@ Decode = \(s string) Value | error {
   }
 }
 
-value = \(v View) result | error {
+value = \(v View) valueResult | error {
   v = blank(v)
 
   if View'HasPrefix(v, "n") {
@@ -80,50 +89,51 @@ value = \(v View) result | error {
   }
 }
 
-null = \(v View) result | error {
+null = \(v View) valueResult | error {
   s = "null"
 
   if View'HasPrefix(v, s) {
-    result(Value'New(none), View'Seek(v, Byte'Length(s)))
+    valueResult(Value'New(none), View'Seek(v, Byte'Length(s)))
   } else {
     error("null expected")
   }
 }
 
-booleanTrue = \(v View) result | error {
+booleanTrue = \(v View) valueResult | error {
   s = "true"
 
   if View'HasPrefix(v, s) {
-    result(Value'New(true), View'Seek(v, Byte'Length(s)))
+    valueResult(Value'New(true), View'Seek(v, Byte'Length(s)))
   } else {
     error("true expected")
   }
 }
 
-booleanFalse = \(v View) result | error {
+booleanFalse = \(v View) valueResult | error {
   s = "false"
 
   if View'HasPrefix(v, s) {
-    result(Value'New(false), View'Seek(v, Byte'Length(s)))
+    valueResult(Value'New(false), View'Seek(v, Byte'Length(s)))
   } else {
     error("false expected")
   }
 }
 
-string = \(v View) result | error {
-  r = stringCharacters(View'Seek(v, 1), [string])?
+string = \(v View) valueResult | error {
+  r = stringCharacters(View'Seek(v, 1))?
 
-  result(Value'New(r.string), View'Seek(r.input, 1))
+  valueResult(Value'New(String'Concatenate(r.strings)), View'Seek(r.input, 1))
 }
 
-stringCharacters = \(v View, ss [string]) stringResult | error {
+stringCharacters = \(v View) stringsResult | error {
   if View'HasPrefix(v, "\"") {
-    stringResult(String'Concatenate(ss), v)
+    stringsResult([string], v)
   } else {
     r = stringCharacter(v)?
+    s = r.string
+    r = stringCharacters(r.input)?
 
-    # TODO Optimize appending string elements.
-    stringCharacters(r.input, [string ...ss, r.string])
+    stringsResult([string s, ...r.strings], r.input)
   }
 }
 
@@ -137,14 +147,14 @@ stringCharacter = \(v View) stringResult | error {
   }
 }
 
-number = \(v View) result | error {
+number = \(v View) valueResult | error {
   i = View'Start(v)
 
   v = if View'HasPrefix(v, "-") { View'Seek(v, 1) } else { v }
   v = integer(v)?
   v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
 
-  result(
+  valueResult(
     Value'New(_pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
     v,
   )
@@ -190,13 +200,13 @@ nonZeroDigit = \(v View) View | none {
   }
 }
 
-array = \(v View) result | error {
+array = \(v View) valueResult | error {
   if View'HasPrefix(v, "[") {
     r = arrayElements(View'Seek(v, 1), [Value])?
     v = blank(r.input)
 
     if View'HasPrefix(v, "]") {
-      result(Value'New(r.array), View'Seek(v, 1))
+      valueResult(Value'New(r.array), View'Seek(v, 1))
     } else {
       error("] expected")
     }
@@ -206,7 +216,7 @@ array = \(v View) result | error {
 }
 
 arrayElements = \(v View, vs [Value]) arrayResult | error {
-  if r = value(v) as result {
+  if r = value(v) as valueResult {
     # TODO Optimize appending list elements. This is O(n^2).
     vs = [Value ...vs, r.value]
     v = blank(r.input)
@@ -227,13 +237,13 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
   }
 }
 
-object = \(v View) result | error {
+object = \(v View) valueResult | error {
   if View'HasPrefix(v, "{") {
     r = objectEntries(View'Seek(v, 1), [objectEntry])?
     v = blank(r.input)
 
     if View'HasPrefix(v, "}") {
-      result(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
+      valueResult(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
     } else {
       error("} expected")
     }
@@ -245,7 +255,7 @@ object = \(v View) result | error {
 objectEntries = \(v View, es [objectEntry]) objectResult | error {
   v = blank(v)
 
-  if r = string(v) as result {
+  if r = string(v) as valueResult {
     k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
     v = blank(r.input)
     v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
