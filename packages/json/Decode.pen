@@ -70,42 +70,15 @@ value = \(v View) valueResult | error {
 }
 
 null = \(v View) valueResult | error {
-  s = "null"
-
-  if View'HasPrefix(v, s) {
-    valueResult{
-      value: Value'New(none),
-      input: View'Seek(v, Byte'Length(s)),
-    }
-  } else {
-    error("null expected")
-  }
+  valueResult{value: Value'New(none), input: token(v, "null")?}
 }
 
 booleanTrue = \(v View) valueResult | error {
-  s = "true"
-
-  if View'HasPrefix(v, s) {
-    valueResult{
-      value: Value'New(true),
-      input: View'Seek(v, Byte'Length(s)),
-    }
-  } else {
-    error("true expected")
-  }
+  valueResult{value: Value'New(true), input: token(v, "true")?}
 }
 
 booleanFalse = \(v View) valueResult | error {
-  s = "false"
-
-  if View'HasPrefix(v, s) {
-    valueResult{
-      value: Value'New(false),
-      input: View'Seek(v, Byte'Length(s)),
-    }
-  } else {
-    error("false expected")
-  }
+  valueResult{value: Value'New(false), input: token(v, "false")?}
 }
 
 string = \(v View) valueResult | error {
@@ -158,8 +131,8 @@ integer = \(v View) View | error {
   if w = nonZeroDigit(v) as View {
     digits(w)
   } else {
-    if View'HasPrefix(v, "0") {
-      View'Seek(v, 1)
+    if v = raw(v, "0") as View {
+      v
     } else {
       error("number expected")
     }
@@ -237,8 +210,8 @@ objectEntries = \(v View) objectResult | error {
 
     e = objectEntry{key: k, value: r.value}
 
-    if w = token(r.input, ",") as View {
-      r = objectEntries(w)?
+    if v = token(r.input, ",") as View {
+      r = objectEntries(v)?
 
       if r.entries == [objectEntry] {
         error("unexpected trailing , in object")
