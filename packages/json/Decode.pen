@@ -119,23 +119,23 @@ string = \(v View) valueResult | error {
 
 stringCharacters = \(v View) stringsResult | error {
   if View'HasPrefix(v, "\"") {
-    stringsResult([string], v)
+    stringsResult{strings: [string], input: v}
   } else {
     r = stringCharacter(v)?
     s = r.string
     r = stringCharacters(r.input)?
 
-    stringsResult([string s, ...r.strings], r.input)
+    stringsResult{strings: [string s, ...r.strings], input: r.input}
   }
 }
 
 stringCharacter = \(v View) stringResult | error {
   if View'HasPrefix(v, "\\\"") {
-    stringResult("\"", View'Seek(v, 2))
+    stringResult{string: "\"", input: View'Seek(v, 2)}
   } else if View'Length(v) == 0 {
     error("unexpected end of string")
   } else {
-    stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
+    stringResult{string: Byte'Slice(View'ToString(v), 1, 1), input: View'Seek(v, 1)}
   }
 }
 
@@ -200,7 +200,7 @@ array = \(v View) valueResult | error {
     v = blank(r.input)
 
     if View'HasPrefix(v, "]") {
-      valueResult(Value'New(r.array), View'Seek(v, 1))
+      valueResult{value: Value'New(r.array), input: View'Seek(v, 1)}
     } else {
       error("] expected")
     }
@@ -237,7 +237,7 @@ object = \(v View) valueResult | error {
     v = blank(r.input)
 
     if View'HasPrefix(v, "}") {
-      valueResult(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
+      valueResult{value: Value'New(entriesToMap(r.entries)), input: View'Seek(v, 1)}
     } else {
       error("} expected")
     }
