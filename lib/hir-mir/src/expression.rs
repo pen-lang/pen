@@ -680,7 +680,7 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation::transform(context, operation)?)?,
+                    _ => compile(&equal_operation::expression::transform(context, operation)?)?,
                 }
             }
             EqualityOperator::NotEqual => compile(&not_equal_operation::transform(operation))?,

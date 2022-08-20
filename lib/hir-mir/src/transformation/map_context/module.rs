@@ -55,8 +55,7 @@ fn transform_map_context_function_definition(
                     position.clone(),
                 ),
                 [
-                    equal_operation::transform_any_function(context, map_type.key(), position)?
-                        .into(),
+                    equal_operation::function::transform(context, map_type.key())?.into(),
                     hash_calculation::transform_any_function(context, map_type.key(), position)?
                         .into(),
                 ]
@@ -68,12 +67,7 @@ fn transform_map_context_function_definition(
                         context.records(),
                     )? {
                         [
-                            equal_operation::transform_any_function(
-                                context,
-                                map_type.value(),
-                                position,
-                            )?
-                            .into(),
+                            equal_operation::function::transform(context, map_type.value())?,
                             hash_calculation::transform_any_function(
                                 context,
                                 map_type.value(),
