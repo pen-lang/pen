@@ -1,7 +1,7 @@
 pub mod boolean_operation;
 mod collection_type;
 pub mod equal_operation;
-mod hash_calculation;
+pub mod hash_calculation;
 pub mod if_list;
 pub mod if_map;
 pub mod list_literal;

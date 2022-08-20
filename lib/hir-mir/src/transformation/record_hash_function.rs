@@ -82,7 +82,7 @@ fn compile_hash_function_definition(
                         Variable::new(&configuration.combine_function_name, position.clone()),
                         vec![
                             expression?,
-                            hash_calculation::transform(
+                            hash_calculation::expression::transform(
                                 context,
                                 &RecordDeconstruction::new(
                                     Some(record_type.clone().into()),
