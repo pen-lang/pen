@@ -16,7 +16,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
             .iter()
             .cloned()
             .chain(
-                collection_type::collect_parameter_types(context, module)?
+                collection_type::collect_comparable_parameter_types(context, module)?
                     .into_iter()
                     .map(|type_| compile_function_definition(context, &type_))
                     .collect::<Result<Vec<_>, _>>()?,

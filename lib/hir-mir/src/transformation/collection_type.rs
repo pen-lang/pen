@@ -34,7 +34,7 @@ pub fn transform_map_context(
     .into())
 }
 
-pub fn collect_parameter_types(
+pub fn collect_comparable_parameter_types(
     context: &CompileContext,
     module: &Module,
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
@@ -92,4 +92,110 @@ pub fn collect_parameter_types(
         .into_iter()
         .flatten()
         .collect())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use hir::test::ModuleFake;
+    use hir::test::TypeAliasFake;
+    use position::test::PositionFake;
+
+    mod comparable_parameter_type_collection {
+        use super::*;
+
+        fn collect(module: &Module) -> Result<FnvHashSet<Type>, AnalysisError> {
+            collect_comparable_parameter_types(
+                &CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone())),
+                module,
+            )
+        }
+
+        #[test]
+        fn collect_no_type() {
+            assert_eq!(collect(&Module::empty()), Ok(Default::default()));
+        }
+
+        #[test]
+        fn collect_type() {
+            assert_eq!(
+                collect(&Module::empty().set_type_aliases(vec![TypeAlias::fake(
+                    "a",
+                    types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    false,
+                    false,
+                )])),
+                Ok([types::None::new(Position::fake()).into()]
+                    .into_iter()
+                    .collect())
+            );
+        }
+
+        #[test]
+        fn collect_types() {
+            assert_eq!(
+                collect(&Module::empty().set_type_aliases(vec![
+                    TypeAlias::fake(
+                        "a",
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        false,
+                        false,
+                    ),
+                    TypeAlias::fake(
+                        "b",
+                        types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                        false,
+                        false,
+                    )
+                ])),
+                Ok([
+                    types::None::new(Position::fake()).into(),
+                    types::Number::new(Position::fake()).into()
+                ]
+                .into_iter()
+                .collect())
+            );
+        }
+
+        #[test]
+        fn collect_duplicate_types() {
+            assert_eq!(
+                collect(&Module::empty().set_type_aliases(vec![
+                    TypeAlias::fake(
+                        "a",
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        false,
+                        false,
+                    ),
+                    TypeAlias::fake("b", types::None::new(Position::fake()), false, false,),
+                    TypeAlias::fake(
+                        "c",
+                        types::List::new(
+                            types::Reference::new("b", Position::fake()),
+                            Position::fake()
+                        ),
+                        false,
+                        false,
+                    )
+                ])),
+                Ok([types::None::new(Position::fake()).into()]
+                    .into_iter()
+                    .collect())
+            );
+        }
+
+        #[test]
+        fn collect_no_any_type() {
+            assert_eq!(
+                collect(&Module::empty().set_type_aliases(vec![TypeAlias::fake(
+                    "a",
+                    types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                    false,
+                    false,
+                ),])),
+                Ok(Default::default())
+            );
+        }
+    }
 }
