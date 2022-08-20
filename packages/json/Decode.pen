@@ -144,7 +144,7 @@ number = \(v View) valueResult | error {
 
   v = if w = sign(v, "-") as View { w } else { v }
   v = integer(v)?
-  v = if w = sign(v, ".") { digits(w) } else { v }
+  v = if w = sign(v, ".") as View { digits(w) } else { v }
 
   valueResult{
     value: Value'New(
@@ -178,8 +178,8 @@ digit = \(v View) View | none {
   if w = nonZeroDigit(v) as View {
     w
   } else {
-    if View'HasPrefix(v, "0") {
-      View'Seek(v, 1)
+    if v = raw(v, "0") as View {
+      v
     } else {
       none
     }
@@ -195,14 +195,10 @@ nonZeroDigit = \(v View) View | none {
 }
 
 array = \(v View) valueResult | error {
-  if View'HasPrefix(v, "[") {
-    r = arrayElements(View'Seek(v, 1), [Value])?
-    v = blank(r.input)
+  r = arrayElements(sign(v, "[")?, [Value])?
+  v = blank(r.input)
 
-    valueResult{value: Value'New(r.array), input: sign(v, "]")?}
-  } else {
-    error("array expected")
-  }
+  valueResult{value: Value'New(r.array), input: sign(v, "]")?}
 }
 
 arrayElements = \(v View, vs [Value]) arrayResult | error {
@@ -267,6 +263,10 @@ entriesToMap = \(es [objectEntry]) {string: Value} {
 }
 
 sign = \(v View, s string) View | error {
+  raw(v, s)
+}
+
+raw = \(v View, s string) View | error {
   if View'HasPrefix(v, s) {
     View'Seek(v, Byte'Length(s))
   } else {
