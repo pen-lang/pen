@@ -70,3 +70,61 @@ fn compile_function_definition(
         position.clone(),
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use hir::test::{ModuleFake, TypeAliasFake};
+    use position::{test::PositionFake, Position};
+
+    fn transform_module(module: &Module) -> Result<Module, CompileError> {
+        transform(
+            &CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone())),
+            module,
+        )
+    }
+
+    #[test]
+    fn transform_comparable_type() {
+        let module = Module::empty().set_type_aliases(vec![TypeAlias::fake(
+            "a",
+            types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            ),
+            false,
+            false,
+        )]);
+
+        insta::assert_debug_snapshot!(transform_module(&module));
+    }
+
+    #[test]
+    fn do_not_transform_any() {
+        let module = Module::empty().set_type_aliases(vec![TypeAlias::fake(
+            "a",
+            types::List::new(types::Any::new(Position::fake()), Position::fake()),
+            false,
+            false,
+        )]);
+
+        assert_eq!(transform_module(&module), Ok(module.clone()));
+    }
+
+    #[test]
+    fn do_not_transform_function() {
+        let module = Module::empty().set_type_aliases(vec![TypeAlias::fake(
+            "a",
+            types::List::new(
+                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            ),
+            false,
+            false,
+        )]);
+
+        assert_eq!(transform_module(&module), Ok(module.clone()));
+    }
+}
