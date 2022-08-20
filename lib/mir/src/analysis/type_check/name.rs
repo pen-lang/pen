@@ -40,7 +40,7 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
             module
                 .function_definitions()
                 .iter()
-                .map(|definition| definition.name()),
+                .map(|definition| definition.definition().name()),
         )
     {
         if names.contains(name) {

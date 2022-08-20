@@ -16,22 +16,29 @@ pub fn transform(module: &Module) -> Module {
     )
 }
 
-fn transform_global_function_definition(definition: &FunctionDefinition) -> FunctionDefinition {
-    FunctionDefinition::with_options(
-        definition.name(),
-        vec![],
-        definition.arguments().to_vec(),
-        transform_expression(
-            definition.body(),
-            &definition
-                .arguments()
-                .iter()
-                .map(|argument| (argument.name().into(), argument.type_().clone()))
-                .collect(),
+fn transform_global_function_definition(
+    definition: &GlobalFunctionDefinition,
+) -> GlobalFunctionDefinition {
+    let public = definition.is_public();
+    let definition = definition.definition();
+
+    GlobalFunctionDefinition::new(
+        FunctionDefinition::with_options(
+            definition.name(),
+            vec![],
+            definition.arguments().to_vec(),
+            definition.result_type().clone(),
+            transform_expression(
+                definition.body(),
+                &definition
+                    .arguments()
+                    .iter()
+                    .map(|argument| (argument.name().into(), argument.type_().clone()))
+                    .collect(),
+            ),
+            definition.is_thunk(),
         ),
-        definition.result_type().clone(),
-        definition.is_public(),
-        definition.is_thunk(),
+        public,
     )
 }
 
@@ -61,6 +68,7 @@ fn transform_local_function_definition(
             })
             .collect(),
         definition.arguments().to_vec(),
+        definition.result_type().clone(),
         transform_expression(
             definition.body(),
             &variables
@@ -69,8 +77,6 @@ fn transform_local_function_definition(
                 .chain(local_variables)
                 .collect(),
         ),
-        definition.result_type().clone(),
-        definition.is_public(),
         definition.is_thunk(),
     )
 }

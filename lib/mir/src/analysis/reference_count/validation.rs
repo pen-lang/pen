@@ -4,13 +4,17 @@ use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn validate(module: &Module) -> Result<(), ReferenceCountError> {
     for definition in module.function_definitions() {
-        validate_global_definition(definition)?;
+        validate_global_function_definition(definition)?;
     }
 
     Ok(())
 }
 
-fn validate_global_definition(definition: &FunctionDefinition) -> Result<(), ReferenceCountError> {
+fn validate_global_function_definition(
+    definition: &GlobalFunctionDefinition,
+) -> Result<(), ReferenceCountError> {
+    let definition = definition.definition();
+
     validate_definition_body(
         definition.body(),
         collect_definition_local_variables(definition)
@@ -480,9 +484,8 @@ mod tests {
                             "g",
                             vec![Argument::new("x", Type::None)],
                             vec![],
-                            Variable::new("x"),
                             Type::None,
-                            false,
+                            Variable::new("x"),
                             false,
                         ),
                         Variable::new("g"),

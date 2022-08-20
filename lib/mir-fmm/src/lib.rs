@@ -72,12 +72,12 @@ pub fn compile(
                 .iter()
                 .map(|declaration| (declaration.name(), declaration.type_())),
         )
-        .chain(
-            module
-                .function_definitions()
-                .iter()
-                .map(|definition| (definition.name(), definition.type_())),
-        )
+        .chain(module.function_definitions().iter().map(|definition| {
+            (
+                definition.definition().name(),
+                definition.definition().type_(),
+            )
+        }))
         .collect::<FnvHashMap<_, _>>();
 
     for definition in module.foreign_definitions() {
@@ -124,6 +124,8 @@ fn compile_global_variables(
             )
         }))
         .chain(module.function_definitions().iter().map(|definition| {
+            let definition = definition.definition();
+
             (
                 definition.name().into(),
                 fmm::build::bit_cast(

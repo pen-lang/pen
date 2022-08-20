@@ -1,15 +1,16 @@
 use crate::{ir::*, types::Type};
 use fnv::FnvHashSet;
 
+// TODO Use a persistent hash map.
 pub fn collect(module: &Module) -> FnvHashSet<Type> {
     module
         .function_definitions()
         .iter()
-        .flat_map(collect_from_definition)
+        .flat_map(|definition| collect_from_function_definition(definition.definition()))
         .collect()
 }
 
-fn collect_from_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
+fn collect_from_function_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
     collect_from_expression(definition.body())
 }
 
@@ -44,7 +45,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
-        Expression::LetRecursive(let_) => collect_from_definition(let_.definition())
+        Expression::LetRecursive(let_) => collect_from_function_definition(let_.definition())
             .into_iter()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
