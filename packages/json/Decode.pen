@@ -109,11 +109,11 @@ booleanFalse = \(v View) valueResult | error {
 }
 
 string = \(v View) valueResult | error {
-  r = stringCharacters(View'Seek(v, 1))?
+  r = stringCharacters(token(v, "\"")?)?
 
   valueResult{
     value: Value'New(String'Concatenate(r.strings)),
-    input: View'Seek(r.input, 1),
+    input: raw(r.input, "\"")?,
   }
 }
 
@@ -142,7 +142,7 @@ stringCharacter = \(v View) stringResult | error {
 number = \(v View) valueResult | error {
   i = View'Start(v)
 
-  v = if w = sign(v, "-") as View { w } else { v }
+  v = if w = token(v, "-") as View { w } else { v }
   v = integer(v)?
   v = if w = raw(v, ".") as View { digits(w) } else { v }
 
@@ -195,19 +195,17 @@ nonZeroDigit = \(v View) View | none {
 }
 
 array = \(v View) valueResult | error {
-  r = arrayElements(sign(v, "[")?)?
-  v = blank(r.input)
+  r = arrayElements(token(v, "[")?)?
 
-  valueResult{value: Value'New(r.array), input: sign(v, "]")?}
+  valueResult{value: Value'New(r.array), input: token(r.input, "]")?}
 }
 
 arrayElements = \(v View) arrayResult | error {
   if r = value(v) as valueResult {
     x = r.value
-    v = blank(r.input)
 
-    if w = sign(v, ",") as View {
-      r = arrayElements(blank(w))?
+    if v = token(r.input, ",") as View {
+      r = arrayElements(v)?
 
       if r.array == [Value] {
         error("unexpected trailing , in array")
@@ -215,7 +213,7 @@ arrayElements = \(v View) arrayResult | error {
         arrayResult{array: [Value x, ...r.array], input: r.input}
       }
     } else {
-      arrayResult{array: [Value x], input: v}
+      arrayResult{array: [Value x], input: r.input}
     }
   } else {
     arrayResult{array: [Value], input: v}
@@ -223,25 +221,23 @@ arrayElements = \(v View) arrayResult | error {
 }
 
 object = \(v View) valueResult | error {
-  r = objectEntries(sign(v, "{")?)?
-  v = blank(r.input)
+  r = objectEntries(token(v, "{")?)?
 
-  valueResult{value: Value'New(entriesToMap(r.entries)), input: sign(v, "}")?}
+  valueResult{
+    value: Value'New(entriesToMap(r.entries)),
+    input: token(r.input, "}")?,
+  }
 }
 
 objectEntries = \(v View) objectResult | error {
-  v = blank(v)
-
   if r = string(v) as valueResult {
     k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
-    v = blank(r.input)
-    v = sign(v, ":")?
+    v = token(r.input, ":")?
     r = value(v)?
 
     e = objectEntry{key: k, value: r.value}
-    v = blank(r.input)
 
-    if w = sign(v, ",") as View {
+    if w = token(r.input, ",") as View {
       r = objectEntries(w)?
 
       if r.entries == [objectEntry] {
@@ -250,7 +246,7 @@ objectEntries = \(v View) objectResult | error {
         objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
       }
     } else {
-      objectResult{entries: [objectEntry e], input: v}
+      objectResult{entries: [objectEntry e], input: r.input}
     }
   } else {
     objectResult{entries: [objectEntry], input: v}
@@ -265,8 +261,8 @@ entriesToMap = \(es [objectEntry]) {string: Value} {
   }
 }
 
-sign = \(v View, s string) View | error {
-  raw(v, s)
+token = \(v View, s string) View | error {
+  raw(blank(v), s)
 }
 
 raw = \(v View, s string) View | error {
