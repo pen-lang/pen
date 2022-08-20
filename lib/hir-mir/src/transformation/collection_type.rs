@@ -60,8 +60,17 @@ pub fn collect_parameter_types(
         Expression::List(list) => {
             types.insert(list.type_());
         }
+        Expression::ListComprehension(comprehension) => {
+            types.extend(comprehension.input_type());
+            types.insert(comprehension.output_type());
+        }
         Expression::Map(map) => {
             types.extend([map.key_type(), map.value_type()]);
+        }
+        Expression::MapIterationComprehension(comprehension) => {
+            types.extend(comprehension.key_type());
+            types.extend(comprehension.value_type());
+            types.insert(comprehension.element_type());
         }
         _ => {}
     });
