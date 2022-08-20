@@ -1,6 +1,7 @@
 use crate::{ir::*, types::Type};
 use fnv::FnvHashSet;
 
+// TODO Use a persistent hash map.
 pub fn collect(module: &Module) -> FnvHashSet<Type> {
     module
         .function_definitions()
