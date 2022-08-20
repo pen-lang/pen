@@ -23,7 +23,7 @@ pub fn transform(
     rhs: &Expression,
     position: &Position,
 ) -> Result<Expression, CompileError> {
-    transform_canonicalized(
+    transform_canonical(
         context,
         &type_canonicalizer::canonicalize(type_, context.types())?,
         lhs,
@@ -32,7 +32,7 @@ pub fn transform(
     )
 }
 
-fn transform_canonicalized(
+fn transform_canonical(
     context: &CompileContext,
     type_: &Type,
     lhs: &Expression,
@@ -171,7 +171,7 @@ fn transform_canonicalized(
                                 rhs.clone(),
                                 vec![IfTypeBranch::new(
                                     member_type.clone(),
-                                    transform_canonicalized(
+                                    transform_canonical(
                                         context,
                                         member_type,
                                         &Variable::new(LHS_NAME, position.clone()).into(),
@@ -212,7 +212,7 @@ fn transform_canonicalized(
             )
             .into()
         }
-        Type::Reference(reference) => transform_canonicalized(
+        Type::Reference(reference) => transform_canonical(
             context,
             &type_resolver::resolve(reference, context.types())?,
             lhs,
