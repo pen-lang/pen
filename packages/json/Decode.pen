@@ -38,26 +38,6 @@ type objectEntry {
   value Value
 }
 
-valueResult = \(v Value, i View) valueResult {
-  valueResult{value: v, input: i}
-}
-
-stringResult = \(s string, i View) stringResult {
-  stringResult{string: s, input: i}
-}
-
-stringsResult = \(ss [string], i View) stringsResult {
-  stringsResult{strings: ss, input: i}
-}
-
-arrayResult = \(vs [Value], i View) arrayResult {
-  arrayResult{array: vs, input: i}
-}
-
-objectResult = \(vs [objectEntry], i View) objectResult {
-  objectResult{entries: vs, input: i}
-}
-
 # Decode a string into a JSON value.
 Decode = \(s string) Value | error {
   r = value(View'New(s))?
@@ -93,7 +73,10 @@ null = \(v View) valueResult | error {
   s = "null"
 
   if View'HasPrefix(v, s) {
-    valueResult(Value'New(none), View'Seek(v, Byte'Length(s)))
+    valueResult{
+      value: Value'New(none),
+      input: View'Seek(v, Byte'Length(s)),
+    }
   } else {
     error("null expected")
   }
@@ -103,7 +86,10 @@ booleanTrue = \(v View) valueResult | error {
   s = "true"
 
   if View'HasPrefix(v, s) {
-    valueResult(Value'New(true), View'Seek(v, Byte'Length(s)))
+    valueResult{
+      value: Value'New(true),
+      input: View'Seek(v, Byte'Length(s)),
+    }
   } else {
     error("true expected")
   }
@@ -113,7 +99,10 @@ booleanFalse = \(v View) valueResult | error {
   s = "false"
 
   if View'HasPrefix(v, s) {
-    valueResult(Value'New(false), View'Seek(v, Byte'Length(s)))
+    valueResult{
+      value: Value'New(false),
+      input: View'Seek(v, Byte'Length(s)),
+    }
   } else {
     error("false expected")
   }
@@ -122,7 +111,10 @@ booleanFalse = \(v View) valueResult | error {
 string = \(v View) valueResult | error {
   r = stringCharacters(View'Seek(v, 1))?
 
-  valueResult(Value'New(String'Concatenate(r.strings)), View'Seek(r.input, 1))
+  valueResult{
+    value: Value'New(String'Concatenate(r.strings)),
+    input: View'Seek(r.input, 1),
+  }
 }
 
 stringCharacters = \(v View) stringsResult | error {
@@ -154,10 +146,12 @@ number = \(v View) valueResult | error {
   v = integer(v)?
   v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
 
-  valueResult(
-    Value'New(_pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
-    v,
-  )
+  valueResult{
+    value: Value'New(
+      _pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1)),
+    ),
+    input: v,
+  }
 }
 
 integer = \(v View) View | error {
@@ -230,10 +224,10 @@ arrayElements = \(v View, vs [Value]) arrayResult | error {
         arrayElements(v, vs)
       }
     } else {
-      arrayResult(vs, v)
+      arrayResult{array: vs, input: v}
     }
   } else {
-    arrayResult(vs, v)
+    arrayResult{array: vs, input: v}
   }
 }
 
@@ -274,10 +268,10 @@ objectEntries = \(v View, es [objectEntry]) objectResult | error {
         objectEntries(v, es)
       }
     } else {
-      objectResult(es, r.input)
+      objectResult{entries: es, input: r.input}
     }
   } else {
-    objectResult(es, v)
+    objectResult{entries: es, input: v}
   }
 }
 
