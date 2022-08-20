@@ -59,7 +59,7 @@ fn transform_map_context_function_definition(
                 ),
                 [
                     equal_operation::function::transform(context, map_type.key())?,
-                    hash_calculation::function::transform(context, map_type.key())?.into(),
+                    hash_calculation::function::transform(context, map_type.key())?,
                 ]
                 .into_iter()
                 .chain(
@@ -70,8 +70,7 @@ fn transform_map_context_function_definition(
                     )? {
                         [
                             equal_operation::function::transform(context, map_type.value())?,
-                            hash_calculation::function::transform(context, map_type.value())?
-                                .into(),
+                            hash_calculation::function::transform(context, map_type.value())?,
                         ]
                     } else {
                         [

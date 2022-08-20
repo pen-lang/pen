@@ -47,7 +47,7 @@ pub fn transform(
                 position.clone(),
             ),
             vec![
-                function::transform(context, list_type.element())?.into(),
+                function::transform(context, list_type.element())?,
                 value.clone(),
             ],
             position.clone(),
