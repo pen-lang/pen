@@ -1,5 +1,5 @@
 use crate::ir::*;
 
-pub fn escapes(expression: &Expression, name: &str) -> bool {
+pub fn escapes(name: &str, expression: &Expression) -> bool {
     todo!()
 }

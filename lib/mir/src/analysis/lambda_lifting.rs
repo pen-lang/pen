@@ -118,6 +118,8 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     expression,
                 )
                 .into()
+            } else if !function_escape::escapes(definition.name(), &expression) {
+                todo!()
             } else {
                 LetRecursive::new(definition, expression).into()
             }
