@@ -1,6 +1,9 @@
 use super::function;
-use crate::transformation::{collection_type, map_context, record_type_information};
-use crate::{context::CompileContext, CompileError};
+use crate::{
+    context::CompileContext,
+    transformation::{collection_type, map_context, record_type_information},
+    CompileError,
+};
 use hir::{
     analysis::{
         type_comparability_checker, type_resolver, union_type_member_calculator, AnalysisError,

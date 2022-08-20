@@ -1,10 +1,13 @@
 use crate::{context::CompileContext, CompileError};
 use fnv::FnvHashSet;
-use hir::analysis::{
-    expression_visitor, type_canonicalizer, type_comparability_checker, type_visitor, AnalysisError,
+use hir::{
+    analysis::{
+        expression_visitor, type_canonicalizer, type_comparability_checker, type_visitor,
+        AnalysisError,
+    },
+    ir::*,
+    types::{self, Type},
 };
-use hir::ir::*;
-use hir::types::{self, Type};
 use position::Position;
 
 pub fn transform_list(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {
@@ -98,8 +101,7 @@ pub fn collect_comparable_parameter_types(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
-    use hir::test::TypeAliasFake;
+    use hir::test::{ModuleFake, TypeAliasFake};
     use position::test::PositionFake;
 
     mod comparable_parameter_type_collection {
