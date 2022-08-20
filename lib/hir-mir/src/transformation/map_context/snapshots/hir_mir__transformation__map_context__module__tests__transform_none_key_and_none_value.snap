@@ -286,81 +286,9 @@ Ok(
                                         },
                                     },
                                 ),
-                                Lambda(
-                                    Lambda {
-                                        arguments: [
-                                            Argument {
-                                                name: "$x",
-                                                type_: Any(
-                                                    Any {
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                            },
-                                        ],
-                                        result_type: Number(
-                                            Number {
-                                                position: Position {
-                                                    path: "",
-                                                    line_number: 1,
-                                                    column_number: 1,
-                                                    line: "",
-                                                },
-                                            },
-                                        ),
-                                        body: IfType(
-                                            IfType {
-                                                name: "$x",
-                                                argument: Variable(
-                                                    Variable {
-                                                        name: "$x",
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                                branches: [
-                                                    IfTypeBranch {
-                                                        type_: None(
-                                                            None {
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                        expression: Number(
-                                                            Number {
-                                                                value: 0.0,
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                    },
-                                                ],
-                                                else_: None,
-                                                position: Position {
-                                                    path: "",
-                                                    line_number: 1,
-                                                    column_number: 1,
-                                                    line: "",
-                                                },
-                                            },
-                                        ),
+                                Variable(
+                                    Variable {
+                                        name: "hir:hash:d409c28886113c9b",
                                         position: Position {
                                             path: "",
                                             line_number: 1,
@@ -380,81 +308,9 @@ Ok(
                                         },
                                     },
                                 ),
-                                Lambda(
-                                    Lambda {
-                                        arguments: [
-                                            Argument {
-                                                name: "$x",
-                                                type_: Any(
-                                                    Any {
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                            },
-                                        ],
-                                        result_type: Number(
-                                            Number {
-                                                position: Position {
-                                                    path: "",
-                                                    line_number: 1,
-                                                    column_number: 1,
-                                                    line: "",
-                                                },
-                                            },
-                                        ),
-                                        body: IfType(
-                                            IfType {
-                                                name: "$x",
-                                                argument: Variable(
-                                                    Variable {
-                                                        name: "$x",
-                                                        position: Position {
-                                                            path: "",
-                                                            line_number: 1,
-                                                            column_number: 1,
-                                                            line: "",
-                                                        },
-                                                    },
-                                                ),
-                                                branches: [
-                                                    IfTypeBranch {
-                                                        type_: None(
-                                                            None {
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                        expression: Number(
-                                                            Number {
-                                                                value: 0.0,
-                                                                position: Position {
-                                                                    path: "",
-                                                                    line_number: 1,
-                                                                    column_number: 1,
-                                                                    line: "",
-                                                                },
-                                                            },
-                                                        ),
-                                                    },
-                                                ],
-                                                else_: None,
-                                                position: Position {
-                                                    path: "",
-                                                    line_number: 1,
-                                                    column_number: 1,
-                                                    line: "",
-                                                },
-                                            },
-                                        ),
+                                Variable(
+                                    Variable {
+                                        name: "hir:hash:d409c28886113c9b",
                                         position: Position {
                                             path: "",
                                             line_number: 1,
