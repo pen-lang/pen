@@ -12,12 +12,17 @@ pub fn transform(module: &Module) -> Result<Module, ReferenceCountError> {
         module
             .function_definitions()
             .iter()
-            .map(|definition| transform_definition(definition, true))
+            .map(|definition| {
+                Ok(GlobalFunctionDefinition::new(
+                    transform_function_definition(definition.definition(), true)?,
+                    definition.is_public(),
+                ))
+            })
             .collect::<Result<_, _>>()?,
     ))
 }
 
-fn transform_definition(
+fn transform_function_definition(
     definition: &FunctionDefinition,
     global: bool,
 ) -> Result<FunctionDefinition, ReferenceCountError> {
@@ -55,7 +60,6 @@ fn transform_definition(
             &owned_variables,
         ),
         definition.result_type().clone(),
-        definition.is_public(),
         definition.is_thunk(),
     ))
 }
@@ -391,7 +395,7 @@ fn transform_expression(
             (
                 clone_variables(
                     LetRecursive::new(
-                        transform_definition(let_.definition(), false)?,
+                        transform_function_definition(let_.definition(), false)?,
                         if expression_moved_variables.contains(let_.definition().name()) {
                             expression
                         } else {
@@ -1379,7 +1383,7 @@ mod tests {
         #[test]
         fn transform_with_dropped_argument() {
             assert_eq!(
-                transform_definition(
+                transform_function_definition(
                     &FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
@@ -1412,7 +1416,7 @@ mod tests {
         #[test]
         fn transform_with_dropped_free_variable() {
             assert_eq!(
-                transform_definition(
+                transform_function_definition(
                     &FunctionDefinition::fake_with_environment(
                         "f",
                         vec![Argument::new("y", Type::Number)],

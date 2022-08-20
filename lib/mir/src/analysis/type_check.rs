@@ -27,11 +27,13 @@ pub fn check(module: &Module) -> Result<(), TypeCheckError> {
     }
 
     for definition in module.function_definitions() {
+        let definition = definition.definition();
+
         variables.insert(definition.name(), definition.type_().clone().into());
     }
 
     for definition in module.function_definitions() {
-        check_definition(definition, &variables, &types)?;
+        check_function_definition(definition.definition(), &variables, &types)?;
     }
 
     for definition in module.foreign_definitions() {
@@ -45,7 +47,7 @@ pub fn check(module: &Module) -> Result<(), TypeCheckError> {
     Ok(())
 }
 
-fn check_definition(
+fn check_function_definition(
     definition: &FunctionDefinition,
     variables: &FnvHashMap<&str, Type>,
     types: &FnvHashMap<&str, &types::RecordBody>,
@@ -159,7 +161,7 @@ fn check_expression(
                 )])
                 .collect();
 
-            check_definition(let_.definition(), &variables, types)?;
+            check_function_definition(let_.definition(), &variables, types)?;
             check_expression(let_.expression(), &variables)?
         }
         Expression::Let(let_) => {

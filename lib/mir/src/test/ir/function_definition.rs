@@ -30,7 +30,7 @@ impl FunctionDefinitionFake for FunctionDefinition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::new(name, arguments, body, result_type, false)
+        Self::new(name, arguments, body, result_type)
     }
 
     fn fake_thunk(
@@ -38,7 +38,7 @@ impl FunctionDefinitionFake for FunctionDefinition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::thunk(name, body, result_type, false)
+        Self::thunk(name, body, result_type)
     }
 
     fn fake_with_environment(
@@ -48,14 +48,6 @@ impl FunctionDefinitionFake for FunctionDefinition {
         body: impl Into<Expression>,
         result_type: impl Into<Type>,
     ) -> Self {
-        Self::with_options(
-            name,
-            environment,
-            arguments,
-            body,
-            result_type,
-            false,
-            false,
-        )
+        Self::with_options(name, environment, arguments, body, result_type, false)
     }
 }

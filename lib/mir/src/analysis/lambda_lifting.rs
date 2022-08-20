@@ -11,7 +11,12 @@ pub fn transform(module: &Module) -> Module {
     let function_definitions = module
         .function_definitions()
         .iter()
-        .map(|definition| transform_function_definition(&mut context, definition))
+        .map(|definition| {
+            GlobalFunctionDefinition::new(
+                transform_function_definition(&mut context, definition.definition()),
+                definition.is_public(),
+            )
+        })
         .collect::<Vec<_>>();
 
     Module::new(
@@ -36,7 +41,6 @@ fn transform_function_definition(
         definition.arguments().to_vec(),
         transform_expression(context, definition.body()),
         definition.result_type().clone(),
-        definition.is_public(),
         definition.is_thunk(),
     )
 }
@@ -282,7 +286,6 @@ mod tests {
                     vec![],
                     42.0,
                     Type::Number,
-                    false,
                     false,
                 ),
                 42.0,

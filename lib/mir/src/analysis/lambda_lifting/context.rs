@@ -1,7 +1,7 @@
 use crate::ir::*;
 
 pub struct Context {
-    function_definitions: Vec<FunctionDefinition>,
+    function_definitions: Vec<GlobalFunctionDefinition>,
 }
 
 impl Context {
@@ -19,25 +19,27 @@ impl Context {
         );
 
         self.function_definitions
-            .push(FunctionDefinition::with_options(
-                &name,
-                definition.environment().to_vec(),
-                definition.arguments().to_vec(),
-                Let::new(
-                    definition.name(),
-                    definition.type_().clone(),
-                    Variable::new(&name),
-                    definition.body().clone(),
+            .push(GlobalFunctionDefinition::new(
+                FunctionDefinition::with_options(
+                    &name,
+                    definition.environment().to_vec(),
+                    definition.arguments().to_vec(),
+                    Let::new(
+                        definition.name(),
+                        definition.type_().clone(),
+                        Variable::new(&name),
+                        definition.body().clone(),
+                    ),
+                    definition.result_type().clone(),
+                    definition.is_thunk(),
                 ),
-                definition.result_type().clone(),
                 false,
-                definition.is_thunk(),
             ));
 
         name
     }
 
-    pub fn into_function_definitions(self) -> Vec<FunctionDefinition> {
+    pub fn into_function_definitions(self) -> Vec<GlobalFunctionDefinition> {
         self.function_definitions
     }
 }
