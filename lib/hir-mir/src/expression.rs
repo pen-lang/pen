@@ -424,10 +424,7 @@ fn compile_list_comprehension(
                         )?,
                     ),
                     mir::ir::Call::new(
-                        mir::types::Function::new(
-                            vec![list_type.clone().into()],
-                            list_type,
-                        ),
+                        mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
                         vec![compile(comprehension.list())?],
                     ),
@@ -464,10 +461,7 @@ fn compile_map_iteration_comprehension(
                 mir::ir::LetRecursive::new(
                     definition.clone(),
                     mir::ir::Call::new(
-                        mir::types::Function::new(
-                            vec![mir::types::Type::Variant],
-                            list_type,
-                        ),
+                        mir::types::Function::new(vec![mir::types::Type::Variant], list_type),
                         mir::ir::Variable::new(definition.name()),
                         vec![mir::ir::Call::new(
                             mir::types::Function::new(
