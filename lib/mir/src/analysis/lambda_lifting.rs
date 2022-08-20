@@ -1,4 +1,5 @@
 mod context;
+mod function_escape;
 
 use self::context::Context;
 use crate::ir::*;
