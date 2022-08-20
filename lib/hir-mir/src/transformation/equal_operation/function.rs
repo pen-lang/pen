@@ -18,6 +18,6 @@ pub fn transform_name(
 ) -> Result<String, CompileError> {
     Ok(format!(
         "hir:equal:{}",
-        type_id_calculator::calculate(&type_.clone().into(), types)?
+        type_id_calculator::calculate(&type_.clone(), types)?
     ))
 }

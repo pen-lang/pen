@@ -46,7 +46,7 @@ fn visit_function_declaration<'a>(
     declaration: &'a FunctionDeclaration,
     visit: &mut impl FnMut(&'a Type),
 ) {
-    visit_function_type(&declaration.type_(), visit);
+    visit_function_type(declaration.type_(), visit);
 }
 
 fn visit_function_definition<'a>(
