@@ -1,8 +1,6 @@
-use crate::context::CompileContext;
-use crate::error::CompileError;
+use crate::{context::CompileContext, error::CompileError};
 use fnv::FnvHashMap;
-use hir::ir::*;
-use hir::{analysis::type_id_calculator, types::Type};
+use hir::{analysis::type_id_calculator, ir::*, types::Type};
 
 pub fn transform(context: &CompileContext, type_: &Type) -> Result<Expression, CompileError> {
     Ok(Variable::new(

@@ -1,6 +1,5 @@
 use super::{function, operation};
-use crate::context::CompileContext;
-use crate::error::CompileError;
+use crate::{context::CompileContext, error::CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{

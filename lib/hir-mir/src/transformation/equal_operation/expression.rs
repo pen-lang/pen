@@ -1,6 +1,5 @@
 use super::operation;
-use crate::context::CompileContext;
-use crate::error::CompileError;
+use crate::{context::CompileContext, error::CompileError};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn transform(

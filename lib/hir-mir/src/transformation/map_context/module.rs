@@ -1,6 +1,9 @@
 use super::context_function_name;
-use crate::transformation::{collection_type, equal_operation, hash_calculation};
-use crate::{context::CompileContext, CompileError};
+use crate::{
+    context::CompileContext,
+    transformation::{collection_type, equal_operation, hash_calculation},
+    CompileError,
+};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{

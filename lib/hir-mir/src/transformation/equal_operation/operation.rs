@@ -1,12 +1,13 @@
 use super::function;
-use crate::error::CompileError;
-use crate::transformation::{collection_type, map_context};
-use crate::{context::CompileContext, transformation::record_type_information};
-use hir::analysis::type_canonicalizer;
+use crate::{
+    context::CompileContext,
+    error::CompileError,
+    transformation::{collection_type, map_context, record_type_information},
+};
 use hir::{
     analysis::{
-        type_comparability_checker, type_equality_checker, type_resolver, union_type_creator,
-        union_type_member_calculator, AnalysisError,
+        type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
+        union_type_creator, union_type_member_calculator, AnalysisError,
     },
     ir::*,
     types::{self, Type},

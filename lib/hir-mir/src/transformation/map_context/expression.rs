@@ -1,6 +1,5 @@
 use super::context_function_name;
-use crate::transformation::collection_type;
-use crate::{context::CompileContext, CompileError};
+use crate::{context::CompileContext, transformation::collection_type, CompileError};
 use hir::{ir::*, types};
 
 pub fn transform(context: &CompileContext, type_: &types::Map) -> Result<Expression, CompileError> {
