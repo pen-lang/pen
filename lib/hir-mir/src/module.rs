@@ -99,36 +99,33 @@ fn compile_function_declaration(
 fn compile_function_definition(
     context: &CompileContext,
     definition: &FunctionDefinition,
-) -> Result<mir::ir::FunctionDefinition, CompileError> {
+) -> Result<mir::ir::GlobalFunctionDefinition, CompileError> {
     let body = expression::compile(context, definition.lambda().body())?;
     let result_type = type_::compile(context, definition.lambda().result_type())?;
 
-    Ok(if definition.lambda().arguments().is_empty() {
-        mir::ir::FunctionDefinition::thunk(
-            definition.name(),
-            body,
-            result_type,
-            definition.is_public(),
-        )
-    } else {
-        mir::ir::FunctionDefinition::new(
-            definition.name(),
-            definition
-                .lambda()
-                .arguments()
-                .iter()
-                .map(|argument| -> Result<_, CompileError> {
-                    Ok(mir::ir::Argument::new(
-                        argument.name(),
-                        type_::compile(context, argument.type_())?,
-                    ))
-                })
-                .collect::<Result<_, _>>()?,
-            body,
-            result_type,
-            definition.is_public(),
-        )
-    })
+    Ok(mir::ir::GlobalFunctionDefinition::new(
+        if definition.lambda().arguments().is_empty() {
+            mir::ir::FunctionDefinition::thunk(definition.name(), body, result_type)
+        } else {
+            mir::ir::FunctionDefinition::new(
+                definition.name(),
+                definition
+                    .lambda()
+                    .arguments()
+                    .iter()
+                    .map(|argument| -> Result<_, CompileError> {
+                        Ok(mir::ir::Argument::new(
+                            argument.name(),
+                            type_::compile(context, argument.type_())?,
+                        ))
+                    })
+                    .collect::<Result<_, _>>()?,
+                body,
+                result_type,
+            )
+        },
+        definition.is_public(),
+    ))
 }
 
 #[cfg(test)]
@@ -175,8 +172,7 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
-                    false,
-                )],))
+                )]))
         );
     }
 
@@ -211,8 +207,7 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::None)],
                     mir::ir::Expression::None,
                     mir::types::Type::None,
-                    false,
-                )],))
+                )]))
         );
     }
 }
