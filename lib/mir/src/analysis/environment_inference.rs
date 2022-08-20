@@ -19,27 +19,26 @@ pub fn transform(module: &Module) -> Module {
 fn transform_global_function_definition(
     definition: &GlobalFunctionDefinition,
 ) -> GlobalFunctionDefinition {
-    GlobalFunctionDefinition::new(
-        {
-            let definition = definition.definition();
+    let public = definition.is_public();
+    let definition = definition.definition();
 
-            FunctionDefinition::with_options(
-                definition.name(),
-                vec![],
-                definition.arguments().to_vec(),
-                transform_expression(
-                    definition.body(),
-                    &definition
-                        .arguments()
-                        .iter()
-                        .map(|argument| (argument.name().into(), argument.type_().clone()))
-                        .collect(),
-                ),
-                definition.result_type().clone(),
-                definition.is_thunk(),
-            )
-        },
-        definition.is_public(),
+    GlobalFunctionDefinition::new(
+        FunctionDefinition::with_options(
+            definition.name(),
+            vec![],
+            definition.arguments().to_vec(),
+            transform_expression(
+                definition.body(),
+                &definition
+                    .arguments()
+                    .iter()
+                    .map(|argument| (argument.name().into(), argument.type_().clone()))
+                    .collect(),
+            ),
+            definition.result_type().clone(),
+            definition.is_thunk(),
+        ),
+        public,
     )
 }
 

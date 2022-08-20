@@ -8,7 +8,7 @@ pub fn compile(
     definition: &mir::ir::GlobalFunctionDefinition,
     global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
-    let is_public = definition.is_public();
+    let public = definition.is_public();
     let definition = definition.definition();
 
     context.module_builder().define_variable(
@@ -20,7 +20,7 @@ pub fn compile(
         ))?,
         fmm::ir::VariableDefinitionOptions::new()
             .set_address_named(false)
-            .set_linkage(if is_public {
+            .set_linkage(if public {
                 fmm::ir::Linkage::External
             } else {
                 fmm::ir::Linkage::Internal
