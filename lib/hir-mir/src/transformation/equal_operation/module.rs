@@ -3,7 +3,10 @@ use crate::context::CompileContext;
 use crate::error::CompileError;
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{expression_visitor, type_canonicalizer, type_visitor, AnalysisError},
+    analysis::{
+        expression_visitor, type_canonicalizer, type_comparability_checker, type_visitor,
+        AnalysisError,
+    },
     ir::*,
     types::{self, Type},
 };
@@ -113,8 +116,21 @@ fn collect_parameter_types(
         _ => {}
     });
 
-    types
+    Ok(types
         .iter()
-        .map(|type_| type_canonicalizer::canonicalize(type_, context.types()))
-        .collect::<Result<_, _>>()
+        .map(|type_| {
+            let type_ = type_canonicalizer::canonicalize(type_, context.types())?;
+
+            Ok(
+                if type_comparability_checker::check(&type_, context.types(), context.records())? {
+                    Some(type_)
+                } else {
+                    None
+                },
+            )
+        })
+        .collect::<Result<FnvHashSet<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect())
 }
