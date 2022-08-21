@@ -1,5 +1,5 @@
 mod context;
-mod function_escape;
+mod escape;
 
 use self::context::Context;
 use crate::ir::*;
