@@ -330,7 +330,7 @@ mod tests {
     }
 
     #[test]
-    fn escape_let_resursive() {
+    fn escape_let_recursive() {
         assert!(escapes(
             &LetRecursive::new(
                 FunctionDefinition::new("y", vec![], Type::None, Expression::None),
@@ -342,7 +342,7 @@ mod tests {
     }
 
     #[test]
-    fn escape_let_resursive_with_shadowed_variable() {
+    fn escape_let_recursive_with_shadowed_variable() {
         assert!(!escapes(
             &LetRecursive::new(
                 FunctionDefinition::new("x", vec![], Type::None, Expression::None),
@@ -354,7 +354,7 @@ mod tests {
     }
 
     #[test]
-    fn escape_let_resursive_with_environment() {
+    fn escape_let_recursive_with_environment() {
         assert!(escapes(
             &LetRecursive::new(
                 FunctionDefinition::with_options(
