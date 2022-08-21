@@ -81,6 +81,7 @@ fn moves_expression(expression: &Expression, name: &str) -> bool {
                     })
                     .unwrap_or_default()
         }
+        Expression::Call(call) => call.arguments().iter().any(moves),
         Expression::CloneVariables(clone) => moves(clone.expression()),
         Expression::DropVariables(drop) => moves(drop.expression()),
         Expression::If(if_) => moves(if_.then()) || moves(if_.else_()),
@@ -122,7 +123,6 @@ fn moves_expression(expression: &Expression, name: &str) -> bool {
         Expression::ArithmeticOperation(_)
         | Expression::Boolean(_)
         | Expression::ByteString(_)
-        | Expression::Call(_)
         | Expression::ComparisonOperation(_)
         | Expression::None
         | Expression::Number(_) => false,
@@ -140,6 +140,23 @@ mod tests {
             &ArithmeticOperation::new(
                 ArithmeticOperator::Add,
                 Variable::new("x"),
+                Expression::Number(0.0)
+            )
+            .into(),
+            "x",
+        ));
+    }
+
+    #[test]
+    fn escape_arithmetic_operation_with_call() {
+        assert!(escapes(
+            &ArithmeticOperation::new(
+                ArithmeticOperator::Add,
+                Call::new(
+                    types::Function::new(vec![], Type::None),
+                    Variable::new("f"),
+                    vec![Variable::new("x").into()]
+                ),
                 Expression::Number(0.0)
             )
             .into(),
@@ -274,6 +291,24 @@ mod tests {
     fn escape_let_expression() {
         assert!(escapes(
             &Let::new("y", Type::None, Expression::None, Variable::new("x")).into(),
+            "x",
+        ));
+    }
+
+    #[test]
+    fn escape_let_expression_with_call() {
+        assert!(escapes(
+            &Let::new(
+                "y",
+                Type::None,
+                Variable::new("x"),
+                Call::new(
+                    types::Function::new(vec![], Type::None),
+                    Variable::new("f"),
+                    vec![Variable::new("y").into()]
+                )
+            )
+            .into(),
             "x",
         ));
     }
