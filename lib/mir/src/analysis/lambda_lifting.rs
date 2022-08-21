@@ -1,4 +1,5 @@
 mod context;
+mod function;
 
 use self::context::Context;
 use crate::ir::*;
@@ -117,6 +118,9 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     expression,
                 )
                 .into()
+            } else if !function::is_boxed(let_.expression(), let_.definition().name()) {
+                // TODO
+                LetRecursive::new(definition, expression).into()
             } else {
                 LetRecursive::new(definition, expression).into()
             }
