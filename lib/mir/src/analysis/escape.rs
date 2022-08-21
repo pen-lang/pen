@@ -94,15 +94,12 @@ fn moves_expression(expression: &Expression, name: &str) -> bool {
                         && moves_expression(let_.expression(), let_.name())
             }
         }
-        // We consider variables to be moved whenever variables are in closure environment
-        // even when the closures are not moved in later expressions
-        // because we need to use normal data representation of those variables anyway
-        // in lambda lifting if moved variables are closures.
         Expression::LetRecursive(let_) => {
             let_.definition()
                 .environment()
                 .iter()
                 .any(|free_variable| free_variable.name() == name)
+                && moves_expression(let_.expression(), let_.definition().name())
                 || let_.definition().name() != name && moves(let_.expression())
         }
         Expression::Synchronize(synchronize) => moves(synchronize.expression()),
@@ -356,6 +353,25 @@ mod tests {
     #[test]
     fn escape_let_recursive_with_environment() {
         assert!(escapes(
+            &LetRecursive::new(
+                FunctionDefinition::with_options(
+                    "y",
+                    vec![Argument::new("x", Type::None)],
+                    vec![],
+                    Type::None,
+                    Expression::None,
+                    false
+                ),
+                Variable::new("y"),
+            )
+            .into(),
+            "x",
+        ));
+    }
+
+    #[test]
+    fn escape_let_recursive_discarded_with_environment() {
+        assert!(!escapes(
             &LetRecursive::new(
                 FunctionDefinition::with_options(
                     "y",
