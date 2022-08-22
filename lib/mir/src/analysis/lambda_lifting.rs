@@ -134,6 +134,18 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         )
                     })
                     .collect::<Vec<_>>();
+                let transform_expression = |expression| {
+                    save_free_variables(
+                        definition.environment(),
+                        &free_variable_names,
+                        &call::transform(
+                            expression,
+                            definition.name(),
+                            definition.name(),
+                            &renamed_environment,
+                        ),
+                    )
+                };
 
                 let function_name =
                     context.add_function_definition(FunctionDefinition::with_options(
@@ -143,15 +155,10 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                             .arguments()
                             .iter()
                             .cloned()
-                            .chain(renamed_environment.iter().cloned())
+                            .chain(definition.environment().iter().cloned())
                             .collect(),
                         definition.result_type().clone(),
-                        call::transform(
-                            definition.body(),
-                            definition.name(),
-                            definition.name(),
-                            &renamed_environment,
-                        ),
+                        transform_expression(definition.body()),
                         definition.is_thunk(),
                     ));
 
@@ -164,7 +171,8 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                             .iter()
                             .cloned()
                             .chain(
-                                renamed_environment
+                                definition
+                                    .environment()
                                     .iter()
                                     .map(|free_variable| free_variable.type_())
                                     .cloned(),
@@ -173,16 +181,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         definition.type_().result().clone(),
                     ),
                     Variable::new(function_name),
-                    save_free_variables(
-                        definition.environment(),
-                        &free_variable_names,
-                        &call::transform(
-                            &expression,
-                            definition.name(),
-                            definition.name(),
-                            &renamed_environment,
-                        ),
-                    ),
+                    transform_expression(&expression),
                 )
                 .into()
             } else {
@@ -375,6 +374,62 @@ mod tests {
     }
 
     #[test]
+    fn lift_closure_with_free_variable_used_in_body() {
+        let function_type = types::Function::new(vec![Type::Number], Type::Number);
+
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "g",
+                            vec![Argument::new("x", Type::Number)],
+                            vec![],
+                            Type::Number,
+                            Variable::new("x"),
+                            false,
+                        ),
+                        42.0,
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        Let::new("fv:x:0", Type::Number, Variable::new("x"), 42.0)
+                    ),
+                    Type::Number,
+                ),
+                FunctionDefinition::with_options(
+                    "mir:lift:0:g",
+                    vec![],
+                    vec![Argument::new("x", Type::Number)],
+                    Type::Number,
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        Let::new(
+                            "fv:x:0",
+                            Type::Number,
+                            Variable::new("x"),
+                            Variable::new("x")
+                        )
+                    ),
+                    false,
+                )
+            ])
+        );
+    }
+    #[test]
     fn lift_closure_with_free_variable() {
         let function_type = types::Function::new(vec![Type::None], Type::Number);
 
@@ -412,13 +467,13 @@ mod tests {
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("fv:x:0", Type::None)],
+                    vec![Argument::new("x", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        42.0
+                        Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
                     false,
                 )
@@ -477,13 +532,13 @@ mod tests {
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("fv:x:0", Type::None)],
+                    vec![Argument::new("x", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        42.0
+                        Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
                     false,
                 )
@@ -589,16 +644,21 @@ mod tests {
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("fv:x:0", Type::None)],
+                    vec![Argument::new("x", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        Call::new(
-                            function_type,
-                            Variable::new("g"),
-                            vec![Variable::new("fv:x:0").into()]
+                        Let::new(
+                            "fv:x:0",
+                            Type::None,
+                            Variable::new("x"),
+                            Call::new(
+                                function_type,
+                                Variable::new("g"),
+                                vec![Variable::new("fv:x:0").into()]
+                            )
                         )
                     ),
                     false,
