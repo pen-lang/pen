@@ -132,17 +132,43 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         .chain(definition.environment().iter().cloned())
                         .collect(),
                     definition.result_type().clone(),
-                    definition.body().clone(),
+                    call::transform(
+                        definition.body(),
+                        definition.name(),
+                        definition.name(),
+                        definition.environment(),
+                    ),
                     definition.is_thunk(),
                 ));
 
                 // TODO Mangle free variables.
-                call::transform(
-                    &expression,
+                Let::new(
                     definition.name(),
-                    &name,
-                    definition.environment(),
+                    types::Function::new(
+                        definition
+                            .type_()
+                            .arguments()
+                            .iter()
+                            .cloned()
+                            .chain(
+                                definition
+                                    .environment()
+                                    .iter()
+                                    .map(|free_variable| free_variable.type_())
+                                    .cloned(),
+                            )
+                            .collect(),
+                        definition.type_().result().clone(),
+                    ),
+                    Variable::new(name),
+                    call::transform(
+                        &expression,
+                        definition.name(),
+                        definition.name(),
+                        definition.environment(),
+                    ),
                 )
+                .into()
             } else {
                 LetRecursive::new(definition, expression).into()
             }
@@ -324,7 +350,17 @@ mod tests {
                 )])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake("f", vec![], 42.0, Type::Number,),
+                FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        42.0
+                    ),
+                    Type::Number,
+                ),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
@@ -373,10 +409,15 @@ mod tests {
                 FunctionDefinition::fake(
                     "f",
                     vec![],
-                    Call::new(
-                        types::Function::new(vec![Type::None], Type::Number),
+                    Let::new(
+                        "g",
+                        function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        vec![Variable::new("x").into()]
+                        Call::new(
+                            types::Function::new(vec![Type::None], Type::Number),
+                            Variable::new("g"),
+                            vec![Variable::new("x").into()]
+                        ),
                     ),
                     Type::Number,
                 ),
@@ -448,6 +489,66 @@ mod tests {
                         )
                     ),
                     Type::Number,
+                )
+            ])
+        );
+    }
+
+    #[test]
+    fn lift_recursive_closure_with_free_variable() {
+        let function_type = types::Function::new(vec![Type::None], Type::Number);
+
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "g",
+                            vec![Argument::new("x", Type::None)],
+                            vec![],
+                            Type::Number,
+                            Call::new(
+                                types::Function::new(vec![], Type::Number),
+                                Variable::new("g"),
+                                vec![]
+                            ),
+                            false,
+                        ),
+                        42.0
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        42.0
+                    ),
+                    Type::Number,
+                ),
+                FunctionDefinition::with_options(
+                    "mir:lift:0:g",
+                    vec![],
+                    vec![Argument::new("x", Type::None)],
+                    Type::Number,
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        Call::new(
+                            function_type,
+                            Variable::new("g"),
+                            vec![Variable::new("x").into()]
+                        ),
+                    ),
+                    false,
                 )
             ])
         );
