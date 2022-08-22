@@ -121,7 +121,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                 )
                 .into()
             } else if !box_::is_boxed(&expression, definition.name())
-                && !box_::is_boxed(&definition.body(), definition.name())
+                && !box_::is_boxed(definition.body(), definition.name())
             {
                 let free_variable_names = rename_free_variables(context, definition.environment());
                 let renamed_environment = definition
@@ -415,7 +415,7 @@ mod tests {
                     Type::Number,
                     Let::new(
                         "g",
-                        function_type.clone(),
+                        function_type,
                         Variable::new("mir:lift:0:g"),
                         Let::new(
                             "fv:x:0",
@@ -471,7 +471,7 @@ mod tests {
                     Type::Number,
                     Let::new(
                         "g",
-                        function_type.clone(),
+                        function_type,
                         Variable::new("mir:lift:0:g"),
                         Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
@@ -536,7 +536,7 @@ mod tests {
                     Type::Number,
                     Let::new(
                         "g",
-                        function_type.clone(),
+                        function_type,
                         Variable::new("mir:lift:0:g"),
                         Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
