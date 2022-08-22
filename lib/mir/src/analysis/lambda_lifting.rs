@@ -1,8 +1,9 @@
 mod box_;
+mod call;
 mod context;
 
 use self::context::Context;
-use crate::ir::*;
+use crate::{ir::*, types};
 
 pub fn transform(module: &Module) -> Module {
     let mut context = Context::new();
@@ -118,9 +119,30 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     expression,
                 )
                 .into()
-            } else if !box_::is_boxed(let_.expression(), let_.definition().name()) {
-                // TODO
-                LetRecursive::new(definition, expression).into()
+            } else if !box_::is_boxed(&expression, definition.name())
+                && !box_::is_boxed(&definition.body(), definition.name())
+            {
+                let name = context.add_function_definition(FunctionDefinition::with_options(
+                    definition.name(),
+                    vec![],
+                    definition
+                        .arguments()
+                        .iter()
+                        .cloned()
+                        .chain(definition.environment().iter().cloned())
+                        .collect(),
+                    definition.result_type().clone(),
+                    definition.body().clone(),
+                    definition.is_thunk(),
+                ));
+
+                // TODO Mangle free variables.
+                call::transform(
+                    &expression,
+                    definition.name(),
+                    &name,
+                    definition.environment(),
+                )
             } else {
                 LetRecursive::new(definition, expression).into()
             }
@@ -279,29 +301,104 @@ mod tests {
     }
 
     #[test]
-    fn do_not_lift_closure_with_free_variable() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-            "f",
-            vec![],
-            LetRecursive::new(
-                FunctionDefinition::with_options(
-                    "g",
-                    vec![Argument::new("x", Type::None)],
-                    vec![],
-                    Type::Number,
-                    42.0,
-                    false,
-                ),
-                42.0,
-            ),
-            Type::Number,
-        )]);
+    fn lift_closure_with_free_variable() {
+        let function_type = types::Function::new(vec![Type::None], Type::Number);
 
-        assert_eq!(transform(&module), module);
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "g",
+                            vec![Argument::new("x", Type::None)],
+                            vec![],
+                            Type::Number,
+                            42.0,
+                            false,
+                        ),
+                        42.0,
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake("f", vec![], 42.0, Type::Number,),
+                FunctionDefinition::with_options(
+                    "mir:lift:0:g",
+                    vec![],
+                    vec![Argument::new("x", Type::None)],
+                    Type::Number,
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        42.0
+                    ),
+                    false,
+                )
+            ])
+        );
     }
 
     #[test]
-    fn lift_recursive_closure_with_no_free_variable() {
+    fn lift_closure_with_free_variable_with_call() {
+        let function_type = types::Function::new(vec![Type::None], Type::Number);
+
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "g",
+                            vec![Argument::new("x", Type::None)],
+                            vec![],
+                            Type::Number,
+                            42.0,
+                            false,
+                        ),
+                        Call::new(
+                            types::Function::new(vec![], Type::Number),
+                            Variable::new("g"),
+                            vec![]
+                        ),
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Call::new(
+                        types::Function::new(vec![Type::None], Type::Number),
+                        Variable::new("mir:lift:0:g"),
+                        vec![Variable::new("x").into()]
+                    ),
+                    Type::Number,
+                ),
+                FunctionDefinition::with_options(
+                    "mir:lift:0:g",
+                    vec![],
+                    vec![Argument::new("x", Type::None)],
+                    Type::Number,
+                    Let::new(
+                        "g",
+                        function_type.clone(),
+                        Variable::new("mir:lift:0:g"),
+                        42.0
+                    ),
+                    false,
+                )
+            ])
+        );
+    }
+
+    #[test]
+    fn lift_recursive_closure_without_free_variable() {
         let function_type = types::Function::new(vec![Type::None], Type::Number);
 
         assert_eq!(

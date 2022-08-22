@@ -1,5 +1,6 @@
 use crate::ir::*;
 
+#[derive(Debug)]
 pub struct Context {
     function_definitions: Vec<GlobalFunctionDefinition>,
 }
