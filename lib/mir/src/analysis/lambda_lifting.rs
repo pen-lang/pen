@@ -147,16 +147,17 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     )
                 };
 
+                let arguments = definition
+                    .arguments()
+                    .iter()
+                    .cloned()
+                    .chain(definition.environment().iter().cloned())
+                    .collect();
                 let function_name =
                     context.add_function_definition(FunctionDefinition::with_options(
                         definition.name(),
                         vec![],
-                        definition
-                            .arguments()
-                            .iter()
-                            .cloned()
-                            .chain(definition.environment().iter().cloned())
-                            .collect(),
+                        arguments.clone(),
                         definition.result_type().clone(),
                         transform_expression(definition.body()),
                         definition.is_thunk(),
@@ -165,18 +166,10 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                 Let::new(
                     definition.name(),
                     types::Function::new(
-                        definition
-                            .type_()
-                            .arguments()
+                        arguments
                             .iter()
+                            .map(|argument| argument.type_())
                             .cloned()
-                            .chain(
-                                definition
-                                    .environment()
-                                    .iter()
-                                    .map(|free_variable| free_variable.type_())
-                                    .cloned(),
-                            )
                             .collect(),
                         definition.type_().result().clone(),
                     ),
