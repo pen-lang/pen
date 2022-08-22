@@ -4,6 +4,7 @@ mod context;
 
 use self::context::Context;
 use crate::{ir::*, types};
+use fnv::FnvHashMap;
 
 pub fn transform(module: &Module) -> Module {
     let mut context = Context::new();
@@ -122,26 +123,38 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             } else if !box_::is_boxed(&expression, definition.name())
                 && !box_::is_boxed(&definition.body(), definition.name())
             {
-                let name = context.add_function_definition(FunctionDefinition::with_options(
-                    definition.name(),
-                    vec![],
-                    definition
-                        .arguments()
-                        .iter()
-                        .cloned()
-                        .chain(definition.environment().iter().cloned())
-                        .collect(),
-                    definition.result_type().clone(),
-                    call::transform(
-                        definition.body(),
-                        definition.name(),
-                        definition.name(),
-                        definition.environment(),
-                    ),
-                    definition.is_thunk(),
-                ));
+                let free_variable_names = rename_free_variables(context, definition.environment());
+                let renamed_environment = definition
+                    .environment()
+                    .iter()
+                    .map(|free_variable| {
+                        Argument::new(
+                            &free_variable_names[free_variable.name()],
+                            free_variable.type_().clone(),
+                        )
+                    })
+                    .collect::<Vec<_>>();
 
-                // TODO Mangle free variables.
+                let function_name =
+                    context.add_function_definition(FunctionDefinition::with_options(
+                        definition.name(),
+                        vec![],
+                        definition
+                            .arguments()
+                            .iter()
+                            .cloned()
+                            .chain(renamed_environment.iter().cloned())
+                            .collect(),
+                        definition.result_type().clone(),
+                        call::transform(
+                            definition.body(),
+                            definition.name(),
+                            definition.name(),
+                            &renamed_environment,
+                        ),
+                        definition.is_thunk(),
+                    ));
+
                 Let::new(
                     definition.name(),
                     types::Function::new(
@@ -151,8 +164,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                             .iter()
                             .cloned()
                             .chain(
-                                definition
-                                    .environment()
+                                renamed_environment
                                     .iter()
                                     .map(|free_variable| free_variable.type_())
                                     .cloned(),
@@ -160,12 +172,16 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                             .collect(),
                         definition.type_().result().clone(),
                     ),
-                    Variable::new(name),
-                    call::transform(
-                        &expression,
-                        definition.name(),
-                        definition.name(),
+                    Variable::new(function_name),
+                    save_free_variables(
                         definition.environment(),
+                        &free_variable_names,
+                        &call::transform(
+                            &expression,
+                            definition.name(),
+                            definition.name(),
+                            &renamed_environment,
+                        ),
                     ),
                 )
                 .into()
@@ -216,6 +232,38 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
         | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => expression.clone(),
+    }
+}
+
+fn rename_free_variables<'a>(
+    context: &mut Context,
+    environment: &'a [Argument],
+) -> FnvHashMap<&'a str, String> {
+    environment
+        .iter()
+        .map(|free_variable| {
+            (
+                free_variable.name(),
+                context.rename_free_variable(free_variable.name()),
+            )
+        })
+        .collect()
+}
+
+fn save_free_variables(
+    environment: &[Argument],
+    names: &FnvHashMap<&str, String>,
+    expression: &Expression,
+) -> Expression {
+    match environment {
+        [] => expression.clone(),
+        [free_variable, ..] => Let::new(
+            &names[free_variable.name()],
+            free_variable.type_().clone(),
+            Variable::new(free_variable.name()),
+            save_free_variables(&environment[1..], names, expression),
+        )
+        .into(),
     }
 }
 
@@ -357,14 +405,14 @@ mod tests {
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        42.0
+                        Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("x", Type::None)],
+                    vec![Argument::new("fv:x:0", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
@@ -413,18 +461,23 @@ mod tests {
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        Call::new(
-                            types::Function::new(vec![Type::None], Type::Number),
-                            Variable::new("g"),
-                            vec![Variable::new("x").into()]
-                        ),
+                        Let::new(
+                            "fv:x:0",
+                            Type::None,
+                            Variable::new("x"),
+                            Call::new(
+                                types::Function::new(vec![Type::None], Type::Number),
+                                Variable::new("g"),
+                                vec![Variable::new("fv:x:0").into()]
+                            ),
+                        )
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("x", Type::None)],
+                    vec![Argument::new("fv:x:0", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
@@ -529,14 +582,14 @@ mod tests {
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
-                        42.0
+                        Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
                     ),
                     Type::Number,
                 ),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
-                    vec![Argument::new("x", Type::None)],
+                    vec![Argument::new("fv:x:0", Type::None)],
                     Type::Number,
                     Let::new(
                         "g",
@@ -545,8 +598,8 @@ mod tests {
                         Call::new(
                             function_type,
                             Variable::new("g"),
-                            vec![Variable::new("x").into()]
-                        ),
+                            vec![Variable::new("fv:x:0").into()]
+                        )
                     ),
                     false,
                 )
