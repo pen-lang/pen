@@ -152,7 +152,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     .iter()
                     .cloned()
                     .chain(definition.environment().iter().cloned())
-                    .collect();
+                    .collect::<Vec<_>>();
                 let function_name =
                     context.add_function_definition(FunctionDefinition::with_options(
                         definition.name(),
