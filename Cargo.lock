@@ -278,7 +278,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#df3a81c979fa659cc213115647b101059cb86b8e"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
 dependencies = [
  "fnv",
  "hamt",
@@ -290,7 +290,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#df3a81c979fa659cc213115647b101059cb86b8e"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
 dependencies = [
  "fmm",
  "fnv",
@@ -300,7 +300,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#df3a81c979fa659cc213115647b101059cb86b8e"
+source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
 dependencies = [
  "fmm",
  "hamt",
@@ -588,14 +588,13 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.18.2"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57a9aec10c9a062ef0454fd49ebaefa59239f836d1b30891d9cc2289978dd970"
+checksum = "f37dc501f12ec0c339b385787fa89ffda3d5d2caa62e558da731134c24d6e0c4"
 dependencies = [
  "console",
  "linked-hash-map",
  "once_cell",
- "serde",
  "similar",
  "yaml-rust",
 ]
