@@ -218,7 +218,9 @@ fn transform_expression(
                         .fields()
                         .iter()
                         .map(|field| field.expression())
-                        .zip(context.record_fields()[update.type_().name()].fields())
+                        .zip(update.fields().iter().map(|field| {
+                            &context.record_fields()[update.type_().name()].fields()[field.index()]
+                        }))
                         .collect::<Vec<_>>(),
                     &|fields| {
                         continue_(
@@ -262,7 +264,6 @@ fn transform_expression(
         | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => continue_(expression.clone()),
-        _ => todo!(),
     }
 }
 
