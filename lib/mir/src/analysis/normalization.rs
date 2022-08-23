@@ -80,6 +80,7 @@ fn transform_expression(
         Expression::Call(call) => transform_expression(call.function(), &|function| {
             let function_name = context.generate_name();
 
+            // TODO Not let function if function is variable.
             Let::new(
                 &function_name,
                 call.type_().clone(),
