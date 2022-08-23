@@ -78,7 +78,7 @@ fn transform_expression(
                         .iter()
                         .zip(call.type_().arguments())
                         .collect::<Vec<_>>(),
-                    &mut |arguments| {
+                    &|arguments| {
                         continue_(
                             Call::new(
                                 call.type_().clone(),
@@ -129,7 +129,6 @@ fn transform_expression(
                     )
                 })
             })
-            .into()
         }
         Expression::DropVariables(drop) => transform_expression(drop.expression(), &|expression| {
             continue_(CloneVariables::new(drop.variables().clone(), expression).into())
@@ -183,8 +182,8 @@ fn transform_expression(
         //         .fields()
         //         .iter()
         //         .map(|field| {
-        //             RecordUpdateField::new(field.index(), transform_expression(field.expression()))
-        //         })
+        //             RecordUpdateField::new(field.index(),
+        // transform_expression(field.expression()))         })
         //         .collect(),
         // )
         // .into(),
@@ -230,7 +229,7 @@ fn transform_expressions_recursively(
     match expressions {
         [] => continue_(transformed_expressions),
         [(expression, type_), ..] => {
-            transform_expression(context, expression, &mut move |expression| {
+            transform_expression(context, expression, &move |expression| {
                 let name = context.generate_name();
 
                 Let::new(
