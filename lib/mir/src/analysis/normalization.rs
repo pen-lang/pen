@@ -1,4 +1,7 @@
-use crate::ir::*;
+mod context;
+
+use self::context::Context;
+use crate::{ir::*, types::Type};
 use std::convert::identity;
 
 // Normalize expressions into the A-normal form with some exceptions.
@@ -8,6 +11,8 @@ use std::convert::identity;
 // - Conditional expressions are kept nested.
 //   - Otherwise, we need to duplicate continuations of those expression.
 pub fn transform(module: &Module) -> Module {
+    let context = Context::new();
+
     Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
@@ -18,7 +23,7 @@ pub fn transform(module: &Module) -> Module {
             .iter()
             .map(|definition| {
                 GlobalFunctionDefinition::new(
-                    transform_function_definition(definition.definition()),
+                    transform_function_definition(&context, definition.definition()),
                     definition.is_public(),
                 )
             })
@@ -26,21 +31,29 @@ pub fn transform(module: &Module) -> Module {
     )
 }
 
-fn transform_function_definition(definition: &FunctionDefinition) -> FunctionDefinition {
+fn transform_function_definition(
+    context: &Context,
+    definition: &FunctionDefinition,
+) -> FunctionDefinition {
     FunctionDefinition::with_options(
         definition.name(),
         definition.environment().to_vec(),
         definition.arguments().to_vec(),
         definition.result_type().clone(),
-        transform_expression(definition.body(), &identity),
+        transform_expression(context, definition.body(), &identity),
         definition.is_thunk(),
     )
 }
 
 fn transform_expression(
+    context: &Context,
     expression: &Expression,
     continue_: &dyn Fn(Expression) -> Expression,
 ) -> Expression {
+    let transform_expression = |expression, continue_: &dyn Fn(Expression) -> Expression| {
+        transform_expression(context, expression, continue_)
+    };
+
     match expression {
         Expression::ArithmeticOperation(operation) => {
             transform_expression(operation.lhs(), &|lhs| {
@@ -51,6 +64,34 @@ fn transform_expression(
                 })
             })
         }
+        Expression::Call(call) => transform_expression(call.function(), &|function| {
+            let function_name = context.generate_name();
+
+            Let::new(
+                &function_name,
+                call.type_().clone(),
+                function,
+                transform_expressions(
+                    context,
+                    &call
+                        .arguments()
+                        .iter()
+                        .zip(call.type_().arguments())
+                        .collect::<Vec<_>>(),
+                    &mut |arguments| {
+                        continue_(
+                            Call::new(
+                                call.type_().clone(),
+                                Variable::new(&function_name),
+                                arguments,
+                            )
+                            .into(),
+                        )
+                    },
+                ),
+            )
+            .into()
+        }),
         Expression::Case(case) => transform_expression(case.argument(), &|argument| {
             continue_(
                 Case::new(
@@ -93,11 +134,6 @@ fn transform_expression(
         Expression::DropVariables(drop) => transform_expression(drop.expression(), &|expression| {
             continue_(CloneVariables::new(drop.variables().clone(), expression).into())
         }),
-        Expression::Call(call) => transform_expression(call.function(), &|function| {
-            transform_expressions(call.arguments(), &mut |arguments| {
-                continue_(Call::new(call.type_().clone(), function.clone(), arguments).into())
-            })
-        }),
         Expression::If(if_) => transform_expression(if_.condition(), &|condition| {
             continue_(
                 If::new(
@@ -120,7 +156,7 @@ fn transform_expression(
             })
         }
         Expression::LetRecursive(let_) => LetRecursive::new(
-            transform_function_definition(let_.definition()),
+            transform_function_definition(context, let_.definition()),
             transform_expression(let_.expression(), continue_),
         )
         .into(),
@@ -178,30 +214,43 @@ fn transform_expression(
 }
 
 fn transform_expressions(
-    expressions: &[Expression],
+    context: &Context,
+    expressions: &[(&Expression, &Type)],
     continue_: &impl Fn(Vec<Expression>) -> Expression,
 ) -> Expression {
-    transform_expressions_recursively(expressions, vec![], &continue_)
+    transform_expressions_recursively(context, expressions, vec![], &continue_)
 }
 
 fn transform_expressions_recursively(
-    expressions: &[Expression],
+    context: &Context,
+    expressions: &[(&Expression, &Type)],
     transformed_expressions: Vec<Expression>,
     continue_: &impl Fn(Vec<Expression>) -> Expression,
 ) -> Expression {
     match expressions {
         [] => continue_(transformed_expressions),
-        [expression, ..] => transform_expression(expression, &mut move |expression| {
-            transform_expressions_recursively(
-                &expressions[1..],
-                transformed_expressions
-                    .iter()
-                    .cloned()
-                    .chain([expression])
-                    .collect(),
-                continue_,
-            )
-        }),
+        [(expression, type_), ..] => {
+            transform_expression(context, expression, &mut move |expression| {
+                let name = context.generate_name();
+
+                Let::new(
+                    &name,
+                    (*type_).clone(),
+                    expression,
+                    transform_expressions_recursively(
+                        context,
+                        &expressions[1..],
+                        transformed_expressions
+                            .iter()
+                            .cloned()
+                            .chain([Variable::new(&name).into()])
+                            .collect(),
+                        continue_,
+                    ),
+                )
+                .into()
+            })
+        }
     }
 }
 
@@ -380,21 +429,39 @@ mod tests {
                     Type::Number,
                     1.0,
                     Let::new(
-                        "y",
-                        Type::Number,
-                        2.0,
+                        "anf:v:0",
+                        types::Function::new(vec![Type::Number, Type::Number], Type::Number),
+                        Variable::new("x"),
                         Let::new(
-                            "z",
+                            "y",
                             Type::Number,
-                            3.0,
-                            Call::new(
-                                types::Function::new(
-                                    vec![Type::Number, Type::Number],
-                                    Type::Number
-                                ),
-                                Variable::new("x"),
-                                vec![Variable::new("y").into(), Variable::new("z").into()],
-                            ),
+                            2.0,
+                            Let::new(
+                                "anf:v:1",
+                                Type::Number,
+                                Variable::new("y"),
+                                Let::new(
+                                    "z",
+                                    Type::Number,
+                                    3.0,
+                                    Let::new(
+                                        "anf:v:2",
+                                        Type::Number,
+                                        Variable::new("z"),
+                                        Call::new(
+                                            types::Function::new(
+                                                vec![Type::Number, Type::Number],
+                                                Type::Number
+                                            ),
+                                            Variable::new("anf:v:0"),
+                                            vec![
+                                                Variable::new("anf:v:1").into(),
+                                                Variable::new("anf:v:2").into()
+                                            ],
+                                        ),
+                                    )
+                                )
+                            )
                         )
                     )
                 ),
