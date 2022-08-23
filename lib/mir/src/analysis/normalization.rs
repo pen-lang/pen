@@ -11,7 +11,7 @@ use std::convert::identity;
 // - Conditional expressions are kept nested.
 //   - Otherwise, we need to duplicate continuations of those expression.
 pub fn transform(module: &Module) -> Module {
-    let context = Context::new();
+    let context = Context::new(module);
 
     Module::new(
         module.type_definitions().to_vec(),
@@ -57,11 +57,24 @@ fn transform_expression(
     match expression {
         Expression::ArithmeticOperation(operation) => {
             transform_expression(operation.lhs(), &|lhs| {
-                transform_expression(operation.rhs(), &|rhs| {
-                    continue_(
-                        ArithmeticOperation::new(operation.operator(), lhs.clone(), rhs).into(),
-                    )
-                })
+                let name = context.generate_name();
+
+                Let::new(
+                    &name,
+                    Type::Number,
+                    lhs,
+                    transform_expression(operation.rhs(), &|rhs| {
+                        continue_(
+                            ArithmeticOperation::new(
+                                operation.operator(),
+                                Variable::new(&name),
+                                rhs,
+                            )
+                            .into(),
+                        )
+                    }),
+                )
+                .into()
             })
         }
         Expression::Call(call) => transform_expression(call.function(), &|function| {
@@ -123,11 +136,24 @@ fn transform_expression(
         }
         Expression::ComparisonOperation(operation) => {
             transform_expression(operation.lhs(), &|lhs| {
-                transform_expression(operation.rhs(), &|rhs| {
-                    continue_(
-                        ComparisonOperation::new(operation.operator(), lhs.clone(), rhs).into(),
-                    )
-                })
+                let name = context.generate_name();
+
+                Let::new(
+                    &name,
+                    Type::Number,
+                    lhs,
+                    transform_expression(operation.rhs(), &|rhs| {
+                        continue_(
+                            ComparisonOperation::new(
+                                operation.operator(),
+                                Variable::new(&name),
+                                rhs,
+                            )
+                            .into(),
+                        )
+                    }),
+                )
+                .into()
             })
         }
         Expression::DropVariables(drop) => transform_expression(drop.expression(), &|expression| {
@@ -164,29 +190,57 @@ fn transform_expression(
                 continue_(Synchronize::new(synchronize.type_().clone(), expression).into())
             })
         }
-        // Expression::Record(record) => Record::new(
-        //     record.type_().clone(),
-        //     record.fields().iter().map(transform_expression).collect(),
-        // )
-        // .into(),
-        // Expression::RecordField(field) => RecordField::new(
-        //     field.type_().clone(),
-        //     field.index(),
-        //     transform_expression(field.record()),
-        // )
-        // .into(),
-        // Expression::RecordUpdate(update) => RecordUpdate::new(
-        //     update.type_().clone(),
-        //     transform_expression(update.record()),
-        //     update
-        //         .fields()
-        //         .iter()
-        //         .map(|field| {
-        //             RecordUpdateField::new(field.index(),
-        // transform_expression(field.expression()))         })
-        //         .collect(),
-        // )
-        // .into(),
+        // TODO Test this.
+        Expression::Record(record) => transform_expressions(
+            context,
+            &record
+                .fields()
+                .iter()
+                .zip(context.record_fields()[record.type_().name()].fields())
+                .collect::<Vec<_>>(),
+            &|fields| continue_(Record::new(record.type_().clone(), fields).into()),
+        ),
+        // TODO Test this.
+        Expression::RecordField(field) => transform_expression(field.record(), &|expression| {
+            continue_(RecordField::new(field.type_().clone(), field.index(), expression).into())
+        }),
+        // TODO Test this.
+        Expression::RecordUpdate(update) => transform_expression(update.record(), &|record| {
+            let record_name = context.generate_name();
+
+            Let::new(
+                &record_name,
+                update.type_().clone(),
+                record,
+                transform_expressions(
+                    context,
+                    &update
+                        .fields()
+                        .iter()
+                        .map(|field| field.expression())
+                        .zip(context.record_fields()[update.type_().name()].fields())
+                        .collect::<Vec<_>>(),
+                    &|fields| {
+                        continue_(
+                            RecordUpdate::new(
+                                update.type_().clone(),
+                                Variable::new(&record_name),
+                                update
+                                    .fields()
+                                    .iter()
+                                    .zip(fields)
+                                    .map(|(field, expression)| {
+                                        RecordUpdateField::new(field.index(), expression)
+                                    })
+                                    .collect(),
+                            )
+                            .into(),
+                        )
+                    },
+                ),
+            )
+            .into()
+        }),
         Expression::TryOperation(operation) => {
             transform_expression(operation.operand(), &|operand| {
                 continue_(
@@ -403,6 +457,49 @@ mod tests {
     }
 
     #[test]
+    fn transform_arithmetic_operation() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    ArithmeticOperation::new(
+                        ArithmeticOperator::Add,
+                        Let::new("x", Type::Number, 1.0, Variable::new("x")),
+                        Let::new("y", Type::Number, 2.0, Variable::new("y")),
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![],
+                Let::new(
+                    "x",
+                    Type::Number,
+                    1.0,
+                    Let::new(
+                        "anf:v:0",
+                        Type::Number,
+                        Variable::new("x"),
+                        Let::new(
+                            "y",
+                            Type::Number,
+                            2.0,
+                            ArithmeticOperation::new(
+                                ArithmeticOperator::Add,
+                                Variable::new("anf:v:0"),
+                                Variable::new("y"),
+                            ),
+                        )
+                    )
+                ),
+                Type::Number,
+            )])
+        );
+    }
+
+    #[test]
     fn transform_call() {
         assert_eq!(
             transform(
@@ -461,6 +558,49 @@ mod tests {
                                     )
                                 )
                             )
+                        )
+                    )
+                ),
+                Type::Number,
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_comparison_operation() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    ComparisonOperation::new(
+                        ComparisonOperator::Equal,
+                        Let::new("x", Type::Number, 1.0, Variable::new("x")),
+                        Let::new("y", Type::Number, 2.0, Variable::new("y")),
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![],
+                Let::new(
+                    "x",
+                    Type::Number,
+                    1.0,
+                    Let::new(
+                        "anf:v:0",
+                        Type::Number,
+                        Variable::new("x"),
+                        Let::new(
+                            "y",
+                            Type::Number,
+                            2.0,
+                            ComparisonOperation::new(
+                                ComparisonOperator::Equal,
+                                Variable::new("anf:v:0"),
+                                Variable::new("y"),
+                            ),
                         )
                     )
                 ),
