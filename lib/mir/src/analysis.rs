@@ -1,4 +1,5 @@
 pub mod environment_inference;
+pub mod normalization;
 pub mod free_variable;
 pub mod lambda_lifting;
 pub mod reference_count;
