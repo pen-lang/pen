@@ -76,34 +76,38 @@ fn transform_expression(
             )
         }),
         Expression::CloneVariables(clone) => {
-            continue_(transform_expression(clone.expression(), &|expression| {
-                CloneVariables::new(clone.variables().clone(), expression).into()
-            }))
+            transform_expression(clone.expression(), &|expression| {
+                continue_(CloneVariables::new(clone.variables().clone(), expression).into())
+            })
         }
-        Expression::ComparisonOperation(operation) => continue_(
+        Expression::ComparisonOperation(operation) => {
             transform_expression(operation.lhs(), &|lhs| {
                 transform_expression(operation.rhs(), &|rhs| {
-                    ComparisonOperation::new(operation.operator(), lhs.clone(), rhs).into()
+                    continue_(
+                        ComparisonOperation::new(operation.operator(), lhs.clone(), rhs).into(),
+                    )
                 })
             })
-            .into(),
-        ),
-        Expression::DropVariables(drop) => {
-            continue_(transform_expression(drop.expression(), &|expression| {
-                CloneVariables::new(drop.variables().clone(), expression).into()
-            }))
+            .into()
         }
-        Expression::Call(call) => continue_(transform_expression(call.function(), &|function| {
+        Expression::DropVariables(drop) => transform_expression(drop.expression(), &|expression| {
+            continue_(CloneVariables::new(drop.variables().clone(), expression).into())
+        }),
+        Expression::Call(call) => transform_expression(call.function(), &|function| {
             transform_expressions(call.arguments(), &mut |arguments| {
-                Call::new(call.type_().clone(), function.clone(), arguments).into()
+                continue_(Call::new(call.type_().clone(), function.clone(), arguments).into())
             })
-        })),
-        // Expression::If(if_) => If::new(
-        //     transform_expression(if_.condition()),
-        //     transform_expression(if_.then()),
-        //     transform_expression(if_.else_()),
-        // )
-        // .into(),
+        }),
+        Expression::If(if_) => transform_expression(if_.condition(), &|condition| {
+            continue_(
+                If::new(
+                    condition,
+                    transform_expression(if_.then(), &identity),
+                    transform_expression(if_.else_(), &identity),
+                )
+                .into(),
+            )
+        }),
         Expression::Let(let_) => {
             transform_expression(let_.bound_expression(), &|bound_expression| {
                 Let::new(
@@ -115,17 +119,16 @@ fn transform_expression(
                 .into()
             })
         }
-        // Expression::LetRecursive(let_) => {
-        //     let definition = transform_function_definition(let_.definition());
-        //     let expression = transform_expression(let_.expression());
-
-        //     LetRecursive::new(definition, expression).into()
-        // }
-        // Expression::Synchronize(synchronize) => Synchronize::new(
-        //     synchronize.type_().clone(),
-        //     transform_expression(synchronize.expression()),
-        // )
-        // .into(),
+        Expression::LetRecursive(let_) => LetRecursive::new(
+            transform_function_definition(let_.definition()),
+            transform_expression(let_.expression(), continue_),
+        )
+        .into(),
+        Expression::Synchronize(synchronize) => {
+            transform_expression(synchronize.expression(), &|expression| {
+                continue_(Synchronize::new(synchronize.type_().clone(), expression).into())
+            })
+        }
         // Expression::Record(record) => Record::new(
         //     record.type_().clone(),
         //     record.fields().iter().map(transform_expression).collect(),
@@ -451,7 +454,7 @@ mod tests {
                     "x",
                     Type::None,
                     Expression::None,
-                    Variant::new(Type::None, Variable::new("x"),)
+                    Variant::new(Type::None, Variable::new("x"))
                 ),
                 Type::Number,
             )])
