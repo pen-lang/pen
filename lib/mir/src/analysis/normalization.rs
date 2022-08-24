@@ -60,28 +60,15 @@ fn transform_expression(
 
     match expression {
         Expression::ArithmeticOperation(operation) => {
-            transform_expression(operation.lhs(), &|lhs| {
-                let name = context.generate_name();
-
-                Let::new(
-                    &name,
-                    Type::Number,
-                    lhs,
-                    transform_expression(operation.rhs(), &|rhs| {
-                        continue_(
-                            ArithmeticOperation::new(
-                                operation.operator(),
-                                Variable::new(&name),
-                                rhs,
-                            )
-                            .into(),
-                        )
-                    }),
-                )
-                .into()
+            transform_bound_expression(context, operation.lhs(), &Type::Number, &|lhs| {
+                transform_expression(operation.rhs(), &|rhs| {
+                    continue_(
+                        ArithmeticOperation::new(operation.operator(), lhs.clone(), rhs).into(),
+                    )
+                })
             })
         }
-        Expression::Call(call) => transform_expression_with_let(
+        Expression::Call(call) => transform_bound_expression(
             context,
             call.function(),
             &call.type_().clone().into(),
@@ -131,25 +118,12 @@ fn transform_expression(
             })
         }
         Expression::ComparisonOperation(operation) => {
-            transform_expression(operation.lhs(), &|lhs| {
-                let name = context.generate_name();
-
-                Let::new(
-                    &name,
-                    Type::Number,
-                    lhs,
-                    transform_expression(operation.rhs(), &|rhs| {
-                        continue_(
-                            ComparisonOperation::new(
-                                operation.operator(),
-                                Variable::new(&name),
-                                rhs,
-                            )
-                            .into(),
-                        )
-                    }),
-                )
-                .into()
+            transform_bound_expression(context, operation.lhs(), &Type::Number, &|lhs| {
+                transform_expression(operation.rhs(), &|rhs| {
+                    continue_(
+                        ComparisonOperation::new(operation.operator(), lhs.clone(), rhs).into(),
+                    )
+                })
             })
         }
         Expression::DropVariables(drop) => transform_expression(drop.expression(), &|expression| {
@@ -186,7 +160,6 @@ fn transform_expression(
                 continue_(Synchronize::new(synchronize.type_().clone(), expression).into())
             })
         }
-        // TODO Test this.
         Expression::Record(record) => transform_expressions(
             context,
             &record
@@ -196,18 +169,14 @@ fn transform_expression(
                 .collect::<Vec<_>>(),
             &|fields| continue_(Record::new(record.type_().clone(), fields).into()),
         ),
-        // TODO Test this.
         Expression::RecordField(field) => transform_expression(field.record(), &|expression| {
             continue_(RecordField::new(field.type_().clone(), field.index(), expression).into())
         }),
-        // TODO Test this.
-        Expression::RecordUpdate(update) => transform_expression(update.record(), &|record| {
-            let record_name = context.generate_name();
-
-            Let::new(
-                &record_name,
-                update.type_().clone(),
-                record,
+        Expression::RecordUpdate(update) => transform_bound_expression(
+            context,
+            update.record(),
+            &update.type_().clone().into(),
+            &|record| {
                 transform_expressions(
                     context,
                     &update
@@ -222,7 +191,7 @@ fn transform_expression(
                         continue_(
                             RecordUpdate::new(
                                 update.type_().clone(),
-                                Variable::new(&record_name),
+                                record.clone(),
                                 update
                                     .fields()
                                     .iter()
@@ -235,10 +204,9 @@ fn transform_expression(
                             .into(),
                         )
                     },
-                ),
-            )
-            .into()
-        }),
+                )
+            },
+        ),
         Expression::TryOperation(operation) => {
             transform_expression(operation.operand(), &|operand| {
                 continue_(
@@ -263,7 +231,7 @@ fn transform_expression(
     }
 }
 
-fn transform_expression_with_let(
+fn transform_bound_expression(
     context: &Context,
     bound_expression: &Expression,
     type_: &Type,
@@ -310,7 +278,7 @@ fn transform_expressions_recursively(
     match expressions {
         [] => continue_(transformed_expressions),
         [(expression, type_), ..] => {
-            transform_expression_with_let(context, expression, type_, &|expression| {
+            transform_bound_expression(context, expression, type_, &|expression| {
                 transform_expressions_recursively(
                     context,
                     &expressions[1..],
@@ -667,6 +635,226 @@ mod tests {
                 ),
                 Type::Number,
             )])
+        );
+    }
+
+    #[test]
+    fn transform_record() {
+        let type_definitions = vec![TypeDefinition::new(
+            "r",
+            types::RecordBody::new(vec![Type::Variant, Type::Variant]),
+        )];
+
+        assert_eq!(
+            transform(
+                &Module::empty()
+                    .set_type_definitions(type_definitions.clone())
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        vec![],
+                        Record::new(
+                            types::Record::new("r"),
+                            vec![
+                                Let::new(
+                                    "x",
+                                    Type::Number,
+                                    1.0,
+                                    Variant::new(Type::Number, Variable::new("x"))
+                                )
+                                .into(),
+                                Let::new(
+                                    "y",
+                                    Type::Number,
+                                    2.0,
+                                    Variant::new(Type::Number, Variable::new("y"))
+                                )
+                                .into(),
+                            ],
+                        ),
+                        Type::Number,
+                    )])
+            ),
+            Module::empty()
+                .set_type_definitions(type_definitions)
+                .set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "x",
+                        Type::Number,
+                        1.0,
+                        Let::new(
+                            "anf:v:0",
+                            Type::Variant,
+                            Variant::new(Type::Number, Variable::new("x")),
+                            Let::new(
+                                "y",
+                                Type::Number,
+                                2.0,
+                                Let::new(
+                                    "anf:v:1",
+                                    Type::Variant,
+                                    Variant::new(Type::Number, Variable::new("y")),
+                                    Record::new(
+                                        types::Record::new("r"),
+                                        vec![
+                                            Variable::new("anf:v:0").into(),
+                                            Variable::new("anf:v:1").into(),
+                                        ],
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    Type::Number,
+                )])
+        );
+    }
+
+    #[test]
+    fn transform_record_field() {
+        let type_definitions = vec![TypeDefinition::new(
+            "r",
+            types::RecordBody::new(vec![Type::Variant, Type::Variant]),
+        )];
+
+        assert_eq!(
+            transform(
+                &Module::empty()
+                    .set_type_definitions(type_definitions.clone())
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        vec![],
+                        RecordField::new(
+                            types::Record::new("r"),
+                            0,
+                            Let::new(
+                                "x",
+                                Type::Number,
+                                1.0,
+                                Variant::new(Type::Number, Variable::new("x"))
+                            )
+                        ),
+                        Type::Number,
+                    )])
+            ),
+            Module::empty()
+                .set_type_definitions(type_definitions)
+                .set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "x",
+                        Type::Number,
+                        1.0,
+                        RecordField::new(
+                            types::Record::new("r"),
+                            0,
+                            Variant::new(Type::Number, Variable::new("x"))
+                        )
+                    ),
+                    Type::Number,
+                )])
+        );
+    }
+
+    #[test]
+    fn transform_record_update() {
+        let type_definitions = vec![TypeDefinition::new(
+            "r",
+            types::RecordBody::new(vec![Type::Variant, Type::Variant]),
+        )];
+
+        assert_eq!(
+            transform(
+                &Module::empty()
+                    .set_type_definitions(type_definitions.clone())
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        vec![],
+                        RecordUpdate::new(
+                            types::Record::new("r"),
+                            Let::new(
+                                "x",
+                                Type::Number,
+                                1.0,
+                                Variant::new(Type::Number, Variable::new("x"))
+                            ),
+                            vec![
+                                RecordUpdateField::new(
+                                    0,
+                                    Let::new(
+                                        "y",
+                                        Type::Number,
+                                        2.0,
+                                        Variant::new(Type::Number, Variable::new("y"))
+                                    )
+                                ),
+                                RecordUpdateField::new(
+                                    1,
+                                    Let::new(
+                                        "z",
+                                        Type::Number,
+                                        3.0,
+                                        Variant::new(Type::Number, Variable::new("z"))
+                                    )
+                                ),
+                            ],
+                        ),
+                        Type::Number,
+                    )])
+            ),
+            Module::empty()
+                .set_type_definitions(type_definitions)
+                .set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "x",
+                        Type::Number,
+                        1.0,
+                        Let::new(
+                            "anf:v:0",
+                            types::Record::new("r"),
+                            Variant::new(Type::Number, Variable::new("x")),
+                            Let::new(
+                                "y",
+                                Type::Number,
+                                2.0,
+                                Let::new(
+                                    "anf:v:1",
+                                    Type::Variant,
+                                    Variant::new(Type::Number, Variable::new("y")),
+                                    Let::new(
+                                        "z",
+                                        Type::Number,
+                                        3.0,
+                                        Let::new(
+                                            "anf:v:2",
+                                            Type::Variant,
+                                            Variant::new(Type::Number, Variable::new("z")),
+                                            RecordUpdate::new(
+                                                types::Record::new("r"),
+                                                Variable::new("anf:v:0"),
+                                                vec![
+                                                    RecordUpdateField::new(
+                                                        0,
+                                                        Variable::new("anf:v:1")
+                                                    ),
+                                                    RecordUpdateField::new(
+                                                        1,
+                                                        Variable::new("anf:v:2")
+                                                    ),
+                                                ],
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    Type::Number,
+                )])
         );
     }
 
