@@ -1,14 +1,9 @@
 use crate::{ir::*, types};
 
-pub fn transform(
-    expression: &Expression,
-    old_name: &str,
-    new_name: &str,
-    free_variables: &[Argument],
-) -> Expression {
-    let transform = |expression: &_| transform(expression, old_name, new_name, free_variables);
+pub fn transform(expression: &Expression, name: &str, free_variables: &[Argument]) -> Expression {
+    let transform = |expression: &_| transform(expression, name, free_variables);
     let transform_shadowed = |expression: &Expression, shadowed_name| {
-        if shadowed_name == old_name {
+        if shadowed_name == name {
             expression.clone()
         } else {
             transform(expression)
@@ -59,7 +54,7 @@ pub fn transform(
             let arguments = call.arguments().iter().map(transform);
 
             if let Expression::Variable(variable) = call.function() {
-                if variable.name() == old_name {
+                if variable.name() == name {
                     Call::new(
                         types::Function::new(
                             call.type_()
@@ -75,7 +70,7 @@ pub fn transform(
                                 .collect(),
                             call.type_().result().clone(),
                         ),
-                        Variable::new(new_name),
+                        Variable::new(name),
                         arguments
                             .chain(
                                 free_variables.iter().map(|free_variable| {
@@ -151,5 +146,91 @@ pub fn transform(
         | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => expression.clone(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::Type;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn transform_call() {
+        let call = Call::new(
+            types::Function::new(vec![], Type::Number),
+            Variable::new("f"),
+            vec![],
+        )
+        .into();
+
+        assert_eq!(transform(&call, "f", &[]), call);
+    }
+
+    #[test]
+    fn transform_call_with_free_variable() {
+        assert_eq!(
+            transform(
+                &Call::new(
+                    types::Function::new(vec![], Type::Number),
+                    Variable::new("f"),
+                    vec![],
+                )
+                .into(),
+                "f",
+                &[Argument::new("x", Type::Number)]
+            ),
+            Call::new(
+                types::Function::new(vec![Type::Number], Type::Number),
+                Variable::new("f"),
+                vec![Variable::new("x").into()],
+            )
+            .into()
+        );
+    }
+
+    #[test]
+    fn transform_call_in_let() {
+        let function_type = types::Function::new(vec![], Type::Number);
+        let let_ = Let::new(
+            "x",
+            function_type.clone(),
+            Variable::new("y"),
+            Call::new(function_type.clone(), Variable::new("x"), vec![]),
+        )
+        .into();
+
+        assert_eq!(transform(&let_, "x", &[]), let_);
+    }
+
+    #[test]
+    fn transform_call_in_let_recursive() {
+        let function_type = types::Function::new(vec![], Type::Number);
+        let let_ = LetRecursive::new(
+            FunctionDefinition::new(
+                "f",
+                vec![],
+                Type::Number,
+                Call::new(function_type.clone(), Variable::new("g"), vec![]),
+            ),
+            Call::new(function_type.clone(), Variable::new("g"), vec![]),
+        )
+        .into();
+
+        assert_eq!(transform(&let_, "g", &[]), let_);
+    }
+
+    #[test]
+    fn transform_call_in_try_operation() {
+        let function_type = types::Function::new(vec![], Type::Number);
+        let expression = TryOperation::new(
+            42.0,
+            "f",
+            function_type.clone(),
+            Call::new(function_type.clone(), Variable::new("f"), vec![]),
+        )
+        .into();
+
+        assert_eq!(transform(&expression, "f", &[]), expression);
     }
 }

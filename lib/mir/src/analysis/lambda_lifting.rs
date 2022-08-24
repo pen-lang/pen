@@ -138,12 +138,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     save_free_variables(
                         definition.environment(),
                         &free_variable_names,
-                        &call::transform(
-                            expression,
-                            definition.name(),
-                            definition.name(),
-                            &renamed_environment,
-                        ),
+                        &call::transform(expression, definition.name(), &renamed_environment),
                     )
                 };
 
