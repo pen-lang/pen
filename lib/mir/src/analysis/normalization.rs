@@ -311,24 +311,16 @@ mod tests {
 
     #[test]
     fn transform_function_definition() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-            "f",
-            vec![],
-            42.0,
-            Type::Number,
-        )]);
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f", vec![], Type::Number, 42.0)]);
 
         assert_eq!(transform(&module), module);
     }
 
     #[test]
     fn transform_let() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-            "f",
-            vec![],
-            Let::new("x", Type::Number, 42.0, Variable::new("x")),
-            Type::Number,
-        )]);
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f", vec![], Type::Number, Let::new("x", Type::Number, 42.0, Variable::new("x")))]);
 
         assert_eq!(transform(&module), module);
     }
@@ -337,24 +329,16 @@ mod tests {
     fn transform_nested_let() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "x",
                         Type::Number,
                         Let::new("y", Type::Number, 42.0, Variable::new("y")),
                         Variable::new("x"),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new("y", Type::Number, 42.0, Variable::new("y")),
-                Type::Number,
-            )])
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new("y", Type::Number, 42.0, Variable::new("y")))])
         );
     }
 
@@ -362,10 +346,8 @@ mod tests {
     fn transform_deeply_nested_let() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "x",
                         Type::Number,
                         Let::new(
@@ -375,16 +357,10 @@ mod tests {
                             Variable::new("y")
                         ),
                         Variable::new("x"),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new("z", Type::Number, 42.0, Variable::new("z")),
-                Type::Number,
-            )])
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new("z", Type::Number, 42.0, Variable::new("z")))])
         );
     }
 
@@ -392,10 +368,8 @@ mod tests {
     fn transform_nested_let_in_nested_expression() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Variant::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Variant::new(
                         Type::None,
                         Let::new(
                             "x",
@@ -406,14 +380,10 @@ mod tests {
                             ),
                             Variable::new("x"),
                         )
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "y",
                     Type::None,
                     Expression::None,
@@ -423,9 +393,7 @@ mod tests {
                         Variant::new(Type::None, Variable::new("y")),
                         Variant::new(Type::None, Variable::new("x")),
                     )
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -433,21 +401,15 @@ mod tests {
     fn transform_arithmetic_operation() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    ArithmeticOperation::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, ArithmeticOperation::new(
                         ArithmeticOperator::Add,
                         Let::new("x", Type::Number, 1.0, Variable::new("x")),
                         Let::new("y", Type::Number, 2.0, Variable::new("y")),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::Number,
                     1.0,
@@ -461,9 +423,7 @@ mod tests {
                             Variable::new("y"),
                         )
                     )
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -471,24 +431,18 @@ mod tests {
     fn transform_normalized_call() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Call::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Call::new(
                         types::Function::new(vec![Type::Number, Type::Number], Type::Number),
                         Let::new("x", Type::Number, 1.0, Variable::new("x")),
                         vec![
                             Let::new("y", Type::Number, 2.0, Variable::new("y")).into(),
                             Let::new("z", Type::Number, 3.0, Variable::new("z")).into(),
                         ],
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::Number,
                     1.0,
@@ -510,9 +464,7 @@ mod tests {
                             ),
                         )
                     )
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -520,10 +472,8 @@ mod tests {
     fn transform_call() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Call::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Call::new(
                         types::Function::new(vec![Type::Variant, Type::Variant], Type::Number),
                         Let::new(
                             "x",
@@ -547,14 +497,10 @@ mod tests {
                             )
                             .into(),
                         ],
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::Number,
                     1.0,
@@ -594,9 +540,7 @@ mod tests {
                             )
                         )
                     )
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -604,21 +548,15 @@ mod tests {
     fn transform_comparison_operation() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    ComparisonOperation::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, ComparisonOperation::new(
                         ComparisonOperator::Equal,
                         Let::new("x", Type::Number, 1.0, Variable::new("x")),
                         Let::new("y", Type::Number, 2.0, Variable::new("y")),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::Number,
                     1.0,
@@ -632,9 +570,7 @@ mod tests {
                             Variable::new("y"),
                         ),
                     )
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -649,10 +585,8 @@ mod tests {
             transform(
                 &Module::empty()
                     .set_type_definitions(type_definitions.clone())
-                    .set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        vec![],
-                        Record::new(
+                    .set_function_definitions(vec![FunctionDefinition::new(
+                        "f", vec![], Type::Number, Record::new(
                             types::Record::new("r"),
                             vec![
                                 Let::new(
@@ -670,16 +604,12 @@ mod tests {
                                 )
                                 .into(),
                             ],
-                        ),
-                        Type::Number,
-                    )])
+                        ))])
             ),
             Module::empty()
                 .set_type_definitions(type_definitions)
-                .set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                .set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "x",
                         Type::Number,
                         1.0,
@@ -705,9 +635,7 @@ mod tests {
                                 )
                             )
                         )
-                    ),
-                    Type::Number,
-                )])
+                    ))])
         );
     }
 
@@ -722,10 +650,8 @@ mod tests {
             transform(
                 &Module::empty()
                     .set_type_definitions(type_definitions.clone())
-                    .set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        vec![],
-                        RecordField::new(
+                    .set_function_definitions(vec![FunctionDefinition::new(
+                        "f", vec![], Type::Number, RecordField::new(
                             types::Record::new("r"),
                             0,
                             Let::new(
@@ -734,16 +660,12 @@ mod tests {
                                 1.0,
                                 Variant::new(Type::Number, Variable::new("x"))
                             )
-                        ),
-                        Type::Number,
-                    )])
+                        ))])
             ),
             Module::empty()
                 .set_type_definitions(type_definitions)
-                .set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                .set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "x",
                         Type::Number,
                         1.0,
@@ -752,9 +674,7 @@ mod tests {
                             0,
                             Variant::new(Type::Number, Variable::new("x"))
                         )
-                    ),
-                    Type::Number,
-                )])
+                    ))])
         );
     }
 
@@ -769,10 +689,8 @@ mod tests {
             transform(
                 &Module::empty()
                     .set_type_definitions(type_definitions.clone())
-                    .set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        vec![],
-                        RecordUpdate::new(
+                    .set_function_definitions(vec![FunctionDefinition::new(
+                        "f", vec![], Type::Number, RecordUpdate::new(
                             types::Record::new("r"),
                             Let::new(
                                 "x",
@@ -800,16 +718,12 @@ mod tests {
                                     )
                                 ),
                             ],
-                        ),
-                        Type::Number,
-                    )])
+                        ))])
             ),
             Module::empty()
                 .set_type_definitions(type_definitions)
-                .set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                .set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "x",
                         Type::Number,
                         1.0,
@@ -852,9 +766,7 @@ mod tests {
                                 )
                             )
                         )
-                    ),
-                    Type::Number,
-                )])
+                    ))])
         );
     }
 
@@ -862,29 +774,21 @@ mod tests {
     fn transform_try_operation() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    TryOperation::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, TryOperation::new(
                         Let::new("x", Type::None, Expression::None, Variable::new("x")),
                         "e",
                         Type::None,
                         Variable::new("e"),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::None,
                     Expression::None,
                     TryOperation::new(Variable::new("x"), "e", Type::None, Variable::new("e")),
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 
@@ -892,27 +796,19 @@ mod tests {
     fn transform_variant() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Variant::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, Variant::new(
                         Type::None,
                         Let::new("x", Type::None, Expression::None, Variable::new("x")),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                vec![],
-                Let::new(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f", vec![], Type::Number, Let::new(
                     "x",
                     Type::None,
                     Expression::None,
                     Variant::new(Type::None, Variable::new("x"))
-                ),
-                Type::Number,
-            )])
+                ))])
         );
     }
 }

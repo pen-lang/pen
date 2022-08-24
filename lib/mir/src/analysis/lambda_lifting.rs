@@ -270,12 +270,8 @@ mod tests {
 
     #[test]
     fn transform_function_definition_without_closure() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-            "f",
-            vec![],
-            42.0,
-            Type::Number,
-        )]);
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f", vec![], Type::Number, 42.0)]);
 
         assert_eq!(transform(&module), module);
     }
@@ -286,34 +282,22 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
-                        FunctionDefinition::fake("g", vec![], 42.0, Type::Number,),
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
+                        FunctionDefinition::new("g", vec![], Type::Number, 42.0),
                         42.0
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
-                    ),
-                    Type::Number,
-                ),
-                FunctionDefinition::fake(
-                    "mir:lift:0:g",
-                    vec![],
-                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
-                    Type::Number,
-                )
+                    )),
+                FunctionDefinition::new(
+                    "mir:lift:0:g", vec![], Type::Number, Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0))
             ])
         );
     }
@@ -324,39 +308,22 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
-                        FunctionDefinition::fake(
-                            "g",
-                            vec![Argument::new("x", Type::None)],
-                            42.0,
-                            Type::Number,
-                        ),
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
+                        FunctionDefinition::new("g", vec![Argument::new("x", Type::None)], Type::Number, 42.0),
                         42.0
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
-                    ),
-                    Type::Number,
-                ),
-                FunctionDefinition::fake(
-                    "mir:lift:0:g",
-                    vec![Argument::new("x", Type::None)],
-                    Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
-                    Type::Number,
-                )
+                    )),
+                FunctionDefinition::new(
+                    "mir:lift:0:g", vec![Argument::new("x", Type::None)], Type::Number, Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0))
             ])
         );
     }
@@ -367,10 +334,8 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
                         FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::Number)],
@@ -380,22 +345,16 @@ mod tests {
                             false,
                         ),
                         42.0,
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         Let::new("fv:x:0", Type::Number, Variable::new("x"), 42.0)
-                    ),
-                    Type::Number,
-                ),
+                    )),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
@@ -423,10 +382,8 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
                         FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
@@ -436,22 +393,16 @@ mod tests {
                             false,
                         ),
                         42.0,
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
-                    ),
-                    Type::Number,
-                ),
+                    )),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
@@ -475,10 +426,8 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
                         FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
@@ -492,15 +441,11 @@ mod tests {
                             Variable::new("g"),
                             vec![]
                         ),
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
@@ -514,9 +459,7 @@ mod tests {
                                 vec![Variable::new("fv:x:0").into()]
                             ),
                         )
-                    ),
-                    Type::Number,
-                ),
+                    )),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
@@ -540,41 +483,26 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
-                        FunctionDefinition::fake(
-                            "g",
-                            vec![Argument::new("x", Type::None)],
-                            Call::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
+                        FunctionDefinition::new("g", vec![Argument::new("x", Type::None)], Type::Number, Call::new(
                                 function_type.clone(),
                                 Variable::new("g"),
                                 vec![Variable::new("x").into()]
-                            ),
-                            Type::Number,
-                        ),
+                            )),
                         42.0
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
-                    ),
-                    Type::Number,
-                ),
-                FunctionDefinition::fake(
-                    "mir:lift:0:g",
-                    vec![Argument::new("x", Type::None)],
-                    Let::new(
+                    )),
+                FunctionDefinition::new(
+                    "mir:lift:0:g", vec![Argument::new("x", Type::None)], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
@@ -583,9 +511,7 @@ mod tests {
                             Variable::new("g"),
                             vec![Variable::new("x").into()]
                         )
-                    ),
-                    Type::Number,
-                )
+                    ))
             ])
         );
     }
@@ -596,10 +522,8 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
                         FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
@@ -613,22 +537,16 @@ mod tests {
                             false,
                         ),
                         42.0
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         Let::new("fv:x:0", Type::None, Variable::new("x"), 42.0)
-                    ),
-                    Type::Number,
-                ),
+                    )),
                 FunctionDefinition::with_options(
                     "mir:lift:0:g",
                     vec![],
@@ -661,28 +579,20 @@ mod tests {
 
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    LetRecursive::new(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f", vec![], Type::Number, LetRecursive::new(
                         FunctionDefinition::fake_thunk("g", 42.0, Type::Number,),
                         42.0
-                    ),
-                    Type::Number,
-                )])
+                    ))])
             ),
             Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    vec![],
-                    Let::new(
+                FunctionDefinition::new(
+                    "f", vec![], Type::Number, Let::new(
                         "g",
                         function_type.clone(),
                         Variable::new("mir:lift:0:g"),
                         42.0
-                    ),
-                    Type::Number,
-                ),
+                    )),
                 FunctionDefinition::fake_thunk(
                     "mir:lift:0:g",
                     Let::new("g", function_type, Variable::new("mir:lift:0:g"), 42.0),
