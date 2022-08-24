@@ -2,7 +2,6 @@ mod context;
 
 use self::context::Context;
 use crate::ir::*;
-use fnv::FnvHashMap;
 
 pub fn transform(module: &Module) -> Module {
     Module::new(
@@ -25,7 +24,7 @@ pub fn transform(module: &Module) -> Module {
 
 fn transform_function_definition<'a>(
     definition: &'a FunctionDefinition,
-    variables: &FnvHashMap<&'a str, String>,
+    variables: &hamt::Map<&'a str, String>,
 ) -> FunctionDefinition {
     FunctionDefinition::with_options(
         definition.name(),
@@ -40,7 +39,7 @@ fn transform_function_definition<'a>(
 fn transform_expression<'a>(
     context: &Context<'a>,
     expression: &'a Expression,
-    variables: &FnvHashMap<&'a str, String>,
+    variables: &hamt::Map<&'a str, String>,
 ) -> Expression {
     let transform = |expression| transform_expression(context, expression, variables);
 
@@ -64,11 +63,7 @@ fn transform_expression<'a>(
                         transform_expression(
                             context,
                             alternative.expression(),
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain([(alternative.name(), name.clone())])
-                                .collect(),
+                            &variables.insert(alternative.name(), name.clone()),
                         ),
                     )
                 })
@@ -81,11 +76,7 @@ fn transform_expression<'a>(
                     transform_expression(
                         context,
                         alternative.expression(),
-                        &variables
-                            .clone()
-                            .into_iter()
-                            .chain([(alternative.name(), name.clone())])
-                            .collect(),
+                        &variables.insert(alternative.name(), name.clone()),
                     ),
                 )
             }),
@@ -125,11 +116,7 @@ fn transform_expression<'a>(
                 transform_expression(
                     context,
                     let_.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(let_.name(), name.clone())])
-                        .collect(),
+                    &variables.insert(let_.name(), name.clone()),
                 ),
             )
             .into()
@@ -137,19 +124,16 @@ fn transform_expression<'a>(
         Expression::LetRecursive(let_) => {
             let definition = let_.definition();
             let name = context.rename(definition.name());
-            let variables = variables
-                .clone()
-                .into_iter()
-                .chain([(definition.name(), name.clone())])
-                .collect::<FnvHashMap<_, _>>();
+            let variables = variables.insert(definition.name(), name.clone());
 
             LetRecursive::new(
                 {
-                    let mut variables = variables.clone();
-
-                    for argument in definition.arguments() {
-                        variables.insert(argument.name(), context.rename(argument.name()));
-                    }
+                    let variables = variables.extend(
+                        definition
+                            .arguments()
+                            .iter()
+                            .map(|argument| (argument.name(), context.rename(argument.name()))),
+                    );
 
                     transform_function_definition(
                         &FunctionDefinition::with_options(
@@ -215,11 +199,7 @@ fn transform_expression<'a>(
                 transform_expression(
                     context,
                     operation.then(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(operation.name(), name.clone())])
-                        .collect(),
+                    &variables.insert(operation.name(), name.clone()),
                 ),
             )
             .into()
