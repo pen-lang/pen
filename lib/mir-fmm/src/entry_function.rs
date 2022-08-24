@@ -404,7 +404,7 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::{FunctionDefinitionFake, ModuleFake};
+    use mir::test::{ModuleFake};
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {

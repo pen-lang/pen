@@ -774,7 +774,7 @@ mod tests {
                             mir::ir::Case::new(
                                 mir::ir::Variable::new("x"),
                                 vec![mir::ir::Alternative::new(
-                                    vec![record_type.clone().into()],
+                                    vec![record_type.into()],
                                     "x",
                                     mir::ir::Variable::new("x"),
                                 )],
@@ -818,7 +818,7 @@ mod tests {
                             mir::ir::Case::new(
                                 mir::ir::Variable::new("x"),
                                 vec![mir::ir::Alternative::new(
-                                    vec![record_type.clone().into()],
+                                    vec![record_type.into()],
                                     "y",
                                     mir::ir::Variable::new("y"),
                                 )],
@@ -866,7 +866,7 @@ mod tests {
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                             record_type.clone(),
-                            mir::ir::Record::new(record_type.clone(), vec![]),
+                            mir::ir::Record::new(record_type, vec![]),
                         )]),
                 );
             }
@@ -885,7 +885,7 @@ mod tests {
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                             record_type.clone(),
-                            mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
+                            mir::ir::Record::new(record_type, vec![42.0.into()]),
                         )]),
                 );
             }
@@ -908,7 +908,7 @@ mod tests {
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                             record_type.clone(),
                             mir::ir::Record::new(
-                                record_type.clone(),
+                                record_type,
                                 vec![42.0.into(), true.into()],
                             ),
                         )]),
@@ -929,7 +929,7 @@ mod tests {
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                             record_type.clone(),
-                            mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
+                            mir::ir::Record::new(record_type, vec![42.0.into()]),
                         )]),
                 );
             }
@@ -999,7 +999,7 @@ mod tests {
                             record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(record_type.clone(), vec![]),
+                                mir::ir::Record::new(record_type, vec![]),
                                 vec![],
                             ),
                         )]),
@@ -1022,7 +1022,7 @@ mod tests {
                             record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
+                                mir::ir::Record::new(record_type, vec![42.0.into()]),
                                 vec![mir::ir::RecordUpdateField::new(0, 0.0)],
                             ),
                         )]),
@@ -1049,7 +1049,7 @@ mod tests {
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(
-                                    record_type.clone(),
+                                    record_type,
                                     vec![42.0.into(), true.into()],
                                 ),
                                 vec![mir::ir::RecordUpdateField::new(1, false)],
@@ -1079,7 +1079,7 @@ mod tests {
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(
-                                    record_type.clone(),
+                                    record_type,
                                     vec![42.0.into(), true.into(), mir::ir::Expression::None],
                                 ),
                                 vec![
@@ -1112,7 +1112,7 @@ mod tests {
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(
-                                    record_type.clone(),
+                                    record_type,
                                     vec![42.0.into(), true.into(), mir::ir::Expression::None],
                                 ),
                                 vec![
