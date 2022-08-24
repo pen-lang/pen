@@ -138,7 +138,19 @@ fn transform_expression<'a>(
                     transform_function_definition(
                         &FunctionDefinition::with_options(
                             name,
-                            definition.environment().to_vec(),
+                            definition
+                                .environment()
+                                .iter()
+                                .map(|free_variable| {
+                                    Argument::new(
+                                        variables
+                                            .get(free_variable.name())
+                                            .map(String::as_str)
+                                            .unwrap_or_else(|| free_variable.name()),
+                                        free_variable.type_().clone(),
+                                    )
+                                })
+                                .collect(),
                             definition
                                 .arguments()
                                 .iter()
@@ -429,6 +441,66 @@ mod tests {
                             Type::Number
                         ),
                         Variable::new("g"),
+                    )
+                ),
+                Type::Number,
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_let_recursive_with_free_variable() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "x",
+                        Type::Number,
+                        42.0,
+                        Let::new(
+                            "x",
+                            Type::Number,
+                            42.0,
+                            LetRecursive::new(
+                                FunctionDefinition::with_options(
+                                    "h",
+                                    vec![Argument::new("x", Type::Number)],
+                                    vec![],
+                                    Type::Number,
+                                    Variable::new("x"),
+                                    false,
+                                ),
+                                Variable::new("x"),
+                            )
+                        )
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![],
+                Let::new(
+                    "x",
+                    Type::Number,
+                    42.0,
+                    Let::new(
+                        "x:1",
+                        Type::Number,
+                        42.0,
+                        LetRecursive::new(
+                            FunctionDefinition::with_options(
+                                "h",
+                                vec![Argument::new("x:1", Type::Number)],
+                                vec![],
+                                Type::Number,
+                                Variable::new("x:1"),
+                                false,
+                            ),
+                            Variable::new("x:1"),
+                        )
                     )
                 ),
                 Type::Number,
