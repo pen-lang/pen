@@ -120,8 +120,9 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                     expression,
                 )
                 .into()
-            } else if !box_::is_boxed(&expression, definition.name())
+            } else if !definition.is_thunk()
                 && !box_::is_boxed(definition.body(), definition.name())
+                && !box_::is_boxed(&expression, definition.name())
             {
                 let free_variable_names = rename_free_variables(context, definition.environment());
                 let renamed_environment = definition
@@ -258,7 +259,7 @@ fn save_free_variables(
 mod tests {
     use super::*;
     use crate::{
-        test::ModuleFake,
+        test::{FunctionDefinitionFake, ModuleFake},
         types::{self, Type},
     };
     use pretty_assertions::assert_eq;
@@ -687,5 +688,21 @@ mod tests {
                 )
             ])
         );
+    }
+
+    #[test]
+    fn lift_thunk_with_free_variable() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f",
+            vec![Argument::new("x", Type::Number)],
+            Type::Number,
+            LetRecursive::new(
+                FunctionDefinition::thunk("g", Type::Number, Variable::new("x"))
+                    .set_environment(vec![Argument::new("x", Type::Number)]),
+                42.0,
+            ),
+        )]);
+
+        assert_eq!(transform(&module), module);
     }
 }
