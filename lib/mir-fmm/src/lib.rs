@@ -535,10 +535,10 @@ mod tests {
         #[test]
         fn compile_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
-                    mir::ir::Expression::Number(42.0),
                     mir::types::Type::Number,
+                    mir::ir::Expression::Number(42.0),
                 ),
                 mir::ir::FunctionDefinition::new(
                     "g",
@@ -907,10 +907,7 @@ mod tests {
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                             record_type.clone(),
-                            mir::ir::Record::new(
-                                record_type,
-                                vec![42.0.into(), true.into()],
-                            ),
+                            mir::ir::Record::new(record_type, vec![42.0.into(), true.into()]),
                         )]),
                 );
             }
@@ -1048,10 +1045,7 @@ mod tests {
                             record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(
-                                    record_type,
-                                    vec![42.0.into(), true.into()],
-                                ),
+                                mir::ir::Record::new(record_type, vec![42.0.into(), true.into()]),
                                 vec![mir::ir::RecordUpdateField::new(1, false)],
                             ),
                         )]),
@@ -1468,10 +1462,10 @@ mod tests {
         #[test]
         fn compile_global_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
-                    mir::ir::Expression::None,
                     mir::types::Type::None,
+                    mir::ir::Expression::None,
                 ),
             ]));
         }
@@ -1479,13 +1473,14 @@ mod tests {
         #[test]
         fn compile_local_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
+                    mir::types::Type::None,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake_thunk(
+                        mir::ir::FunctionDefinition::thunk(
                             "g",
-                            mir::ir::Expression::None,
                             mir::types::Type::None,
+                            mir::ir::Expression::None,
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::None),
@@ -1493,7 +1488,6 @@ mod tests {
                             vec![],
                         ),
                     ),
-                    mir::types::Type::None,
                 ),
             ]));
         }
@@ -1506,10 +1500,10 @@ mod tests {
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
                     mir::types::Type::Number,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake_thunk(
+                        mir::ir::FunctionDefinition::thunk(
                             "g",
-                            mir::ir::Variable::new("x"),
                             mir::types::Type::Number,
+                            mir::ir::Variable::new("x"),
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::Number),

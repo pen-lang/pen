@@ -1,12 +1,6 @@
 use crate::{ir::*, types::Type};
 
 pub trait FunctionDefinitionFake {
-    fn fake_thunk(
-        name: impl Into<String>,
-        body: impl Into<Expression>,
-        result_type: impl Into<Type>,
-    ) -> Self;
-
     fn fake_with_environment(
         name: impl Into<String>,
         environment: Vec<Argument>,
@@ -17,14 +11,6 @@ pub trait FunctionDefinitionFake {
 }
 
 impl FunctionDefinitionFake for FunctionDefinition {
-    fn fake_thunk(
-        name: impl Into<String>,
-        body: impl Into<Expression>,
-        result_type: impl Into<Type>,
-    ) -> Self {
-        Self::thunk(name, result_type, body)
-    }
-
     fn fake_with_environment(
         name: impl Into<String>,
         environment: Vec<Argument>,
