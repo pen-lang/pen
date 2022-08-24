@@ -208,7 +208,7 @@ fn transform_expression<'a>(
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }
         Expression::Variable(variable) => if let Some(name) = variables.get(variable.name()) {
-            Variable::new(&*name)
+            Variable::new(name)
         } else {
             variable.clone()
         }

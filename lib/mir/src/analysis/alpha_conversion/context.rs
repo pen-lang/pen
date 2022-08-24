@@ -21,7 +21,7 @@ impl<'a> Context<'a> {
             .copied()
             .unwrap_or_default();
 
-        self.name_counts.borrow_mut().insert(&name, count + 1);
+        self.name_counts.borrow_mut().insert(name, count + 1);
 
         if count == 0 {
             name.into()

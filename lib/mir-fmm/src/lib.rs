@@ -30,7 +30,7 @@ pub fn compile(
 ) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::type_check::check(module)?;
 
-    let module = mir::analysis::alpha_conversion::transform(&module);
+    let module = mir::analysis::alpha_conversion::transform(module);
     let module = mir::analysis::environment_inference::transform(&module);
     let module = mir::analysis::normalization::transform(&module);
     let module = mir::analysis::lambda_lifting::transform(&module);

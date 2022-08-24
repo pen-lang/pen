@@ -97,7 +97,6 @@ fn transform_expression(
                         )
                     },
                 )
-                .into()
             },
         ),
         Expression::Case(case) => transform_expression(case.argument(), &|argument| {
@@ -309,7 +308,7 @@ fn transform_expressions_recursively(
     match expressions {
         [] => continue_(transformed_expressions),
         [(expression, type_), ..] => {
-            transform_expression_with_let(context, expression, &type_, &|expression| {
+            transform_expression_with_let(context, expression, type_, &|expression| {
                 transform_expressions_recursively(
                     context,
                     &expressions[1..],
@@ -321,7 +320,6 @@ fn transform_expressions_recursively(
                         .collect(),
                     continue_,
                 )
-                .into()
             })
         }
     }
