@@ -1,3 +1,4 @@
+mod alias_removal;
 mod context;
 
 use self::context::Context;
@@ -11,7 +12,8 @@ use std::convert::identity;
 // - Conditional expressions are kept nested.
 //   - Otherwise, we need to duplicate continuations of those expression.
 //
-// This transformation assumes that the alpha conversion is applied to a module already.
+// This transformation assumes that the alpha conversion is applied to a module
+// already.
 pub fn transform(module: &Module) -> Module {
     let context = Context::new(module);
 
@@ -42,7 +44,7 @@ fn transform_function_definition(
         definition.environment().to_vec(),
         definition.arguments().to_vec(),
         definition.result_type().clone(),
-        transform_expression(context, definition.body(), &identity),
+        alias_removal::transform(&transform_expression(context, definition.body(), &identity)),
         definition.is_thunk(),
     )
 }
@@ -382,12 +384,7 @@ mod tests {
             Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![],
-                Let::new(
-                    "y",
-                    Type::Number,
-                    42.0,
-                    Let::new("x", Type::Number, Variable::new("y"), Variable::new("x"))
-                ),
+                Let::new("y", Type::Number, 42.0, Variable::new("y")),
                 Type::Number,
             )])
         );
@@ -417,17 +414,7 @@ mod tests {
             Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "f",
                 vec![],
-                Let::new(
-                    "z",
-                    Type::Number,
-                    42.0,
-                    Let::new(
-                        "y",
-                        Type::Number,
-                        Variable::new("z"),
-                        Let::new("x", Type::Number, Variable::new("y"), Variable::new("x"))
-                    )
-                ),
+                Let::new("z", Type::Number, 42.0, Variable::new("z")),
                 Type::Number,
             )])
         );
@@ -497,18 +484,13 @@ mod tests {
                     Type::Number,
                     1.0,
                     Let::new(
-                        "anf:v:0",
+                        "y",
                         Type::Number,
-                        Variable::new("x"),
-                        Let::new(
-                            "y",
-                            Type::Number,
-                            2.0,
-                            ArithmeticOperation::new(
-                                ArithmeticOperator::Add,
-                                Variable::new("anf:v:0"),
-                                Variable::new("y"),
-                            ),
+                        2.0,
+                        ArithmeticOperation::new(
+                            ArithmeticOperator::Add,
+                            Variable::new("x"),
+                            Variable::new("y"),
                         )
                     )
                 ),
@@ -673,19 +655,14 @@ mod tests {
                     Type::Number,
                     1.0,
                     Let::new(
-                        "anf:v:0",
+                        "y",
                         Type::Number,
-                        Variable::new("x"),
-                        Let::new(
-                            "y",
-                            Type::Number,
-                            2.0,
-                            ComparisonOperation::new(
-                                ComparisonOperator::Equal,
-                                Variable::new("anf:v:0"),
-                                Variable::new("y"),
-                            ),
-                        )
+                        2.0,
+                        ComparisonOperation::new(
+                            ComparisonOperator::Equal,
+                            Variable::new("x"),
+                            Variable::new("y"),
+                        ),
                     )
                 ),
                 Type::Number,
