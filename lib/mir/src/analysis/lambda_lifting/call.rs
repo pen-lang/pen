@@ -197,7 +197,7 @@ mod tests {
             vec![Alternative::new(
                 vec![function_type.clone().into()],
                 "f",
-                Call::new(function_type.clone(), Variable::new("f"), vec![]),
+                Call::new(function_type, Variable::new("f"), vec![]),
             )],
             None,
         )
@@ -214,7 +214,7 @@ mod tests {
             vec![],
             Some(DefaultAlternative::new(
                 "f",
-                Call::new(function_type.clone(), Variable::new("f"), vec![]),
+                Call::new(function_type, Variable::new("f"), vec![]),
             )),
         )
         .into();
@@ -229,7 +229,7 @@ mod tests {
             "x",
             function_type.clone(),
             Variable::new("y"),
-            Call::new(function_type.clone(), Variable::new("x"), vec![]),
+            Call::new(function_type, Variable::new("x"), vec![]),
         )
         .into();
 
@@ -246,7 +246,7 @@ mod tests {
                 Type::Number,
                 Call::new(function_type.clone(), Variable::new("g"), vec![]),
             ),
-            Call::new(function_type.clone(), Variable::new("g"), vec![]),
+            Call::new(function_type, Variable::new("g"), vec![]),
         )
         .into();
 
@@ -260,7 +260,7 @@ mod tests {
             42.0,
             "f",
             function_type.clone(),
-            Call::new(function_type.clone(), Variable::new("f"), vec![]),
+            Call::new(function_type, Variable::new("f"), vec![]),
         )
         .into();
 

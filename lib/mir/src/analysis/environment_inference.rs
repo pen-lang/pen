@@ -97,10 +97,7 @@ fn transform_expression(
         Expression::Call(call) => Call::new(
             call.type_().clone(),
             transform(call.function()),
-            call.arguments()
-                .iter()
-                .map(|argument| transform(argument))
-                .collect(),
+            call.arguments().iter().map(transform).collect(),
         )
         .into(),
         Expression::Case(case) => Case::new(
@@ -185,11 +182,7 @@ fn transform_expression(
         .into(),
         Expression::Record(record) => Record::new(
             record.type_().clone(),
-            record
-                .fields()
-                .iter()
-                .map(|field| transform(field))
-                .collect(),
+            record.fields().iter().map(transform).collect(),
         )
         .into(),
         Expression::RecordField(field) => RecordField::new(
