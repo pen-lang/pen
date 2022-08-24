@@ -85,30 +85,139 @@ fn transform_expression(
     expression: &Expression,
     variables: &FnvHashMap<String, Type>,
 ) -> Expression {
+    let transform = |expression| transform_expression(expression, variables);
+
     match expression {
-        Expression::ArithmeticOperation(operation) => {
-            transform_arithmetic_operation(operation, variables).into()
-        }
-        Expression::Case(case) => transform_case(case, variables).into(),
-        Expression::CloneVariables(clone) => transform_clone_variables(clone, variables).into(),
-        Expression::ComparisonOperation(operation) => {
-            transform_comparison_operation(operation, variables).into()
-        }
-        Expression::DropVariables(drop) => transform_drop_variables(drop, variables).into(),
-        Expression::Call(call) => transform_call(call, variables).into(),
-        Expression::If(if_) => transform_if(if_, variables).into(),
-        Expression::Let(let_) => transform_let(let_, variables).into(),
-        Expression::LetRecursive(let_) => transform_let_recursive(let_, variables).into(),
-        Expression::Synchronize(synchronize) => Synchronize::new(
-            synchronize.type_().clone(),
-            transform_expression(synchronize.expression(), variables),
+        Expression::ArithmeticOperation(operation) => ArithmeticOperation::new(
+            operation.operator(),
+            transform(operation.lhs()),
+            transform(operation.rhs()),
         )
         .into(),
-        Expression::Record(record) => transform_record(record, variables).into(),
-        Expression::RecordField(field) => transform_record_field(field, variables).into(),
-        Expression::RecordUpdate(update) => transform_record_update(update, variables).into(),
-        Expression::TryOperation(operation) => transform_try_operation(operation, variables).into(),
-        Expression::Variant(variant) => transform_variant(variant, variables).into(),
+        Expression::Call(call) => Call::new(
+            call.type_().clone(),
+            transform(call.function()),
+            call.arguments().iter().map(transform).collect(),
+        )
+        .into(),
+        Expression::Case(case) => Case::new(
+            transform(case.argument()),
+            case.alternatives()
+                .iter()
+                .map(|alternative| {
+                    let mut variables = variables.clone();
+
+                    variables.insert(alternative.name().into(), alternative.type_().clone());
+
+                    Alternative::new(
+                        alternative.types().to_vec(),
+                        alternative.name(),
+                        transform_expression(alternative.expression(), &variables),
+                    )
+                })
+                .collect(),
+            case.default_alternative().map(|alternative| {
+                let mut variables = variables.clone();
+
+                variables.insert(alternative.name().into(), Type::Variant);
+
+                DefaultAlternative::new(
+                    alternative.name(),
+                    transform_expression(alternative.expression(), &variables),
+                )
+            }),
+        )
+        .into(),
+        Expression::CloneVariables(clone) => {
+            CloneVariables::new(clone.variables().clone(), transform(clone.expression())).into()
+        }
+        Expression::ComparisonOperation(operation) => ComparisonOperation::new(
+            operation.operator(),
+            transform(operation.lhs()),
+            transform(operation.rhs()),
+        )
+        .into(),
+        Expression::DropVariables(drop) => {
+            DropVariables::new(drop.variables().clone(), transform(drop.expression())).into()
+        }
+        Expression::If(if_) => If::new(
+            transform(if_.condition()),
+            transform(if_.then()),
+            transform(if_.else_()),
+        )
+        .into(),
+        Expression::Let(let_) => Let::new(
+            let_.name(),
+            let_.type_().clone(),
+            transform(let_.bound_expression()),
+            transform_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain([(let_.name().into(), let_.type_().clone())])
+                    .collect(),
+            ),
+        )
+        .into(),
+        Expression::LetRecursive(let_) => LetRecursive::new(
+            transform_local_function_definition(let_.definition(), variables),
+            transform_expression(
+                let_.expression(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain([(
+                        let_.definition().name().into(),
+                        let_.definition().type_().clone().into(),
+                    )])
+                    .collect(),
+            ),
+        )
+        .into(),
+        Expression::Synchronize(synchronize) => Synchronize::new(
+            synchronize.type_().clone(),
+            transform(synchronize.expression()),
+        )
+        .into(),
+        Expression::Record(record) => Record::new(
+            record.type_().clone(),
+            record.fields().iter().map(transform).collect(),
+        )
+        .into(),
+        Expression::RecordField(field) => RecordField::new(
+            field.type_().clone(),
+            field.index(),
+            transform(field.record()),
+        )
+        .into(),
+        Expression::RecordUpdate(update) => RecordUpdate::new(
+            update.type_().clone(),
+            transform(update.record()),
+            update
+                .fields()
+                .iter()
+                .map(|field| RecordUpdateField::new(field.index(), transform(field.expression())))
+                .collect(),
+        )
+        .into(),
+        Expression::TryOperation(operation) => TryOperation::new(
+            transform(operation.operand()),
+            operation.name(),
+            operation.type_().clone(),
+            transform_expression(
+                operation.then(),
+                &variables
+                    .clone()
+                    .into_iter()
+                    .chain([(operation.name().into(), operation.type_().clone())])
+                    .collect(),
+            ),
+        )
+        .into(),
+        Expression::Variant(variant) => {
+            Variant::new(variant.type_().clone(), transform(variant.payload())).into()
+        }
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None
@@ -117,216 +226,13 @@ fn transform_expression(
     }
 }
 
-fn transform_arithmetic_operation(
-    operation: &ArithmeticOperation,
-    variables: &FnvHashMap<String, Type>,
-) -> ArithmeticOperation {
-    ArithmeticOperation::new(
-        operation.operator(),
-        transform_expression(operation.lhs(), variables),
-        transform_expression(operation.rhs(), variables),
-    )
-}
-
-fn transform_if(if_: &If, variables: &FnvHashMap<String, Type>) -> If {
-    If::new(
-        transform_expression(if_.condition(), variables),
-        transform_expression(if_.then(), variables),
-        transform_expression(if_.else_(), variables),
-    )
-}
-
-fn transform_case(case: &Case, variables: &FnvHashMap<String, Type>) -> Case {
-    Case::new(
-        transform_expression(case.argument(), variables),
-        case.alternatives()
-            .iter()
-            .map(|alternative| transform_alternative(alternative, variables))
-            .collect(),
-        case.default_alternative()
-            .map(|alternative| transform_default_alternative(alternative, variables)),
-    )
-}
-
-fn transform_alternative(
-    alternative: &Alternative,
-    variables: &FnvHashMap<String, Type>,
-) -> Alternative {
-    let mut variables = variables.clone();
-
-    variables.insert(alternative.name().into(), alternative.type_().clone());
-
-    Alternative::new(
-        alternative.types().to_vec(),
-        alternative.name(),
-        transform_expression(alternative.expression(), &variables),
-    )
-}
-
-fn transform_default_alternative(
-    alternative: &DefaultAlternative,
-    variables: &FnvHashMap<String, Type>,
-) -> DefaultAlternative {
-    let mut variables = variables.clone();
-
-    variables.insert(alternative.name().into(), Type::Variant);
-
-    DefaultAlternative::new(
-        alternative.name(),
-        transform_expression(alternative.expression(), &variables),
-    )
-}
-
-fn transform_clone_variables(
-    clone: &CloneVariables,
-    variables: &FnvHashMap<String, Type>,
-) -> CloneVariables {
-    CloneVariables::new(
-        clone.variables().clone(),
-        transform_expression(clone.expression(), variables),
-    )
-}
-
-fn transform_comparison_operation(
-    operation: &ComparisonOperation,
-    variables: &FnvHashMap<String, Type>,
-) -> ComparisonOperation {
-    ComparisonOperation::new(
-        operation.operator(),
-        transform_expression(operation.lhs(), variables),
-        transform_expression(operation.rhs(), variables),
-    )
-}
-
-fn transform_drop_variables(
-    drop: &DropVariables,
-    variables: &FnvHashMap<String, Type>,
-) -> DropVariables {
-    DropVariables::new(
-        drop.variables().clone(),
-        transform_expression(drop.expression(), variables),
-    )
-}
-
-fn transform_call(call: &Call, variables: &FnvHashMap<String, Type>) -> Call {
-    Call::new(
-        call.type_().clone(),
-        transform_expression(call.function(), variables),
-        call.arguments()
-            .iter()
-            .map(|argument| transform_expression(argument, variables))
-            .collect(),
-    )
-}
-
-fn transform_let(let_: &Let, variables: &FnvHashMap<String, Type>) -> Let {
-    Let::new(
-        let_.name(),
-        let_.type_().clone(),
-        transform_expression(let_.bound_expression(), variables),
-        transform_expression(
-            let_.expression(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain([(let_.name().into(), let_.type_().clone())])
-                .collect(),
-        ),
-    )
-}
-
-fn transform_let_recursive(
-    let_: &LetRecursive,
-    variables: &FnvHashMap<String, Type>,
-) -> LetRecursive {
-    LetRecursive::new(
-        transform_local_function_definition(let_.definition(), variables),
-        transform_expression(
-            let_.expression(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain([(
-                    let_.definition().name().into(),
-                    let_.definition().type_().clone().into(),
-                )])
-                .collect(),
-        ),
-    )
-}
-
-fn transform_record(record: &Record, variables: &FnvHashMap<String, Type>) -> Record {
-    Record::new(
-        record.type_().clone(),
-        record
-            .fields()
-            .iter()
-            .map(|field| transform_expression(field, variables))
-            .collect(),
-    )
-}
-
-fn transform_record_update(
-    update: &RecordUpdate,
-    variables: &FnvHashMap<String, Type>,
-) -> RecordUpdate {
-    RecordUpdate::new(
-        update.type_().clone(),
-        transform_expression(update.record(), variables),
-        update
-            .fields()
-            .iter()
-            .map(|field| {
-                RecordUpdateField::new(
-                    field.index(),
-                    transform_expression(field.expression(), variables),
-                )
-            })
-            .collect(),
-    )
-}
-
-fn transform_record_field(
-    field: &RecordField,
-    variables: &FnvHashMap<String, Type>,
-) -> RecordField {
-    RecordField::new(
-        field.type_().clone(),
-        field.index(),
-        transform_expression(field.record(), variables),
-    )
-}
-
-fn transform_try_operation(
-    operation: &TryOperation,
-    variables: &FnvHashMap<String, Type>,
-) -> TryOperation {
-    TryOperation::new(
-        transform_expression(operation.operand(), variables),
-        operation.name(),
-        operation.type_().clone(),
-        transform_expression(
-            operation.then(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain([(operation.name().into(), operation.type_().clone())])
-                .collect(),
-        ),
-    )
-}
-
-fn transform_variant(variant: &Variant, variables: &FnvHashMap<String, Type>) -> Variant {
-    Variant::new(
-        variant.type_().clone(),
-        transform_expression(variant.payload(), variables),
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{test::FunctionDefinitionFake, types};
+    use crate::{
+        test::{FunctionDefinitionFake, ModuleFake},
+        types,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -403,101 +309,153 @@ mod tests {
     #[test]
     fn infer_environment_for_recursive_definition() {
         assert_eq!(
-            transform_let_recursive(
-                &LetRecursive::new(
-                    FunctionDefinition::fake(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "a",
+                    vec![],
+                    Type::Number,
+                    LetRecursive::new(
+                        FunctionDefinition::new(
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            Call::new(
+                                types::Function::new(vec![Type::Number], Type::Number),
+                                Variable::new("f"),
+                                vec![Variable::new("x").into()]
+                            ),
+                        ),
+                        42.0
+                    )
+                )]),
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "a",
+                vec![],
+                Type::Number,
+                LetRecursive::new(
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
+                        Type::Number,
                         Call::new(
                             types::Function::new(vec![Type::Number], Type::Number),
                             Variable::new("f"),
                             vec![Variable::new("x").into()]
                         ),
-                        Type::Number,
                     ),
-                    Expression::Number(42.0)
-                ),
-                &Default::default(),
-            )
-            .definition(),
-            &FunctionDefinition::fake_with_environment(
-                "f",
-                vec![],
-                vec![Argument::new("x", Type::Number)],
-                Call::new(
-                    types::Function::new(vec![Type::Number], Type::Number),
-                    Variable::new("f"),
-                    vec![Variable::new("x").into()]
-                ),
-                Type::Number
-            )
+                    42.0
+                )
+            )]),
         );
     }
 
     #[test]
     fn infer_environment_for_recursive_definition_shadowing_outer_variable() {
         assert_eq!(
-            transform_let_recursive(
-                &LetRecursive::new(
-                    FunctionDefinition::fake(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "a",
+                    vec![],
+                    Type::Number,
+                    LetRecursive::new(
+                        FunctionDefinition::fake(
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Call::new(
+                                types::Function::new(vec![Type::Number], Type::Number),
+                                LetRecursive::new(
+                                    FunctionDefinition::fake(
+                                        "f",
+                                        vec![Argument::new("x", Type::Number)],
+                                        Call::new(
+                                            types::Function::new(vec![Type::Number], Type::Number),
+                                            Variable::new("f"),
+                                            vec![Variable::new("x").into()]
+                                        ),
+                                        Type::Number,
+                                    ),
+                                    Variable::new("f")
+                                ),
+                                vec![Variable::new("x").into()]
+                            ),
+                            Type::Number,
+                        ),
+                        42.0
+                    )
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "a",
+                vec![],
+                Type::Number,
+                LetRecursive::new(
+                    FunctionDefinition::fake_with_environment(
                         "f",
+                        vec![],
                         vec![Argument::new("x", Type::Number)],
                         Call::new(
                             types::Function::new(vec![Type::Number], Type::Number),
                             LetRecursive::new(
-                                FunctionDefinition::fake(
+                                FunctionDefinition::fake_with_environment(
                                     "f",
+                                    vec![],
                                     vec![Argument::new("x", Type::Number)],
                                     Call::new(
                                         types::Function::new(vec![Type::Number], Type::Number),
                                         Variable::new("f"),
                                         vec![Variable::new("x").into()]
                                     ),
-                                    Type::Number,
+                                    Type::Number
                                 ),
                                 Variable::new("f")
                             ),
                             vec![Variable::new("x").into()]
                         ),
-                        Type::Number,
+                        Type::Number
                     ),
-                    Expression::Number(42.0)
-                ),
-                &Default::default(),
-            )
-            .definition(),
-            &FunctionDefinition::fake_with_environment(
-                "f",
-                vec![],
-                vec![Argument::new("x", Type::Number)],
-                Call::new(
-                    types::Function::new(vec![Type::Number], Type::Number),
-                    LetRecursive::new(
-                        FunctionDefinition::fake_with_environment(
-                            "f",
-                            vec![],
-                            vec![Argument::new("x", Type::Number)],
-                            Call::new(
-                                types::Function::new(vec![Type::Number], Type::Number),
-                                Variable::new("f"),
-                                vec![Variable::new("x").into()]
-                            ),
-                            Type::Number
-                        ),
-                        Variable::new("f")
-                    ),
-                    vec![Variable::new("x").into()]
-                ),
-                Type::Number
-            )
+                    42.0
+                )
+            )])
         );
     }
 
     #[test]
     fn infer_environment_for_nested_function_definitions() {
         assert_eq!(
-            transform_let_recursive(
-                &LetRecursive::new(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "a",
+                    vec![],
+                    Type::Number,
+                    LetRecursive::new(
+                        FunctionDefinition::fake(
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            42.0,
+                            Type::Number,
+                        ),
+                        LetRecursive::new(
+                            FunctionDefinition::fake(
+                                "g",
+                                vec![Argument::new("x", Type::Number)],
+                                Call::new(
+                                    types::Function::new(vec![Type::Number], Type::Number),
+                                    Variable::new("f"),
+                                    vec![Variable::new("x").into()]
+                                ),
+                                Type::Number,
+                            ),
+                            42.0,
+                        )
+                    )
+                )]),
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "a",
+                vec![],
+                Type::Number,
+                LetRecursive::new(
                     FunctionDefinition::fake(
                         "f",
                         vec![Argument::new("x", Type::Number)],
@@ -505,8 +463,12 @@ mod tests {
                         Type::Number,
                     ),
                     LetRecursive::new(
-                        FunctionDefinition::fake(
+                        FunctionDefinition::fake_with_environment(
                             "g",
+                            vec![Argument::new(
+                                "f",
+                                types::Function::new(vec![Type::Number], Type::Number)
+                            )],
                             vec![Argument::new("x", Type::Number)],
                             Call::new(
                                 types::Function::new(vec![Type::Number], Type::Number),
@@ -517,28 +479,8 @@ mod tests {
                         ),
                         42.0,
                     )
-                ),
-                &Default::default(),
-            )
-            .expression(),
-            &LetRecursive::new(
-                FunctionDefinition::fake_with_environment(
-                    "g",
-                    vec![Argument::new(
-                        "f",
-                        types::Function::new(vec![Type::Number], Type::Number)
-                    )],
-                    vec![Argument::new("x", Type::Number)],
-                    Call::new(
-                        types::Function::new(vec![Type::Number], Type::Number),
-                        Variable::new("f"),
-                        vec![Variable::new("x").into()]
-                    ),
-                    Type::Number,
-                ),
-                42.0,
-            )
-            .into()
+                )
+            )])
         );
     }
 
