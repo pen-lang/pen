@@ -77,14 +77,11 @@ fn transform_expression(
                 .into()
             })
         }
-        Expression::Call(call) => transform_expression(call.function(), &|function| {
-            let function_name = context.generate_name();
-
-            // TODO Not let function if function is variable.
-            Let::new(
-                &function_name,
-                call.type_().clone(),
-                function,
+        Expression::Call(call) => transform_expression_with_let(
+            context,
+            call.function(),
+            &call.type_().clone().into(),
+            &|function| {
                 transform_expressions(
                     context,
                     &call
@@ -94,18 +91,13 @@ fn transform_expression(
                         .collect::<Vec<_>>(),
                     &|arguments| {
                         continue_(
-                            Call::new(
-                                call.type_().clone(),
-                                Variable::new(&function_name),
-                                arguments,
-                            )
-                            .into(),
+                            Call::new(call.type_().clone(), function.clone(), arguments).into(),
                         )
                     },
-                ),
-            )
-            .into()
-        }),
+                )
+                .into()
+            },
+        ),
         Expression::Case(case) => transform_expression(case.argument(), &|argument| {
             continue_(
                 Case::new(
@@ -268,6 +260,36 @@ fn transform_expression(
     }
 }
 
+fn transform_expression_with_let(
+    context: &Context,
+    bound_expression: &Expression,
+    type_: &Type,
+    continue_: &dyn Fn(Expression) -> Expression,
+) -> Expression {
+    transform_expression(
+        context,
+        bound_expression,
+        &|bound_expression| match &bound_expression {
+            Expression::Boolean(_)
+            | Expression::ByteString(_)
+            | Expression::None
+            | Expression::Number(_)
+            | Expression::Variable(_) => continue_(bound_expression),
+            _ => {
+                let name = context.generate_name();
+
+                Let::new(
+                    &name,
+                    type_.clone(),
+                    bound_expression,
+                    continue_(Variable::new(&name).into()),
+                )
+                .into()
+            }
+        },
+    )
+}
+
 fn transform_expressions(
     context: &Context,
     expressions: &[(&Expression, &Type)],
@@ -285,23 +307,16 @@ fn transform_expressions_recursively(
     match expressions {
         [] => continue_(transformed_expressions),
         [(expression, type_), ..] => {
-            transform_expression(context, expression, &move |expression| {
-                let name = context.generate_name();
-
-                Let::new(
-                    &name,
-                    (*type_).clone(),
-                    expression,
-                    transform_expressions_recursively(
-                        context,
-                        &expressions[1..],
-                        transformed_expressions
-                            .iter()
-                            .cloned()
-                            .chain([Variable::new(&name).into()])
-                            .collect(),
-                        continue_,
-                    ),
+            transform_expression_with_let(context, expression, &type_, &|expression| {
+                transform_expressions_recursively(
+                    context,
+                    &expressions[1..],
+                    transformed_expressions
+                        .iter()
+                        .cloned()
+                        .chain([expression])
+                        .collect(),
+                    continue_,
                 )
                 .into()
             })
@@ -502,7 +517,7 @@ mod tests {
     }
 
     #[test]
-    fn transform_call() {
+    fn transform_normalized_call() {
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
@@ -527,28 +542,94 @@ mod tests {
                     Type::Number,
                     1.0,
                     Let::new(
+                        "y",
+                        Type::Number,
+                        2.0,
+                        Let::new(
+                            "z",
+                            Type::Number,
+                            3.0,
+                            Call::new(
+                                types::Function::new(
+                                    vec![Type::Number, Type::Number],
+                                    Type::Number
+                                ),
+                                Variable::new("x"),
+                                vec![Variable::new("y").into(), Variable::new("z").into()],
+                            ),
+                        )
+                    )
+                ),
+                Type::Number,
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_call() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Call::new(
+                        types::Function::new(vec![Type::Variant, Type::Variant], Type::Number),
+                        Let::new(
+                            "x",
+                            Type::Number,
+                            1.0,
+                            Variant::new(Type::Number, Variable::new("x"))
+                        ),
+                        vec![
+                            Let::new(
+                                "y",
+                                Type::Number,
+                                2.0,
+                                Variant::new(Type::Number, Variable::new("y"))
+                            )
+                            .into(),
+                            Let::new(
+                                "z",
+                                Type::Number,
+                                3.0,
+                                Variant::new(Type::Number, Variable::new("z"))
+                            )
+                            .into(),
+                        ],
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![],
+                Let::new(
+                    "x",
+                    Type::Number,
+                    1.0,
+                    Let::new(
                         "anf:v:0",
-                        types::Function::new(vec![Type::Number, Type::Number], Type::Number),
-                        Variable::new("x"),
+                        types::Function::new(vec![Type::Variant, Type::Variant], Type::Number),
+                        Variant::new(Type::Number, Variable::new("x")),
                         Let::new(
                             "y",
                             Type::Number,
                             2.0,
                             Let::new(
                                 "anf:v:1",
-                                Type::Number,
-                                Variable::new("y"),
+                                Type::Variant,
+                                Variant::new(Type::Number, Variable::new("y")),
                                 Let::new(
                                     "z",
                                     Type::Number,
                                     3.0,
                                     Let::new(
                                         "anf:v:2",
-                                        Type::Number,
-                                        Variable::new("z"),
+                                        Type::Variant,
+                                        Variant::new(Type::Number, Variable::new("z")),
                                         Call::new(
                                             types::Function::new(
-                                                vec![Type::Number, Type::Number],
+                                                vec![Type::Variant, Type::Variant],
                                                 Type::Number
                                             ),
                                             Variable::new("anf:v:0"),
