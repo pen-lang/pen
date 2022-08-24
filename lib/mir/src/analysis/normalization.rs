@@ -311,6 +311,7 @@ fn transform_expressions_recursively(
                 transform_expressions_recursively(
                     context,
                     &expressions[1..],
+                    // TODO This is O(n^2)!
                     transformed_expressions
                         .iter()
                         .cloned()
