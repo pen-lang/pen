@@ -11,7 +11,7 @@ use std::convert::identity;
 // - Conditional expressions are kept nested.
 //   - Otherwise, we need to duplicate continuations of those expression.
 //
-// This transformation requires the alpha conversion.
+// This transformation assumes that the alpha conversion is applied to a module already.
 pub fn transform(module: &Module) -> Module {
     let context = Context::new(module);
 

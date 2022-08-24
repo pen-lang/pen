@@ -22,11 +22,10 @@ impl<'a> Context<'a> {
 
     pub fn generate_name(&self) -> String {
         let index = self.name_index.get();
-        let name = format!("anf:v:{}", index);
 
         self.name_index.set(index + 1);
 
-        name
+        format!("anf:v:{}", index)
     }
 
     pub fn record_fields(&self) -> &FnvHashMap<&'a str, &'a types::RecordBody> {
