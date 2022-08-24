@@ -27,7 +27,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                             variables
                                 .remove(alternative.name())
                                 .as_ref()
-                                .unwrap_or(&variables),
+                                .unwrap_or(variables),
                         ),
                     )
                 })
@@ -40,7 +40,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                         variables
                             .remove(alternative.name())
                             .as_ref()
-                            .unwrap_or(&variables),
+                            .unwrap_or(variables),
                     ),
                 )
             }),
@@ -87,7 +87,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
             .into(),
         },
         Expression::LetRecursive(let_) => LetRecursive::new(
-            transform_function_definition(let_.definition(), &variables),
+            transform_function_definition(let_.definition(), variables),
             transform_expression(
                 let_.expression(),
                 variables
@@ -166,7 +166,7 @@ fn transform_function_definition(
                     variables
                         .get(free_variable.name())
                         .copied()
-                        .unwrap_or(free_variable.name()),
+                        .unwrap_or_else(|| free_variable.name()),
                     free_variable.type_().clone(),
                 )
             })
@@ -176,12 +176,12 @@ fn transform_function_definition(
         {
             let mut variables = variables
                 .remove(definition.name())
-                .unwrap_or(variables.clone());
+                .unwrap_or_else(|| variables.clone());
 
             for argument in definition.arguments() {
                 variables = variables
                     .remove(argument.name())
-                    .unwrap_or(variables.clone());
+                    .unwrap_or_else(|| variables.clone());
             }
 
             transform_expression(definition.body(), &variables)
