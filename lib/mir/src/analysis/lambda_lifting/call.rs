@@ -190,6 +190,39 @@ mod tests {
     }
 
     #[test]
+    fn transform_call_in_case() {
+        let function_type = types::Function::new(vec![], Type::Number);
+        let expression = Case::new(
+            Variant::new(function_type.clone(), 42.0),
+            vec![Alternative::new(
+                vec![function_type.clone().into()],
+                "f",
+                Call::new(function_type.clone(), Variable::new("f"), vec![]),
+            )],
+            None,
+        )
+        .into();
+
+        assert_eq!(transform(&expression, "f", &[]), expression);
+    }
+
+    #[test]
+    fn transform_call_in_case_default_alternative() {
+        let function_type = types::Function::new(vec![], Type::Number);
+        let expression = Case::new(
+            Variant::new(function_type.clone(), 42.0),
+            vec![],
+            Some(DefaultAlternative::new(
+                "f",
+                Call::new(function_type.clone(), Variable::new("f"), vec![]),
+            )),
+        )
+        .into();
+
+        assert_eq!(transform(&expression, "f", &[]), expression);
+    }
+
+    #[test]
     fn transform_call_in_let() {
         let function_type = types::Function::new(vec![], Type::Number);
         let let_ = Let::new(
