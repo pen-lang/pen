@@ -10,6 +10,8 @@ use std::convert::identity;
 // - Arguments do not have to be variables.
 // - Conditional expressions are kept nested.
 //   - Otherwise, we need to duplicate continuations of those expression.
+//
+// This transformation requires the alpha conversion.
 pub fn transform(module: &Module) -> Module {
     let context = Context::new(module);
 
