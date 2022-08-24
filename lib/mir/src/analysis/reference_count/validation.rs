@@ -424,18 +424,18 @@ mod tests {
                 vec![Argument::new("x", Type::None)],
                 Type::None,
                 LetRecursive::new(
-                    FunctionDefinition::fake_with_environment(
+                    FunctionDefinition::new(
                         "g",
-                        vec![Argument::new("x", Type::None)],
                         vec![],
+                        Type::None,
                         DropVariables::new(
                             [("g".into(), types::Function::new(vec![], Type::None).into())]
                                 .into_iter()
                                 .collect(),
                             Variable::new("x"),
                         ),
-                        Type::None,
-                    ),
+                    )
+                    .set_environment(vec![Argument::new("x", Type::None)]),
                     Variable::new("g"),
                 ),
             )]),
@@ -452,18 +452,18 @@ mod tests {
                     vec![Argument::new("x", Type::None)],
                     Type::None,
                     LetRecursive::new(
-                        FunctionDefinition::fake_with_environment(
+                        FunctionDefinition::new(
                             "g",
-                            vec![Argument::new("x", Type::None)],
                             vec![],
+                            Type::None,
                             DropVariables::new(
                                 [("g".into(), types::Function::new(vec![], Type::None).into())]
                                     .into_iter()
                                     .collect(),
                                 Variable::new("x"),
-                            ),
-                            Type::None,
-                        ),
+                            )
+                        )
+                        .set_environment(vec![Argument::new("x", Type::None)]),
                         Expression::None,
                     )
                 )],)
