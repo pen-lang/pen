@@ -111,20 +111,17 @@ fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
-        types::Type,
-    };
+    use crate::{test::ModuleFake, types::Type};
 
     #[test]
     fn collect_from_case_argument() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
-                    Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None),
                     Type::None,
+                    Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None)
                 )])
             ),
             [Type::Number].into_iter().collect()
@@ -135,16 +132,16 @@ mod tests {
     fn collect_from_try_operation_operand() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
+                    Type::None,
                     TryOperation::new(
                         Variable::new("x"),
                         "error",
                         Type::Number,
                         Variable::new("error"),
-                    ),
-                    Type::None,
+                    )
                 )],)
             ),
             [Type::Number].into_iter().collect()
@@ -155,16 +152,16 @@ mod tests {
     fn collect_from_try_operation_then_expression() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
+                    Type::None,
                     TryOperation::new(
                         Variable::new("x"),
                         "error",
                         Type::Number,
                         Variant::new(Type::Boolean, Variable::new("error")),
-                    ),
-                    Type::None,
+                    )
                 )],)
             ),
             [Type::Boolean, Type::Number].into_iter().collect()

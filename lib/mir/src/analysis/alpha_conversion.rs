@@ -235,10 +235,7 @@ fn transform_expression<'a>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
-        types::Type,
-    };
+    use crate::{test::ModuleFake, types::Type};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -248,11 +245,11 @@ mod tests {
 
     #[test]
     fn transform_number() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "f",
             vec![],
-            42.0,
             Type::Number,
+            42.0,
         )]);
 
         assert_eq!(transform(&module), module);
@@ -262,9 +259,10 @@ mod tests {
     fn transform_case() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "x",
                         Type::Number,
@@ -278,13 +276,13 @@ mod tests {
                             )],
                             Some(DefaultAlternative::new("x", Variable::new("x"))),
                         ),
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "x",
                     Type::Number,
@@ -298,19 +296,18 @@ mod tests {
                         )],
                         Some(DefaultAlternative::new("x:2", Variable::new("x:2"))),
                     ),
-                ),
-                Type::Number,
+                )
             )])
         );
     }
 
     #[test]
     fn transform_let() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "f",
             vec![],
-            Let::new("x", Type::Number, 42.0, Variable::new("x")),
             Type::Number,
+            Let::new("x", Type::Number, 42.0, Variable::new("x")),
         )]);
 
         assert_eq!(transform(&module), module);
@@ -320,21 +317,22 @@ mod tests {
     fn transform_let_with_shadowed_variable() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "x",
                         Type::Number,
                         42.0,
                         Let::new("x", Type::Number, Variable::new("x"), Variable::new("x")),
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "x",
                     Type::Number,
@@ -345,22 +343,21 @@ mod tests {
                         Variable::new("x"),
                         Variable::new("x:1")
                     ),
-                ),
-                Type::Number,
+                )
             )])
         );
     }
 
     #[test]
     fn transform_let_recursive() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "f",
             vec![],
+            Type::Number,
             LetRecursive::new(
-                FunctionDefinition::fake("g", vec![], Variable::new("g"), Type::Number),
+                FunctionDefinition::new("g", vec![], Type::Number, Variable::new("g")),
                 Variable::new("g"),
             ),
-            Type::Number,
         )]);
 
         assert_eq!(transform(&module), module);
@@ -370,34 +367,34 @@ mod tests {
     fn transform_let_recursive_with_shadowed_function_name() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "g",
                         Type::Number,
                         42.0,
                         LetRecursive::new(
-                            FunctionDefinition::fake("g", vec![], Variable::new("g"), Type::Number),
+                            FunctionDefinition::new("g", vec![], Type::Number, Variable::new("g")),
                             Variable::new("g"),
                         )
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "g",
                     Type::Number,
                     42.0,
                     LetRecursive::new(
-                        FunctionDefinition::fake("g:1", vec![], Variable::new("g:1"), Type::Number),
+                        FunctionDefinition::new("g:1", vec![], Type::Number, Variable::new("g:1")),
                         Variable::new("g:1"),
                     )
-                ),
-                Type::Number,
+                )
             )])
         );
     }
@@ -406,44 +403,44 @@ mod tests {
     fn transform_let_recursive_with_shadowed_argument_name() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "g",
                         Type::Number,
                         42.0,
                         LetRecursive::new(
-                            FunctionDefinition::fake(
+                            FunctionDefinition::new(
                                 "h",
                                 vec![Argument::new("g", Type::Number)],
-                                Variable::new("g"),
-                                Type::Number
+                                Type::Number,
+                                Variable::new("g")
                             ),
                             Variable::new("g"),
                         )
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "g",
                     Type::Number,
                     42.0,
                     LetRecursive::new(
-                        FunctionDefinition::fake(
+                        FunctionDefinition::new(
                             "h",
                             vec![Argument::new("g:1", Type::Number)],
-                            Variable::new("g:1"),
-                            Type::Number
+                            Type::Number,
+                            Variable::new("g:1")
                         ),
                         Variable::new("g"),
                     )
-                ),
-                Type::Number,
+                )
             )])
         );
     }
@@ -452,9 +449,10 @@ mod tests {
     fn transform_let_recursive_with_free_variable() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "x",
                         Type::Number,
@@ -475,13 +473,13 @@ mod tests {
                                 Variable::new("x"),
                             )
                         )
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "x",
                     Type::Number,
@@ -502,8 +500,7 @@ mod tests {
                             Variable::new("x:1"),
                         )
                     )
-                ),
-                Type::Number,
+                )
             )])
         );
     }
@@ -512,28 +509,28 @@ mod tests {
     fn transform_try_operation() {
         assert_eq!(
             transform(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
+                    Type::Number,
                     Let::new(
                         "x",
                         Type::Number,
                         1.0,
                         TryOperation::new(2.0, "x", Type::Number, Variable::new("x")),
-                    ),
-                    Type::Number,
+                    )
                 )])
             ),
-            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![],
+                Type::Number,
                 Let::new(
                     "x",
                     Type::Number,
                     1.0,
                     TryOperation::new(2.0, "x:1", Type::Number, Variable::new("x:1")),
-                ),
-                Type::Number,
+                )
             )])
         );
     }
