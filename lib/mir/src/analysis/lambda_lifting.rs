@@ -258,7 +258,7 @@ fn save_free_variables(
 mod tests {
     use super::*;
     use crate::{
-        test::{ModuleFake},
+        test::ModuleFake,
         types::{self, Type},
     };
     use pretty_assertions::assert_eq;

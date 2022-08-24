@@ -57,7 +57,7 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
 mod tests {
     use super::*;
     use crate::{
-        test::{ModuleFake},
+        test::ModuleFake,
         types::{self, Type},
     };
 
@@ -83,9 +83,17 @@ mod tests {
     fn check_duplicate_function_name_in_definition() {
         let module = Module::empty().set_function_definitions(vec![
             FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("x")),
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Number,
+                Variable::new("x"),
+            ),
             FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("x")),
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Number,
+                Variable::new("x"),
+            ),
         ]);
 
         assert_eq!(
@@ -104,7 +112,11 @@ mod tests {
                 CallingConvention::Target,
             )])
             .set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("x"))]);
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Number,
+                Variable::new("x"),
+            )]);
 
         assert_eq!(
             check_names(&module),
@@ -120,7 +132,11 @@ mod tests {
                 types::Function::new(vec![Type::Number], Type::Number),
             )])
             .set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("x"))]);
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Number,
+                Variable::new("x"),
+            )]);
 
         assert_eq!(
             check_names(&module),

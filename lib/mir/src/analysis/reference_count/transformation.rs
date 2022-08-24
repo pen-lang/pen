@@ -982,7 +982,11 @@ mod tests {
                 transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
-                            "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            42.0
+                        ),
                         Variable::new("f")
                     )
                     .into(),
@@ -993,7 +997,10 @@ mod tests {
                 .0,
                 LetRecursive::new(
                     FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, DropVariables::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        DropVariables::new(
                             [
                                 (
                                     "f".into(),
@@ -1004,7 +1011,8 @@ mod tests {
                             .into_iter()
                             .collect(),
                             42.0,
-                        )),
+                        )
+                    ),
                     Variable::new("f")
                 )
                 .into(),
@@ -1026,7 +1034,11 @@ mod tests {
                 transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
-                            "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            42.0
+                        ),
                         Call::new(
                             f_type.clone(),
                             Call::new(
@@ -1045,7 +1057,10 @@ mod tests {
                 .0,
                 LetRecursive::new(
                     FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, DropVariables::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        DropVariables::new(
                             [
                                 (
                                     "f".into(),
@@ -1056,7 +1071,8 @@ mod tests {
                             .into_iter()
                             .collect(),
                             42.0,
-                        )),
+                        )
+                    ),
                     Call::new(
                         f_type,
                         Call::new(
@@ -1086,7 +1102,11 @@ mod tests {
                 transform_expression(
                     &LetRecursive::new(
                         FunctionDefinition::new(
-                            "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            42.0
+                        ),
                         42.0,
                     )
                     .into(),
@@ -1097,7 +1117,10 @@ mod tests {
                 .0,
                 LetRecursive::new(
                     FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, DropVariables::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        DropVariables::new(
                             [
                                 (
                                     "f".into(),
@@ -1108,7 +1131,8 @@ mod tests {
                             .into_iter()
                             .collect(),
                             42.0,
-                        )),
+                        )
+                    ),
                     DropVariables::new(
                         [(
                             "f".into(),
@@ -1361,12 +1385,19 @@ mod tests {
             assert_eq!(
                 transform_function_definition(
                     &FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        42.0
+                    ),
                     false
                 )
                 .unwrap(),
                 FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Number)], Type::Number, DropVariables::new(
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Type::Number,
+                    DropVariables::new(
                         [
                             (
                                 "f".into(),
@@ -1377,7 +1408,8 @@ mod tests {
                         .into_iter()
                         .collect(),
                         42.0
-                    )),
+                    )
+                ),
             );
         }
 

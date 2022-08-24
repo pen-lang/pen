@@ -240,7 +240,11 @@ mod tests {
         assert_eq!(
             transform_local_function_definition(
                 &FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Type::Number,
+                    42.0
+                ),
                 &Default::default()
             ),
             FunctionDefinition::fake_with_environment(
@@ -258,7 +262,11 @@ mod tests {
         assert_eq!(
             transform_local_function_definition(
                 &FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("y")),
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Type::Number,
+                    Variable::new("y")
+                ),
                 &vec![("y".into(), Type::Number)].drain(..).collect()
             ),
             FunctionDefinition::fake_with_environment(
@@ -279,7 +287,11 @@ mod tests {
             transform_local_function_definition(
                 &transform_local_function_definition(
                     &FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("y")),
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        Variable::new("y")
+                    ),
                     &variables
                 ),
                 &variables
@@ -348,18 +360,27 @@ mod tests {
                     Type::Number,
                     LetRecursive::new(
                         FunctionDefinition::new(
-                            "f", vec![Argument::new("x", Type::Number)], Type::Number, Call::new(
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            Call::new(
                                 types::Function::new(vec![Type::Number], Type::Number),
                                 LetRecursive::new(
-                                    FunctionDefinition::new("f", vec![Argument::new("x", Type::Number)], Type::Number, Call::new(
+                                    FunctionDefinition::new(
+                                        "f",
+                                        vec![Argument::new("x", Type::Number)],
+                                        Type::Number,
+                                        Call::new(
                                             types::Function::new(vec![Type::Number], Type::Number),
                                             Variable::new("f"),
                                             vec![Variable::new("x").into()]
-                                        )),
+                                        )
+                                    ),
                                     Variable::new("f")
                                 ),
                                 vec![Variable::new("x").into()]
-                            )),
+                            )
+                        ),
                         42.0
                     )
                 )])
@@ -409,14 +430,22 @@ mod tests {
                     Type::Number,
                     LetRecursive::new(
                         FunctionDefinition::new(
-                            "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                            "f",
+                            vec![Argument::new("x", Type::Number)],
+                            Type::Number,
+                            42.0
+                        ),
                         LetRecursive::new(
                             FunctionDefinition::new(
-                                "g", vec![Argument::new("x", Type::Number)], Type::Number, Call::new(
+                                "g",
+                                vec![Argument::new("x", Type::Number)],
+                                Type::Number,
+                                Call::new(
                                     types::Function::new(vec![Type::Number], Type::Number),
                                     Variable::new("f"),
                                     vec![Variable::new("x").into()]
-                                )),
+                                )
+                            ),
                             42.0,
                         )
                     )
@@ -428,7 +457,11 @@ mod tests {
                 Type::Number,
                 LetRecursive::new(
                     FunctionDefinition::new(
-                        "f", vec![Argument::new("x", Type::Number)], Type::Number, 42.0),
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        Type::Number,
+                        42.0
+                    ),
                     LetRecursive::new(
                         FunctionDefinition::fake_with_environment(
                             "g",
@@ -456,7 +489,11 @@ mod tests {
         assert_eq!(
             transform_local_function_definition(
                 &FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Number)], Type::Number, Variable::new("x")),
+                    "f",
+                    vec![Argument::new("x", Type::Number)],
+                    Type::Number,
+                    Variable::new("x")
+                ),
                 &vec![("x".into(), Type::Number)].drain(..).collect()
             ),
             FunctionDefinition::fake_with_environment(

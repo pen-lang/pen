@@ -285,7 +285,11 @@ mod tests {
     fn validate_none() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![], Type::None, Expression::None)]),
+                "f",
+                vec![],
+                Type::None,
+                Expression::None,
+            )]),
         )
         .unwrap();
     }
@@ -294,14 +298,18 @@ mod tests {
     fn validate_variable_clone() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Number)], Type::None, CloneVariables::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::None,
+                CloneVariables::new(
                     [("x".into(), Type::Number)].into_iter().collect(),
                     ArithmeticOperation::new(
                         ArithmeticOperator::Add,
                         Variable::new("x"),
                         Variable::new("x"),
                     ),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -310,10 +318,14 @@ mod tests {
     fn validate_variable_drop() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, DropVariables::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                DropVariables::new(
                     [("x".into(), Type::None)].into_iter().collect(),
                     Expression::None,
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -323,7 +335,11 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, Expression::None)],)
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    Expression::None
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("x".into(), 1)].into_iter().collect()
@@ -335,7 +351,11 @@ mod tests {
     fn validate_variable_move() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, Variable::new("x"))]),
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                Variable::new("x"),
+            )]),
         )
         .unwrap();
     }
@@ -344,7 +364,11 @@ mod tests {
     fn validate_let() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, Let::new("y", Type::None, Variable::new("x"), Variable::new("y")))]),
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                Let::new("y", Type::None, Variable::new("x"), Variable::new("y")),
+            )]),
         )
         .unwrap();
     }
@@ -354,7 +378,11 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, Let::new("y", Type::None, Variable::new("x"), Expression::None))],)
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    Let::new("y", Type::None, Variable::new("x"), Expression::None)
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -364,7 +392,11 @@ mod tests {
     fn validate_let_with_shadowed_variable() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, Let::new("x", Type::None, Variable::new("x"), Variable::new("x")))]),
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                Let::new("x", Type::None, Variable::new("x"), Variable::new("x")),
+            )]),
         )
         .unwrap();
     }
@@ -374,7 +406,11 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, Let::new("x", Type::None, Variable::new("x"), Expression::None))],)
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    Let::new("x", Type::None, Variable::new("x"), Expression::None)
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("x".into(), 1))
         );
@@ -384,7 +420,10 @@ mod tests {
     fn validate_let_recursive() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, LetRecursive::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                LetRecursive::new(
                     FunctionDefinition::fake_with_environment(
                         "g",
                         vec![Argument::new("x", Type::None)],
@@ -398,7 +437,8 @@ mod tests {
                         Type::None,
                     ),
                     Variable::new("g"),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -408,7 +448,10 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, LetRecursive::new(
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    LetRecursive::new(
                         FunctionDefinition::fake_with_environment(
                             "g",
                             vec![Argument::new("x", Type::None)],
@@ -422,7 +465,8 @@ mod tests {
                             Type::None,
                         ),
                         Expression::None,
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("g".into(), 1))
         );
@@ -433,7 +477,10 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, LetRecursive::new(
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    LetRecursive::new(
                         FunctionDefinition::with_options(
                             "g",
                             vec![Argument::new("x", Type::None)],
@@ -443,7 +490,8 @@ mod tests {
                             false,
                         ),
                         Variable::new("g"),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("g".into(), 1)].into_iter().collect()
@@ -455,11 +503,15 @@ mod tests {
     fn validate_if() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::None)], Type::None, If::new(
+                "f",
+                vec![Argument::new("x", Type::None)],
+                Type::None,
+                If::new(
                     Expression::Boolean(true),
                     Variable::new("x"),
                     Variable::new("x"),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -469,11 +521,15 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::None)], Type::None, If::new(
+                    "f",
+                    vec![Argument::new("x", Type::None)],
+                    Type::None,
+                    If::new(
                         Expression::Boolean(true),
                         Variable::new("x"),
                         Expression::None,
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::UnmatchedVariables(
                 [("x".into(), 1)].into_iter().collect(),
@@ -486,11 +542,15 @@ mod tests {
     fn validate_case_with_default_alternative() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                Case::new(
                     Variable::new("x"),
                     vec![],
                     Some(DefaultAlternative::new("y", Variable::new("y"))),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -500,11 +560,15 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    Case::new(
                         Variable::new("x"),
                         vec![],
                         Some(DefaultAlternative::new("y", Expression::None)),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -514,11 +578,15 @@ mod tests {
     fn validate_case_with_alternative() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                Case::new(
                     Variable::new("x"),
                     vec![Alternative::new(vec![Type::None], "y", Variable::new("y"))],
                     None,
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -528,11 +596,15 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(vec![Type::None], "y", Expression::None)],
                         None,
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -542,11 +614,15 @@ mod tests {
     fn validate_case_with_alternative_and_default_alternative() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                Case::new(
                     Variable::new("x"),
                     vec![Alternative::new(vec![Type::None], "y", Variable::new("y"))],
                     Some(DefaultAlternative::new("y", Variable::new("y"))),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -556,11 +632,15 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    Case::new(
                         Variable::new("x"),
                         vec![Alternative::new(vec![Type::None], "y", Expression::None)],
                         Some(DefaultAlternative::new("y", Variable::new("y"))),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -570,14 +650,18 @@ mod tests {
     fn validate_case_with_two_alternatives_and_default_alternative() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                Case::new(
                     Variable::new("x"),
                     vec![
                         Alternative::new(vec![Type::None], "y", Variable::new("y")),
                         Alternative::new(vec![Type::None], "y", Variable::new("y")),
                     ],
                     Some(DefaultAlternative::new("y", Variable::new("y"))),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -587,14 +671,18 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    Case::new(
                         Variable::new("x"),
                         vec![
                             Alternative::new(vec![Type::None], "y", Variable::new("y")),
                             Alternative::new(vec![Type::None], "y", Expression::None),
                         ],
                         Some(DefaultAlternative::new("y", Variable::new("y"))),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -604,14 +692,18 @@ mod tests {
     fn validate_case_with_different_bound_variables() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, Case::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                Case::new(
                     Variable::new("x"),
                     vec![
                         Alternative::new(vec![Type::None], "y", Variable::new("y")),
                         Alternative::new(vec![Type::None], "z", Variable::new("z")),
                     ],
                     None,
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -620,12 +712,16 @@ mod tests {
     fn validate_try_operation() {
         validate(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f", vec![Argument::new("x", Type::Variant)], Type::Variant, TryOperation::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::Variant,
+                TryOperation::new(
                     Variable::new("x"),
                     "y",
                     Type::None,
                     Variant::new(Type::None, Variable::new("y")),
-                ))]),
+                ),
+            )]),
         )
         .unwrap();
     }
@@ -635,12 +731,16 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, TryOperation::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    TryOperation::new(
                         Variable::new("x"),
                         "y",
                         Type::None,
                         Variant::new(Type::None, Expression::None),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariable("y".into(), 1))
         );
@@ -651,7 +751,10 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, TryOperation::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    TryOperation::new(
                         Variable::new("x"),
                         "y",
                         Type::None,
@@ -659,7 +762,8 @@ mod tests {
                             [("y".into(), Type::None)].into_iter().collect(),
                             Variable::new("x"),
                         ),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("x".into(), -1), ("y".into(), 0)].into_iter().collect()
@@ -672,12 +776,16 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, TryOperation::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    TryOperation::new(
                         Expression::None,
                         "y",
                         Type::None,
                         Variant::new(Type::None, Variable::new("y")),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("x".into(), 1), ("y".into(), 0)].into_iter().collect()
@@ -690,12 +798,16 @@ mod tests {
         assert_eq!(
             validate(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                    "f", vec![Argument::new("x", Type::Variant)], Type::Variant, TryOperation::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    TryOperation::new(
                         Expression::None,
                         "x",
                         Type::None,
                         Variant::new(Type::None, Variable::new("x")),
-                    ))],)
+                    )
+                )],)
             ),
             Err(ReferenceCountError::InvalidLocalVariables(
                 [("x".into(), 1)].into_iter().collect()
@@ -709,11 +821,15 @@ mod tests {
             validate(&Module::empty().set_function_definitions(vec![
                 FunctionDefinition::new("f", vec![], Type::None, Expression::None),
                 FunctionDefinition::new(
-                    "g", vec![], Type::None, Call::new(
+                    "g",
+                    vec![],
+                    Type::None,
+                    Call::new(
                         types::Function::new(vec![], Type::None),
                         Variable::new("f"),
                         vec![],
-                    ))
+                    )
+                )
             ],)),
             Ok(())
         );
