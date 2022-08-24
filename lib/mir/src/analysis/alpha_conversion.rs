@@ -236,7 +236,7 @@ fn transform_expression<'a>(
 mod tests {
     use super::*;
     use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::{ModuleFake},
         types::Type,
     };
     use pretty_assertions::assert_eq;

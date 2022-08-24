@@ -57,7 +57,7 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
 mod tests {
     use super::*;
     use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::{ModuleFake},
         types::{self, Type},
     };
 

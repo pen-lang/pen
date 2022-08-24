@@ -112,7 +112,7 @@ fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
 mod tests {
     use super::*;
     use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::{ModuleFake},
         types::Type,
     };
 

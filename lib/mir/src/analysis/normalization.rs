@@ -299,7 +299,7 @@ fn transform_expressions_recursively(
 mod tests {
     use super::*;
     use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::{ModuleFake},
         types::{self, Type},
     };
     use pretty_assertions::assert_eq;

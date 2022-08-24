@@ -413,24 +413,15 @@ mod tests {
 
         compile(
             &context,
-            &mir::ir::FunctionDefinition::fake(
-                "f",
-                vec![],
-                mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::fake(
-                        "g",
-                        vec![],
-                        mir::ir::Call::new(
+            &mir::ir::FunctionDefinition::new(
+                "f", vec![], mir::types::Type::Number, mir::ir::LetRecursive::new(
+                    mir::ir::FunctionDefinition::new("g", vec![], mir::types::Type::Number, mir::ir::Call::new(
                             function_type.clone(),
                             mir::ir::Variable::new("f"),
                             vec![],
-                        ),
-                        mir::types::Type::Number,
-                    ),
+                        )),
                     mir::ir::Call::new(function_type.clone(), mir::ir::Variable::new("g"), vec![]),
-                ),
-                mir::types::Type::Number,
-            ),
+                )),
             true,
             &[(
                 "f".into(),
