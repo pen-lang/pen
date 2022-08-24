@@ -141,20 +141,40 @@ fn transform_expression<'a>(
                 .clone()
                 .into_iter()
                 .chain([(definition.name(), name.clone())])
-                .collect();
+                .collect::<FnvHashMap<_, _>>();
 
             LetRecursive::new(
-                transform_function_definition(
-                    &FunctionDefinition::with_options(
-                        name,
-                        definition.environment().to_vec(),
-                        definition.arguments().to_vec(),
-                        definition.result_type().clone(),
-                        definition.body().clone(),
-                        definition.is_thunk(),
-                    ),
-                    &variables,
-                ),
+                {
+                    let mut variables = variables.clone();
+
+                    for argument in definition.arguments() {
+                        variables.insert(argument.name(), context.rename(argument.name()));
+                    }
+
+                    transform_function_definition(
+                        &FunctionDefinition::with_options(
+                            name,
+                            definition.environment().to_vec(),
+                            definition
+                                .arguments()
+                                .iter()
+                                .map(|argument| {
+                                    Argument::new(
+                                        variables
+                                            .get(argument.name())
+                                            .map(String::as_str)
+                                            .unwrap_or_else(|| argument.name()),
+                                        argument.type_().clone(),
+                                    )
+                                })
+                                .collect(),
+                            definition.result_type().clone(),
+                            definition.body().clone(),
+                            definition.is_thunk(),
+                        ),
+                        &variables,
+                    )
+                },
                 transform_expression(context, let_.expression(), &variables),
             )
             .into()
@@ -355,7 +375,7 @@ mod tests {
     }
 
     #[test]
-    fn transform_let_recursive_with_shadowed_variable() {
+    fn transform_let_recursive_with_shadowed_function_name() {
         assert_eq!(
             transform(
                 &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
@@ -383,6 +403,52 @@ mod tests {
                     LetRecursive::new(
                         FunctionDefinition::fake("g:1", vec![], Variable::new("g:1"), Type::Number),
                         Variable::new("g:1"),
+                    )
+                ),
+                Type::Number,
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_let_recursive_with_shadowed_argument_name() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    vec![],
+                    Let::new(
+                        "g",
+                        Type::Number,
+                        42.0,
+                        LetRecursive::new(
+                            FunctionDefinition::fake(
+                                "h",
+                                vec![Argument::new("g", Type::Number)],
+                                Variable::new("g"),
+                                Type::Number
+                            ),
+                            Variable::new("g"),
+                        )
+                    ),
+                    Type::Number,
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                vec![],
+                Let::new(
+                    "g",
+                    Type::Number,
+                    42.0,
+                    LetRecursive::new(
+                        FunctionDefinition::fake(
+                            "h",
+                            vec![Argument::new("g:1", Type::Number)],
+                            Variable::new("g:1"),
+                            Type::Number
+                        ),
+                        Variable::new("g"),
                     )
                 ),
                 Type::Number,
