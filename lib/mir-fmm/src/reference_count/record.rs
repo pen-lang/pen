@@ -29,9 +29,46 @@ pub fn compile_clone_function(
                 builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
                     clone_boxed(&builder, &record)?
                 } else {
-                    clone_unboxed(context, &builder, &record, &record_type)?
+                    builder.call(
+                        fmm::build::variable(
+                            utilities::get_clone_unboxed_function_name(record_type.name()),
+                            utilities::compile_clone_unboxed_function_type(
+                                &record_type,
+                                context.types(),
+                            ),
+                        ),
+                        vec![record],
+                    )?
                 }),
             )
+        },
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
+    )?;
+
+    Ok(())
+}
+
+pub fn compile_clone_unboxed_function(
+    context: &Context,
+    definition: &mir::ir::TypeDefinition,
+) -> Result<(), CompileError> {
+    let record_type = mir::types::Record::new(definition.name());
+    let fmm_record_type = type_::compile_unboxed_record(&record_type, context.types());
+
+    context.module_builder().define_function(
+        utilities::get_clone_unboxed_function_name(definition.name()),
+        vec![fmm::ir::Argument::new(
+            ARGUMENT_NAME,
+            fmm_record_type.clone(),
+        )],
+        fmm_record_type.clone(),
+        |builder| -> Result<_, CompileError> {
+            Ok(builder.return_(clone_unboxed(
+                context,
+                &builder,
+                &fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone()),
+                &record_type,
+            )?))
         },
         REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )?;
