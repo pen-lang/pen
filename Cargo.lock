@@ -246,9 +246,9 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.7.0"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f107b87b6afc2a64fd13cac55fe06d6c8859f12d4b14cbcdd2c67d0976781be"
+checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
 
 [[package]]
 name = "encode_unicode"
@@ -278,7 +278,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4722086ce9f000e3093df26e5d74d62fa087b952"
 dependencies = [
  "fnv",
  "hamt",
@@ -290,7 +290,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4722086ce9f000e3093df26e5d74d62fa087b952"
 dependencies = [
  "fmm",
  "fnv",
@@ -300,7 +300,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e36a63014631de8b706c7189c456503335f72c58"
+source = "git+https://github.com/raviqqe/fmm?branch=main#4722086ce9f000e3093df26e5d74d62fa087b952"
 dependencies = [
  "fmm",
  "hamt",
