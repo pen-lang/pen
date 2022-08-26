@@ -24,10 +24,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                         alternative.name(),
                         transform_expression(
                             alternative.expression(),
-                            variables
-                                .remove(alternative.name())
-                                .as_ref()
-                                .unwrap_or(variables),
+                            &variables.remove(alternative.name()),
                         ),
                     )
                 })
@@ -37,10 +34,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                     alternative.name(),
                     transform_expression(
                         alternative.expression(),
-                        variables
-                            .remove(alternative.name())
-                            .as_ref()
-                            .unwrap_or(variables),
+                        &variables.remove(alternative.name()),
                     ),
                 )
             }),
@@ -79,10 +73,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                 let_.name(),
                 let_.type_().clone(),
                 bound_expression,
-                transform_expression(
-                    let_.expression(),
-                    variables.remove(let_.name()).as_ref().unwrap_or(variables),
-                ),
+                transform_expression(let_.expression(), &variables.remove(let_.name())),
             )
             .into(),
         },
@@ -90,10 +81,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
             transform_function_definition(let_.definition(), variables),
             transform_expression(
                 let_.expression(),
-                variables
-                    .remove(let_.definition().name())
-                    .as_ref()
-                    .unwrap_or(variables),
+                &variables.remove(let_.definition().name()),
             ),
         )
         .into(),
@@ -127,13 +115,7 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
             transform(operation.operand()),
             operation.name(),
             operation.type_().clone(),
-            transform_expression(
-                operation.then(),
-                variables
-                    .remove(operation.name())
-                    .as_ref()
-                    .unwrap_or(variables),
-            ),
+            transform_expression(operation.then(), &variables.remove(operation.name())),
         )
         .into(),
         Expression::Variant(variant) => {
@@ -174,14 +156,10 @@ fn transform_function_definition(
         definition.arguments().to_vec(),
         definition.result_type().clone(),
         {
-            let mut variables = variables
-                .remove(definition.name())
-                .unwrap_or_else(|| variables.clone());
+            let mut variables = variables.remove(definition.name());
 
             for argument in definition.arguments() {
-                variables = variables
-                    .remove(argument.name())
-                    .unwrap_or_else(|| variables.clone());
+                variables = variables.remove(argument.name());
             }
 
             transform_expression(definition.body(), &variables)
