@@ -98,45 +98,47 @@ pub fn compile(
                 .map(|field| Ok((field.index(), compile(field.expression(), variables)?)))
                 .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
 
-            let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
-                Ok(fmm::build::record(
-                    context.types()[update.type_().name()]
-                        .fields()
-                        .iter()
-                        .enumerate()
-                        .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = record::get_field(
-                                context,
-                                builder,
-                                &record,
-                                update.type_(),
-                                index,
-                            )?;
+            let compile_unboxed = |builder: &fmm::build::InstructionBuilder,
+                                   clone: bool|
+             -> Result<_, CompileError> {
+                let pointer = builder.allocate_stack(type_::compile_unboxed_record(
+                    update.type_(),
+                    context.types(),
+                ));
 
-                            Ok(if let Some(expression) = fields.get(&index) {
-                                if !clone {
-                                    reference_count::drop(
-                                        builder,
-                                        &field,
-                                        field_type,
-                                        context.types(),
-                                    )?;
-                                }
+                builder.store(
+                    if type_::is_record_boxed(update.type_(), context.types()) {
+                        builder.load(record.clone())?
+                    } else {
+                        record.clone()
+                    },
+                    pointer.clone(),
+                );
 
-                                expression.clone()
-                            } else if clone {
-                                reference_count::clone(
-                                    builder,
-                                    &field,
-                                    field_type,
-                                    context.types(),
-                                )?
-                            } else {
-                                field
-                            })
-                        })
-                        .collect::<Result<_, _>>()?,
-                ))
+                for (index, field_type) in context.types()[update.type_().name()]
+                    .fields()
+                    .iter()
+                    .enumerate()
+                {
+                    let field =
+                        record::get_field(context, builder, &record, update.type_(), index)?;
+                    let pointer = fmm::build::record_address(pointer.clone(), index)?;
+
+                    if let Some(expression) = fields.get(&index) {
+                        if !clone {
+                            reference_count::drop(builder, &field, field_type, context.types())?;
+                        }
+
+                        builder.store(expression.clone(), pointer);
+                    } else if clone {
+                        builder.store(
+                            reference_count::clone(builder, &field, field_type, context.types())?,
+                            pointer,
+                        );
+                    }
+                }
+
+                Ok(builder.load(pointer)?)
             };
 
             if type_::is_record_boxed(update.type_(), context.types()) {
