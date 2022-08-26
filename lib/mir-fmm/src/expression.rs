@@ -198,7 +198,7 @@ pub fn compile(
                     },
                 )?
             } else {
-                compile_unboxed(builder, false)?.into()
+                compile_unboxed(builder, false)?
             }
         }
         mir::ir::Expression::ByteString(string) => {

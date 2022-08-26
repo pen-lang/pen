@@ -93,7 +93,7 @@ pub fn clone_unboxed(
     Ok(builder.call(
         fmm::build::variable(
             utilities::get_clone_unboxed_function_name(record_type.name()),
-            utilities::compile_clone_unboxed_function_type(&record_type, context.types()),
+            utilities::compile_clone_unboxed_function_type(record_type, context.types()),
         ),
         vec![record.clone()],
     )?)
