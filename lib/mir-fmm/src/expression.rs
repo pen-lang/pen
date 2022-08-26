@@ -98,45 +98,76 @@ pub fn compile(
                 .map(|field| Ok((field.index(), compile(field.expression(), variables)?)))
                 .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
 
-            let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
-                Ok(fmm::build::record(
-                    context.types()[update.type_().name()]
-                        .fields()
-                        .iter()
-                        .enumerate()
-                        .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = record::get_field(
-                                context,
-                                builder,
-                                &record,
-                                update.type_(),
-                                index,
-                            )?;
+            let compile_unboxed = |builder: &fmm::build::InstructionBuilder,
+                                   cloned: bool|
+             -> Result<_, CompileError> {
+                let record_fields = context.types()[update.type_().name()].fields();
+                let pointer = builder.allocate_stack(type_::compile_unboxed_record(
+                    update.type_(),
+                    context.types(),
+                ));
 
-                            Ok(if let Some(expression) = fields.get(&index) {
-                                if !clone {
-                                    reference_count::drop(
-                                        builder,
-                                        &field,
-                                        field_type,
-                                        context.types(),
-                                    )?;
-                                }
+                builder.store(
+                    if type_::is_record_boxed(update.type_(), context.types()) {
+                        builder.load(fmm::build::bit_cast(
+                            pointer.type_().clone(),
+                            record.clone(),
+                        ))?
+                    } else {
+                        record.clone()
+                    },
+                    pointer.clone(),
+                );
 
-                                expression.clone()
-                            } else if clone {
-                                reference_count::clone(
-                                    builder,
-                                    &field,
+                if cloned {
+                    for (index, field_type) in record_fields.iter().enumerate() {
+                        if fields.contains_key(&index) {
+                            builder.store(
+                                fmm::ir::Undefined::new(type_::compile(
                                     field_type,
                                     context.types(),
-                                )?
-                            } else {
-                                field
-                            })
-                        })
-                        .collect::<Result<_, _>>()?,
-                ))
+                                )),
+                                fmm::build::record_address(pointer.clone(), index)?,
+                            );
+                        }
+                    }
+
+                    builder.store(
+                        reference_count::record::clone_unboxed(
+                            context,
+                            builder,
+                            &builder.load(pointer.clone())?,
+                            update.type_(),
+                        )?,
+                        pointer.clone(),
+                    )
+                }
+
+                for (index, field_type) in record_fields.iter().enumerate() {
+                    if let Some(expression) = fields.get(&index) {
+                        if !cloned {
+                            reference_count::drop(
+                                builder,
+                                &record::get_field(
+                                    context,
+                                    builder,
+                                    &record,
+                                    update.type_(),
+                                    index,
+                                )?,
+                                field_type,
+                                context.types(),
+                            )?;
+                        }
+
+                        builder.store(
+                            expression.clone(),
+                            fmm::build::record_address(pointer.clone(), index)?,
+                        );
+                    }
+                }
+
+                Ok(builder.load(pointer)?)
             };
 
             if type_::is_record_boxed(update.type_(), context.types()) {
@@ -167,7 +198,7 @@ pub fn compile(
                     },
                 )?
             } else {
-                compile_unboxed(builder, false)?.into()
+                compile_unboxed(builder, false)?
             }
         }
         mir::ir::Expression::ByteString(string) => {

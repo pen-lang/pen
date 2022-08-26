@@ -46,6 +46,7 @@ pub fn compile(
 
     for definition in module.type_definitions() {
         reference_count::record::compile_clone_function(&context, definition)?;
+        reference_count::record::compile_clone_unboxed_function(&context, definition)?;
         reference_count::record::compile_drop_function(&context, definition)?;
         reference_count::record::compile_synchronize_function(&context, definition)?;
     }
