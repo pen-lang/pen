@@ -108,7 +108,10 @@ pub fn compile(
 
                 builder.store(
                     if type_::is_record_boxed(update.type_(), context.types()) {
-                        builder.load(record.clone())?
+                        builder.load(fmm::build::bit_cast(
+                            pointer.type_().clone(),
+                            record.clone(),
+                        ))?
                     } else {
                         record.clone()
                     },
