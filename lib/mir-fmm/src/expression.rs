@@ -101,6 +101,7 @@ pub fn compile(
             let compile_unboxed = |builder: &fmm::build::InstructionBuilder,
                                    cloned: bool|
              -> Result<_, CompileError> {
+                let record_fields = context.types()[update.type_().name()].fields();
                 let pointer = builder.allocate_stack(type_::compile_unboxed_record(
                     update.type_(),
                     context.types(),
@@ -118,25 +119,50 @@ pub fn compile(
                     pointer.clone(),
                 );
 
-                for (index, field_type) in context.types()[update.type_().name()]
-                    .fields()
-                    .iter()
-                    .enumerate()
-                {
-                    let field =
-                        record::get_field(context, builder, &record, update.type_(), index)?;
-                    let pointer = fmm::build::record_address(pointer.clone(), index)?;
+                if cloned {
+                    for (index, field_type) in record_fields.iter().enumerate() {
+                        if fields.contains_key(&index) {
+                            builder.store(
+                                fmm::ir::Undefined::new(type_::compile(
+                                    field_type,
+                                    context.types(),
+                                )),
+                                fmm::build::record_address(pointer.clone(), index)?,
+                            );
+                        }
+                    }
 
+                    builder.store(
+                        reference_count::record::clone_unboxed_for_update(
+                            context,
+                            builder,
+                            &builder.load(pointer.clone())?,
+                            update.type_(),
+                        )?,
+                        pointer.clone(),
+                    )
+                }
+
+                for (index, field_type) in record_fields.iter().enumerate() {
                     if let Some(expression) = fields.get(&index) {
                         if !cloned {
-                            reference_count::drop(builder, &field, field_type, context.types())?;
+                            reference_count::drop(
+                                builder,
+                                &record::get_field(
+                                    context,
+                                    builder,
+                                    &record,
+                                    update.type_(),
+                                    index,
+                                )?,
+                                field_type,
+                                context.types(),
+                            )?;
                         }
 
-                        builder.store(expression.clone(), pointer);
-                    } else if cloned {
                         builder.store(
-                            reference_count::clone(builder, &field, field_type, context.types())?,
-                            pointer,
+                            expression.clone(),
+                            fmm::build::record_address(pointer.clone(), index)?,
                         );
                     }
                 }

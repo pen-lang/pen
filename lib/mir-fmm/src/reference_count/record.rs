@@ -76,6 +76,21 @@ pub fn compile_clone_unboxed_function(
     Ok(())
 }
 
+pub fn clone_unboxed_for_update(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(builder.call(
+        fmm::build::variable(
+            utilities::get_clone_unboxed_function_name(record_type.name()),
+            utilities::compile_clone_unboxed_function_type(&record_type, context.types()),
+        ),
+        vec![record.clone()],
+    )?)
+}
+
 fn clone_boxed(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
