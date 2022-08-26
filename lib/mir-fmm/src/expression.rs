@@ -99,7 +99,7 @@ pub fn compile(
                 .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
 
             let compile_unboxed = |builder: &fmm::build::InstructionBuilder,
-                                   clone: bool|
+                                   cloned: bool|
              -> Result<_, CompileError> {
                 let pointer = builder.allocate_stack(type_::compile_unboxed_record(
                     update.type_(),
@@ -128,12 +128,12 @@ pub fn compile(
                     let pointer = fmm::build::record_address(pointer.clone(), index)?;
 
                     if let Some(expression) = fields.get(&index) {
-                        if !clone {
+                        if !cloned {
                             reference_count::drop(builder, &field, field_type, context.types())?;
                         }
 
                         builder.store(expression.clone(), pointer);
-                    } else if clone {
+                    } else if cloned {
                         builder.store(
                             reference_count::clone(builder, &field, field_type, context.types())?,
                             pointer,
