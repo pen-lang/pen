@@ -29,16 +29,7 @@ pub fn compile_clone_function(
                 builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
                     clone_boxed(&builder, &record)?
                 } else {
-                    builder.call(
-                        fmm::build::variable(
-                            utilities::get_clone_unboxed_function_name(record_type.name()),
-                            utilities::compile_clone_unboxed_function_type(
-                                &record_type,
-                                context.types(),
-                            ),
-                        ),
-                        vec![record],
-                    )?
+                    clone_unboxed(context, &builder, &record, &record_type)?
                 }),
             )
         },
@@ -63,12 +54,22 @@ pub fn compile_clone_unboxed_function(
         )],
         fmm_record_type.clone(),
         |builder| -> Result<_, CompileError> {
-            Ok(builder.return_(clone_unboxed(
-                context,
-                &builder,
-                &fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone()),
-                &record_type,
-            )?))
+            let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
+            Ok(builder.return_(fmm::build::record(
+                context.types()[record_type.name()]
+                    .fields()
+                    .iter()
+                    .enumerate()
+                    .map(|(index, type_)| {
+                        expression::clone(
+                            &builder,
+                            &record::get_unboxed_field(&builder, &record, index)?,
+                            type_,
+                            context.types(),
+                        )
+                    })
+                    .collect::<Result<_, _>>()?,
+            )))
         },
         REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )?;
@@ -76,7 +77,14 @@ pub fn compile_clone_unboxed_function(
     Ok(())
 }
 
-pub fn clone_unboxed_for_update(
+fn clone_boxed(
+    builder: &fmm::build::InstructionBuilder,
+    record: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    pointer::clone(builder, record)
+}
+
+pub fn clone_unboxed(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
@@ -89,37 +97,6 @@ pub fn clone_unboxed_for_update(
         ),
         vec![record.clone()],
     )?)
-}
-
-fn clone_boxed(
-    builder: &fmm::build::InstructionBuilder,
-    record: &fmm::build::TypedExpression,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    pointer::clone(builder, record)
-}
-
-fn clone_unboxed(
-    context: &Context,
-    builder: &fmm::build::InstructionBuilder,
-    record: &fmm::build::TypedExpression,
-    record_type: &mir::types::Record,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record(
-        context.types()[record_type.name()]
-            .fields()
-            .iter()
-            .enumerate()
-            .map(|(index, type_)| {
-                expression::clone(
-                    builder,
-                    &record::get_unboxed_field(builder, record, index)?,
-                    type_,
-                    context.types(),
-                )
-            })
-            .collect::<Result<_, _>>()?,
-    )
-    .into())
 }
 
 pub fn compile_drop_function(

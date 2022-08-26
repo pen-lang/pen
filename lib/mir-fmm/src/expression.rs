@@ -133,7 +133,7 @@ pub fn compile(
                     }
 
                     builder.store(
-                        reference_count::record::clone_unboxed_for_update(
+                        reference_count::record::clone_unboxed(
                             context,
                             builder,
                             &builder.load(pointer.clone())?,
