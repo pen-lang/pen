@@ -9,7 +9,6 @@ tarball=pen-$version-$target.tar.xz
 cd $(dirname $0)/..
 
 $(dirname $0)/build.sh
-strip target/release/pen
 
 tar caf $tarball \
   README.md LICENSE-MIT LICENSE-APACHE \
