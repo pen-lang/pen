@@ -28,17 +28,16 @@ run = \(ctx context) none | error {
   step(ctx, input(ctx))
 }
 
-step = \(ctx Context) none | error {
-  step(ctx)
+step = \(ctx Context, input [string | error]) none | error {
+  if [s, ...input] = input {
+    File'Write(ctx, File'StdOut(), s()?)?
+
+    step(ctx, input)
+  } else {
+    none
+  }
 }
 
 input = \(ctx Context) [string | error] {
-  [string | error
-    ...if x = File'Read(File'StdIn()) as string {
-      [string | error ...Utf8'Characters(x)]
-    } else {
-      [string | error x]
-    },
-    ...input(ctx),
-  ]
+  [string | error File'ReadLimit(ctx, File'StdIn(), 1), ...input(ctx)]
 }
