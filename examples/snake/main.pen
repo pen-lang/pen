@@ -19,6 +19,7 @@ main = \(ctx context) none {
 run = \(ctx context) none | error {
   ctx = ctx.Os
 
+  Process'Run(ctx, "stty", [string "-echo"])?
   step(ctx, input(ctx))
 }
 
