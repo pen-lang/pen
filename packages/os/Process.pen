@@ -7,5 +7,5 @@ Exit = \(ctx Context, code number) none {
 
 # Run a command.
 Run = \(ctx Context, cmd string, args [string]) none | error {
-  context'Inner(ctx).Run(cmd, args)
+  context'Inner(ctx).RunCommand(cmd, args)
 }
