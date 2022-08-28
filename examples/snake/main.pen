@@ -2,13 +2,12 @@ import Console'Print
 import Core'List
 import Core'Number
 import Core'String
+import Core'String'Utf8
 import Os'Context { Context }
 import Os'File
 import Os'Process
 import Os'Time
 import Random'Random
-
-import 'lifeGame
 
 rows = \() number { 40 }
 
@@ -23,23 +22,23 @@ main = \(ctx context) none {
   }
 }
 
-input = () { 
-  }
-
 run = \(ctx context) none | error {
-  step(
-    ctx.Os,
-    lifeGame'Initialize(
-      lifeGame'NewContext(\() number { Random'Number(ctx.Random) }),
-      rows(),
-      columns(),
-    ),
-  )
+  ctx = ctx.Os
+
+  step(ctx, input(ctx))
 }
 
-step = \(ctx Context, rows [[boolean]]) none | error {
-  File'Write(ctx, File'StdOut(), "\x1bc")?
-  File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
+step = \(ctx Context) none | error {
+  step(ctx)
+}
 
-  step(ctx, lifeGame'Step(rows)?)
+input = \(ctx Context) [string | error] {
+  [string | error
+    ...if x = File'Read(File'StdIn()) as string {
+      [string | error ...Utf8'Characters(x)]
+    } else {
+      [string | error x]
+    },
+    ...input(ctx),
+  ]
 }
