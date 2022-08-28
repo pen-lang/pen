@@ -367,7 +367,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e694567208727cc3e1463969ce18e46f23c6e929"
+source = "git+https://github.com/raviqqe/fmm?branch=main#bcee06b0496b48639116ca5c30176f4cb4030f75"
 dependencies = [
  "cached",
  "fnv",
@@ -380,7 +380,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e694567208727cc3e1463969ce18e46f23c6e929"
+source = "git+https://github.com/raviqqe/fmm?branch=main#bcee06b0496b48639116ca5c30176f4cb4030f75"
 dependencies = [
  "fmm",
  "fnv",
@@ -390,9 +390,10 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#e694567208727cc3e1463969ce18e46f23c6e929"
+source = "git+https://github.com/raviqqe/fmm?branch=main#bcee06b0496b48639116ca5c30176f4cb4030f75"
 dependencies = [
  "fmm",
+ "fnv",
  "hamt",
  "inkwell",
  "llvm-sys",
@@ -534,7 +535,7 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 [[package]]
 name = "hamt"
 version = "0.3.1"
-source = "git+https://github.com/raviqqe/hamt-rs?branch=main#723a40d7f8e2567fbf19006ec944514c329a1b84"
+source = "git+https://github.com/raviqqe/hamt-rs?branch=main#3aab04bf2f668a8005bd2ce15f32a3f471047311"
 
 [[package]]
 name = "hashbrown"
@@ -662,7 +663,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#cc07beccde71d028f50dd62b748797540034c033"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#75284de83705132af8927b3e701840b2573c48c7"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -675,7 +676,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#cc07beccde71d028f50dd62b748797540034c033"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#75284de83705132af8927b3e701840b2573c48c7"
 dependencies = [
  "proc-macro2",
  "quote",

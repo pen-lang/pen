@@ -447,7 +447,7 @@ mod tests {
         )
         .unwrap();
 
-        insta::assert_snapshot!(fmm::analysis::format_module(
+        insta::assert_snapshot!(fmm::analysis::format::format_module(
             &context.module_builder().as_module()
         ));
     }

@@ -210,7 +210,7 @@ fn compile_mir_module(
     infrastructure.file_system.write(
         object_file,
         &fmm_llvm::compile_to_bit_code(
-            &fmm::analysis::transform_to_cps(
+            &fmm::analysis::cps::transform(
                 &mir_fmm::compile(module, &compile_configuration.mir)?,
                 fmm::types::void_type(),
             )?,
