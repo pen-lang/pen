@@ -1,13 +1,7 @@
 import Console'Print
-import Core'List
-import Core'Number
-import Core'String
-import Core'String'Utf8
 import Os'Context { Context }
 import Os'File
 import Os'Process
-import Os'Time
-import Random'Random
 
 rows = \() number { 40 }
 
