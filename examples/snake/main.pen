@@ -2,6 +2,9 @@ import Console'Print
 import Os'Context { Context }
 import Os'File
 import Os'Process
+import Os'Time
+
+type input = [string | none | error]
 
 rows = \() number { 40 }
 
@@ -23,16 +26,35 @@ run = \(ctx context) none | error {
   step(ctx, input(ctx))
 }
 
-step = \(ctx Context, input [string | error]) none | error {
-  if [s, ...input] = input {
-    File'Write(ctx, File'StdOut(), s()?)?
-
-    step(ctx, input)
+step = \(ctx Context, input input) none | error {
+  if [x, ...input] = input {
+    if x = x() as string {
+      File'Write(ctx, File'StdOut(), x)?
+      step(ctx, input)
+    } else if none {
+      debug("FRAME")
+      step(ctx, input)
+    } else if error {
+      x
+    }
   } else {
     none
   }
 }
 
-input = \(ctx Context) [string | error] {
-  [string | error File'ReadLimit(ctx, File'StdIn(), 1), ...input(ctx)]
+input = \(ctx Context) input {
+  race(
+    [[string | none | error]
+      [string | none | error ...keys(ctx)],
+      [string | none | error ...frames(ctx)],
+    ],
+  )
+}
+
+keys = \(ctx Context) [string | error] {
+  [string | error File'ReadLimit(ctx, File'StdIn(), 1), ...keys(ctx)]
+}
+
+frames = \(ctx Context) [none] {
+  [none Time'Sleep(ctx, 1000), ...frames(ctx)]
 }
