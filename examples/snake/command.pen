@@ -1,0 +1,9 @@
+type Up {}
+
+type Down {}
+
+type Left {}
+
+type Right {}
+
+type Command = Up | Down | Left | Right

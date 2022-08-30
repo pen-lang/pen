@@ -1,0 +1,7 @@
+import Core'String
+
+import 'field { Field }
+
+Render = \(f Field) string {
+  String'Join([string f.cells], "\n")
+}

@@ -1,0 +1,20 @@
+import 'creature { Creature }
+import 'position { Position }
+
+type Field {
+  rowCount number
+  columnCount number
+  cells {Position: Creature}
+}
+
+New = \(r number, c number) Field {
+  Field{
+    rowCount: r,
+    columnCount: c,
+    cells: {Position: Creature},
+  }
+}
+
+Set = \(f Field, p Position, c Creature) Field {
+  Field{...f, cells: {Position: Creature ...f.cells, p: c}}
+}

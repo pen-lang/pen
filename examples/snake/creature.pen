@@ -1,0 +1,7 @@
+type Snake {
+  Length number
+}
+
+type Frog {}
+
+type Creature = Snake | Frog
