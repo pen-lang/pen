@@ -28,9 +28,9 @@ main = \(ctx context) none {
 run = \(ctx context) none | error {
   ctx = ctx.Os
 
-  Process'Run(ctx, "stty", [string "raw", "cbreak", "-echo"])?
+  Process'Run(ctx, "stty", [string "raw", "-echo"])?
   step(ctx, input(ctx))?
-  Process'Run(ctx, "stty", [string "-raw", "-cbreak", "echo"])?
+  Process'Run(ctx, "stty", [string "-raw", "echo"])?
 }
 
 step = \(ctx Context, input input) none | error {
