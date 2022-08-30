@@ -1,0 +1,56 @@
+import 'Context { Context }
+import 'Context'context
+
+type stdIn {}
+
+type stdOut {}
+
+type stdErr {}
+
+type specialFile = stdIn | stdOut | stdErr
+
+# A file on a file system.
+type File {
+  inner specialFile
+}
+
+# TODO Support normal files like in the `Os` package.
+
+# A file of standard input.
+StdIn = \() File {
+  File{inner: stdIn{}}
+}
+
+# A file of standard output.
+StdOut = \() File {
+  File{inner: stdOut{}}
+}
+
+# A file of standard error.
+StdErr = \() File {
+  File{inner: stdErr{}}
+}
+
+# Read a file.
+Read = \(ctx Context, file File) string | error {
+  if f = file.inner as stdIn {
+    context'Inner(ctx).ReadStdIn()
+  } else if stdOut {
+    error("cannot read from stdout")
+  } else if stdErr {
+    error("cannot read from stderr")
+  }
+}
+
+# Write data to a file.
+Write = \(ctx Context, file File, data string) number | error {
+  inner = context'Inner(ctx)
+
+  if f = file.inner as stdIn {
+    error("cannot write to stdin")
+  } else if stdOut {
+    inner.WriteStdOut(data)
+  } else if stdErr {
+    inner.WriteStdErr(data)
+  }
+}

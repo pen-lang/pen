@@ -1,0 +1,6 @@
+import 'Context'context
+
+# A context for Unix API
+type Context = context'Context
+
+UnsafeNew = \() Context { context'New() }

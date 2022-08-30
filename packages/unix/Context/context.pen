@@ -1,0 +1,27 @@
+import foreign _pen_unix_read_stdin \() string | error
+import foreign _pen_unix_write_stdout \(string) number | error
+import foreign _pen_unix_write_stderr \(string) number | error
+
+type Context {
+  inner Inner
+}
+
+type Inner {
+  ReadStdIn \() string | error
+  WriteStdOut \(string) number | error
+  WriteStdErr \(string) number | error
+}
+
+New = \() Context {
+  Context{
+    inner: Inner{
+      ReadStdIn: _pen_unix_read_stdin,
+      WriteStdOut: _pen_unix_write_stdout,
+      WriteStdErr: _pen_unix_write_stderr,
+    },
+  }
+}
+
+Inner = \(ctx Context) Inner {
+  ctx.inner
+}
