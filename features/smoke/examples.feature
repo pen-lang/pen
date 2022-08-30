@@ -26,6 +26,7 @@ Feature: Examples
       | http-server                   |
       | life-game                     |
       | ls                            |
+      | snake                         |
       | sql-client                    |
       | tcp-client                    |
       | tcp-server                    |
