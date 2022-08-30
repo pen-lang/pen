@@ -13,28 +13,37 @@ rows = \() number { 40 }
 columns = \() number { 80 }
 
 main = \(ctx context) none {
-  if e = run(ctx) as none {
-    none
-  } else {
-    _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
-    Process'Exit(ctx.Os, 1)
-  }
+  Process'Exit(
+    ctx.Os,
+    if e = run(ctx) as none {
+      0
+    } else {
+      _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
+
+      1
+    },
+  )
 }
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
 
-  Process'Run(ctx, "stty", [string "-echo"])?
-  step(ctx, input(ctx))
+  Process'Run(ctx, "stty", [string "raw", "cbreak", "-echo"])?
+  step(ctx, input(ctx))?
+  Process'Run(ctx, "stty", [string "-raw", "-cbreak", "echo"])?
 }
 
 step = \(ctx Context, input input) none | error {
   if [x, ...input] = input {
     if x = x() as string {
-      File'Write(ctx, File'StdOut(), x)?
-      step(ctx, input)
+      if x == "q" {
+        none
+      } else {
+        File'Write(ctx, File'StdOut(), x)?
+        step(ctx, input)
+      }
     } else if none {
-      debug("FRAME")
+      #debug("FRAME")
       step(ctx, input)
     } else if error {
       x

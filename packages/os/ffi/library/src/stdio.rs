@@ -3,7 +3,7 @@ use core::ops::DerefMut;
 use once_cell::sync::Lazy;
 use std::error::Error;
 use tokio::{
-    io::{stderr, stdin, stdout, Stderr, Stdin, Stdout},
+    io::{stderr, stdin, stdout, AsyncWriteExt, Stderr, Stdin, Stdout},
     sync::Mutex,
 };
 
@@ -23,10 +23,20 @@ async fn _pen_os_read_limit_stdin(limit: ffi::Number) -> Result<ffi::ByteString,
 
 #[ffi::bindgen]
 async fn _pen_os_write_stdout(bytes: ffi::ByteString) -> Result<ffi::Number, Box<dyn Error>> {
-    utilities::write(STDOUT.lock().await.deref_mut(), bytes).await
+    let mut stdout = STDOUT.lock().await;
+    let count = utilities::write(stdout.deref_mut(), bytes).await?;
+
+    stdout.deref_mut().flush().await?;
+
+    Ok(count)
 }
 
 #[ffi::bindgen]
 async fn _pen_os_write_stderr(bytes: ffi::ByteString) -> Result<ffi::Number, Box<dyn Error>> {
-    utilities::write(STDERR.lock().await.deref_mut(), bytes).await
+    let mut stderr = STDOUT.lock().await;
+    let count = utilities::write(stderr.deref_mut(), bytes).await?;
+
+    stderr.deref_mut().flush().await?;
+
+    Ok(count)
 }
