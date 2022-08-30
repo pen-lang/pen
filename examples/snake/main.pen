@@ -43,7 +43,6 @@ step = \(ctx Context, input input) none | error {
         step(ctx, input)
       }
     } else if none {
-      #debug("FRAME")
       step(ctx, input)
     } else if error {
       x
