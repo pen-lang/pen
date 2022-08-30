@@ -2,16 +2,32 @@ import 'creature { Creature }
 import 'position { Position }
 
 type Field {
-  rowCount number
-  columnCount number
+  rows number
+  columns number
   cells {Position: Creature}
 }
 
 New = \(r number, c number) Field {
   Field{
-    rowCount: r,
-    columnCount: c,
+    rows: r,
+    columns: c,
     cells: {Position: Creature},
+  }
+}
+
+Rows = \(f Field) number {
+  f.rows
+}
+
+Columns = \(f Field) number {
+  f.columns
+}
+
+Get = \(f Field, p Position) Creature | none {
+  if c = f.cells[p] {
+    c
+  } else {
+    none
   }
 }
 

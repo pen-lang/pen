@@ -1,7 +1,29 @@
+import Core'Number
 import Core'String
 
+import 'creature { Creature }
 import 'field { Field }
+import 'position { Position }
 
 Render = \(f Field) string {
-  String'Join([string f.cells], "\n")
+  String'Join(
+    [string
+      String'Concatenate(
+        [string
+          if c = field'Get(f, Position{X: x(), Y: y()}) as none {
+            " "
+          } else {
+            renderCreature(c)
+          }
+          for y in Number'Sequence(field'Columns(f))
+        ],
+      )
+      for x in Number'Sequence(field'Rows(f))
+    ],
+    "\n",
+  )
+}
+
+renderCreature = \(c Creature) string {
+  " "
 }
