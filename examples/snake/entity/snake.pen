@@ -1,4 +1,7 @@
+import Core'Number
+
 import 'command { Command }
+import 'field { Field }
 import 'position { Position }
 
 type Snake {
@@ -10,20 +13,20 @@ New = \(p Position) Snake {
   Snake{positions: [Position p], length: 1}
 }
 
-Move = \(s Snake, c Command) Snake {
+Move = \(s Snake, c Command, f Field) Snake {
   p = head(s)
 
   Snake{
     ...s,
     positions: [Position
       if _ = c as command'Left {
-        Position{...p, X: p.X - 1}
+        Position{...p, X: Number'Maximum(p.X - 1, 1)}
       } else if command'Right {
-        Position{...p, X: p.X + 1}
+        Position{...p, X: Number'Minimum(p.X + 1, f.Columns)}
       } else if command'Up {
-        Position{...p, Y: p.Y - 1}
+        Position{...p, Y: Number'Maximum(p.Y - 1, 1)}
       } else if command'Down {
-        Position{...p, Y: p.Y + 1}
+        Position{...p, Y: Number'Minimum(p.Y + 1, f.Rows)}
       },
       ...s.positions,
     ],

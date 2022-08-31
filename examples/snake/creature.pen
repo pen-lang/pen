@@ -1,6 +1,0 @@
-import 'creature'frog { Frog }
-import 'creature'snake { Snake }
-# TODO Remove this.
-import 'position { Position }
-
-type Creature = Snake | Frog

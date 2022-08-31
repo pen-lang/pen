@@ -1,9 +1,9 @@
 import Core'Number
 import Core'String
 
-import 'creature { Creature }
-import 'creature'frog { Frog }
-import 'creature'snake { Snake }
+import 'entity { Entity }
+import 'entity'frog { Frog }
+import 'entity'snake { Snake }
 import 'field { Field }
 import 'game { Game }
 import 'position { Position }
@@ -24,7 +24,7 @@ Render = \(g Game) string {
               if c = game'EntityAt(g, Position{X: x(), Y: y()}) as none {
                 empty()
               } else {
-                renderCreature(c)
+                renderEntity(c)
               }
               for x in Number'Sequence(f.Columns)
             ],
@@ -40,7 +40,7 @@ Render = \(g Game) string {
   )
 }
 
-renderCreature = \(c Creature) string {
+renderEntity = \(c Entity) string {
   if _ = c as Snake {
     "o"
   } else if Frog {

@@ -6,9 +6,9 @@ import Os'Time
 
 import 'command { Command }
 # TODO Remove this.
-import 'creature'frog
+import 'entity'frog
 # TODO Remove this.
-import 'creature'snake
+import 'entity'snake
 import 'field
 import 'game { Game }
 # TODO Remove this.

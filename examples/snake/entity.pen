@@ -1,0 +1,6 @@
+import 'entity'frog { Frog }
+import 'entity'snake { Snake }
+# TODO Remove this.
+import 'position { Position }
+
+type Entity = Snake | Frog
