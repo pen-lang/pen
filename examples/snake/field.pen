@@ -1,40 +1,4 @@
-import 'creature { Creature }
-# TODO Remove this.
-import 'creature'frog
-# TODO Remove this.
-import 'creature'snake
-import 'position { Position }
-
 type Field {
-  columns number
-  rows number
-  cells {Position: Creature}
-}
-
-New = \(c number, r number) Field {
-  Field{
-    columns: c,
-    rows: r,
-    cells: {Position: Creature},
-  }
-}
-
-Columns = \(f Field) number {
-  f.columns
-}
-
-Rows = \(f Field) number {
-  f.rows
-}
-
-Get = \(f Field, p Position) Creature | none {
-  if c = f.cells[p] {
-    c
-  } else {
-    none
-  }
-}
-
-Set = \(f Field, p Position, c Creature) Field {
-  Field{...f, cells: {Position: Creature ...f.cells, p: c}}
+  Columns number
+  Rows number
 }

@@ -1,6 +1,7 @@
 import Core'Number
 
 import 'command { Command }
+import 'creature { Creature }
 import 'creature'frog
 import 'creature'snake { Snake }
 import 'field { Field }
@@ -8,9 +9,8 @@ import 'position { Position }
 
 type Game {
   snake Snake
-  columns number
-  rows number
   field Field
+  entities {Position: Creature}
 }
 
 New = \(c number, r number) Game {
@@ -19,9 +19,8 @@ New = \(c number, r number) Game {
 
   Game{
     snake: s,
-    field: field'Set(field'New(c, r), p, s),
-    columns: c,
-    rows: r,
+    field: Field{Columns: c, Rows: r},
+    entities: {Position: Creature p: s},
   }
 }
 
@@ -30,13 +29,21 @@ Field = \(g Game) Field { g.field }
 RunCommand = \(g Game, c Command) Game {
   s = snake'Move(g.snake, c)
 
-  Game{...g, snake: s, field: putSnake(field'New(g.columns, g.rows), s, snake'Positions(s))}
+  Game{...g, snake: s, entities: putSnake({Position: Creature}, s, snake'Positions(s))}
 }
 
-putSnake = \(f Field, s Snake, ps [Position]) Field {
+putSnake = \(es {Position: Creature}, s Snake, ps [Position]) {Position: Creature} {
   if [p, ...ps] = ps {
-    putSnake(field'Set(f, p(), s), s, ps)
+    putSnake({Position: Creature ...es, p(): s}, s, ps)
   } else {
-    f
+    es
+  }
+}
+
+EntityAt = \(g Game, p Position) Creature | none {
+  if c = g.entities[p] {
+    c
+  } else {
+    none
   }
 }

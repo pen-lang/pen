@@ -21,15 +21,15 @@ Render = \(g Game) string {
         [string
           String'Concatenate(
             [string
-              if c = field'Get(f, Position{X: x(), Y: y()}) as none {
+              if c = game'EntityAt(g, Position{X: x(), Y: y()}) as none {
                 empty()
               } else {
                 renderCreature(c)
               }
-              for x in Number'Sequence(field'Columns(f))
+              for x in Number'Sequence(f.Columns)
             ],
           )
-          for y in Number'Sequence(field'Rows(f))
+          for y in Number'Sequence(f.Rows)
         ],
         "\r\n",
       ),
