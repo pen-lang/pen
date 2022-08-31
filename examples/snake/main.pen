@@ -52,7 +52,7 @@ step = \(ctx Context, g Game, input input) none | error {
       if x == "q" {
         none
       } else {
-        f = \(c Command) Game { game'RunCommand(g, c) }
+        f = \(c Command) Game | none { game'RunCommand(g, c) }
         g = if x == "h" {
           f(command'Left{})
         } else if x == "j" {
@@ -65,8 +65,12 @@ step = \(ctx Context, g Game, input input) none | error {
           g
         }
 
-        render(ctx, g)?
-        step(ctx, g, input)
+        if g = g as none {
+          none
+        } else {
+          render(ctx, g)?
+          step(ctx, g, input)
+        }
       }
     } else if none {
       step(ctx, g, input)

@@ -26,10 +26,12 @@ New = \(c number, r number) Game {
 
 Field = \(g Game) Field { g.field }
 
-RunCommand = \(g Game, c Command) Game {
-  s = snake'Move(g.snake, c, g.field)
-
-  Game{...g, snake: s, entities: putSnake({Position: Entity}, s, snake'Positions(s))}
+RunCommand = \(g Game, c Command) Game | none {
+  if s = snake'Move(g.snake, c, g.field) as none {
+    none
+  } else {
+    Game{...g, snake: s, entities: putSnake({Position: Entity}, s, snake'Positions(s))}
+  }
 }
 
 putSnake = \(es {Position: Entity}, s Snake, ps [Position]) {Position: Entity} {
