@@ -30,7 +30,7 @@ run = \(ctx context) none | error {
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
   step(ctx, input(ctx))?
-  Process'Run(ctx, "stty", [string "-raw", "echo"])?
+  Process'Run(ctx, "stty", [string "cooked", "echo"])?
 }
 
 step = \(ctx Context, input input) none | error {
