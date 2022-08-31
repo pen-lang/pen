@@ -4,13 +4,20 @@ import Os'File
 import Os'Process
 import Os'Time
 
+# TODO Remove this.
+import 'creature
+import 'field { Field }
+# TODO Remove this.
+import 'position
+import 'render { Render }
+
 type input = [string | none | error]
 
 fps = \() number { 120 }
 
-rows = \() number { 40 }
+rows = \() number { 20 }
 
-columns = \() number { 80 }
+columns = \() number { 40 }
 
 main = \(ctx context) none {
   Process'Exit(
@@ -27,29 +34,37 @@ main = \(ctx context) none {
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
+  f = field'New(rows(), columns())
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
-  step(ctx, input(ctx))?
+  render(ctx, f)?
+  step(ctx, f, input(ctx))?
   Process'Run(ctx, "stty", [string "cooked", "echo"])?
 }
 
-step = \(ctx Context, input input) none | error {
+step = \(ctx Context, f Field, input input) none | error {
   if [x, ...input] = input {
     if x = x() as string {
       if x == "q" {
         none
       } else {
-        File'Write(ctx, File'StdOut(), x)?
-        step(ctx, input)
+        render(ctx, f)?
+        step(ctx, f, input)
       }
     } else if none {
-      step(ctx, input)
+      step(ctx, f, input)
     } else if error {
       x
     }
   } else {
     none
   }
+}
+
+render = \(ctx Context, f Field) none | error {
+  File'Write(ctx, File'StdOut(), Render(f))?
+
+  none
 }
 
 input = \(ctx Context) input {

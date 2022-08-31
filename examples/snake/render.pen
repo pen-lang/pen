@@ -4,26 +4,37 @@ import Core'String
 import 'creature { Creature }
 import 'field { Field }
 import 'position { Position }
+import 'usage { Usage }
+
+empty = \() string { "." }
 
 Render = \(f Field) string {
-  String'Join(
+  String'Concatenate(
     [string
-      String'Concatenate(
+      "\x1bc",
+      String'Join(
         [string
-          if c = field'Get(f, Position{X: x(), Y: y()}) as none {
-            " "
-          } else {
-            renderCreature(c)
-          }
-          for y in Number'Sequence(field'Columns(f))
+          String'Concatenate(
+            [string
+              if c = field'Get(f, Position{X: x(), Y: y()}) as none {
+                empty()
+              } else {
+                renderCreature(c)
+              }
+              for y in Number'Sequence(field'Columns(f))
+            ],
+          )
+          for x in Number'Sequence(field'Rows(f))
         ],
-      )
-      for x in Number'Sequence(field'Rows(f))
+        "\r\n",
+      ),
+      "\r\n",
+      Usage(),
+      "\r\n",
     ],
-    "\n",
   )
 }
 
 renderCreature = \(c Creature) string {
-  " "
+  "@"
 }
