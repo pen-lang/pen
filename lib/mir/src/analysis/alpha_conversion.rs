@@ -2,8 +2,28 @@ mod context;
 
 use self::context::Context;
 use crate::ir::*;
+use fnv::FnvHashMap;
 
 pub fn transform(module: &Module) -> Module {
+    let name_counts = module
+        .foreign_declarations()
+        .iter()
+        .map(|declaration| declaration.name())
+        .chain(
+            module
+                .function_declarations()
+                .iter()
+                .map(|declaration| declaration.name()),
+        )
+        .chain(
+            module
+                .function_definitions()
+                .iter()
+                .map(|definition| definition.definition().name()),
+        )
+        .map(|name| (name, 1))
+        .collect::<FnvHashMap<_, _>>();
+
     Module::new(
         module.type_definitions().to_vec(),
         module.foreign_declarations().to_vec(),
@@ -14,25 +34,26 @@ pub fn transform(module: &Module) -> Module {
             .iter()
             .map(|definition| {
                 GlobalFunctionDefinition::new(
-                    transform_function_definition(definition.definition(), &Default::default()),
+                    {
+                        let definition = definition.definition();
+
+                        FunctionDefinition::with_options(
+                            definition.name(),
+                            definition.environment().to_vec(),
+                            definition.arguments().to_vec(),
+                            definition.result_type().clone(),
+                            transform_expression(
+                                &Context::new(name_counts.clone()),
+                                definition.body(),
+                                &Default::default(),
+                            ),
+                            definition.is_thunk(),
+                        )
+                    },
                     definition.is_public(),
                 )
             })
             .collect(),
-    )
-}
-
-fn transform_function_definition<'a>(
-    definition: &'a FunctionDefinition,
-    variables: &hamt::Map<&'a str, String>,
-) -> FunctionDefinition {
-    FunctionDefinition::with_options(
-        definition.name(),
-        definition.environment().to_vec(),
-        definition.arguments().to_vec(),
-        definition.result_type().clone(),
-        transform_expression(&Context::new(), definition.body(), variables),
-        definition.is_thunk(),
     )
 }
 
@@ -135,40 +156,37 @@ fn transform_expression<'a>(
                             .map(|argument| (argument.name(), context.rename(argument.name()))),
                     );
 
-                    transform_function_definition(
-                        &FunctionDefinition::with_options(
-                            name,
-                            definition
-                                .environment()
-                                .iter()
-                                .map(|free_variable| {
-                                    Argument::new(
-                                        variables
-                                            .get(free_variable.name())
-                                            .map(String::as_str)
-                                            .unwrap_or_else(|| free_variable.name()),
-                                        free_variable.type_().clone(),
-                                    )
-                                })
-                                .collect(),
-                            definition
-                                .arguments()
-                                .iter()
-                                .map(|argument| {
-                                    Argument::new(
-                                        variables
-                                            .get(argument.name())
-                                            .map(String::as_str)
-                                            .unwrap_or_else(|| argument.name()),
-                                        argument.type_().clone(),
-                                    )
-                                })
-                                .collect(),
-                            definition.result_type().clone(),
-                            definition.body().clone(),
-                            definition.is_thunk(),
-                        ),
-                        &variables,
+                    FunctionDefinition::with_options(
+                        name,
+                        definition
+                            .environment()
+                            .iter()
+                            .map(|free_variable| {
+                                Argument::new(
+                                    variables
+                                        .get(free_variable.name())
+                                        .map(String::as_str)
+                                        .unwrap_or_else(|| free_variable.name()),
+                                    free_variable.type_().clone(),
+                                )
+                            })
+                            .collect(),
+                        definition
+                            .arguments()
+                            .iter()
+                            .map(|argument| {
+                                Argument::new(
+                                    variables
+                                        .get(argument.name())
+                                        .map(String::as_str)
+                                        .unwrap_or_else(|| argument.name()),
+                                    argument.type_().clone(),
+                                )
+                            })
+                            .collect(),
+                        definition.result_type().clone(),
+                        transform_expression(context, definition.body(), &variables),
+                        definition.is_thunk(),
                     )
                 },
                 transform_expression(context, let_.expression(), &variables),
@@ -500,6 +518,106 @@ mod tests {
                             Variable::new("x:1"),
                         )
                     )
+                )
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_let_recursive_with_shadowed_global_function_name() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Type::Number,
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "f",
+                            vec![],
+                            vec![],
+                            Type::Number,
+                            Expression::None,
+                            false,
+                        ),
+                        Expression::None,
+                    )
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f",
+                vec![],
+                Type::Number,
+                LetRecursive::new(
+                    FunctionDefinition::with_options(
+                        "f:1",
+                        vec![],
+                        vec![],
+                        Type::Number,
+                        Expression::None,
+                        false,
+                    ),
+                    Expression::None,
+                )
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_let_recursive_with_shadowed_nested_function_name() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Type::Number,
+                    LetRecursive::new(
+                        FunctionDefinition::with_options(
+                            "f",
+                            vec![],
+                            vec![],
+                            Type::Number,
+                            LetRecursive::new(
+                                FunctionDefinition::with_options(
+                                    "f",
+                                    vec![],
+                                    vec![],
+                                    Type::Number,
+                                    Expression::None,
+                                    false,
+                                ),
+                                Expression::None,
+                            ),
+                            false,
+                        ),
+                        Expression::None,
+                    )
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f",
+                vec![],
+                Type::Number,
+                LetRecursive::new(
+                    FunctionDefinition::with_options(
+                        "f:1",
+                        vec![],
+                        vec![],
+                        Type::Number,
+                        LetRecursive::new(
+                            FunctionDefinition::with_options(
+                                "f:2",
+                                vec![],
+                                vec![],
+                                Type::Number,
+                                Expression::None,
+                                false,
+                            ),
+                            Expression::None,
+                        ),
+                        false,
+                    ),
+                    Expression::None,
                 )
             )])
         );
