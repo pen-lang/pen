@@ -1,4 +1,8 @@
 import 'creature { Creature }
+# TODO Remove this.
+import 'creature'frog
+# TODO Remove this.
+import 'creature'snake
 import 'position { Position }
 
 type Field {

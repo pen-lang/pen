@@ -1,7 +1,4 @@
-type Snake {
-  Length number
-}
-
-type Frog {}
+import 'creature'frog { Frog }
+import 'creature'snake { Snake }
 
 type Creature = Snake | Frog

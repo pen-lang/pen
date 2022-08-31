@@ -2,13 +2,18 @@ import Core'Number
 import Core'String
 
 import 'creature { Creature }
+import 'creature'frog { Frog }
+import 'creature'snake { Snake }
 import 'field { Field }
+import 'game { Game }
 import 'position { Position }
 import 'usage { Usage }
 
 empty = \() string { "." }
 
-Render = \(f Field) string {
+Render = \(g Game) string {
+  f = game'Field(g)
+
   String'Concatenate(
     [string
       "\x1bc",
@@ -36,5 +41,9 @@ Render = \(f Field) string {
 }
 
 renderCreature = \(c Creature) string {
-  "@"
+  if _ = c as Snake {
+    "o"
+  } else if Frog {
+    "*"
+  }
 }

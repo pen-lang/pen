@@ -1,0 +1,20 @@
+import 'creature'frog
+import 'creature'snake { Snake }
+import 'field { Field }
+import 'position { Position }
+
+type Game {
+  snake Snake
+  field Field
+}
+
+New = \(r number, c number) Game {
+  s = snake'New(0)
+
+  Game{
+    snake: s,
+    field: field'Set(field'New(r, c), Position{X: 1, Y: 1}, s),
+  }
+}
+
+Field = \(g Game) Field { g.field }

@@ -1,0 +1,7 @@
+type Frog {
+  _ none
+}
+
+New = \() Frog {
+  Frog{_: none}
+}

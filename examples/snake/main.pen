@@ -6,7 +6,12 @@ import Os'Time
 
 # TODO Remove this.
 import 'creature
-import 'field { Field }
+# TODO Remove this.
+import 'creature'frog
+# TODO Remove this.
+import 'creature'snake
+import 'field
+import 'game { Game }
 # TODO Remove this.
 import 'position
 import 'render { Render }
@@ -34,25 +39,25 @@ main = \(ctx context) none {
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
-  f = field'New(rows(), columns())
+  g = game'New(rows(), columns())
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
-  render(ctx, f)?
-  step(ctx, f, input(ctx))?
+  render(ctx, g)?
+  step(ctx, g, input(ctx))?
   Process'Run(ctx, "stty", [string "cooked", "echo"])?
 }
 
-step = \(ctx Context, f Field, input input) none | error {
+step = \(ctx Context, g Game, input input) none | error {
   if [x, ...input] = input {
     if x = x() as string {
       if x == "q" {
         none
       } else {
-        render(ctx, f)?
-        step(ctx, f, input)
+        render(ctx, g)?
+        step(ctx, g, input)
       }
     } else if none {
-      step(ctx, f, input)
+      step(ctx, g, input)
     } else if error {
       x
     }
@@ -61,8 +66,8 @@ step = \(ctx Context, f Field, input input) none | error {
   }
 }
 
-render = \(ctx Context, f Field) none | error {
-  File'Write(ctx, File'StdOut(), Render(f))?
+render = \(ctx Context, g Game) none | error {
+  File'Write(ctx, File'StdOut(), Render(g))?
 
   none
 }

@@ -1,0 +1,7 @@
+type Snake {
+  length number
+}
+
+New = \(l number) Snake {
+  Snake{length: l}
+}
