@@ -26,10 +26,10 @@ Render = \(g Game) string {
               } else {
                 renderCreature(c)
               }
-              for y in Number'Sequence(field'Columns(f))
+              for x in Number'Sequence(field'Columns(f))
             ],
           )
-          for x in Number'Sequence(field'Rows(f))
+          for y in Number'Sequence(field'Rows(f))
         ],
         "\r\n",
       ),

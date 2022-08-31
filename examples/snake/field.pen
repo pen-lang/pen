@@ -6,25 +6,25 @@ import 'creature'snake
 import 'position { Position }
 
 type Field {
-  rows number
   columns number
+  rows number
   cells {Position: Creature}
 }
 
-New = \(r number, c number) Field {
+New = \(c number, r number) Field {
   Field{
-    rows: r,
     columns: c,
+    rows: r,
     cells: {Position: Creature},
   }
 }
 
-Rows = \(f Field) number {
-  f.rows
-}
-
 Columns = \(f Field) number {
   f.columns
+}
+
+Rows = \(f Field) number {
+  f.rows
 }
 
 Get = \(f Field, p Position) Creature | none {

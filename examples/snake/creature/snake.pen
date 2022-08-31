@@ -1,7 +1,60 @@
+import 'command { Command }
+import 'position { Position }
+
 type Snake {
+  positions [Position]
   length number
 }
 
-New = \(l number) Snake {
-  Snake{length: l}
+New = \(p Position) Snake {
+  Snake{positions: [Position p], length: 1}
+}
+
+Move = \(s Snake, c Command) Snake {
+  p = head(s)
+
+  Snake{
+    ...s,
+    positions: [Position
+      if _ = c as command'Left {
+        Position{...p, X: p.X - 1}
+      } else if command'Right {
+        Position{...p, X: p.X + 1}
+      } else if command'Up {
+        Position{...p, Y: p.Y - 1}
+      } else if command'Down {
+        Position{...p, Y: p.Y + 1}
+      },
+      ...s.positions,
+    ],
+  }
+}
+
+head = \(s Snake) Position {
+  if [p, ...ps] = s.positions {
+    p()
+  } else {
+    Position{X: -1, Y: -1}
+  }
+}
+
+Eat = \(s Snake) Snake {
+  Snake{...s, length: s.length + 1}
+}
+
+Positions = \(s Snake) [Position] {
+  # TODO Use a list comprehension for filtering.
+  positions(s.positions, s.length)
+}
+
+positions = \(ps [Position], l number) [Position] {
+  if l == 0 {
+    [Position]
+  } else {
+    if [p, ...ps] = ps {
+      [Position p(), ...positions(ps, l - 1)]
+    } else {
+      [Position]
+    }
+  }
 }

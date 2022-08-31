@@ -4,8 +4,7 @@ import Os'File
 import Os'Process
 import Os'Time
 
-# TODO Remove this.
-import 'creature
+import 'command { Command }
 # TODO Remove this.
 import 'creature'frog
 # TODO Remove this.
@@ -39,7 +38,7 @@ main = \(ctx context) none {
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
-  g = game'New(rows(), columns())
+  g = game'New(columns(), rows())
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
   render(ctx, g)?
@@ -53,6 +52,19 @@ step = \(ctx Context, g Game, input input) none | error {
       if x == "q" {
         none
       } else {
+        f = \(c Command) Game { game'RunCommand(g, c) }
+        g = if x == "h" {
+          f(command'Left{})
+        } else if x == "j" {
+          f(command'Down{})
+        } else if x == "k" {
+          f(command'Up{})
+        } else if x == "l" {
+          f(command'Right{})
+        } else {
+          g
+        }
+
         render(ctx, g)?
         step(ctx, g, input)
       }

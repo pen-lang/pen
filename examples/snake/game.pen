@@ -1,3 +1,6 @@
+import Core'Number
+
+import 'command { Command }
 import 'creature'frog
 import 'creature'snake { Snake }
 import 'field { Field }
@@ -5,16 +8,35 @@ import 'position { Position }
 
 type Game {
   snake Snake
+  columns number
+  rows number
   field Field
 }
 
-New = \(r number, c number) Game {
-  s = snake'New(0)
+New = \(c number, r number) Game {
+  p = Position{X: Number'Floor(c / 2), Y: Number'Floor(r / 2)}
+  s = snake'New(p)
 
   Game{
     snake: s,
-    field: field'Set(field'New(r, c), Position{X: 1, Y: 1}, s),
+    field: field'Set(field'New(c, r), p, s),
+    columns: c,
+    rows: r,
   }
 }
 
 Field = \(g Game) Field { g.field }
+
+RunCommand = \(g Game, c Command) Game {
+  s = snake'Move(g.snake, c)
+
+  Game{...g, snake: s, field: putSnake(field'New(g.columns, g.rows), s, snake'Positions(s))}
+}
+
+putSnake = \(f Field, s Snake, ps [Position]) Field {
+  if [p, ...ps] = ps {
+    putSnake(field'Set(f, p(), s), s, ps)
+  } else {
+    f
+  }
+}
