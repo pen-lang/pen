@@ -41,8 +41,8 @@ putSnake = \(es {Position: Entity}, s Snake, ps [Position]) {Position: Entity} {
 }
 
 EntityAt = \(g Game, p Position) Entity | none {
-  if c = g.entities[p] {
-    c
+  if e = g.entities[p] {
+    e
   } else {
     none
   }
