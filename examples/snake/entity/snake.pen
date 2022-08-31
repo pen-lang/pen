@@ -5,16 +5,17 @@ import 'field { Field }
 import 'position { Position }
 
 type Snake {
+  head Position
   positions [Position]
   length number
 }
 
 New = \(p Position) Snake {
-  Snake{positions: [Position p], length: 1}
+  Snake{head: p, positions: [Position], length: 1}
 }
 
 Move = \(s Snake, c Command, f Field) Snake {
-  p = head(s)
+  p = s.head
 
   Snake{
     ...s,
@@ -33,21 +34,13 @@ Move = \(s Snake, c Command, f Field) Snake {
   }
 }
 
-head = \(s Snake) Position {
-  if [p, ...ps] = s.positions {
-    p()
-  } else {
-    Position{X: -1, Y: -1}
-  }
-}
-
 Eat = \(s Snake) Snake {
   Snake{...s, length: s.length + 1}
 }
 
 Positions = \(s Snake) [Position] {
   # TODO Use a list comprehension for filtering.
-  positions(s.positions, s.length)
+  [Position s.head, ...positions(s.positions, s.length - 1)]
 }
 
 positions = \(ps [Position], l number) [Position] {
