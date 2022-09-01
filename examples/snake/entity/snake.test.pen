@@ -1,5 +1,6 @@
 import Test'Assert
 
+import 'direction
 import 'entity'snake
 import 'field { Field }
 import 'position { Position }
@@ -8,4 +9,34 @@ Head = \() none | error {
   p = Position{X: 1, Y: 1}
 
   Assert'True(snake'Head(snake'New(p)) == p)
+}
+
+Positions = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(snake'Positions(snake'New(p)) == [Position p])
+}
+
+PositionsWithTick = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(snake'Positions(snake'Tick(snake'New(p))) == [Position p])
+}
+
+MoveHead = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(
+    snake'Head(snake'Tick(snake'Move(snake'New(p), direction'Up{})))
+      == Position{X: 1, Y: 0},
+  )
+}
+
+Move = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(
+    snake'Positions(snake'Tick(snake'Move(snake'New(p), direction'Up{})))
+      == [Position Position{X: 1, Y: 0}],
+  )
 }
