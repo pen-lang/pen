@@ -1,0 +1,75 @@
+import Core'Number
+
+import 'direction { Direction }
+import 'field { Field }
+import 'position { Position }
+
+type Snake {
+  head Position
+  positions [Position]
+  length number
+  direction Direction | none
+}
+
+New = \(p Position) Snake {
+  Snake{
+    head: p,
+    positions: [Position],
+    length: 0,
+    direction: none,
+  }
+}
+
+Head = \(s Snake) Position { s.head }
+
+Move = \(s Snake, d Direction | none) Snake {
+  Snake{...s, direction: if d = d as none { s.direction } else { d }}
+}
+
+Tick = \(s Snake) Snake {
+  if d = s.direction as none {
+    s
+  } else {
+    p = position'Move(s.head, d)
+
+    Snake{
+      ...s,
+      head: p,
+      positions: [Position s.head, ...s.positions],
+    }
+  }
+}
+
+Grow = \(s Snake) Snake {
+  Snake{...s, length: s.length + 1}
+}
+
+Positions = \(s Snake) [Position] {
+  # TODO Use a list comprehension for filtering.
+  [Position s.head, ...positions(s.positions, s.length)]
+}
+
+positions = \(ps [Position], l number) [Position] {
+  if l == 0 {
+    [Position]
+  } else {
+    if [p, ...ps] = ps {
+      [Position p(), ...positions(ps, l - 1)]
+    } else {
+      [Position]
+    }
+  }
+}
+
+IsCrashed = \(s Snake, f Field) boolean {
+  !field'IsInside(f, s.head) | isCrashed(s.head, s.positions, s.length)
+}
+
+isCrashed = \(head Position, ps [Position], l number) boolean {
+  l > 0
+    & if [p, ...ps] = ps {
+      p() == head | isCrashed(head, ps, l - 1)
+    } else {
+      false
+    }
+}

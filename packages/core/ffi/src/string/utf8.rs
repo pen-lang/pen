@@ -2,6 +2,19 @@ use alloc::{string::String, vec::Vec};
 use core::str;
 
 #[ffi::bindgen]
+fn _pen_core_utf8_characters(string: ffi::ByteString) -> ffi::List {
+    if let Ok(string) = str::from_utf8(string.as_slice()) {
+        string
+            .chars()
+            .map(|character| character.into())
+            .collect::<Vec<ffi::ByteString>>()
+            .into()
+    } else {
+        Default::default()
+    }
+}
+
+#[ffi::bindgen]
 fn _pen_core_utf8_contains(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {

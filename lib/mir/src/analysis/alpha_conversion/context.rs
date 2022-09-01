@@ -7,9 +7,9 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new() -> Self {
+    pub fn new(name_counts: FnvHashMap<&'a str, usize>) -> Self {
         Self {
-            name_counts: Default::default(),
+            name_counts: name_counts.into(),
         }
     }
 
