@@ -1273,6 +1273,10 @@ By using those views, you can apply operations to strings without copying them.<
 <h3 id="types-10"><a class="header" href="#types-10">Types</a></h3>
 <p>No types are defined.</p>
 <h3 id="functions-10"><a class="header" href="#functions-10">Functions</a></h3>
+<h4 id="characters"><a class="header" href="#characters"><code>Characters</code></a></h4>
+<p>Split a string into characters.</p>
+<pre><code class="language-pen">\(s string) [string]
+</code></pre>
 <h4 id="contains"><a class="header" href="#contains"><code>Contains</code></a></h4>
 <p>Check if a string contains a pattern.</p>
 <pre><code class="language-pen">\(s string, pat string) boolean
@@ -1678,6 +1682,10 @@ By using those views, you can apply operations to strings without copying them.<
 <h4 id="exit"><a class="header" href="#exit"><code>Exit</code></a></h4>
 <p>Exit a current process.</p>
 <pre><code class="language-pen">\(ctx Context, code number) none
+</code></pre>
+<h4 id="run"><a class="header" href="#run"><code>Run</code></a></h4>
+<p>Run a command.</p>
+<pre><code class="language-pen">\(ctx Context, cmd string, args [string]) none | error
 </code></pre>
 <h2 id="ostcp-module"><a class="header" href="#ostcp-module"><code>Os'Tcp</code> module</a></h2>
 <h3 id="types-29"><a class="header" href="#types-29">Types</a></h3>
@@ -3638,6 +3646,13 @@ Basic syntax</li>
 <li><input disabled="" type="checkbox" checked=""/>
 CPS transformation</li>
 <li><input disabled="" type="checkbox" checked=""/>
+Asynchronous I/O
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+Asynchronous synchronization</li>
+</ul>
+</li>
+<li><input disabled="" type="checkbox" checked=""/>
 Capability-based effect system</li>
 <li><input disabled="" type="checkbox" checked=""/>
 Performant GC
@@ -3676,6 +3691,8 @@ Map type</li>
 Code formatter</li>
 <li><input disabled="" type="checkbox" checked=""/>
 Documentation generator</li>
+<li><input disabled="" type="checkbox" checked=""/>
+Process management</li>
 <li><input disabled="" type="checkbox"/>
 IDE/editor support
 <ul>
@@ -3687,8 +3704,6 @@ Language server</li>
 Reflection</li>
 <li><input disabled="" type="checkbox"/>
 Serialization / deserialization</li>
-<li><input disabled="" type="checkbox"/>
-Process management</li>
 <li><input disabled="" type="checkbox"/>
 Mutable state
 <ul>
