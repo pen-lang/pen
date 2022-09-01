@@ -26,8 +26,12 @@ New = \(f Field) Game {
 
 Field = \(g Game) Field { g.field }
 
-Run = \(g Game, c Direction | none) Game | none {
-  if s = snake'Tick(snake'Move(g.snake, c), g.field) as none {
+MoveSnake = \(g Game, d Direction) Game {
+  Game{...g, snake: snake'Move(g.snake, d)}
+}
+
+Tick = \(g Game) Game | none {
+  if s = snake'Tick(g.snake, g.field) as none {
     none
   } else {
     Game{...g, snake: s, entities: putSnake({Position: Entity}, s, snake'Positions(s))}
