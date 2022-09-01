@@ -1,0 +1,11 @@
+import Test'Assert
+
+import 'entity'snake
+import 'field { Field }
+import 'position { Position }
+
+Head = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(snake'Head(snake'New(p)) == p)
+}
