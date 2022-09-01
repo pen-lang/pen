@@ -24,8 +24,6 @@ New = \(f Field) Game {
   }
 }
 
-Field = \(g Game) Field { g.field }
-
 MoveSnake = \(g Game, d Direction) Game {
   Game{...g, snake: snake'Move(g.snake, d)}
 }
@@ -45,6 +43,8 @@ putSnake = \(es {Position: Entity}, s Snake, ps [Position]) {Position: Entity} {
     es
   }
 }
+
+Field = \(g Game) Field { g.field }
 
 EntityAt = \(g Game, p Position) Entity | none {
   if e = g.entities[p] {
