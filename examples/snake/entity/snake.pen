@@ -26,18 +26,16 @@ Move = \(s Snake, d Direction | none) Snake {
   Snake{...s, direction: if d = d as none { s.direction } else { d }}
 }
 
-Tick = \(s Snake, f Field) Snake | none {
+Tick = \(s Snake) Snake {
   if d = s.direction as none {
     s
   } else {
-    if p = position'Move(s.head, d, f) as none {
-      none
-    } else {
-      Snake{
-        ...s,
-        head: p,
-        positions: [Position s.head, ...s.positions],
-      }
+    p = position'Move(s.head, d)
+
+    Snake{
+      ...s,
+      head: p,
+      positions: [Position s.head, ...s.positions],
     }
   }
 }
@@ -63,8 +61,8 @@ positions = \(ps [Position], l number) [Position] {
   }
 }
 
-IsCrashed = \(s Snake) boolean {
-  isCrashed(s.head, s.positions, s.length)
+IsCrashed = \(s Snake, f Field) boolean {
+  !field'IsInside(f, s.head) | isCrashed(s.head, s.positions, s.length)
 }
 
 isCrashed = \(head Position, ps [Position], l number) boolean {

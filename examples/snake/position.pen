@@ -1,35 +1,18 @@
 import 'direction { Direction }
-import 'field { Field }
 
 type Position {
   X number
   Y number
 }
 
-Move = \(p Position, d Direction, f Field) Position | none {
+Move = \(p Position, d Direction) Position {
   if _ = d as direction'Left {
-    if p.X == 1 {
-      none
-    } else {
-      Position{...p, X: p.X - 1}
-    }
+    Position{...p, X: p.X - 1}
   } else if direction'Right {
-    if p.X == f.Width {
-      none
-    } else {
-      Position{...p, X: p.X + 1}
-    }
+    Position{...p, X: p.X + 1}
   } else if direction'Up {
-    if p.Y == 1 {
-      none
-    } else {
-      Position{...p, Y: p.Y - 1}
-    }
+    Position{...p, Y: p.Y - 1}
   } else if direction'Down {
-    if p.Y == f.Height {
-      none
-    } else {
-      Position{...p, Y: p.Y + 1}
-    }
+    Position{...p, Y: p.Y + 1}
   }
 }

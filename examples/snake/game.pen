@@ -35,33 +35,31 @@ MoveSnake = \(g Game, d Direction) Game {
 }
 
 Tick = \(g Game) Game | none {
-  if s = snake'Tick(g.snake, g.field) as none {
-    none
-  } else {
-    if snake'IsCrashed(g.snake) {
-      none
-    } else if snake'Head(s) == frog'Position(g.frog) {
-      s = snake'Grow(s)
-      f = newFrog(g.entities, g.field, g.random)
+  s = snake'Tick(g.snake)
 
-      Game{
-        ...g,
-        snake: s,
-        frog: f,
-        entities: {Position: Entity
-          ...putSnake({Position: Entity}, s, snake'Positions(s)),
-          frog'Position(f): f,
-        },
-      }
-    } else {
-      Game{
-        ...g,
-        snake: s,
-        entities: {Position: Entity
-          ...putSnake({Position: Entity}, s, snake'Positions(s)),
-          frog'Position(g.frog): g.frog,
-        },
-      }
+  if snake'IsCrashed(s, g.field) {
+    none
+  } else if snake'Head(s) == frog'Position(g.frog) {
+    s = snake'Grow(s)
+    f = newFrog(g.entities, g.field, g.random)
+
+    Game{
+      ...g,
+      snake: s,
+      frog: f,
+      entities: {Position: Entity
+        ...putSnake({Position: Entity}, s, snake'Positions(s)),
+        frog'Position(f): f,
+      },
+    }
+  } else {
+    Game{
+      ...g,
+      snake: s,
+      entities: {Position: Entity
+        ...putSnake({Position: Entity}, s, snake'Positions(s)),
+        frog'Position(g.frog): g.frog,
+      },
     }
   }
 }
