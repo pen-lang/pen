@@ -64,3 +64,16 @@ positions = \(ps [Position], l number) [Position] {
     }
   }
 }
+
+IsBody = \(s Snake, p Position) boolean {
+  isBody(s.positions, s.length, p)
+}
+
+isBody = \(ps [Position], l number, p Position) boolean {
+  l > 1
+    & if [pp, ...ps] = ps {
+      pp() == p | isBody(ps, l - 1, p)
+    } else {
+      false
+    }
+}
