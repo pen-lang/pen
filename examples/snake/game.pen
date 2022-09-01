@@ -38,7 +38,7 @@ Tick = \(g Game) Game | none {
   if s = snake'Tick(g.snake, g.field) as none {
     none
   } else {
-    if crashed(g) {
+    if snake'IsCrashed(g.snake) {
       none
     } else if snake'Head(s) == frog'Position(g.frog) {
       s = snake'Grow(s)
@@ -63,16 +63,6 @@ Tick = \(g Game) Game | none {
         },
       }
     }
-  }
-}
-
-crashed = \(g Game) boolean {
-  p = snake'Head(g.snake)
-
-  if e = g.entities[p] {
-    if s = e as Snake { snake'IsBody(s, p) } else { false }
-  } else {
-    false
   }
 }
 

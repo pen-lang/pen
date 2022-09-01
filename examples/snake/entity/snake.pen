@@ -27,19 +27,17 @@ Move = \(s Snake, d Direction | none) Snake {
 }
 
 Tick = \(s Snake, f Field) Snake | none {
-  p = if d = s.direction as none {
-    s.head
+  if d = s.direction as none {
+    s
   } else {
-    position'Move(s.head, d, f)
-  }
-
-  if p = p as none {
-    none
-  } else {
-    Snake{
-      ...s,
-      head: p,
-      positions: [Position s.head, ...s.positions],
+    if p = position'Move(s.head, d, f) as none {
+      none
+    } else {
+      Snake{
+        ...s,
+        head: p,
+        positions: [Position s.head, ...s.positions],
+      }
     }
   }
 }
@@ -65,14 +63,14 @@ positions = \(ps [Position], l number) [Position] {
   }
 }
 
-IsBody = \(s Snake, p Position) boolean {
-  isBody(s.positions, s.length, p)
+IsCrashed = \(s Snake) boolean {
+  isCrashed(s.head, s.positions, s.length)
 }
 
-isBody = \(ps [Position], l number, p Position) boolean {
-  l > 1
-    & if [pp, ...ps] = ps {
-      pp() == p | isBody(ps, l - 1, p)
+isCrashed = \(head Position, ps [Position], l number) boolean {
+  l > 0
+    & if [p, ...ps] = ps {
+      p() == head | isCrashed(head, ps, l - 1)
     } else {
       false
     }
