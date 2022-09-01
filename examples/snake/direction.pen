@@ -6,4 +6,4 @@ type Left {}
 
 type Right {}
 
-type Command = Up | Down | Left | Right
+type Direction = Up | Down | Left | Right

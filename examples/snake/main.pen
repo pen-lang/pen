@@ -4,12 +4,12 @@ import Os'File
 import Os'Process
 import Os'Time
 
-import 'command { Command }
+import 'direction { Direction }
 # TODO Remove this.
 import 'entity'frog
 # TODO Remove this.
 import 'entity'snake
-import 'field
+import 'field { Field }
 import 'game { Game }
 # TODO Remove this.
 import 'position
@@ -17,7 +17,7 @@ import 'render { Render }
 
 type input = [string | none | error]
 
-fps = \() number { 120 }
+snakeSpeed = \() number { 2 }
 
 rows = \() number { 20 }
 
@@ -38,7 +38,7 @@ main = \(ctx context) none {
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
-  g = game'New(columns(), rows())
+  g = game'New(Field{Columns: columns(), Rows: rows()})
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
   render(ctx, g)?
@@ -52,18 +52,20 @@ step = \(ctx Context, g Game, input input) none | error {
       if x == "q" {
         none
       } else {
-        f = \(c Command) Game | none { game'RunCommand(g, c) }
-        g = if x == "h" {
-          f(command'Left{})
-        } else if x == "j" {
-          f(command'Down{})
-        } else if x == "k" {
-          f(command'Up{})
-        } else if x == "l" {
-          f(command'Right{})
-        } else {
-          g
-        }
+        g = game'Run(
+          g,
+          if x == "h" {
+            direction'Left{}
+          } else if x == "j" {
+            direction'Down{}
+          } else if x == "k" {
+            direction'Up{}
+          } else if x == "l" {
+            direction'Right{}
+          } else {
+            none
+          },
+        )
 
         if g = g as none {
           none
@@ -73,7 +75,14 @@ step = \(ctx Context, g Game, input input) none | error {
         }
       }
     } else if none {
-      step(ctx, g, input)
+      g = game'Run(g, none)
+
+      if g = g as none {
+        none
+      } else {
+        render(ctx, g)?
+        step(ctx, g, input)
+      }
     } else if error {
       x
     }
@@ -102,5 +111,5 @@ keys = \(ctx Context) [string | error] {
 }
 
 frames = \(ctx Context) [none] {
-  [none Time'Sleep(ctx, 1000 / fps()), ...frames(ctx)]
+  [none Time'Sleep(ctx, 1000 / snakeSpeed()), ...frames(ctx)]
 }

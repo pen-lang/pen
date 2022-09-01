@@ -1,6 +1,6 @@
 import Core'Number
 
-import 'command { Command }
+import 'direction { Direction }
 import 'field { Field }
 import 'position { Position }
 
@@ -8,45 +8,36 @@ type Snake {
   head Position
   positions [Position]
   length number
+  direction Direction | none
 }
 
 New = \(p Position) Snake {
-  Snake{head: p, positions: [Position], length: 1}
+  Snake{
+    head: p,
+    positions: [Position],
+    length: 1,
+    direction: none,
+  }
 }
 
-Move = \(s Snake, c Command, f Field) Snake | none {
-  move = \(p Position) Snake {
+Move = \(s Snake, d Direction | none) Snake {
+  Snake{...s, direction: if d = d as none { s.direction } else { d }}
+}
+
+Tick = \(s Snake, f Field) Snake | none {
+  p = if d = s.direction as none {
+    s.head
+  } else {
+    position'Move(s.head, d, f)
+  }
+
+  if p = p as none {
+    none
+  } else {
     Snake{
       ...s,
       head: p,
       positions: [Position s.head, ...s.positions],
-    }
-  }
-  p = s.head
-
-  if _ = c as command'Left {
-    if p.X == 1 {
-      none
-    } else {
-      move(Position{...p, X: p.X - 1})
-    }
-  } else if command'Right {
-    if p.X == f.Columns {
-      none
-    } else {
-      move(Position{...p, X: p.X + 1})
-    }
-  } else if command'Up {
-    if p.Y == 1 {
-      none
-    } else {
-      move(Position{...p, Y: p.Y - 1})
-    }
-  } else if command'Down {
-    if p.Y == f.Rows {
-      none
-    } else {
-      move(Position{...p, Y: p.Y + 1})
     }
   }
 }

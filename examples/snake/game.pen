@@ -1,6 +1,6 @@
 import Core'Number
 
-import 'command { Command }
+import 'direction { Direction }
 import 'entity { Entity }
 import 'entity'frog
 import 'entity'snake { Snake }
@@ -13,21 +13,21 @@ type Game {
   entities {Position: Entity}
 }
 
-New = \(c number, r number) Game {
-  p = Position{X: Number'Floor(c / 2), Y: Number'Floor(r / 2)}
+New = \(f Field) Game {
+  p = Position{X: Number'Floor(f.Columns / 2), Y: Number'Floor(f.Rows / 2)}
   s = snake'New(p)
 
   Game{
     snake: s,
-    field: Field{Columns: c, Rows: r},
+    field: f,
     entities: {Position: Entity p: s},
   }
 }
 
 Field = \(g Game) Field { g.field }
 
-RunCommand = \(g Game, c Command) Game | none {
-  if s = snake'Move(g.snake, c, g.field) as none {
+Run = \(g Game, c Direction | none) Game | none {
+  if s = snake'Tick(snake'Move(g.snake, c), g.field) as none {
     none
   } else {
     Game{...g, snake: s, entities: putSnake({Position: Entity}, s, snake'Positions(s))}
