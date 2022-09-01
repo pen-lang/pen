@@ -20,6 +20,8 @@ New = \(p Position) Snake {
   }
 }
 
+Head = \(s Snake) Position { s.head }
+
 Move = \(s Snake, d Direction | none) Snake {
   Snake{...s, direction: if d = d as none { s.direction } else { d }}
 }
@@ -42,7 +44,7 @@ Tick = \(s Snake, f Field) Snake | none {
   }
 }
 
-Eat = \(s Snake) Snake {
+Grow = \(s Snake) Snake {
   Snake{...s, length: s.length + 1}
 }
 

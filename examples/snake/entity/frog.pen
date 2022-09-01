@@ -1,7 +1,13 @@
+import 'position { Position }
+
 type Frog {
-  _ none
+  position Position
 }
 
-New = \() Frog {
-  Frog{_: none}
+New = \(p Position) Frog {
+  Frog{position: p}
+}
+
+Position = \(f Frog) Position {
+  f.position
 }

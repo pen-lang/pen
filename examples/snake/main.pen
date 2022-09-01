@@ -3,6 +3,8 @@ import Os'Context { Context }
 import Os'File
 import Os'Process
 import Os'Time
+import Random'Context as Random
+import Random'Random
 
 import 'direction { Direction }
 # TODO Remove this.
@@ -17,7 +19,7 @@ import 'render { Render }
 
 type input = [string | none | error]
 
-snakeSpeed = \() number { 2 }
+snakeSpeed = \() number { 4 }
 
 height = \() number { 20 }
 
@@ -37,13 +39,16 @@ main = \(ctx context) none {
 }
 
 run = \(ctx context) none | error {
-  ctx = ctx.Os
-  g = game'New(Field{Width: width(), Height: height()})
+  Process'Run(ctx.Os, "stty", [string "raw", "-echo"])?
 
-  Process'Run(ctx, "stty", [string "raw", "-echo"])?
-  render(ctx, g)?
-  step(ctx, g, input(ctx))?
-  Process'Run(ctx, "stty", [string "cooked", "echo"])?
+  g = game'New(
+    Field{Width: width(), Height: height()},
+    \() number { Random'Number(ctx.Random) },
+  )
+  render(ctx.Os, g)?
+  step(ctx.Os, g, input(ctx.Os))?
+
+  Process'Run(ctx.Os, "stty", [string "cooked", "echo"])?
 }
 
 step = \(ctx Context, g Game, input input) none | error {
