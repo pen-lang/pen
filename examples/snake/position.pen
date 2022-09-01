@@ -14,7 +14,7 @@ Move = \(p Position, d Direction, f Field) Position | none {
       Position{...p, X: p.X - 1}
     }
   } else if direction'Right {
-    if p.X == f.Columns {
+    if p.X == f.Width {
       none
     } else {
       Position{...p, X: p.X + 1}
@@ -26,7 +26,7 @@ Move = \(p Position, d Direction, f Field) Position | none {
       Position{...p, Y: p.Y - 1}
     }
   } else if direction'Down {
-    if p.Y == f.Rows {
+    if p.Y == f.Height {
       none
     } else {
       Position{...p, Y: p.Y + 1}

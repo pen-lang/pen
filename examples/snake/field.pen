@@ -1,4 +1,4 @@
 type Field {
-  Columns number
-  Rows number
+  Width number
+  Height number
 }

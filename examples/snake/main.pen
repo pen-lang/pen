@@ -19,9 +19,9 @@ type input = [string | none | error]
 
 snakeSpeed = \() number { 2 }
 
-rows = \() number { 20 }
+height = \() number { 20 }
 
-columns = \() number { 40 }
+width = \() number { 40 }
 
 main = \(ctx context) none {
   Process'Exit(
@@ -38,7 +38,7 @@ main = \(ctx context) none {
 
 run = \(ctx context) none | error {
   ctx = ctx.Os
-  g = game'New(Field{Columns: columns(), Rows: rows()})
+  g = game'New(Field{Width: width(), Height: height()})
 
   Process'Run(ctx, "stty", [string "raw", "-echo"])?
   render(ctx, g)?

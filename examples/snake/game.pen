@@ -14,7 +14,7 @@ type Game {
 }
 
 New = \(f Field) Game {
-  p = Position{X: Number'Floor(f.Columns / 2), Y: Number'Floor(f.Rows / 2)}
+  p = Position{X: Number'Floor(f.Width / 2), Y: Number'Floor(f.Height / 2)}
   s = snake'New(p)
 
   Game{

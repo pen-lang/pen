@@ -26,10 +26,10 @@ Render = \(g Game) string {
               } else {
                 renderEntity(e)
               }
-              for x in Number'Sequence(f.Columns)
+              for x in Number'Sequence(f.Width)
             ],
           )
-          for y in Number'Sequence(f.Rows)
+          for y in Number'Sequence(f.Height)
         ],
         "\r\n",
       ),
