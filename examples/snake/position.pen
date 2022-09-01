@@ -6,8 +6,8 @@ type Position {
   Y number
 }
 
-Move = \(p Position, c Direction, f Field) Position | none {
-  if _ = c as direction'Left {
+Move = \(p Position, d Direction, f Field) Position | none {
+  if _ = d as direction'Left {
     if p.X == 1 {
       none
     } else {
