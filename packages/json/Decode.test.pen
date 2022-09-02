@@ -108,6 +108,10 @@ DecodeObjectWithSpaces = \() none | error {
   )?
 }
 
+FailToDecodeTrailingCommaInObject = \() none | error {
+  Assert'Error(Decode("{\"foo\":null,}"))
+}
+
 SkipSpace = \() none | error {
   Assert'True(Decode(" null")? == Value'New(none))
 }

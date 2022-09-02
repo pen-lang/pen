@@ -1,0 +1,9 @@
+type Up {}
+
+type Down {}
+
+type Left {}
+
+type Right {}
+
+type Direction = Up | Down | Left | Right

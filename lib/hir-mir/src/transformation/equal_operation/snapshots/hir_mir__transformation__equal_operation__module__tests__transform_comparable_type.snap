@@ -1,0 +1,196 @@
+---
+source: lib/hir-mir/src/transformation/equal_operation/module.rs
+expression: transform_module(&module)
+---
+Ok(
+    Module {
+        type_definitions: [],
+        type_aliases: [
+            TypeAlias {
+                name: "a",
+                original_name: "",
+                type_: List(
+                    List {
+                        element: None(
+                            None {
+                                position: Position {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            },
+                        ),
+                        position: Position {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    },
+                ),
+                public: false,
+                external: false,
+                position: Position {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
+            },
+        ],
+        foreign_declarations: [],
+        function_declarations: [],
+        function_definitions: [
+            FunctionDefinition {
+                name: "hir:equal:d409c28886113c9b",
+                original_name: "hir:equal:d409c28886113c9b",
+                lambda: Lambda {
+                    arguments: [
+                        Argument {
+                            name: "$lhs",
+                            type_: Any(
+                                Any {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        },
+                        Argument {
+                            name: "$rhs",
+                            type_: Any(
+                                Any {
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                        },
+                    ],
+                    result_type: Boolean(
+                        Boolean {
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    body: IfType(
+                        IfType {
+                            name: "$lhs",
+                            argument: Variable(
+                                Variable {
+                                    name: "$lhs",
+                                    position: Position {
+                                        path: "",
+                                        line_number: 1,
+                                        column_number: 1,
+                                        line: "",
+                                    },
+                                },
+                            ),
+                            branches: [
+                                IfTypeBranch {
+                                    type_: None(
+                                        None {
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                    expression: IfType(
+                                        IfType {
+                                            name: "$rhs",
+                                            argument: Variable(
+                                                Variable {
+                                                    name: "$rhs",
+                                                    position: Position {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                },
+                                            ),
+                                            branches: [
+                                                IfTypeBranch {
+                                                    type_: None(
+                                                        None {
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                    expression: Boolean(
+                                                        Boolean {
+                                                            value: true,
+                                                            position: Position {
+                                                                path: "",
+                                                                line_number: 1,
+                                                                column_number: 1,
+                                                                line: "",
+                                                            },
+                                                        },
+                                                    ),
+                                                },
+                                            ],
+                                            else_: None,
+                                            position: Position {
+                                                path: "",
+                                                line_number: 1,
+                                                column_number: 1,
+                                                line: "",
+                                            },
+                                        },
+                                    ),
+                                },
+                            ],
+                            else_: None,
+                            position: Position {
+                                path: "",
+                                line_number: 1,
+                                column_number: 1,
+                                line: "",
+                            },
+                        },
+                    ),
+                    position: Position {
+                        path: "",
+                        line_number: 1,
+                        column_number: 1,
+                        line: "",
+                    },
+                },
+                foreign_definition_configuration: None,
+                public: false,
+                position: Position {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
+            },
+        ],
+        position: Position {
+            path: "",
+            line_number: 1,
+            column_number: 1,
+            line: "",
+        },
+    },
+)

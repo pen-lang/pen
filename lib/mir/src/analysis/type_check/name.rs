@@ -40,7 +40,7 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
             module
                 .function_definitions()
                 .iter()
-                .map(|definition| definition.name()),
+                .map(|definition| definition.definition().name()),
         )
     {
         if names.contains(name) {
@@ -57,7 +57,7 @@ fn check_functions(module: &Module) -> Result<(), TypeCheckError> {
 mod tests {
     use super::*;
     use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::ModuleFake,
         types::{self, Type},
     };
 
@@ -82,17 +82,17 @@ mod tests {
     #[test]
     fn check_duplicate_function_name_in_definition() {
         let module = Module::empty().set_function_definitions(vec![
-            FunctionDefinition::fake(
+            FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
-                Variable::new("x"),
                 Type::Number,
+                Variable::new("x"),
             ),
-            FunctionDefinition::fake(
+            FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
-                Variable::new("x"),
                 Type::Number,
+                Variable::new("x"),
             ),
         ]);
 
@@ -111,11 +111,11 @@ mod tests {
                 types::Function::new(vec![Type::Number], Type::Number),
                 CallingConvention::Target,
             )])
-            .set_function_definitions(vec![FunctionDefinition::fake(
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
-                Variable::new("x"),
                 Type::Number,
+                Variable::new("x"),
             )]);
 
         assert_eq!(
@@ -131,11 +131,11 @@ mod tests {
                 "f",
                 types::Function::new(vec![Type::Number], Type::Number),
             )])
-            .set_function_definitions(vec![FunctionDefinition::fake(
+            .set_function_definitions(vec![FunctionDefinition::new(
                 "f",
                 vec![Argument::new("x", Type::Number)],
-                Variable::new("x"),
                 Type::Number,
+                Variable::new("x"),
             )]);
 
         assert_eq!(

@@ -1,6 +1,9 @@
-use crate::{ir::*, types::Type};
+use crate::{
+    ir::*,
+    types::{self, Type},
+};
 
-pub fn visit(module: &Module, mut visit: impl FnMut(&Type)) {
+pub fn visit<'a>(module: &'a Module, mut visit: impl FnMut(&'a Type)) {
     for definition in module.type_definitions() {
         visit_type_definition(definition, &mut visit);
     }
@@ -22,29 +25,38 @@ pub fn visit(module: &Module, mut visit: impl FnMut(&Type)) {
     }
 }
 
-fn visit_type_definition(definition: &TypeDefinition, visit: &mut impl FnMut(&Type)) {
+fn visit_type_definition<'a>(definition: &'a TypeDefinition, visit: &mut impl FnMut(&'a Type)) {
     for field in definition.fields() {
         visit_type(field.type_(), visit);
     }
 }
 
-fn visit_type_alias(alias: &TypeAlias, visit: &mut impl FnMut(&Type)) {
+fn visit_type_alias<'a>(alias: &'a TypeAlias, visit: &mut impl FnMut(&'a Type)) {
     visit_type(alias.type_(), visit)
 }
 
-fn visit_foreign_declaration(declaration: &ForeignDeclaration, visit: &mut impl FnMut(&Type)) {
+fn visit_foreign_declaration<'a>(
+    declaration: &'a ForeignDeclaration,
+    visit: &mut impl FnMut(&'a Type),
+) {
     visit_type(declaration.type_(), visit)
 }
 
-fn visit_function_declaration(declaration: &FunctionDeclaration, visit: &mut impl FnMut(&Type)) {
-    visit_type(&declaration.type_().clone().into(), visit)
+fn visit_function_declaration<'a>(
+    declaration: &'a FunctionDeclaration,
+    visit: &mut impl FnMut(&'a Type),
+) {
+    visit_function_type(declaration.type_(), visit);
 }
 
-fn visit_function_definition(definition: &FunctionDefinition, visit: &mut impl FnMut(&Type)) {
+fn visit_function_definition<'a>(
+    definition: &'a FunctionDefinition,
+    visit: &mut impl FnMut(&'a Type),
+) {
     visit_lambda(definition.lambda(), visit)
 }
 
-fn visit_lambda(lambda: &Lambda, visit: &mut impl FnMut(&Type)) {
+fn visit_lambda<'a>(lambda: &'a Lambda, visit: &mut impl FnMut(&'a Type)) {
     for argument in lambda.arguments() {
         visit_type(argument.type_(), visit);
     }
@@ -54,7 +66,7 @@ fn visit_lambda(lambda: &Lambda, visit: &mut impl FnMut(&Type)) {
     visit_expression(lambda.body(), visit)
 }
 
-fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Type)) {
+fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a Type)) {
     match expression {
         Expression::Call(call) => {
             if let Some(type_) = call.function_type() {
@@ -239,19 +251,13 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Type)) {
     }
 }
 
-fn visit_type(type_: &Type, visit: &mut impl FnMut(&Type)) {
+fn visit_type<'a>(type_: &'a Type, visit: &mut impl FnMut(&'a Type)) {
     visit(type_);
 
     let mut visit_type = |type_| visit_type(type_, visit);
 
     match type_ {
-        Type::Function(function) => {
-            visit_type(function.result());
-
-            for argument in function.arguments() {
-                visit_type(argument);
-            }
-        }
+        Type::Function(function) => visit_function_type(function, visit),
         Type::List(list) => visit_type(list.element()),
         Type::Map(map) => {
             visit_type(map.key());
@@ -269,5 +275,13 @@ fn visit_type(type_: &Type, visit: &mut impl FnMut(&Type)) {
         | Type::Record(_)
         | Type::Reference(_)
         | Type::String(_) => {}
+    }
+}
+
+fn visit_function_type<'a>(function: &'a types::Function, visit: &mut impl FnMut(&'a Type)) {
+    visit_type(function.result(), visit);
+
+    for argument in function.arguments() {
+        visit_type(argument, visit);
     }
 }

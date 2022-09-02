@@ -38,6 +38,7 @@ import foreign _pen_os_udp_send_to \(Udp'Socket, string, string) number | error
 import foreign "c" _pen_os_get_time \() number
 import foreign _pen_os_sleep \(number) none
 import foreign _pen_os_exit \(number) none
+import foreign _pen_os_run_command \(string, [string]) none | error
 
 type Context {
   inner InnerContext
@@ -75,6 +76,7 @@ type InnerContext {
   GetTime \() number
   Sleep \(number) none
   Exit \(number) none
+  RunCommand \(string, [string]) none | error
 }
 
 UnsafeNew = \() Context {
@@ -115,6 +117,7 @@ UnsafeNew = \() Context {
       GetTime: _pen_os_get_time,
       Sleep: _pen_os_sleep,
       Exit: _pen_os_exit,
+      RunCommand: _pen_os_run_command,
     },
   }
 }

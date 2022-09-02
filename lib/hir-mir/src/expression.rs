@@ -190,14 +190,13 @@ pub fn compile(
             mir::ir::LetRecursive::new(
                 mir::ir::FunctionDefinition::thunk(
                     THUNK_NAME,
-                    compile(thunk.expression())?,
                     type_::compile(
                         context,
                         thunk.type_().ok_or_else(|| {
                             AnalysisError::TypeNotInferred(thunk.position().clone())
                         })?,
                     )?,
-                    false,
+                    compile(thunk.expression())?,
                 ),
                 mir::ir::Variable::new(THUNK_NAME),
             )
@@ -281,9 +280,8 @@ fn compile_lambda(
                     ))
                 })
                 .collect::<Result<_, _>>()?,
-            compile(context, lambda.body())?,
             type_::compile(context, lambda.result_type())?,
-            false,
+            compile(context, lambda.body())?,
         ),
         mir::ir::Variable::new(CLOSURE_NAME),
     )
@@ -376,10 +374,12 @@ fn compile_list_comprehension(
             mir::ir::FunctionDefinition::new(
                 CLOSURE_NAME,
                 vec![],
+                list_type.clone(),
                 mir::ir::LetRecursive::new(
                     mir::ir::FunctionDefinition::new(
                         CLOSURE_NAME,
                         vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
+                        list_type.clone(),
                         compile(
                             &IfList::new(
                                 Some(input_element_type.clone()),
@@ -422,20 +422,13 @@ fn compile_list_comprehension(
                             )
                             .into(),
                         )?,
-                        list_type.clone(),
-                        false,
                     ),
                     mir::ir::Call::new(
-                        mir::types::Function::new(
-                            vec![list_type.clone().into()],
-                            list_type.clone(),
-                        ),
+                        mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
                         vec![compile(comprehension.list())?],
                     ),
                 ),
-                list_type,
-                false,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
         )
@@ -464,13 +457,11 @@ fn compile_map_iteration_comprehension(
             mir::ir::FunctionDefinition::new(
                 CLOSURE_NAME,
                 vec![],
+                list_type.clone(),
                 mir::ir::LetRecursive::new(
                     definition.clone(),
                     mir::ir::Call::new(
-                        mir::types::Function::new(
-                            vec![mir::types::Type::Variant],
-                            list_type.clone(),
-                        ),
+                        mir::types::Function::new(vec![mir::types::Type::Variant], list_type),
                         mir::ir::Variable::new(definition.name()),
                         vec![mir::ir::Call::new(
                             mir::types::Function::new(
@@ -489,8 +480,6 @@ fn compile_map_iteration_comprehension(
                         .into()],
                     ),
                 ),
-                list_type,
-                false,
             ),
             mir::ir::Variable::new(CLOSURE_NAME),
         )
@@ -554,6 +543,7 @@ fn compile_map_iteration_function_definition(
             ITERATOR_NAME,
             mir::types::Type::Variant,
         )],
+        type_::compile_list(context)?,
         compile(
             context,
             &IfType::new(
@@ -631,8 +621,6 @@ fn compile_map_iteration_function_definition(
             )
             .into(),
         )?,
-        type_::compile_list(context)?,
-        false,
     ))
 }
 
@@ -680,7 +668,7 @@ fn compile_operation(
                         vec![compile(operation.lhs())?, compile(operation.rhs())?],
                     )
                     .into(),
-                    _ => compile(&equal_operation::transform(context, operation)?)?,
+                    _ => compile(&equal_operation::expression::transform(context, operation)?)?,
                 }
             }
             EqualityOperator::NotEqual => compile(&not_equal_operation::transform(operation))?,

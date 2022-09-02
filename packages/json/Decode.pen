@@ -8,13 +8,18 @@ import 'Value { Value }
 
 import foreign "c" _pen_json_decode_number \(string) number
 
-type result {
+type valueResult {
   value Value
   input View
 }
 
 type stringResult {
   string string
+  input View
+}
+
+type stringsResult {
+  strings [string]
   input View
 }
 
@@ -33,22 +38,6 @@ type objectEntry {
   value Value
 }
 
-result = \(v Value, i View) result {
-  result{value: v, input: i}
-}
-
-stringResult = \(s string, i View) stringResult {
-  stringResult{string: s, input: i}
-}
-
-arrayResult = \(vs [Value], i View) arrayResult {
-  arrayResult{array: vs, input: i}
-}
-
-objectResult = \(vs [objectEntry], i View) objectResult {
-  objectResult{entries: vs, input: i}
-}
-
 # Decode a string into a JSON value.
 Decode = \(s string) Value | error {
   r = value(View'New(s))?
@@ -60,7 +49,7 @@ Decode = \(s string) Value | error {
   }
 }
 
-value = \(v View) result | error {
+value = \(v View) valueResult | error {
   v = blank(v)
 
   if View'HasPrefix(v, "n") {
@@ -80,82 +69,72 @@ value = \(v View) result | error {
   }
 }
 
-null = \(v View) result | error {
-  s = "null"
+null = \(v View) valueResult | error {
+  valueResult{value: Value'New(none), input: token(v, "null")?}
+}
 
-  if View'HasPrefix(v, s) {
-    result(Value'New(none), View'Seek(v, Byte'Length(s)))
-  } else {
-    error("null expected")
+booleanTrue = \(v View) valueResult | error {
+  valueResult{value: Value'New(true), input: token(v, "true")?}
+}
+
+booleanFalse = \(v View) valueResult | error {
+  valueResult{value: Value'New(false), input: token(v, "false")?}
+}
+
+string = \(v View) valueResult | error {
+  r = stringCharacters(token(v, "\"")?)?
+
+  valueResult{
+    value: Value'New(String'Concatenate(r.strings)),
+    input: raw(r.input, "\"")?,
   }
 }
 
-booleanTrue = \(v View) result | error {
-  s = "true"
-
-  if View'HasPrefix(v, s) {
-    result(Value'New(true), View'Seek(v, Byte'Length(s)))
-  } else {
-    error("true expected")
-  }
-}
-
-booleanFalse = \(v View) result | error {
-  s = "false"
-
-  if View'HasPrefix(v, s) {
-    result(Value'New(false), View'Seek(v, Byte'Length(s)))
-  } else {
-    error("false expected")
-  }
-}
-
-string = \(v View) result | error {
-  r = stringCharacters(View'Seek(v, 1), [string])?
-
-  result(Value'New(r.string), View'Seek(r.input, 1))
-}
-
-stringCharacters = \(v View, ss [string]) stringResult | error {
+stringCharacters = \(v View) stringsResult | error {
   if View'HasPrefix(v, "\"") {
-    stringResult(String'Concatenate(ss), v)
+    stringsResult{strings: [string], input: v}
   } else {
     r = stringCharacter(v)?
+    s = r.string
+    r = stringCharacters(r.input)?
 
-    # TODO Optimize appending string elements.
-    stringCharacters(r.input, [string ...ss, r.string])
+    stringsResult{strings: [string s, ...r.strings], input: r.input}
   }
 }
 
 stringCharacter = \(v View) stringResult | error {
-  if View'HasPrefix(v, "\\\"") {
-    stringResult("\"", View'Seek(v, 2))
-  } else if View'Length(v) == 0 {
-    error("unexpected end of string")
+  if w = raw(v, "\\\"") as View {
+    stringResult{string: "\"", input: w}
   } else {
-    stringResult(Byte'Slice(View'ToString(v), 1, 1), View'Seek(v, 1))
+    if View'Length(v) == 0 {
+      error("unexpected end of string")
+    } else {
+      stringResult{string: View'ToString(View'Slice(v, 1, 1)), input: View'Seek(v, 1)}
+    }
   }
 }
 
-number = \(v View) result | error {
+number = \(v View) valueResult | error {
   i = View'Start(v)
 
-  v = if View'HasPrefix(v, "-") { View'Seek(v, 1) } else { v }
+  v = if w = token(v, "-") as View { w } else { v }
   v = integer(v)?
-  v = if View'HasPrefix(v, ".") { digits(View'Seek(v, 1)) } else { v }
+  v = if w = raw(v, ".") as View { digits(w) } else { v }
 
-  result(
-    Value'New(_pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1))),
-    v,
-  )
+  valueResult{
+    value: Value'New(
+      _pen_json_decode_number(Byte'Slice(View'Viewee(v), i, View'Start(v) - 1)),
+    ),
+    input: v,
+  }
 }
 
 integer = \(v View) View | error {
   if w = nonZeroDigit(v) as View {
     digits(w)
   } else {
-    if View'HasPrefix(v, "0") {
-      View'Seek(v, 1)
+    if v = raw(v, "0") as View {
+      v
     } else {
       error("number expected")
     }
@@ -174,8 +153,8 @@ digit = \(v View) View | none {
   if w = nonZeroDigit(v) as View {
     w
   } else {
-    if View'HasPrefix(v, "0") {
-      View'Seek(v, 1)
+    if v = raw(v, "0") as View {
+      v
     } else {
       none
     }
@@ -190,84 +169,62 @@ nonZeroDigit = \(v View) View | none {
   }
 }
 
-array = \(v View) result | error {
-  if View'HasPrefix(v, "[") {
-    r = arrayElements(View'Seek(v, 1), [Value])?
-    v = blank(r.input)
+array = \(v View) valueResult | error {
+  r = arrayElements(token(v, "[")?)?
 
-    if View'HasPrefix(v, "]") {
-      result(Value'New(r.array), View'Seek(v, 1))
-    } else {
-      error("] expected")
-    }
-  } else {
-    error("array expected")
-  }
+  valueResult{value: Value'New(r.array), input: token(r.input, "]")?}
 }
 
-arrayElements = \(v View, vs [Value]) arrayResult | error {
-  if r = value(v) as result {
-    # TODO Optimize appending list elements. This is O(n^2).
-    vs = [Value ...vs, r.value]
-    v = blank(r.input)
+arrayElements = \(v View) arrayResult | error {
+  if r = value(v) as valueResult {
+    x = r.value
 
-    if View'HasPrefix(v, ",") {
-      v = blank(View'Seek(v, 1))
+    if v = token(r.input, ",") as View {
+      r = arrayElements(v)?
 
-      if View'HasPrefix(v, "]") {
-        error("unexpected ]")
+      if r.array == [Value] {
+        error("unexpected trailing , in array")
       } else {
-        arrayElements(v, vs)
+        arrayResult{array: [Value x, ...r.array], input: r.input}
       }
     } else {
-      arrayResult(vs, v)
+      arrayResult{array: [Value x], input: r.input}
     }
   } else {
-    arrayResult(vs, v)
+    arrayResult{array: [Value], input: v}
   }
 }
 
-object = \(v View) result | error {
-  if View'HasPrefix(v, "{") {
-    r = objectEntries(View'Seek(v, 1), [objectEntry])?
-    v = blank(r.input)
+object = \(v View) valueResult | error {
+  r = objectEntries(token(v, "{")?)?
 
-    if View'HasPrefix(v, "}") {
-      result(Value'New(entriesToMap(r.entries)), View'Seek(v, 1))
-    } else {
-      error("} expected")
-    }
-  } else {
-    error("{ expected")
+  valueResult{
+    value: Value'New(entriesToMap(r.entries)),
+    input: token(r.input, "}")?,
   }
 }
 
-objectEntries = \(v View, es [objectEntry]) objectResult | error {
-  v = blank(v)
-
-  if r = string(v) as result {
+objectEntries = \(v View) objectResult | error {
+  if r = string(v) as valueResult {
     k = if k = Value'Raw(r.value) as string { k } else { error("unexpected non-string key") }?
-    v = blank(r.input)
-    v = if View'HasPrefix(v, ":") { View'Seek(v, 1) } else { error(": expected") }?
+    v = token(r.input, ":")?
     r = value(v)?
 
-    # TODO Optimize appending list elements. This is O(n^2).
-    es = [objectEntry ...es, objectEntry{key: k, value: r.value}]
-    v = blank(r.input)
+    e = objectEntry{key: k, value: r.value}
 
-    if View'HasPrefix(v, ",") {
-      v = blank(View'Seek(v, 1))
+    if v = token(r.input, ",") as View {
+      r = objectEntries(v)?
 
-      if View'HasPrefix(v, "]") {
-        error("unexpected ]")
+      if r.entries == [objectEntry] {
+        error("unexpected trailing , in object")
       } else {
-        objectEntries(v, es)
+        objectResult{entries: [objectEntry e, ...r.entries], input: r.input}
       }
     } else {
-      objectResult(es, r.input)
+      objectResult{entries: [objectEntry e], input: r.input}
     }
   } else {
-    objectResult(es, v)
+    objectResult{entries: [objectEntry], input: v}
   }
 }
 
@@ -276,6 +233,18 @@ entriesToMap = \(es [objectEntry]) {string: Value} {
     {string: Value e().key: e().value, ...entriesToMap(es)}
   } else {
     {string: Value}
+  }
+}
+
+token = \(v View, s string) View | error {
+  raw(blank(v), s)
+}
+
+raw = \(v View, s string) View | error {
+  if View'HasPrefix(v, s) {
+    View'Seek(v, Byte'Length(s))
+  } else {
+    error(String'Concatenate([string s, " expected"]))
   }
 }
 

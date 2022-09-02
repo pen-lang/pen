@@ -65,7 +65,6 @@ pub fn downcast(
     variant: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    // TODO Should we rather return errors for variants?
     Ok(if matches!(type_, mir::types::Type::Variant) {
         variant.clone()
     } else {

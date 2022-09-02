@@ -4,6 +4,8 @@ Items are ordered by priority.
 
 - [x] Basic syntax
 - [x] CPS transformation
+- [x] Asynchronous I/O
+  - [x] Asynchronous synchronization
 - [x] Capability-based effect system
 - [x] Performant GC
   - [x] Automatic reference counting
@@ -22,11 +24,11 @@ Items are ordered by priority.
 - [x] Map type
 - [x] Code formatter
 - [x] Documentation generator
+- [x] Process management
 - [ ] IDE/editor support
   - [ ] Language server
 - [ ] Reflection
 - [ ] Serialization / deserialization
-- [ ] Process management
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] Vector type

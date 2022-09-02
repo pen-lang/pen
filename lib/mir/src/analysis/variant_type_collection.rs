@@ -1,15 +1,16 @@
 use crate::{ir::*, types::Type};
 use fnv::FnvHashSet;
 
+// TODO Use a persistent hash map.
 pub fn collect(module: &Module) -> FnvHashSet<Type> {
     module
         .function_definitions()
         .iter()
-        .flat_map(collect_from_definition)
+        .flat_map(|definition| collect_from_function_definition(definition.definition()))
         .collect()
 }
 
-fn collect_from_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
+fn collect_from_function_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
     collect_from_expression(definition.body())
 }
 
@@ -44,7 +45,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .cloned()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
-        Expression::LetRecursive(let_) => collect_from_definition(let_.definition())
+        Expression::LetRecursive(let_) => collect_from_function_definition(let_.definition())
             .into_iter()
             .chain(collect_from_expression(let_.expression()))
             .collect(),
@@ -110,20 +111,17 @@ fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        test::{FunctionDefinitionFake, ModuleFake},
-        types::Type,
-    };
+    use crate::{test::ModuleFake, types::Type};
 
     #[test]
     fn collect_from_case_argument() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![],
-                    Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None),
                     Type::None,
+                    Case::new(Variant::new(Type::Number, Variable::new("x")), vec![], None)
                 )])
             ),
             [Type::Number].into_iter().collect()
@@ -134,16 +132,16 @@ mod tests {
     fn collect_from_try_operation_operand() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
+                    Type::None,
                     TryOperation::new(
                         Variable::new("x"),
                         "error",
                         Type::Number,
                         Variable::new("error"),
-                    ),
-                    Type::None,
+                    )
                 )],)
             ),
             [Type::Number].into_iter().collect()
@@ -154,16 +152,16 @@ mod tests {
     fn collect_from_try_operation_then_expression() {
         assert_eq!(
             collect(
-                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
                     "f",
                     vec![Argument::new("x", Type::Variant)],
+                    Type::None,
                     TryOperation::new(
                         Variable::new("x"),
                         "error",
                         Type::Number,
                         Variant::new(Type::Boolean, Variable::new("error")),
-                    ),
-                    Type::None,
+                    )
                 )],)
             ),
             [Type::Boolean, Type::Number].into_iter().collect()
