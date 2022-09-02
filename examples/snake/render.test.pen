@@ -1,0 +1,21 @@
+import Test'Assert
+
+# TODO Remove this.
+import 'entity'frog
+# TODO Remove this.
+import 'entity'snake
+import 'field { Field }
+import 'game { Game }
+# TODO Remove this.
+import 'position
+import 'render { Render }
+
+RenderGame = \() none | error {
+  Assert'True(
+    Render(game'New(Field{Width: 2, Height: 2}, \() number { 0 }))
+      == [string
+        "o.",
+        "..",
+      ],
+  )
+}

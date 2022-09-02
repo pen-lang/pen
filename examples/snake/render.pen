@@ -7,35 +7,23 @@ import 'entity'snake { Snake }
 import 'field { Field }
 import 'game { Game }
 import 'position { Position }
-import 'usage { Usage }
 
-Render = \(g Game) string {
+Render = \(g Game) [string] {
   f = game'Field(g)
 
-  String'Concatenate(
-    [string
-      "\x1bc",
-      String'Join(
-        [string
-          String'Concatenate(
-            [string
-              if e = game'EntityAt(g, Position{X: x(), Y: y()}) as none {
-                empty()
-              } else {
-                entity(e)
-              }
-              for x in Number'Sequence(f.Width)
-            ],
-          )
-          for y in Number'Sequence(f.Height)
-        ],
-        "\r\n",
-      ),
-      "\r\n",
-      Usage(),
-      "\r\n",
-    ],
-  )
+  [string
+    String'Concatenate(
+      [string
+        if e = game'EntityAt(g, Position{X: x(), Y: y()}) as none {
+          empty()
+        } else {
+          entity(e)
+        }
+        for x in Number'Sequence(f.Width)
+      ],
+    )
+    for y in Number'Sequence(f.Height)
+  ]
 }
 
 entity = \(e Entity) string {
