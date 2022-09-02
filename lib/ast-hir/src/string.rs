@@ -8,7 +8,7 @@ static HEX_CHARACTER_REGEX: Lazy<Regex> =
 pub fn compile(string: &str) -> Vec<u8> {
     HEX_CHARACTER_REGEX
         .replace_all(
-            &string
+            string
                 .replace("\\\\", "\\")
                 .replace("\\\"", "\"")
                 .replace("\\n", "\n")
