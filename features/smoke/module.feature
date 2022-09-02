@@ -9,25 +9,23 @@ Feature: Modules
     """
 
   Scenario: Compare a type imported indirectly
-    Given a file named "Foo.pen" with:
+    Given a file named "foo.pen" with:
     """pen
     type Foo {}
     """
-    And a file named "Bar.pen" with:
+    And a file named "bar.pen" with:
     """pen
     import 'foo { Foo }
 
     type Bar {
-      foo Foo
+      xs [Foo]
     }
     """
-    And a file named "Baz.pen" with:
+    And a file named "baz.pen" with:
     """pen
     import 'bar { Bar }
 
-    compare = \(x Bar, y Bar) boolean {
-      x == y
-    }
+    type Baz = Bar
     """
-    When I run `pen build`
+    When I successfully run `pen build`
     Then the exit status should be 0
