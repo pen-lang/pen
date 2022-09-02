@@ -11,7 +11,7 @@ Feature: Modules
   Scenario: Import a duplicate name
     Given a file named "foo.pen" with:
     """pen
-    Foo = \() none { none }
+    Foo = \(x number) number { x }
     """
     And a file named "bar.pen" with:
     """pen
@@ -19,8 +19,8 @@ Feature: Modules
 
     Foo = \() none { Foo() }
     """
-    When I run `pen build`
-    Then the exit status should not be 0
+    When I successfully run `pen build`
+    Then the exit status should be 0
 
   Scenario: Compare a type imported indirectly
     Given a file named "foo.pen" with:
