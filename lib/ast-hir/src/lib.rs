@@ -35,7 +35,11 @@ pub fn compile(
                     .ok_or_else(|| CompileError::ModuleNotFound(import.module_path().clone()))?
                     .clone(),
                 module_prefix::compile(import),
-                import.unqualified_names().iter().cloned().collect(),
+                import
+                    .unqualified_names()
+                    .iter()
+                    .map(|name| (name.name().into(), name.position().clone()))
+                    .collect(),
             ))
         })
         .collect::<Result<Vec<_>, _>>()?;

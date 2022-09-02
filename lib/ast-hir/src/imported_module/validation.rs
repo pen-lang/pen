@@ -23,9 +23,9 @@ pub fn validate(module: &ImportedModule) -> Result<(), CompileError> {
         )
         .collect::<FnvHashSet<_>>();
 
-    for name in module.unqualified_names() {
+    for (name, position) in module.unqualified_names() {
         if !names.contains(&**name) {
-            return Err(CompileError::NameNotFound(name.into()));
+            return Err(CompileError::NameNotFound(name.into(), position.clone()));
         }
     }
     Ok(())
@@ -34,6 +34,7 @@ pub fn validate(module: &ImportedModule) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn validate_undefined_name() {
@@ -41,9 +42,9 @@ mod tests {
             validate(&ImportedModule::new(
                 interface::Module::new(vec![], vec![], vec![]),
                 "",
-                ["foo".into()].into_iter().collect()
+                [("foo".into(), Position::fake())].into_iter().collect()
             )),
-            Err(CompileError::NameNotFound("foo".into()))
+            Err(CompileError::NameNotFound("foo".into(), Position::fake()))
         );
     }
 }
