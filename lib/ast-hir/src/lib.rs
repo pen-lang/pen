@@ -39,6 +39,11 @@ pub fn compile(
             ))
         })
         .collect::<Result<Vec<_>, _>>()?;
+
+    for module in &imported_modules {
+        imported_module::validation::validate(module)?
+    }
+
     let module = module::compile(module)?;
     let module = import::compile(&module, &imported_modules, prelude_module_interfaces);
 

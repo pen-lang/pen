@@ -8,6 +8,7 @@ use std::{
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CompileError {
     ModuleNotFound(ast::ModulePath),
+    NameNotFound(String),
     ParseFloat {
         error: ParseFloatError,
         position: Position,
@@ -24,6 +25,10 @@ impl Display for CompileError {
         match self {
             Self::ModuleNotFound(path) => {
                 write!(formatter, "module \"{}\" not found", path)
+            }
+            Self::NameNotFound(name) => {
+                // TODO Use positions.
+                write!(formatter, "name \"{}\" not found", name)
             }
             Self::ParseFloat { error, position } => {
                 write!(formatter, "{}\n{}", error, position)
