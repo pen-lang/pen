@@ -35,7 +35,7 @@ pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, Co
             ),
             Variable::new(&configuration.get_function_name, position.clone()),
             vec![
-                map_context::transform_expression(
+                map_context::expression::transform(
                     context,
                     &types::Map::new(key_type.clone(), value_type.clone(), position.clone()),
                 )?,

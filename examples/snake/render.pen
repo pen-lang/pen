@@ -1,0 +1,37 @@
+import Core'Number
+import Core'String
+
+import 'entity { Entity }
+import 'entity'frog { Frog }
+import 'entity'snake { Snake }
+import 'field { Field }
+import 'game { Game }
+import 'position { Position }
+
+Render = \(g Game) [string] {
+  f = game'Field(g)
+
+  [string
+    String'Concatenate(
+      [string
+        if e = game'EntityAt(g, Position{X: x(), Y: y()}) as none {
+          empty()
+        } else {
+          entity(e)
+        }
+        for x in Number'Sequence(f.Width)
+      ],
+    )
+    for y in Number'Sequence(f.Height)
+  ]
+}
+
+entity = \(e Entity) string {
+  if _ = e as Snake {
+    "o"
+  } else if Frog {
+    "*"
+  }
+}
+
+empty = \() string { "." }

@@ -1,0 +1,55 @@
+import Test'Assert
+
+import 'direction
+import 'entity'snake { Head, Tick, New, Move, Grow, IsCrashed }
+import 'field { Field }
+import 'position { Position }
+
+Head = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(Head(New(p)) == p)
+}
+
+Positions = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(snake'Positions(New(p)) == [Position p])
+}
+
+PositionsWithTick = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(snake'Positions(Tick(New(p))) == [Position p])
+}
+
+MoveHead = \() none | error {
+  Assert'True(
+    Head(Tick(Move(New(Position{X: 1, Y: 1}), direction'Up{})))
+      == Position{X: 1, Y: 0},
+  )
+}
+
+Move = \() none | error {
+  Assert'True(
+    snake'Positions(Tick(Move(New(Position{X: 1, Y: 1}), direction'Up{})))
+      == [Position Position{X: 1, Y: 0}],
+  )
+}
+
+Grow = \() none | error {
+  p = Position{X: 1, Y: 1}
+
+  Assert'True(
+    snake'Positions(Tick(Move(Grow(New(p)), direction'Up{})))
+      == [Position Position{X: 1, Y: 0}, p],
+  )
+}
+
+IsCrashed = \() none | error {
+  f = Field{Width: 1, Height: 1}
+  s = New(Position{X: 1, Y: 1})
+
+  Assert'True(!IsCrashed(s, f))?
+  Assert'True(IsCrashed(Tick(Move(s, direction'Up{})), f))
+}

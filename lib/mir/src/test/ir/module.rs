@@ -1,5 +1,7 @@
 use crate::ir::*;
 
+use super::GlobalFunctionDefinitionFake;
+
 pub trait ModuleFake {
     #[must_use]
     fn empty() -> Self;
@@ -71,7 +73,10 @@ impl ModuleFake for Module {
             self.foreign_declarations().to_vec(),
             self.foreign_definitions().to_vec(),
             self.function_declarations().to_vec(),
-            definitions,
+            definitions
+                .into_iter()
+                .map(GlobalFunctionDefinition::fake)
+                .collect(),
         )
     }
 }

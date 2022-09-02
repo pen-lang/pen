@@ -31,7 +31,9 @@ pub use map_type_configuration::{
 };
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
-use transformation::{map_context, record_equal_function, record_hash_function};
+use transformation::{
+    equal_operation, hash_calculation, map_context, record_equal_function, record_hash_function,
+};
 
 pub fn compile_main(
     module: &Module,
@@ -75,14 +77,18 @@ fn compile_module(
     let context = CompileContext::new(module, configuration.cloned());
 
     let module = hir::analysis::analyze(context.analysis(), module)?;
-    let module = record_equal_function::transform(&context, &module)?;
-    let module = record_hash_function::transform(&context, &module)?;
-    let module = map_context::transform_module(&context, &module)?;
 
     Ok((
         {
+            let module = record_equal_function::transform(&context, &module)?;
+            let module = record_hash_function::transform(&context, &module)?;
+            let module = map_context::module::transform(&context, &module)?;
+            let module = equal_operation::module::transform(&context, &module)?;
+            let module = hash_calculation::module::transform(&context, &module)?;
             let module = module::compile(&context, &module)?;
+
             mir::analysis::type_check::check(&module)?;
+
             module
         },
         module_interface::compile(&module)?,

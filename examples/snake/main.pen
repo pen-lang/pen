@@ -1,0 +1,130 @@
+import Console'Print
+import Core'String
+import Os'Context { Context }
+import Os'File
+import Os'Process
+import Os'Time
+import Random'Context as Random
+import Random'Random
+
+import 'direction { Direction }
+import 'field { Field }
+import 'game { Game }
+import 'render { Render }
+import 'usage { Usage }
+
+type input = [string | none | error]
+
+snakeSpeed = \() number { 4 }
+
+height = \() number { 20 }
+
+width = \() number { 40 }
+
+main = \(ctx context) none {
+  Process'Exit(
+    ctx.Os,
+    if e = run(ctx) as none {
+      0
+    } else {
+      _ = Print'Line(ctx.Os, if s = source(e) as string { s } else { "unknown error" })
+
+      1
+    },
+  )
+}
+
+run = \(ctx context) none | error {
+  Process'Run(ctx.Os, "stty", [string "raw", "-echo"])?
+
+  g = game'New(
+    Field{Width: width(), Height: height()},
+    \() number { Random'Number(ctx.Random) },
+  )
+  render(ctx.Os, g)?
+  step(ctx.Os, g, input(ctx.Os))?
+
+  Process'Run(ctx.Os, "stty", [string "cooked", "echo"])?
+}
+
+step = \(ctx Context, g Game, input input) none | error {
+  if [x, ...input] = input {
+    if x = x() as string {
+      if x == "q" {
+        none
+      } else {
+        d = if x == "h" {
+          direction'Left{}
+        } else if x == "j" {
+          direction'Down{}
+        } else if x == "k" {
+          direction'Up{}
+        } else if x == "l" {
+          direction'Right{}
+        } else {
+          none
+        }
+
+        step(
+          ctx,
+          if d = d as none {
+            g
+          } else {
+            game'MoveSnake(g, d)
+          },
+          input,
+        )
+      }
+    } else if none {
+      if g = game'Tick(g) as none {
+        none
+      } else {
+        render(ctx, g)?
+        step(ctx, g, input)
+      }
+    } else if error {
+      x
+    }
+  } else {
+    none
+  }
+}
+
+render = \(ctx Context, g Game) none | error {
+  print(ctx, "\x1bc")?
+  printLines(ctx, Render(g))?
+  printLine(ctx, Usage())?
+
+  none
+}
+
+input = \(ctx Context) input {
+  race(
+    [[string | none | error]
+      [string | none | error ...keys(ctx)],
+      [string | none | error ...frames(ctx)],
+    ],
+  )
+}
+
+keys = \(ctx Context) [string | error] {
+  [string | error File'ReadLimit(ctx, File'StdIn(), 1), ...keys(ctx)]
+}
+
+frames = \(ctx Context) [none] {
+  [none Time'Sleep(ctx, 1000 / snakeSpeed()), ...frames(ctx)]
+}
+
+printLines = \(ctx Context, ss [string]) none | error {
+  printLine(ctx, String'Join(ss, "\r\n"))?
+}
+
+printLine = \(ctx Context, s string) none | error {
+  print(ctx, String'Concatenate([string s, "\r\n"]))
+}
+
+print = \(ctx Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), s)?
+
+  none
+}

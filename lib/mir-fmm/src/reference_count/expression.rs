@@ -21,14 +21,23 @@ pub fn clone(
         mir::types::Type::Variant => {
             let tag = variant::get_tag(builder, expression)?;
 
-            fmm::build::record(vec![
-                tag.clone(),
-                builder.call(
-                    type_information::get_clone_function(builder, tag)?,
-                    vec![variant::get_payload(builder, expression)?],
+            builder.if_::<CompileError>(
+                fmm::build::comparison_operation(
+                    fmm::ir::ComparisonOperator::Equal,
+                    fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, tag.clone()),
+                    fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
                 )?,
-            ])
-            .into()
+                |builder| Ok(builder.branch(expression.clone())),
+                |builder| {
+                    Ok(builder.branch(fmm::build::record(vec![
+                        tag.clone(),
+                        builder.call(
+                            type_information::get_clone_function(&builder, tag.clone())?,
+                            vec![variant::get_payload(&builder, expression)?],
+                        )?,
+                    ])))
+                },
+            )?
         }
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {
             expression.clone()

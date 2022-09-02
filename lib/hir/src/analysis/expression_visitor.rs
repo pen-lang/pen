@@ -1,16 +1,23 @@
 use crate::ir::*;
 
-pub fn visit(module: &Module, mut visit: impl FnMut(&Expression)) {
+pub fn visit<'a>(module: &'a Module, mut visit: impl FnMut(&'a Expression)) {
     for definition in module.function_definitions() {
         visit_definition(definition, &mut visit);
     }
 }
 
-fn visit_definition(definition: &FunctionDefinition, visit: &mut impl FnMut(&Expression)) {
+fn visit_definition<'a>(
+    definition: &'a FunctionDefinition,
+    visit: &mut impl FnMut(&'a Expression),
+) {
     visit_lambda(definition.lambda(), visit)
 }
 
-fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)) {
+fn visit_lambda<'a>(lambda: &'a Lambda, visit: &mut impl FnMut(&'a Expression)) {
+    visit_expression(lambda.body(), visit)
+}
+
+fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a Expression)) {
     visit(expression);
 
     let mut visit_expression = |expression| visit_expression(expression, visit);
@@ -131,8 +138,4 @@ fn visit_expression(expression: &Expression, visit: &mut impl FnMut(&Expression)
         | Expression::String(_)
         | Expression::Variable(_) => {}
     }
-}
-
-fn visit_lambda(lambda: &Lambda, visit: &mut impl FnMut(&Expression)) {
-    visit_expression(lambda.body(), visit)
 }

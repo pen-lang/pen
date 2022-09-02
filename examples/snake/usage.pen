@@ -1,0 +1,3 @@
+Usage = \() string {
+  "h: left, j: down, k: up, l: right, q: quit"
+}

@@ -30,7 +30,9 @@ pub fn compile(
 ) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::type_check::check(module)?;
 
-    let module = mir::analysis::environment_inference::transform(module);
+    let module = mir::analysis::alpha_conversion::transform(module);
+    let module = mir::analysis::normalization::transform(&module);
+    let module = mir::analysis::environment_inference::transform(&module);
     let module = mir::analysis::lambda_lifting::transform(&module);
     let module = mir::analysis::reference_count::transform(&module)?;
 
@@ -44,6 +46,7 @@ pub fn compile(
 
     for definition in module.type_definitions() {
         reference_count::record::compile_clone_function(&context, definition)?;
+        reference_count::record::compile_clone_unboxed_function(&context, definition)?;
         reference_count::record::compile_drop_function(&context, definition)?;
         reference_count::record::compile_synchronize_function(&context, definition)?;
     }
@@ -72,12 +75,12 @@ pub fn compile(
                 .iter()
                 .map(|declaration| (declaration.name(), declaration.type_())),
         )
-        .chain(
-            module
-                .function_definitions()
-                .iter()
-                .map(|definition| (definition.name(), definition.type_())),
-        )
+        .chain(module.function_definitions().iter().map(|definition| {
+            (
+                definition.definition().name(),
+                definition.definition().type_(),
+            )
+        }))
         .collect::<FnvHashMap<_, _>>();
 
     for definition in module.foreign_definitions() {
@@ -124,6 +127,8 @@ fn compile_global_variables(
             )
         }))
         .chain(module.function_definitions().iter().map(|definition| {
+            let definition = definition.definition();
+
             (
                 definition.name().into(),
                 fmm::build::bit_cast(
@@ -148,7 +153,7 @@ fn compile_global_variables(
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::{FunctionDefinitionFake, ModuleFake};
+    use mir::test::ModuleFake;
     use once_cell::sync::Lazy;
 
     static FOREIGN_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
@@ -170,12 +175,12 @@ mod tests {
 
         compile_final_module(&module);
         compile_final_module(
-            &fmm::analysis::transform_to_cps(&module, fmm::types::Record::new(vec![])).unwrap(),
+            &fmm::analysis::cps::transform(&module, fmm::types::Record::new(vec![])).unwrap(),
         );
     }
 
     fn compile_final_module(module: &fmm::ir::Module) {
-        fmm::analysis::check_types(module).unwrap();
+        fmm::analysis::type_check::check(module).unwrap();
 
         fmm_llvm::compile_to_object(
             module,
@@ -357,11 +362,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Source,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Variable::new("x"),
                         mir::types::Type::Number,
+                        mir::ir::Variable::new("x"),
                     )]),
             );
         }
@@ -375,11 +380,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Target,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Variable::new("x"),
                         mir::types::Type::Number,
+                        mir::ir::Variable::new("x"),
                     )]),
             );
         }
@@ -393,11 +398,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Target,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
-                        mir::ir::Expression::None,
                         mir::types::Type::None,
+                        mir::ir::Expression::None,
                     )]),
             );
         }
@@ -411,11 +416,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Target,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![],
-                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None),
                         mir::types::Type::Variant,
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None),
                     )]),
             );
         }
@@ -430,11 +435,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Target,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Record::new("a"))],
-                        mir::ir::Expression::None,
                         mir::types::Type::None,
+                        mir::ir::Expression::None,
                     )]),
             );
         }
@@ -451,11 +456,11 @@ mod tests {
                         "g",
                         mir::ir::CallingConvention::Target,
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![],
-                        mir::ir::Record::new(record_type, vec![mir::ir::Expression::Number(42.0)]),
                         mir::types::Record::new("a"),
+                        mir::ir::Record::new(record_type, vec![mir::ir::Expression::Number(42.0)]),
                     )]),
             );
         }
@@ -500,11 +505,11 @@ mod tests {
         #[test]
         fn compile() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                    mir::ir::Variable::new("x"),
                     mir::types::Type::Number,
+                    mir::ir::Variable::new("x"),
                 ),
             ]));
         }
@@ -512,18 +517,18 @@ mod tests {
         #[test]
         fn compile_with_multiple_arguments() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![
                         mir::ir::Argument::new("x", mir::types::Type::Number),
                         mir::ir::Argument::new("y", mir::types::Type::Number),
                     ],
+                    mir::types::Type::Number,
                     mir::ir::ArithmeticOperation::new(
                         mir::ir::ArithmeticOperator::Add,
                         mir::ir::Variable::new("x"),
                         mir::ir::Variable::new("y"),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -531,20 +536,20 @@ mod tests {
         #[test]
         fn compile_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
-                    mir::ir::Expression::Number(42.0),
                     mir::types::Type::Number,
+                    mir::ir::Expression::Number(42.0),
                 ),
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "g",
                     vec![],
+                    mir::types::Type::Number,
                     mir::ir::Call::new(
                         mir::types::Function::new(vec![], mir::types::Type::Number),
                         mir::ir::Variable::new("f"),
                         vec![],
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -556,16 +561,16 @@ mod tests {
         #[test]
         fn compile_let() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::types::Type::Number,
                     mir::ir::Let::new(
                         "y",
                         mir::types::Type::Number,
                         mir::ir::Variable::new("x"),
                         mir::ir::Variable::new("y"),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -573,19 +578,20 @@ mod tests {
         #[test]
         fn compile_let_recursive() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::types::Type::Number,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
                             "g",
                             vec![mir::ir::Argument::new("y", mir::types::Type::Number)],
+                            mir::types::Type::Number,
                             mir::ir::ArithmeticOperation::new(
                                 mir::ir::ArithmeticOperator::Add,
                                 mir::ir::Variable::new("x"),
                                 mir::ir::Variable::new("y"),
                             ),
-                            mir::types::Type::Number,
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(
@@ -596,7 +602,6 @@ mod tests {
                             vec![42.0.into()],
                         ),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -604,24 +609,26 @@ mod tests {
         #[test]
         fn compile_nested_let_recursive() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::types::Type::Number,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
                             "g",
                             vec![mir::ir::Argument::new("y", mir::types::Type::Number)],
+                            mir::types::Type::Number,
                             mir::ir::ArithmeticOperation::new(
                                 mir::ir::ArithmeticOperator::Add,
                                 mir::ir::Variable::new("x"),
                                 mir::ir::Variable::new("y"),
                             ),
-                            mir::types::Type::Number,
                         ),
                         mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::fake(
+                            mir::ir::FunctionDefinition::new(
                                 "h",
                                 vec![mir::ir::Argument::new("z", mir::types::Type::Number)],
+                                mir::types::Type::Number,
                                 mir::ir::Call::new(
                                     mir::types::Function::new(
                                         vec![mir::types::Type::Number],
@@ -630,7 +637,6 @@ mod tests {
                                     mir::ir::Variable::new("g"),
                                     vec![mir::ir::Variable::new("z").into()],
                                 ),
-                                mir::types::Type::Number,
                             ),
                             mir::ir::Call::new(
                                 mir::types::Function::new(
@@ -642,7 +648,6 @@ mod tests {
                             ),
                         ),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -650,17 +655,23 @@ mod tests {
         #[test]
         fn compile_let_recursive_with_curried_function() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::types::Type::Number,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
                             "g",
                             vec![mir::ir::Argument::new("y", mir::types::Type::Number)],
+                            mir::types::Function::new(
+                                vec![mir::types::Type::Number],
+                                mir::types::Type::Number,
+                            ),
                             mir::ir::LetRecursive::new(
-                                mir::ir::FunctionDefinition::fake(
+                                mir::ir::FunctionDefinition::new(
                                     "h",
                                     vec![mir::ir::Argument::new("z", mir::types::Type::Number)],
+                                    mir::types::Type::Number,
                                     mir::ir::ArithmeticOperation::new(
                                         mir::ir::ArithmeticOperator::Add,
                                         mir::ir::ArithmeticOperation::new(
@@ -670,13 +681,8 @@ mod tests {
                                         ),
                                         mir::ir::Variable::new("z"),
                                     ),
-                                    mir::types::Type::Number,
                                 ),
                                 mir::ir::Variable::new("h"),
-                            ),
-                            mir::types::Function::new(
-                                vec![mir::types::Type::Number],
-                                mir::types::Type::Number,
                             ),
                         ),
                         mir::ir::Call::new(
@@ -698,7 +704,6 @@ mod tests {
                             vec![42.0.into()],
                         ),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -709,9 +714,10 @@ mod tests {
             #[test]
             fn compile_number() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::Number,
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
@@ -721,7 +727,6 @@ mod tests {
                             )],
                             None,
                         ),
-                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -736,19 +741,19 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                            record_type.clone(),
                             mir::ir::Case::new(
                                 mir::ir::Variable::new("x"),
                                 vec![mir::ir::Alternative::new(
-                                    vec![record_type.clone().into()],
+                                    vec![record_type.into()],
                                     "x",
                                     mir::ir::Variable::new("x"),
                                 )],
                                 None,
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -763,19 +768,19 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                            record_type.clone(),
                             mir::ir::Case::new(
                                 mir::ir::Variable::new("x"),
                                 vec![mir::ir::Alternative::new(
-                                    vec![record_type.clone().into()],
+                                    vec![record_type.into()],
                                     "x",
                                     mir::ir::Variable::new("x"),
                                 )],
                                 None,
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -783,9 +788,10 @@ mod tests {
             #[test]
             fn compile_string() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::ByteString,
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
@@ -795,7 +801,6 @@ mod tests {
                             )],
                             None,
                         ),
-                        mir::types::Type::ByteString,
                     ),
                 ]));
             }
@@ -807,19 +812,19 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                            record_type.clone(),
                             mir::ir::Case::new(
                                 mir::ir::Variable::new("x"),
                                 vec![mir::ir::Alternative::new(
-                                    vec![record_type.clone().into()],
+                                    vec![record_type.into()],
                                     "y",
                                     mir::ir::Variable::new("y"),
                                 )],
                                 None,
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -827,9 +832,10 @@ mod tests {
             #[test]
             fn compile_multiple_types() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::Variant,
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![mir::ir::Alternative::new(
@@ -839,7 +845,6 @@ mod tests {
                             )],
                             None,
                         ),
-                        mir::types::Type::Variant,
                     ),
                 ]));
             }
@@ -858,11 +863,11 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                            mir::ir::Record::new(record_type.clone(), vec![]),
-                            record_type,
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type, vec![]),
                         )]),
                 );
             }
@@ -877,11 +882,11 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                            mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
-                            record_type,
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type, vec![42.0.into()]),
                         )]),
                 );
             }
@@ -899,14 +904,11 @@ mod tests {
                                 mir::types::Type::Boolean,
                             ]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                            mir::ir::Record::new(
-                                record_type.clone(),
-                                vec![42.0.into(), true.into()],
-                            ),
-                            record_type,
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type, vec![42.0.into(), true.into()]),
                         )]),
                 );
             }
@@ -921,11 +923,11 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                            mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
-                            record_type,
+                            record_type.clone(),
+                            mir::ir::Record::new(record_type, vec![42.0.into()]),
                         )]),
                 );
             }
@@ -944,11 +946,11 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],
-                            mir::ir::RecordField::new(record_type, 0, mir::ir::Variable::new("x")),
                             mir::types::Type::Number,
+                            mir::ir::RecordField::new(record_type, 0, mir::ir::Variable::new("x")),
                         )]),
                 );
             }
@@ -966,11 +968,11 @@ mod tests {
                                 mir::types::Type::Number,
                             ]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],
-                            mir::ir::RecordField::new(record_type, 1, mir::ir::Variable::new("x")),
                             mir::types::Type::Number,
+                            mir::ir::RecordField::new(record_type, 1, mir::ir::Variable::new("x")),
                         )]),
                 );
             }
@@ -989,15 +991,15 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![],
+                            record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(record_type.clone(), vec![]),
+                                mir::ir::Record::new(record_type, vec![]),
                                 vec![],
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -1012,15 +1014,15 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![],
+                            record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(record_type.clone(), vec![42.0.into()]),
+                                mir::ir::Record::new(record_type, vec![42.0.into()]),
                                 vec![mir::ir::RecordUpdateField::new(0, 0.0)],
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -1038,18 +1040,15 @@ mod tests {
                                 mir::types::Type::Boolean,
                             ]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![],
+                            record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
-                                mir::ir::Record::new(
-                                    record_type.clone(),
-                                    vec![42.0.into(), true.into()],
-                                ),
+                                mir::ir::Record::new(record_type, vec![42.0.into(), true.into()]),
                                 vec![mir::ir::RecordUpdateField::new(1, false)],
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -1068,13 +1067,14 @@ mod tests {
                                 mir::types::Type::None,
                             ]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![],
+                            record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(
-                                    record_type.clone(),
+                                    record_type,
                                     vec![42.0.into(), true.into(), mir::ir::Expression::None],
                                 ),
                                 vec![
@@ -1082,7 +1082,6 @@ mod tests {
                                     mir::ir::RecordUpdateField::new(2, mir::ir::Expression::None),
                                 ],
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -1101,13 +1100,14 @@ mod tests {
                                 mir::types::Type::None,
                             ]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![],
+                            record_type.clone(),
                             mir::ir::RecordUpdate::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(
-                                    record_type.clone(),
+                                    record_type,
                                     vec![42.0.into(), true.into(), mir::ir::Expression::None],
                                 ),
                                 vec![
@@ -1115,7 +1115,6 @@ mod tests {
                                     mir::ir::RecordUpdateField::new(1, false),
                                 ],
                             ),
-                            record_type,
                         )]),
                 );
             }
@@ -1127,11 +1126,11 @@ mod tests {
             #[test]
             fn compile_with_float_64() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Variant::new(mir::types::Type::Number, 42.0),
                         mir::types::Type::Variant,
+                        mir::ir::Variant::new(mir::types::Type::Number, 42.0),
                     ),
                 ]));
             }
@@ -1146,14 +1145,14 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],
+                            mir::types::Type::Variant,
                             mir::ir::Variant::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(record_type, vec![]),
                             ),
-                            mir::types::Type::Variant,
                         )]),
                 );
             }
@@ -1168,14 +1167,14 @@ mod tests {
                             "foo",
                             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
                         )])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],
+                            mir::types::Type::Variant,
                             mir::ir::Variant::new(
                                 record_type.clone(),
                                 mir::ir::Record::new(record_type, vec![42.0.into()]),
                             ),
-                            mir::types::Type::Variant,
                         )]),
                 );
             }
@@ -1185,14 +1184,14 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_definitions(vec![])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                            mir::types::Type::Variant,
                             mir::ir::Variant::new(
                                 mir::types::Type::ByteString,
                                 mir::ir::ByteString::new("foo"),
                             ),
-                            mir::types::Type::Variant,
                         )]),
                 );
             }
@@ -1204,11 +1203,11 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
-                        .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],
-                            mir::ir::Variant::new(record_type, mir::ir::Variable::new("x")),
                             mir::types::Type::Variant,
+                            mir::ir::Variant::new(record_type, mir::ir::Variable::new("x")),
                         )]),
                 );
             }
@@ -1220,15 +1219,16 @@ mod tests {
             #[test]
             fn compile_1_argument() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                        mir::ir::Variable::new("x"),
                         mir::types::Type::Number,
+                        mir::ir::Variable::new("x"),
                     ),
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                        mir::types::Type::Number,
                         mir::ir::Call::new(
                             mir::types::Function::new(
                                 vec![mir::types::Type::Number],
@@ -1237,7 +1237,6 @@ mod tests {
                             mir::ir::Variable::new("f"),
                             vec![42.0.into()],
                         ),
-                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -1245,18 +1244,19 @@ mod tests {
             #[test]
             fn compile_2_arguments() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![
                             mir::ir::Argument::new("x", mir::types::Type::Number),
                             mir::ir::Argument::new("y", mir::types::Type::Boolean),
                         ],
-                        mir::ir::Variable::new("x"),
                         mir::types::Type::Number,
+                        mir::ir::Variable::new("x"),
                     ),
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                        mir::types::Type::Number,
                         mir::ir::Call::new(
                             mir::types::Function::new(
                                 vec![mir::types::Type::Number, mir::types::Type::Boolean],
@@ -1265,7 +1265,6 @@ mod tests {
                             mir::ir::Variable::new("f"),
                             vec![42.0.into(), true.into()],
                         ),
-                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -1273,19 +1272,20 @@ mod tests {
             #[test]
             fn compile_3_arguments() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![
                             mir::ir::Argument::new("x", mir::types::Type::Number),
                             mir::ir::Argument::new("y", mir::types::Type::Boolean),
                             mir::ir::Argument::new("z", mir::types::Type::ByteString),
                         ],
-                        mir::ir::Variable::new("x"),
                         mir::types::Type::Number,
+                        mir::ir::Variable::new("x"),
                     ),
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                        mir::types::Type::Number,
                         mir::ir::Call::new(
                             mir::types::Function::new(
                                 vec![
@@ -1302,7 +1302,6 @@ mod tests {
                                 mir::ir::ByteString::new("foo").into(),
                             ],
                         ),
-                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -1310,30 +1309,31 @@ mod tests {
             #[test]
             fn compile_with_curried_function() {
                 compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                        mir::types::Function::new(
+                            vec![mir::types::Type::Number],
+                            mir::types::Type::Number,
+                        ),
                         mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::fake(
+                            mir::ir::FunctionDefinition::new(
                                 "g",
                                 vec![mir::ir::Argument::new("y", mir::types::Type::Number)],
+                                mir::types::Type::Number,
                                 mir::ir::ArithmeticOperation::new(
                                     mir::ir::ArithmeticOperator::Add,
                                     mir::ir::Variable::new("x"),
                                     mir::ir::Variable::new("y"),
                                 ),
-                                mir::types::Type::Number,
                             ),
                             mir::ir::Variable::new("g"),
                         ),
-                        mir::types::Function::new(
-                            vec![mir::types::Type::Number],
-                            mir::types::Type::Number,
-                        ),
                     ),
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                        mir::types::Type::Number,
                         mir::ir::Call::new(
                             mir::types::Function::new(
                                 vec![mir::types::Type::Number],
@@ -1352,7 +1352,6 @@ mod tests {
                             ),
                             vec![222.0.into()],
                         ),
-                        mir::types::Type::Number,
                     ),
                 ]));
             }
@@ -1361,11 +1360,11 @@ mod tests {
         #[test]
         fn compile_if() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
-                    mir::ir::If::new(true, 42.0, 42.0),
                     mir::types::Type::Number,
+                    mir::ir::If::new(true, 42.0, 42.0),
                 ),
             ]));
         }
@@ -1373,9 +1372,10 @@ mod tests {
         #[test]
         fn compile_try_operation() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                    mir::types::Type::Variant,
                     mir::ir::TryOperation::new(
                         mir::ir::Variable::new("x"),
                         "y",
@@ -1385,7 +1385,6 @@ mod tests {
                             mir::ir::Variable::new("y"),
                         ),
                     ),
-                    mir::types::Type::Variant,
                 ),
             ]));
         }
@@ -1397,18 +1396,19 @@ mod tests {
         #[test]
         fn clone_and_drop_strings() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![
                         mir::ir::Argument::new("x", mir::types::Type::ByteString),
                         mir::ir::Argument::new("y", mir::types::Type::ByteString),
                     ],
-                    mir::ir::Expression::Number(42.0),
                     mir::types::Type::Number,
+                    mir::ir::Expression::Number(42.0),
                 ),
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "g",
                     vec![mir::ir::Argument::new("x", mir::types::Type::ByteString)],
+                    mir::types::Type::Number,
                     mir::ir::Call::new(
                         mir::types::Function::new(
                             vec![mir::types::Type::ByteString, mir::types::Type::ByteString],
@@ -1420,7 +1420,6 @@ mod tests {
                             mir::ir::Variable::new("x").into(),
                         ],
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }
@@ -1433,9 +1432,10 @@ mod tests {
                         "a",
                         mir::types::RecordBody::new(vec![]),
                     )])
-                    .set_function_definitions(vec![mir::ir::FunctionDefinition::fake(
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
                         vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::ByteString,
                         mir::ir::Case::new(
                             mir::ir::Variable::new("x"),
                             vec![
@@ -1452,7 +1452,6 @@ mod tests {
                             ],
                             None,
                         ),
-                        mir::types::Type::ByteString,
                     )]),
             );
         }
@@ -1464,10 +1463,10 @@ mod tests {
         #[test]
         fn compile_global_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
-                    mir::ir::Expression::None,
                     mir::types::Type::None,
+                    mir::ir::Expression::None,
                 ),
             ]));
         }
@@ -1475,13 +1474,14 @@ mod tests {
         #[test]
         fn compile_local_thunk() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake_thunk(
+                mir::ir::FunctionDefinition::thunk(
                     "f",
+                    mir::types::Type::None,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake_thunk(
+                        mir::ir::FunctionDefinition::thunk(
                             "g",
-                            mir::ir::Expression::None,
                             mir::types::Type::None,
+                            mir::ir::Expression::None,
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::None),
@@ -1489,7 +1489,6 @@ mod tests {
                             vec![],
                         ),
                     ),
-                    mir::types::Type::None,
                 ),
             ]));
         }
@@ -1497,14 +1496,15 @@ mod tests {
         #[test]
         fn compile_local_thunk_with_environment() {
             compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                mir::ir::FunctionDefinition::fake(
+                mir::ir::FunctionDefinition::new(
                     "f",
                     vec![mir::ir::Argument::new("x", mir::types::Type::Number)],
+                    mir::types::Type::Number,
                     mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::fake_thunk(
+                        mir::ir::FunctionDefinition::thunk(
                             "g",
-                            mir::ir::Variable::new("x"),
                             mir::types::Type::Number,
+                            mir::ir::Variable::new("x"),
                         ),
                         mir::ir::Call::new(
                             mir::types::Function::new(vec![], mir::types::Type::Number),
@@ -1512,7 +1512,6 @@ mod tests {
                             vec![],
                         ),
                     ),
-                    mir::types::Type::Number,
                 ),
             ]));
         }

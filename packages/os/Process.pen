@@ -4,3 +4,8 @@ import 'Context'context { Context }
 Exit = \(ctx Context, code number) none {
   context'Inner(ctx).Exit(code)
 }
+
+# Run a command.
+Run = \(ctx Context, cmd string, args [string]) none | error {
+  context'Inner(ctx).RunCommand(cmd, args)
+}

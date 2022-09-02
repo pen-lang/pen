@@ -1,0 +1,10 @@
+import 'position { Position }
+
+type Field {
+  Width number
+  Height number
+}
+
+IsInside = \(f Field, p Position) boolean {
+  1 <= p.X & p.X <= f.Width & 1 <= p.Y & p.Y <= f.Height
+}

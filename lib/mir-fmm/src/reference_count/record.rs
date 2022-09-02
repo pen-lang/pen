@@ -39,6 +39,44 @@ pub fn compile_clone_function(
     Ok(())
 }
 
+pub fn compile_clone_unboxed_function(
+    context: &Context,
+    definition: &mir::ir::TypeDefinition,
+) -> Result<(), CompileError> {
+    let record_type = mir::types::Record::new(definition.name());
+    let fmm_record_type = type_::compile_unboxed_record(&record_type, context.types());
+
+    context.module_builder().define_function(
+        utilities::get_clone_unboxed_function_name(definition.name()),
+        vec![fmm::ir::Argument::new(
+            ARGUMENT_NAME,
+            fmm_record_type.clone(),
+        )],
+        fmm_record_type.clone(),
+        |builder| -> Result<_, CompileError> {
+            let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
+            Ok(builder.return_(fmm::build::record(
+                context.types()[record_type.name()]
+                    .fields()
+                    .iter()
+                    .enumerate()
+                    .map(|(index, type_)| {
+                        expression::clone(
+                            &builder,
+                            &record::get_unboxed_field(&builder, &record, index)?,
+                            type_,
+                            context.types(),
+                        )
+                    })
+                    .collect::<Result<_, _>>()?,
+            )))
+        },
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
+    )?;
+
+    Ok(())
+}
+
 fn clone_boxed(
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
@@ -46,28 +84,19 @@ fn clone_boxed(
     pointer::clone(builder, record)
 }
 
-fn clone_unboxed(
+pub fn clone_unboxed(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::record(
-        context.types()[record_type.name()]
-            .fields()
-            .iter()
-            .enumerate()
-            .map(|(index, type_)| {
-                expression::clone(
-                    builder,
-                    &record::get_unboxed_field(builder, record, index)?,
-                    type_,
-                    context.types(),
-                )
-            })
-            .collect::<Result<_, _>>()?,
-    )
-    .into())
+    Ok(builder.call(
+        fmm::build::variable(
+            utilities::get_clone_unboxed_function_name(record_type.name()),
+            utilities::compile_clone_unboxed_function_type(record_type, context.types()),
+        ),
+        vec![record.clone()],
+    )?)
 }
 
 pub fn compile_drop_function(
