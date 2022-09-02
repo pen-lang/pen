@@ -1,6 +1,6 @@
 import Core'String
 
-import 'Node { Attribute, Node, Tag }
+import 'Node { Attribute, Node }
 import 'validate
 
 import foreign "c" _pen_html_encode_attribute \(string) string
