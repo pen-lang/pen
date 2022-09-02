@@ -8,14 +8,8 @@ import Random'Context as Random
 import Random'Random
 
 import 'direction { Direction }
-# TODO Remove this.
-import 'entity'frog
-# TODO Remove this.
-import 'entity'snake
 import 'field { Field }
 import 'game { Game }
-# TODO Remove this.
-import 'position
 import 'render { Render }
 import 'usage { Usage }
 

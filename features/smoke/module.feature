@@ -1,0 +1,31 @@
+Feature: Modules
+  Background:
+    Given a file named "pen.json" with:
+    """json
+    {
+      "type": "library",
+      "dependencies": {}
+    }
+    """
+
+  Scenario: Compare a type imported indirectly
+    Given a file named "foo.pen" with:
+    """pen
+    type Foo {}
+    """
+    And a file named "bar.pen" with:
+    """pen
+    import 'foo { Foo }
+
+    type Bar {
+      xs [Foo]
+    }
+    """
+    And a file named "baz.pen" with:
+    """pen
+    import 'bar { Bar }
+
+    type Baz = Bar
+    """
+    When I successfully run `pen build`
+    Then the exit status should be 0
