@@ -45,7 +45,6 @@ Grow = \(s Snake) Snake {
 }
 
 Positions = \(s Snake) [Position] {
-  # TODO Use a list comprehension for filtering.
   [Position s.head, ...positions(s.positions, s.length)]
 }
 

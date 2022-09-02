@@ -1,4 +1,5 @@
 import Console'Print
+import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Process
@@ -16,6 +17,7 @@ import 'game { Game }
 # TODO Remove this.
 import 'position
 import 'render { Render }
+import 'usage { Usage }
 
 type input = [string | none | error]
 
@@ -95,7 +97,9 @@ step = \(ctx Context, g Game, input input) none | error {
 }
 
 render = \(ctx Context, g Game) none | error {
-  File'Write(ctx, File'StdOut(), Render(g))?
+  print(ctx, "\x1bc")?
+  printLines(ctx, Render(g))?
+  printLine(ctx, Usage())?
 
   none
 }
@@ -115,4 +119,18 @@ keys = \(ctx Context) [string | error] {
 
 frames = \(ctx Context) [none] {
   [none Time'Sleep(ctx, 1000 / snakeSpeed()), ...frames(ctx)]
+}
+
+printLines = \(ctx Context, ss [string]) none | error {
+  printLine(ctx, String'Join(ss, "\r\n"))?
+}
+
+printLine = \(ctx Context, s string) none | error {
+  print(ctx, String'Concatenate([string s, "\r\n"]))
+}
+
+print = \(ctx Context, s string) none | error {
+  File'Write(ctx, File'StdOut(), s)?
+
+  none
 }
