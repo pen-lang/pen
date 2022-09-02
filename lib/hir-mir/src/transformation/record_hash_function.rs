@@ -53,7 +53,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
                 external_type_definitions
                     .iter()
                     .copied()
-                    .map(compile_hash_function_declaration),
+                    .map(compile_function_declaration),
             )
             .collect(),
         module
@@ -63,7 +63,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
             .chain(
                 internal_type_definitions
                     .iter()
-                    .map(|definition| compile_hash_function_definition(context, definition))
+                    .map(|definition| compile_function_definition(context, definition))
                     .collect::<Result<Vec<_>, _>>()?,
             )
             .collect(),
@@ -71,7 +71,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
     ))
 }
 
-fn compile_hash_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
+fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
@@ -86,7 +86,7 @@ fn compile_hash_function_declaration(type_definition: &TypeDefinition) -> Functi
     )
 }
 
-fn compile_hash_function_definition(
+fn compile_function_definition(
     context: &CompileContext,
     type_definition: &TypeDefinition,
 ) -> Result<FunctionDefinition, CompileError> {

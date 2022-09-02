@@ -38,7 +38,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
                 external_type_definitions
                     .iter()
                     .copied()
-                    .map(compile_equal_function_declaration),
+                    .map(compile_function_declaration),
             )
             .collect(),
         module
@@ -49,14 +49,14 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
                 internal_type_definitions
                     .iter()
                     .copied()
-                    .map(compile_equal_function_definition),
+                    .map(compile_function_definition),
             )
             .collect(),
         module.position().clone(),
     ))
 }
 
-fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
+fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
@@ -71,7 +71,7 @@ fn compile_equal_function_declaration(type_definition: &TypeDefinition) -> Funct
     )
 }
 
-fn compile_equal_function_definition(type_definition: &TypeDefinition) -> FunctionDefinition {
+fn compile_function_definition(type_definition: &TypeDefinition) -> FunctionDefinition {
     let position = type_definition.position();
     let record_type = types::Record::new(type_definition.name(), position.clone());
 
