@@ -85,13 +85,19 @@ fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
         optional(between(
             sign("{"),
             sign("}"),
-            sep_end_by1(identifier(), sign(",")),
+            sep_end_by1(unqualified_name(), sign(",")),
         )),
     )
         .map(|((position, _, _), path, prefix, names)| {
             Import::new(path, prefix, names.unwrap_or_default(), position)
         })
         .expected("import statement")
+}
+
+fn unqualified_name<'a>() -> impl Parser<Stream<'a>, Output = UnqualifiedName> {
+    token(attempt((position(), identifier())))
+        .map(|(position, identifier)| UnqualifiedName::new(identifier, position))
+        .expected("unqualified name")
 }
 
 fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
@@ -1129,7 +1135,7 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into()],
+                    vec![UnqualifiedName::new("Foo", Position::fake())],
                     Position::fake()
                 ),
             );
@@ -1145,7 +1151,10 @@ mod tests {
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
-                    vec!["Foo".into(), "Bar".into()],
+                    vec![
+                        UnqualifiedName::new("Foo", Position::fake()),
+                        UnqualifiedName::new("Bar", Position::fake())
+                    ],
                     Position::fake()
                 ),
             );

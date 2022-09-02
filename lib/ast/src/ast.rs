@@ -39,6 +39,7 @@ mod type_alias;
 mod type_definition;
 mod unary_operation;
 mod unary_operator;
+mod unqualified_name;
 mod variable;
 
 pub use argument::*;
@@ -82,6 +83,7 @@ pub use type_alias::*;
 pub use type_definition::*;
 pub use unary_operation::*;
 pub use unary_operator::*;
+pub use unqualified_name::*;
 pub use variable::*;
 
 pub const IDENTIFIER_SEPARATOR: &str = "'";
