@@ -101,8 +101,8 @@ fn compile_import(context: &mut Context, import: &Import) -> Document {
                     import
                         .unqualified_names()
                         .iter()
-                        .cloned()
-                        .intersperse(", ".into()),
+                        .map(|name| name.name())
+                        .intersperse(", "),
                 ),
                 " }".into(),
             ])
@@ -972,7 +972,10 @@ mod tests {
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
-                        vec!["Baz".into(), "Blah".into()],
+                        vec![
+                            UnqualifiedName::new("Baz", Position::fake()),
+                            UnqualifiedName::new("Blah", Position::fake())
+                        ],
                         Position::fake()
                     )],
                     vec![],

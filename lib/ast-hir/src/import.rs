@@ -101,7 +101,7 @@ fn rename_variables(module: &ir::Module, imported_modules: &[ImportedModule]) ->
                         (
                             if module
                                 .unqualified_names()
-                                .contains(declaration.original_name())
+                                .contains_key(declaration.original_name())
                             {
                                 declaration.original_name().into()
                             } else {
@@ -136,7 +136,7 @@ fn rename_types(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir:
                 )
                 .map(|(original_name, name)| {
                     (
-                        if module.unqualified_names().contains(original_name) {
+                        if module.unqualified_names().contains_key(original_name) {
                             original_name.into()
                         } else {
                             name::qualify(module.prefix(), original_name)
@@ -625,7 +625,7 @@ mod tests {
                             )]
                         ),
                         "Bar",
-                        ["Bar".into()].into_iter().collect()
+                        [("Bar".into(), Position::fake())].into_iter().collect()
                     )],
                 ),
                 ir::Module::empty()
@@ -690,7 +690,7 @@ mod tests {
                             vec![]
                         ),
                         "Bar",
-                        ["Bar".into()].into_iter().collect()
+                        [("Bar".into(), Position::fake())].into_iter().collect()
                     )],
                 ),
                 ir::Module::empty()
@@ -766,7 +766,7 @@ mod tests {
                             vec![]
                         ),
                         "Bar",
-                        ["Bar".into()].into_iter().collect()
+                        [("Bar".into(), Position::fake())].into_iter().collect()
                     )],
                 ),
                 ir::Module::empty()
