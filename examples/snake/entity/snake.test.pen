@@ -1,7 +1,7 @@
 import Test'Assert
 
 import 'direction
-import 'entity'snake { Head, Tick, New, Move, Grow, IsCrashed }
+import 'entity'snake { Grow, Head, IsCrashed, Move, New, Tick }
 import 'field { Field }
 import 'position { Position }
 

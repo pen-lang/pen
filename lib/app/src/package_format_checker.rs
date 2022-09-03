@@ -1,7 +1,7 @@
 use crate::{
     error::ApplicationError,
     infra::{FilePath, Infrastructure},
-    module_finder, module_formatter,
+    module_finder, module_formatter, test_module_finder,
 };
 use std::error::Error;
 
@@ -11,7 +11,10 @@ pub fn check(
 ) -> Result<(), Box<dyn Error>> {
     let mut paths = vec![];
 
-    for path in module_finder::find(infrastructure, package_directory)? {
+    for path in module_finder::find(infrastructure, package_directory)?
+        .into_iter()
+        .chain(test_module_finder::find(infrastructure, package_directory)?)
+    {
         let source = infrastructure.file_system.read_to_string(&path)?;
         let path = infrastructure.file_path_displayer.display(&path);
 
