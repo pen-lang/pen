@@ -102,6 +102,7 @@ fn compile_import(context: &mut Context, import: &Import) -> Document {
                         .unqualified_names()
                         .iter()
                         .map(|name| name.name())
+                        .sorted()
                         .intersperse(", "),
                 ),
                 " }".into(),
