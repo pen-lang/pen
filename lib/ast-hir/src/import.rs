@@ -13,7 +13,7 @@ pub fn compile(
     imported_modules: &[ImportedModule],
     prelude_module_interfaces: &[interface::Module],
 ) -> ir::Module {
-    let module = rename_types(&module, imported_modules);
+    let module = rename_types(module, imported_modules);
     let module = rename_variables(&module, imported_modules);
 
     compile_imports(
