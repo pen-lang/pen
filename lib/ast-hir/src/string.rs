@@ -1,23 +1,24 @@
 use once_cell::sync::Lazy;
+use regex::bytes::{Captures, Regex};
 use std::str;
 
-static HEX_CHARACTER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
+static HEX_CHARACTER_REGEX: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
 
 pub fn compile(string: &str) -> Vec<u8> {
     HEX_CHARACTER_REGEX
         .replace_all(
-            &string
+            string
                 .replace("\\\\", "\\")
                 .replace("\\\"", "\"")
                 .replace("\\n", "\n")
                 .replace("\\r", "\r")
-                .replace("\\t", "\t"),
-            |captures: &regex::Captures| {
-                String::from_utf8(vec![u8::from_str_radix(&captures[1], 16).unwrap()]).unwrap()
+                .replace("\\t", "\t")
+                .as_bytes(),
+            |captures: &Captures| {
+                vec![u8::from_str_radix(str::from_utf8(&captures[1]).unwrap(), 16).unwrap()]
             },
         )
-        .to_string()
         .into()
 }
 
@@ -63,5 +64,10 @@ mod tests {
     #[test]
     fn compile_sequence_of_byte_escape() {
         assert_eq!(compile("\\x01\\x02\\x03"), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn compile_byte_escape_invalid_as_utf8() {
+        assert_eq!(compile("\\x80"), vec![0x80]);
     }
 }

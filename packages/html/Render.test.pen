@@ -1,6 +1,6 @@
 import Test'Assert
 
-import 'Node { Node, Attribute, Element }
+import 'Node { Attribute, Element, Node }
 import 'Render { Render }
 
 RenderElement = \() none | error {
