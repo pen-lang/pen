@@ -88,32 +88,35 @@ fn compile_imports(module: &ir::Module, module_interfaces: &[&interface::Module]
 }
 
 fn rename_variables(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir::Module {
-    variable_renamer::rename(
-        module,
-        &imported_modules
-            .iter()
-            .flat_map(|module| {
-                module
-                    .interface()
-                    .function_declarations()
-                    .iter()
-                    .map(|declaration| {
-                        (
-                            if module
-                                .unqualified_names()
-                                .contains_key(declaration.original_name())
-                            {
-                                declaration.original_name().into()
-                            } else {
-                                name::qualify(module.prefix(), declaration.original_name())
-                            },
-                            declaration.name().into(),
-                        )
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .collect(),
-    )
+    let mut names = imported_modules
+        .iter()
+        .flat_map(|module| {
+            module
+                .interface()
+                .function_declarations()
+                .iter()
+                .map(|declaration| {
+                    (
+                        if module
+                            .unqualified_names()
+                            .contains_key(declaration.original_name())
+                        {
+                            declaration.original_name().into()
+                        } else {
+                            name::qualify(module.prefix(), declaration.original_name())
+                        },
+                        declaration.name().into(),
+                    )
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<FnvHashMap<_, _>>();
+
+    for definition in module.function_definitions() {
+        names.remove(definition.original_name());
+    }
+
+    variable_renamer::rename(module, &names)
 }
 
 fn rename_types(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir::Module {
@@ -146,7 +149,7 @@ fn rename_types(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir:
                 })
                 .collect::<Vec<_>>()
         })
-        .collect::<FnvHashMap<String, String>>();
+        .collect::<FnvHashMap<_, String>>();
 
     for definition in module.type_definitions() {
         names.remove(definition.original_name());
@@ -202,42 +205,109 @@ mod tests {
         );
     }
 
-    #[test]
-    fn rename_variable() {
-        assert_eq!(
-            compile_module(
-                &ir::Module::empty().set_function_definitions(vec![ir::FunctionDefinition::fake(
+    mod function_definition {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn rename_variable() {
+            assert_eq!(
+                compile_module(
+                    &ir::Module::empty().set_function_definitions(vec![
+                        ir::FunctionDefinition::fake(
+                            "Foo",
+                            ir::Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                ir::Variable::new("Bar'Bar", Position::fake()),
+                                Position::fake(),
+                            ),
+                            true,
+                        )
+                    ]),
+                    &[ImportedModule::new(
+                        interface::Module::new(
+                            vec![],
+                            vec![],
+                            vec![interface::FunctionDeclaration::new(
+                                "RealBar",
+                                "Bar",
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            )]
+                        ),
+                        "Bar",
+                        Default::default(),
+                    )],
+                ),
+                ir::Module::empty()
+                    .set_function_declarations(vec![ir::FunctionDeclaration::new(
+                        "RealBar",
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )])
+                    .set_function_definitions(vec![ir::FunctionDefinition::fake(
+                        "Foo",
+                        ir::Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            ir::Variable::new("RealBar", Position::fake()),
+                            Position::fake(),
+                        ),
+                        true,
+                    )])
+            );
+        }
+
+        #[test]
+        fn do_not_rename_overridden_variable() {
+            let module =
+                ir::Module::empty().set_function_definitions(vec![ir::FunctionDefinition::new(
+                    "Foo.Foo",
                     "Foo",
                     ir::Lambda::new(
                         vec![],
                         types::None::new(Position::fake()),
-                        ir::Variable::new("Bar'Bar", Position::fake()),
+                        ir::Variable::new("Foo", Position::fake()),
                         Position::fake(),
                     ),
+                    None,
                     true,
-                )]),
-                &[ImportedModule::new(
-                    interface::Module::new(
-                        vec![],
-                        vec![],
-                        vec![interface::FunctionDeclaration::new(
-                            "RealBar",
-                            "Bar",
-                            types::Function::new(
-                                vec![],
-                                types::None::new(Position::fake()),
+                    Position::fake(),
+                )]);
+
+            assert_eq!(
+                compile_module(
+                    &module,
+                    &[ImportedModule::new(
+                        interface::Module::new(
+                            vec![],
+                            vec![],
+                            vec![interface::FunctionDeclaration::new(
+                                "Bar.Foo",
+                                "Foo",
+                                types::Function::new(
+                                    vec![],
+                                    types::None::new(Position::fake()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
-                            ),
-                            Position::fake()
-                        )]
-                    ),
-                    "Bar",
-                    Default::default(),
-                )],
-            ),
-            ir::Module::empty()
-                .set_function_declarations(vec![ir::FunctionDeclaration::new(
-                    "RealBar",
+                            )]
+                        ),
+                        "Bar",
+                        [("Foo".into(), Position::fake())].into_iter().collect(),
+                    )],
+                ),
+                module.set_function_declarations(vec![ir::FunctionDeclaration::new(
+                    "Bar.Foo",
                     types::Function::new(
                         vec![],
                         types::None::new(Position::fake()),
@@ -245,17 +315,8 @@ mod tests {
                     ),
                     Position::fake()
                 )])
-                .set_function_definitions(vec![ir::FunctionDefinition::fake(
-                    "Foo",
-                    ir::Lambda::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        ir::Variable::new("RealBar", Position::fake()),
-                        Position::fake(),
-                    ),
-                    true,
-                )])
-        );
+            );
+        }
     }
 
     mod type_definition {
@@ -479,7 +540,7 @@ mod tests {
                             vec![]
                         ),
                         "Bar",
-                        Default::default()
+                        [("Bar".into(), Position::fake())].into_iter().collect(),
                     )],
                 ),
                 module.set_type_definitions(
@@ -668,6 +729,59 @@ mod tests {
                     types::None::new(Position::fake()),
                     true,
                     true,
+                )])
+            );
+        }
+
+        #[test]
+        fn do_not_rename_overridden_type_alias() {
+            let module = ir::Module::empty().set_type_aliases(vec![
+                ir::TypeAlias::new(
+                    "Foo.Foo",
+                    "Foo",
+                    types::Reference::new("Bar", Position::fake()),
+                    false,
+                    false,
+                    Position::fake(),
+                ),
+                ir::TypeAlias::new(
+                    "Foo.Bar",
+                    "Bar",
+                    types::Reference::new("Baz", Position::fake()),
+                    false,
+                    false,
+                    Position::fake(),
+                ),
+            ]);
+
+            assert_eq!(
+                compile_module(
+                    &module,
+                    &[ImportedModule::new(
+                        interface::Module::new(
+                            vec![interface::TypeDefinition::new(
+                                "Bar.Bar",
+                                "Bar",
+                                vec![],
+                                false,
+                                true,
+                                Position::fake()
+                            )],
+                            vec![],
+                            vec![]
+                        ),
+                        "Bar",
+                        [("Bar".into(), Position::fake())].into_iter().collect(),
+                    )],
+                ),
+                module.set_type_definitions(vec![ir::TypeDefinition::new(
+                    "Bar.Bar",
+                    "Bar",
+                    vec![],
+                    false,
+                    true,
+                    true,
+                    Position::fake(),
                 )])
             );
         }
