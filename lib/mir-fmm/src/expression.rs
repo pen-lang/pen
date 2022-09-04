@@ -273,16 +273,25 @@ pub fn compile(
                 fmm::build::size_of(fmm::types::Primitive::PointerInteger),
             )?;
 
-            for operand in operands {
+            for operand in &operands {
                 let size = builder.load(fmm::build::record_address(operand.clone(), 0)?)?;
 
                 builder.memory_copy(
-                    fmm::build::record_address(operand, 1)?,
+                    fmm::build::record_address(operand.clone(), 1)?,
                     content_pointer.clone(),
                     size.clone(),
                 );
 
                 content_pointer = fmm::build::pointer_address(content_pointer, size)?;
+            }
+
+            for operand in operands {
+                reference_count::drop(
+                    builder,
+                    &operand,
+                    &mir::types::Type::ByteString,
+                    context.types(),
+                )?;
             }
 
             fmm::build::bit_cast(type_::compile_string(), pointer).into()
