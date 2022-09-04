@@ -289,8 +289,8 @@ fn transform_operation(
     match operation {
         Operation::Addition(operation) => AdditionOperation::new(
             operation.type_().cloned(),
-            operation.lhs().clone(),
-            operation.rhs().clone(),
+            transform_expression(operation.lhs(), transform),
+            transform_expression(operation.rhs(), transform),
             operation.position().clone(),
         )
         .into(),
