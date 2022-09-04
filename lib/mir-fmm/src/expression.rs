@@ -234,6 +234,7 @@ pub fn compile(
                 .into()
             }
         }
+        // TODO Reuse the first string's heap block.
         mir::ir::Expression::StringConcatenation(concatenation) => {
             let operands = concatenation
                 .operands()
