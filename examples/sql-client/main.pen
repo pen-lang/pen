@@ -18,10 +18,9 @@ main = \(ctx context) none {
     _ = File'Write(
       ctx.Os,
       File'StdErr(),
-      String'Concatenate(
-        [string if s = source(e) as string { s } else { "unknown error" }, "\n"],
-      ),
+      if s = source(e) as string { s } else { "unknown error" } + "\n",
     )
+
     Process'Exit(ctx.Os, 1)
   }
 }

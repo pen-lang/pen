@@ -120,7 +120,7 @@ printLines = \(ctx Context, ss [string]) none | error {
 }
 
 printLine = \(ctx Context, s string) none | error {
-  print(ctx, String'Concatenate([string s, "\r\n"]))
+  print(ctx, s + "\r\n")
 }
 
 print = \(ctx Context, s string) none | error {
