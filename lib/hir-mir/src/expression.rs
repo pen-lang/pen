@@ -652,7 +652,6 @@ fn compile_operation(
         },
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
             match operation.operator() {
-                ArithmeticOperator::Add => mir::ir::ArithmeticOperator::Add,
                 ArithmeticOperator::Subtract => mir::ir::ArithmeticOperator::Subtract,
                 ArithmeticOperator::Multiply => mir::ir::ArithmeticOperator::Multiply,
                 ArithmeticOperator::Divide => mir::ir::ArithmeticOperator::Divide,

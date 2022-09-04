@@ -1699,7 +1699,7 @@ mod tests {
                         vec![Argument::new("x", union_type.clone())],
                         union_type,
                         ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
+                            ArithmeticOperator::Subtract,
                             TryOperation::new(
                                 Some(types::Number::new(Position::fake()).into()),
                                 Variable::new("x", Position::fake()),
