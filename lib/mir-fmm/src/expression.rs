@@ -234,6 +234,9 @@ pub fn compile(
                 .into()
             }
         }
+        mir::ir::Expression::StringConcatenation(_) => {
+            todo!()
+        }
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }

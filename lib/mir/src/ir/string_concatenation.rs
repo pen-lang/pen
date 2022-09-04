@@ -3,23 +3,17 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct StringConcatenation {
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    operands: Arc<Vec<Expression>>,
 }
 
 impl StringConcatenation {
-    pub fn new(lhs: impl Into<Expression>, rhs: impl Into<Expression>) -> Self {
+    pub fn new(operands: Vec<Expression>) -> Self {
         Self {
-            lhs: Arc::new(lhs.into()),
-            rhs: Arc::new(rhs.into()),
+            operands: operands.into(),
         }
     }
 
-    pub fn lhs(&self) -> &Expression {
-        &self.lhs
-    }
-
-    pub fn rhs(&self) -> &Expression {
-        &self.rhs
+    pub fn operands(&self) -> &[Expression] {
+        &self.operands
     }
 }
