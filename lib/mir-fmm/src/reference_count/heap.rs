@@ -24,6 +24,24 @@ pub fn allocate(
     Ok(fmm::build::record_address(pointer, 1)?.into())
 }
 
+pub fn allocate_variadic(
+    builder: &fmm::build::InstructionBuilder,
+    length: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let pointer = builder.allocate_heap(fmm::build::arithmetic_operation(
+        fmm::ir::ArithmeticOperator::Add,
+        fmm::build::size_of(count::compile_type()),
+        length,
+    )?);
+
+    builder.store(
+        count::compile_unique(),
+        fmm::build::record_address(pointer.clone(), 0)?,
+    );
+
+    Ok(fmm::build::record_address(pointer, 1)?.into())
+}
+
 pub fn free(
     builder: &fmm::build::InstructionBuilder,
     pointer: impl Into<fmm::build::TypedExpression>,

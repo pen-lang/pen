@@ -234,7 +234,33 @@ pub fn compile(
                 .into()
             }
         }
-        mir::ir::Expression::StringConcatenation(_) => {
+        mir::ir::Expression::StringConcatenation(concatenation) => {
+            let operands = concatenation
+                .operands()
+                .iter()
+                .map(|operand| compile(operand, variables))
+                .collect::<Result<Vec<_>, _>>()?;
+            let mut length =
+                fmm::build::TypedExpression::from(fmm::ir::Primitive::PointerInteger(0));
+
+            for operand in operands {
+                length = fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    length,
+                    builder.load(fmm::build::record_address(operand, 0)?)?,
+                )?
+                .into();
+            }
+
+            let _pointer = reference_count::heap::allocate_variadic(
+                builder,
+                fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    fmm::build::size_of(fmm::types::Primitive::PointerInteger),
+                    length,
+                )?,
+            )?;
+
             todo!()
         }
         mir::ir::Expression::TryOperation(operation) => {
