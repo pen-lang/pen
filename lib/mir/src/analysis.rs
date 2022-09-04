@@ -1,5 +1,6 @@
 pub mod alpha_conversion;
 pub mod environment_inference;
+mod expression_conversion;
 pub mod free_variable;
 pub mod lambda_lifting;
 pub mod normalization;
