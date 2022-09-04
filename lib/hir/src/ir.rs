@@ -1,3 +1,4 @@
+mod addition_operation;
 mod argument;
 mod arithmetic_operation;
 mod boolean;
@@ -37,7 +38,6 @@ mod record_deconstruction;
 mod record_field;
 mod record_update;
 mod string;
-mod string_concatenation;
 mod thunk;
 mod try_operation;
 mod type_alias;
@@ -45,6 +45,7 @@ mod type_coercion;
 mod type_definition;
 mod variable;
 
+pub use addition_operation::*;
 pub use argument::*;
 pub use arithmetic_operation::*;
 pub use boolean::*;
@@ -84,7 +85,6 @@ pub use record_deconstruction::*;
 pub use record_field::*;
 pub use record_update::*;
 pub use string::*;
-pub use string_concatenation::*;
 pub use thunk::*;
 pub use try_operation::*;
 pub use type_alias::*;

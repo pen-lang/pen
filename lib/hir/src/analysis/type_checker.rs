@@ -454,14 +454,6 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
-        Expression::StringConcatenation(concatenation) => {
-            let type_ = types::ByteString::new(concatenation.position().clone()).into();
-
-            check_subsumption(&check_expression(concatenation.lhs(), variables)?, &type_)?;
-            check_subsumption(&check_expression(concatenation.rhs(), variables)?, &type_)?;
-
-            type_
-        }
         Expression::Thunk(thunk) => {
             let type_ = thunk
                 .type_()
@@ -554,6 +546,30 @@ fn check_operation(
     let check_subsumption = |lower: &_, upper| check_subsumption(lower, upper, context.types());
 
     Ok(match operation {
+        Operation::Addition(operation) => {
+            let type_ = operation
+                .type_()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?;
+            let number_type = types::Number::new(operation.position().clone()).into();
+            let string_type = types::ByteString::new(operation.position().clone()).into();
+
+            let lhs_type = check_expression(operation.lhs())?;
+            let rhs_type = check_expression(operation.rhs())?;
+
+            if type_equality_checker::check(type_, &number_type, &context.types())? {
+                check_subsumption(&lhs_type, &number_type)?;
+                check_subsumption(&rhs_type, &number_type)?;
+            } else if type_equality_checker::check(type_, &string_type, &context.types())? {
+                check_subsumption(&lhs_type, &string_type)?;
+                check_subsumption(&rhs_type, &string_type)?;
+            } else {
+                return Err(AnalysisError::InvalidAdditionOperand(
+                    operation.lhs().position().clone(),
+                ));
+            }
+
+            type_.clone()
+        }
         Operation::Arithmetic(operation) => {
             let number_type = types::Number::new(operation.position().clone()).into();
 
@@ -713,26 +729,6 @@ mod tests {
                 types::None::new(Position::fake()).into(),
             ))
         );
-    }
-
-    #[test]
-    fn check_string_concatenation() -> Result<(), AnalysisError> {
-        check_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::ByteString::new(Position::fake()),
-                    StringConcatenation::new(
-                        ByteString::new("", Position::fake()),
-                        ByteString::new("", Position::fake()),
-                        Position::fake(),
-                    ),
-                    Position::fake(),
-                ),
-                false,
-            )]),
-        )
     }
 
     #[test]
@@ -1396,6 +1392,74 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
+        fn check_addition_operation_with_numbers() {
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::Number::new(Position::fake()),
+                        AdditionOperation::new(
+                            Some(types::Number::new(Position::fake()).into()),
+                            Number::new(1.0, Position::fake()),
+                            Number::new(2.0, Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_addition_operation_with_strings() {
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::ByteString::new(Position::fake()),
+                        AdditionOperation::new(
+                            Some(types::ByteString::new(Position::fake()).into()),
+                            ByteString::new("", Position::fake()),
+                            ByteString::new("", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn check_addition_operation_with_nones() {
+            assert_eq!(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            AdditionOperation::new(
+                                Some(types::None::new(Position::fake()).into()),
+                                None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ]),),
+                Err(AnalysisError::InvalidAdditionOperand(Position::fake()))
+            );
+        }
+
+        #[test]
         fn check_arithmetic_operation() {
             check_module(&Module::empty().set_function_definitions(vec![
                 FunctionDefinition::fake(
@@ -1404,7 +1468,7 @@ mod tests {
                         vec![],
                         types::Number::new(Position::fake()),
                         ArithmeticOperation::new(
-                            ArithmeticOperator::Add,
+                            ArithmeticOperator::Subtract,
                             Number::new(0.0, Position::fake()),
                             Number::new(0.0, Position::fake()),
                             Position::fake(),

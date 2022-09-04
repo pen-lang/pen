@@ -357,6 +357,19 @@ fn infer_expression(
             .into()
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                let lhs = infer_expression(operation.lhs(), variables)?;
+
+                AdditionOperation::new(
+                    Some(type_extractor::extract_from_expression(
+                        context, &lhs, variables,
+                    )?),
+                    lhs,
+                    infer_expression(operation.rhs(), variables)?,
+                    operation.position().clone(),
+                )
+                .into()
+            }
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
                 infer_expression(operation.lhs(), variables)?,
@@ -475,12 +488,6 @@ fn infer_expression(
                 })
                 .collect::<Result<_, AnalysisError>>()?,
             update.position().clone(),
-        )
-        .into(),
-        Expression::StringConcatenation(concatenation) => StringConcatenation::new(
-            infer_expression(concatenation.lhs(), variables)?,
-            infer_expression(concatenation.rhs(), variables)?,
-            concatenation.position().clone(),
         )
         .into(),
         Expression::Thunk(thunk) => Thunk::new(

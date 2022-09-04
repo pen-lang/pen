@@ -98,6 +98,10 @@ fn validate_expression(
             validate_expression(context, comprehension.map(), None)?;
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
+            }
             Operation::Arithmetic(operation) => {
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;
@@ -149,10 +153,6 @@ fn validate_expression(
             for field in update.fields() {
                 validate(field.expression())?;
             }
-        }
-        Expression::StringConcatenation(concatenation) => {
-            validate(concatenation.lhs())?;
-            validate(concatenation.rhs())?;
         }
         Expression::Thunk(thunk) => {
             validate_expression(

@@ -401,6 +401,13 @@ fn transform_expression(
             .into()
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => AdditionOperation::new(
+                operation.type_().cloned(),
+                transform_expression(operation.lhs(), variables)?,
+                transform_expression(operation.rhs(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
                 transform_expression(operation.lhs(), variables)?,
@@ -471,12 +478,6 @@ fn transform_expression(
             transform_expression(update.record(), variables)?,
             transform_record_fields(update.fields(), update.type_(), variables, context)?,
             update.position().clone(),
-        )
-        .into(),
-        Expression::StringConcatenation(concatenation) => StringConcatenation::new(
-            transform_expression(concatenation.lhs(), variables)?,
-            transform_expression(concatenation.rhs(), variables)?,
-            concatenation.position().clone(),
         )
         .into(),
         Expression::Thunk(thunk) => Thunk::new(

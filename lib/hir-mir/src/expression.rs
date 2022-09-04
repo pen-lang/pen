@@ -184,9 +184,6 @@ pub fn compile(
         )
         .into(),
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
-        Expression::StringConcatenation(_) => {
-            todo!()
-        }
         Expression::Thunk(thunk) => {
             const THUNK_NAME: &str = "$thunk";
 
@@ -634,6 +631,9 @@ fn compile_operation(
     let compile = |expression| compile(context, expression);
 
     Ok(match operation {
+        Operation::Addition(_) => {
+            todo!()
+        }
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
             match operation.operator() {
                 ArithmeticOperator::Add => mir::ir::ArithmeticOperator::Add,

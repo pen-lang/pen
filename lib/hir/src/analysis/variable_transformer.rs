@@ -260,12 +260,6 @@ fn transform_expression(
             update.position().clone(),
         )
         .into(),
-        Expression::StringConcatenation(concatenation) => StringConcatenation::new(
-            concatenation.lhs().clone(),
-            concatenation.rhs().clone(),
-            concatenation.position().clone(),
-        )
-        .into(),
         Expression::Thunk(thunk) => Thunk::new(
             thunk.type_().cloned(),
             transform_expression(thunk.expression(), transform),
@@ -293,6 +287,13 @@ fn transform_operation(
     transform: &dyn Fn(&Variable) -> Expression,
 ) -> Operation {
     match operation {
+        Operation::Addition(operation) => AdditionOperation::new(
+            operation.type_().cloned(),
+            operation.lhs().clone(),
+            operation.rhs().clone(),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Arithmetic(operation) => ArithmeticOperation::new(
             operation.operator(),
             transform_expression(operation.lhs(), transform),
