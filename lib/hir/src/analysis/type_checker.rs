@@ -564,7 +564,7 @@ fn check_operation(
                 check_subsumption(&rhs_type, &string_type)?;
             } else {
                 return Err(AnalysisError::InvalidAdditionOperand(
-                    operation.lhs().position().clone(),
+                    type_.position().clone(),
                 ));
             }
 
