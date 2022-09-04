@@ -130,6 +130,10 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
                 visit_expression(field.expression());
             }
         }
+        Expression::StringConcatenation(concatenation) => {
+            visit_expression(concatenation.lhs());
+            visit_expression(concatenation.rhs());
+        }
         Expression::Thunk(thunk) => visit_expression(thunk.expression()),
         Expression::Boolean(_)
         | Expression::BuiltInFunction(_)

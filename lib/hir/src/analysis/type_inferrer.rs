@@ -477,6 +477,12 @@ fn infer_expression(
             update.position().clone(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => StringConcatenation::new(
+            infer_expression(concatenation.lhs(), variables)?,
+            infer_expression(concatenation.rhs(), variables)?,
+            concatenation.position().clone(),
+        )
+        .into(),
         Expression::Thunk(thunk) => Thunk::new(
             Some(type_extractor::extract_from_expression(
                 context,

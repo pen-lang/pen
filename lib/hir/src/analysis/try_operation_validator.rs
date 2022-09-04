@@ -150,6 +150,10 @@ fn validate_expression(
                 validate(field.expression())?;
             }
         }
+        Expression::StringConcatenation(concatenation) => {
+            validate(concatenation.lhs())?;
+            validate(concatenation.rhs())?;
+        }
         Expression::Thunk(thunk) => {
             validate_expression(
                 context,

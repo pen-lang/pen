@@ -473,6 +473,12 @@ fn transform_expression(
             update.position().clone(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => StringConcatenation::new(
+            transform_expression(concatenation.lhs(), variables)?,
+            transform_expression(concatenation.rhs(), variables)?,
+            concatenation.position().clone(),
+        )
+        .into(),
         Expression::Thunk(thunk) => Thunk::new(
             thunk.type_().cloned(),
             transform_and_coerce_expression(

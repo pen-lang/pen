@@ -235,6 +235,10 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
                 visit_expression(field.expression(), visit);
             }
         }
+        Expression::StringConcatenation(concatenation) => {
+            visit_expression(concatenation.lhs(), visit);
+            visit_expression(concatenation.rhs(), visit);
+        }
         Expression::Thunk(thunk) => {
             if let Some(type_) = thunk.type_() {
                 visit_type(type_, visit);

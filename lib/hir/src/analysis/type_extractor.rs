@@ -198,6 +198,9 @@ pub fn extract_from_expression(
         .clone(),
         Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::StringConcatenation(concatenation) => {
+            types::ByteString::new(concatenation.position().clone()).into()
+        }
         Expression::Thunk(thunk) => types::Function::new(
             vec![],
             thunk

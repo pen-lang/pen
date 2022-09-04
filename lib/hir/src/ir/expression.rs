@@ -4,7 +4,7 @@ use super::{
     record_construction::RecordConstruction, record_deconstruction::RecordDeconstruction,
     record_update::RecordUpdate, string::ByteString, type_coercion::TypeCoercion,
     variable::Variable, BuiltInFunction, Lambda, Let, ListComprehension, MapIterationComprehension,
-    Thunk,
+    StringConcatenation, Thunk,
 };
 use position::Position;
 
@@ -30,6 +30,7 @@ pub enum Expression {
     RecordDeconstruction(RecordDeconstruction),
     RecordUpdate(RecordUpdate),
     String(ByteString),
+    StringConcatenation(StringConcatenation),
     Thunk(Thunk),
     TypeCoercion(TypeCoercion),
     Variable(Variable),
@@ -58,6 +59,7 @@ impl Expression {
             Self::RecordDeconstruction(deconstruction) => deconstruction.position(),
             Self::RecordUpdate(record_update) => record_update.position(),
             Self::String(string) => string.position(),
+            Self::StringConcatenation(concatenation) => concatenation.position(),
             Self::Thunk(thunk) => thunk.position(),
             Self::TypeCoercion(coercion) => coercion.position(),
             Self::Variable(variable) => variable.position(),
@@ -182,6 +184,12 @@ impl From<Number> for Expression {
 impl<T: Into<Operation>> From<T> for Expression {
     fn from(operation: T) -> Self {
         Self::Operation(operation.into())
+    }
+}
+
+impl From<StringConcatenation> for Expression {
+    fn from(concatenation: StringConcatenation) -> Self {
+        Self::StringConcatenation(concatenation)
     }
 }
 

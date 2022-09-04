@@ -454,6 +454,14 @@ fn check_expression(
             update.type_().clone()
         }
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
+        Expression::StringConcatenation(concatenation) => {
+            let type_ = types::ByteString::new(concatenation.position().clone()).into();
+
+            check_subsumption(&check_expression(concatenation.lhs(), variables)?, &type_)?;
+            check_subsumption(&check_expression(concatenation.rhs(), variables)?, &type_)?;
+
+            type_
+        }
         Expression::Thunk(thunk) => {
             let type_ = thunk
                 .type_()
@@ -705,6 +713,26 @@ mod tests {
                 types::None::new(Position::fake()).into(),
             ))
         );
+    }
+
+    #[test]
+    fn check_string_concatenation() -> Result<(), AnalysisError> {
+        check_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    StringConcatenation::new(
+                        ByteString::new("", Position::fake()),
+                        ByteString::new("", Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
     }
 
     #[test]
