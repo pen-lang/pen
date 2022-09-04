@@ -556,10 +556,10 @@ fn check_operation(
             let lhs_type = check_expression(operation.lhs())?;
             let rhs_type = check_expression(operation.rhs())?;
 
-            if type_equality_checker::check(type_, &number_type, &context.types())? {
+            if type_equality_checker::check(type_, &number_type, context.types())? {
                 check_subsumption(&lhs_type, &number_type)?;
                 check_subsumption(&rhs_type, &number_type)?;
-            } else if type_equality_checker::check(type_, &string_type, &context.types())? {
+            } else if type_equality_checker::check(type_, &string_type, context.types())? {
                 check_subsumption(&lhs_type, &string_type)?;
                 check_subsumption(&rhs_type, &string_type)?;
             } else {

@@ -225,7 +225,7 @@ fn check_expression(
         Expression::ByteString(_) => Type::ByteString,
         Expression::StringConcatenation(concatenation) => {
             for operand in concatenation.operands() {
-                check_equality(&check_expression(operand, &variables)?, &Type::ByteString)?;
+                check_equality(&check_expression(operand, variables)?, &Type::ByteString)?;
             }
 
             Type::ByteString
