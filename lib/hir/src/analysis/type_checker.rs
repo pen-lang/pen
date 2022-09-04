@@ -663,7 +663,6 @@ mod tests {
         test::{ForeignDeclarationFake, FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
     };
     use position::{test::PositionFake, Position};
-    use pretty_assertions::assert_eq;
 
     fn check_module(module: &Module) -> Result<(), AnalysisError> {
         check_types(
@@ -680,80 +679,126 @@ mod tests {
         check_module(&Module::empty())
     }
 
-    #[test]
-    fn check_definition() -> Result<(), AnalysisError> {
-        check_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::fake()),
-                    None::new(Position::fake()),
-                    Position::fake(),
+    mod function_definition {
+        use super::*;
+        use pretty_assertions::assert_eq;
+
+        #[test]
+        fn check() -> Result<(), AnalysisError> {
+            check_module(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+            )
+        }
+
+        #[test]
+        fn check_result_type() {
+            let function_type = types::Function::new(
+                vec![],
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                check_module(
+                    &Module::empty()
+                        .set_function_definitions(vec![FunctionDefinition::fake(
+                            "x",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Call::new(
+                                    Some(function_type.clone().into()),
+                                    Variable::new("y", Position::fake()),
+                                    vec![],
+                                    Position::fake()
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                        .set_foreign_declarations(vec![ForeignDeclaration::fake(
+                            "y",
+                            function_type,
+                        )])
                 ),
-                false,
-            )]),
-        )
-    }
+                Err(AnalysisError::TypesNotMatched(
+                    types::Number::new(Position::fake()).into(),
+                    types::None::new(Position::fake()).into(),
+                ))
+            );
+        }
 
-    #[test]
-    fn fail_to_check_function_result_type_of_foreign_declaration() {
-        let function_type = types::Function::new(
-            vec![],
-            types::Number::new(Position::fake()),
-            Position::fake(),
-        );
-
-        assert_eq!(
+        #[test]
+        fn check_overridden_function_declaration() -> Result<(), AnalysisError> {
             check_module(
                 &Module::empty()
+                    .set_function_declarations(vec![FunctionDeclaration::new(
+                        "f",
+                        types::Function::new(
+                            vec![types::Number::new(Position::fake()).into()],
+                            types::Number::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )])
                     .set_function_definitions(vec![FunctionDefinition::fake(
-                        "x",
+                        "f",
                         Lambda::new(
                             vec![],
                             types::None::new(Position::fake()),
                             Call::new(
-                                Some(function_type.clone().into()),
-                                Variable::new("y", Position::fake()),
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                Variable::new("f", Position::fake()),
                                 vec![],
-                                Position::fake()
+                                Position::fake(),
                             ),
                             Position::fake(),
                         ),
                         false,
-                    )])
-                    .set_foreign_declarations(vec![ForeignDeclaration::fake("y", function_type,)])
-            ),
-            Err(AnalysisError::TypesNotMatched(
-                types::Number::new(Position::fake()).into(),
-                types::None::new(Position::fake()).into(),
-            ))
-        );
-    }
+                    )]),
+            )
+        }
 
-    #[test]
-    fn check_thunk() {
-        check_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "x",
-                Lambda::new(
-                    vec![],
-                    types::Function::new(
+        #[test]
+        fn check_thunk() {
+            check_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
                         vec![],
-                        types::None::new(Position::fake()),
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                        Thunk::new(
+                            Some(types::None::new(Position::fake()).into()),
+                            None::new(Position::fake()),
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     ),
-                    Thunk::new(
-                        Some(types::None::new(Position::fake()).into()),
-                        None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    Position::fake(),
+                    false,
                 ),
-                false,
-            )]),
-        )
-        .unwrap();
+            ]))
+            .unwrap();
+        }
     }
 
     mod lambda {
