@@ -184,6 +184,9 @@ pub fn compile(
         )
         .into(),
         Expression::String(string) => mir::ir::ByteString::new(string.value()).into(),
+        Expression::StringConcatenation(_) => {
+            todo!()
+        }
         Expression::Thunk(thunk) => {
             const THUNK_NAME: &str = "$thunk";
 
