@@ -15,9 +15,9 @@ dependencies = [
 
 [[package]]
 name = "aho-corasick"
-version = "0.7.18"
+version = "0.7.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
+checksum = "b4f55bd91a0978cbfd91c457a164bab8b4001c833b7f323132c0a4e1922dd44e"
 dependencies = [
  "memchr",
 ]
@@ -358,7 +358,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a601bfc2dd0f67440923aafa4be45d41870ab249"
+source = "git+https://github.com/raviqqe/fmm?branch=main#54274fd4bc3f7485c8e02b04616765fed16d46d8"
 dependencies = [
  "cached",
  "fnv",
@@ -371,7 +371,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a601bfc2dd0f67440923aafa4be45d41870ab249"
+source = "git+https://github.com/raviqqe/fmm?branch=main#54274fd4bc3f7485c8e02b04616765fed16d46d8"
 dependencies = [
  "fmm",
  "fnv",
@@ -381,7 +381,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#a601bfc2dd0f67440923aafa4be45d41870ab249"
+source = "git+https://github.com/raviqqe/fmm?branch=main#54274fd4bc3f7485c8e02b04616765fed16d46d8"
 dependencies = [
  "fmm",
  "fnv",
@@ -753,9 +753,9 @@ dependencies = [
 
 [[package]]
 name = "lock_api"
-version = "0.4.7"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "327fa5b6a6940e4699ec49a9beae1ea4845c6bab9314e4f84ac68742139d8c53"
+checksum = "9f80bf5aacaf25cbfc8210d1cfb718f2bf3b11c4c54e5afe36c236853a8ec390"
 dependencies = [
  "autocfg",
  "scopeguard",
@@ -1145,9 +1145,9 @@ checksum = "2fd0db749597d91ff862fd1d55ea87f7855a744a8425a64695b6fca237d1dad1"
 
 [[package]]
 name = "socket2"
-version = "0.4.6"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10c98bba371b9b22a71a9414e420f92ddeb2369239af08200816169d5e2dd7aa"
+checksum = "02e2d2db9033d13a1567121ddd7a095ee144db4e1ca1b1bda3419bc0da294ebd"
 dependencies = [
  "libc",
  "winapi",
@@ -1230,18 +1230,18 @@ checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
 
 [[package]]
 name = "thiserror"
-version = "1.0.32"
+version = "1.0.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5f6586b7f764adc0231f4c79be7b920e766bb2f3e51b3661cdb263828f19994"
+checksum = "8c1b05ca9d106ba7d2e31a9dab4a64e7be2cce415321966ea3132c49a656e252"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.32"
+version = "1.0.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12bafc5b54507e0149cdf1b145a5d80ab80a90bcd9275df43d4fff68460f6c21"
+checksum = "e8f2591983642de85c921015f3f070c665a197ed69e417af436115e3a1407487"
 dependencies = [
  "proc-macro2",
  "quote",
