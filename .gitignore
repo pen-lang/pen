@@ -5,6 +5,7 @@
 *.svg
 *.tar.*
 .pen
+assets
 dhat-*
 site
 target

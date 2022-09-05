@@ -1,31 +1,34 @@
-{% extends "base.html" %} 
-
-{% block extrahead %}
-<script defer data-domain="pen-lang.org" src="https://plausible.io/js/plausible.js"></script>
+{% extends "base.html" %} {% block extrahead %}
+<script
+  defer
+  data-domain="pen-lang.org"
+  src="https://plausible.io/js/plausible.js"
+></script>
 <script type="module">
-import hljs from '/highlight.js';
-import 'highlight.js/styles/github.css';
+  import hljs from "/assets/highlight/es/highlight.min.js";
+  import json from "/assets/highlight/es/languages/json.min.js";
 
-hljs.registerLanguage("pen", (hljs) => ({
-  name: "Pen",
-  keywords: {
-    keyword: "as else for foreign go if import in type",
-    built_in: "any boolean error none number string",
-    literal: "false none true",
-  },
-  contains: [
-    hljs.QUOTE_STRING_MODE,
-    hljs.C_NUMBER_MODE,
-    {
-      scope: "string",
-      begin: '"',
-      end: '"',
-      contains: [{ begin: "\\\\." }],
+  hljs.registerLanguage("json", json);
+  hljs.registerLanguage("pen", (hljs) => ({
+    name: "Pen",
+    keywords: {
+      keyword: "as else for foreign go if import in type",
+      built_in: "any boolean error none number string",
+      literal: "false none true",
     },
-    hljs.COMMENT("#", "$"),
-  ],
-}));
+    contains: [
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE,
+      {
+        scope: "string",
+        begin: '"',
+        end: '"',
+        contains: [{ begin: "\\\\." }],
+      },
+      hljs.COMMENT("#", "$"),
+    ],
+  }));
 
-hljs.initHighlightingOnLoad();
+  hljs.highlightAll();
 </script>
 {% endblock %}
