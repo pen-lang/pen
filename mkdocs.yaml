@@ -28,7 +28,10 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
-  - Home: README.md
+  - Home:
+      - Introduction: README.md
+      - Roadmap: roadmap.md
+      - The Zen: the-zen.md
   - Install: introduction/install.md
   - Getting started: introduction/getting-started.md
   - Guides:
@@ -89,5 +92,3 @@ nav:
           - Random: examples/standard-packages/random.md
           - Test: examples/standard-packages/test.md
       - Foreign Function Interface (FFI): examples/ffi.md
-  - Roadmap: roadmap.md
-  - The Zen: the-zen.md

@@ -7,15 +7,6 @@
 - Single solution for multiple problems
 - Steady value over volatile value
 
-## Language qualities
-
-In the order of priority,
-
-- Simplicity
-- Readability
-- Consistency
-- Writability
-
 ## References
 
 - [The Zen of Python](https://www.python.org/dev/peps/pep-0020/)
