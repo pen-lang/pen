@@ -8,8 +8,8 @@ theme:
   features:
     - navigation.instant
     - navigation.tabs
-  favicon: favicon.svg
-  logo: favicon.svg
+  favicon: icon.svg
+  logo: icon.svg
   palette:
     - scheme: default
       primary: blue grey

@@ -72,6 +72,6 @@ build_package_document \
 
 go run github.com/raviqqe/gherkin2markdown features docs/examples
 
-curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >docs/favicon.svg
+curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >docs/icon.svg
 
 mkdocs build
