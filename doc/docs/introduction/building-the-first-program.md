@@ -1,8 +1,4 @@
-# Getting started
-
-## Install
-
-See [Install](install.md).
+# Building the first program
 
 ## Creating a package
 
