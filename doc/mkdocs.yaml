@@ -8,7 +8,6 @@ theme:
   name: material
   custom_dir: theme
   features:
-    - navigation.instant
     - navigation.tabs
   favicon: icon.svg
   logo: icon.svg
