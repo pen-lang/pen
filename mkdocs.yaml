@@ -25,7 +25,6 @@ theme:
         name: Switch to light mode
 markdown_extensions:
   - pymdownx.highlight
-  - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
