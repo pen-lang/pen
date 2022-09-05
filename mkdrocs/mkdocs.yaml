@@ -6,12 +6,15 @@ theme:
   name: material
   features:
     - navigation.instant
+    - navigation.tabs
   palette:
     - scheme: default
+      primary: brown
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
+      primary: brown
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -29,6 +32,10 @@ nav:
       - Testing: guides/testing.md
       - Concurrency and parallelism: guides/concurrency-and-parallelism.md
       - Coding style: guides/coding-style.md
+      - Advanced features:
+          - Cross compile: advanced-features/cross-compile.md
+          - Foreign Function Interface (FFI): advanced-features/ffi.md
+          - Writing system packages: advanced-features/writing-system-packages.md
   - References:
       - Language:
           - Syntax: references/language/syntax.md
@@ -76,9 +83,5 @@ nav:
           - Random: examples/standard-packages/random.md
           - Test: examples/standard-packages/test.md
       - Foreign Function Interface (FFI): examples/ffi.md
-  - Advanced features:
-      - Cross compile: advanced-features/cross-compile.md
-      - Foreign Function Interface (FFI): advanced-features/ffi.md
-      - Writing system packages: advanced-features/writing-system-packages.md
   - Roadmap: roadmap.md
   - The Zen: the-zen.md
