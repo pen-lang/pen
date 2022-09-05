@@ -6,6 +6,7 @@ edit_uri: edit/main/docs/
 strict: true
 theme:
   name: material
+  custom_dir: theme
   features:
     - navigation.instant
     - navigation.tabs
@@ -25,8 +26,6 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 markdown_extensions:
-  - pymdownx.highlight
-  - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
