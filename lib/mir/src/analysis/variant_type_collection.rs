@@ -61,6 +61,11 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
                     .flat_map(|field| collect_from_expression(field.expression())),
             )
             .collect(),
+        Expression::StringConcatenation(concatenation) => concatenation
+            .operands()
+            .iter()
+            .flat_map(collect_from_expression)
+            .collect(),
         Expression::TryOperation(operation) => [operation.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(operation.operand()))

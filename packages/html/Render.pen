@@ -24,7 +24,7 @@ Render = \(n Node) string | error {
     tag = if validate'Name(n.Tag) {
       n.Tag
     } else {
-      error(String'Concatenate([string "invalid tag: ", n.Tag]))
+      error("invalid tag: " + n.Tag)
     }?
 
     String'Concatenate(
@@ -48,7 +48,7 @@ renderAttributes = \(ats [Attribute]) [string] | error {
     k = if validate'Name(k) {
       k
     } else {
-      error(String'Concatenate([string "invalid attribute key: ", k]))
+      error("invalid attribute key: " + k)
     }?
 
     ats = renderAttributes(ats)?

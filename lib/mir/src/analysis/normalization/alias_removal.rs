@@ -111,6 +111,10 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
                 .collect(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => {
+            StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
+                .into()
+        }
         Expression::TryOperation(operation) => TryOperation::new(
             transform(operation.operand()),
             operation.name(),

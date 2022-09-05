@@ -223,6 +223,13 @@ fn check_expression(
             update.type_().clone().into()
         }
         Expression::ByteString(_) => Type::ByteString,
+        Expression::StringConcatenation(concatenation) => {
+            for operand in concatenation.operands() {
+                check_equality(&check_expression(operand, variables)?, &Type::ByteString)?;
+            }
+
+            Type::ByteString
+        }
         Expression::TryOperation(operation) => {
             let then_variables = variables
                 .clone()
@@ -1064,7 +1071,20 @@ mod tests {
         assert_eq!(check(&module), Ok(()));
     }
 
-    mod try_operations {
+    #[test]
+    fn check_string_concatenation() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f",
+            vec![Argument::new("x", Type::ByteString)],
+            Type::ByteString,
+            StringConcatenation::new(vec![Variable::new("x").into(), Variable::new("x").into()]),
+        )
+        .set_environment(vec![])]);
+
+        assert_eq!(check(&module), Ok(()));
+    }
+
+    mod try_operation {
         use super::*;
 
         #[test]

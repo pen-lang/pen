@@ -17,18 +17,12 @@ main = \(ctx context) none {
   _ = File'Write(
     ctx.Os,
     File'StdOut(),
-    String'Join(
-      [string
-        String'Join([string showItem(i()) for i in is], ", "),
-        "\n",
-      ],
-      "",
-    ),
+    String'Join([string showItem(i()) for i in is], ", ") + "\n",
   )
 
   none
 }
 
 showItem = \(i Item) string {
-  String'Concatenate([string "(", Number'String(i.Cost), ", ", Number'String(i.Value), ")"])
+  "(" + Number'String(i.Cost) + ", " + Number'String(i.Value) + ")"
 }

@@ -473,6 +473,20 @@ fn transform_expression(
                 moved_variables,
             )
         }
+        Expression::StringConcatenation(concatenation) => {
+            let mut operands = vec![];
+            let mut moved_variables = moved_variables.clone();
+
+            for operand in concatenation.operands() {
+                let (expression, variables) =
+                    transform_expression(operand, owned_variables, &moved_variables)?;
+
+                operands.push(expression);
+                moved_variables = variables;
+            }
+
+            (StringConcatenation::new(operands).into(), moved_variables)
+        }
         Expression::TryOperation(operation) => {
             let (then, then_moved_variables) =
                 transform_expression(operation.then(), owned_variables, &Default::default())?;

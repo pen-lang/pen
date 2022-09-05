@@ -331,3 +331,17 @@ Feature: Language
     """
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
+
+  Scenario: Concatenate strings
+    Given a file named "main.pen" with:
+    """pen
+    main = \(ctx context) none {
+      x = "foo"
+      y = x + x
+      z = y + y
+
+      none
+    }
+    """
+    When I successfully run `pen build`
+    Then I successfully run `check_memory_leak.sh ./app`

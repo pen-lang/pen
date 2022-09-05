@@ -631,9 +631,27 @@ fn compile_operation(
     let compile = |expression| compile(context, expression);
 
     Ok(match operation {
+        Operation::Addition(operation) => match operation
+            .type_()
+            .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?
+        {
+            Type::Number(_) => mir::ir::ArithmeticOperation::new(
+                mir::ir::ArithmeticOperator::Add,
+                compile(operation.lhs())?,
+                compile(operation.rhs())?,
+            )
+            .into(),
+            Type::String(_) => mir::ir::StringConcatenation::new(vec![
+                compile(operation.lhs())?,
+                compile(operation.rhs())?,
+            ])
+            .into(),
+            type_ => {
+                return Err(AnalysisError::InvalidAdditionOperand(type_.position().clone()).into());
+            }
+        },
         Operation::Arithmetic(operation) => mir::ir::ArithmeticOperation::new(
             match operation.operator() {
-                ArithmeticOperator::Add => mir::ir::ArithmeticOperator::Add,
                 ArithmeticOperator::Subtract => mir::ir::ArithmeticOperator::Subtract,
                 ArithmeticOperator::Multiply => mir::ir::ArithmeticOperator::Multiply,
                 ArithmeticOperator::Divide => mir::ir::ArithmeticOperator::Divide,

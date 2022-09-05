@@ -1,9 +1,8 @@
-import Core'String
 import Os'Context { Context }
 import Os'File
 
 Line = \(ctx Context, s string) none | error {
-  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
+  File'Write(ctx, File'StdOut(), s + "\n")?
 
   none
 }

@@ -3,7 +3,7 @@ use super::{
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
     record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
-    RecordUpdate, Synchronize,
+    RecordUpdate, StringConcatenation, Synchronize,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -25,6 +25,7 @@ pub enum Expression {
     Record(Record),
     RecordField(RecordField),
     RecordUpdate(RecordUpdate),
+    StringConcatenation(StringConcatenation),
     TryOperation(TryOperation),
     Variable(Variable),
     Variant(Variant),
@@ -123,6 +124,12 @@ impl From<RecordField> for Expression {
 impl From<RecordUpdate> for Expression {
     fn from(field: RecordUpdate) -> Self {
         Self::RecordUpdate(field)
+    }
+}
+
+impl From<StringConcatenation> for Expression {
+    fn from(concatenation: StringConcatenation) -> Self {
+        Self::StringConcatenation(concatenation)
     }
 }
 
