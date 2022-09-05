@@ -7,14 +7,14 @@ This page describes how to create a library in Pen. It consists of the following
 
 ## Creating a library package
 
-[Library packages](/references/language/packages.md#library-packages) are packages imported and used by other packages.
+[Library packages](/references/language/packages#library-packages) are packages imported and used by other packages.
 To create it, you run a `pen create --library` command with your library's name (e.g. `foo`) in your terminal.
 
 ```sh
 pen create --library foo
 ```
 
-Then, you should see a `foo` directory in your current directory. When you go there, you should see a `Foo.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
+Then, you should see a `foo` directory in your current directory. When you go there, you should see a `Foo.pen` source file and a `pen.json` file for [package configuration](/references/language/packages#package-configuration).
 
 `Foo.pen`:
 
@@ -50,6 +50,6 @@ Now, your package is ready for use by other packages!
 
 ## Next steps
 
-- [Building an executable](building-an-executable)
-- [Using a library](using-a-library)
+- [Building an executable](building-an-executable.md)
+- [Using a library](using-a-library.md)
 - [Language syntax](/references/language/syntax)

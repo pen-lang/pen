@@ -2,7 +2,7 @@
 
 ## Install
 
-See [Install](install).
+See [Install](install.md).
 
 ## Creating a package
 
@@ -12,7 +12,7 @@ To create your first package, run a `pen create` command with your package's nam
 pen create foo
 ```
 
-Then, you should see a directory named `foo` in your current directory. When you go into the directory, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages.md#package-configuration).
+Then, you should see a directory named `foo` in your current directory. When you go into the directory, you should see a `main.pen` source file and a `pen.json` file for [package configuration](/references/language/packages#package-configuration).
 
 ## Building a package
 
@@ -33,7 +33,7 @@ Now, you can start editing source files and build your own application in Pen!
 ## Next steps
 
 - To use other library packages, see [Using a library](/guides/using-a-library).
-- For more code examples, see [Examples](/examples).
+- For more code examples, see [Examples](/examples/types/number).
 - For the language syntax, see [Syntax](/references/language/syntax) and [Types](/references/language/types).
-- For usage of the standard packages, see [Standard packages](/references/standard-packages).
+- For usage of the standard packages, see [Standard packages](/references/standard-packages/core).
 - To add more modules in your package, see [Modules](/references/language/modules).

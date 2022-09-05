@@ -4,7 +4,7 @@ Built-in types and functions are ones implicitly defined in every module.
 
 ## Types
 
-See [Types](types).
+See [Types](types.md).
 
 ## Functions
 

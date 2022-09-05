@@ -10,7 +10,7 @@ Pen provides several built-in functions for concurrent and parallel programming.
 
 ### `go` function
 
-[The `go` built-in function](/references/language/built-ins.html#go) runs a given function concurrently, and possibly in parallel.
+[The `go` built-in function](/references/language/built-ins#go) runs a given function concurrently, and possibly in parallel.
 
 ```pen
 future = go(\() number {
@@ -24,7 +24,7 @@ The `go` function may or may not run a given function immediately depending on i
 
 ### `race` function
 
-[The `race` built-in function](/references/language/built-ins.html#race) takes multiple lists and merge them into one by evaluating elements in each list concurrently and possibly in parallel. The resulting list contains the elements in the original lists in order of their finished times of computation. Remember that elements in lists are evaluated lazily.
+[The `race` built-in function](/references/language/built-ins#race) takes multiple lists and merge them into one by evaluating elements in each list concurrently and possibly in parallel. The resulting list contains the elements in the original lists in order of their finished times of computation. Remember that elements in lists are evaluated lazily.
 
 ```pen
 zs = race([[number] xs, ys])

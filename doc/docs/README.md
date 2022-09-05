@@ -1,4 +1,4 @@
-<p align="center"><img width="300px" src="favicon.svg" /></p>
+<p align="center"><img width="300px" src="icon.svg" /></p>
 
 # Pen programming language
 
@@ -82,6 +82,6 @@ Pen aims to make large-scale software development efficient where many engineers
 
 Pen is dual-licensed under [MIT](https://github.com/pen-lang/pen/blob/main/LICENSE-MIT) and [Apache 2.0](https://github.com/pen-lang/pen/blob/main/LICENSE-APACHE).
 
-[error-handling]: /references/language/syntax.md#error-handling
-[syntax]: /references/language/syntax.md
-[system-packages]: /advanced-features/writing-system-packages.md
+[error-handling]: /references/language/syntax#error-handling
+[syntax]: /references/language/syntax
+[system-packages]: /advanced-features/writing-system-packages
