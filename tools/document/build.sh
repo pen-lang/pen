@@ -2,7 +2,7 @@
 
 set -ex
 
-document_directory=docs/references/standard-packages
+document_directory=doc/docs/references/standard-packages
 
 build_package_document() {
   (
@@ -70,8 +70,11 @@ build_package_document \
   Test \
   "This package provides test utilities."
 
-go run github.com/raviqqe/gherkin2markdown features docs/examples
+go run github.com/raviqqe/gherkin2markdown features doc/docs/examples
 
-curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >docs/icon.svg
+curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/docs/icon.svg
 
-mkdocs build
+(
+  cd doc
+  mkdocs build
+)
