@@ -75,11 +75,13 @@ nav:
           - examples/types/record.md
           - examples/types/union.md
           - examples/types/list.md
+          - examples/types/map.md
           - examples/types/error.md
           - examples/types/any.md
           - examples/types/polymorphism.md
       - Syntax:
           - examples/syntax/block.md
+          - examples/syntax/concurrency.md
       - Modules: examples/module.md
       - Packages: examples/package.md
       - Commands:
@@ -87,6 +89,7 @@ nav:
           - examples/commands/create.md
           - examples/commands/test.md
           - examples/commands/format.md
+          - examples/commands/document.md
       - Standard packages:
           - examples/standard-packages/core.md
           - examples/standard-packages/os.md
