@@ -1,4 +1,5 @@
 site_name: Pen programming language
+site_description: The programming language for scalable development
 site_url: https://pen-lang.org/
 repo_url: https://github.com/pen-lang/pen
 edit_uri: edit/main/docs/
