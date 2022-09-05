@@ -6,5 +6,6 @@
 *.tar.*
 .pen
 dhat-*
+site
 target
 tmp
