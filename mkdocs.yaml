@@ -13,14 +13,14 @@ theme:
   logo: icon.svg
   palette:
     - scheme: default
-      primary: blue grey
-      accent: deep orange
+      primary: black
+      accent: red
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
       primary: black
-      accent: deep orange
+      accent: red
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
