@@ -19,6 +19,7 @@ pub enum AnalysisError {
     ErrorTypeUndefined,
     FunctionExpected(Type),
     ImpossibleRecord(Position),
+    InvalidAdditionOperand(Position),
     InvalidTryOperation(Position),
     ListExpected(Type),
     MapExpected(Type),
@@ -108,6 +109,13 @@ impl Display for AnalysisError {
                 write!(
                     formatter,
                     "record construction dependent on itself\n{}",
+                    position
+                )
+            }
+            Self::InvalidAdditionOperand(position) => {
+                write!(
+                    formatter,
+                    "addition operands must be numbers or strings\n{}",
                     position
                 )
             }

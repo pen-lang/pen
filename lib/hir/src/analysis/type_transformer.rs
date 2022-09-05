@@ -337,6 +337,13 @@ fn transform_operation(operation: &Operation, transform: &impl Fn(&Type) -> Type
     let transform_expression = |expression| transform_expression(expression, transform);
 
     match operation {
+        Operation::Addition(operation) => AdditionOperation::new(
+            operation.type_().map(transform),
+            transform_expression(operation.lhs()),
+            transform_expression(operation.rhs()),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Arithmetic(operation) => ArithmeticOperation::new(
             operation.operator(),
             transform_expression(operation.lhs()),

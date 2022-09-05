@@ -131,6 +131,10 @@ pub fn transform(expression: &Expression, name: &str, free_variables: &[Argument
                 .collect(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => {
+            StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
+                .into()
+        }
         Expression::TryOperation(operation) => TryOperation::new(
             transform(operation.operand()),
             operation.name(),
