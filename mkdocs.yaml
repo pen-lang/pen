@@ -9,12 +9,12 @@ theme:
     - navigation.tabs
   palette:
     - scheme: default
-      primary: brown
+      primary: blue grey
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: brown
+      primary: black
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
