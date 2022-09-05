@@ -16,8 +16,10 @@
 </style>
 <script type="module">
   import hljs from "/assets/highlight/es/highlight.min.js";
+  import bash from "/assets/highlight/es/languages/bash.min.js";
   import json from "/assets/highlight/es/languages/json.min.js";
 
+  hljs.registerLanguage("sh", bash);
   hljs.registerLanguage("json", json);
   hljs.registerLanguage("pen", (hljs) => ({
     name: "Pen",
