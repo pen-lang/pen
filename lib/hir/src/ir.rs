@@ -1,3 +1,4 @@
+mod addition_operation;
 mod argument;
 mod arithmetic_operation;
 mod boolean;
@@ -44,6 +45,7 @@ mod type_coercion;
 mod type_definition;
 mod variable;
 
+pub use addition_operation::*;
 pub use argument::*;
 pub use arithmetic_operation::*;
 pub use boolean::*;

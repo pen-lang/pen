@@ -11,8 +11,8 @@ pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std:
             std::io::Error::new(std::io::ErrorKind::NotFound, "parent directory not found")
         })?,
     ));
-    let infrastructure = infrastructure::create(file_path_converter.clone(), &package_directory)?;
-    let package_directory = file_path_converter.convert_to_file_path(&package_directory)?;
+    let infrastructure = infrastructure::create(file_path_converter.clone(), package_directory)?;
+    let package_directory = file_path_converter.convert_to_file_path(package_directory)?;
 
     if library {
         app::package_creator::create_library(

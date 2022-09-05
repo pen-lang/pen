@@ -234,6 +234,69 @@ pub fn compile(
                 .into()
             }
         }
+        // TODO Reuse the first string's heap block.
+        mir::ir::Expression::StringConcatenation(concatenation) => {
+            let operands = concatenation
+                .operands()
+                .iter()
+                .map(|operand| compile(operand, variables))
+                .collect::<Result<Vec<_>, _>>()?;
+            let mut size = fmm::build::TypedExpression::from(fmm::ir::Primitive::PointerInteger(0));
+
+            for operand in &operands {
+                size = fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    size,
+                    builder.load(fmm::build::record_address(operand.clone(), 0)?)?,
+                )?
+                .into();
+            }
+
+            let pointer = reference_count::heap::allocate_variadic(
+                builder,
+                fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    fmm::build::size_of(fmm::types::Primitive::PointerInteger),
+                    size.clone(),
+                )?,
+            )?;
+
+            builder.store(
+                size,
+                fmm::build::bit_cast(
+                    fmm::types::Pointer::new(fmm::types::Primitive::PointerInteger),
+                    pointer.clone(),
+                ),
+            );
+
+            let mut content_pointer = fmm::build::pointer_address(
+                pointer.clone(),
+                fmm::build::size_of(fmm::types::Primitive::PointerInteger),
+            )?;
+
+            for operand in &operands {
+                let size = builder.load(fmm::build::record_address(operand.clone(), 0)?)?;
+
+                builder.memory_copy(
+                    fmm::build::record_address(operand.clone(), 1)?,
+                    content_pointer.clone(),
+                    size.clone(),
+                );
+
+                content_pointer = fmm::build::pointer_address(content_pointer, size)?;
+            }
+
+            for operand in operands {
+                reference_count::drop(
+                    builder,
+                    &operand,
+                    &mir::types::Type::ByteString,
+                    context.types(),
+                )?;
+            }
+
+            fmm::build::bit_cast(type_::compile_string(), pointer).into()
+        }
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }

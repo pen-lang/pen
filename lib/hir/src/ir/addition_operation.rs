@@ -1,39 +1,33 @@
 use super::expression::Expression;
+use crate::types::Type;
 use position::Position;
 use std::sync::Arc;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ArithmeticOperator {
-    Subtract,
-    Multiply,
-    Divide,
-}
-
 #[derive(Clone, Debug, PartialEq)]
-pub struct ArithmeticOperation {
-    operator: ArithmeticOperator,
+pub struct AdditionOperation {
+    type_: Option<Type>,
     lhs: Arc<Expression>,
     rhs: Arc<Expression>,
     position: Position,
 }
 
-impl ArithmeticOperation {
+impl AdditionOperation {
     pub fn new(
-        operator: ArithmeticOperator,
+        type_: Option<Type>,
         lhs: impl Into<Expression>,
         rhs: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
-            operator,
+            type_,
             lhs: lhs.into().into(),
             rhs: rhs.into().into(),
             position,
         }
     }
 
-    pub fn operator(&self) -> ArithmeticOperator {
-        self.operator
+    pub fn type_(&self) -> Option<&Type> {
+        self.type_.as_ref()
     }
 
     pub fn lhs(&self) -> &Expression {

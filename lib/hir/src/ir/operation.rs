@@ -1,12 +1,13 @@
 use super::{
     arithmetic_operation::ArithmeticOperation, boolean_operation::BooleanOperation,
     equality_operation::EqualityOperation, not_operation::NotOperation,
-    order_operation::OrderOperation, try_operation::TryOperation,
+    order_operation::OrderOperation, try_operation::TryOperation, AdditionOperation,
 };
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Operation {
+    Addition(AdditionOperation),
     Arithmetic(ArithmeticOperation),
     Boolean(BooleanOperation),
     Equality(EqualityOperation),
@@ -18,6 +19,7 @@ pub enum Operation {
 impl Operation {
     pub fn position(&self) -> &Position {
         match self {
+            Self::Addition(operation) => operation.position(),
             Self::Arithmetic(operation) => operation.position(),
             Self::Boolean(operation) => operation.position(),
             Self::Equality(operation) => operation.position(),
@@ -25,6 +27,12 @@ impl Operation {
             Self::Order(operation) => operation.position(),
             Self::Try(operation) => operation.position(),
         }
+    }
+}
+
+impl From<AdditionOperation> for Operation {
+    fn from(operation: AdditionOperation) -> Self {
+        Self::Addition(operation)
     }
 }
 

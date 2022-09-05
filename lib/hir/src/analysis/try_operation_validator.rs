@@ -98,6 +98,10 @@ fn validate_expression(
             validate_expression(context, comprehension.map(), None)?;
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                validate(operation.lhs())?;
+                validate(operation.rhs())?;
+            }
             Operation::Arithmetic(operation) => {
                 validate(operation.lhs())?;
                 validate(operation.rhs())?;

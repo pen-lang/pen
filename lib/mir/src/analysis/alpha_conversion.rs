@@ -219,6 +219,10 @@ fn transform_expression<'a>(
                 .collect(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => {
+            StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
+                .into()
+        }
         Expression::TryOperation(operation) => {
             let name = context.rename(operation.name());
 
