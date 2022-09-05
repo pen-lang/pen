@@ -177,6 +177,22 @@ g = \() boolean {
 </code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
+<h2 id="concatenate-strings"><a class="header" href="#concatenate-strings">Concatenate strings</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">f = \() string {
+  &quot;foo&quot; + &quot;bar&quot;
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="concatenate-3-strings"><a class="header" href="#concatenate-3-strings">Concatenate 3 strings</a></h2>
+<p><em>Given</em> a file named &quot;Foo.pen&quot; with:</p>
+<pre><code class="language-pen">f = \() string {
+  &quot;foo&quot; + &quot;bar&quot; + &quot;baz&quot;
+}
+</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
 
                     </main>
 
