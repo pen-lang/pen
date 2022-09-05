@@ -1,12 +1,15 @@
 site_name: Pen programming language
 site_url: https://pen-lang.org/
 repo_url: https://github.com/pen-lang/pen
+edit_uri: edit/main/docs/
 strict: true
 theme:
   name: material
   features:
     - navigation.instant
     - navigation.tabs
+  favicon: favicon.svg
+  logo: favicon.svg
   palette:
     - scheme: default
       primary: blue grey
