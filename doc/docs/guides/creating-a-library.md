@@ -50,6 +50,6 @@ Now, your package is ready for use by other packages!
 
 ## Next steps
 
-- [Building an executable](building-an-executable.md)
-- [Using a library](using-a-library.md)
-- [Language syntax](/references/language/syntax.md)
+- [Building an executable](building-an-executable)
+- [Using a library](using-a-library)
+- [Language syntax](/references/language/syntax)

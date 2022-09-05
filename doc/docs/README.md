@@ -42,13 +42,13 @@ Pen aims to make large-scale software development efficient where many engineers
 
 ### Minimal language
 
-- Its [syntax][syntax] and [type system](/references/language/types.md) are small, simple, and easy to learn.
+- Its [syntax][syntax] and [type system](/references/language/types) are small, simple, and easy to learn.
 - Yet, the language supports all the modern features.
 
 ### Concurrent/parallel computation
 
 - The language and its runtime enables thread-safe concurrent/parallel computation.
-- For more information, see [Concurrency and parallelism](/guides/concurrency-and-parallelism.md).
+- For more information, see [Concurrency and parallelism](/guides/concurrency-and-parallelism).
 
 ### Reliable testing
 
@@ -75,7 +75,7 @@ Pen aims to make large-scale software development efficient where many engineers
 - Pure functions by default
 - [Errors as values][error-handling]
 - Asynchronous I/O
-- [Cross compile](/advanced-features/cross-compile.md)
+- [Cross compile](/advanced-features/cross-compile)
 - [Rust](https://www.rust-lang.org/)/C Foreign Function Interface (FFI)
 
 ## License

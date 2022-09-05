@@ -2,7 +2,7 @@
 
 ## Install
 
-See [Install](install.md).
+See [Install](install).
 
 ## Creating a package
 
@@ -32,8 +32,8 @@ Now, you can start editing source files and build your own application in Pen!
 
 ## Next steps
 
-- To use other library packages, see [Using a library](/guides/using-a-library.md).
+- To use other library packages, see [Using a library](/guides/using-a-library).
 - For more code examples, see [Examples](/examples).
-- For the language syntax, see [Syntax](/references/language/syntax.md) and [Types](/references/language/types.md).
+- For the language syntax, see [Syntax](/references/language/syntax) and [Types](/references/language/types).
 - For usage of the standard packages, see [Standard packages](/references/standard-packages).
-- To add more modules in your package, see [Modules](/references/language/modules.md).
+- To add more modules in your package, see [Modules](/references/language/modules).

@@ -1,12 +1,12 @@
 # Packages
 
-Packages are sets of [modules](/references/language/modules.md). Like modules, packages can import other packages specifying them in [their configurations](#package-configuration).
+Packages are sets of [modules](/references/language/modules). Like modules, packages can import other packages specifying them in [their configurations](#package-configuration).
 
 ## What composes a package?
 
 The following entities compose packages.
 
-- Standard packages bundled in [installation](/introduction/install.md) of the language
+- Standard packages bundled in [installation](/introduction/install) of the language
 - Remote repositories managed by version control systems (VCS)
   - Currently, Pen supports only [Git](https://git-scm.com/) as a VCS.
 - Directories with [package configuration files](#package-configuration) on file systems
@@ -42,7 +42,7 @@ System packages contain functions and types that have side effects to provide sy
 
 Although they can be imported by library packages as well as application packages, then they are expected not to cause any side effects.
 
-If you want to write your own system packages, see [Writing system packages](/advanced-features/writing-system-packages.md).
+If you want to write your own system packages, see [Writing system packages](/advanced-features/writing-system-packages).
 
 ## Package configuration
 

@@ -1,10 +1,10 @@
 # Syntax
 
-This page describes syntax of Pen. You can compose programs building up those language constructs. See also [Types](types.md) about syntax for specific data types.
+This page describes syntax of Pen. You can compose programs building up those language constructs. See also [Types](types) about syntax for specific data types.
 
 ## Module
 
-Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules.md) about how modules themselves interact with each other.
+Modules are sets of type and function definitions. Syntactically, a module consists of [statements](#statements). See [Modules](modules) about how modules themselves interact with each other.
 
 ## Statements
 
@@ -14,7 +14,7 @@ Statements are constructs that declare functions and types in modules.
 
 It imports types and functions from another module from the same or another package.
 
-See [Modules](modules.md) for more details.
+See [Modules](modules) for more details.
 
 ```pen
 import Foo'Bar
@@ -24,7 +24,7 @@ import Foo'Bar
 
 It imports a function from a foreign language.
 
-See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi) for more details.
 
 ```pen
 import foreign "c" foo \(number, number) number
@@ -65,7 +65,7 @@ foo = \(x number, y number) number {
 
 It defines a function exported to foreign languages.
 
-See [Foreign Function Interface (FFI)](/advanced-features/ffi.md) for more details.
+See [Foreign Function Interface (FFI)](/advanced-features/ffi) for more details.
 
 ```pen
 foreign "c" foo = \(x number, y number) number {

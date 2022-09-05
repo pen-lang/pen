@@ -12,7 +12,7 @@ You might specify calling conventions of foreign functions in a format of string
 import foreign "c" foo \(number, number) number
 ```
 
-> Caveat: You can import foreign functions that might cause side effects **only in system packages**. See also [Writing system packages](writing-system-packages.md).
+> Caveat: You can import foreign functions that might cause side effects **only in system packages**. See also [Writing system packages](writing-system-packages).
 
 ## Exporting functions to foreign languages
 
