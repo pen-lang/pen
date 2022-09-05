@@ -10,7 +10,7 @@ Pen provides several built-in functions for concurrent and parallel programming.
 
 ### `go` function
 
-[The `go` built-in function](/references/language/built-ins#go) runs a given function concurrently, and possibly in parallel.
+[The `go` built-in function](../references/language/built-ins.md#go) runs a given function concurrently, and possibly in parallel.
 
 ```pen
 future = go(\() number {
@@ -20,11 +20,11 @@ future = go(\() number {
 
 The `go` function returns a function of the same type as the given argument. The returned function returns a resulting value of the function execution. In other languages, such functions returning values computed concurrently when they are ready are also known as [futures](https://doc.rust-lang.org/std/future/trait.Future.html) or [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
-The `go` function may or may not run a given function immediately depending on its implementation. For example, [the standard `Os` system package](/references/standard-packages/os) runs the given function in parallel if multiple CPU cores are available.
+The `go` function may or may not run a given function immediately depending on its implementation. For example, [the standard `Os` system package](../references/standard-packages/os.md) runs the given function in parallel if multiple CPU cores are available.
 
 ### `race` function
 
-[The `race` built-in function](/references/language/built-ins#race) takes multiple lists and merge them into one by evaluating elements in each list concurrently and possibly in parallel. The resulting list contains the elements in the original lists in order of their finished times of computation. Remember that elements in lists are evaluated lazily.
+[The `race` built-in function](../references/language/built-ins.md#race) takes multiple lists and merge them into one by evaluating elements in each list concurrently and possibly in parallel. The resulting list contains the elements in the original lists in order of their finished times of computation. Remember that elements in lists are evaluated lazily.
 
 ```pen
 zs = race([[number] xs, ys])

@@ -5,7 +5,7 @@ Using existing system packages covers most use cases in application development.
 - Define your own system interfaces of functions and types with side effects.
 - Link applications in arbitrary file formats.
 
-This page assumes that you have already read [Packages](/references/language/packages).
+This page assumes that you have already read [Packages](../references/language/packages.md).
 
 > Caveat: Providing bad system packages which do not conform to conventions can break the ecosystem of the language! In the worst cases, they might make applications malfunction. Please be careful to follow the conventions to keep applications maintainable and portable.
 

@@ -4,7 +4,7 @@ Using FFI, you can import or export functions in foreign languages, such as [Rus
 
 ## Importing functions in foreign languages
 
-You can import functions in foreign languages using [foreign import statements](/references/language/syntax#foreign-import-statement). The statements specify the foreign functions' calling convention, names and types.
+You can import functions in foreign languages using [foreign import statements](../references/language/syntax.md#foreign-import-statement). The statements specify the foreign functions' calling convention, names and types.
 
 You might specify calling conventions of foreign functions in a format of string literals after `import foreign` keywords optionally. Currently, only the C calling convention is supported as `"c"`. If the options are omitted, the functions are imported with the native calling convention of Pen.
 
@@ -16,7 +16,7 @@ import foreign "c" foo \(number, number) number
 
 ## Exporting functions to foreign languages
 
-You can export functions to foreign languages using [foreign function definitions](/references/language/syntax#foreign-function-definition), which have `foreign` keywords in front of normal function definitions.
+You can export functions to foreign languages using [foreign function definitions](../references/language/syntax.md#foreign-function-definition), which have `foreign` keywords in front of normal function definitions.
 
 You might specify calling conventions of exported foreign functions optionally after `foreign` keywords as well as [imported foreign functions](#importing-functions-in-foreign-languages).
 

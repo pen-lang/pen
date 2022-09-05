@@ -24,7 +24,7 @@ CheckFoo = \() none | error {
 
 ### The `Test` package
 
-[The `Test` standard package](/references/standard-packages/test) includes some utilities which helps you to write tests.
+[The `Test` standard package](../references/standard-packages/test.md) includes some utilities which helps you to write tests.
 
 ## Running tests
 
