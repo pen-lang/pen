@@ -81,6 +81,7 @@ nav:
           - examples/types/error.md
           - examples/types/any.md
           - examples/types/polymorphism.md
+          - examples/types/stream.md
       - Syntax:
           - examples/syntax/block.md
           - examples/syntax/concurrency.md
