@@ -2,6 +2,6 @@
 
 set -e
 
-$(dirname $0)/build_documents.sh
+$(dirname $0)/build.sh
 
 mkdocs serve

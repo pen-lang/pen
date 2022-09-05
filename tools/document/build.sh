@@ -14,7 +14,7 @@ build_package_document() {
   ) >$document_directory/$1.md
 }
 
-cd $(dirname $0)/..
+cd $(dirname $0)/../..
 
 tools/build.sh
 
