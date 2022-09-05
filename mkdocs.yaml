@@ -31,28 +31,28 @@ markdown_extensions:
 nav:
   - Home:
       - Introduction: README.md
-      - Roadmap: roadmap.md
-      - The Zen: the-zen.md
+      - roadmap.md
+      - the-zen.md
   - Install: introduction/install.md
   - Getting started: introduction/getting-started.md
   - Guides:
-      - Building an executable: guides/building-an-executable.md
-      - Creating a library: guides/creating-a-library.md
-      - Using a library: guides/using-a-library.md
-      - Testing: guides/testing.md
-      - Concurrency and parallelism: guides/concurrency-and-parallelism.md
-      - Coding style: guides/coding-style.md
+      - guides/building-an-executable.md
+      - guides/creating-a-library.md
+      - guides/using-a-library.md
+      - guides/testing.md
+      - guides/concurrency-and-parallelism.md
+      - guides/coding-style.md
       - Advanced features:
-          - Cross compile: advanced-features/cross-compile.md
-          - Foreign Function Interface (FFI): advanced-features/ffi.md
-          - Writing system packages: advanced-features/writing-system-packages.md
+          - advanced-features/cross-compile.md
+          - advanced-features/ffi.md
+          - advanced-features/writing-system-packages.md
   - References:
       - Language:
-          - Syntax: references/language/syntax.md
-          - Types: references/language/types.md
-          - Built-ins: references/language/built-ins.md
-          - Modules: references/language/modules.md
-          - Packages: references/language/packages.md
+          - references/language/syntax.md
+          - references/language/types.md
+          - references/language/built-ins.md
+          - references/language/modules.md
+          - references/language/packages.md
       - Command line tools: references/command-line-tools.md
       - Standard packages:
           - Core: references/standard-packages/core.md
@@ -67,29 +67,29 @@ nav:
           - Test: references/standard-packages/test.md
   - Examples:
       - Types:
-          - Number: examples/types/number.md
-          - Boolean: examples/types/boolean.md
-          - None: examples/types/none.md
-          - String: examples/types/string.md
-          - Function: examples/types/function.md
-          - Record: examples/types/record.md
-          - Union: examples/types/union.md
-          - List: examples/types/list.md
-          - Error: examples/types/error.md
-          - Any: examples/types/any.md
-          - Polymorphism: examples/types/polymorphism.md
+          - examples/types/number.md
+          - examples/types/boolean.md
+          - examples/types/none.md
+          - examples/types/string.md
+          - examples/types/function.md
+          - examples/types/record.md
+          - examples/types/union.md
+          - examples/types/list.md
+          - examples/types/error.md
+          - examples/types/any.md
+          - examples/types/polymorphism.md
       - Syntax:
-          - Block: examples/syntax/block.md
+          - examples/syntax/block.md
       - Modules: examples/module.md
       - Packages: examples/package.md
       - Commands:
-          - Building packages: examples/commands/build.md
-          - Creating packages: examples/commands/create.md
-          - Testing packages: examples/commands/test.md
-          - Formatting module files: examples/commands/format.md
+          - examples/commands/build.md
+          - examples/commands/create.md
+          - examples/commands/test.md
+          - examples/commands/format.md
       - Standard packages:
-          - Core: examples/standard-packages/core.md
-          - Os: examples/standard-packages/os.md
-          - Random: examples/standard-packages/random.md
-          - Test: examples/standard-packages/test.md
-      - Foreign Function Interface (FFI): examples/ffi.md
+          - examples/standard-packages/core.md
+          - examples/standard-packages/os.md
+          - examples/standard-packages/random.md
+          - examples/standard-packages/test.md
+      - examples/ffi.md
