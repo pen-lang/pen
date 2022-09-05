@@ -2,7 +2,7 @@
 
 set -ex
 
-document_directory=doc/src/references/standard-packages
+document_directory=docs/references/standard-packages
 
 build_package_document() {
   (
@@ -70,12 +70,8 @@ build_package_document \
   Test \
   "This package provides test utilities."
 
-go run github.com/raviqqe/gherkin2markdown features doc/src/examples
+go run github.com/raviqqe/gherkin2markdown features docs/examples
 
-curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/src/favicon.svg
+curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >assets/favicon.svg
 
-# spell-checker: disable-next-line
-cargo install mdbook-pagetoc
-
-cd doc
-mdbook build
+mkdocs build
