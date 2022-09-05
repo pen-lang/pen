@@ -125,6 +125,10 @@ fn transform_expression(
                 .collect(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => {
+            StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
+                .into()
+        }
         Expression::TryOperation(operation) => TryOperation::new(
             transform(operation.operand()),
             operation.name(),
