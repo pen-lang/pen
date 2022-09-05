@@ -5,7 +5,9 @@ set -e
 llvm_version=14
 
 brew update
-brew install jq llvm@$llvm_version mdbook ninja sccache
+brew install jq llvm@$llvm_version ninja sccache
+
+pip3 install mkdocs mkdocs-material
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 
