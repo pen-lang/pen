@@ -139,6 +139,50 @@ mod tests {
     }
 
     #[test]
+    fn compile_addition_operation_with_numbers() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(Position::fake()),
+                    AdditionOperation::new(
+                        Some(types::Number::new(Position::fake()).into()),
+                        Number::new(1.0, Position::fake()),
+                        Number::new(2.0, Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_addition_operation_with_strings() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    AdditionOperation::new(
+                        Some(types::ByteString::new(Position::fake()).into()),
+                        ByteString::new("foo", Position::fake()),
+                        ByteString::new("bar", Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
     fn compile_boolean() -> Result<(), CompileError> {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
