@@ -34,8 +34,9 @@ nav:
       - Introduction: README.md
       - roadmap.md
       - the-zen.md
-  - Install: introduction/install.md
-  - Getting started: introduction/getting-started.md
+  - Getting started:
+      - introduction/getting-started.md
+      - introduction/install.md
   - Guides:
       - guides/building-an-executable.md
       - guides/creating-a-library.md
@@ -54,7 +55,7 @@ nav:
           - references/language/built-ins.md
           - references/language/modules.md
           - references/language/packages.md
-      - Command line tools: references/command-line-tools.md
+      - references/command-line-tools.md
       - Standard packages:
           - Core: references/standard-packages/core.md
           - Flag: references/standard-packages/flag.md
