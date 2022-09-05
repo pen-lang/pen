@@ -361,8 +361,9 @@ fn infer_expression(
                 let lhs = infer_expression(operation.lhs(), variables)?;
 
                 AdditionOperation::new(
-                    Some(type_extractor::extract_from_expression(
-                        context, &lhs, variables,
+                    Some(type_canonicalizer::canonicalize(
+                        &type_extractor::extract_from_expression(context, &lhs, variables)?,
+                        context.types(),
                     )?),
                     lhs,
                     infer_expression(operation.rhs(), variables)?,
