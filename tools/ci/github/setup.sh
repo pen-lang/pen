@@ -7,8 +7,6 @@ llvm_version=14
 brew update
 brew install jq llvm@$llvm_version ninja sccache
 
-pip3 install mkdocs mkdocs-material
-
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 
 echo LLVM_SYS_${llvm_version}0_PREFIX=$llvm_prefix >>$GITHUB_ENV
