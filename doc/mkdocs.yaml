@@ -28,7 +28,7 @@ extra_css:
   - extra.css
 markdown_extensions:
   - mdx_truly_sane_lists
-  - pymdownx.superfences:
+  - pymdownx.superfences
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
