@@ -43,7 +43,7 @@ Pen is available via [Homebrew](https://brew.sh/).
 brew install pen-lang/pen/pen
 ```
 
-For more information, see [Install](https://pen-lang.org/introduction/install).
+For more information, see [Install][install].
 
 ## Examples
 
@@ -51,7 +51,7 @@ See [the `examples` directory](examples).
 
 ## Documentation
 
-- [Getting started](https://pen-lang.org/introduction/getting-started)
+- [Getting started][install]
 - Guides
   - [Building an executable](https://pen-lang.org/guides/building-an-executable)
   - [Creating a library](https://pen-lang.org/guides/creating-a-library)
@@ -205,5 +205,6 @@ Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 [error-handling]: https://pen-lang.org/references/language/syntax#error-handling
 [gc]: #reference-counting-gc
 [go]: https://go.dev/
+[install]: https://pen-lang.org/introduction/install
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
 [rust]: https://www.rust-lang.org/
