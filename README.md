@@ -43,7 +43,7 @@ Pen is available via [Homebrew](https://brew.sh/).
 brew install pen-lang/pen/pen
 ```
 
-For more information, see [Install](https://pen-lang.org/introduction/install.html).
+For more information, see [Install](https://pen-lang.org/introduction/install).
 
 ## Examples
 
@@ -51,14 +51,14 @@ See [the `examples` directory](examples).
 
 ## Documentation
 
-- [Getting started](https://pen-lang.org/introduction/getting-started.html)
+- [Getting started](https://pen-lang.org/introduction/getting-started)
 - Guides
-  - [Building an executable](https://pen-lang.org/guides/building-an-executable.html)
-  - [Creating a library](https://pen-lang.org/guides/creating-a-library.html)
-  - [Using a library](https://pen-lang.org/guides/using-a-library.html)
+  - [Building an executable](https://pen-lang.org/guides/building-an-executable)
+  - [Creating a library](https://pen-lang.org/guides/creating-a-library)
+  - [Using a library](https://pen-lang.org/guides/using-a-library)
 - Language reference
-  - [Syntax](https://pen-lang.org/references/language/syntax.html)
-  - [Types](https://pen-lang.org/references/language/types.html)
+  - [Syntax](https://pen-lang.org/references/language/syntax)
+  - [Types](https://pen-lang.org/references/language/types)
 
 ## Comparison with [Go][go]
 
@@ -137,7 +137,7 @@ Pen is under heavy development. Feel free to post [Issues](https://github.com/pe
 
 #### Installing from source
 
-See [Install](https://pen-lang.org/introduction/install.html#building-from-source).
+See [Install](https://pen-lang.org/introduction/install#building-from-source).
 
 #### Building crates
 
@@ -201,8 +201,8 @@ tools/format.sh
 
 Pen is dual-licensed under [MIT](LICENSE-MIT) and [Apache 2.0](LICENSE-APACHE).
 
-[concurrency]: https://pen-lang.org/guides/concurrency-and-parallelism.html
-[error-handling]: https://pen-lang.org/references/language/syntax.html#error-handling
+[concurrency]: https://pen-lang.org/guides/concurrency-and-parallelism
+[error-handling]: https://pen-lang.org/references/language/syntax#error-handling
 [gc]: #reference-counting-gc
 [go]: https://go.dev/
 [perceus]: https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/
