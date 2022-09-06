@@ -1,0 +1,100 @@
+site_name: Pen programming language
+site_description: The programming language for scalable development
+site_url: https://pen-lang.org/
+repo_url: https://github.com/pen-lang/pen
+edit_uri: edit/main/docs/
+strict: true
+theme:
+  name: material
+  custom_dir: theme
+  features:
+    - navigation.tabs
+  favicon: icon.svg
+  logo: icon.svg
+  palette:
+    - scheme: default
+      primary: black
+      accent: red
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: red
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+markdown_extensions:
+  - mdx_truly_sane_lists
+  - pymdownx.tasklist:
+      custom_checkbox: true
+nav:
+  - Home:
+      - Overview: README.md
+      - roadmap.md
+      - the-zen.md
+  - Getting started:
+      - introduction/install.md
+      - introduction/building-the-first-program.md
+  - Guides:
+      - guides/building-an-executable.md
+      - guides/creating-a-library.md
+      - guides/using-a-library.md
+      - guides/testing.md
+      - guides/concurrency-and-parallelism.md
+      - guides/coding-style.md
+      - Advanced features:
+          - advanced-features/cross-compile.md
+          - advanced-features/ffi.md
+          - advanced-features/writing-system-packages.md
+  - References:
+      - Language:
+          - references/language/syntax.md
+          - references/language/types.md
+          - references/language/built-ins.md
+          - references/language/modules.md
+          - references/language/packages.md
+      - references/command-line-tools.md
+      - Standard packages:
+          - Core: references/standard-packages/core.md
+          - Flag: references/standard-packages/flag.md
+          - Json: references/standard-packages/json.md
+          - Html: references/standard-packages/html.md
+          - Http: references/standard-packages/http.md
+          - Os: references/standard-packages/os.md
+          - Random: references/standard-packages/random.md
+          - Regex: references/standard-packages/regex.md
+          - Sql: references/standard-packages/sql.md
+          - Test: references/standard-packages/test.md
+  - Examples:
+      - Types:
+          - examples/types/number.md
+          - examples/types/boolean.md
+          - examples/types/none.md
+          - examples/types/string.md
+          - examples/types/function.md
+          - examples/types/record.md
+          - examples/types/union.md
+          - examples/types/list.md
+          - examples/types/map.md
+          - examples/types/error.md
+          - examples/types/any.md
+          - examples/types/polymorphism.md
+          - examples/types/stream.md
+      - Syntax:
+          - examples/syntax/block.md
+          - examples/syntax/concurrency.md
+      - Modules: examples/module.md
+      - Packages: examples/package.md
+      - Commands:
+          - examples/commands/build.md
+          - examples/commands/create.md
+          - examples/commands/test.md
+          - examples/commands/format.md
+          - examples/commands/document.md
+      - Standard packages:
+          - examples/standard-packages/core.md
+          - examples/standard-packages/os.md
+          - examples/standard-packages/random.md
+          - examples/standard-packages/test.md
+      - examples/ffi.md
