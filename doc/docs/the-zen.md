@@ -3,7 +3,7 @@
 - Simple is better than complex.
 - Explicit is better than implicit.
 - One way to do one thing
-- Single solution for multiple problems
+- One solution for many problems
 - Steady value over volatile value
 
 ## References
