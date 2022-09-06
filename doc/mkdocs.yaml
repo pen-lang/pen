@@ -29,7 +29,7 @@ markdown_extensions:
       custom_checkbox: true
 nav:
   - Home:
-      - Introduction: README.md
+      - Overview: README.md
       - roadmap.md
       - the-zen.md
   - Getting started:
