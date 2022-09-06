@@ -25,6 +25,7 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 markdown_extensions:
+  - mdx_truely_sane_list
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
