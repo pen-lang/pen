@@ -24,6 +24,8 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+extra_css:
+  - extra.css
 markdown_extensions:
   - mdx_truly_sane_lists
   - pymdownx.tasklist:
