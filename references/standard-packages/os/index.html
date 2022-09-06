@@ -1,0 +1,3623 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The programming language for scalable development">
+      
+      
+      
+        <link rel="canonical" href="https://pen-lang.org/references/standard-packages/os/">
+      
+      <link rel="icon" href="../../../icon.svg">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Os - Pen programming language</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+<script
+  defer
+  data-domain="pen-lang.org"
+  src="https://plausible.io/js/plausible.js"
+></script>
+<link
+  rel="stylesheet"
+  href="/assets/highlight/styles/github-dark-dimmed.min.css"
+/>
+<style>
+  code {
+    --md-code-fg-color: #adbac7;
+    --md-code-bg-color: #22272e;
+  }
+</style>
+<script type="module">
+  import hljs from "/assets/highlight/es/highlight.min.js";
+  import bash from "/assets/highlight/es/languages/bash.min.js";
+  import json from "/assets/highlight/es/languages/json.min.js";
+
+  hljs.registerLanguage("sh", bash);
+  hljs.registerLanguage("json", json);
+  hljs.registerLanguage("pen", (hljs) => ({
+    name: "Pen",
+    keywords: {
+      keyword: "as else for foreign if import in type",
+      built_in: "any boolean error go none number race string",
+      literal: "false none true",
+    },
+    contains: [
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE,
+      {
+        scope: "string",
+        begin: '"',
+        end: '"',
+        contains: [{ begin: "\\\\." }],
+      },
+      hljs.COMMENT("#", "$"),
+    ],
+  }));
+
+  hljs.highlightAll();
+</script>
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#os-package" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Pen programming language" class="md-header__button md-logo" aria-label="Pen programming language" data-md-component="logo">
+      
+  <img src="../../../icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pen programming language
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Os
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pen-lang/pen" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        Home
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../introduction/install/" class="md-tabs__link">
+        Getting started
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../guides/building-an-executable/" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../language/syntax/" class="md-tabs__link md-tabs__link--active">
+        References
+      </a>
+    </li>
+  
+
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../examples/types/number/" class="md-tabs__link">
+        Examples
+      </a>
+    </li>
+  
+
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Pen programming language" class="md-nav__button md-logo" aria-label="Pen programming language" data-md-component="logo">
+      
+  <img src="../../../icon.svg" alt="logo">
+
+    </a>
+    Pen programming language
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pen-lang/pen" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Home" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Home
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../roadmap/" class="md-nav__link">
+        Roadmap
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../the-zen/" class="md-nav__link">
+        The Zen
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Getting started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Getting started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../introduction/install/" class="md-nav__link">
+        Install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../introduction/building-the-first-program/" class="md-nav__link">
+        Building the first program
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/building-an-executable/" class="md-nav__link">
+        Building an executable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/creating-a-library/" class="md-nav__link">
+        Creating a library
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/using-a-library/" class="md-nav__link">
+        Using a library
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/testing/" class="md-nav__link">
+        Testing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/concurrency-and-parallelism/" class="md-nav__link">
+        Concurrency and parallelism
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/coding-style/" class="md-nav__link">
+        Coding style
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_7" type="checkbox" id="__nav_3_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7">
+          Advanced features
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Advanced features" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_7">
+          <span class="md-nav__icon md-icon"></span>
+          Advanced features
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/cross-compile/" class="md-nav__link">
+        Cross compile
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/ffi/" class="md-nav__link">
+        Foreign Function Interface (FFI)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/writing-system-packages/" class="md-nav__link">
+        Writing system packages
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          References
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="References" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          References
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1">
+          Language
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Language" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Language
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/syntax/" class="md-nav__link">
+        Syntax
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/types/" class="md-nav__link">
+        Types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/built-ins/" class="md-nav__link">
+        Built-ins
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/packages/" class="md-nav__link">
+        Packages
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../command-line-tools/" class="md-nav__link">
+        Command line tools
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_3" type="checkbox" id="__nav_4_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_3">
+          Standard packages
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Standard packages" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_3">
+          <span class="md-nav__icon md-icon"></span>
+          Standard packages
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/" class="md-nav__link">
+        Core
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flag/" class="md-nav__link">
+        Flag
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../json/" class="md-nav__link">
+        Json
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../html/" class="md-nav__link">
+        Html
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http/" class="md-nav__link">
+        Http
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Os
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Os
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oscontext-module" class="md-nav__link">
+    Os'Context module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Context module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    Context
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osdirectory-module" class="md-nav__link">
+    Os'Directory module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Directory module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read" class="md-nav__link">
+    Read
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    Create
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove" class="md-nav__link">
+    Remove
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osenvironment-module" class="md-nav__link">
+    Os'Environment module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Environment module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_2" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_2" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    Arguments
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variable" class="md-nav__link">
+    Variable
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfile-module" class="md-nav__link">
+    Os'File module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_3" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file" class="md-nav__link">
+    File
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_3" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stdin" class="md-nav__link">
+    StdIn
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdout" class="md-nav__link">
+    StdOut
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stderr" class="md-nav__link">
+    StdErr
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open" class="md-nav__link">
+    Open
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openwithoptions" class="md-nav__link">
+    OpenWithOptions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_1" class="md-nav__link">
+    Read
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readlimit" class="md-nav__link">
+    ReadLimit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write" class="md-nav__link">
+    Write
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copy" class="md-nav__link">
+    Copy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#move" class="md-nav__link">
+    Move
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_1" class="md-nav__link">
+    Remove
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfilemetadata-module" class="md-nav__link">
+    Os'File'Metadata module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File'Metadata module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_4" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata_1" class="md-nav__link">
+    Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_4" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfileopenoptions-module" class="md-nav__link">
+    Os'File'OpenOptions module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File'OpenOptions module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_5" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openoptions" class="md-nav__link">
+    OpenOptions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_5" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default" class="md-nav__link">
+    Default
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osprocess-module" class="md-nav__link">
+    Os'Process module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Process module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_6" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_6" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exit" class="md-nav__link">
+    Exit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcp-module" class="md-nav__link">
+    Os'Tcp module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_7" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_7" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bind" class="md-nav__link">
+    Bind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect" class="md-nav__link">
+    Connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accept" class="md-nav__link">
+    Accept
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive" class="md-nav__link">
+    Receive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send" class="md-nav__link">
+    Send
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcpacceptedstream-module" class="md-nav__link">
+    Os'Tcp'AcceptedStream module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'AcceptedStream module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_8" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acceptedstream" class="md-nav__link">
+    AcceptedStream
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_8" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcplistener-module" class="md-nav__link">
+    Os'Tcp'Listener module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'Listener module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_9" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listener" class="md-nav__link">
+    Listener
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_9" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcpstream-module" class="md-nav__link">
+    Os'Tcp'Stream module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'Stream module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_10" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stream" class="md-nav__link">
+    Stream
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_10" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostime-module" class="md-nav__link">
+    Os'Time module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Time module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_11" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_11" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#now" class="md-nav__link">
+    Now
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sleep" class="md-nav__link">
+    Sleep
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudp-module" class="md-nav__link">
+    Os'Udp module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_12" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_12" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bind_1" class="md-nav__link">
+    Bind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect_1" class="md-nav__link">
+    Connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive_1" class="md-nav__link">
+    Receive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receivefrom" class="md-nav__link">
+    ReceiveFrom
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send_1" class="md-nav__link">
+    Send
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sendto" class="md-nav__link">
+    SendTo
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudpdatagram-module" class="md-nav__link">
+    Os'Udp'Datagram module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp'Datagram module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_13" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#datagram" class="md-nav__link">
+    Datagram
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_13" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudpsocket-module" class="md-nav__link">
+    Os'Udp'Socket module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp'Socket module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_14" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#socket" class="md-nav__link">
+    Socket
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_14" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../random/" class="md-nav__link">
+        Random
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regex/" class="md-nav__link">
+        Regex
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sql/" class="md-nav__link">
+        Sql
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test/" class="md-nav__link">
+        Test
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1">
+          Types
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Types" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_1">
+          <span class="md-nav__icon md-icon"></span>
+          Types
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/number/" class="md-nav__link">
+        Number
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/boolean/" class="md-nav__link">
+        Boolean
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/none/" class="md-nav__link">
+        None
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/string/" class="md-nav__link">
+        String
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/function/" class="md-nav__link">
+        Function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/record/" class="md-nav__link">
+        Record
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/union/" class="md-nav__link">
+        Union
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/list/" class="md-nav__link">
+        List
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/error/" class="md-nav__link">
+        Error
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/any/" class="md-nav__link">
+        Any
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/polymorphism/" class="md-nav__link">
+        Polymorphism
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/stream/" class="md-nav__link">
+        List as stream
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Syntax
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Syntax" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Syntax
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/syntax/block/" class="md-nav__link">
+        Block
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/syntax/concurrency/" class="md-nav__link">
+        Concurrency
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/module/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/package/" class="md-nav__link">
+        Packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_5">
+          Commands
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Commands" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_5">
+          <span class="md-nav__icon md-icon"></span>
+          Commands
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/build/" class="md-nav__link">
+        Building packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/create/" class="md-nav__link">
+        Creating packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/test/" class="md-nav__link">
+        Testing packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/format/" class="md-nav__link">
+        Formatting module files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/document/" class="md-nav__link">
+        Generating documentation for a package
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_6" type="checkbox" id="__nav_5_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_6">
+          Standard packages
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Standard packages" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_6">
+          <span class="md-nav__icon md-icon"></span>
+          Standard packages
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/core/" class="md-nav__link">
+        Core
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/os/" class="md-nav__link">
+        Os
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/random/" class="md-nav__link">
+        Random
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/test/" class="md-nav__link">
+        Test
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/ffi/" class="md-nav__link">
+        FFI
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#oscontext-module" class="md-nav__link">
+    Os'Context module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Context module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    Context
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osdirectory-module" class="md-nav__link">
+    Os'Directory module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Directory module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read" class="md-nav__link">
+    Read
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create" class="md-nav__link">
+    Create
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove" class="md-nav__link">
+    Remove
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osenvironment-module" class="md-nav__link">
+    Os'Environment module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Environment module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_2" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_2" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    Arguments
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#variable" class="md-nav__link">
+    Variable
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfile-module" class="md-nav__link">
+    Os'File module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_3" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file" class="md-nav__link">
+    File
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_3" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stdin" class="md-nav__link">
+    StdIn
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stdout" class="md-nav__link">
+    StdOut
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stderr" class="md-nav__link">
+    StdErr
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#open" class="md-nav__link">
+    Open
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#openwithoptions" class="md-nav__link">
+    OpenWithOptions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_1" class="md-nav__link">
+    Read
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#readlimit" class="md-nav__link">
+    ReadLimit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write" class="md-nav__link">
+    Write
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copy" class="md-nav__link">
+    Copy
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#move" class="md-nav__link">
+    Move
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remove_1" class="md-nav__link">
+    Remove
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#metadata" class="md-nav__link">
+    Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfilemetadata-module" class="md-nav__link">
+    Os'File'Metadata module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File'Metadata module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_4" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadata_1" class="md-nav__link">
+    Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_4" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osfileopenoptions-module" class="md-nav__link">
+    Os'File'OpenOptions module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'File'OpenOptions module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_5" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#openoptions" class="md-nav__link">
+    OpenOptions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_5" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#default" class="md-nav__link">
+    Default
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osprocess-module" class="md-nav__link">
+    Os'Process module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Process module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_6" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_6" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exit" class="md-nav__link">
+    Exit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcp-module" class="md-nav__link">
+    Os'Tcp module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_7" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_7" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bind" class="md-nav__link">
+    Bind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect" class="md-nav__link">
+    Connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#accept" class="md-nav__link">
+    Accept
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive" class="md-nav__link">
+    Receive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send" class="md-nav__link">
+    Send
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcpacceptedstream-module" class="md-nav__link">
+    Os'Tcp'AcceptedStream module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'AcceptedStream module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_8" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acceptedstream" class="md-nav__link">
+    AcceptedStream
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_8" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcplistener-module" class="md-nav__link">
+    Os'Tcp'Listener module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'Listener module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_9" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#listener" class="md-nav__link">
+    Listener
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_9" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostcpstream-module" class="md-nav__link">
+    Os'Tcp'Stream module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Tcp'Stream module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_10" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stream" class="md-nav__link">
+    Stream
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_10" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ostime-module" class="md-nav__link">
+    Os'Time module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Time module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_11" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_11" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#now" class="md-nav__link">
+    Now
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sleep" class="md-nav__link">
+    Sleep
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudp-module" class="md-nav__link">
+    Os'Udp module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_12" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_12" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bind_1" class="md-nav__link">
+    Bind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect_1" class="md-nav__link">
+    Connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receive_1" class="md-nav__link">
+    Receive
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#receivefrom" class="md-nav__link">
+    ReceiveFrom
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#send_1" class="md-nav__link">
+    Send
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sendto" class="md-nav__link">
+    SendTo
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudpdatagram-module" class="md-nav__link">
+    Os'Udp'Datagram module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp'Datagram module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_13" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#datagram" class="md-nav__link">
+    Datagram
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_13" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#osudpsocket-module" class="md-nav__link">
+    Os'Udp'Socket module
+  </a>
+  
+    <nav class="md-nav" aria-label="Os'Udp'Socket module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_14" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#socket" class="md-nav__link">
+    Socket
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_14" class="md-nav__link">
+    Functions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/pen-lang/pen/edit/main/docs/references/standard-packages/os.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="os-package"><code>Os</code> package</h1>
+<p>This package provides an interface for operating systems.</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;system&quot;
+}
+</code></pre>
+<h2 id="install">Install</h2>
+<pre><code class="language-json">{
+  &quot;dependencies&quot;: {
+    &quot;Os&quot;: &quot;pen:///os&quot;
+  } 
+}
+</code></pre>
+<h2 id="oscontext-module"><code>Os'Context</code> module</h2>
+<h3 id="types">Types</h3>
+<h4 id="context"><code>Context</code></h4>
+<p>A context of an operating system.</p>
+<pre><code class="language-pen">type Context = context'Context
+</code></pre>
+<h3 id="functions">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="osdirectory-module"><code>Os'Directory</code> module</h2>
+<h3 id="types_1">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_1">Functions</h3>
+<h4 id="read"><code>Read</code></h4>
+<p>Read a directory and return file paths it contains.</p>
+<pre><code class="language-pen">\(ctx Context, path string) [string] | error
+</code></pre>
+<h4 id="create"><code>Create</code></h4>
+<p>Create a directory.</p>
+<pre><code class="language-pen">\(ctx Context, path string) none | error
+</code></pre>
+<h4 id="remove"><code>Remove</code></h4>
+<p>Remove a directory.</p>
+<pre><code class="language-pen">\(ctx Context, path string) none | error
+</code></pre>
+<h2 id="osenvironment-module"><code>Os'Environment</code> module</h2>
+<h3 id="types_2">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_2">Functions</h3>
+<h4 id="arguments"><code>Arguments</code></h4>
+<p>Get command line arguments.</p>
+<pre><code class="language-pen">\(ctx Context) [string]
+</code></pre>
+<h4 id="variable"><code>Variable</code></h4>
+<p>Get an environment variable.</p>
+<pre><code class="language-pen">\(ctx Context, name string) string | error
+</code></pre>
+<h2 id="osfile-module"><code>Os'File</code> module</h2>
+<h3 id="types_3">Types</h3>
+<h4 id="file"><code>File</code></h4>
+<p>A file on a file system.</p>
+<pre><code class="language-pen">type File {
+  # ...
+}
+</code></pre>
+<h3 id="functions_3">Functions</h3>
+<h4 id="stdin"><code>StdIn</code></h4>
+<p>A file of standard input.</p>
+<pre><code class="language-pen">\() File
+</code></pre>
+<h4 id="stdout"><code>StdOut</code></h4>
+<p>A file of standard output.</p>
+<pre><code class="language-pen">\() File
+</code></pre>
+<h4 id="stderr"><code>StdErr</code></h4>
+<p>A file of standard error.</p>
+<pre><code class="language-pen">\() File
+</code></pre>
+<h4 id="open"><code>Open</code></h4>
+<p>Open a file for read-only.</p>
+<pre><code class="language-pen">\(ctx Context, path string) File | error
+</code></pre>
+<h4 id="openwithoptions"><code>OpenWithOptions</code></h4>
+<p>Open a file with options.</p>
+<pre><code class="language-pen">\(ctx Context, path string, opt OpenOptions) File | error
+</code></pre>
+<h4 id="read_1"><code>Read</code></h4>
+<p>Read a file.</p>
+<pre><code class="language-pen">\(ctx Context, file File) string | error
+</code></pre>
+<h4 id="readlimit"><code>ReadLimit</code></h4>
+<p>Read a file until a size limit.</p>
+<pre><code class="language-pen">\(ctx Context, file File, limit number) string | error
+</code></pre>
+<h4 id="write"><code>Write</code></h4>
+<p>Write data to a file.</p>
+<pre><code class="language-pen">\(ctx Context, file File, data string) number | error
+</code></pre>
+<h4 id="copy"><code>Copy</code></h4>
+<p>Copy a file to another path.</p>
+<pre><code class="language-pen">\(ctx Context, src string, dest string) none | error
+</code></pre>
+<h4 id="move"><code>Move</code></h4>
+<p>Move a file to another path.</p>
+<pre><code class="language-pen">\(ctx Context, src string, dest string) none | error
+</code></pre>
+<h4 id="remove_1"><code>Remove</code></h4>
+<p>Remove a file.</p>
+<pre><code class="language-pen">\(ctx Context, path string) none | error
+</code></pre>
+<h4 id="metadata"><code>Metadata</code></h4>
+<p>Get metadata of a file at a path.</p>
+<pre><code class="language-pen">\(ctx Context, path string) Metadata | error
+</code></pre>
+<h2 id="osfilemetadata-module"><code>Os'File'Metadata</code> module</h2>
+<h3 id="types_4">Types</h3>
+<h4 id="metadata_1"><code>Metadata</code></h4>
+<p>File metadata</p>
+<pre><code class="language-pen">type Metadata {
+  Size number
+}
+</code></pre>
+<h3 id="functions_4">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="osfileopenoptions-module"><code>Os'File'OpenOptions</code> module</h2>
+<h3 id="types_5">Types</h3>
+<h4 id="openoptions"><code>OpenOptions</code></h4>
+<p>Options to open a file</p>
+<ul>
+<li><code>Append</code> allows appending data to the file.</li>
+<li><code>Create</code> creates a new file if the file doesn't exist or opens it otherwise.</li>
+<li><code>CreateNew</code> creates a new file. If the file already exists, it emits an error.</li>
+<li><code>Read</code> allows reading data from the file.</li>
+<li><code>Truncate</code> truncates the file to zero byte.</li>
+<li><code>Write</code> allows writing data to the file.</li>
+</ul>
+<pre><code class="language-pen">type OpenOptions {
+  Append boolean
+  Create boolean
+  CreateNew boolean
+  Read boolean
+  Truncate boolean
+  Write boolean
+}
+</code></pre>
+<h3 id="functions_5">Functions</h3>
+<h4 id="default"><code>Default</code></h4>
+<p>Get default options to open a file. They do not include any permission.</p>
+<pre><code class="language-pen">\() OpenOptions
+</code></pre>
+<h2 id="osprocess-module"><code>Os'Process</code> module</h2>
+<h3 id="types_6">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_6">Functions</h3>
+<h4 id="exit"><code>Exit</code></h4>
+<p>Exit a current process.</p>
+<pre><code class="language-pen">\(ctx Context, code number) none
+</code></pre>
+<h4 id="run"><code>Run</code></h4>
+<p>Run a command.</p>
+<pre><code class="language-pen">\(ctx Context, cmd string, args [string]) none | error
+</code></pre>
+<h2 id="ostcp-module"><code>Os'Tcp</code> module</h2>
+<h3 id="types_7">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_7">Functions</h3>
+<h4 id="bind"><code>Bind</code></h4>
+<p>Create a listener bound to a server address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Listener | error
+</code></pre>
+<h4 id="connect"><code>Connect</code></h4>
+<p>Create a stream connected to a peer address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Stream | error
+</code></pre>
+<h4 id="accept"><code>Accept</code></h4>
+<p>Accept a client connection and create its stream.</p>
+<pre><code class="language-pen">\(ctx Context, l Listener) AcceptedStream | error
+</code></pre>
+<h4 id="receive"><code>Receive</code></h4>
+<p>Receive data from a peer through a stream with a size limit in bytes.</p>
+<pre><code class="language-pen">\(ctx Context, s Stream, limit number) string | error
+</code></pre>
+<h4 id="send"><code>Send</code></h4>
+<p>Send data to a peer through a stream.</p>
+<pre><code class="language-pen">\(ctx Context, s Stream, data string) number | error
+</code></pre>
+<h2 id="ostcpacceptedstream-module"><code>Os'Tcp'AcceptedStream</code> module</h2>
+<h3 id="types_8">Types</h3>
+<h4 id="acceptedstream"><code>AcceptedStream</code></h4>
+<p>A TCP stream accepted on a server with a client address</p>
+<pre><code class="language-pen">type AcceptedStream {
+  Stream Stream
+  Address string
+}
+</code></pre>
+<h3 id="functions_8">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="ostcplistener-module"><code>Os'Tcp'Listener</code> module</h2>
+<h3 id="types_9">Types</h3>
+<h4 id="listener"><code>Listener</code></h4>
+<p>A TCP listener to listen for client connections</p>
+<pre><code class="language-pen">type Listener {
+  # ...
+}
+</code></pre>
+<h3 id="functions_9">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="ostcpstream-module"><code>Os'Tcp'Stream</code> module</h2>
+<h3 id="types_10">Types</h3>
+<h4 id="stream"><code>Stream</code></h4>
+<p>A TCP stream</p>
+<pre><code class="language-pen">type Stream {
+  # ...
+}
+</code></pre>
+<h3 id="functions_10">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="ostime-module"><code>Os'Time</code> module</h2>
+<h3 id="types_11">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_11">Functions</h3>
+<h4 id="now"><code>Now</code></h4>
+<p>Fetch a current system time in milliseconds.</p>
+<pre><code class="language-pen">\(ctx Context) number
+</code></pre>
+<h4 id="sleep"><code>Sleep</code></h4>
+<p>Pause a current execution context for a given amount of time.</p>
+<pre><code class="language-pen">\(ctx Context, milliseconds number) none
+</code></pre>
+<h2 id="osudp-module"><code>Os'Udp</code> module</h2>
+<h3 id="types_12">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_12">Functions</h3>
+<h4 id="bind_1"><code>Bind</code></h4>
+<p>Bind a socket with a server address.</p>
+<pre><code class="language-pen">\(ctx Context, address string) Socket | error
+</code></pre>
+<h4 id="connect_1"><code>Connect</code></h4>
+<p>Connect a socket to a peer address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, address string) none | error
+</code></pre>
+<h4 id="receive_1"><code>Receive</code></h4>
+<p>Receive a datagram from a connected address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket) string | error
+</code></pre>
+<h4 id="receivefrom"><code>ReceiveFrom</code></h4>
+<p>Receive a datagram from any address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket) Datagram | error
+</code></pre>
+<h4 id="send_1"><code>Send</code></h4>
+<p>Send a datagram to a connected address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, data string) number | error
+</code></pre>
+<h4 id="sendto"><code>SendTo</code></h4>
+<p>Send a datagram to a specified address.</p>
+<pre><code class="language-pen">\(ctx Context, s Socket, data string, address string) number | error
+</code></pre>
+<h2 id="osudpdatagram-module"><code>Os'Udp'Datagram</code> module</h2>
+<h3 id="types_13">Types</h3>
+<h4 id="datagram"><code>Datagram</code></h4>
+<p>UDP datagram</p>
+<pre><code class="language-pen">type Datagram {
+  Data string
+  Address string
+}
+</code></pre>
+<h3 id="functions_13">Functions</h3>
+<p>No functions are defined.</p>
+<h2 id="osudpsocket-module"><code>Os'Udp'Socket</code> module</h2>
+<h3 id="types_14">Types</h3>
+<h4 id="socket"><code>Socket</code></h4>
+<p>UDP socket</p>
+<pre><code class="language-pen">type Socket {
+  # ...
+}
+</code></pre>
+<h3 id="functions_14">Functions</h3>
+<p>No functions are defined.</p>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../http/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Http" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Http
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../random/" class="md-footer__link md-footer__link--next" aria-label="Next: Random" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Random
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs"], "search": "../../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>

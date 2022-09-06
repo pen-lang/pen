@@ -1,0 +1,3677 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The programming language for scalable development">
+      
+      
+      
+        <link rel="canonical" href="https://pen-lang.org/references/standard-packages/core/">
+      
+      <link rel="icon" href="../../../icon.svg">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.4.2">
+    
+    
+      
+        <title>Core - Pen programming language</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.69437709.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+<script
+  defer
+  data-domain="pen-lang.org"
+  src="https://plausible.io/js/plausible.js"
+></script>
+<link
+  rel="stylesheet"
+  href="/assets/highlight/styles/github-dark-dimmed.min.css"
+/>
+<style>
+  code {
+    --md-code-fg-color: #adbac7;
+    --md-code-bg-color: #22272e;
+  }
+</style>
+<script type="module">
+  import hljs from "/assets/highlight/es/highlight.min.js";
+  import bash from "/assets/highlight/es/languages/bash.min.js";
+  import json from "/assets/highlight/es/languages/json.min.js";
+
+  hljs.registerLanguage("sh", bash);
+  hljs.registerLanguage("json", json);
+  hljs.registerLanguage("pen", (hljs) => ({
+    name: "Pen",
+    keywords: {
+      keyword: "as else for foreign if import in type",
+      built_in: "any boolean error go none number race string",
+      literal: "false none true",
+    },
+    contains: [
+      hljs.QUOTE_STRING_MODE,
+      hljs.C_NUMBER_MODE,
+      {
+        scope: "string",
+        begin: '"',
+        end: '"',
+        contains: [{ begin: "\\\\." }],
+      },
+      hljs.COMMENT("#", "$"),
+    ],
+  }));
+
+  hljs.highlightAll();
+</script>
+
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="red">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#core-package" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Pen programming language" class="md-header__button md-logo" aria-label="Pen programming language" data-md-component="logo">
+      
+  <img src="../../../icon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Pen programming language
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Core
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="red"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/pen-lang/pen" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../.." class="md-tabs__link">
+        Home
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../introduction/install/" class="md-tabs__link">
+        Getting started
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../guides/building-an-executable/" class="md-tabs__link">
+        Guides
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../language/syntax/" class="md-tabs__link md-tabs__link--active">
+        References
+      </a>
+    </li>
+  
+
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../examples/types/number/" class="md-tabs__link">
+        Examples
+      </a>
+    </li>
+  
+
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Pen programming language" class="md-nav__button md-logo" aria-label="Pen programming language" data-md-component="logo">
+      
+  <img src="../../../icon.svg" alt="logo">
+
+    </a>
+    Pen programming language
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/pen-lang/pen" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Home
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Home" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Home
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../roadmap/" class="md-nav__link">
+        Roadmap
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../the-zen/" class="md-nav__link">
+        The Zen
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Getting started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Getting started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../introduction/install/" class="md-nav__link">
+        Install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../introduction/building-the-first-program/" class="md-nav__link">
+        Building the first program
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Guides
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Guides" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Guides
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/building-an-executable/" class="md-nav__link">
+        Building an executable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/creating-a-library/" class="md-nav__link">
+        Creating a library
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/using-a-library/" class="md-nav__link">
+        Using a library
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/testing/" class="md-nav__link">
+        Testing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/concurrency-and-parallelism/" class="md-nav__link">
+        Concurrency and parallelism
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../guides/coding-style/" class="md-nav__link">
+        Coding style
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_7" type="checkbox" id="__nav_3_7" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_7">
+          Advanced features
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Advanced features" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_7">
+          <span class="md-nav__icon md-icon"></span>
+          Advanced features
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/cross-compile/" class="md-nav__link">
+        Cross compile
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/ffi/" class="md-nav__link">
+        Foreign Function Interface (FFI)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../advanced-features/writing-system-packages/" class="md-nav__link">
+        Writing system packages
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          References
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="References" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          References
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1">
+          Language
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Language" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Language
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/syntax/" class="md-nav__link">
+        Syntax
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/types/" class="md-nav__link">
+        Types
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/built-ins/" class="md-nav__link">
+        Built-ins
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/modules/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../language/packages/" class="md-nav__link">
+        Packages
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../command-line-tools/" class="md-nav__link">
+        Command line tools
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_3" type="checkbox" id="__nav_4_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_3">
+          Standard packages
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Standard packages" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_3">
+          <span class="md-nav__icon md-icon"></span>
+          Standard packages
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Core
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Core
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corebit-module" class="md-nav__link">
+    Core'Bit module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Bit module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#and" class="md-nav__link">
+    And
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#or" class="md-nav__link">
+    Or
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#xor" class="md-nav__link">
+    Xor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    Not
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leftshift" class="md-nav__link">
+    LeftShift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rightshift" class="md-nav__link">
+    RightShift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tointeger64" class="md-nav__link">
+    ToInteger64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frominteger64" class="md-nav__link">
+    FromInteger64
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coreboolean-module" class="md-nav__link">
+    Core'Boolean module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Boolean module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#any" class="md-nav__link">
+    Any
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all" class="md-nav__link">
+    All
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corecharacter-module" class="md-nav__link">
+    Core'Character module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Character module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_2" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_2" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fromcodepoint" class="md-nav__link">
+    FromCodePoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tocodepoint" class="md-nav__link">
+    ToCodePoint
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corelist-module" class="md-nav__link">
+    Core'List module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'List module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_3" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_3" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first" class="md-nav__link">
+    First
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#last" class="md-nav__link">
+    Last
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tonumbers" class="md-nav__link">
+    ToNumbers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tostrings" class="md-nav__link">
+    ToStrings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tobooleans" class="md-nav__link">
+    ToBooleans
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corenumber-module" class="md-nav__link">
+    Core'Number module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Number module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_4" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_4" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#absolute" class="md-nav__link">
+    Absolute
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ceil" class="md-nav__link">
+    Ceil
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#epsilon" class="md-nav__link">
+    Epsilon
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exponential" class="md-nav__link">
+    Exponential
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#floor" class="md-nav__link">
+    Floor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fraction" class="md-nav__link">
+    Fraction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infinity" class="md-nav__link">
+    Infinity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isnan" class="md-nav__link">
+    IsNan
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum" class="md-nav__link">
+    Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum" class="md-nav__link">
+    Minimum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nan" class="md-nav__link">
+    Nan
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parse" class="md-nav__link">
+    Parse
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#power" class="md-nav__link">
+    Power
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range" class="md-nav__link">
+    Range
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remainder" class="md-nav__link">
+    Remainder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round" class="md-nav__link">
+    Round
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequence" class="md-nav__link">
+    Sequence
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#squareroot" class="md-nav__link">
+    SquareRoot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string" class="md-nav__link">
+    String
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum" class="md-nav__link">
+    Sum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truncate" class="md-nav__link">
+    Truncate
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestring-module" class="md-nav__link">
+    Core'String module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_5" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_5" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concatenate" class="md-nav__link">
+    Concatenate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringbyte-module" class="md-nav__link">
+    Core'String'Byte module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Byte module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_6" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_6" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#length" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringbyteview-module" class="md-nav__link">
+    Core'String'Byte'View module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Byte'View module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_7" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#view" class="md-nav__link">
+    View
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_7" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new" class="md-nav__link">
+    New
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewee" class="md-nav__link">
+    Viewee
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start" class="md-nav__link">
+    Start
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#end" class="md-nav__link">
+    End
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix_1" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length_1" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seek" class="md-nav__link">
+    Seek
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice_1" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tostring" class="md-nav__link">
+    ToString
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringutf8-module" class="md-nav__link">
+    Core'String'Utf8 module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Utf8 module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_8" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_8" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#characters" class="md-nav__link">
+    Characters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contains" class="md-nav__link">
+    Contains
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find" class="md-nav__link">
+    Find
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix_2" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hassuffix" class="md-nav__link">
+    HasSuffix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length_2" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace" class="md-nav__link">
+    Replace
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice_2" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    Split
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tolowercase" class="md-nav__link">
+    ToLowercase
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#touppercase" class="md-nav__link">
+    ToUppercase
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trim" class="md-nav__link">
+    Trim
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimend" class="md-nav__link">
+    TrimEnd
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimendmatches" class="md-nav__link">
+    TrimEndMatches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimmatches" class="md-nav__link">
+    TrimMatches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimstart" class="md-nav__link">
+    TrimStart
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimstartmatches" class="md-nav__link">
+    TrimStartMatches
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flag/" class="md-nav__link">
+        Flag
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../json/" class="md-nav__link">
+        Json
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../html/" class="md-nav__link">
+        Html
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http/" class="md-nav__link">
+        Http
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../os/" class="md-nav__link">
+        Os
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../random/" class="md-nav__link">
+        Random
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../regex/" class="md-nav__link">
+        Regex
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sql/" class="md-nav__link">
+        Sql
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test/" class="md-nav__link">
+        Test
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_1">
+          Types
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Types" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_1">
+          <span class="md-nav__icon md-icon"></span>
+          Types
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/number/" class="md-nav__link">
+        Number
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/boolean/" class="md-nav__link">
+        Boolean
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/none/" class="md-nav__link">
+        None
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/string/" class="md-nav__link">
+        String
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/function/" class="md-nav__link">
+        Function
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/record/" class="md-nav__link">
+        Record
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/union/" class="md-nav__link">
+        Union
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/list/" class="md-nav__link">
+        List
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/error/" class="md-nav__link">
+        Error
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/any/" class="md-nav__link">
+        Any
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/polymorphism/" class="md-nav__link">
+        Polymorphism
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/types/stream/" class="md-nav__link">
+        List as stream
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Syntax
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Syntax" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Syntax
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/syntax/block/" class="md-nav__link">
+        Block
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/syntax/concurrency/" class="md-nav__link">
+        Concurrency
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/module/" class="md-nav__link">
+        Modules
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/package/" class="md-nav__link">
+        Packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_5" type="checkbox" id="__nav_5_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_5">
+          Commands
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Commands" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_5">
+          <span class="md-nav__icon md-icon"></span>
+          Commands
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/build/" class="md-nav__link">
+        Building packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/create/" class="md-nav__link">
+        Creating packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/test/" class="md-nav__link">
+        Testing packages
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/format/" class="md-nav__link">
+        Formatting module files
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/commands/document/" class="md-nav__link">
+        Generating documentation for a package
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_6" type="checkbox" id="__nav_5_6" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_6">
+          Standard packages
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Standard packages" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_6">
+          <span class="md-nav__icon md-icon"></span>
+          Standard packages
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/core/" class="md-nav__link">
+        Core
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/os/" class="md-nav__link">
+        Os
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/random/" class="md-nav__link">
+        Random
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/standard-packages/test/" class="md-nav__link">
+        Test
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../examples/ffi/" class="md-nav__link">
+        FFI
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corebit-module" class="md-nav__link">
+    Core'Bit module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Bit module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#and" class="md-nav__link">
+    And
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#or" class="md-nav__link">
+    Or
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#xor" class="md-nav__link">
+    Xor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    Not
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#leftshift" class="md-nav__link">
+    LeftShift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rightshift" class="md-nav__link">
+    RightShift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tointeger64" class="md-nav__link">
+    ToInteger64
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frominteger64" class="md-nav__link">
+    FromInteger64
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coreboolean-module" class="md-nav__link">
+    Core'Boolean module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Boolean module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#any" class="md-nav__link">
+    Any
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#all" class="md-nav__link">
+    All
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corecharacter-module" class="md-nav__link">
+    Core'Character module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Character module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_2" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_2" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fromcodepoint" class="md-nav__link">
+    FromCodePoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tocodepoint" class="md-nav__link">
+    ToCodePoint
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corelist-module" class="md-nav__link">
+    Core'List module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'List module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_3" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_3" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first" class="md-nav__link">
+    First
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#last" class="md-nav__link">
+    Last
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tonumbers" class="md-nav__link">
+    ToNumbers
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tostrings" class="md-nav__link">
+    ToStrings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tobooleans" class="md-nav__link">
+    ToBooleans
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corenumber-module" class="md-nav__link">
+    Core'Number module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'Number module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_4" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_4" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#absolute" class="md-nav__link">
+    Absolute
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ceil" class="md-nav__link">
+    Ceil
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#epsilon" class="md-nav__link">
+    Epsilon
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exponential" class="md-nav__link">
+    Exponential
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#floor" class="md-nav__link">
+    Floor
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fraction" class="md-nav__link">
+    Fraction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infinity" class="md-nav__link">
+    Infinity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#isnan" class="md-nav__link">
+    IsNan
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maximum" class="md-nav__link">
+    Maximum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#minimum" class="md-nav__link">
+    Minimum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#nan" class="md-nav__link">
+    Nan
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parse" class="md-nav__link">
+    Parse
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#power" class="md-nav__link">
+    Power
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range" class="md-nav__link">
+    Range
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remainder" class="md-nav__link">
+    Remainder
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#round" class="md-nav__link">
+    Round
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequence" class="md-nav__link">
+    Sequence
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#squareroot" class="md-nav__link">
+    SquareRoot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string" class="md-nav__link">
+    String
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sum" class="md-nav__link">
+    Sum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truncate" class="md-nav__link">
+    Truncate
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestring-module" class="md-nav__link">
+    Core'String module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_5" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_5" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#concatenate" class="md-nav__link">
+    Concatenate
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#join" class="md-nav__link">
+    Join
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringbyte-module" class="md-nav__link">
+    Core'String'Byte module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Byte module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_6" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_6" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#length" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringbyteview-module" class="md-nav__link">
+    Core'String'Byte'View module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Byte'View module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_7" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#view" class="md-nav__link">
+    View
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_7" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new" class="md-nav__link">
+    New
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#viewee" class="md-nav__link">
+    Viewee
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start" class="md-nav__link">
+    Start
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#end" class="md-nav__link">
+    End
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix_1" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length_1" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seek" class="md-nav__link">
+    Seek
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice_1" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tostring" class="md-nav__link">
+    ToString
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#corestringutf8-module" class="md-nav__link">
+    Core'String'Utf8 module
+  </a>
+  
+    <nav class="md-nav" aria-label="Core'String'Utf8 module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_8" class="md-nav__link">
+    Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_8" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#characters" class="md-nav__link">
+    Characters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#contains" class="md-nav__link">
+    Contains
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find" class="md-nav__link">
+    Find
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hasprefix_2" class="md-nav__link">
+    HasPrefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hassuffix" class="md-nav__link">
+    HasSuffix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#length_2" class="md-nav__link">
+    Length
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#replace" class="md-nav__link">
+    Replace
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slice_2" class="md-nav__link">
+    Slice
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#split" class="md-nav__link">
+    Split
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tolowercase" class="md-nav__link">
+    ToLowercase
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#touppercase" class="md-nav__link">
+    ToUppercase
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trim" class="md-nav__link">
+    Trim
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimend" class="md-nav__link">
+    TrimEnd
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimendmatches" class="md-nav__link">
+    TrimEndMatches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimmatches" class="md-nav__link">
+    TrimMatches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimstart" class="md-nav__link">
+    TrimStart
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trimstartmatches" class="md-nav__link">
+    TrimStartMatches
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/pen-lang/pen/edit/main/docs/references/standard-packages/core.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="core-package"><code>Core</code> package</h1>
+<p>This package provides common algorithms and data structures.</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;library&quot;
+}
+</code></pre>
+<h2 id="install">Install</h2>
+<pre><code class="language-json">{
+  &quot;dependencies&quot;: {
+    &quot;Core&quot;: &quot;pen:///core&quot;
+  } 
+}
+</code></pre>
+<h2 id="corebit-module"><code>Core'Bit</code> module</h2>
+<p>This module provides bitwise operations.</p>
+<p>Most functions defined in this module take arguments of 64-bit integers.
+They can be converted from and into integers represented in IEEE-754 of a
+<code>number</code> type.</p>
+<h3 id="types">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions">Functions</h3>
+<h4 id="and"><code>And</code></h4>
+<p>Calculate bitwise "and" given two 64-bit integers.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="or"><code>Or</code></h4>
+<p>Calculate bitwise "or" given two 64-bit integers.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="xor"><code>Xor</code></h4>
+<p>Calculate bitwise exclusive-"or" given two 64-bit integers.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="not"><code>Not</code></h4>
+<p>Calculate bitwise "not" given two 64-bit integers.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="leftshift"><code>LeftShift</code></h4>
+<p>Calculate unsigned left shift given a 64-bit integer.</p>
+<pre><code class="language-pen">\(x number, n number) number
+</code></pre>
+<h4 id="rightshift"><code>RightShift</code></h4>
+<p>Calculate unsigned right shift given a 64-bit integer.</p>
+<pre><code class="language-pen">\(x number, n number) number
+</code></pre>
+<h4 id="tointeger64"><code>ToInteger64</code></h4>
+<p>Convert an integer in IEEE-754 to a 64-bit integer.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="frominteger64"><code>FromInteger64</code></h4>
+<p>Convert a 64-bit integer to an integer in IEEE-754.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h2 id="coreboolean-module"><code>Core'Boolean</code> module</h2>
+<p>This module provides common boolean operations.</p>
+<h3 id="types_1">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_1">Functions</h3>
+<h4 id="any"><code>Any</code></h4>
+<p>Return true if any of given booleans are true or false otherwise.</p>
+<pre><code class="language-pen">\(bs [boolean]) boolean
+</code></pre>
+<h4 id="all"><code>All</code></h4>
+<p>Return true if all of given booleans are true or false otherwise.</p>
+<pre><code class="language-pen">\(bs [boolean]) boolean
+</code></pre>
+<h2 id="corecharacter-module"><code>Core'Character</code> module</h2>
+<h3 id="types_2">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_2">Functions</h3>
+<h4 id="fromcodepoint"><code>FromCodePoint</code></h4>
+<pre><code class="language-pen">\(n number) string
+</code></pre>
+<h4 id="tocodepoint"><code>ToCodePoint</code></h4>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h2 id="corelist-module"><code>Core'List</code> module</h2>
+<p>This module provides common list operations.</p>
+<h3 id="types_3">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_3">Functions</h3>
+<h4 id="first"><code>First</code></h4>
+<p>Get the first element in a list. If a list is empty, it returns a fallback value.</p>
+<pre><code class="language-pen">\(xs [any], fallback any) any
+</code></pre>
+<h4 id="last"><code>Last</code></h4>
+<p>Get the last element in a list. If a list is empty, it returns a fallback value.</p>
+<pre><code class="language-pen">\(xs [any], fallback any) any
+</code></pre>
+<h4 id="tonumbers"><code>ToNumbers</code></h4>
+<p>Convert a list of an <code>any</code> type to one of a <code>number</code> type skipping non-<code>number</code> types.</p>
+<pre><code class="language-pen">\(xs [any]) [number]
+</code></pre>
+<h4 id="tostrings"><code>ToStrings</code></h4>
+<p>Convert a list of an <code>any</code> type to one of a <code>string</code> type skipping non-<code>string</code> types.</p>
+<pre><code class="language-pen">\(xs [any]) [string]
+</code></pre>
+<h4 id="tobooleans"><code>ToBooleans</code></h4>
+<p>Convert a list of an <code>any</code> type to one of a <code>boolean</code> type skipping non-<code>boolean</code> types.</p>
+<pre><code class="language-pen">\(xs [any]) [boolean]
+</code></pre>
+<h2 id="corenumber-module"><code>Core'Number</code> module</h2>
+<p>This module provides common number operations.</p>
+<h3 id="types_4">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_4">Functions</h3>
+<h4 id="absolute"><code>Absolute</code></h4>
+<p>Calculate an absolute value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="ceil"><code>Ceil</code></h4>
+<p>Calculate a ceil value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="epsilon"><code>Epsilon</code></h4>
+<p>Machine epsilon</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="exponential"><code>Exponential</code></h4>
+<p>Calculate an exponential of a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="floor"><code>Floor</code></h4>
+<p>Calculate a floor value.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="fraction"><code>Fraction</code></h4>
+<p>Calculate a fraction value of a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="infinity"><code>Infinity</code></h4>
+<p>Infinity</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="isnan"><code>IsNan</code></h4>
+<p>Check if a number is NaN.</p>
+<pre><code class="language-pen">\(x number) boolean
+</code></pre>
+<h4 id="maximum"><code>Maximum</code></h4>
+<p>Calculate a maximum.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="minimum"><code>Minimum</code></h4>
+<p>Calculate a minimum.</p>
+<pre><code class="language-pen">\(x number, y number) number
+</code></pre>
+<h4 id="nan"><code>Nan</code></h4>
+<p>NaN</p>
+<pre><code class="language-pen">\() number
+</code></pre>
+<h4 id="parse"><code>Parse</code></h4>
+<p>Parse a number.</p>
+<pre><code class="language-pen">\(s string) number | error
+</code></pre>
+<h4 id="power"><code>Power</code></h4>
+<p>Calculate a power.</p>
+<pre><code class="language-pen">\(base number, exponent number) number
+</code></pre>
+<h4 id="range"><code>Range</code></h4>
+<p>Create a list of numbers from a minimum to a maximum.</p>
+<pre><code class="language-pen">\(minimum number, maximum number) [number]
+</code></pre>
+<h4 id="remainder"><code>Remainder</code></h4>
+<p>Calculate a remainder.</p>
+<pre><code class="language-pen">\(dividend number, divisor number) number
+</code></pre>
+<h4 id="round"><code>Round</code></h4>
+<p>Round a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="sequence"><code>Sequence</code></h4>
+<p>Create a list of numbers from 1 to a maximum value.</p>
+<pre><code class="language-pen">\(maximum number) [number]
+</code></pre>
+<h4 id="squareroot"><code>SquareRoot</code></h4>
+<p>Calculate a square root.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h4 id="string"><code>String</code></h4>
+<p>Convert a number into its string representation.</p>
+<pre><code class="language-pen">\(x number) string
+</code></pre>
+<h4 id="sum"><code>Sum</code></h4>
+<p>Sum up numbers.</p>
+<pre><code class="language-pen">\(xs [number]) number
+</code></pre>
+<h4 id="truncate"><code>Truncate</code></h4>
+<p>Return an integer value of a number.</p>
+<pre><code class="language-pen">\(x number) number
+</code></pre>
+<h2 id="corestring-module"><code>Core'String</code> module</h2>
+<p>This module provides common string operations.</p>
+<h3 id="types_5">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_5">Functions</h3>
+<h4 id="concatenate"><code>Concatenate</code></h4>
+<p>Concatenate strings.</p>
+<pre><code class="language-pen">\(strings [string]) string
+</code></pre>
+<h4 id="join"><code>Join</code></h4>
+<p>Join strings with a separator.</p>
+<pre><code class="language-pen">\(strings [string], separator string) string
+</code></pre>
+<h4 id="hasprefix"><code>HasPrefix</code></h4>
+<p>Check if a string has a prefix.</p>
+<pre><code class="language-pen">\(s string, prefix string) boolean
+</code></pre>
+<h2 id="corestringbyte-module"><code>Core'String'Byte</code> module</h2>
+<p>This module provides operations for strings as byte arrays.</p>
+<h3 id="types_6">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_6">Functions</h3>
+<h4 id="length"><code>Length</code></h4>
+<p>Return a length of a string.</p>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h4 id="slice"><code>Slice</code></h4>
+<p>Slice a string.</p>
+<pre><code class="language-pen">\(s string, start number, end number) string
+</code></pre>
+<h2 id="corestringbyteview-module"><code>Core'String'Byte'View</code> module</h2>
+<p>This module provides views of strings as byte arrays.
+By using those views, you can apply operations to strings without copying them.</p>
+<h3 id="types_7">Types</h3>
+<h4 id="view"><code>View</code></h4>
+<p>A view of a string</p>
+<pre><code class="language-pen">type View {
+  # ...
+}
+</code></pre>
+<h3 id="functions_7">Functions</h3>
+<h4 id="new"><code>New</code></h4>
+<p>Create a view of a string.</p>
+<pre><code class="language-pen">\(s string) View
+</code></pre>
+<h4 id="viewee"><code>Viewee</code></h4>
+<p>Get an original string.</p>
+<pre><code class="language-pen">\(v View) string
+</code></pre>
+<h4 id="start"><code>Start</code></h4>
+<p>Get a start index of a view.</p>
+<pre><code class="language-pen">\(v View) number
+</code></pre>
+<h4 id="end"><code>End</code></h4>
+<p>Get an end index of a view.</p>
+<pre><code class="language-pen">\(v View) number
+</code></pre>
+<h4 id="hasprefix_1"><code>HasPrefix</code></h4>
+<p>Check if a string has a prefix.</p>
+<pre><code class="language-pen">\(v View, s string) boolean
+</code></pre>
+<h4 id="length_1"><code>Length</code></h4>
+<p>Get a length of a view.</p>
+<pre><code class="language-pen">\(v View) number
+</code></pre>
+<h4 id="seek"><code>Seek</code></h4>
+<p>Move a start index forward.</p>
+<pre><code class="language-pen">\(v View, n number) View
+</code></pre>
+<h4 id="slice_1"><code>Slice</code></h4>
+<p>Slice a view.</p>
+<pre><code class="language-pen">\(v View, start number, end number) View
+</code></pre>
+<h4 id="tostring"><code>ToString</code></h4>
+<p>Convert a view into a string.</p>
+<pre><code class="language-pen">\(v View) string
+</code></pre>
+<h2 id="corestringutf8-module"><code>Core'String'Utf8</code> module</h2>
+<p>This module provides operations for strings encoded in UTF-8.</p>
+<h3 id="types_8">Types</h3>
+<p>No types are defined.</p>
+<h3 id="functions_8">Functions</h3>
+<h4 id="characters"><code>Characters</code></h4>
+<p>Split a string into characters.</p>
+<pre><code class="language-pen">\(s string) [string]
+</code></pre>
+<h4 id="contains"><code>Contains</code></h4>
+<p>Check if a string contains a pattern.</p>
+<pre><code class="language-pen">\(s string, pat string) boolean
+</code></pre>
+<h4 id="find"><code>Find</code></h4>
+<p>Find an index for a pattern in a string.</p>
+<pre><code class="language-pen">\(s string, pat string) number | none
+</code></pre>
+<h4 id="hasprefix_2"><code>HasPrefix</code></h4>
+<p>Checks if a string has a prefix..</p>
+<pre><code class="language-pen">\(s string, pat string) boolean
+</code></pre>
+<h4 id="hassuffix"><code>HasSuffix</code></h4>
+<p>Checks if a string has a suffix..</p>
+<pre><code class="language-pen">\(s string, pat string) boolean
+</code></pre>
+<h4 id="length_2"><code>Length</code></h4>
+<p>Return a length of a string.</p>
+<pre><code class="language-pen">\(s string) number
+</code></pre>
+<h4 id="replace"><code>Replace</code></h4>
+<p>Replace a pattern in a string.</p>
+<pre><code class="language-pen">\(s string, pattern string, replacement string) string
+</code></pre>
+<h4 id="slice_2"><code>Slice</code></h4>
+<p>Slice a string.</p>
+<pre><code class="language-pen">\(s string, start number, end number) string
+</code></pre>
+<h4 id="split"><code>Split</code></h4>
+<p>Split a string by a pattern.</p>
+<pre><code class="language-pen">\(s string, pat string) [string]
+</code></pre>
+<h4 id="tolowercase"><code>ToLowercase</code></h4>
+<p>Convert a string into lowercase.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="touppercase"><code>ToUppercase</code></h4>
+<p>Convert a string into uppercase.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="trim"><code>Trim</code></h4>
+<p>Trim leading and trailing spaces.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="trimend"><code>TrimEnd</code></h4>
+<p>Trim trailing spaces.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="trimendmatches"><code>TrimEndMatches</code></h4>
+<p>Trim trailing patterns.</p>
+<pre><code class="language-pen">\(s string, pat string) string
+</code></pre>
+<h4 id="trimmatches"><code>TrimMatches</code></h4>
+<p>Trim leading and trailing patterns.</p>
+<pre><code class="language-pen">\(s string, pat string) string
+</code></pre>
+<h4 id="trimstart"><code>TrimStart</code></h4>
+<p>Trim leading spaces.</p>
+<pre><code class="language-pen">\(s string) string
+</code></pre>
+<h4 id="trimstartmatches"><code>TrimStartMatches</code></h4>
+<p>Trim leading patterns.</p>
+<pre><code class="language-pen">\(s string, pat string) string
+</code></pre>
+
+
+
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../../command-line-tools/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Command line tools" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Command line tools
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../flag/" class="md-footer__link md-footer__link--next" aria-label="Next: Flag" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Flag
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.tabs"], "search": "../../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.9c69f0bc.min.js"></script>
+      
+    
+  </body>
+</html>
