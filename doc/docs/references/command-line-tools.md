@@ -27,3 +27,30 @@ pen create foo
 ```sh
 pen create --library foo
 ```
+
+## `test` command
+
+It runs test modules in a package. See also [Testing](../guides/testing.md).
+
+```sh
+pen test
+```
+
+## `format` command
+
+It formats all module files in a package.
+
+```sh
+pen format
+```
+
+## `document` command
+
+It generates a documentation file of a package and emits it to stdout.
+
+```sh
+pen document \
+  --name Foo \
+  --description "A package to provide Foo" \
+  --url git://github.com/foo/foo
+```
