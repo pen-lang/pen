@@ -1769,13 +1769,12 @@
 <h1 id="building-packages">Building packages</h1>
 <h2 id="build-an-application-package">Build an application package</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os"
+  }
+}</code></pre>
 <p><em>And</em> a file named "main.pen" with:</p>
 <pre class="pen"><code>import Os'Context { Context }
 
@@ -1786,11 +1785,10 @@ main = \(ctx context) none {
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="build-a-library-package">Build a library package</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "library",
+  "dependencies": {}
+}</code></pre>
 <p><em>And</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(x number) number {
   x
@@ -1799,13 +1797,12 @@ main = \(ctx context) none {
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="cross-build-an-application-package">Cross-build an application package</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os-sync&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os-sync"
+  }
+}</code></pre>
 <p><em>And</em> a file named "main.pen" with:</p>
 <pre class="pen"><code>import Os'Context { Context }
 
@@ -1839,11 +1836,10 @@ main = \(ctx context) none {
 </table>
 <h2 id="cross-build-a-library-package">Cross-build a library package</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "library",
+  "dependencies": {}
+}</code></pre>
 <p><em>And</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(x number) number {
   x

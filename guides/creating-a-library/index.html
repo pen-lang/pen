@@ -1714,11 +1714,10 @@ To create it, you run a <code>pen create --library</code> command with your libr
   x + y
 }</code></pre>
 <p><code>pen.json</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "library",
+  "dependencies": {}
+}</code></pre>
 <p>In this example, the <code>Foo.pen</code> file contains an <code>Add</code> function that adds two numbers. And the <code>pen.json</code> configuration file defines a package type of <code>library</code> and its dependencies of none.</p>
 <h2 id="publishing-a-package">Publishing a package</h2>
 <p>The easiest way to publish your library package is to push the package as a Git repository onto one of Git repository hosting services, such as <a href="https://github.com">GitHub</a>.</p>

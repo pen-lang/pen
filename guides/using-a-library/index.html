@@ -1706,13 +1706,12 @@
 </ol>
 <h2 id="modifying-package-configuration">Modifying package configuration</h2>
 <p>To use a library package, you need to add the package as a dependency in another package. To add the dependency, you modify a <code>pen.json</code> configuration file in the package adding the library package's name (e.g. <code>Foo</code>) and URL (e.g. <code>git://github.com/your-name/foo</code>) in a <code>dependencies</code> field like the following example. Note that you need to specify a <code>git</code> protocol scheme for library packages published as Git repositories. For other kinds of library packages, see <a href="../../references/language/packages/#package-configuration">Package configuration</a>.</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// This can be any type.</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;Foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;git://github.com/your-name/foo&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "application", // This can be any type.
+  "dependencies": {
+    "Foo": "git://github.com/your-name/foo"
+  }
+}</code></pre>
 <h2 id="importing-functions-and-types-from-a-library-package">Importing functions and types from a library package</h2>
 <p>To import functions and types from the library package, you use <code>import</code> statements in a source file of your module with a name of the library package (e.g. <code>Foo</code>) and a module name (e.g. <code>Math</code>) where functions or types you want to use are defined.</p>
 <pre class="pen"><code>import Foo'Math</code></pre>

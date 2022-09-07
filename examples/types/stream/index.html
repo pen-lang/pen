@@ -1731,13 +1731,12 @@
 <h1 id="list-as-stream">List as stream</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os"
+  }
+}</code></pre>
 <p><em>And</em> a file named "Hello.pen" with:</p>
 <pre class="pen"><code>import Os'Context { Context }
 import Os'File

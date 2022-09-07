@@ -1718,13 +1718,12 @@ main = \(ctx context) none {
   none
 }</code></pre>
 <p><code>pen.json</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
-<span class="w">  </span><span class="p">}</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os"
+  }
+}</code></pre>
 <p>In this example, the <code>main.pen</code> file contains a program that outputs a text, "Hello, world!" in a terminal. And the <code>pen.json</code> configuration file defines a package type of <code>application</code> and its dependencies. Here, it has only a dependency of the <code>Os</code> <a href="../../references/language/packages/#system-packages">system package</a>.</p>
 <h2 id="building-a-package-into-an-executable">Building a package into an executable</h2>
 <p>To build the package, you run a <code>pen build</code> command in the package's directory.</p>
