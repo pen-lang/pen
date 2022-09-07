@@ -24,8 +24,16 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+extra_css:
+  - extra.css
 markdown_extensions:
   - mdx_truly_sane_lists
+  - pymdownx.superfences:
+      custom_fences:
+        - name: pen
+          class: pen
+        - name: sh
+          class: sh
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:

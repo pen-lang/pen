@@ -34,7 +34,7 @@ jobs:
       - uses: streetsidesoftware/cspell-action@main
         with:
           files: "**/*.{feature,md,pen,rs,sh}"
-  lint_readme:
+  readme:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
