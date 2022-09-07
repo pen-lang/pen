@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1745,17 +1747,17 @@
 <h1 id="os-synchronous-version">OS (synchronous version)</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os-sync&quot;,
-    &quot;Core&quot;: &quot;pen:///core&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os-sync&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="build-an-application">Build an application</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
@@ -1768,17 +1770,16 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), &quot;Hello, world!&quot;)?
+  File'Write(ctx, File'StdOut(), "Hello, world!")?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "Hello, world!".</p>
 <h2 id="get-arguments">Get arguments</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'String
+<pre class="pen"><code>import Core'String
 import Os'Context { Context }
 import Os'Environment
 import Os'File
@@ -1793,17 +1794,16 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), &quot; &quot;))?
+  File'Write(ctx, File'StdOut(), String'Join(Environment'Arguments(ctx), " "))?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app foo bar</code></p>
 <p><em>And</em> stdout from "./app foo bar" should contain exactly "foo bar".</p>
 <h2 id="get-an-environment-variable">Get an environment variable</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'String
+<pre class="pen"><code>import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Environment
@@ -1818,18 +1818,17 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  File'Write(ctx, File'StdOut(), Environment'Variable(ctx, &quot;FOO&quot;)?)?
+  File'Write(ctx, File'StdOut(), Environment'Variable(ctx, "FOO")?)?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> I append "foo" to the environment variable "FOO"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> stdout from "./app" should contain exactly "foo".</p>
 <h2 id="open-a-file">Open a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File { File }
 import Os'Process
 
@@ -1842,17 +1841,16 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  File'Open(ctx, &quot;./foo.txt&quot;)?
+  File'Open(ctx, "./foo.txt")?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with ""</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="read-a-file">Read a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'File'OpenOptions
 import Os'Process
@@ -1866,21 +1864,20 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  f = File'Open(ctx, &quot;foo.txt&quot;)?
+  f = File'Open(ctx, "foo.txt")?
   d = File'Read(ctx, f)?
 
   File'Write(ctx, File'StdOut(), d)?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "foo"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "foo".</p>
 <h2 id="read-a-file-until-a-limit">Read a file until a limit</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
@@ -1893,20 +1890,19 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  f = File'Open(ctx, &quot;foo.txt&quot;)?
+  f = File'Open(ctx, "foo.txt")?
   d = File'ReadLimit(ctx, f, 5)?
   File'Write(ctx, File'StdOut(), d)?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "Hello, world!"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "Hello".</p>
 <h2 id="write-a-file">Write a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'File'OpenOptions { OpenOptions }
 import Os'Process
@@ -1922,33 +1918,31 @@ main = \(ctx context) none {
 run = \(ctx Context) none | error {
   f = File'OpenWithOptions(
     ctx,
-    &quot;./foo.txt&quot;,
+    "./foo.txt",
     OpenOptions{...OpenOptions'Default(), Write: true},
   )?
 
-  File'Write(ctx, f, &quot;foo&quot;)?
+  File'Write(ctx, f, "foo")?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with ""</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file "foo.txt" should contain "foo".</p>
 <h2 id="copy-a-file">Copy a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = File'Copy(ctx.Os, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
+  if _ = File'Copy(ctx.Os, "foo.txt", "bar.txt") as none {
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "foo"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
@@ -1956,18 +1950,17 @@ main = \(ctx context) none {
 <p><em>And</em> the file "bar.txt" should contain "foo".</p>
 <h2 id="move-a-file">Move a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = File'Move(ctx.Os, &quot;foo.txt&quot;, &quot;bar.txt&quot;) as none {
+  if _ = File'Move(ctx.Os, "foo.txt", "bar.txt") as none {
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "foo"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
@@ -1975,25 +1968,24 @@ main = \(ctx context) none {
 <p><em>And</em> the file "bar.txt" should contain "foo".</p>
 <h2 id="remove-a-file">Remove a file</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = File'Remove(ctx.Os, &quot;foo.txt&quot;) as none {
+  if _ = File'Remove(ctx.Os, "foo.txt") as none {
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with ""</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file "foo.txt" does not exist.</p>
 <h2 id="read-a-directory">Read a directory</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'String
+<pre class="pen"><code>import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Directory
@@ -2011,60 +2003,57 @@ run = \(ctx Context) none | error {
   File'Write(
     ctx,
     File'StdOut(),
-    String'Join(Directory'Read(ctx, &quot;.&quot;)?, &quot;\n&quot;),
+    String'Join(Directory'Read(ctx, ".")?, "\n"),
   )?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain "main.pen"</p>
 <p><em>And</em> the stdout from "./app" should contain "pen.json".</p>
 <h2 id="create-a-directory">Create a directory</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Directory
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = Directory'Create(ctx.Os, &quot;foo&quot;) as none {
+  if _ = Directory'Create(ctx.Os, "foo") as none {
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> a directory named "foo" should exist.</p>
 <h2 id="remove-a-directory">Remove a directory</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Directory
 import Os'Process
 
 main = \(ctx context) none {
-  if _ = Directory'Remove(ctx.Os, &quot;foo&quot;) as none {
+  if _ = Directory'Remove(ctx.Os, "foo") as none {
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a directory named "foo"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> a directory named "foo" should not exist.</p>
 <h2 id="get-file-metadata">Get file metadata</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'File'Metadata { Metadata }
 import Os'Process
 
 main = \(ctx context) none {
-  m = File'Metadata(ctx.Os, &quot;foo&quot;)
+  m = File'Metadata(ctx.Os, "foo")
 
   c = if m = m as Metadata {
     if m.Size == 3 {
@@ -2077,16 +2066,15 @@ main = \(ctx context) none {
   }
 
   Process'Exit(ctx.Os, c)
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo" with:</p>
-<pre><code>foo
-</code></pre>
+<div class="highlight"><pre><span></span><code>foo
+</code></pre></div>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="get-os-time">Get os time</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'Number
+<pre class="pen"><code>import Core'Number
 import Os'Context { Context }
 import Os'File
 import Os'Process
@@ -2104,30 +2092,27 @@ run = \(ctx Context) none | error {
   File'Write(ctx, File'StdOut(), Number'String(Time'Now(ctx)))?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="sleep">Sleep</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Time
 
 main = \(ctx context) none {
   Time'Sleep(ctx.Os, 1)
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="exit-a-process">Exit a process</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Process
 
 main = \(ctx context) none {
   Process'Exit(ctx.Os, 42)
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I run <code>./app</code></p>
 <p><em>And</em> the exit status should be 42.</p>

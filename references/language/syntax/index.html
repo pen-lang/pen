@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -2115,106 +2117,88 @@
 <h3 id="import-statement">Import statement</h3>
 <p>It imports types and functions from another module from the same or another package.</p>
 <p>See <a href="../modules/">Modules</a> for more details.</p>
-<pre><code class="language-pen">import Foo'Bar
-</code></pre>
+<pre class="pen"><code>import Foo'Bar</code></pre>
 <h3 id="foreign-import-statement">Foreign import statement</h3>
 <p>It imports a function from a foreign language.</p>
 <p>See <a href="../../../advanced-features/ffi/">Foreign Function Interface (FFI)</a> for more details.</p>
-<pre><code class="language-pen">import foreign &quot;c&quot; foo \(number, number) number
-</code></pre>
+<pre class="pen"><code>import foreign "c" foo \(number, number) number</code></pre>
 <h3 id="record-type-definition">Record type definition</h3>
 <p>It defines a record type.</p>
 <p>See <a href="../types/#records">Records</a> for more details.</p>
-<pre><code class="language-pen">type foo {
+<pre class="pen"><code>type foo {
   bar number
   baz string
-}
-</code></pre>
+}</code></pre>
 <h3 id="type-alias">Type alias</h3>
 <p>It gives another name to a type.</p>
-<pre><code class="language-pen">type foo = number | none
-</code></pre>
+<pre class="pen"><code>type foo = number | none</code></pre>
 <h3 id="function-definition">Function definition</h3>
 <p>It defines a function with a given name. The right-hand side of <code>=</code> signs must be <a href="#function">function expressions</a>.</p>
-<pre><code class="language-pen">foo = \(x number, y number) number {
+<pre class="pen"><code>foo = \(x number, y number) number {
   x + y
-}
-</code></pre>
+}</code></pre>
 <h3 id="foreign-function-definition">Foreign function definition</h3>
 <p>It defines a function exported to foreign languages.</p>
 <p>See <a href="../../../advanced-features/ffi/">Foreign Function Interface (FFI)</a> for more details.</p>
-<pre><code class="language-pen">foreign &quot;c&quot; foo = \(x number, y number) number {
+<pre class="pen"><code>foreign "c" foo = \(x number, y number) number {
   x + y
-}
-</code></pre>
+}</code></pre>
 <h2 id="block">Block</h2>
 <p>A block consists of 1 or more expressions wrapped in <code>{</code> and <code>}</code>. Values of the last expressions are treated as resulting values of the blocks.</p>
-<pre><code class="language-pen">{
+<pre class="pen"><code>{
   foo(ctx, z)
 
   x + y + z
-}
-</code></pre>
+}</code></pre>
 <p>If you want to keep values of intermediate expressions for later use, you can define variables putting their names and <code>=</code> operators in front of the expressions.</p>
-<pre><code class="language-pen">{
+<pre class="pen"><code>{
   x = 42
 
   ...
-}
-</code></pre>
+}</code></pre>
 <h2 id="expressions">Expressions</h2>
 <p>Expressions represent some computation. Expressions can be nested; expressions often contain other expressions inside.</p>
 <h3 id="function-call">Function call</h3>
 <p>It calls a function to evaluate it with given arguments returning its result value.</p>
-<pre><code class="language-pen">f(x, y)
-</code></pre>
+<pre class="pen"><code>f(x, y)</code></pre>
 <h3 id="operators">Operators</h3>
 <h4 id="arithmetic">Arithmetic</h4>
 <p>Arithmetic operators add, subtract, multiply, or divide a number with another.</p>
-<pre><code class="language-pen">1 + 1
+<pre class="pen"><code>1 + 1
 1 - 1
 1 * 1
-1 / 1
-</code></pre>
+1 / 1</code></pre>
 <h4 id="comparison">Comparison</h4>
 <h5 id="equality">Equality</h5>
 <p>Equal (<code>==</code>) and not-equal (<code>!=</code>) operators compare two values and return a boolean value indicating if they are equal or not.</p>
-<pre><code class="language-pen">1 == 1
-1 != 1
-</code></pre>
+<pre class="pen"><code>1 == 1
+1 != 1</code></pre>
 <p>The operators can compare any types except functions and types containing them.</p>
-<pre><code class="language-pen">&quot;foo&quot; == &quot;bar&quot;
+<pre class="pen"><code>"foo" == "bar"
 foo{x: 0} == foo{x: 1}
-42 != none
-</code></pre>
+42 != none</code></pre>
 <h5 id="ordering">Ordering</h5>
 <p>Order operators compare two numbers and return a boolean value indicating if the condition is correct or not.</p>
-<pre><code class="language-pen">1 &lt; 1
+<pre class="pen"><code>1 &lt; 1
 1 &lt;= 1
 1 &gt; 1
-1 &gt;= 1
-</code></pre>
+1 &gt;= 1</code></pre>
 <h4 id="boolean">Boolean</h4>
 <p>A <em>not</em> operator flips a boolean value.</p>
-<pre><code class="language-pen">!true
-</code></pre>
+<pre class="pen"><code>!true</code></pre>
 <p>An <em>and</em> operator returns <code>true</code> if both operands are <code>true</code>, or <code>false</code> otherwise.</p>
-<pre><code class="language-pen">true &amp; false
-</code></pre>
+<pre class="pen"><code>true &amp; false</code></pre>
 <p>An <em>or</em> operator returns <code>true</code> if either operand is <code>true</code>, or <code>false</code> otherwise.</p>
-<pre><code class="language-pen">true | false
-</code></pre>
+<pre class="pen"><code>true | false</code></pre>
 <h4 id="error-handling">Error handling</h4>
 <p><code>?</code> suffix operators immediately exit the current functions with operands if they are of <a href="../built-ins/#error">the <code>error</code> type</a>. Both the operands and result values of functions where the operators are used must be a union type containing <a href="../built-ins/#error">the <code>error</code> type</a>.</p>
-<pre><code class="language-pen">x?
-</code></pre>
+<pre class="pen"><code>x?</code></pre>
 <h3 id="function">Function</h3>
 <p>It creates a function.</p>
 <p>First, functions declare their argument names and types (<code>x number</code> and <code>y number</code>) and their result types (<code>number</code>). After that, function bodies of <a href="#block">blocks</a> describe how the functions compute result values.</p>
-<pre><code class="language-pen">\(x number, y number) number {
+<pre class="pen"><code>\(x number, y number) number {
   x + y
-}
-</code></pre>
+}</code></pre>
 <h3 id="conditionals">Conditionals</h3>
 <h4 id="if-expression">If expression</h4>
 <p>It evaluates one of <a href="#block">blocks</a> depending on a condition of an expression of a boolean type.</p>
@@ -2222,58 +2206,51 @@ foo{x: 0} == foo{x: 1}
 <li>It evaluates the first block if a given boolean value is <code>true</code>.</li>
 <li>Otherwise, it evaluates the second block.</li>
 </ul>
-<pre><code class="language-pen">if x {
+<pre class="pen"><code>if x {
   ...
 } else {
   ...
-}
-</code></pre>
+}</code></pre>
 <h4 id="if-type-expression">If-type expression</h4>
 <p>It evaluates one of <a href="#block">blocks</a> depending on the type of a given expression. The expression (<code>foo()</code>) needs to be bound to a variable (<code>x</code>) and, in each block, the variable is treated as its specified type.</p>
-<pre><code class="language-pen">if x = foo() as number {
+<pre class="pen"><code>if x = foo() as number {
   ...
 } else if string | none {
   ...
 } else {
   ...
-}
-</code></pre>
+}</code></pre>
 <h4 id="if-list-expression">If-list expression</h4>
 <p>It deconstructs a list and evaluates one of two <a href="#block">blocks</a> depending on if the list is empty or not.</p>
 <ul>
 <li>If a given list has 1 or more element, it evaluates the first block with <strong>a function that returns its first element</strong> (<code>x</code>) and rest of elements as a list (<code>xs</code>).</li>
 <li>If the list has no element, it evaluates the second block.</li>
 </ul>
-<pre><code class="language-pen">if [x, ...xs] = ... {
+<pre class="pen"><code>if [x, ...xs] = ... {
   ...
 } else {
   ...
-}
-</code></pre>
+}</code></pre>
 <h4 id="if-map-expression">If-map expression</h4>
 <p>It gets a value for a key in a map and evaluates one of two <a href="#block">blocks</a> depending on if the map has the key or not.</p>
 <ul>
 <li>If a value for a key (<code>key</code>) is found, it evaluates the first block with the value (<code>value</code>).</li>
 <li>If the map has no such key, it evaluates the second block.</li>
 </ul>
-<pre><code class="language-pen">if value = xs[key] {
+<pre class="pen"><code>if value = xs[key] {
   ...
 } else {
   ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="loop">Loop</h3>
 <h4 id="list-comprehension">List comprehension</h4>
 <p>It iterates over elements in a given list and generates a new list with elements of a given expression.</p>
-<pre><code class="language-pen">[number f(x) for x in xs]
-</code></pre>
+<pre class="pen"><code>[number f(x) for x in xs]</code></pre>
 <p>You can also iterate keys and values in a map.</p>
-<pre><code class="language-pen">[number f(key, value) for key, value in map]
-</code></pre>
+<pre class="pen"><code>[number f(key, value) for key, value in map]</code></pre>
 <h2 id="comment">Comment</h2>
 <p>Comments start with <code>#</code> and end with new-line characters.</p>
-<pre><code class="language-pen"># This is a comment.
-</code></pre>
+<pre class="pen"><code># This is a comment.</code></pre>
 
 
 

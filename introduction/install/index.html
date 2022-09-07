@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1687,13 +1689,11 @@
 <p>On Linux, macOS and <a href="https://docs.microsoft.com/en-us/windows/wsl/about">WSL</a>, you can install Pen through <a href="https://brew.sh">Homebrew</a>.</p>
 <ol>
 <li>Install <a href="https://brew.sh">Homebrew</a>.</li>
-<li>Run the following command in your terminal.<p><code>sh
-  brew install pen-lang/pen/pen</code></p>
+<li>Run the following command in your terminal.<pre class="sh"><code>brew install pen-lang/pen/pen</code></pre>
 </li>
 </ol>
 <p>Now, you should be able to run a <code>pen</code> command in your shell.</p>
-<pre><code class="language-sh">pen --version
-</code></pre>
+<pre class="sh"><code>pen --version</code></pre>
 <h2 id="building-from-source">Building from source</h2>
 <p>You can also build Pen from source on your local machine.</p>
 <ol>
@@ -1708,18 +1708,15 @@
 </li>
 <li>
 <p>Clone the Git repository.</p>
-<p><code>sh
- git clone https://github.com/pen-lang/pen</code></p>
+<pre class="sh"><code>git clone https://github.com/pen-lang/pen</code></pre>
 </li>
 <li>
 <p>Run a <code>cargo</code> command in the repository's directory.</p>
-<p><code>sh
- cargo install --path cmd/pen</code></p>
+<pre class="sh"><code>cargo install --path cmd/pen</code></pre>
 </li>
 <li>
 <p>Set a <code>PEN_ROOT</code> environment variable to the directory.</p>
-<p><code>sh
- export PEN_ROOT=&lt;directory&gt;</code></p>
+<pre class="sh"><code>export PEN_ROOT=&lt;directory&gt;</code></pre>
 </li>
 </ol>
 <p>Now, you are ready to use the <code>pen</code> command built manually.</p>

@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="extra.css">
+    
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1796,7 +1798,7 @@
 
 <h1 id="pen-programming-language">Pen programming language</h1>
 <p>Pen is the parallel, concurrent, and functional programming language for <a href="#vision"><strong>scalable</strong> software development</a>, focused on software maintainability and portability.</p>
-<pre><code class="language-pen">import Core'Number
+<pre class="pen"><code>import Core'Number
 import Os'File
 
 # The `\` prefix for λ denotes a function.
@@ -1809,14 +1811,13 @@ findAnswer = \(kind string) number {
 main = \(ctx context) none {
   # The `go` function runs a given function in parallel.
   # `x` is a future for the computed value.
-  x = go(\() number { findAnswer(&quot;humanity&quot;) })
-  y = findAnswer(&quot;dolphins&quot;)
+  x = go(\() number { findAnswer("humanity") })
+  y = findAnswer("dolphins")
 
   _ = File'Write(ctx, File'StdOut(), Number'String(x() + y))
 
   none
-}
-</code></pre>
+}</code></pre>
 <h2 id="vision">Vision</h2>
 <p>Pen aims to make large-scale software development efficient where many engineers develop software together for a long time. To realize that, it focuses on software <strong>maintainability</strong> and <strong>portability</strong>.</p>
 <ul>

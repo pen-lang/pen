@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1827,101 +1829,90 @@
 <h1 id="map">Map</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;,
-  &quot;dependencies&quot;: {}
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="create-an-empty-map">Create an empty map</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() {string: number} {
+<pre class="pen"><code>f = \() {string: number} {
   {string: number}
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="create-a-map-with-an-entry">Create a map with an entry</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() {string: number} {
-  {string: number &quot;foo&quot;: 42}
-}
-</code></pre>
+<pre class="pen"><code>f = \() {string: number} {
+  {string: number "foo": 42}
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="create-a-map-with-two-elements">Create a map with two elements</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() {string: number} {
-  {string: number &quot;foo&quot;: 1, &quot;bar&quot;: 2}
-}
-</code></pre>
+<pre class="pen"><code>f = \() {string: number} {
+  {string: number "foo": 1, "bar": 2}
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="get-a-value-in-a-map">Get a value in a map</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) number {
-  if x = xs[&quot;foo&quot;] {
+<pre class="pen"><code>f = \(xs {string: number}) number {
+  if x = xs["foo"] {
     x
   } else {
     0
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="merge-maps">Merge maps</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) {string: number} {
+<pre class="pen"><code>f = \(xs {string: number}) {string: number} {
   {string: number ...xs, ...xs}
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="merge-a-map-of-different-types">Merge a map of different types</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) {string | none: number | none} {
+<pre class="pen"><code>f = \(xs {string: number}) {string | none: number | none} {
   {string | none: number | none ...xs}
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="create-a-map-of-a-union-type-key">Create a map of a union type key</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() {string|none:number} {
-  {string|none:number &quot;foo&quot;: 1, none: 2}
-}
-</code></pre>
+<pre class="pen"><code>f = \() {string|none:number} {
+  {string|none:number "foo": 1, none: 2}
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="create-a-map-of-a-union-type-value">Create a map of a union type value</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() {string: number | none} {
-  {string: number | none &quot;foo&quot;: 42, &quot;bar&quot;: none}
-}
-</code></pre>
+<pre class="pen"><code>f = \() {string: number | none} {
+  {string: number | none "foo": 42, "bar": none}
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="iterate-map-keys">Iterate map keys</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) [string] {
+<pre class="pen"><code>f = \(xs {string: number}) [string] {
   [string k for k, _ in xs]
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="iterate-map-values">Iterate map values</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) [number] {
+<pre class="pen"><code>f = \(xs {string: number}) [number] {
   [number v for _, v in xs]
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="get-a-size-of-a-map">Get a size of a map</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(xs {string: number}) number {
+<pre class="pen"><code>f = \(xs {string: number}) number {
   size(xs)
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 

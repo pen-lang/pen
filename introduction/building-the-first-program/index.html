@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1699,16 +1701,13 @@
 <h1 id="building-the-first-program">Building the first program</h1>
 <h2 id="creating-a-package">Creating a package</h2>
 <p>To create your first package, run a <code>pen create</code> command with your package's name in your terminal.</p>
-<pre><code class="language-sh">pen create foo
-</code></pre>
+<pre class="sh"><code>pen create foo</code></pre>
 <p>Then, you should see a directory named <code>foo</code> in your current directory. When you go into the directory, you should see a <code>main.pen</code> source file and a <code>pen.json</code> file for <a href="../../references/language/packages/#package-configuration">package configuration</a>.</p>
 <h2 id="building-a-package">Building a package</h2>
 <p>To build the package, run a <code>pen build</code> command in the <code>foo</code> directory.</p>
-<pre><code class="language-sh">pen build
-</code></pre>
+<pre class="sh"><code>pen build</code></pre>
 <p>Then, you will see an executable file named <code>app</code> in the directory. Run it to see your first "Hello, world!"</p>
-<pre><code class="language-sh">./app # -&gt; Hello, world!
-</code></pre>
+<pre class="sh"><code>./app # -&gt; Hello, world!</code></pre>
 <p>Now, you can start editing source files and build your own application in Pen!</p>
 <h2 id="next-steps">Next steps</h2>
 <ul>

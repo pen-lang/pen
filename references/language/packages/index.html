@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1849,13 +1851,12 @@
 <p>There are 3 package types: application, library, and system. Those types are specified in <a href="#package-configuration">package configuration files</a>.</p>
 <h3 id="application-packages">Application packages</h3>
 <p>Application packages build applications often as executable files. Every application package must have a <code>main.pen</code> module file at its top directory. The main module has a <code>main</code> function that receives an argument of a <code>context</code> type and returns a <code>none</code> type. The <code>context</code> type is a record type containing context values of system packages with their field names of package names. For example, given system packages named <code>Http</code> and <code>Os</code>, a main function looks like the following.</p>
-<pre><code class="language-pen">main = \(ctx context) none {
-  s = fetch(ctx.Http, &quot;https://pen-lang.org/&quot;)
+<pre class="pen"><code>main = \(ctx context) none {
+  s = fetch(ctx.Http, "https://pen-lang.org/")
   print(ctx.Os, s)
 
   none
-}
-</code></pre>
+}</code></pre>
 <p>Every application package must specify one and only one <a href="#system-packages">system package</a> that links applications (e.g. the <code>Os</code> standard system package) in its <a href="#package-configuration">package configuration file</a>. However, application packages can specify system packages that do not link applications (e.g. the <code>Http</code> system package in the example above) as many as possible.</p>
 <h3 id="library-packages">Library packages</h3>
 <p>Library packages contain functions and types that have <em>no</em> side effects. They are imported and used by other packages.</p>
@@ -1894,36 +1895,36 @@
 </ul>
 <h3 id="examples">Examples</h3>
 <h4 id="application">Application</h4>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;,
-    &quot;Core&quot;: &quot;pen:///core&quot;,
-    &quot;Foo&quot;: &quot;git://github.com/foo/foo&quot;,
-    &quot;Bar&quot;: &quot;../bar&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;git://github.com/foo/foo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Bar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../bar&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h4 id="library">Library</h4>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Core&quot;: &quot;pen:///core&quot;,
-    &quot;Foo&quot;: &quot;git://github.com/foo/foo&quot;,
-    &quot;Bar&quot;: &quot;../bar&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;git://github.com/foo/foo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Bar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../bar&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h4 id="system">System</h4>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;system&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Core&quot;: &quot;pen:///core&quot;,
-    &quot;Foo&quot;: &quot;git://github.com/foo/foo&quot;,
-    &quot;Bar&quot;: &quot;../bar&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;system&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;git://github.com/foo/foo&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Bar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;../bar&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
 
 

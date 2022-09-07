@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1705,28 +1707,25 @@
 <h2 id="creating-a-library-package">Creating a library package</h2>
 <p><a href="../../references/language/packages/#library-packages">Library packages</a> are packages imported and used by other packages.
 To create it, you run a <code>pen create --library</code> command with your library's name (e.g. <code>foo</code>) in your terminal.</p>
-<pre><code class="language-sh">pen create --library foo
-</code></pre>
+<pre class="sh"><code>pen create --library foo</code></pre>
 <p>Then, you should see a <code>foo</code> directory in your current directory. When you go there, you should see a <code>Foo.pen</code> source file and a <code>pen.json</code> file for <a href="../../references/language/packages/#package-configuration">package configuration</a>.</p>
 <p><code>Foo.pen</code>:</p>
-<pre><code class="language-pen">Add = \(x number, y number) number {
+<pre class="pen"><code>Add = \(x number, y number) number {
   x + y
-}
-</code></pre>
+}</code></pre>
 <p><code>pen.json</code>:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;,
-  &quot;dependencies&quot;: {}
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p>In this example, the <code>Foo.pen</code> file contains an <code>Add</code> function that adds two numbers. And the <code>pen.json</code> configuration file defines a package type of <code>library</code> and its dependencies of none.</p>
 <h2 id="publishing-a-package">Publishing a package</h2>
 <p>The easiest way to publish your library package is to push the package as a Git repository onto one of Git repository hosting services, such as <a href="https://github.com">GitHub</a>.</p>
-<pre><code class="language-sh">git add .
+<pre class="sh"><code>git add .
 git commit
 git remote add origin ssh://git@github.com/your-name/foo
-git push
-</code></pre>
+git push</code></pre>
 <p>Now, your package is ready for use by other packages!</p>
 <h2 id="next-steps">Next steps</h2>
 <ul>

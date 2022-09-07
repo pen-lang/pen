@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1718,13 +1720,12 @@
 <h2 id="writing-tests">Writing tests</h2>
 <p>You can write tests as <em>test</em> functions in <em>test</em> modules. All modules with the <code>.test.pen</code> file extension are test modules. And, all public functions in test modules are test functions. The test functions need to have a type of <code>\() none | error</code> and should return <code>error</code> values when they fail.</p>
 <p>For example, to test a <code>Foo</code> function in a <code>Foo.pen</code> module, write a <code>Foo.test.pen</code> test module with the following contents.</p>
-<pre><code class="language-pen">import Test'Assert
+<pre class="pen"><code>import Test'Assert
 import 'Foo
 
 CheckFoo = \() none | error {
   Assert'True(Foo'Foo() == 42)
-}
-</code></pre>
+}</code></pre>
 <h3 id="the-test-package">The <code>Test</code> package</h3>
 <p><a href="../../references/standard-packages/test/">The <code>Test</code> standard package</a> includes some utilities which helps you to write tests.</p>
 <h2 id="running-tests">Running tests</h2>

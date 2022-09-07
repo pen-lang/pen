@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1966,54 +1968,48 @@
 
 <h1 id="json-package"><code>Json</code> package</h1>
 <p>This package provides a JSON parser.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Json&quot;: &quot;pen:///json&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Json&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///json&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="jsondecode-module"><code>Json'Decode</code> module</h2>
 <h3 id="types">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions">Functions</h3>
 <h4 id="decode"><code>Decode</code></h4>
 <p>Decode a string into a JSON value.</p>
-<pre><code class="language-pen">\(s string) Value | error
-</code></pre>
+<pre class="pen"><code>\(s string) Value | error</code></pre>
 <h2 id="jsonencode-module"><code>Json'Encode</code> module</h2>
 <h3 id="types_1">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions_1">Functions</h3>
 <h4 id="encode"><code>Encode</code></h4>
 <p>Encode a JSON value.</p>
-<pre><code class="language-pen">\(v Value) string
-</code></pre>
+<pre class="pen"><code>\(v Value) string</code></pre>
 <h2 id="jsonvalue-module"><code>Json'Value</code> module</h2>
 <h3 id="types_2">Types</h3>
 <h4 id="value"><code>Value</code></h4>
 <p>A JSON value</p>
-<pre><code class="language-pen">type Value {
+<pre class="pen"><code>type Value {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h4 id="raw"><code>Raw</code></h4>
 <p>A raw JSON value represented by built-in types</p>
-<pre><code class="language-pen">type Raw = boolean | none | number | string | [Value] | {string: Value}
-</code></pre>
+<pre class="pen"><code>type Raw = boolean | none | number | string | [Value] | {string: Value}</code></pre>
 <h3 id="functions_2">Functions</h3>
 <h4 id="new"><code>New</code></h4>
 <p>Create a JSON value.</p>
-<pre><code class="language-pen">\(r Raw) Value
-</code></pre>
+<pre class="pen"><code>\(r Raw) Value</code></pre>
 <h4 id="raw_1"><code>Raw</code></h4>
 <p>Get a raw value.</p>
-<pre><code class="language-pen">\(v Value) Raw
-</code></pre>
+<pre class="pen"><code>\(v Value) Raw</code></pre>
 
 
 

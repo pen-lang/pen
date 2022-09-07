@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1758,7 +1760,7 @@
 <h3 id="defining-context-types">Defining context types</h3>
 <p>Every system package must have a module named <code>Context</code> at the top level. The module defines a <code>Context</code> type and an <code>UnsafeNew</code> function that returns a <code>Context</code> value with no argument.</p>
 <p>For example, a system package for command line applications might have the following <code>Context</code> module:</p>
-<pre><code class="language-pen">...
+<pre class="pen"><code>...
 
 type Context {
   print \(string) none
@@ -1768,8 +1770,7 @@ UnsafeNew = \() Context {
   Context{
     print: ...
   }
-}
-</code></pre>
+}</code></pre>
 <p>The language's compiler uses these type and function to compose a <code>context</code> type passed to <code>main</code> functions in <code>main</code> modules in application packages.</p>
 <h3 id="providing-system-functions-and-types">Providing system functions and types</h3>
 <p>System packages are the only places where you can define functions that have side effects. Thanks to system packages, applications can perform effects to interact with the world, such as:</p>
@@ -1781,7 +1782,7 @@ UnsafeNew = \() Context {
 </ul>
 <p>Note that <strong>system packages should never expose side effects directly through their functions</strong>; all public functions in system packages must be purely functional. Instead, you need to pass a <code>Context</code> type to every effect-ful function for it to make side effects.</p>
 <p>For example, a system package for command line applications might have the following types and functions:</p>
-<pre><code class="language-pen"># Define a foreign function to output a string in console.
+<pre class="pen"><code># Define a foreign function to output a string in console.
 import foreign _pen_cli_print \(string) none
 
 type Context {
@@ -1790,16 +1791,14 @@ type Context {
 
 Print = \(ctx Context, s string) none {
   ctx.print(s)
-}
-</code></pre>
+}</code></pre>
 <p>rather than:</p>
-<pre><code class="language-pen">import foreign _pen_cli_print \(string) none
+<pre class="pen"><code>import foreign _pen_cli_print \(string) none
 
 Print = \(s string) none {
   # Oh, no! We make side effects in a public function directly.
   _pen_cli_print(s)
-}
-</code></pre>
+}</code></pre>
 <h3 id="linking-application-files-optional">Linking application files (optional)</h3>
 <p>System packages might have optional script files named <code>pen-link</code> at their top directories. On every build of application packages using the system packages, the script files run given object files specified as command line arguments to link application files. The script files may or may not have file extensions.</p>
 <p>The scripts should accept the following command line arguments.</p>

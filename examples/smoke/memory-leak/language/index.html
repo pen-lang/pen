@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../../extra.css">
+    
     <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1752,30 +1754,29 @@
 <h1 id="language">Language</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Core&quot;: &quot;pen:///core&quot;,
-    &quot;Os&quot;: &quot;pen:///os-sync&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os-sync&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="run-hello-world">Run hello world</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 
 main = \(ctx context) none {
-  _ = File'Write(ctx.Os, File'StdOut(), &quot;Hello, world!\n&quot;)
+  _ = File'Write(ctx.Os, File'StdOut(), "Hello, world!\n")
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="create-a-record">Create a record</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1785,13 +1786,12 @@ main = \(ctx context) none {
   _ = foo{x: 42}
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="deconstruct-a-record">Deconstruct a record</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1801,29 +1801,27 @@ main = \(ctx context) none {
   _ = foo{x: 42}.x
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="put-a-string-into-a-value-of-any-type">Put a string into a value of any type</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 f = \(x any) any {
   x
 }
 
 main = \(ctx context) none {
-  f(&quot;&quot;)
+  f("")
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="shadow-a-variable-in-a-block">Shadow a variable in a block</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1834,13 +1832,12 @@ main = \(ctx context) none {
   x = x.x
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="define-a-function-in-a-let-expression-with-a-free-variable">Define a function in a let expression with a free variable</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1851,39 +1848,36 @@ main = \(ctx context) none {
   _ = \() number { x.x }
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="convert-a-number-to-a-string">Convert a number to a string</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'Number
+<pre class="pen"><code>import Core'Number
 import Os'Context { Context }
 
 main = \(ctx context) none {
   Number'String(42)
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="join-strings">Join strings</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'String
+<pre class="pen"><code>import Core'String
 import Os'Context { Context }
 
 main = \(ctx context) none {
-  String'Join([string &quot;hello&quot;, &quot;world&quot;], &quot; &quot;)
+  String'Join([string "hello", "world"], " ")
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="drop-an-unforced-list">Drop an unforced list</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1894,13 +1888,12 @@ main = \(ctx context) none {
   _ = [foo x]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="drop-a-forced-list">Drop a forced list</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1916,13 +1909,12 @@ main = \(ctx context) none {
   }
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="drop-an-unforced-list-with-no-environment">Drop an unforced list with no environment</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1932,13 +1924,12 @@ main = \(ctx context) none {
   [foo foo{x: 42}]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="drop-a-forced-list-with-no-environment">Drop a forced list with no environment</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 type foo {
   x number
@@ -1952,13 +1943,12 @@ main = \(ctx context) none {
   }
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="force-an-element-twice">Force an element twice</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 main = \(ctx context) none {
   xs = [none none]
@@ -1971,23 +1961,21 @@ main = \(ctx context) none {
   }
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="use-spawn-function">Use spawn function</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">main = \(ctx context) none {
+<pre class="pen"><code>main = \(ctx context) none {
   f = go(\() none { none })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="use-spawn-function-with-a-record">Use spawn function with a record</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">type foo {
+<pre class="pen"><code>type foo {
   x number
   y number
   z number
@@ -2002,13 +1990,12 @@ main = \(ctx context) none {
   })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="use-spawn-function-with-a-closure">Use spawn function with a closure</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">main = \(ctx context) none {
+<pre class="pen"><code>main = \(ctx context) none {
   x = \() none { none }
 
   f = go(\() none {
@@ -2017,13 +2004,12 @@ main = \(ctx context) none {
   })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="use-spawn-function-with-a-closure-with-a-record">Use spawn function with a closure with a record</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">type foo {
+<pre class="pen"><code>type foo {
   x number
   y number
   z number
@@ -2043,20 +2029,18 @@ main = \(ctx context) none {
   })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="concatenate-strings">Concatenate strings</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">main = \(ctx context) none {
-  x = &quot;foo&quot;
+<pre class="pen"><code>main = \(ctx context) none {
+  x = "foo"
   y = x + x
   z = y + y
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 

@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1780,17 +1782,17 @@
 
 <h1 id="test-package"><code>Test</code> package</h1>
 <p>This package provides test utilities.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Test&quot;: &quot;pen:///test&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Test&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///test&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="testassert-module"><code>Test'Assert</code> module</h2>
 <p>This module provides a collection of assertion logic for testing.</p>
 <h3 id="types">Types</h3>
@@ -1798,17 +1800,14 @@
 <h3 id="functions">Functions</h3>
 <h4 id="true"><code>True</code></h4>
 <p>Assert that a condition is true.</p>
-<pre><code class="language-pen">\(x boolean) none | error
-</code></pre>
+<pre class="pen"><code>\(x boolean) none | error</code></pre>
 <h4 id="error"><code>Error</code></h4>
 <p>Check if a value is an error.</p>
-<pre><code class="language-pen">\(x any) none | error
-</code></pre>
+<pre class="pen"><code>\(x any) none | error</code></pre>
 <h4 id="fail"><code>Fail</code></h4>
 <p>Fail with an error immediately.
 This function is useful to make unreachable codes fail.</p>
-<pre><code class="language-pen">\() error
-</code></pre>
+<pre class="pen"><code>\() error</code></pre>
 
 
 

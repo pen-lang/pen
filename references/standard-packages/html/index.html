@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1860,38 +1862,35 @@
 
 <h1 id="html-package"><code>Html</code> package</h1>
 <p>This package provides HTML rendering logic.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Html&quot;: &quot;pen:///html&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Html&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///html&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="htmlnode-module"><code>Html'Node</code> module</h2>
 <h3 id="types">Types</h3>
 <h4 id="node"><code>Node</code></h4>
 <p>An HTML node</p>
-<pre><code class="language-pen">type Node = Element | string
-</code></pre>
+<pre class="pen"><code>type Node = Element | string</code></pre>
 <h4 id="element"><code>Element</code></h4>
 <p>An HTML element</p>
-<pre><code class="language-pen">type Element {
+<pre class="pen"><code>type Element {
   Tag string
   Attributes [Attribute]
   Children [Node]
-}
-</code></pre>
+}</code></pre>
 <h4 id="attribute"><code>Attribute</code></h4>
 <p>An HTML attribute</p>
-<pre><code class="language-pen">type Attribute {
+<pre class="pen"><code>type Attribute {
   Key string
   Value string
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="htmlrender-module"><code>Html'Render</code> module</h2>
@@ -1900,8 +1899,7 @@
 <h3 id="functions_1">Functions</h3>
 <h4 id="render"><code>Render</code></h4>
 <p>Render an HTML node.</p>
-<pre><code class="language-pen">\(n Node) string | error
-</code></pre>
+<pre class="pen"><code>\(n Node) string | error</code></pre>
 
 
 

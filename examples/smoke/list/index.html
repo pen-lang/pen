@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1661,16 +1663,16 @@
 <h1 id="list">List</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="force-multiple-elements-of-a-list">Force multiple elements of a list</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 
 main = \(ctx context) none {
   if [x, ...xs] = [none ...[none none]] {
@@ -1680,29 +1682,27 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="force-an-element-in-a-list-of-any-type">Force an element in a list of any type</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 
 main = \(ctx context) none {
-  if [x, ..._] = [any &quot;foo&quot;] {
+  if [x, ..._] = [any "foo"] {
     x()
 
     none
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="compile-nested-list-comprehension">Compile nested list comprehension</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Process
 
 f = \(xss [[boolean]]) [[number]] {
@@ -1720,23 +1720,21 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h2 id="compile-list-comprehension-with-wrong-typing">Compile list comprehension with wrong typing</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">main = \(ctx context) none {
+<pre class="pen"><code>main = \(ctx context) none {
   _ = [none x() for x in [none 1]]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the stderr should contain "types not matched".</p>
 <h2 id="evaluate-list-comprehension-lazily">Evaluate list comprehension lazily</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Process
 
 xs = \(ctx Context) [none] {
@@ -1749,8 +1747,7 @@ main = \(ctx context) none {
   _ = [none x() for x in xs(ctx.Os)]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 

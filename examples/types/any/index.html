@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1701,29 +1703,27 @@
 <h1 id="any">Any</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;,
-  &quot;dependencies&quot;: {}
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="use-an-any-type">Use an any type</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \() any {
+<pre class="pen"><code>f = \() any {
   42
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="downcast-an-any-type">Downcast an any type</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">f = \(x any) number {
+<pre class="pen"><code>f = \(x any) number {
   if x = x as number {
     x
   } else {
     0
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 

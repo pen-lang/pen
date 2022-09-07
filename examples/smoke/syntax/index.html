@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1647,43 +1649,40 @@
 <h1 id="syntax">Syntax</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;,
-  &quot;dependencies&quot;: {}
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="override-a-built-in-function">Override a built-in function</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">go = \() none {
+<pre class="pen"><code>go = \() none {
   none
 }
 
 foo = \() none {
   go()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="override-a-built-in-type-with-a-type-definition">Override a built-in type with a type definition</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">type none {
+<pre class="pen"><code>type none {
   x number
 }
 
 foo = \() none {
   none{x: 42}
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="override-a-built-in-type-with-a-type-alias">Override a built-in type with a type alias</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
-<pre><code class="language-pen">type none = number
+<pre class="pen"><code>type none = number
 
 foo = \() none {
   0
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 

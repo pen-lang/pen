@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -2046,62 +2048,55 @@
 
 <h1 id="sql-package"><code>Sql</code> package</h1>
 <p>This package provides a SQL database client.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;system&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;system&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Sql&quot;: &quot;pen:///sql&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Sql&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///sql&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="sqlcontext-module"><code>Sql'Context</code> module</h2>
 <h3 id="types">Types</h3>
 <h4 id="context"><code>Context</code></h4>
 <p>A SQL database context</p>
-<pre><code class="language-pen">type Context = context'Context
-</code></pre>
+<pre class="pen"><code>type Context = context'Context</code></pre>
 <h3 id="functions">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="sqlpool-module"><code>Sql'Pool</code> module</h2>
 <h3 id="types_1">Types</h3>
 <h4 id="pool"><code>Pool</code></h4>
 <p>A connection pool</p>
-<pre><code class="language-pen">type Pool = pool'Pool
-</code></pre>
+<pre class="pen"><code>type Pool = pool'Pool</code></pre>
 <h3 id="functions_1">Functions</h3>
 <h4 id="new"><code>New</code></h4>
 <p>Create a connection pool.</p>
-<pre><code class="language-pen">\(context Context, uri string, options Options) Pool | error
-</code></pre>
+<pre class="pen"><code>\(context Context, uri string, options Options) Pool | error</code></pre>
 <h4 id="query"><code>Query</code></h4>
 <p>Run a query and return its rows.</p>
-<pre><code class="language-pen">\(context Context, pool Pool, query string, arguments [Value]) [[Value]] | error
-</code></pre>
+<pre class="pen"><code>\(context Context, pool Pool, query string, arguments [Value]) [[Value]] | error</code></pre>
 <h4 id="execute"><code>Execute</code></h4>
 <p>Run a query and return a number of affected rows.</p>
-<pre><code class="language-pen">\(context Context, pool Pool, query string, arguments [Value]) number | error
-</code></pre>
+<pre class="pen"><code>\(context Context, pool Pool, query string, arguments [Value]) number | error</code></pre>
 <h2 id="sqlpooloptions-module"><code>Sql'Pool'Options</code> module</h2>
 <h3 id="types_2">Types</h3>
 <h4 id="options"><code>Options</code></h4>
 <p>Connection pool options</p>
-<pre><code class="language-pen">type Options {
+<pre class="pen"><code>type Options {
   MinConnections number
   MaxConnections number
   ConnectTimeout number
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_2">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="sqlvalue-module"><code>Sql'Value</code> module</h2>
 <h3 id="types_3">Types</h3>
 <h4 id="value"><code>Value</code></h4>
 <p>A value in a column</p>
-<pre><code class="language-pen">type Value = boolean | none | number | string
-</code></pre>
+<pre class="pen"><code>type Value = boolean | none | number | string</code></pre>
 <h3 id="functions_3">Functions</h3>
 <p>No functions are defined.</p>
 

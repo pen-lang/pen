@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1743,26 +1745,25 @@
 <h1 id="concurrency">Concurrency</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="use-spawn-function">Use spawn function</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">main = \(ctx context) none {
+<pre class="pen"><code>main = \(ctx context) none {
   f = go(\() none { none })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="use-race-function">Use race function</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 
 main = \(ctx context) none {
   xs = race([[none] [none none]])
@@ -1772,13 +1773,12 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="use-race-function-with-multiple-lists">Use race function with multiple lists</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 
 main = \(ctx context) none {
   xs = race([[none] [none none], [none none]])
@@ -1788,13 +1788,12 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="use-race-function-to-get-the-first-result">Use race function to get the first result</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Process
 import Os'Time
 
@@ -1818,13 +1817,12 @@ main = \(ctx context) none {
 loop = \(ctx Context) none {
   Time'Sleep(ctx, 1)
   loop(ctx)
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 <h2 id="use-race-function-and-get-all-elements">Use race function and get all elements</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 
 main = \(ctx context) none {
   xs = race([[none] [none none], [none none]])
@@ -1834,8 +1832,7 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code>.</p>
 

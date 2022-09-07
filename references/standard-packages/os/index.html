@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -3274,23 +3276,22 @@
 
 <h1 id="os-package"><code>Os</code> package</h1>
 <p>This package provides an interface for operating systems.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;system&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;system&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="oscontext-module"><code>Os'Context</code> module</h2>
 <h3 id="types">Types</h3>
 <h4 id="context"><code>Context</code></h4>
 <p>A context of an operating system.</p>
-<pre><code class="language-pen">type Context = context'Context
-</code></pre>
+<pre class="pen"><code>type Context = context'Context</code></pre>
 <h3 id="functions">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="osdirectory-module"><code>Os'Directory</code> module</h2>
@@ -3299,93 +3300,74 @@
 <h3 id="functions_1">Functions</h3>
 <h4 id="read"><code>Read</code></h4>
 <p>Read a directory and return file paths it contains.</p>
-<pre><code class="language-pen">\(ctx Context, path string) [string] | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) [string] | error</code></pre>
 <h4 id="create"><code>Create</code></h4>
 <p>Create a directory.</p>
-<pre><code class="language-pen">\(ctx Context, path string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) none | error</code></pre>
 <h4 id="remove"><code>Remove</code></h4>
 <p>Remove a directory.</p>
-<pre><code class="language-pen">\(ctx Context, path string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) none | error</code></pre>
 <h2 id="osenvironment-module"><code>Os'Environment</code> module</h2>
 <h3 id="types_2">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions_2">Functions</h3>
 <h4 id="arguments"><code>Arguments</code></h4>
 <p>Get command line arguments.</p>
-<pre><code class="language-pen">\(ctx Context) [string]
-</code></pre>
+<pre class="pen"><code>\(ctx Context) [string]</code></pre>
 <h4 id="variable"><code>Variable</code></h4>
 <p>Get an environment variable.</p>
-<pre><code class="language-pen">\(ctx Context, name string) string | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, name string) string | error</code></pre>
 <h2 id="osfile-module"><code>Os'File</code> module</h2>
 <h3 id="types_3">Types</h3>
 <h4 id="file"><code>File</code></h4>
 <p>A file on a file system.</p>
-<pre><code class="language-pen">type File {
+<pre class="pen"><code>type File {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_3">Functions</h3>
 <h4 id="stdin"><code>StdIn</code></h4>
 <p>A file of standard input.</p>
-<pre><code class="language-pen">\() File
-</code></pre>
+<pre class="pen"><code>\() File</code></pre>
 <h4 id="stdout"><code>StdOut</code></h4>
 <p>A file of standard output.</p>
-<pre><code class="language-pen">\() File
-</code></pre>
+<pre class="pen"><code>\() File</code></pre>
 <h4 id="stderr"><code>StdErr</code></h4>
 <p>A file of standard error.</p>
-<pre><code class="language-pen">\() File
-</code></pre>
+<pre class="pen"><code>\() File</code></pre>
 <h4 id="open"><code>Open</code></h4>
 <p>Open a file for read-only.</p>
-<pre><code class="language-pen">\(ctx Context, path string) File | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) File | error</code></pre>
 <h4 id="openwithoptions"><code>OpenWithOptions</code></h4>
 <p>Open a file with options.</p>
-<pre><code class="language-pen">\(ctx Context, path string, opt OpenOptions) File | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string, opt OpenOptions) File | error</code></pre>
 <h4 id="read_1"><code>Read</code></h4>
 <p>Read a file.</p>
-<pre><code class="language-pen">\(ctx Context, file File) string | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, file File) string | error</code></pre>
 <h4 id="readlimit"><code>ReadLimit</code></h4>
 <p>Read a file until a size limit.</p>
-<pre><code class="language-pen">\(ctx Context, file File, limit number) string | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, file File, limit number) string | error</code></pre>
 <h4 id="write"><code>Write</code></h4>
 <p>Write data to a file.</p>
-<pre><code class="language-pen">\(ctx Context, file File, data string) number | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, file File, data string) number | error</code></pre>
 <h4 id="copy"><code>Copy</code></h4>
 <p>Copy a file to another path.</p>
-<pre><code class="language-pen">\(ctx Context, src string, dest string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, src string, dest string) none | error</code></pre>
 <h4 id="move"><code>Move</code></h4>
 <p>Move a file to another path.</p>
-<pre><code class="language-pen">\(ctx Context, src string, dest string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, src string, dest string) none | error</code></pre>
 <h4 id="remove_1"><code>Remove</code></h4>
 <p>Remove a file.</p>
-<pre><code class="language-pen">\(ctx Context, path string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) none | error</code></pre>
 <h4 id="metadata"><code>Metadata</code></h4>
 <p>Get metadata of a file at a path.</p>
-<pre><code class="language-pen">\(ctx Context, path string) Metadata | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, path string) Metadata | error</code></pre>
 <h2 id="osfilemetadata-module"><code>Os'File'Metadata</code> module</h2>
 <h3 id="types_4">Types</h3>
 <h4 id="metadata_1"><code>Metadata</code></h4>
 <p>File metadata</p>
-<pre><code class="language-pen">type Metadata {
+<pre class="pen"><code>type Metadata {
   Size number
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_4">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="osfileopenoptions-module"><code>Os'File'OpenOptions</code> module</h2>
@@ -3400,85 +3382,73 @@
 <li><code>Truncate</code> truncates the file to zero byte.</li>
 <li><code>Write</code> allows writing data to the file.</li>
 </ul>
-<pre><code class="language-pen">type OpenOptions {
+<pre class="pen"><code>type OpenOptions {
   Append boolean
   Create boolean
   CreateNew boolean
   Read boolean
   Truncate boolean
   Write boolean
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_5">Functions</h3>
 <h4 id="default"><code>Default</code></h4>
 <p>Get default options to open a file. They do not include any permission.</p>
-<pre><code class="language-pen">\() OpenOptions
-</code></pre>
+<pre class="pen"><code>\() OpenOptions</code></pre>
 <h2 id="osprocess-module"><code>Os'Process</code> module</h2>
 <h3 id="types_6">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions_6">Functions</h3>
 <h4 id="exit"><code>Exit</code></h4>
 <p>Exit a current process.</p>
-<pre><code class="language-pen">\(ctx Context, code number) none
-</code></pre>
+<pre class="pen"><code>\(ctx Context, code number) none</code></pre>
 <h4 id="run"><code>Run</code></h4>
 <p>Run a command.</p>
-<pre><code class="language-pen">\(ctx Context, cmd string, args [string]) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, cmd string, args [string]) none | error</code></pre>
 <h2 id="ostcp-module"><code>Os'Tcp</code> module</h2>
 <h3 id="types_7">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions_7">Functions</h3>
 <h4 id="bind"><code>Bind</code></h4>
 <p>Create a listener bound to a server address.</p>
-<pre><code class="language-pen">\(ctx Context, address string) Listener | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, address string) Listener | error</code></pre>
 <h4 id="connect"><code>Connect</code></h4>
 <p>Create a stream connected to a peer address.</p>
-<pre><code class="language-pen">\(ctx Context, address string) Stream | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, address string) Stream | error</code></pre>
 <h4 id="accept"><code>Accept</code></h4>
 <p>Accept a client connection and create its stream.</p>
-<pre><code class="language-pen">\(ctx Context, l Listener) AcceptedStream | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, l Listener) AcceptedStream | error</code></pre>
 <h4 id="receive"><code>Receive</code></h4>
 <p>Receive data from a peer through a stream with a size limit in bytes.</p>
-<pre><code class="language-pen">\(ctx Context, s Stream, limit number) string | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Stream, limit number) string | error</code></pre>
 <h4 id="send"><code>Send</code></h4>
 <p>Send data to a peer through a stream.</p>
-<pre><code class="language-pen">\(ctx Context, s Stream, data string) number | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Stream, data string) number | error</code></pre>
 <h2 id="ostcpacceptedstream-module"><code>Os'Tcp'AcceptedStream</code> module</h2>
 <h3 id="types_8">Types</h3>
 <h4 id="acceptedstream"><code>AcceptedStream</code></h4>
 <p>A TCP stream accepted on a server with a client address</p>
-<pre><code class="language-pen">type AcceptedStream {
+<pre class="pen"><code>type AcceptedStream {
   Stream Stream
   Address string
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_8">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="ostcplistener-module"><code>Os'Tcp'Listener</code> module</h2>
 <h3 id="types_9">Types</h3>
 <h4 id="listener"><code>Listener</code></h4>
 <p>A TCP listener to listen for client connections</p>
-<pre><code class="language-pen">type Listener {
+<pre class="pen"><code>type Listener {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_9">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="ostcpstream-module"><code>Os'Tcp'Stream</code> module</h2>
 <h3 id="types_10">Types</h3>
 <h4 id="stream"><code>Stream</code></h4>
 <p>A TCP stream</p>
-<pre><code class="language-pen">type Stream {
+<pre class="pen"><code>type Stream {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_10">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="ostime-module"><code>Os'Time</code> module</h2>
@@ -3487,59 +3457,49 @@
 <h3 id="functions_11">Functions</h3>
 <h4 id="now"><code>Now</code></h4>
 <p>Fetch a current system time in milliseconds.</p>
-<pre><code class="language-pen">\(ctx Context) number
-</code></pre>
+<pre class="pen"><code>\(ctx Context) number</code></pre>
 <h4 id="sleep"><code>Sleep</code></h4>
 <p>Pause a current execution context for a given amount of time.</p>
-<pre><code class="language-pen">\(ctx Context, milliseconds number) none
-</code></pre>
+<pre class="pen"><code>\(ctx Context, milliseconds number) none</code></pre>
 <h2 id="osudp-module"><code>Os'Udp</code> module</h2>
 <h3 id="types_12">Types</h3>
 <p>No types are defined.</p>
 <h3 id="functions_12">Functions</h3>
 <h4 id="bind_1"><code>Bind</code></h4>
 <p>Bind a socket with a server address.</p>
-<pre><code class="language-pen">\(ctx Context, address string) Socket | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, address string) Socket | error</code></pre>
 <h4 id="connect_1"><code>Connect</code></h4>
 <p>Connect a socket to a peer address.</p>
-<pre><code class="language-pen">\(ctx Context, s Socket, address string) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Socket, address string) none | error</code></pre>
 <h4 id="receive_1"><code>Receive</code></h4>
 <p>Receive a datagram from a connected address.</p>
-<pre><code class="language-pen">\(ctx Context, s Socket) string | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Socket) string | error</code></pre>
 <h4 id="receivefrom"><code>ReceiveFrom</code></h4>
 <p>Receive a datagram from any address.</p>
-<pre><code class="language-pen">\(ctx Context, s Socket) Datagram | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Socket) Datagram | error</code></pre>
 <h4 id="send_1"><code>Send</code></h4>
 <p>Send a datagram to a connected address.</p>
-<pre><code class="language-pen">\(ctx Context, s Socket, data string) number | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Socket, data string) number | error</code></pre>
 <h4 id="sendto"><code>SendTo</code></h4>
 <p>Send a datagram to a specified address.</p>
-<pre><code class="language-pen">\(ctx Context, s Socket, data string, address string) number | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, s Socket, data string, address string) number | error</code></pre>
 <h2 id="osudpdatagram-module"><code>Os'Udp'Datagram</code> module</h2>
 <h3 id="types_13">Types</h3>
 <h4 id="datagram"><code>Datagram</code></h4>
 <p>UDP datagram</p>
-<pre><code class="language-pen">type Datagram {
+<pre class="pen"><code>type Datagram {
   Data string
   Address string
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_13">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="osudpsocket-module"><code>Os'Udp'Socket</code> module</h2>
 <h3 id="types_14">Types</h3>
 <h4 id="socket"><code>Socket</code></h4>
 <p>UDP socket</p>
-<pre><code class="language-pen">type Socket {
+<pre class="pen"><code>type Socket {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_14">Functions</h3>
 <p>No functions are defined.</p>
 

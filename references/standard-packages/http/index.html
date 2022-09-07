@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -2072,17 +2074,17 @@
 
 <h1 id="http-package"><code>Http</code> package</h1>
 <p>This package provides HTTP client and server.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;system&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;system&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Http&quot;: &quot;pen:///http&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Http&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///http&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="httpclient-module"><code>Http'Client</code> module</h2>
 <p>This module provides an HTTP client.</p>
 <h3 id="types">Types</h3>
@@ -2090,39 +2092,35 @@
 <h3 id="functions">Functions</h3>
 <h4 id="send"><code>Send</code></h4>
 <p>Send an HTTP request.</p>
-<pre><code class="language-pen">\(ctx Context, r Request) Response | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, r Request) Response | error</code></pre>
 <h2 id="httpcontext-module"><code>Http'Context</code> module</h2>
 <h3 id="types_1">Types</h3>
 <h4 id="context"><code>Context</code></h4>
 <p>An HTTP context</p>
-<pre><code class="language-pen">type Context = context'Context
-</code></pre>
+<pre class="pen"><code>type Context = context'Context</code></pre>
 <h3 id="functions_1">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="httprequest-module"><code>Http'Request</code> module</h2>
 <h3 id="types_2">Types</h3>
 <h4 id="request"><code>Request</code></h4>
 <p>An HTTP request</p>
-<pre><code class="language-pen">type Request {
+<pre class="pen"><code>type Request {
   Method string
   Uri string
   Headers {string: string}
   Body string
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_2">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="httpresponse-module"><code>Http'Response</code> module</h2>
 <h3 id="types_3">Types</h3>
 <h4 id="response"><code>Response</code></h4>
 <p>An HTTP response</p>
-<pre><code class="language-pen">type Response {
+<pre class="pen"><code>type Response {
   Status number
   Headers {string: string}
   Body string
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions_3">Functions</h3>
 <p>No functions are defined.</p>
 <h2 id="httpserver-module"><code>Http'Server</code> module</h2>
@@ -2132,8 +2130,7 @@
 <h3 id="functions_4">Functions</h3>
 <h4 id="serve"><code>Serve</code></h4>
 <p>Run an HTTP service.</p>
-<pre><code class="language-pen">\(ctx Context, address string, callback \(Request) Response) none | error
-</code></pre>
+<pre class="pen"><code>\(ctx Context, address string, callback \(Request) Response) none | error</code></pre>
 
 
 

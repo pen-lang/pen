@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1778,17 +1780,17 @@
 
 <h1 id="flag-package"><code>Flag</code> package</h1>
 <p>This package provides command-line flag parsing.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Flag&quot;: &quot;pen:///flag&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///flag&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="flagflag-module"><code>Flag'Flag</code> module</h2>
 <p>This module provides command-line flag parsing.</p>
 <p>The flags have the following formats:</p>
@@ -1800,16 +1802,14 @@
 <h3 id="types">Types</h3>
 <h4 id="set"><code>Set</code></h4>
 <p>A set of flags</p>
-<pre><code class="language-pen">type Set {
+<pre class="pen"><code>type Set {
   Named {string: string}
   Positional [string]
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions">Functions</h3>
 <h4 id="parse"><code>Parse</code></h4>
 <p>Parse flags.</p>
-<pre><code class="language-pen">\(ss [string]) Set | error
-</code></pre>
+<pre class="pen"><code>\(ss [string]) Set | error</code></pre>
 
 
 

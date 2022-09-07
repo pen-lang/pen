@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1729,39 +1731,37 @@
 <h1 id="list-as-stream">List as stream</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p><em>And</em> a file named "Hello.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 
 Hello = \(ctx Context) none {
-  _ = File'Write(ctx, File'StdOut(), &quot;hello&quot;)
+  _ = File'Write(ctx, File'StdOut(), "hello")
 
   none
-}
-</code></pre>
+}</code></pre>
 <h2 id="evaluate-an-element-lazily">Evaluate an element lazily</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import 'Hello
+<pre class="pen"><code>import 'Hello
 
 main = \(ctx context) none {
   [none Hello'Hello(ctx.Os)]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should not contain "hello".</p>
 <h2 id="evaluate-an-element-lazily-but-only-once">Evaluate an element lazily but only once</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Process
+<pre class="pen"><code>import Os'Process
 import 'Hello
 
 main = \(ctx context) none {
@@ -1773,14 +1773,13 @@ main = \(ctx context) none {
   } else {
     Process'Exit(ctx.Os, 1)
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "hello".</p>
 <h2 id="evaluate-multiple-elements-lazily">Evaluate multiple elements lazily</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import 'Hello
 
 foo = \(ctx Context) [none] {
@@ -1793,14 +1792,13 @@ main = \(ctx context) none {
   [none ...foo(ctx.Os)]
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should not contain "hello".</p>
 <h2 id="evaluate-multiple-elements-lazily-but-only-once">Evaluate multiple elements lazily but only once</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'Process
 import 'Hello
 
@@ -1822,8 +1820,7 @@ main = \(ctx context) none {
       none
     }
   }
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "hello".</p>

@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1769,30 +1771,27 @@
 <p>Pen provides several built-in functions for concurrent and parallel programming.</p>
 <h3 id="go-function"><code>go</code> function</h3>
 <p><a href="../../references/language/built-ins/#go">The <code>go</code> built-in function</a> runs a given function concurrently, and possibly in parallel.</p>
-<pre><code class="language-pen">future = go(\() number {
+<pre class="pen"><code>future = go(\() number {
   computeExpensive(x, y, z)
-})
-</code></pre>
+})</code></pre>
 <p>The <code>go</code> function returns a function of the same type as the given argument. The returned function returns a resulting value of the function execution. In other languages, such functions returning values computed concurrently when they are ready are also known as <a href="https://doc.rust-lang.org/std/future/trait.Future.html">futures</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">promises</a>.</p>
 <p>The <code>go</code> function may or may not run a given function immediately depending on its implementation. For example, <a href="../../references/standard-packages/os/">the standard <code>Os</code> system package</a> runs the given function in parallel if multiple CPU cores are available.</p>
 <h3 id="race-function"><code>race</code> function</h3>
 <p><a href="../../references/language/built-ins/#race">The <code>race</code> built-in function</a> takes multiple lists and merge them into one by evaluating elements in each list concurrently and possibly in parallel. The resulting list contains the elements in the original lists in order of their finished times of computation. Remember that elements in lists are evaluated lazily.</p>
-<pre><code class="language-pen">zs = race([[number] xs, ys])
-</code></pre>
+<pre class="pen"><code>zs = race([[number] xs, ys])</code></pre>
 <p>This functionality is similar to concurrent queues in other imperative languages, such as <a href="https://go.dev/tour/concurrency/2">channels</a> in <a href="https://go.dev">Go</a>. Input lists to the <code>race</code> function correspond to producers of elements into the queue, and a consumer of the queue is codes that use elements in the output list.</p>
 <h2 id="patterns">Patterns</h2>
 <h3 id="task-parallelism">Task parallelism</h3>
 <p>The <code>go</code> function can run different codes concurrently. For example, the following code runs the functions, <code>computeA</code> and <code>computeB</code> concurrently. Runtimes of applications might execute those functions even in parallel if their system packages allow that.</p>
-<pre><code class="language-pen">compute = \(x number, y number) number {
+<pre class="pen"><code>compute = \(x number, y number) number {
   z = go(\() number { computeA(x) })
   v = computeB(y)
 
   v + z
-}
-</code></pre>
+}</code></pre>
 <h3 id="data-parallelism">Data parallelism</h3>
 <p>To run the same computation against many values of the same type, you can use recursion and the <code>go</code> function.</p>
-<pre><code class="language-pen">computeMany = \(xs [number]) [number] {
+<pre class="pen"><code>computeMany = \(xs [number]) [number] {
   if [x, ...xs] = xs {
     y = go(\() number { foo(x()) })
     ys = computeMany(xs)
@@ -1801,18 +1800,15 @@
   } else {
     [number]
   }
-}
-</code></pre>
+}</code></pre>
 <p>The example above computes things in order of elements in the original list. However, you might want to see output values of concurrent computation in order of their finished times. By doing that, you can start using the output values as fast as possible without waiting for all computation to be completed. In this case, you can use the <code>race</code> function to reorder elements in the output list by their finished times.</p>
-<pre><code class="language-pen">compute = \(xs [number]) [number] {
+<pre class="pen"><code>compute = \(xs [number]) [number] {
   race([[number] [number x()] for x in computeMany(xs)])
-}
-</code></pre>
+}</code></pre>
 <p>If you want to evaluate elements in multiple lists concurrently, you can simply pass the lists as an argument to the <code>race</code> function. Note that elements in the same lists are not evaluated concurrently although elements in different lists are evaluated concurrently.</p>
-<pre><code class="language-pen">compute = \(xs [number], ys [number]) [number] {
+<pre class="pen"><code>compute = \(xs [number], ys [number]) [number] {
   race([[number] computeMany(xs), computeMany(ys)])
-}
-</code></pre>
+}</code></pre>
 
 
 

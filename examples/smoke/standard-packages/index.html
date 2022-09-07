@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1639,8 +1641,8 @@
 <h1 id="standard-packages">Standard packages</h1>
 <h2 id="build-and-test-standard-packages">Build and test standard packages</h2>
 <p><em>Given</em> I run the following script:</p>
-<pre><code>cp -r $PEN_ROOT/packages .
-</code></pre>
+<div class="highlight"><pre><span></span><code>cp -r $PEN_ROOT/packages .
+</code></pre></div>
 <p><em>When</em> I cd to "packages/<package>"</p>
 <p><em>Then</em> I successfully run <code>pen format --check</code></p>
 <p><em>And</em> I successfully run <code>pen build</code></p>

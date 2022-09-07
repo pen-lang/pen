@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1687,8 +1689,7 @@
 <h1 id="cross-compile">Cross compile</h1>
 <p>The language's compiler supports <a href="https://en.wikipedia.org/wiki/cross_compiler">cross compile</a>. To compile applications and libraries for different targets, specify the <code>--target</code> option of the <code>pen build</code> subcommand.</p>
 <p>For example, run the following command to compile a <code>wasm32</code> binary for the WASI platform.</p>
-<pre><code class="language-sh">pen build --target wasm32-wasi
-</code></pre>
+<pre class="sh"><code>pen build --target wasm32-wasi</code></pre>
 <p>Note that we currently support those targets via <a href="https://www.rust-lang.org/">Rust</a>'s cross compiler toolchain. Please install a Rust compiler through <a href="https://rust-lang.github.io/rustup/"><code>rustup</code></a> to enable installation of toolchains for different targets.</p>
 <h2 id="supported-targets">Supported targets</h2>
 <p>Run <code>pen build --help</code> to see all supported targets.</p>

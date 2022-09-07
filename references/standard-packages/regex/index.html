@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1806,39 +1808,35 @@
 
 <h1 id="regex-package"><code>Regex</code> package</h1>
 <p>This package provides regular expressions.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;library&quot;
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;library&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="install">Install</h2>
-<pre><code class="language-json">{
-  &quot;dependencies&quot;: {
-    &quot;Regex&quot;: &quot;pen:///regex&quot;
-  } 
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///regex&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="regexexpression-module"><code>Regex'Expression</code> module</h2>
 <p>This module provides functions to compile and match regular expressions.</p>
 <h3 id="types">Types</h3>
 <h4 id="expression"><code>Expression</code></h4>
 <p>A regular expression.</p>
-<pre><code class="language-pen">type Expression {
+<pre class="pen"><code>type Expression {
   # ...
-}
-</code></pre>
+}</code></pre>
 <h3 id="functions">Functions</h3>
 <h4 id="new"><code>New</code></h4>
 <p>Compile a regular expression.</p>
-<pre><code class="language-pen">\(s string) Expression | error
-</code></pre>
+<pre class="pen"><code>\(s string) Expression | error</code></pre>
 <h4 id="ismatch"><code>IsMatch</code></h4>
 <p>Check if a regular expression matches with a string or not.</p>
-<pre><code class="language-pen">\(e Expression, s string) boolean
-</code></pre>
+<pre class="pen"><code>\(e Expression, s string) boolean</code></pre>
 <h4 id="match"><code>Match</code></h4>
 <p>Match a regular expression with a string and return matched groups.</p>
-<pre><code class="language-pen">\(e Expression, s string) [string | none] | none
-</code></pre>
+<pre class="pen"><code>\(e Expression, s string) [string | none] | none</code></pre>
 
 
 

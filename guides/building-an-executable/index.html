@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1705,34 +1707,30 @@
 <h2 id="creating-an-application-package">Creating an application package</h2>
 <p><a href="../../references/language/packages/#application-packages">Application packages</a> are packages that are built into executables.
 To create it, you run a <code>pen create</code> command with your application's name (e.g. <code>foo</code>) in your terminal.</p>
-<pre><code class="language-sh">pen create foo
-</code></pre>
+<pre class="sh"><code>pen create foo</code></pre>
 <p>Then, you should see a <code>foo</code> directory in your current directory. When you go there, you should see a <code>main.pen</code> source file and a <code>pen.json</code> file for <a href="../../references/language/packages/#package-configuration">package configuration</a>.</p>
 <p><code>main.pen</code>:</p>
-<pre><code class="language-pen">import Os'File
+<pre class="pen"><code>import Os'File
 
 main = \(ctx context) none {
-  _ = File'Write(ctx.Os, File'StdOut(), &quot;Hello, world!\n&quot;)
+  _ = File'Write(ctx.Os, File'StdOut(), "Hello, world!\n")
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><code>pen.json</code>:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p>In this example, the <code>main.pen</code> file contains a program that outputs a text, "Hello, world!" in a terminal. And the <code>pen.json</code> configuration file defines a package type of <code>application</code> and its dependencies. Here, it has only a dependency of the <code>Os</code> <a href="../../references/language/packages/#system-packages">system package</a>.</p>
 <h2 id="building-a-package-into-an-executable">Building a package into an executable</h2>
 <p>To build the package, you run a <code>pen build</code> command in the package's directory.</p>
-<pre><code class="language-sh">pen build
-</code></pre>
+<pre class="sh"><code>pen build</code></pre>
 <p>Then, you will see an executable file named <code>app</code> in the directory. Now, you can run it to see its output, "Hello, world!"</p>
-<pre><code class="language-sh">./app # -&gt; Hello, world!
-</code></pre>
+<pre class="sh"><code>./app # -&gt; Hello, world!</code></pre>
 <h2 id="next-steps">Next steps</h2>
 <ul>
 <li><a href="../creating-a-library/">Creating a library</a></li>

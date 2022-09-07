@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1797,7 +1799,7 @@
 <p>Each source file suffixed with a <code>.pen</code> file extension composes a module. Modules can import functions and types from other modules.</p>
 <h2 id="exporting-functions-and-types-from-modules">Exporting functions and types from modules</h2>
 <p>You can name functions and types in an upper camel case for them to be accessible from other modules.</p>
-<pre><code class="language-pen">type Foo {
+<pre class="pen"><code>type Foo {
   ...
 }
 
@@ -1805,40 +1807,34 @@ type Bar = ...
 
 Foo = \() number {
   ...
-}
-</code></pre>
+}</code></pre>
 <h2 id="importing-functions-and-types-from-modules">Importing functions and types from modules</h2>
 <p>In order to import functions and types from other modules, place <a href="../syntax/#import-statement">import statements</a> at the top of modules.</p>
 <p>The first components in the statements are names of external packages you declare in <a href="../packages/#package-configuration">package configuration files</a> (<code>Foo</code>.) They are omitted if imported modules are in the same packages. The rest of the components are directory names where the modules exist (<code>Bar</code>) and the modules' filenames without their file extensions (<code>Baz</code> for <code>Baz.pen</code>.)</p>
-<pre><code class="language-pen">import Foo'Bar'Baz
-</code></pre>
+<pre class="pen"><code>import Foo'Bar'Baz</code></pre>
 <p>Then, you can access exported members of the modules with their prefixes.</p>
-<pre><code class="language-pen">type foo = Baz'Type
+<pre class="pen"><code>type foo = Baz'Type
 
 bar = \(x number) number {
   Baz'Function(x)
-}
-</code></pre>
+}</code></pre>
 <h3 id="module-names">Module names</h3>
 <h4 id="modules-in-the-same-package">Modules in the same package</h4>
 <p>Modules in the same package are referenced by their paths relative to a root directory of the package.</p>
 <p>For example, a module of a file at <code>&lt;package directory&gt;/Foo/Bar.pen</code> is imported as below.</p>
-<pre><code class="language-pen">import 'Foo'Bar
-</code></pre>
+<pre class="pen"><code>import 'Foo'Bar</code></pre>
 <h4 id="modules-in-other-packages">Modules in other packages</h4>
 <p>Modules in other packages are referenced by their package names defined in <a href="../packages/#package-configuration">package configuration files</a> and module paths.</p>
 <p>For example, a module of a file at <code>&lt;package directory&gt;/Bar/Baz.pen</code> in a package <code>Foo</code> is imported as below.</p>
-<pre><code class="language-pen">import Foo'Bar'Baz
-</code></pre>
+<pre class="pen"><code>import Foo'Bar'Baz</code></pre>
 <h4 id="private-modules">Private modules</h4>
 <p>For modules to be private and not accessible from other packages, you can name them in lower camel case (e.g. <code>fooBar</code>.)</p>
 <h3 id="custom-prefixes">Custom prefixes</h3>
 <p>Imported modules can have custom prefixes given different names after the <code>as</code> keywords.</p>
-<pre><code class="language-pen">import Foo'Bar'Baz as Blah
-</code></pre>
+<pre class="pen"><code>import Foo'Bar'Baz as Blah</code></pre>
 <h3 id="unqualified-import">Unqualified import</h3>
 <p>You can import functions and types without prefixes by putting their names between <code>{</code> and <code>}</code> in <a href="../syntax/#import-statement">import statements</a>. This is especially useful when module names and imported functions or types have the same names like <code>import 'MyType { MyType }</code>.</p>
-<pre><code class="language-pen">import Foo'Bar { Foo, Bar }
+<pre class="pen"><code>import Foo'Bar { Foo, Bar }
 
 type Baz {
   foo Foo
@@ -1846,8 +1842,7 @@ type Baz {
 
 Blah = \() number {
   Bar()
-}
-</code></pre>
+}</code></pre>
 
 
 

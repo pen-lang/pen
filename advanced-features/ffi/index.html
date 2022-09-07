@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1717,18 +1719,16 @@
 <h2 id="importing-functions-in-foreign-languages">Importing functions in foreign languages</h2>
 <p>You can import functions in foreign languages using <a href="../../references/language/syntax/#foreign-import-statement">foreign import statements</a>. The statements specify the foreign functions' calling convention, names and types.</p>
 <p>You might specify calling conventions of foreign functions in a format of string literals after <code>import foreign</code> keywords optionally. Currently, only the C calling convention is supported as <code>"c"</code>. If the options are omitted, the functions are imported with the native calling convention of Pen.</p>
-<pre><code class="language-pen">import foreign &quot;c&quot; foo \(number, number) number
-</code></pre>
+<pre class="pen"><code>import foreign "c" foo \(number, number) number</code></pre>
 <blockquote>
 <p>Caveat: You can import foreign functions that might cause side effects <strong>only in system packages</strong>. See also <a href="../writing-system-packages/">Writing system packages</a>.</p>
 </blockquote>
 <h2 id="exporting-functions-to-foreign-languages">Exporting functions to foreign languages</h2>
 <p>You can export functions to foreign languages using <a href="../../references/language/syntax/#foreign-function-definition">foreign function definitions</a>, which have <code>foreign</code> keywords in front of normal function definitions.</p>
 <p>You might specify calling conventions of exported foreign functions optionally after <code>foreign</code> keywords as well as <a href="#importing-functions-in-foreign-languages">imported foreign functions</a>.</p>
-<pre><code class="language-pen">foreign &quot;c&quot; foo = \(x number, y number) number {
+<pre class="pen"><code>foreign "c" foo = \(x number, y number) number {
   ...
-}
-</code></pre>
+}</code></pre>
 <h2 id="building-libraries-of-foreign-languages">Building libraries of foreign languages</h2>
 <p>During builds of your packages, you might want to build libraries of foreign languages so that you can use their functions. If that's your case, you can set up <code>pen-ffi</code> scripts in your packages. The script files run on every build and output absolute paths to <code>.a</code> archive files of your libraries in foreign languages built by the scripts. The script files may or may not have file extensions.</p>
 <p>The <code>pen-ffi</code> scripts should accept the following command line arguments.</p>

@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../../extra.css">
+    
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1654,17 +1656,17 @@
 <h1 id="os">OS</h1>
 <h2 id="background">Background</h2>
 <p><em>Given</em> a file named "pen.json" with:</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;,
-  &quot;dependencies&quot;: {
-    &quot;Os&quot;: &quot;pen:///os&quot;,
-    &quot;Core&quot;: &quot;pen:///core&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Os&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///os&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Core&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pen:///core&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="read-and-write-files">Read and write files</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'File'OpenOptions { OpenOptions }
 import Os'Process
@@ -1678,11 +1680,11 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  f = File'Open(ctx, &quot;foo.txt&quot;)?
+  f = File'Open(ctx, "foo.txt")?
   d = File'Read(ctx, f)?
   f = File'OpenWithOptions(
     ctx,
-    &quot;bar.txt&quot;,
+    "bar.txt",
     OpenOptions{
       ...OpenOptions'Default(),
       Create: true,
@@ -1692,15 +1694,14 @@ run = \(ctx Context) none | error {
   File'Write(ctx, f, d)?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "foo"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the file "bar.txt" should contain "foo".</p>
 <h2 id="read-a-file-until-a-limit">Read a file until a limit</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 import Os'File
 import Os'Process
 
@@ -1713,20 +1714,19 @@ main = \(ctx context) none {
 }
 
 run = \(ctx Context) none | error {
-  f = File'Open(ctx, &quot;foo.txt&quot;)?
+  f = File'Open(ctx, "foo.txt")?
   d = File'ReadLimit(ctx, f, 5)?
   File'Write(ctx, File'StdOut(), d)?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>And</em> a file named "foo.txt" with "Hello, world!"</p>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain exactly "Hello".</p>
 <h2 id="read-a-directory">Read a directory</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Core'String
+<pre class="pen"><code>import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Directory
@@ -1744,26 +1744,24 @@ run = \(ctx Context) none | error {
   File'Write(
     ctx,
     File'StdOut(),
-    String'Join(Directory'Read(ctx, &quot;.&quot;)?, &quot;\n&quot;),
+    String'Join(Directory'Read(ctx, ".")?, "\n"),
   )?
 
   none
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
 <p><em>And</em> the stdout from "./app" should contain "main.pen"</p>
 <p><em>And</em> the stdout from "./app" should contain "pen.json".</p>
 <h2 id="use-go-syntax">Use go syntax</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre><code class="language-pen">import Os'Context { Context }
+<pre class="pen"><code>import Os'Context { Context }
 
 main = \(ctx context) none {
   f = go(\() none { none })
 
   f()
-}
-</code></pre>
+}</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 

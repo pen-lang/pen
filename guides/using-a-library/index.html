@@ -40,6 +40,8 @@
       
     
     
+      <link rel="stylesheet" href="../../extra.css">
+    
     <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -1704,24 +1706,22 @@
 </ol>
 <h2 id="modifying-package-configuration">Modifying package configuration</h2>
 <p>To use a library package, you need to add the package as a dependency in another package. To add the dependency, you modify a <code>pen.json</code> configuration file in the package adding the library package's name (e.g. <code>Foo</code>) and URL (e.g. <code>git://github.com/your-name/foo</code>) in a <code>dependencies</code> field like the following example. Note that you need to specify a <code>git</code> protocol scheme for library packages published as Git repositories. For other kinds of library packages, see <a href="../../references/language/packages/#package-configuration">Package configuration</a>.</p>
-<pre><code class="language-json">{
-  &quot;type&quot;: &quot;application&quot;, // This can be any type.
-  &quot;dependencies&quot;: {
-    &quot;Foo&quot;: &quot;git://github.com/your-name/foo&quot;
-  }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;application&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// This can be any type.</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;Foo&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;git://github.com/your-name/foo&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="importing-functions-and-types-from-a-library-package">Importing functions and types from a library package</h2>
 <p>To import functions and types from the library package, you use <code>import</code> statements in a source file of your module with a name of the library package (e.g. <code>Foo</code>) and a module name (e.g. <code>Math</code>) where functions or types you want to use are defined.</p>
-<pre><code class="language-pen">import Foo'Math
-</code></pre>
+<pre class="pen"><code>import Foo'Math</code></pre>
 <p>Then, you are ready to use those functions and types with a prefix of the module name! For example, to call a function named <code>Add</code> in the <code>Math</code> module, you can write <code>Math'Add(x, y)</code>.</p>
-<pre><code class="language-pen">type MyType = Math'Order
+<pre class="pen"><code>type MyType = Math'Order
 
 MyFunction = \(x number, y number) number {
   Math'Add(x, y)
-}
-</code></pre>
+}</code></pre>
 <h2 id="next-steps">Next steps</h2>
 <ul>
 <li><a href="../building-an-executable/">Building an executable</a></li>
