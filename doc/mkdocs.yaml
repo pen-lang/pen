@@ -30,6 +30,8 @@ markdown_extensions:
   - mdx_truly_sane_lists
   - pymdownx.superfences:
       custom_fences:
+        - name: json
+          class: json
         - name: pen
           class: pen
         - name: sh
