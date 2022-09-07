@@ -30,9 +30,10 @@ markdown_extensions:
   - mdx_truly_sane_lists
   - pymdownx.superfences:
       custom_fences:
-        - name: "*"
-          class: "*"
-          format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: pen
+          class: pen
+        - name: sh
+          class: sh
   - pymdownx.tasklist:
       custom_checkbox: true
 nav:
