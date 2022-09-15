@@ -160,6 +160,11 @@ fn move_expression(
                 move_expression(field.expression(), variables)?;
             }
         }
+        Expression::StringConcatenation(concatenation) => {
+            for operand in concatenation.operands() {
+                move_expression(operand, variables)?;
+            }
+        }
         Expression::TryOperation(operation) => {
             move_expression(operation.operand(), variables)?;
 

@@ -16,3 +16,11 @@ updates:
     directory: /
     schedule:
       interval: daily
+  - package-ecosystem: npm
+    directory: /doc
+    schedule:
+      interval: daily
+  - package-ecosystem: pip
+    directory: /doc
+    schedule:
+      interval: daily

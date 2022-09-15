@@ -357,6 +357,20 @@ fn infer_expression(
             .into()
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                let lhs = infer_expression(operation.lhs(), variables)?;
+
+                AdditionOperation::new(
+                    Some(type_canonicalizer::canonicalize(
+                        &type_extractor::extract_from_expression(context, &lhs, variables)?,
+                        context.types(),
+                    )?),
+                    lhs,
+                    infer_expression(operation.rhs(), variables)?,
+                    operation.position().clone(),
+                )
+                .into()
+            }
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
                 infer_expression(operation.lhs(), variables)?,
@@ -1005,40 +1019,104 @@ mod tests {
         );
     }
 
-    #[test]
-    fn infer_thunk() {
-        let none_type = types::None::new(Position::fake());
+    mod function_definition {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-        assert_eq!(
-            infer_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        none_type.clone(),
-                        Thunk::new(None, None::new(Position::fake()), Position::fake()),
-                        Position::fake(),
-                    ),
-                    false,
-                )
-            ])),
-            Ok(
-                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        none_type.clone(),
-                        Thunk::new(
-                            Some(none_type.into()),
-                            None::new(Position::fake()),
-                            Position::fake()
+        #[test]
+        fn check_overridden_function_declaration() {
+            let function_declaration = FunctionDeclaration::new(
+                "f",
+                types::Function::new(
+                    vec![types::Number::new(Position::fake()).into()],
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                ),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(
+                    &Module::empty()
+                        .set_function_declarations(vec![function_declaration.clone()])
+                        .set_function_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Call::new(
+                                    None,
+                                    Variable::new("f", Position::fake()),
+                                    vec![],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )]),
+                ),
+                Ok(Module::empty()
+                    .set_function_declarations(vec![function_declaration])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![],
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                Variable::new("f", Position::fake()),
+                                vec![],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    false,
-                )])
+                        false,
+                    )]))
             )
-        );
+        }
+
+        #[test]
+        fn infer_thunk() {
+            let none_type = types::None::new(Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            none_type.clone(),
+                            Thunk::new(None, None::new(Position::fake()), Position::fake()),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            none_type.clone(),
+                            Thunk::new(
+                                Some(none_type.into()),
+                                None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
     }
 
     mod if_type {

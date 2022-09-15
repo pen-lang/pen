@@ -203,6 +203,10 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                 .collect(),
         )
         .into(),
+        Expression::StringConcatenation(concatenation) => {
+            StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
+                .into()
+        }
         Expression::TryOperation(operation) => TryOperation::new(
             transform_expression(context, operation.operand()),
             operation.name(),

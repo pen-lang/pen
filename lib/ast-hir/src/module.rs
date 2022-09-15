@@ -128,8 +128,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
 
             match operation.operator() {
                 ast::BinaryOperator::Add => {
-                    ir::ArithmeticOperation::new(ir::ArithmeticOperator::Add, lhs, rhs, position)
-                        .into()
+                    ir::AdditionOperation::new(None, lhs, rhs, position).into()
                 }
                 ast::BinaryOperator::Subtract => ir::ArithmeticOperation::new(
                     ir::ArithmeticOperator::Subtract,

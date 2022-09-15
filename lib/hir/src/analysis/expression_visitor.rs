@@ -94,6 +94,10 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
             visit_expression(comprehension.map());
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                visit_expression(operation.lhs());
+                visit_expression(operation.rhs());
+            }
             Operation::Arithmetic(operation) => {
                 visit_expression(operation.lhs());
                 visit_expression(operation.rhs());

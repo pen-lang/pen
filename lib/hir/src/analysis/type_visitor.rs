@@ -191,6 +191,14 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
             visit_expression(comprehension.map(), visit);
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => {
+                if let Some(type_) = operation.type_() {
+                    visit_type(type_, visit);
+                }
+
+                visit_expression(operation.lhs(), visit);
+                visit_expression(operation.rhs(), visit);
+            }
             Operation::Arithmetic(operation) => {
                 visit_expression(operation.lhs(), visit);
                 visit_expression(operation.rhs(), visit);
@@ -200,6 +208,10 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
                 visit_expression(operation.rhs(), visit);
             }
             Operation::Equality(operation) => {
+                if let Some(type_) = operation.type_() {
+                    visit_type(type_, visit);
+                }
+
                 visit_expression(operation.lhs(), visit);
                 visit_expression(operation.rhs(), visit);
             }

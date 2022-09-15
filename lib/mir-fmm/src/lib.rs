@@ -30,7 +30,8 @@ pub fn compile(
 ) -> Result<fmm::ir::Module, CompileError> {
     mir::analysis::type_check::check(module)?;
 
-    let module = mir::analysis::alpha_conversion::transform(module);
+    let module = mir::analysis::optimization::string_concatenation::transform(module);
+    let module = mir::analysis::alpha_conversion::transform(&module);
     let module = mir::analysis::normalization::transform(&module);
     let module = mir::analysis::environment_inference::transform(&module);
     let module = mir::analysis::lambda_lifting::transform(&module);
@@ -708,6 +709,18 @@ mod tests {
             ]));
         }
 
+        #[test]
+        fn compile_string() {
+            compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
+                mir::ir::FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    mir::types::Type::ByteString,
+                    mir::ir::ByteString::new("foo"),
+                ),
+            ]));
+        }
+
         mod case {
             use super::*;
 
@@ -786,26 +799,6 @@ mod tests {
             }
 
             #[test]
-            fn compile_string() {
-                compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
-                    mir::ir::FunctionDefinition::new(
-                        "f",
-                        vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
-                        mir::types::Type::ByteString,
-                        mir::ir::Case::new(
-                            mir::ir::Variable::new("x"),
-                            vec![mir::ir::Alternative::new(
-                                vec![mir::types::Type::ByteString],
-                                "y",
-                                mir::ir::Variable::new("y"),
-                            )],
-                            None,
-                        ),
-                    ),
-                ]));
-            }
-
-            #[test]
             fn compile_unboxed_large_record() {
                 let record_type = mir::types::Record::new("a");
 
@@ -827,6 +820,26 @@ mod tests {
                             ),
                         )]),
                 );
+            }
+
+            #[test]
+            fn compile_string() {
+                compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
+                    mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::ByteString,
+                        mir::ir::Case::new(
+                            mir::ir::Variable::new("x"),
+                            vec![mir::ir::Alternative::new(
+                                vec![mir::types::Type::ByteString],
+                                "y",
+                                mir::ir::Variable::new("y"),
+                            )],
+                            None,
+                        ),
+                    ),
+                ]));
             }
 
             #[test]
@@ -1120,6 +1133,51 @@ mod tests {
             }
         }
 
+        mod string_concatenation {
+            use super::*;
+
+            #[test]
+            fn compile_no_operand() {
+                compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
+                    mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::types::Type::ByteString,
+                        mir::ir::StringConcatenation::new(vec![]),
+                    ),
+                ]));
+            }
+
+            #[test]
+            fn compile_operand() {
+                compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
+                    mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::types::Type::ByteString,
+                        mir::ir::StringConcatenation::new(vec![
+                            mir::ir::ByteString::new("foo").into(),
+                        ]),
+                    ),
+                ]));
+            }
+
+            #[test]
+            fn compile_operands() {
+                compile_module(&mir::ir::Module::empty().set_function_definitions(vec![
+                    mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![],
+                        mir::types::Type::ByteString,
+                        mir::ir::StringConcatenation::new(vec![
+                            mir::ir::ByteString::new("foo").into(),
+                            mir::ir::ByteString::new("bar").into(),
+                        ]),
+                    ),
+                ]));
+            }
+        }
+
         mod variant {
             use super::*;
 
@@ -1213,7 +1271,7 @@ mod tests {
             }
         }
 
-        mod calls {
+        mod call {
             use super::*;
 
             #[test]
@@ -1457,7 +1515,7 @@ mod tests {
         }
     }
 
-    mod thunks {
+    mod thunk {
         use super::*;
 
         #[test]

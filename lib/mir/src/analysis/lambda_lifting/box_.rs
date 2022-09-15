@@ -45,7 +45,6 @@ pub fn is_boxed(expression: &Expression, name: &str) -> bool {
                 .any(|free_variable| free_variable.name() == name)
                 || let_.definition().name() != name && is_uniform(let_.expression())
         }
-        Expression::Synchronize(synchronize) => is_uniform(synchronize.expression()),
         Expression::Record(record) => record.fields().iter().any(is_uniform),
         Expression::RecordField(field) => is_uniform(field.record()),
         Expression::RecordUpdate(update) => {
@@ -55,6 +54,10 @@ pub fn is_boxed(expression: &Expression, name: &str) -> bool {
                     .iter()
                     .any(|field| is_uniform(field.expression()))
         }
+        Expression::StringConcatenation(concatenation) => {
+            concatenation.operands().iter().any(is_uniform)
+        }
+        Expression::Synchronize(synchronize) => is_uniform(synchronize.expression()),
         Expression::TryOperation(operation) => {
             is_uniform(operation.operand()) || is_uniform(operation.then())
         }

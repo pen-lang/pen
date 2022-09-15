@@ -38,7 +38,7 @@
     "lcov",
     "libc",
     "malloc",
-    "mdbook",
+    "mkdocs",
     "modifiability",
     "mtriple",
     "optarg",

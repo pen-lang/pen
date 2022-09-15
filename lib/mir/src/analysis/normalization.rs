@@ -3,7 +3,7 @@ mod context;
 
 use self::context::Context;
 use crate::{ir::*, types::Type};
-use std::convert::identity;
+use std::{convert::identity, iter::repeat};
 
 // Normalize expressions into the A-normal form with some exceptions.
 //
@@ -206,6 +206,15 @@ fn transform_expression(
                     },
                 )
             },
+        ),
+        Expression::StringConcatenation(concatenation) => transform_expressions(
+            context,
+            &concatenation
+                .operands()
+                .iter()
+                .zip(repeat(&Type::ByteString))
+                .collect::<Vec<_>>(),
+            &|operands| continue_(StringConcatenation::new(operands).into()),
         ),
         Expression::TryOperation(operation) => {
             transform_expression(operation.operand(), &|operand| {
