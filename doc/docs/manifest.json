@@ -1,0 +1,9 @@
+{
+  "short_name": "Pen",
+  "name": "Pen programming language",
+  "icons": [{ "src": "icon.svg", "sizes": "any" }],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f55",
+  "background_color": "gray"
+}
