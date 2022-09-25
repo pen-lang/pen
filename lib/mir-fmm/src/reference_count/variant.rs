@@ -2,6 +2,7 @@ use super::{
     super::error::CompileError, expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
 };
 use crate::{context::Context, type_, variant};
+use mir::ir::ByteString;
 
 const FUNCTION_PREFIX: &str = "mir:variant:";
 const ARGUMENT_NAME: &str = "_payload";
@@ -109,6 +110,37 @@ pub fn compile_synchronize_function(
             }
 
             Ok(builder.return_(fmm::ir::void_value()))
+        },
+        REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
+    )
+}
+
+pub fn compile_debug_function(
+    context: &Context,
+    type_: &mir::types::Type,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let payload_type = type_::compile_variant_payload();
+
+    context.module_builder().define_function(
+        compile_function_name(type_, "debug"),
+        vec![fmm::ir::Argument::new(ARGUMENT_NAME, payload_type.clone())],
+        type_::compile_string(),
+        |builder| -> Result<_, CompileError> {
+            let _payload = variant::unbox_payload(
+                context,
+                &builder,
+                &fmm::build::variable(ARGUMENT_NAME, payload_type),
+                type_,
+            )?;
+
+            // TODO Call a type-specific debug function.
+
+            Ok(builder.return_(crate::expression::compile(
+                context,
+                &builder,
+                &ByteString::new("UNKNOWN").into(),
+                &Default::default(),
+            )?))
         },
         REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS.clone(),
     )

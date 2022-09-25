@@ -10,6 +10,7 @@ pub fn compile_global_variable(
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
             reference_count::variant::compile_synchronize_function(context, type_)?,
+            reference_count::variant::compile_debug_function(context, type_)?,
         ]),
         fmm::ir::VariableDefinitionOptions::new()
             .set_address_named(true)
