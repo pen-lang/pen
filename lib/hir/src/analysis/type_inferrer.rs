@@ -537,14 +537,14 @@ fn infer_built_in_call(
     Ok(Call::new(
         Some(
             match function.name() {
-                BuiltInFunctionName::Error => types::Function::new(
-                    vec![types::Any::new(position.clone()).into()],
-                    types::Error::new(position.clone()),
-                    position.clone(),
-                ),
                 BuiltInFunctionName::Debug => types::Function::new(
                     vec![types::Any::new(position.clone()).into()],
                     types::None::new(position.clone()),
+                    position.clone(),
+                ),
+                BuiltInFunctionName::Error => types::Function::new(
+                    vec![types::Any::new(position.clone()).into()],
+                    types::Error::new(position.clone()),
                     position.clone(),
                 ),
                 BuiltInFunctionName::Race => {
