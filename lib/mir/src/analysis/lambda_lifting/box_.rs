@@ -61,6 +61,7 @@ pub fn is_boxed(expression: &Expression, name: &str) -> bool {
         Expression::TryOperation(operation) => {
             is_uniform(operation.operand()) || is_uniform(operation.then())
         }
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variable(variable) => variable.name() == name,
         Expression::Variant(variant) => is_uniform(variant.payload()),
         Expression::Boolean(_)

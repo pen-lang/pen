@@ -300,6 +300,7 @@ pub fn compile(
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }
+        mir::ir::Expression::TypeInformation(_) => todo!(),
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,

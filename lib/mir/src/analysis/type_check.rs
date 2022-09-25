@@ -247,6 +247,7 @@ fn check_expression(
 
             type_
         }
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {

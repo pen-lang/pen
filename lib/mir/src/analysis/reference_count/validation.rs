@@ -178,6 +178,7 @@ fn move_expression(
                 ));
             }
         }
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variable(variable) => {
             drop_variable(variable.name(), variables);
         }

@@ -4,7 +4,7 @@ use crate::{
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
-    type_, CompileError,
+    type_, type_information, CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
@@ -39,7 +39,22 @@ pub fn compile(
 
     Ok(match function.name() {
         BuiltInFunctionName::Debug => {
-            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
+            let types = type_information::compile_types();
+
+            compile_call(
+                mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+                vec![mir::ir::Call::new(
+                    types[0].clone().into_function().unwrap(),
+                    mir::ir::TypeInformation::new(
+                        types,
+                        type_information::DEBUG_FUNCTION_INDEX,
+                        arguments[0].clone(),
+                    ),
+                    arguments,
+                )
+                .into()],
+            )?
+            .into()
         }
         BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
@@ -176,6 +191,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
@@ -202,7 +218,13 @@ mod tests {
                     .into()
                 ),
                 BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                vec![ByteString::new(vec![], Position::fake()).into()],
+                vec![TypeCoercion::new(
+                    types::None::new(Position::fake()),
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()],
                 Position::fake(),
             ),),
             Ok(mir::ir::Call::new(
@@ -211,7 +233,22 @@ mod tests {
                     mir::types::Type::None
                 ),
                 mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-                vec![mir::ir::ByteString::new(vec![]).into()],
+                vec![mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Variant],
+                        mir::types::Type::ByteString
+                    ),
+                    mir::ir::TypeInformation::new(
+                        type_information::compile_types(),
+                        type_information::DEBUG_FUNCTION_INDEX,
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
+                    ),
+                    vec![
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
+                            .into()
+                    ],
+                )
+                .into()],
             )
             .into())
         );

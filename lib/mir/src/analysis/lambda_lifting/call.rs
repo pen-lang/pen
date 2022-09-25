@@ -142,6 +142,7 @@ pub fn transform(expression: &Expression, name: &str, free_variables: &[Argument
             transform_shadowed(operation.then(), operation.name()),
         )
         .into(),
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }

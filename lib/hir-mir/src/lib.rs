@@ -18,6 +18,7 @@ mod test_function;
 mod test_module_configuration;
 mod transformation;
 mod type_;
+mod type_information;
 
 pub use compile_configuration::CompileConfiguration;
 use context::CompileContext;

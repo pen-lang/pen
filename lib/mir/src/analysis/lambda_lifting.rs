@@ -177,11 +177,6 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                 LetRecursive::new(definition, expression).into()
             }
         }
-        Expression::Synchronize(synchronize) => Synchronize::new(
-            synchronize.type_().clone(),
-            transform(synchronize.expression()),
-        )
-        .into(),
         Expression::Record(record) => Record::new(
             record.type_().clone(),
             record.fields().iter().map(transform).collect(),
@@ -207,6 +202,11 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
                 .into()
         }
+        Expression::Synchronize(synchronize) => Synchronize::new(
+            synchronize.type_().clone(),
+            transform(synchronize.expression()),
+        )
+        .into(),
         Expression::TryOperation(operation) => TryOperation::new(
             transform_expression(context, operation.operand()),
             operation.name(),
@@ -214,6 +214,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             transform_expression(context, operation.then()),
         )
         .into(),
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variant(variant) => Variant::new(
             variant.type_().clone(),
             transform_expression(context, variant.payload()),

@@ -219,6 +219,7 @@ fn transform_expression(
             ),
         )
         .into(),
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }

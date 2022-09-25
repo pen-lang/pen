@@ -528,6 +528,7 @@ fn transform_expression(
                 operand_moved_variables,
             )
         }
+        Expression::TypeInformation(_) => todo!(),
         Expression::Variable(variable) => {
             if should_clone_variable(variable.name(), owned_variables, moved_variables) {
                 (
