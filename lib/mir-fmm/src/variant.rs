@@ -97,7 +97,7 @@ fn box_payload(
     )
 }
 
-pub fn unbox_payload(
+fn unbox_payload(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     value: &fmm::build::TypedExpression,
