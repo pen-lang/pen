@@ -27,14 +27,7 @@ pub trait ModuleFake {
 
 impl ModuleFake for Module {
     fn empty() -> Self {
-        Self::new(
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            vec![],
-            TypeInformation::new(vec![]),
-        )
+        Self::new(vec![], vec![], vec![], vec![], vec![], Default::default())
     }
 
     fn set_type_definitions(&self, definitions: Vec<TypeDefinition>) -> Self {

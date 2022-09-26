@@ -403,7 +403,10 @@ mod tests {
     };
 
     fn check_module(module: &Module) -> Result<(), TypeCheckError> {
-        check(&module.set_type_information(types::TypeInformation::new(vec![Type::None])))
+        check(&module.set_type_information(types::TypeInformation::new(
+            vec![Type::None],
+            Default::default(),
+        )))
     }
 
     #[test]

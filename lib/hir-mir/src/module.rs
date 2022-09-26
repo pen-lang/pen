@@ -60,7 +60,8 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .iter()
             .map(|definition| compile_function_definition(context, definition))
             .collect::<Result<Vec<_>, CompileError>>()?,
-        type_information::compile(),
+        // TODO Compile type information.
+        type_information::compile(Default::default()),
     ))
 }
 
@@ -143,7 +144,7 @@ mod tests {
     }
 
     fn create_mir_module() -> mir::ir::Module {
-        mir::ir::Module::empty().set_type_information(type_information::compile())
+        mir::ir::Module::empty().set_type_information(type_information::compile(Default::default()))
     }
 
     #[test]
