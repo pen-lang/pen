@@ -214,7 +214,12 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             transform_expression(context, operation.then()),
         )
         .into(),
-        Expression::TypeInformation(_) => todo!(),
+        Expression::TypeInformation(information) => TypeInformation::new(
+            information.types().to_vec(),
+            information.index(),
+            transform_expression(context, information.variant()),
+        )
+        .into(),
         Expression::Variant(variant) => Variant::new(
             variant.type_().clone(),
             transform_expression(context, variant.payload()),
