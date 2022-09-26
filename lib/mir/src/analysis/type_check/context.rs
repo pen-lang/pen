@@ -1,6 +1,5 @@
 use crate::types::TypeInformation;
 
-// TODO Move this to `type_check` module.
 pub struct Context<'a> {
     type_information: &'a TypeInformation,
 }
