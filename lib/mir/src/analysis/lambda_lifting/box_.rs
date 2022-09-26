@@ -1,6 +1,8 @@
 use crate::ir::*;
 
-// Does a function need to be boxed into a uniform representation?
+/// Returns `true` if a given function as a `name` argument needs to be boxed
+/// into a uniform representation when, for example, the function is captured
+/// in environment of another function.
 pub fn is_boxed(expression: &Expression, name: &str) -> bool {
     let is_uniform = |expression| is_boxed(expression, name);
 

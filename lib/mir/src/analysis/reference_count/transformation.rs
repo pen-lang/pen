@@ -687,7 +687,7 @@ mod tests {
             )
             .unwrap(),
             (
-                TypeInformation::new(types.clone(), 0, Variable::new("x")).into(),
+                TypeInformation::new(types, 0, Variable::new("x")).into(),
                 ["x".into()].into_iter().collect()
             ),
         );
