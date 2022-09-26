@@ -219,7 +219,12 @@ fn transform_expression(
             ),
         )
         .into(),
-        Expression::TypeInformation(_) => todo!(),
+        Expression::TypeInformation(information) => TypeInformation::new(
+            information.types().to_vec(),
+            information.index(),
+            transform(information.variant()),
+        )
+        .into(),
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }
