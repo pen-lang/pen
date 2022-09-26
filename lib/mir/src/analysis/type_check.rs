@@ -260,7 +260,9 @@ fn check_expression(
                 &Type::Variant,
             )?;
 
-            context.type_information().types()[information.index()].clone()
+            context.type_information().types()[information.index()]
+                .clone()
+                .into()
         }
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
@@ -404,7 +406,7 @@ mod tests {
 
     fn check_module(module: &Module) -> Result<(), TypeCheckError> {
         check(&module.set_type_information(types::TypeInformation::new(
-            vec![Type::None],
+            vec![types::Function::new(vec![], Type::None)],
             Default::default(),
         )))
     }
@@ -709,7 +711,7 @@ mod tests {
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "f",
             vec![Argument::new("x", Type::Variant)],
-            Type::None,
+            types::Function::new(vec![], Type::None),
             TypeInformation::new(0, Variable::new("x")),
         )]);
         assert_eq!(check_module(&module), Ok(()));
