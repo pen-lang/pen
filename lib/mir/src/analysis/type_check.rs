@@ -1,7 +1,8 @@
+mod context;
 mod error;
 mod name;
 
-use super::context::Context;
+use self::context::Context;
 use crate::{
     ir::*,
     types::{self, Type},
