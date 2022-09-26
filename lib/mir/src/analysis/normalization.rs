@@ -229,7 +229,18 @@ fn transform_expression(
                 )
             })
         }
-        Expression::TypeInformation(_) => todo!(),
+        Expression::TypeInformation(information) => {
+            transform_expression(information.variant(), &|expression| {
+                continue_(
+                    TypeInformation::new(
+                        information.types().to_vec(),
+                        information.index(),
+                        expression,
+                    )
+                    .into(),
+                )
+            })
+        }
         Expression::Variant(variant) => transform_expression(variant.payload(), &|expression| {
             continue_(Variant::new(variant.type_().clone(), expression).into())
         }),
@@ -893,6 +904,40 @@ mod tests {
                     Type::None,
                     Expression::None,
                     TryOperation::new(Variable::new("x"), "e", Type::None, Variable::new("e")),
+                )
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_type_information() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Type::None,
+                    TypeInformation::new(
+                        vec![Type::None],
+                        0,
+                        Let::new(
+                            "x",
+                            Type::Variant,
+                            Variant::new(Type::None, Expression::None),
+                            Variable::new("x")
+                        ),
+                    )
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f",
+                vec![],
+                Type::None,
+                Let::new(
+                    "x",
+                    Type::Variant,
+                    Variant::new(Type::None, Expression::None),
+                    TypeInformation::new(vec![Type::None], 0, Variable::new("x"))
                 )
             )])
         );
