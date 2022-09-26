@@ -1,4 +1,5 @@
 pub mod alpha_conversion;
+pub mod context;
 pub mod environment_inference;
 mod expression_conversion;
 pub mod free_variable;
