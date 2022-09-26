@@ -18,6 +18,10 @@ impl TypeInformation {
         }
     }
 
+    pub fn types(&self) -> &[Type] {
+        &self.types
+    }
+
     pub fn type_(&self) -> &Type {
         &self.types[self.index]
     }

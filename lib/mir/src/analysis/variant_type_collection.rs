@@ -71,7 +71,7 @@ fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
             .chain(collect_from_expression(operation.operand()))
             .chain(collect_from_expression(operation.then()))
             .collect(),
-        Expression::TypeInformation(_) => todo!(),
+        Expression::TypeInformation(information) => collect_from_expression(information.variant()),
         Expression::Variant(variant) => [variant.type_().clone()]
             .into_iter()
             .chain(collect_from_expression(variant.payload()))

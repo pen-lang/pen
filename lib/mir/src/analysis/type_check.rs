@@ -247,7 +247,14 @@ fn check_expression(
 
             type_
         }
-        Expression::TypeInformation(_) => todo!(),
+        Expression::TypeInformation(information) => {
+            check_equality(
+                &check_expression(information.variant(), variables)?,
+                &Type::Variant,
+            )?;
+
+            information.type_().clone()
+        }
         Expression::Variable(variable) => check_variable(variable, variables)?,
         Expression::Variant(variant) => {
             if matches!(variant.type_(), Type::Variant) {
@@ -677,6 +684,17 @@ mod tests {
             check(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
+    }
+
+    #[test]
+    fn check_type_information() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+            "f",
+            vec![Argument::new("x", Type::Variant)],
+            Type::None,
+            TypeInformation::new(vec![Type::None], 0, Variable::new("x")),
+        )]);
+        assert_eq!(check(&module), Ok(()));
     }
 
     mod if_ {
