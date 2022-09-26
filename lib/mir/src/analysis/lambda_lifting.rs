@@ -31,6 +31,7 @@ pub fn transform(module: &Module) -> Module {
             .into_iter()
             .chain(context.into_function_definitions())
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -215,7 +216,6 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
         )
         .into(),
         Expression::TypeInformation(information) => TypeInformation::new(
-            information.types().to_vec(),
             information.index(),
             transform_expression(context, information.variant()),
         )

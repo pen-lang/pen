@@ -19,6 +19,7 @@ pub fn transform(module: &Module) -> Result<Module, ReferenceCountError> {
                 ))
             })
             .collect::<Result<_, _>>()?,
+        module.type_information().clone(),
     ))
 }
 
@@ -533,12 +534,7 @@ fn transform_expression(
                 transform_expression(information.variant(), owned_variables, moved_variables)?;
 
             (
-                TypeInformation::new(
-                    information.types().to_vec(),
-                    information.index(),
-                    expression,
-                )
-                .into(),
+                TypeInformation::new(information.index(), expression).into(),
                 moved_variables,
             )
         }
@@ -677,17 +673,15 @@ mod tests {
 
     #[test]
     fn transform_type_information() {
-        let types = vec![Type::None];
-
         assert_eq!(
             transform_expression(
-                &TypeInformation::new(types.clone(), 0, Variable::new("x")).into(),
+                &TypeInformation::new(0, Variable::new("x")).into(),
                 &[("x".into(), Type::Variant)].into_iter().collect(),
                 &Default::default()
             )
             .unwrap(),
             (
-                TypeInformation::new(types, 0, Variable::new("x")).into(),
+                TypeInformation::new(0, Variable::new("x")).into(),
                 ["x".into()].into_iter().collect()
             ),
         );

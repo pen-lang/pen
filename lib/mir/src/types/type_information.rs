@@ -1,5 +1,6 @@
 use super::Type;
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TypeInformation {
     types: Vec<Type>,
 }

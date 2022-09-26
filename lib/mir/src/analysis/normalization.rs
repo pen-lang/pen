@@ -32,6 +32,7 @@ pub fn transform(module: &Module) -> Module {
                 )
             })
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -231,14 +232,7 @@ fn transform_expression(
         }
         Expression::TypeInformation(information) => {
             transform_expression(information.variant(), &|expression| {
-                continue_(
-                    TypeInformation::new(
-                        information.types().to_vec(),
-                        information.index(),
-                        expression,
-                    )
-                    .into(),
-                )
+                continue_(TypeInformation::new(information.index(), expression).into())
             })
         }
         Expression::Variant(variant) => transform_expression(variant.payload(), &|expression| {
@@ -918,7 +912,6 @@ mod tests {
                     vec![],
                     Type::None,
                     TypeInformation::new(
-                        vec![Type::None],
                         0,
                         Let::new(
                             "x",
@@ -937,7 +930,7 @@ mod tests {
                     "x",
                     Type::Variant,
                     Variant::new(Type::None, Expression::None),
-                    TypeInformation::new(vec![Type::None], 0, Variable::new("x"))
+                    TypeInformation::new(0, Variable::new("x"))
                 )
             )])
         );

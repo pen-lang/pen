@@ -54,6 +54,7 @@ pub fn transform(module: &Module) -> Module {
                 )
             })
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -238,12 +239,9 @@ fn transform_expression<'a>(
             )
             .into()
         }
-        Expression::TypeInformation(information) => TypeInformation::new(
-            information.types().to_vec(),
-            information.index(),
-            transform(information.variant()),
-        )
-        .into(),
+        Expression::TypeInformation(information) => {
+            TypeInformation::new(information.index(), transform(information.variant())).into()
+        }
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }

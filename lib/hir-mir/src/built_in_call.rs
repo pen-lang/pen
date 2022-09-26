@@ -38,24 +38,19 @@ pub fn compile(
     };
 
     Ok(match function.name() {
-        BuiltInFunctionName::Debug => {
-            let types = type_information::compile_types();
-
-            compile_call(
-                mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-                vec![mir::ir::Call::new(
-                    types[0].clone().into_function().unwrap(),
-                    mir::ir::TypeInformation::new(
-                        types,
-                        type_information::DEBUG_FUNCTION_INDEX,
-                        arguments[0].clone(),
-                    ),
-                    arguments,
-                )
-                .into()],
-            )?
-            .into()
-        }
+        BuiltInFunctionName::Debug => compile_call(
+            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+            vec![mir::ir::Call::new(
+                type_information::compile_debug_function_type(),
+                mir::ir::TypeInformation::new(
+                    type_information::DEBUG_FUNCTION_INDEX,
+                    arguments[0].clone(),
+                ),
+                arguments,
+            )
+            .into()],
+        )?
+        .into(),
         BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
             arguments,
@@ -239,7 +234,6 @@ mod tests {
                         mir::types::Type::ByteString
                     ),
                     mir::ir::TypeInformation::new(
-                        type_information::compile_types(),
                         type_information::DEBUG_FUNCTION_INDEX,
                         mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
                     ),

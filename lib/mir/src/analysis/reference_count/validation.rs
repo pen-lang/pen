@@ -850,7 +850,7 @@ mod tests {
                 "f",
                 vec![Argument::new("x", Type::Variant)],
                 Type::None,
-                TypeInformation::new(vec![Type::None], 0, Variable::new("x")),
+                TypeInformation::new(0, Variable::new("x")),
             )]),
         )
         .unwrap();
