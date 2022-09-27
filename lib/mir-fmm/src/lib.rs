@@ -60,7 +60,7 @@ pub fn compile(
         function_declaration::compile(&context, declaration);
     }
 
-    let global_variables = compile_global_variables(&module, context.types())?;
+    let global_variables = compile_global_variables(&context, &module)?;
 
     for definition in module.function_definitions() {
         function_definition::compile(&context, definition, &global_variables)?;
@@ -99,8 +99,8 @@ pub fn compile(
 }
 
 fn compile_global_variables(
+    context: &Context,
     module: &mir::ir::Module,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<FnvHashMap<String, fmm::build::TypedExpression>, CompileError> {
     module
         .foreign_declarations()
@@ -111,7 +111,7 @@ fn compile_global_variables(
                 fmm::build::variable(
                     declaration.name(),
                     fmm::types::Pointer::new(reference_count::block::compile_type(
-                        type_::compile_unsized_closure(declaration.type_(), types),
+                        type_::compile_unsized_closure(context, declaration.type_()),
                     )),
                 ),
             )
@@ -122,7 +122,7 @@ fn compile_global_variables(
                 fmm::build::variable(
                     declaration.name(),
                     fmm::types::Pointer::new(reference_count::block::compile_type(
-                        type_::compile_unsized_closure(declaration.type_(), types),
+                        type_::compile_unsized_closure(context, declaration.type_()),
                     )),
                 ),
             )
@@ -134,12 +134,12 @@ fn compile_global_variables(
                 definition.name().into(),
                 fmm::build::bit_cast(
                     fmm::types::Pointer::new(reference_count::block::compile_type(
-                        type_::compile_unsized_closure(definition.type_(), types),
+                        type_::compile_unsized_closure(context, definition.type_()),
                     )),
                     fmm::build::variable(
                         definition.name(),
                         fmm::types::Pointer::new(reference_count::block::compile_type(
-                            type_::compile_sized_closure(definition, types),
+                            type_::compile_sized_closure(context, definition),
                         )),
                     ),
                 )

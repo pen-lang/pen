@@ -14,7 +14,7 @@ pub fn compile(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_with_builder(context, |builder, environment_pointer| {
         let environment = builder.load(fmm::build::bit_cast(
-            fmm::types::Pointer::new(type_::compile_environment(definition, context.types())),
+            fmm::types::Pointer::new(type_::compile_environment(context, definition)),
             environment_pointer.clone(),
         ))?;
 
@@ -40,10 +40,7 @@ pub fn compile_normal_thunk(
             builder,
             &builder.load(fmm::build::union_address(
                 fmm::build::bit_cast(
-                    fmm::types::Pointer::new(type_::compile_closure_payload(
-                        definition,
-                        context.types(),
-                    )),
+                    fmm::types::Pointer::new(type_::compile_closure_payload(context, definition)),
                     environment_pointer.clone(),
                 ),
                 1,
@@ -73,8 +70,8 @@ fn compile_with_builder(
                 &builder,
                 &super::get_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
+                        context,
                         &DUMMY_FUNCTION_TYPE,
-                        context.types(),
                     )),
                     fmm::build::variable(argument.name(), argument.type_().clone()),
                 ))?,

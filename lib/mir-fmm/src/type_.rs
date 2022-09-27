@@ -1,25 +1,24 @@
 pub mod foreign;
 pub mod variant;
 
-use fnv::FnvHashMap;
+use crate::context::Context;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
-pub fn compile(
-    type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Type {
+pub fn compile(context: &Context, type_: &mir::types::Type) -> fmm::types::Type {
     match type_ {
         mir::types::Type::Boolean => fmm::types::Primitive::Boolean.into(),
-        mir::types::Type::Function(function) => {
-            fmm::types::Pointer::new(compile_unsized_closure(function, types)).into()
-        }
+        mir::types::Type::Function(function) => compile_function(context, function),
         mir::types::Type::None => compile_none(),
         mir::types::Type::Number => fmm::types::Primitive::Float64.into(),
-        mir::types::Type::Record(record) => compile_record(record, types),
+        mir::types::Type::Record(record) => compile_record(context, record),
         mir::types::Type::ByteString => compile_string().into(),
-        mir::types::Type::Variant => compile_variant().into(),
+        mir::types::Type::Variant => compile_variant(context).into(),
     }
+}
+
+pub fn compile_function(context: &Context, function: &mir::types::Function) -> fmm::types::Type {
+    fmm::types::Pointer::new(compile_unsized_closure(context, function)).into()
 }
 
 pub fn compile_none() -> fmm::types::Type {
@@ -34,7 +33,7 @@ pub fn compile_string() -> fmm::types::Pointer {
     ]))
 }
 
-pub fn compile_variant() -> fmm::types::Record {
+pub fn compile_variant(context: &Context) -> fmm::types::Record {
     fmm::types::Record::new(vec![
         compile_variant_tag().into(),
         compile_variant_payload().into(),
@@ -77,22 +76,16 @@ pub fn compile_id(type_: &mir::types::Type) -> String {
     format!("{:?}", type_)
 }
 
-pub fn compile_record(
-    record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> fmm::types::Type {
-    if is_record_boxed(record, types) {
+pub fn compile_record(context: &Context, record: &mir::types::Record) -> fmm::types::Type {
+    if is_record_boxed(context, record) {
         compile_boxed_record()
     } else {
         compile_unboxed_record(record, types).into()
     }
 }
 
-pub fn is_record_boxed(
-    record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> bool {
-    let body_type = &types[record.name()];
+pub fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
+    let body_type = &context.types()[record.name()];
 
     // TODO Unbox small records.
     !body_type.fields().is_empty()
@@ -103,55 +96,55 @@ pub fn compile_boxed_record() -> fmm::types::Type {
 }
 
 pub fn compile_unboxed_record(
+    context: &Context,
     record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     fmm::types::Record::new(
-        types[record.name()]
+        context.types()[record.name()]
             .fields()
             .iter()
-            .map(|type_| compile(type_, types))
+            .map(|type_| compile(context, type_))
             .collect(),
     )
 }
 
 pub fn compile_sized_closure(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function(definition.type_(), types),
-        compile_closure_payload(definition, types),
+        compile_entry_function(context, definition.type_()),
+        compile_closure_payload(context, definition),
     )
 }
 
 pub fn compile_closure_payload(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Type {
     if definition.is_thunk() {
-        compile_thunk_payload(definition, types).into()
+        compile_thunk_payload(context, definition).into()
     } else {
-        compile_environment(definition, types).into()
+        compile_environment(context, definition).into()
     }
 }
 
 pub fn compile_thunk_payload(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Union {
     fmm::types::Union::new(vec![
-        compile_environment(definition, types).into(),
-        compile(definition.result_type(), types),
+        compile_environment(context, definition).into(),
+        compile(context, definition.result_type()),
     ])
 }
 
 pub fn compile_unsized_closure(
+    context: &Context,
     function: &mir::types::Function,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     compile_raw_closure(
-        compile_entry_function(function, types),
+        compile_entry_function(context, function),
         compile_unsized_environment(),
     )
 }
@@ -168,14 +161,14 @@ fn compile_raw_closure(
 }
 
 pub fn compile_environment(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Record {
     fmm::types::Record::new(
         definition
             .environment()
             .iter()
-            .map(|argument| compile(argument.type_(), types))
+            .map(|argument| compile(context, argument.type_()))
             .collect(),
     )
 }
@@ -185,15 +178,20 @@ pub fn compile_unsized_environment() -> fmm::types::Record {
 }
 
 pub fn compile_entry_function(
+    context: &Context,
     type_: &mir::types::Function,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
         [compile_untyped_closure_pointer().into()]
             .into_iter()
-            .chain(type_.arguments().iter().map(|type_| compile(type_, types)))
+            .chain(
+                type_
+                    .arguments()
+                    .iter()
+                    .map(|type_| compile(context, type_)),
+            )
             .collect(),
-        compile(type_.result(), types),
+        compile(context, type_.result()),
         fmm::types::CallingConvention::Source,
     )
 }
