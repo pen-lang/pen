@@ -1,15 +1,14 @@
-use crate::{box_, type_, CompileError};
-use fnv::FnvHashMap;
+use crate::{box_, context::Context, type_, CompileError};
 
 pub fn convert_to_foreign(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     value: impl Into<fmm::build::TypedExpression>,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(if type_::foreign::is_payload_boxed(type_, types)? {
+    Ok(if type_::foreign::is_payload_boxed(context, type_)? {
         box_::box_(builder, value)?
     } else {
         value
@@ -17,15 +16,15 @@ pub fn convert_to_foreign(
 }
 
 pub fn convert_from_foreign(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     value: impl Into<fmm::build::TypedExpression>,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = value.into();
 
-    Ok(if type_::foreign::is_payload_boxed(type_, types)? {
-        box_::unbox(builder, value, type_, types)?
+    Ok(if type_::foreign::is_payload_boxed(context, type_)? {
+        box_::unbox(context, builder, value, type_)?
     } else {
         value
     })
