@@ -1,7 +1,7 @@
 use super::error::CompileError;
 use crate::{
     call, closure, context::Context, entry_function, pointer, record, reference_count, type_,
-    variant,
+    type_information, variant,
 };
 use fnv::FnvHashMap;
 
@@ -300,7 +300,13 @@ pub fn compile(
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }
-        mir::ir::Expression::TypeInformation(_) => todo!(),
+        mir::ir::Expression::TypeInformation(information) => builder.deconstruct_record(
+            type_information::get_custom_information(
+                builder,
+                variant::get_tag(builder, &compile(information.variant(), variables)?)?,
+            )?,
+            information.index(),
+        )?,
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,

@@ -10,6 +10,21 @@ pub fn compile_global_variable(
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
             reference_count::variant::compile_synchronize_function(context, type_)?,
+            fmm::build::record(
+                context
+                    .type_information()
+                    .types()
+                    .iter()
+                    .enumerate()
+                    .map(|(index, information_type)| {
+                        fmm::build::variable(
+                            &context.type_information().information()[type_][index],
+                            type_::compile_function(information_type, context.types()),
+                        )
+                    })
+                    .collect(),
+            )
+            .into(),
         ]),
         fmm::ir::VariableDefinitionOptions::new()
             .set_address_named(true)
@@ -24,24 +39,31 @@ pub fn get_clone_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 0)
+    get_field(builder, tag, 0)
 }
 
 pub fn get_drop_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 1)
+    get_field(builder, tag, 1)
 }
 
 pub fn get_synchronize_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 2)
+    get_field(builder, tag, 2)
 }
 
-fn get_function(
+pub fn get_custom_information(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_field(builder, tag, 3)
+}
+
+fn get_field(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
     index: usize,

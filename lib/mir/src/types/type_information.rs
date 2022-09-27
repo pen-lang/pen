@@ -1,14 +1,15 @@
+use super::Type;
 use crate::types;
 use fnv::FnvHashMap;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct TypeInformation {
     types: Vec<types::Function>,
-    information: FnvHashMap<String, Vec<String>>,
+    information: FnvHashMap<Type, Vec<String>>,
 }
 
 impl TypeInformation {
-    pub fn new(types: Vec<types::Function>, information: FnvHashMap<String, Vec<String>>) -> Self {
+    pub fn new(types: Vec<types::Function>, information: FnvHashMap<Type, Vec<String>>) -> Self {
         Self { types, information }
     }
 
@@ -16,7 +17,7 @@ impl TypeInformation {
         &self.types
     }
 
-    pub fn information(&self) -> &FnvHashMap<String, Vec<String>> {
+    pub fn information(&self) -> &FnvHashMap<Type, Vec<String>> {
         &self.information
     }
 }

@@ -2,7 +2,9 @@ use fnv::FnvHashMap;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
-pub fn compile(information: FnvHashMap<String, Vec<String>>) -> mir::types::TypeInformation {
+pub fn compile(
+    information: FnvHashMap<mir::types::Type, Vec<String>>,
+) -> mir::types::TypeInformation {
     mir::types::TypeInformation::new(vec![compile_debug_function_type().into()], information)
 }
 

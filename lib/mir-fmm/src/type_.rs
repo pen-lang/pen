@@ -11,15 +11,20 @@ pub fn compile(
 ) -> fmm::types::Type {
     match type_ {
         mir::types::Type::Boolean => fmm::types::Primitive::Boolean.into(),
-        mir::types::Type::Function(function) => {
-            fmm::types::Pointer::new(compile_unsized_closure(function, types)).into()
-        }
+        mir::types::Type::Function(function) => compile_function(function, types),
         mir::types::Type::None => compile_none(),
         mir::types::Type::Number => fmm::types::Primitive::Float64.into(),
         mir::types::Type::Record(record) => compile_record(record, types),
         mir::types::Type::ByteString => compile_string().into(),
         mir::types::Type::Variant => compile_variant().into(),
     }
+}
+
+pub fn compile_function(
+    function: &mir::types::Function,
+    types: &FnvHashMap<String, mir::types::RecordBody>,
+) -> fmm::types::Type {
+    fmm::types::Pointer::new(compile_unsized_closure(function, types)).into()
 }
 
 pub fn compile_none() -> fmm::types::Type {
