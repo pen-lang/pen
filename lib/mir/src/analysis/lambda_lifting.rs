@@ -215,7 +215,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             transform_expression(context, operation.then()),
         )
         .into(),
-        Expression::TypeInformation(information) => TypeInformation::new(
+        Expression::TypeInformation(information) => TypeInformationFunction::new(
             information.index(),
             transform_expression(context, information.variant()),
         )

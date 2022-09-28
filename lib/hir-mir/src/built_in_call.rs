@@ -42,7 +42,7 @@ pub fn compile(
             mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
             vec![mir::ir::Call::new(
                 type_information::compile_debug_function_type(),
-                mir::ir::TypeInformation::new(
+                mir::ir::TypeInformationFunction::new(
                     type_information::DEBUG_FUNCTION_INDEX,
                     arguments[0].clone(),
                 ),
@@ -233,7 +233,7 @@ mod tests {
                         vec![mir::types::Type::Variant],
                         mir::types::Type::ByteString
                     ),
-                    mir::ir::TypeInformation::new(
+                    mir::ir::TypeInformationFunction::new(
                         type_information::DEBUG_FUNCTION_INDEX,
                         mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
                     ),

@@ -221,8 +221,7 @@ fn transform_expression(
         )
         .into(),
         Expression::TypeInformation(information) => {
-            TypeInformationFunction::new(information.index(), transform(information.variant()))
-                .into()
+            TypeInformationFunction::new(information.index(), transform(information.variant())).into()
         }
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()

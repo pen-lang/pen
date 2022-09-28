@@ -2,12 +2,12 @@ use super::expression::Expression;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct TypeInformation {
+pub struct TypeInformationFunction {
     index: usize,
     variant: Arc<Expression>,
 }
 
-impl TypeInformation {
+impl TypeInformationFunction {
     pub fn new(index: usize, variant: impl Into<Expression>) -> Self {
         Self {
             index,

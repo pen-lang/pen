@@ -29,7 +29,7 @@ mod string_concatenation;
 mod synchronize;
 mod try_operation;
 mod type_definition;
-mod type_information;
+mod type_information_function;
 mod variable;
 mod variant;
 
@@ -64,6 +64,6 @@ pub use string_concatenation::*;
 pub use synchronize::*;
 pub use try_operation::*;
 pub use type_definition::*;
-pub use type_information::*;
+pub use type_information_function::*;
 pub use variable::*;
 pub use variant::*;

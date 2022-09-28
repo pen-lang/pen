@@ -534,7 +534,7 @@ fn transform_expression(
                 transform_expression(information.variant(), owned_variables, moved_variables)?;
 
             (
-                TypeInformation::new(information.index(), expression).into(),
+                TypeInformationFunction::new(information.index(), expression).into(),
                 moved_variables,
             )
         }
@@ -675,13 +675,13 @@ mod tests {
     fn transform_type_information() {
         assert_eq!(
             transform_expression(
-                &TypeInformation::new(0, Variable::new("x")).into(),
+                &TypeInformationFunction::new(0, Variable::new("x")).into(),
                 &[("x".into(), Type::Variant)].into_iter().collect(),
                 &Default::default()
             )
             .unwrap(),
             (
-                TypeInformation::new(0, Variable::new("x")).into(),
+                TypeInformationFunction::new(0, Variable::new("x")).into(),
                 ["x".into()].into_iter().collect()
             ),
         );

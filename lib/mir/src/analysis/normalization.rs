@@ -232,7 +232,7 @@ fn transform_expression(
         }
         Expression::TypeInformation(information) => {
             transform_expression(information.variant(), &|expression| {
-                continue_(TypeInformation::new(information.index(), expression).into())
+                continue_(TypeInformationFunction::new(information.index(), expression).into())
             })
         }
         Expression::Variant(variant) => transform_expression(variant.payload(), &|expression| {
@@ -911,7 +911,7 @@ mod tests {
                     "f",
                     vec![],
                     Type::None,
-                    TypeInformation::new(
+                    TypeInformationFunction::new(
                         0,
                         Let::new(
                             "x",
@@ -930,7 +930,7 @@ mod tests {
                     "x",
                     Type::Variant,
                     Variant::new(Type::None, Expression::None),
-                    TypeInformation::new(0, Variable::new("x"))
+                    TypeInformationFunction::new(0, Variable::new("x"))
                 )
             )])
         );
