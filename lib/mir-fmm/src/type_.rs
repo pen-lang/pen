@@ -80,7 +80,7 @@ pub fn compile_record(context: &Context, record: &mir::types::Record) -> fmm::ty
     if is_record_boxed(context, record) {
         compile_boxed_record()
     } else {
-        compile_unboxed_record(record, types).into()
+        compile_unboxed_record(context, record).into()
     }
 }
 

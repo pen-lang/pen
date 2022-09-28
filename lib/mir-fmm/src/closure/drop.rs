@@ -20,10 +20,10 @@ pub fn compile(
 
         for (index, free_variable) in definition.environment().iter().enumerate() {
             reference_count::drop(
+                context,
                 builder,
                 &builder.deconstruct_record(environment.clone(), index)?,
                 free_variable.type_(),
-                context.types(),
             )?;
         }
 
@@ -37,6 +37,7 @@ pub fn compile_normal_thunk(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_with_builder(context, |builder, environment_pointer| {
         reference_count::drop(
+            context,
             builder,
             &builder.load(fmm::build::union_address(
                 fmm::build::bit_cast(
@@ -46,7 +47,6 @@ pub fn compile_normal_thunk(
                 1,
             )?)?,
             definition.result_type(),
-            context.types(),
         )?;
 
         Ok(())
