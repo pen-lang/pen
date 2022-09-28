@@ -21,7 +21,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ghcr.io/${{ github.repository_owner }}/ci
-      - uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v3
         with:
           context: .
           push: true
