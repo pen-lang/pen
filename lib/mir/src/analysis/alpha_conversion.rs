@@ -239,7 +239,7 @@ fn transform_expression<'a>(
             )
             .into()
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             TypeInformationFunction::new(information.index(), transform(information.variant()))
                 .into()
         }

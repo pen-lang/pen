@@ -254,7 +254,7 @@ fn check_expression(
 
             type_
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             check_equality(
                 &check_expression(information.variant(), variables)?,
                 &Type::Variant,

@@ -290,7 +290,7 @@ pub fn compile(
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }
-        mir::ir::Expression::TypeInformation(information) => builder.deconstruct_record(
+        mir::ir::Expression::TypeInformationFunction(information) => builder.deconstruct_record(
             type_information::get_custom_information(
                 builder,
                 variant::get_tag(builder, &compile(information.variant(), variables)?)?,

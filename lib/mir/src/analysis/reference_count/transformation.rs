@@ -529,7 +529,7 @@ fn transform_expression(
                 operand_moved_variables,
             )
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             let (expression, moved_variables) =
                 transform_expression(information.variant(), owned_variables, moved_variables)?;
 

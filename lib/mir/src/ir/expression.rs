@@ -28,7 +28,7 @@ pub enum Expression {
     RecordUpdate(RecordUpdate),
     StringConcatenation(StringConcatenation),
     TryOperation(TryOperation),
-    TypeInformation(TypeInformationFunction),
+    TypeInformationFunction(TypeInformationFunction),
     Variable(Variable),
     Variant(Variant),
 }
@@ -143,7 +143,7 @@ impl From<TryOperation> for Expression {
 
 impl From<TypeInformationFunction> for Expression {
     fn from(information: TypeInformationFunction) -> Self {
-        Self::TypeInformation(information)
+        Self::TypeInformationFunction(information)
     }
 }
 

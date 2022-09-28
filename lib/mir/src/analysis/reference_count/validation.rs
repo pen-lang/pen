@@ -178,7 +178,7 @@ fn move_expression(
                 ));
             }
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             move_expression(information.variant(), variables)?;
         }
         Expression::Variable(variable) => {

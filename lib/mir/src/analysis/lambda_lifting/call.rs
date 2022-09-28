@@ -142,7 +142,7 @@ pub fn transform(expression: &Expression, name: &str, free_variables: &[Argument
             transform_shadowed(operation.then(), operation.name()),
         )
         .into(),
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             TypeInformationFunction::new(information.index(), transform(information.variant()))
                 .into()
         }

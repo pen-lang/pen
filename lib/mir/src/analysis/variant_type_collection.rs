@@ -90,7 +90,7 @@ fn collect_from_expression(expression: &Expression, types: &mut FnvHashSet<Type>
             collect_from_expression(operation.operand(), types);
             collect_from_expression(operation.then(), types);
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             collect_from_expression(information.variant(), types)
         }
         Expression::Variant(variant) => {

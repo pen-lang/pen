@@ -230,7 +230,7 @@ fn transform_expression(
                 )
             })
         }
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             transform_expression(information.variant(), &|expression| {
                 continue_(TypeInformationFunction::new(information.index(), expression).into())
             })

@@ -220,7 +220,7 @@ fn transform_expression(
             ),
         )
         .into(),
-        Expression::TypeInformation(information) => {
+        Expression::TypeInformationFunction(information) => {
             TypeInformationFunction::new(information.index(), transform(information.variant()))
                 .into()
         }
