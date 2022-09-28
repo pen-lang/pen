@@ -1,4 +1,4 @@
-use crate::types::TypeInformation;
+use crate::ir::TypeInformation;
 
 pub struct Context<'a> {
     type_information: &'a TypeInformation,

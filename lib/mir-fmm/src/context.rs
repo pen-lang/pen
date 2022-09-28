@@ -4,7 +4,7 @@ use fnv::FnvHashMap;
 pub struct Context {
     module_builder: fmm::build::ModuleBuilder,
     types: FnvHashMap<String, mir::types::RecordBody>,
-    type_information: mir::types::TypeInformation,
+    type_information: mir::ir::TypeInformation,
     configuration: Configuration,
 }
 
@@ -30,7 +30,7 @@ impl Context {
         &self.types
     }
 
-    pub fn type_information(&self) -> &mir::types::TypeInformation {
+    pub fn type_information(&self) -> &mir::ir::TypeInformation {
         &self.type_information
     }
 

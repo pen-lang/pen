@@ -1,9 +1,8 @@
 use super::{
     foreign_declaration::ForeignDeclaration, foreign_definition::ForeignDefinition,
     function_declaration::FunctionDeclaration, type_definition::TypeDefinition,
-    GlobalFunctionDefinition,
+    GlobalFunctionDefinition, TypeInformation,
 };
-use crate::types::TypeInformation;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Module {

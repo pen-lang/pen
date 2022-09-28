@@ -4,8 +4,8 @@ pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
 pub fn compile(
     information: FnvHashMap<mir::types::Type, Vec<String>>,
-) -> mir::types::TypeInformation {
-    mir::types::TypeInformation::new(vec![compile_debug_function_type().into()], information)
+) -> mir::ir::TypeInformation {
+    mir::ir::TypeInformation::new(vec![compile_debug_function_type().into()], information)
 }
 
 pub fn compile_debug_function_type() -> mir::types::Function {

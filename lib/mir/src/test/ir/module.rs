@@ -1,4 +1,4 @@
-use crate::{ir::*, types::TypeInformation};
+use crate::ir::*;
 
 use super::GlobalFunctionDefinitionFake;
 
