@@ -1,5 +1,4 @@
 use crate::{box_, context::Context, type_, CompileError};
-use fnv::FnvHashMap;
 
 const VARIANT_TAG_FIELD_INDEX: usize = 0;
 const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
@@ -34,14 +33,14 @@ pub fn bit_cast_to_opaque_payload(
 }
 
 pub fn bit_cast_from_opaque_payload(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     payload: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(bit_cast_payload(
         builder,
-        type_::variant::compile_payload(type_, types)?,
+        type_::variant::compile_payload(context, type_)?,
         payload.clone(),
     )?)
 }
@@ -72,10 +71,10 @@ pub fn downcast(
             context,
             builder,
             &bit_cast_from_opaque_payload(
+                context,
                 builder,
                 &get_payload(builder, variant)?,
                 type_,
-                context.types(),
             )?,
             type_,
         )?
@@ -88,13 +87,11 @@ fn box_payload(
     value: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        if type_::variant::is_payload_boxed(type_, context.types())? {
-            box_::box_(builder, value.clone())?
-        } else {
-            value.clone()
-        },
-    )
+    Ok(if type_::variant::is_payload_boxed(context, type_)? {
+        box_::box_(builder, value.clone())?
+    } else {
+        value.clone()
+    })
 }
 
 fn unbox_payload(
@@ -103,13 +100,11 @@ fn unbox_payload(
     value: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(
-        if type_::variant::is_payload_boxed(type_, context.types())? {
-            box_::unbox(builder, value.clone(), type_, context.types())?
-        } else {
-            value.clone()
-        },
-    )
+    Ok(if type_::variant::is_payload_boxed(context, type_)? {
+        box_::unbox(context, builder, value.clone(), type_)?
+    } else {
+        value.clone()
+    })
 }
 
 fn bit_cast_payload(
