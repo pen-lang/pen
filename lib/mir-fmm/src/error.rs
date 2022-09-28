@@ -9,6 +9,7 @@ pub enum CompileError {
     NestedVariant,
     ReferenceCount(mir::analysis::reference_count::ReferenceCountError),
     TypeCheck(mir::analysis::type_check::TypeCheckError),
+    TypeInformationNotFound(mir::types::Type),
     UnboxedRecord,
 }
 

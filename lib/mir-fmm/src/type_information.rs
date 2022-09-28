@@ -15,7 +15,13 @@ pub fn compile_global_variable(
                     .type_information()
                     .types()
                     .iter()
-                    .zip(&context.type_information().information()[type_])
+                    .zip(
+                        context
+                            .type_information()
+                            .information()
+                            .get(type_)
+                            .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?,
+                    )
                     .map(|(type_, name)| {
                         fmm::build::variable(&*name, type_::compile_function(context, type_))
                     })
