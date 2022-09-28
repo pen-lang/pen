@@ -1,5 +1,4 @@
-use crate::type_;
-use fnv::FnvHashMap;
+use crate::{context::Context, type_};
 
 pub fn get_clone_function_name(name: &str) -> String {
     format!("mir:clone:{}", name)
@@ -18,10 +17,10 @@ pub fn get_synchronize_function_name(name: &str) -> String {
 }
 
 pub fn compile_clone_function_type(
+    context: &Context,
     record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
-    let record = type_::compile_record(record, types);
+    let record = type_::compile_record(context, record);
 
     fmm::types::Function::new(
         vec![record.clone()],
@@ -31,10 +30,10 @@ pub fn compile_clone_function_type(
 }
 
 pub fn compile_clone_unboxed_function_type(
+    context: &Context,
     record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
-    let record = type_::compile_unboxed_record(record, types);
+    let record = type_::compile_unboxed_record(context, record);
 
     fmm::types::Function::new(
         vec![record.clone().into()],
@@ -44,22 +43,22 @@ pub fn compile_clone_unboxed_function_type(
 }
 
 pub fn compile_drop_function_type(
+    context: &Context,
     record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
-        vec![type_::compile_record(record, types)],
+        vec![type_::compile_record(context, record)],
         fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
 }
 
 pub fn compile_synchronize_function_type(
+    context: &Context,
     record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> fmm::types::Function {
     fmm::types::Function::new(
-        vec![type_::compile_record(record, types)],
+        vec![type_::compile_record(context, record)],
         fmm::types::void_type(),
         fmm::types::CallingConvention::Target,
     )
