@@ -136,7 +136,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         )
                     })
                     .collect::<Vec<_>>();
-                let transform_expression = |expression| {
+                let transform = |expression| {
                     save_free_variables(
                         definition.environment(),
                         &free_variable_names,
@@ -156,7 +156,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         vec![],
                         arguments.clone(),
                         definition.result_type().clone(),
-                        transform_expression(definition.body()),
+                        transform(definition.body()),
                         definition.is_thunk(),
                     ));
 
@@ -171,7 +171,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         definition.type_().result().clone(),
                     ),
                     Variable::new(function_name),
-                    transform_expression(&expression),
+                    transform(&expression),
                 )
                 .into()
             } else {
@@ -209,22 +209,19 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
         )
         .into(),
         Expression::TryOperation(operation) => TryOperation::new(
-            transform_expression(context, operation.operand()),
+            transform(operation.operand()),
             operation.name(),
             operation.type_().clone(),
-            transform_expression(context, operation.then()),
+            transform(operation.then()),
         )
         .into(),
-        Expression::TypeInformation(information) => TypeInformationFunction::new(
-            information.index(),
-            transform_expression(context, information.variant()),
-        )
-        .into(),
-        Expression::Variant(variant) => Variant::new(
-            variant.type_().clone(),
-            transform_expression(context, variant.payload()),
-        )
-        .into(),
+        Expression::TypeInformation(information) => {
+            TypeInformationFunction::new(information.index(), transform(information.variant()))
+                .into()
+        }
+        Expression::Variant(variant) => {
+            Variant::new(variant.type_().clone(), transform(variant.payload())).into()
+        }
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None
