@@ -60,8 +60,7 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .iter()
             .map(|definition| compile_function_definition(context, definition))
             .collect::<Result<Vec<_>, CompileError>>()?,
-        // TODO Compile type information.
-        type_information::compile(Default::default()),
+        type_information::compile(context, module)?,
     ))
 }
 
@@ -143,10 +142,6 @@ mod tests {
         CompileContext::new(module, COMPILE_CONFIGURATION.clone().into())
     }
 
-    fn create_mir_module() -> mir::ir::Module {
-        mir::ir::Module::empty().set_type_information(type_information::compile(Default::default()))
-    }
-
     #[test]
     fn compile_foreign_definition() {
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
@@ -166,7 +161,8 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module),
-            Ok(create_mir_module()
+            Ok(mir::ir::Module::empty()
+                .set_type_information(type_information::compile(&context, &module).unwrap())
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
@@ -201,7 +197,8 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module),
-            Ok(create_mir_module()
+            Ok(mir::ir::Module::empty()
+                .set_type_information(type_information::compile(&context, &module).unwrap())
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
