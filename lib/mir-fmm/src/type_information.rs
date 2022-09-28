@@ -19,7 +19,7 @@ pub fn compile_global_variable(
                     .map(|(index, information_type)| {
                         fmm::build::variable(
                             &context.type_information().information()[type_][index],
-                            type_::compile_function(information_type, context.types()),
+                            type_::compile_function(context, information_type),
                         )
                     })
                     .collect(),
