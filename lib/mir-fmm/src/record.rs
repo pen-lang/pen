@@ -9,7 +9,7 @@ pub fn get_field(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     get_unboxed_field(
         builder,
-        &if type_::is_record_boxed(record_type, context.types()) {
+        &if type_::is_record_boxed(context, record_type) {
             load(context, builder, record, record_type)?
         } else {
             record.clone()
@@ -33,7 +33,7 @@ pub fn load(
     record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(builder.load(fmm::build::bit_cast(
-        fmm::types::Pointer::new(type_::compile_unboxed_record(record_type, context.types())),
+        fmm::types::Pointer::new(type_::compile_unboxed_record(context, record_type)),
         record.clone(),
     ))?)
 }
