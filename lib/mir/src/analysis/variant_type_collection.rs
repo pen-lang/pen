@@ -1,116 +1,106 @@
 use crate::{ir::*, types::Type};
 use fnv::FnvHashSet;
 
-// TODO Use a persistent hash map.
 pub fn collect(module: &Module) -> FnvHashSet<Type> {
-    module
-        .function_definitions()
-        .iter()
-        .flat_map(|definition| collect_from_function_definition(definition.definition()))
-        .collect()
+    let mut types = FnvHashSet::default();
+
+    for definition in module.function_definitions() {
+        collect_from_function_definition(definition.definition(), &mut types);
+    }
+
+    types
 }
 
-fn collect_from_function_definition(definition: &FunctionDefinition) -> FnvHashSet<Type> {
-    collect_from_expression(definition.body())
+fn collect_from_function_definition(definition: &FunctionDefinition, types: &mut FnvHashSet<Type>) {
+    collect_from_expression(definition.body(), types)
 }
 
-fn collect_from_expression(expression: &Expression) -> FnvHashSet<Type> {
+fn collect_from_expression(expression: &Expression, types: &mut FnvHashSet<Type>) {
     match expression {
-        Expression::ArithmeticOperation(operation) => collect_from_expression(operation.lhs())
-            .iter()
-            .cloned()
-            .chain(collect_from_expression(operation.rhs()))
-            .collect(),
-        Expression::Case(case) => collect_from_case(case),
-        Expression::CloneVariables(clone) => collect_from_expression(clone.expression()),
-        Expression::ComparisonOperation(operation) => collect_from_expression(operation.lhs())
-            .iter()
-            .cloned()
-            .chain(collect_from_expression(operation.rhs()))
-            .collect(),
-        Expression::DropVariables(drop) => collect_from_drop_variables(drop),
-        Expression::Call(call) => collect_from_expression(call.function())
-            .iter()
-            .cloned()
-            .chain(call.arguments().iter().flat_map(collect_from_expression))
-            .collect(),
-        Expression::If(if_) => collect_from_expression(if_.condition())
-            .iter()
-            .cloned()
-            .chain(collect_from_expression(if_.then()))
-            .chain(collect_from_expression(if_.else_()))
-            .collect(),
-        Expression::Let(let_) => collect_from_expression(let_.bound_expression())
-            .iter()
-            .cloned()
-            .chain(collect_from_expression(let_.expression()))
-            .collect(),
-        Expression::LetRecursive(let_) => collect_from_function_definition(let_.definition())
-            .into_iter()
-            .chain(collect_from_expression(let_.expression()))
-            .collect(),
-        Expression::Synchronize(synchronize) => collect_from_expression(synchronize.expression()),
-        Expression::Record(record) => collect_from_record(record),
-        Expression::RecordField(field) => collect_from_expression(field.record()),
-        Expression::RecordUpdate(update) => collect_from_expression(update.record())
-            .into_iter()
-            .chain(
-                update
-                    .fields()
-                    .iter()
-                    .flat_map(|field| collect_from_expression(field.expression())),
-            )
-            .collect(),
-        Expression::StringConcatenation(concatenation) => concatenation
-            .operands()
-            .iter()
-            .flat_map(collect_from_expression)
-            .collect(),
-        Expression::TryOperation(operation) => [operation.type_().clone()]
-            .into_iter()
-            .chain(collect_from_expression(operation.operand()))
-            .chain(collect_from_expression(operation.then()))
-            .collect(),
-        Expression::Variant(variant) => [variant.type_().clone()]
-            .into_iter()
-            .chain(collect_from_expression(variant.payload()))
-            .collect(),
+        Expression::ArithmeticOperation(operation) => {
+            for expression in [operation.lhs(), operation.rhs()] {
+                collect_from_expression(expression, types);
+            }
+        }
+        Expression::Case(case) => {
+            collect_from_expression(case.argument(), types);
+
+            for alternative in case.alternatives() {
+                types.extend(alternative.types().iter().cloned());
+
+                collect_from_expression(alternative.expression(), types);
+
+                if let Some(alternative) = case.default_alternative() {
+                    collect_from_expression(alternative.expression(), types);
+                }
+            }
+        }
+        Expression::CloneVariables(clone) => collect_from_expression(clone.expression(), types),
+        Expression::ComparisonOperation(operation) => {
+            for expression in [operation.lhs(), operation.rhs()] {
+                collect_from_expression(expression, types);
+            }
+        }
+        Expression::DropVariables(drop) => collect_from_expression(drop.expression(), types),
+        Expression::Call(call) => {
+            collect_from_expression(call.function(), types);
+
+            for argument in call.arguments() {
+                collect_from_expression(argument, types);
+            }
+        }
+        Expression::If(if_) => {
+            for expression in [if_.condition(), if_.then(), if_.else_()] {
+                collect_from_expression(expression, types);
+            }
+        }
+        Expression::Let(let_) => {
+            for expression in [let_.bound_expression(), let_.expression()] {
+                collect_from_expression(expression, types);
+            }
+        }
+        Expression::LetRecursive(let_) => {
+            collect_from_function_definition(let_.definition(), types);
+            collect_from_expression(let_.expression(), types);
+        }
+        Expression::Synchronize(synchronize) => {
+            collect_from_expression(synchronize.expression(), types)
+        }
+        Expression::Record(record) => {
+            for field in record.fields() {
+                collect_from_expression(field, types);
+            }
+        }
+        Expression::RecordField(field) => collect_from_expression(field.record(), types),
+        Expression::RecordUpdate(update) => {
+            collect_from_expression(update.record(), types);
+
+            for field in update.fields() {
+                collect_from_expression(field.expression(), types);
+            }
+        }
+        Expression::StringConcatenation(concatenation) => {
+            for operand in concatenation.operands() {
+                collect_from_expression(operand, types);
+            }
+        }
+        Expression::TryOperation(operation) => {
+            types.insert(operation.type_().clone());
+
+            collect_from_expression(operation.operand(), types);
+            collect_from_expression(operation.then(), types);
+        }
+        Expression::Variant(variant) => {
+            types.insert(variant.type_().clone());
+
+            collect_from_expression(variant.payload(), types);
+        }
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None
         | Expression::Number(_)
         | Expression::Variable(_) => Default::default(),
     }
-}
-
-fn collect_from_case(case: &Case) -> FnvHashSet<Type> {
-    collect_from_expression(case.argument())
-        .into_iter()
-        .chain(case.alternatives().iter().flat_map(|alternative| {
-            alternative
-                .types()
-                .iter()
-                .cloned()
-                .chain(collect_from_expression(alternative.expression()))
-        }))
-        .chain(
-            case.default_alternative()
-                .map(|alternative| collect_from_expression(alternative.expression()))
-                .unwrap_or_default(),
-        )
-        .collect()
-}
-
-fn collect_from_drop_variables(drop: &DropVariables) -> FnvHashSet<Type> {
-    collect_from_expression(drop.expression())
-}
-
-fn collect_from_record(record: &Record) -> FnvHashSet<Type> {
-    record
-        .fields()
-        .iter()
-        .flat_map(collect_from_expression)
-        .collect()
 }
 
 #[cfg(test)]
