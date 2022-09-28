@@ -36,7 +36,7 @@ jobs:
       - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
