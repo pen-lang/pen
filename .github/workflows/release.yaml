@@ -33,6 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: Swatinem/rust-cache@v1
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
       - uses: actions/upload-artifact@v2

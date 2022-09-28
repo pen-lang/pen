@@ -18,6 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: Swatinem/rust-cache@v1
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/lint.sh -- -D warnings
   unused_dependencies:
@@ -25,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: Swatinem/rust-cache@v1
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/unused_dependencies.sh
   spell_check:
