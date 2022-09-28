@@ -15,12 +15,9 @@ pub fn compile_global_variable(
                     .type_information()
                     .types()
                     .iter()
-                    .enumerate()
-                    .map(|(index, information_type)| {
-                        fmm::build::variable(
-                            &context.type_information().information()[type_][index],
-                            type_::compile_function(context, information_type),
-                        )
+                    .zip(&context.type_information().information()[type_])
+                    .map(|(type_, name)| {
+                        fmm::build::variable(&*name, type_::compile_function(context, type_))
                     })
                     .collect(),
             )
