@@ -13,7 +13,7 @@ pub fn compile(context: &Context, type_: &mir::types::Type) -> fmm::types::Type 
         mir::types::Type::Number => fmm::types::Primitive::Float64.into(),
         mir::types::Type::Record(record) => compile_record(context, record),
         mir::types::Type::ByteString => compile_string().into(),
-        mir::types::Type::Variant => compile_variant().into(),
+        mir::types::Type::Variant => compile_variant(context).into(),
     }
 }
 
@@ -33,14 +33,14 @@ pub fn compile_string() -> fmm::types::Pointer {
     ]))
 }
 
-pub fn compile_variant() -> fmm::types::Record {
+pub fn compile_variant(context: &Context) -> fmm::types::Record {
     fmm::types::Record::new(vec![
-        compile_variant_tag().into(),
+        compile_variant_tag(context).into(),
         compile_variant_payload().into(),
     ])
 }
 
-pub fn compile_variant_tag() -> fmm::types::Pointer {
+pub fn compile_variant_tag(context: &Context) -> fmm::types::Pointer {
     let payload = fmm::types::Type::from(compile_variant_payload());
 
     fmm::types::Pointer::new(fmm::types::Record::new(vec![
@@ -63,6 +63,15 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
             vec![payload],
             fmm::types::void_type(),
             fmm::types::CallingConvention::Target,
+        )
+        .into(),
+        fmm::types::Record::new(
+            context
+                .type_information()
+                .types()
+                .iter()
+                .map(|type_| compile_function(context, type_))
+                .collect(),
         )
         .into(),
     ]))
