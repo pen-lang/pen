@@ -42,28 +42,26 @@ fn compile_entry_function(
             .iter()
             .enumerate()
             .map(|(index, type_)| {
-                fmm::ir::Argument::new(
-                    format!("arg_{}", index),
-                    type_::compile(type_, context.types()),
-                )
+                fmm::ir::Argument::new(format!("arg_{}", index), type_::compile(context, type_))
             }),
     )
     .collect::<Vec<_>>();
 
     context.module_builder().define_anonymous_function(
         arguments.clone(),
-        type_::compile(declaration.type_().result(), context.types()),
+        type_::compile(context, declaration.type_().result()),
         |instruction_builder| {
             Ok(
                 instruction_builder.return_(foreign_value::convert_from_foreign(
+                    context,
                     &instruction_builder,
                     instruction_builder.call(
                         context.module_builder().declare_function(
                             declaration.foreign_name(),
                             type_::foreign::compile_function(
+                                context,
                                 declaration.type_(),
                                 declaration.calling_convention(),
-                                context.types(),
                             )?,
                         ),
                         arguments[FUNCTION_ARGUMENT_OFFSET..]
@@ -71,16 +69,15 @@ fn compile_entry_function(
                             .zip(declaration.type_().arguments())
                             .map(|(argument, type_)| {
                                 foreign_value::convert_to_foreign(
+                                    context,
                                     &instruction_builder,
                                     fmm::build::variable(argument.name(), argument.type_().clone()),
                                     type_,
-                                    context.types(),
                                 )
                             })
                             .collect::<Result<_, _>>()?,
                     )?,
                     declaration.type_().result(),
-                    context.types(),
                 )?),
             )
         },

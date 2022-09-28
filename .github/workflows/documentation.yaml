@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@main
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
       - uses: peaceiris/actions-gh-pages@v3

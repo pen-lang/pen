@@ -13,7 +13,7 @@ pub fn compile_clone_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = type_::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(context, &record_type);
 
     context.module_builder().define_function(
         utilities::get_clone_function_name(definition.name()),
@@ -26,7 +26,7 @@ pub fn compile_clone_function(
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
             Ok(
-                builder.return_(if type_::is_record_boxed(&record_type, context.types()) {
+                builder.return_(if type_::is_record_boxed(context, &record_type) {
                     clone_boxed(&builder, &record)?
                 } else {
                     clone_unboxed(context, &builder, &record, &record_type)?
@@ -44,7 +44,7 @@ pub fn compile_clone_unboxed_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = type_::compile_unboxed_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_unboxed_record(context, &record_type);
 
     context.module_builder().define_function(
         utilities::get_clone_unboxed_function_name(definition.name()),
@@ -62,10 +62,10 @@ pub fn compile_clone_unboxed_function(
                     .enumerate()
                     .map(|(index, type_)| {
                         expression::clone(
+                            context,
                             &builder,
                             &record::get_unboxed_field(&builder, &record, index)?,
                             type_,
-                            context.types(),
                         )
                     })
                     .collect::<Result<_, _>>()?,
@@ -93,7 +93,7 @@ pub fn clone_unboxed(
     Ok(builder.call(
         fmm::build::variable(
             utilities::get_clone_unboxed_function_name(record_type.name()),
-            utilities::compile_clone_unboxed_function_type(record_type, context.types()),
+            utilities::compile_clone_unboxed_function_type(context, record_type),
         ),
         vec![record.clone()],
     )?)
@@ -104,7 +104,7 @@ pub fn compile_drop_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = type_::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(context, &record_type);
 
     context.module_builder().define_function(
         utilities::get_drop_function_name(definition.name()),
@@ -116,7 +116,7 @@ pub fn compile_drop_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            if type_::is_record_boxed(&record_type, context.types()) {
+            if type_::is_record_boxed(context, &record_type) {
                 drop_boxed(context, &builder, &record, &record_type)?
             } else {
                 drop_unboxed(context, &builder, &record, &record_type)?;
@@ -158,10 +158,10 @@ fn drop_unboxed(
         .enumerate()
     {
         expression::drop(
+            context,
             builder,
             &record::get_unboxed_field(builder, record, index)?,
             type_,
-            context.types(),
         )?;
     }
 
@@ -173,7 +173,7 @@ pub fn compile_synchronize_function(
     definition: &mir::ir::TypeDefinition,
 ) -> Result<(), CompileError> {
     let record_type = mir::types::Record::new(definition.name());
-    let fmm_record_type = type_::compile_record(&record_type, context.types());
+    let fmm_record_type = type_::compile_record(context, &record_type);
 
     context.module_builder().define_function(
         utilities::get_synchronize_function_name(definition.name()),
@@ -185,7 +185,7 @@ pub fn compile_synchronize_function(
         |builder| -> Result<_, CompileError> {
             let record = fmm::build::variable(ARGUMENT_NAME, fmm_record_type.clone());
 
-            if type_::is_record_boxed(&record_type, context.types()) {
+            if type_::is_record_boxed(context, &record_type) {
                 synchronize_boxed(context, &builder, &record, &record_type)?
             } else {
                 synchronize_unboxed(context, &builder, &record, &record_type)?;
@@ -227,10 +227,10 @@ fn synchronize_unboxed(
         .enumerate()
     {
         expression::synchronize(
+            context,
             builder,
             &record::get_unboxed_field(builder, record, index)?,
             type_,
-            context.types(),
         )?;
     }
 

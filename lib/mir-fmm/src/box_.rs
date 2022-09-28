@@ -1,5 +1,4 @@
-use crate::{reference_count, type_, CompileError};
-use fnv::FnvHashMap;
+use crate::{context::Context, reference_count, type_, CompileError};
 
 pub fn box_(
     builder: &fmm::build::InstructionBuilder,
@@ -13,19 +12,19 @@ pub fn box_(
 }
 
 pub fn unbox(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     pointer: fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let loaded = builder.load(fmm::build::bit_cast(
-        fmm::types::Pointer::new(type_::compile(type_, types)),
+        fmm::types::Pointer::new(type_::compile(context, type_)),
         pointer.clone(),
     ))?;
-    let unboxed = reference_count::clone(builder, &loaded, type_, types)?;
+    let unboxed = reference_count::clone(context, builder, &loaded, type_)?;
 
     reference_count::pointer::drop(builder, &pointer, |builder| {
-        reference_count::drop(builder, &loaded, type_, types)
+        reference_count::drop(context, builder, &loaded, type_)
     })?;
 
     Ok(unboxed)

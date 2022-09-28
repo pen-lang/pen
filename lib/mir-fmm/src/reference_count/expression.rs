@@ -1,12 +1,11 @@
 use super::{super::error::CompileError, function, pointer, record};
-use crate::{type_information, variant};
-use fnv::FnvHashMap;
+use crate::{context::Context, type_information, variant};
 
 pub fn clone(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
         mir::types::Type::ByteString => pointer::clone(builder, expression)?,
@@ -14,7 +13,7 @@ pub fn clone(
         mir::types::Type::Record(record) => builder.call(
             fmm::build::variable(
                 record::utilities::get_clone_function_name(record.name()),
-                record::utilities::compile_clone_function_type(record, types),
+                record::utilities::compile_clone_function_type(context, record),
             ),
             vec![expression.clone()],
         )?,
@@ -46,10 +45,10 @@ pub fn clone(
 }
 
 pub fn drop(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => pointer::drop(builder, expression, |_| Ok(()))?,
@@ -58,7 +57,7 @@ pub fn drop(
             builder.call(
                 fmm::build::variable(
                     record::utilities::get_drop_function_name(record.name()),
-                    record::utilities::compile_drop_function_type(record, types),
+                    record::utilities::compile_drop_function_type(context, record),
                 ),
                 vec![expression.clone()],
             )?;
@@ -79,10 +78,10 @@ pub fn drop(
 }
 
 pub fn synchronize(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => {
@@ -95,7 +94,7 @@ pub fn synchronize(
             builder.call(
                 fmm::build::variable(
                     record::utilities::get_synchronize_function_name(record.name()),
-                    record::utilities::compile_synchronize_function_type(record, types),
+                    record::utilities::compile_synchronize_function_type(context, record),
                 ),
                 vec![expression.clone()],
             )?;
