@@ -1,17 +1,12 @@
 use super::{context::CompileContext, type_, CompileError};
-use fnv::{FnvHashMap, FnvHashSet};
-use hir::{
-    analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
-    ir::*,
-    types,
-    types::Type,
-};
+use crate::generic_type_collection;
+use hir::{ir::*, types::Type};
 
 pub fn compile(
     context: &CompileContext,
     module: &Module,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    Ok(collect_types(module, context.types())?
+    Ok(generic_type_collection::collect(context, module)?
         .into_iter()
         .map(|type_| compile_type_definition(context, &type_))
         .collect::<Result<Vec<_>, _>>()?
@@ -54,79 +49,6 @@ fn compile_type_definition(
         | Type::Record(_) => None,
         Type::Reference(_) | Type::Union(_) => unreachable!(),
     })
-}
-
-// Collect generic types potentially up-casted to union types.
-fn collect_types(
-    module: &Module,
-    types: &FnvHashMap<String, Type>,
-) -> Result<FnvHashSet<Type>, AnalysisError> {
-    let mut lower_types = FnvHashSet::default();
-
-    // We need to visit expressions other than type coercion too because type
-    // coercion might be generated just before compilation.
-    expression_visitor::visit(module, |expression| match expression {
-        Expression::Call(call) => {
-            if let Expression::BuiltInFunction(function) = call.function() {
-                if function.name() == BuiltInFunctionName::Race {
-                    let position = call.position();
-
-                    lower_types.insert(
-                        types::List::new(types::Any::new(position.clone()), position.clone())
-                            .into(),
-                    );
-                }
-            }
-        }
-        Expression::IfList(if_) => {
-            lower_types.insert(if_.type_().unwrap().clone());
-        }
-        Expression::IfMap(if_) => {
-            lower_types.insert(if_.key_type().unwrap().clone());
-            lower_types.insert(if_.value_type().unwrap().clone());
-        }
-        Expression::IfType(if_) => {
-            lower_types.extend(
-                if_.branches()
-                    .iter()
-                    .map(|branch| branch.type_())
-                    .chain(if_.else_().and_then(|branch| branch.type_()))
-                    .cloned(),
-            );
-        }
-        Expression::List(list) => {
-            lower_types.insert(list.type_().clone());
-        }
-        Expression::ListComprehension(comprehension) => {
-            lower_types.insert(comprehension.input_type().unwrap().clone());
-            lower_types.insert(comprehension.output_type().clone());
-        }
-        Expression::Map(map) => {
-            lower_types.insert(map.key_type().clone());
-            lower_types.insert(map.value_type().clone());
-        }
-        Expression::TypeCoercion(coercion) => {
-            lower_types.insert(coercion.from().clone());
-        }
-        Expression::Operation(operation) => match operation {
-            Operation::Equality(operation) => {
-                lower_types.extend(operation.type_().cloned());
-            }
-            Operation::Try(operation) => {
-                lower_types.extend(operation.type_().cloned());
-            }
-            _ => {}
-        },
-        _ => {}
-    });
-
-    Ok(lower_types
-        .into_iter()
-        .map(|type_| union_type_member_calculator::calculate(&type_, types))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .flatten()
-        .collect())
 }
 
 #[cfg(test)]

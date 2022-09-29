@@ -5,6 +5,7 @@ mod downcast;
 mod error;
 mod error_type_configuration;
 mod expression;
+mod generic_type_collection;
 mod generic_type_definition;
 mod list_type_configuration;
 mod main_function;

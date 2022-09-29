@@ -1,4 +1,4 @@
-use crate::{context::CompileContext, type_, CompileError};
+use crate::{context::CompileContext, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::type_collector,
@@ -23,17 +23,20 @@ pub fn compile(
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
         vec![compile_debug_function_type().into()],
-        collect_types(module)
+        collect_types(context, module)?
             .iter()
-            .map(|type_| Ok((type_::compile(context, &type_)?, vec![])))
+            .map(|type_| Ok((type_::compile(context, type_)?, vec![])))
             .collect::<Result<_, CompileError>>()?,
     ))
 }
 
-fn collect_types(module: &Module) -> FnvHashSet<Type> {
+fn collect_types(
+    context: &CompileContext,
+    module: &Module,
+) -> Result<FnvHashSet<Type>, CompileError> {
     let position = module.position();
 
-    [
+    Ok([
         types::Boolean::new(position.clone()).into(),
         types::ByteString::new(position.clone()).into(),
         types::Error::new(position.clone()).into(),
@@ -41,10 +44,11 @@ fn collect_types(module: &Module) -> FnvHashSet<Type> {
         types::Number::new(position.clone()).into(),
     ]
     .into_iter()
+    .chain(generic_type_collection::collect(context, module)?)
     .chain(
         type_collector::collect_records(module)
             .into_values()
             .map(Type::from),
     )
-    .collect()
+    .collect())
 }
