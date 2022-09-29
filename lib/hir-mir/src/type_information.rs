@@ -17,19 +17,15 @@ pub fn compile(
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
         vec![debug::compile_function_type().into()],
-        if context.configuration().is_ok() {
-            collect_types(context, module)?
-                .iter()
-                .map(|type_| {
-                    Ok((
-                        type_::compile(context, type_)?,
-                        vec![debug::compile_function_name(context, type_)?],
-                    ))
-                })
-                .collect::<Result<_, CompileError>>()?
-        } else {
-            Default::default()
-        },
+        collect_types(context, module)?
+            .iter()
+            .map(|type_| {
+                Ok((
+                    type_::compile(context, type_)?,
+                    vec![debug::compile_function_name(context, type_)?],
+                ))
+            })
+            .collect::<Result<_, CompileError>>()?,
     ))
 }
 
@@ -37,18 +33,14 @@ pub fn compile_function_definitions(
     context: &CompileContext,
     module: &Module,
 ) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
-    Ok(if context.configuration().is_ok() {
-        collect_types(context, module)?
-            .iter()
-            .map(|type_| debug::compile_function_definition(context, type_))
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .unique_by(|definition| definition.name().to_owned())
-            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
-            .collect()
-    } else {
-        Default::default()
-    })
+    Ok(collect_types(context, module)?
+        .iter()
+        .map(|type_| debug::compile_function_definition(context, type_))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .unique_by(|definition| definition.name().to_owned())
+        .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+        .collect())
 }
 
 fn collect_types(
@@ -60,11 +52,15 @@ fn collect_types(
     Ok([
         types::Boolean::new(position.clone()).into(),
         types::ByteString::new(position.clone()).into(),
-        types::Error::new(position.clone()).into(),
         types::None::new(position.clone()).into(),
         types::Number::new(position.clone()).into(),
     ]
     .into_iter()
+    .chain(
+        context
+            .configuration()
+            .map(|_| types::Error::new(position.clone()).into()),
+    )
     .chain(generic_type_collection::collect(context, module)?)
     .chain(
         type_collector::collect_records(module)
