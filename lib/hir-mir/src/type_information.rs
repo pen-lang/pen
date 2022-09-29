@@ -34,7 +34,9 @@ fn collect_types(module: &Module) -> FnvHashSet<Type> {
     let position = module.position();
 
     [
+        types::Boolean::new(position.clone()).into(),
         types::ByteString::new(position.clone()).into(),
+        types::Error::new(position.clone()).into(),
         types::None::new(position.clone()).into(),
         types::Number::new(position.clone()).into(),
     ]
