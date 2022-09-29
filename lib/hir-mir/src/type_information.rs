@@ -146,7 +146,45 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module).unwrap(),
-            mir::ir::TypeInformation::new(vec![debug::compile_function_type()], Default::default())
+            mir::ir::TypeInformation::new(
+                vec![debug::compile_function_type()],
+                [
+                    (
+                        mir::types::Type::Boolean,
+                        vec![debug::compile_function_name(
+                            &context,
+                            &types::Boolean::new(Position::fake()).into()
+                        )
+                        .unwrap()]
+                    ),
+                    (
+                        mir::types::Type::ByteString,
+                        vec![debug::compile_function_name(
+                            &context,
+                            &types::ByteString::new(Position::fake()).into()
+                        )
+                        .unwrap()]
+                    ),
+                    (
+                        mir::types::Type::None,
+                        vec![debug::compile_function_name(
+                            &context,
+                            &types::None::new(Position::fake()).into()
+                        )
+                        .unwrap()]
+                    ),
+                    (
+                        mir::types::Type::Number,
+                        vec![debug::compile_function_name(
+                            &context,
+                            &types::Number::new(Position::fake()).into()
+                        )
+                        .unwrap()]
+                    ),
+                ]
+                .into_iter()
+                .collect()
+            )
         )
     }
 }
