@@ -15,6 +15,9 @@ pub fn collect(
 
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
+    //
+    // TODO Do such transformation ahead, check types, and collect generic types only from type
+    // coercion.
     expression_visitor::visit(module, |expression| match expression {
         Expression::Call(call) => {
             if let Expression::BuiltInFunction(function) = call.function() {
