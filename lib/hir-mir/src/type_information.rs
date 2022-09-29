@@ -1,5 +1,11 @@
 use crate::{context::CompileContext, type_, CompileError};
-use hir::{analysis::type_collector, ir::*};
+use fnv::FnvHashSet;
+use hir::{
+    analysis::type_collector,
+    ir::*,
+    types::{self, Type},
+};
+use position::Position;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
@@ -17,9 +23,26 @@ pub fn compile(
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
         vec![compile_debug_function_type().into()],
-        type_collector::collect(module)
-            .values()
+        collect_types(module)
+            .iter()
             .map(|type_| Ok((type_::compile(context, &type_)?, vec![])))
             .collect::<Result<_, CompileError>>()?,
     ))
+}
+
+fn collect_types(module: &Module) -> FnvHashSet<Type> {
+    let position = module.position();
+
+    [
+        types::ByteString::new(position.clone()).into(),
+        types::None::new(position.clone()).into(),
+        types::Number::new(position.clone()).into(),
+    ]
+    .into_iter()
+    .chain(
+        type_collector::collect_records(module)
+            .into_values()
+            .map(Type::from),
+    )
+    .collect()
 }

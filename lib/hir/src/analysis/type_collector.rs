@@ -5,6 +5,18 @@ use crate::{
 use fnv::FnvHashMap;
 
 pub fn collect(module: &Module) -> FnvHashMap<String, Type> {
+    collect_records(module)
+        .into_iter()
+        .chain(
+            module
+                .type_aliases()
+                .iter()
+                .map(|alias| (alias.name().into(), alias.type_().clone())),
+        )
+        .collect()
+}
+
+pub fn collect_records(module: &Module) -> FnvHashMap<String, Type> {
     module
         .type_definitions()
         .iter()
@@ -14,12 +26,6 @@ pub fn collect(module: &Module) -> FnvHashMap<String, Type> {
                 types::Record::new(definition.name(), definition.position().clone()).into(),
             )
         })
-        .chain(
-            module
-                .type_aliases()
-                .iter()
-                .map(|alias| (alias.name().into(), alias.type_().clone())),
-        )
         .collect()
 }
 
