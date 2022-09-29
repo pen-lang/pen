@@ -1,4 +1,4 @@
-mod debug;
+pub mod debug;
 
 use crate::{context::CompileContext, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
@@ -7,15 +7,9 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
+use itertools::Itertools;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
-
-pub fn compile_debug_function_type() -> mir::types::Function {
-    mir::types::Function::new(
-        vec![mir::types::Type::Variant],
-        mir::types::Type::ByteString,
-    )
-}
 
 // TODO Compile type information.
 pub fn compile(
@@ -23,7 +17,7 @@ pub fn compile(
     module: &Module,
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
-        vec![compile_debug_function_type().into()],
+        vec![debug::compile_function_type().into()],
         collect_types(context, module)?
             .iter()
             .map(|type_| {
@@ -34,6 +28,20 @@ pub fn compile(
             })
             .collect::<Result<_, CompileError>>()?,
     ))
+}
+
+pub fn compile_function_definitions(
+    context: &CompileContext,
+    module: &Module,
+) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
+    Ok(collect_types(context, module)?
+        .iter()
+        .map(|type_| debug::compile_function_definition(context, type_))
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .unique_by(|definition| definition.name().to_owned())
+        .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+        .collect())
 }
 
 fn collect_types(
@@ -79,7 +87,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module).unwrap(),
             mir::ir::TypeInformation::new(
-                vec![compile_debug_function_type()],
+                vec![debug::compile_function_type()],
                 [
                     (
                         mir::types::Type::Boolean,

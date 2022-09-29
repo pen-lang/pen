@@ -130,14 +130,33 @@ mod tests {
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-        compile(module, &COMPILE_CONFIGURATION)
+        compile(
+            &module.set_type_definitions(
+                module
+                    .type_definitions()
+                    .iter()
+                    .cloned()
+                    .chain([TypeDefinition::new(
+                        "error",
+                        "error",
+                        vec![types::RecordField::new(
+                            "source",
+                            types::Any::new(Position::fake()),
+                        )],
+                        false,
+                        false,
+                        false,
+                        Position::fake(),
+                    )])
+                    .collect(),
+            ),
+            &COMPILE_CONFIGURATION,
+        )
     }
 
     #[test]
-    fn compile_empty_module() -> Result<(), CompileError> {
-        compile_module(&Module::empty())?;
-
-        Ok(())
+    fn compile_empty_module() {
+        compile_module(&Module::empty()).unwrap();
     }
 
     #[test]
@@ -185,7 +204,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_boolean() -> Result<(), CompileError> {
+    fn compile_boolean() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -197,13 +216,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_none() -> Result<(), CompileError> {
+    fn compile_none() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -215,13 +233,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_number() -> Result<(), CompileError> {
+    fn compile_number() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -233,13 +250,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_string() -> Result<(), CompileError> {
+    fn compile_string() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -251,9 +267,8 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]

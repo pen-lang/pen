@@ -40,15 +40,7 @@ pub fn compile(
     Ok(match function.name() {
         BuiltInFunctionName::Debug => compile_call(
             mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-            vec![mir::ir::Call::new(
-                type_information::compile_debug_function_type(),
-                mir::ir::TypeInformationFunction::new(
-                    type_information::DEBUG_FUNCTION_INDEX,
-                    arguments[0].clone(),
-                ),
-                arguments,
-            )
-            .into()],
+            vec![type_information::debug::compile_call(arguments[0].clone())],
         )?
         .into(),
         BuiltInFunctionName::Error => compile_call(

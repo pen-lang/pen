@@ -1,6 +1,5 @@
-use crate::ir::*;
-
 use super::GlobalFunctionDefinitionFake;
+use crate::ir::*;
 
 pub trait ModuleFake {
     #[must_use]
@@ -20,6 +19,9 @@ pub trait ModuleFake {
 
     #[must_use]
     fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
+
+    #[must_use]
+    fn set_global_function_definitions(&self, definitions: Vec<GlobalFunctionDefinition>) -> Self;
 
     #[must_use]
     fn set_type_information(&self, information: TypeInformation) -> Self;
@@ -84,6 +86,17 @@ impl ModuleFake for Module {
                 .into_iter()
                 .map(GlobalFunctionDefinition::fake)
                 .collect(),
+            self.type_information().clone(),
+        )
+    }
+
+    fn set_global_function_definitions(&self, definitions: Vec<GlobalFunctionDefinition>) -> Self {
+        Self::new(
+            self.type_definitions().to_vec(),
+            self.foreign_declarations().to_vec(),
+            self.foreign_definitions().to_vec(),
+            self.function_declarations().to_vec(),
+            definitions,
             self.type_information().clone(),
         )
     }

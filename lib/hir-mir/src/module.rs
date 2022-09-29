@@ -59,7 +59,12 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .function_definitions()
             .iter()
             .map(|definition| compile_function_definition(context, definition))
-            .collect::<Result<Vec<_>, CompileError>>()?,
+            .collect::<Result<Vec<_>, CompileError>>()?
+            .into_iter()
+            .chain(type_information::compile_function_definitions(
+                context, module,
+            )?)
+            .collect(),
         type_information::compile(context, module)?,
     ))
 }
@@ -134,7 +139,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{test::ModuleFake, types};
-    use mir::test::ModuleFake as _;
+    use mir::test::{GlobalFunctionDefinitionFake, ModuleFake as _};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -169,12 +174,21 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Source
                 )],)
-                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
-                    "foo",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::types::Type::None,
-                    mir::ir::Expression::None,
-                )]))
+                .set_global_function_definitions(
+                    [mir::ir::GlobalFunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
+                            "foo",
+                            vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                            mir::types::Type::None,
+                            mir::ir::Expression::None,
+                        )
+                    )]
+                    .into_iter()
+                    .chain(
+                        type_information::compile_function_definitions(&context, &module).unwrap()
+                    )
+                    .collect()
+                ))
         );
     }
 
@@ -205,12 +219,21 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
-                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
-                    "foo",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::types::Type::None,
-                    mir::ir::Expression::None,
-                )]))
+                .set_global_function_definitions(
+                    [mir::ir::GlobalFunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
+                            "foo",
+                            vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                            mir::types::Type::None,
+                            mir::ir::Expression::None,
+                        )
+                    )]
+                    .into_iter()
+                    .chain(
+                        type_information::compile_function_definitions(&context, &module).unwrap()
+                    )
+                    .collect()
+                ))
         );
     }
 }
