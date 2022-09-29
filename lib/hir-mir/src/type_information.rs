@@ -5,7 +5,6 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use position::Position;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
