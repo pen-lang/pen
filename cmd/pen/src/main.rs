@@ -320,7 +320,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn build_target_triple_argument() -> clap::Arg<'static> {
+fn build_target_triple_argument() -> clap::Arg {
     clap::Arg::new("target")
         .short('t')
         .long("target")
