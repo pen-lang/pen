@@ -22,7 +22,7 @@ jobs:
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: git diff --exit-code
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: build-${{ matrix.os }}
           path: target/release/pen
