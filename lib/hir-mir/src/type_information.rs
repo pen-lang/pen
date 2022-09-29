@@ -11,7 +11,6 @@ use itertools::Itertools;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
-// TODO Compile type information.
 pub fn compile(
     context: &CompileContext,
     module: &Module,

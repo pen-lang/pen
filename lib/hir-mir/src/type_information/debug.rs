@@ -37,6 +37,7 @@ pub fn compile_function_definition(
     let mir_type = type_::compile(context, type_)?;
     let compile_downcast = |body| compile_downcast(argument.clone().into(), mir_type.clone(), body);
 
+    // TODO Compile type information.
     Ok(mir::ir::FunctionDefinition::new(
         compile_function_name(context, type_)?,
         vec![mir::ir::Argument::new(
