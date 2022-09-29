@@ -29,6 +29,7 @@ pub fn compile(
     ))
 }
 
+// TODO Compile function declarations for external records.
 pub fn compile_function_definitions(
     context: &CompileContext,
     module: &Module,
