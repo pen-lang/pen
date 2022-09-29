@@ -18,15 +18,19 @@ pub fn compile(
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
         vec![debug::compile_function_type().into()],
-        collect_types(context, module)?
-            .iter()
-            .map(|type_| {
-                Ok((
-                    type_::compile(context, type_)?,
-                    vec![debug::compile_function_name(context, type_)?],
-                ))
-            })
-            .collect::<Result<_, CompileError>>()?,
+        if context.configuration().is_ok() {
+            collect_types(context, module)?
+                .iter()
+                .map(|type_| {
+                    Ok((
+                        type_::compile(context, type_)?,
+                        vec![debug::compile_function_name(context, type_)?],
+                    ))
+                })
+                .collect::<Result<_, CompileError>>()?
+        } else {
+            Default::default()
+        },
     ))
 }
 
@@ -34,14 +38,18 @@ pub fn compile_function_definitions(
     context: &CompileContext,
     module: &Module,
 ) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
-    Ok(collect_types(context, module)?
-        .iter()
-        .map(|type_| debug::compile_function_definition(context, type_))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .unique_by(|definition| definition.name().to_owned())
-        .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
-        .collect())
+    Ok(if context.configuration().is_ok() {
+        collect_types(context, module)?
+            .iter()
+            .map(|type_| debug::compile_function_definition(context, type_))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique_by(|definition| definition.name().to_owned())
+            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+            .collect()
+    } else {
+        Default::default()
+    })
 }
 
 fn collect_types(
@@ -133,6 +141,17 @@ mod tests {
                 .into_iter()
                 .collect()
             )
+        )
+    }
+
+    #[test]
+    fn compile_without_compile_configuration() {
+        let module = Module::empty();
+        let context = CompileContext::new(&module, None);
+
+        assert_eq!(
+            compile(&context, &module).unwrap(),
+            mir::ir::TypeInformation::new(vec![debug::compile_function_type()], Default::default())
         )
     }
 }
