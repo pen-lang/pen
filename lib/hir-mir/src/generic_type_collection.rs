@@ -18,6 +18,7 @@ pub fn collect(
     //
     // TODO Do such transformation ahead, check types, and collect generic types only from type
     // coercion.
+    // https://github.com/pen-lang/pen/issues/1271
     expression_visitor::visit(module, |expression| match expression {
         Expression::Call(call) => {
             if let Expression::BuiltInFunction(function) = call.function() {
