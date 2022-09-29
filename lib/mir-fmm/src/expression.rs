@@ -290,13 +290,24 @@ pub fn compile(
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }
-        mir::ir::Expression::TypeInformationFunction(information) => builder.deconstruct_record(
-            type_information::get_custom_information(
-                builder,
-                variant::get_tag(builder, &compile(information.variant(), variables)?)?,
-            )?,
-            information.index(),
-        )?,
+        mir::ir::Expression::TypeInformationFunction(information) => {
+            // TODO Drop a variant.
+
+            fmm::build::bit_cast(
+                type_::compile_function(
+                    context,
+                    &context.type_information().types()[information.index()],
+                ),
+                builder.deconstruct_record(
+                    type_information::get_custom_information(
+                        builder,
+                        variant::get_tag(builder, &compile(information.variant(), variables)?)?,
+                    )?,
+                    information.index(),
+                )?,
+            )
+            .into()
+        }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,

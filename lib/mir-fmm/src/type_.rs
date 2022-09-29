@@ -70,7 +70,7 @@ pub fn compile_variant_tag(context: &Context) -> fmm::types::Pointer {
                 .type_information()
                 .types()
                 .iter()
-                .map(|type_| compile_function(context, type_))
+                .map(|_| fmm::types::generic_pointer_type())
                 .collect(),
         )
         .into(),

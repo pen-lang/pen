@@ -1,8 +1,10 @@
 use crate::{context::Context, error::CompileError, reference_count, type_};
+use fnv::FnvHashMap;
 
 pub fn compile_global_variable(
     context: &Context,
     type_: &mir::types::Type,
+    global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         type_::compile_id(type_),
@@ -13,17 +15,16 @@ pub fn compile_global_variable(
             fmm::build::record(
                 context
                     .type_information()
-                    .types()
+                    .information()
+                    .get(type_)
+                    .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?
                     .iter()
-                    .zip(
-                        context
-                            .type_information()
-                            .information()
-                            .get(type_)
-                            .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?,
-                    )
-                    .map(|(type_, name)| {
-                        fmm::build::variable(&*name, type_::compile_function(context, type_))
+                    .map(|name| {
+                        fmm::build::bit_cast(
+                            fmm::types::generic_pointer_type(),
+                            global_variables[name].clone(),
+                        )
+                        .into()
                     })
                     .collect(),
             )

@@ -40,9 +40,10 @@ pub fn compile(
     mir::analysis::type_check::check(&module)?;
 
     let context = Context::new(&module, configuration.clone());
+    let global_variables = compile_global_variables(&context, &module)?;
 
     for type_ in &mir::analysis::variant_type_collection::collect(&module) {
-        type_information::compile_global_variable(&context, type_)?;
+        type_information::compile_global_variable(&context, type_, &global_variables)?;
     }
 
     for definition in module.type_definitions() {
@@ -59,8 +60,6 @@ pub fn compile(
     for declaration in module.function_declarations() {
         function_declaration::compile(&context, declaration);
     }
-
-    let global_variables = compile_global_variables(&context, &module)?;
 
     for definition in module.function_definitions() {
         function_definition::compile(&context, definition, &global_variables)?;
@@ -723,6 +722,43 @@ mod tests {
                     mir::ir::ByteString::new("foo"),
                 ),
             ]));
+        }
+
+        #[test]
+        fn compile_type_information_function() {
+            compile_module(
+                &mir::ir::Module::empty()
+                    .set_type_information(mir::ir::TypeInformation::new(
+                        vec![mir::types::Function::new(vec![], mir::types::Type::None)],
+                        [(mir::types::Type::None, vec!["f".into()])]
+                            .into_iter()
+                            .collect(),
+                    ))
+                    .set_function_definitions(vec![
+                        mir::ir::FunctionDefinition::new(
+                            "f",
+                            vec![],
+                            mir::types::Type::None,
+                            mir::ir::Expression::None,
+                        ),
+                        mir::ir::FunctionDefinition::new(
+                            "g",
+                            vec![],
+                            mir::types::Type::None,
+                            mir::ir::Call::new(
+                                mir::types::Function::new(vec![], mir::types::Type::None),
+                                mir::ir::TypeInformationFunction::new(
+                                    0,
+                                    mir::ir::Variant::new(
+                                        mir::types::Type::None,
+                                        mir::ir::Expression::None,
+                                    ),
+                                ),
+                                vec![],
+                            ),
+                        ),
+                    ]),
+            );
         }
 
         mod case {
