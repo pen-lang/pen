@@ -245,7 +245,7 @@ mod tests {
                 FunctionDefinition::fake(
                     "x",
                     Lambda::new(
-                        vec![Argument::new("x", list_type.clone())],
+                        vec![Argument::new("x", list_type)],
                         types::Boolean::new(Position::fake()),
                         TryOperation::new(
                             Some(types::None::new(Position::fake()).into()),

@@ -42,7 +42,7 @@ pub(super) fn compile_function_definition(
     Ok(match type_ {
         Type::Boolean(_) => Some(compile_function_definition(
             mir::ir::If::new(
-                argument.clone(),
+                argument,
                 mir::ir::ByteString::new("true"),
                 mir::ir::ByteString::new("false"),
             )
@@ -54,7 +54,7 @@ pub(super) fn compile_function_definition(
                 compile_call(mir::ir::RecordField::new(
                     type_::compile_error(context)?,
                     0,
-                    argument.clone(),
+                    argument,
                 )),
                 mir::ir::ByteString::new(")").into(),
             ])
@@ -82,7 +82,7 @@ pub(super) fn compile_function_definition(
         Type::String(_) => Some(compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("\"").into(),
-                argument.clone().into(),
+                argument.into(),
                 mir::ir::ByteString::new("\"").into(),
             ])
             .into(),
