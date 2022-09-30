@@ -1,11 +1,11 @@
-use super::{context::CompileContext, CompileError};
+use super::{context::Context, CompileError};
 use fnv::FnvHashMap;
 use hir::{
     analysis::{type_canonicalizer, type_id_calculator},
     types::{self, Type},
 };
 
-pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Type, CompileError> {
+pub fn compile(context: &Context, type_: &Type) -> Result<mir::types::Type, CompileError> {
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
@@ -23,16 +23,13 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     )
 }
 
-pub fn compile_error(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+pub fn compile_error(context: &Context) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(
         &context.configuration()?.error_type.error_type_name,
     ))
 }
 
-pub fn compile_concrete(
-    context: &CompileContext,
-    type_: &Type,
-) -> Result<mir::types::Type, CompileError> {
+pub fn compile_concrete(context: &Context, type_: &Type) -> Result<mir::types::Type, CompileError> {
     Ok(
         match &type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Function(type_) => compile_concrete_function(type_, context.types())?.into(),
@@ -50,7 +47,7 @@ pub fn compile_concrete(
 }
 
 pub fn compile_function(
-    context: &CompileContext,
+    context: &Context,
     function: &types::Function,
 ) -> Result<mir::types::Function, CompileError> {
     let compile = |type_| compile(context, type_);
@@ -84,7 +81,7 @@ pub fn compile_concrete_function_name(
     ))
 }
 
-pub fn compile_list(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+pub fn compile_list(context: &Context) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(
         &context.configuration()?.list_type.list_type_name,
     ))
@@ -109,7 +106,7 @@ pub fn compile_concrete_list_name(
     ))
 }
 
-pub fn compile_map(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+pub fn compile_map(context: &Context) -> Result<mir::types::Record, CompileError> {
     Ok(mir::types::Record::new(
         &context.configuration()?.map_type.map_type_name,
     ))
@@ -135,9 +132,7 @@ pub fn compile_concrete_map_name(
     ))
 }
 
-pub fn compile_race_function(
-    context: &CompileContext,
-) -> Result<mir::types::Function, CompileError> {
+pub fn compile_race_function(context: &Context) -> Result<mir::types::Function, CompileError> {
     let list_type = compile_list(context)?;
 
     Ok(mir::types::Function::new(

@@ -7,12 +7,12 @@ use hir::{
 };
 
 #[derive(Debug)]
-pub struct CompileContext {
+pub struct Context {
     analysis_context: AnalysisContext,
     configuration: Option<CompileConfiguration>,
 }
 
-impl CompileContext {
+impl Context {
     pub fn new(module: &Module, configuration: Option<CompileConfiguration>) -> Self {
         Self {
             analysis_context: AnalysisContext::new(

@@ -22,7 +22,7 @@ mod type_;
 mod type_information;
 
 pub use compile_configuration::CompileConfiguration;
-use context::CompileContext;
+use context::Context;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
@@ -76,7 +76,7 @@ fn compile_module(
     module: &Module,
     configuration: Option<&CompileConfiguration>,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    let context = CompileContext::new(module, configuration.cloned());
+    let context = Context::new(module, configuration.cloned());
 
     let module = hir::analysis::analyze(context.analysis(), module)?;
 

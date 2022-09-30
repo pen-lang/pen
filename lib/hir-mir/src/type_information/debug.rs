@@ -1,4 +1,4 @@
-use crate::{context::CompileContext, type_, CompileError};
+use crate::{context::Context, type_, CompileError};
 use hir::{analysis::type_id_calculator, types::Type};
 
 const ARGUMENT_NAME: &str = "$x";
@@ -15,7 +15,7 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
 }
 
 pub(super) fn compile_function_name(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
 ) -> Result<String, CompileError> {
     Ok(format!(
@@ -32,7 +32,7 @@ pub(super) fn compile_function_type() -> mir::types::Function {
 }
 
 pub(super) fn compile_function_declaration(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
@@ -42,7 +42,7 @@ pub(super) fn compile_function_declaration(
 }
 
 pub(super) fn compile_function_definition(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
 ) -> Result<Option<mir::ir::FunctionDefinition>, CompileError> {
     let argument = mir::ir::Variable::new(ARGUMENT_NAME);
@@ -103,7 +103,7 @@ pub(super) fn compile_function_definition(
 }
 
 fn compile_function_definition_for_concrete_type(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
     body: mir::ir::Expression,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
@@ -135,7 +135,7 @@ mod tests {
 
     #[test]
     fn compile_function_definition_for_none() {
-        let context = CompileContext::new(&Module::empty(), None);
+        let context = Context::new(&Module::empty(), None);
         let type_ = types::None::new(Position::fake()).into();
         let definition = compile_function_definition(&context, &type_)
             .unwrap()

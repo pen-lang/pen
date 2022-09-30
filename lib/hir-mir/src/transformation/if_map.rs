@@ -1,12 +1,12 @@
 use super::{super::error::CompileError, collection_type, map_context};
-use crate::{context::CompileContext, downcast};
+use crate::{context::Context, downcast};
 use hir::{
     analysis::AnalysisError,
     ir::*,
     types::{self, Type},
 };
 
-pub fn transform(context: &CompileContext, if_: &IfMap) -> Result<Expression, CompileError> {
+pub fn transform(context: &Context, if_: &IfMap) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.map_type;
     let position = if_.position();
 
@@ -83,7 +83,7 @@ mod tests {
     #[test]
     fn transform_if_map() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &IfMap::new(
                 Some(types::Number::new(Position::fake()).into()),
                 Some(types::None::new(Position::fake()).into()),

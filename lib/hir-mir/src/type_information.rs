@@ -1,6 +1,6 @@
 pub mod debug;
 
-use crate::{context::CompileContext, generic_type_collection, type_, CompileError};
+use crate::{context::Context, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{type_canonicalizer, type_collector},
@@ -11,7 +11,7 @@ use hir::{
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     module: &Module,
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
@@ -29,7 +29,7 @@ pub fn compile(
 }
 
 pub fn compile_functions(
-    context: &CompileContext,
+    context: &Context,
     module: &Module,
 ) -> Result<
     (
@@ -88,10 +88,7 @@ pub fn compile_functions(
     ))
 }
 
-fn collect_types(
-    context: &CompileContext,
-    module: &Module,
-) -> Result<FnvHashSet<Type>, CompileError> {
+fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, CompileError> {
     let position = module.position();
 
     Ok([
@@ -128,12 +125,12 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    fn create_context(module: &Module) -> CompileContext {
-        CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone()))
+    fn create_context(module: &Module) -> Context {
+        Context::new(module, Some(COMPILE_CONFIGURATION.clone()))
     }
 
     fn create_default_type_information(
-        context: &CompileContext,
+        context: &Context,
     ) -> FnvHashMap<mir::types::Type, Vec<String>> {
         [
             (
@@ -215,7 +212,7 @@ mod tests {
     #[test]
     fn compile_without_compile_configuration() {
         let module = Module::empty();
-        let context = CompileContext::new(&module, None);
+        let context = Context::new(&module, None);
 
         assert_eq!(
             compile(&context, &module).unwrap(),
