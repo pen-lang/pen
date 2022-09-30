@@ -436,17 +436,20 @@ mod tests {
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(compile_functions(&context, &module)
-            .unwrap()
-            .0
-            .iter()
-            .find(|declaration| declaration.name()
-                == debug::compile_function_name(
-                    &context,
-                    &types::Record::new("r", Position::fake()).into()
-                )
-                .unwrap())
-            .is_some());
+        assert_eq!(
+            compile_functions(&context, &module)
+                .unwrap()
+                .0
+                .iter()
+                .filter(|declaration| declaration.name()
+                    == debug::compile_function_name(
+                        &context,
+                        &types::Record::new("r", Position::fake()).into()
+                    )
+                    .unwrap())
+                .count(),
+            1
+        );
     }
 
     #[test]

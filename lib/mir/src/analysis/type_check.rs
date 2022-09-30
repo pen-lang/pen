@@ -56,7 +56,7 @@ fn check_type_information(
     type_information: &TypeInformation,
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    for (_, names) in type_information.information() {
+    for names in type_information.information().values() {
         for (name, type_) in names.iter().zip(type_information.types()) {
             check_equality(&check_variable(name, variables)?, &type_.clone().into())?;
         }
@@ -121,7 +121,7 @@ fn check_expression(
         Expression::Case(case) => check_case(context, case, variables, result_type, types)?,
         Expression::CloneVariables(clone) => {
             for (name, type_) in clone.variables() {
-                check_equality(&check_variable(&name, variables)?, type_)?;
+                check_equality(&check_variable(name, variables)?, type_)?;
             }
 
             check_expression(clone.expression(), variables)?
@@ -368,7 +368,7 @@ fn check_drop_variables(
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
     for (name, type_) in drop.variables() {
-        check_equality(&check_variable(&name, variables)?, type_)?;
+        check_equality(&check_variable(name, variables)?, type_)?;
     }
 
     check_expression(context, drop.expression(), variables, result_type, types)
