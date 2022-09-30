@@ -291,7 +291,9 @@ pub fn compile(
             compile_try_operation(context, builder, operation, variables)?
         }
         mir::ir::Expression::TypeInformationFunction(information) => {
-            // TODO Drop a variant.
+            let value = compile(information.variant(), variables)?;
+
+            reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
 
             fmm::build::bit_cast(
                 type_::compile_function(
@@ -301,7 +303,7 @@ pub fn compile(
                 builder.deconstruct_record(
                     type_information::get_custom_information(
                         builder,
-                        variant::get_tag(builder, &compile(information.variant(), variables)?)?,
+                        variant::get_tag(builder, &value)?,
                     )?,
                     information.index(),
                 )?,
