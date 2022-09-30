@@ -12,11 +12,12 @@ pub enum TypeCheckError {
     FieldIndexOutOfBounds(RecordField),
     ForeignDefinitionNotFound(ForeignDefinition),
     FunctionExpected(Expression),
+    InvalidTypeInformationFunctionIndex(TypeInformationFunction),
     NestedVariant(Expression),
     NoAlternativeFound(Case),
     TypeNotFound(types::Record),
     TypesNotMatched(Type, Type),
-    VariableNotFound(Variable),
+    VariableNotFound(String),
     WrongArgumentCount(Call),
     WrongFieldCount(Record),
 }
