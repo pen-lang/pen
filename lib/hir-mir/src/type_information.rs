@@ -69,7 +69,7 @@ pub fn compile_functions(
             .into_iter()
             .flatten()
             .unique_by(|definition| definition.name().to_owned())
-            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, true))
             .collect(),
     ))
 }
@@ -178,7 +178,7 @@ mod tests {
                 vec![debug::compile_function_type()],
                 create_default_type_information(&context)
             )
-        )
+        );
     }
 
     #[test]
@@ -227,7 +227,7 @@ mod tests {
                 .into_iter()
                 .collect()
             )
-        )
+        );
     }
 
     #[test]
@@ -250,7 +250,7 @@ mod tests {
                 vec![debug::compile_function_type()],
                 create_default_type_information(&context)
             )
-        )
+        );
     }
 
     #[test]
@@ -309,7 +309,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
-        )
+        );
     }
 
     #[test]
@@ -333,7 +333,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
-        )
+        );
     }
 
     #[test]
@@ -373,7 +373,7 @@ mod tests {
         assert_eq!(
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 2
-        )
+        );
     }
 
     #[test]
@@ -401,6 +401,97 @@ mod tests {
         assert_eq!(
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
-        )
+        );
+    }
+
+    #[test]
+    fn compile_external_record() {
+        let module = Module::empty()
+            .set_type_definitions(vec![TypeDefinition::new(
+                "r",
+                "r",
+                vec![],
+                false,
+                false,
+                true,
+                Position::fake(),
+            )])
+            .set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    List::new(
+                        types::Record::new("r", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 1
+        );
+        assert!(compile_functions(&context, &module)
+            .unwrap()
+            .0
+            .iter()
+            .find(|declaration| declaration.name()
+                == debug::compile_function_name(
+                    &context,
+                    &types::Record::new("r", Position::fake()).into()
+                )
+                .unwrap())
+            .is_some());
+    }
+
+    #[test]
+    fn compile_internal_record() {
+        let module = Module::empty()
+            .set_type_definitions(vec![TypeDefinition::new(
+                "r",
+                "r",
+                vec![],
+                false,
+                false,
+                false,
+                Position::fake(),
+            )])
+            .set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    List::new(
+                        types::Record::new("r", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 1
+        );
+        assert!(compile_functions(&context, &module)
+            .unwrap()
+            .1
+            .iter()
+            .find(|definition| definition.definition().name()
+                == debug::compile_function_name(
+                    &context,
+                    &types::Record::new("r", Position::fake()).into()
+                )
+                .unwrap())
+            .unwrap()
+            .is_public(),);
     }
 }
