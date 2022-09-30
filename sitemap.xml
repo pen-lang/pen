@@ -71,6 +71,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://pen-lang.org/examples/smoke/built-ins/</loc>
+         <lastmod>2022-09-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://pen-lang.org/examples/smoke/examples/</loc>
          <lastmod>2022-09-30</lastmod>
          <changefreq>daily</changefreq>
