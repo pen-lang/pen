@@ -254,4 +254,96 @@ mod tests {
             )
         )
     }
+
+    #[test]
+    fn compile_list() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            "f",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                List::new(
+                    types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                    vec![],
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 1
+        )
+    }
+
+    #[test]
+    fn compile_two_lists() {
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    List::new(
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            ),
+            FunctionDefinition::fake(
+                "g",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    List::new(
+                        types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            ),
+        ]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 2
+        )
+    }
+
+    #[test]
+    fn compile_map() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            "f",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                List::new(
+                    types::Map::new(
+                        types::None::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    vec![],
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 1
+        )
+    }
 }
