@@ -80,12 +80,62 @@ fn collect_types(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
+    use fnv::FnvHashMap;
+    use hir::test::{FunctionDefinitionFake, ModuleFake};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
     fn create_context(module: &Module) -> CompileContext {
         CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone()))
+    }
+
+    fn create_default_type_information(
+        context: &CompileContext,
+    ) -> FnvHashMap<mir::types::Type, Vec<String>> {
+        [
+            (
+                mir::types::Type::Boolean,
+                vec![debug::compile_function_name(
+                    &context,
+                    &types::Boolean::new(Position::fake()).into(),
+                )
+                .unwrap()],
+            ),
+            (
+                mir::types::Type::ByteString,
+                vec![debug::compile_function_name(
+                    &context,
+                    &types::ByteString::new(Position::fake()).into(),
+                )
+                .unwrap()],
+            ),
+            (
+                mir::types::Type::None,
+                vec![debug::compile_function_name(
+                    &context,
+                    &types::None::new(Position::fake()).into(),
+                )
+                .unwrap()],
+            ),
+            (
+                mir::types::Type::Number,
+                vec![debug::compile_function_name(
+                    &context,
+                    &types::Number::new(Position::fake()).into(),
+                )
+                .unwrap()],
+            ),
+            (
+                mir::types::Record::new("error").into(),
+                vec![debug::compile_function_name(
+                    &context,
+                    &types::Error::new(Position::fake()).into(),
+                )
+                .unwrap()],
+            ),
+        ]
+        .into_iter()
+        .collect()
     }
 
     #[test]
@@ -97,50 +147,7 @@ mod tests {
             compile(&context, &module).unwrap(),
             mir::ir::TypeInformation::new(
                 vec![debug::compile_function_type()],
-                [
-                    (
-                        mir::types::Type::Boolean,
-                        vec![debug::compile_function_name(
-                            &context,
-                            &types::Boolean::new(Position::fake()).into()
-                        )
-                        .unwrap()]
-                    ),
-                    (
-                        mir::types::Type::ByteString,
-                        vec![debug::compile_function_name(
-                            &context,
-                            &types::ByteString::new(Position::fake()).into()
-                        )
-                        .unwrap()]
-                    ),
-                    (
-                        mir::types::Type::None,
-                        vec![debug::compile_function_name(
-                            &context,
-                            &types::None::new(Position::fake()).into()
-                        )
-                        .unwrap()]
-                    ),
-                    (
-                        mir::types::Type::Number,
-                        vec![debug::compile_function_name(
-                            &context,
-                            &types::Number::new(Position::fake()).into()
-                        )
-                        .unwrap()]
-                    ),
-                    (
-                        mir::types::Record::new("error").into(),
-                        vec![debug::compile_function_name(
-                            &context,
-                            &types::Error::new(Position::fake()).into()
-                        )
-                        .unwrap()]
-                    ),
-                ]
-                .into_iter()
-                .collect()
+                create_default_type_information(&context)
             )
         )
     }
@@ -190,6 +197,60 @@ mod tests {
                 ]
                 .into_iter()
                 .collect()
+            )
+        )
+    }
+
+    #[test]
+    fn compile_any() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            "f",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                List::new(types::Any::new(Position::fake()), vec![], Position::fake()),
+                Position::fake(),
+            ),
+            false,
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap(),
+            mir::ir::TypeInformation::new(
+                vec![debug::compile_function_type()],
+                create_default_type_information(&context)
+            )
+        )
+    }
+
+    #[test]
+    fn compile_union() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            "f",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                List::new(
+                    types::Union::new(
+                        types::Number::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    vec![],
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap(),
+            mir::ir::TypeInformation::new(
+                vec![debug::compile_function_type()],
+                create_default_type_information(&context)
             )
         )
     }
