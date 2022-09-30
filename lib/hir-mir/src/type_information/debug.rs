@@ -3,13 +3,6 @@ use hir::types::Type;
 
 const ARGUMENT_NAME: &str = "$x";
 
-pub fn compile_function_type() -> mir::types::Function {
-    mir::types::Function::new(
-        vec![mir::types::Type::Variant],
-        mir::types::Type::ByteString,
-    )
-}
-
 pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expression {
     let argument = argument.into();
 
@@ -29,6 +22,13 @@ pub(super) fn compile_function_name(
         "hir:debug:{}",
         mir::analysis::type_id::calculate(&type_::compile_concrete(context, type_)?)
     ))
+}
+
+pub(super) fn compile_function_type() -> mir::types::Function {
+    mir::types::Function::new(
+        vec![mir::types::Type::Variant],
+        mir::types::Type::ByteString,
+    )
 }
 
 pub(super) fn compile_function_definition(
@@ -104,23 +104,14 @@ fn compile_function_definition_for_non_variant(
             mir::types::Type::Variant,
         )],
         mir::types::Type::ByteString,
-        compile_downcast(
-            mir::ir::Variable::new(ARGUMENT_NAME).into(),
-            type_::compile_concrete(context, type_)?,
-            body,
+        mir::ir::Case::new(
+            mir::ir::Variable::new(ARGUMENT_NAME),
+            vec![mir::ir::Alternative::new(
+                vec![type_::compile_concrete(context, type_)?],
+                ARGUMENT_NAME,
+                body,
+            )],
+            None,
         ),
     ))
-}
-
-fn compile_downcast(
-    argument: mir::ir::Expression,
-    type_: mir::types::Type,
-    body: mir::ir::Expression,
-) -> mir::ir::Expression {
-    mir::ir::Case::new(
-        argument,
-        vec![mir::ir::Alternative::new(vec![type_], ARGUMENT_NAME, body)],
-        None,
-    )
-    .into()
 }
