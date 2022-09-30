@@ -39,7 +39,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .long("verbose")
                 .help("Use verbose output")
                 .global(true)
-                .num_args(0),
+                .action(clap::ArgAction::SetTrue),
         )
         .subcommand(clap::Command::new("build").about("Build a package").arg(
             build_target_triple_argument().value_parser(clap::builder::PossibleValuesParser::new(
@@ -55,7 +55,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short('l')
                         .long("library")
                         .help("Create a library package instead of an application one")
-                        .num_args(0),
+                        .action(clap::ArgAction::SetTrue),
                 )
                 .arg(
                     clap::Arg::new("directory")
@@ -70,13 +70,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("check")
                         .long("check")
                         .help("Check if module files are formatted")
-                        .num_args(0),
+                        .action(clap::ArgAction::SetTrue),
                 )
                 .arg(
                     clap::Arg::new("stdin")
                         .long("stdin")
                         .help("Format stdin")
-                        .num_args(0),
+                        .action(clap::ArgAction::SetTrue),
                 ),
         )
         .subcommand(
