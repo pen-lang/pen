@@ -37,7 +37,7 @@ pub(super) fn compile_function_definition(
 ) -> Result<Option<mir::ir::FunctionDefinition>, CompileError> {
     let argument = mir::ir::Variable::new(ARGUMENT_NAME);
     let compile_function_definition =
-        |body| compile_function_definition_for_non_variant(context, type_, body);
+        |body| compile_function_definition_for_concrete_type(context, type_, body);
 
     // TODO Implement proper type-specfic debug format.
     Ok(match type_ {
@@ -92,7 +92,7 @@ pub(super) fn compile_function_definition(
     })
 }
 
-fn compile_function_definition_for_non_variant(
+fn compile_function_definition_for_concrete_type(
     context: &CompileContext,
     type_: &Type,
     body: mir::ir::Expression,
@@ -114,4 +114,27 @@ fn compile_function_definition_for_non_variant(
             None,
         ),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hir::{ir::*, test::ModuleFake, types};
+    use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn compile_function_definition_for_none() {
+        let context = CompileContext::new(&Module::empty(), None);
+        let type_ = types::None::new(Position::fake()).into();
+        let definition = compile_function_definition(&context, &type_)
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(
+            definition.name(),
+            &compile_function_name(&context, &type_).unwrap()
+        );
+        assert_eq!(definition.type_(), &compile_function_type());
+    }
 }
