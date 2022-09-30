@@ -23,7 +23,7 @@ Feature: Built-ins
     Then I successfully run `check_memory_leak.sh ./app`
 
     Examples:
-      | value | string  |
+      | value | output  |
       | false | false   |
       | true  | true    |
       | none  | none    |
