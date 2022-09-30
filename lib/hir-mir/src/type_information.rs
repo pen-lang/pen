@@ -29,20 +29,49 @@ pub fn compile(
     ))
 }
 
-// TODO Compile function declarations for external records.
-pub fn compile_function_definitions(
+pub fn compile_functions(
     context: &CompileContext,
     module: &Module,
-) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
-    Ok(collect_types(context, module)?
+) -> Result<
+    (
+        Vec<mir::ir::FunctionDeclaration>,
+        Vec<mir::ir::GlobalFunctionDefinition>,
+    ),
+    CompileError,
+> {
+    let types = collect_types(context, module)?;
+    let external_record_names = module
+        .type_definitions()
         .iter()
-        .map(|type_| debug::compile_function_definition(context, type_))
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .flatten()
-        .unique_by(|definition| definition.name().to_owned())
-        .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
-        .collect())
+        .filter(|definition| definition.is_external())
+        .map(|definition| definition.name())
+        .collect::<FnvHashSet<_>>();
+    let (external_types, internal_types) =
+        types
+            .iter()
+            .partition::<FnvHashSet<_>, _>(|type_| match type_ {
+                Type::Record(type_) => external_record_names.contains(type_.name()),
+                _ => false,
+            });
+
+    Ok((
+        external_types
+            .iter()
+            .map(|type_| debug::compile_function_declaration(context, type_))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .unique_by(|declaration| declaration.name().to_owned())
+            .collect(),
+        internal_types
+            .iter()
+            .map(|type_| debug::compile_function_definition(context, type_))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .flatten()
+            .unique_by(|definition| definition.name().to_owned())
+            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+            .collect(),
+    ))
 }
 
 fn collect_types(

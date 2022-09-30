@@ -3,6 +3,9 @@ use crate::{runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
+    let (type_information_function_declarations, type_information_function_definitions) =
+        type_information::compile_functions(context, module)?;
+
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
@@ -54,16 +57,17 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .function_declarations()
             .iter()
             .map(|declaration| compile_function_declaration(context, declaration))
-            .collect::<Result<_, _>>()?,
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .chain(type_information_function_declarations)
+            .collect(),
         module
             .function_definitions()
             .iter()
             .map(|definition| compile_function_definition(context, definition))
             .collect::<Result<Vec<_>, CompileError>>()?
             .into_iter()
-            .chain(type_information::compile_function_definitions(
-                context, module,
-            )?)
+            .chain(type_information_function_definitions)
             .collect(),
         type_information::compile(context, module)?,
     ))
@@ -163,6 +167,8 @@ mod tests {
             Position::fake(),
         )]);
         let context = create_context(&module);
+        let (type_information_function_declarations, type_information_function_definitions) =
+            type_information::compile_functions(&context, &module).unwrap();
 
         assert_eq!(
             compile(&context, &module),
@@ -173,7 +179,8 @@ mod tests {
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Source
-                )],)
+                )])
+                .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
                         mir::ir::FunctionDefinition::new(
@@ -184,9 +191,7 @@ mod tests {
                         )
                     )]
                     .into_iter()
-                    .chain(
-                        type_information::compile_function_definitions(&context, &module).unwrap()
-                    )
+                    .chain(type_information_function_definitions)
                     .collect()
                 ))
         );
@@ -208,6 +213,8 @@ mod tests {
             Position::fake(),
         )]);
         let context = create_context(&module);
+        let (type_information_function_declarations, type_information_function_definitions) =
+            type_information::compile_functions(&context, &module).unwrap();
 
         assert_eq!(
             compile(&context, &module),
@@ -219,6 +226,7 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
+                .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
                         mir::ir::FunctionDefinition::new(
@@ -229,9 +237,7 @@ mod tests {
                         )
                     )]
                     .into_iter()
-                    .chain(
-                        type_information::compile_function_definitions(&context, &module).unwrap()
-                    )
+                    .chain(type_information_function_definitions)
                     .collect()
                 ))
         );

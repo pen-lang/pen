@@ -31,6 +31,16 @@ pub(super) fn compile_function_type() -> mir::types::Function {
     )
 }
 
+pub(super) fn compile_function_declaration(
+    context: &CompileContext,
+    type_: &Type,
+) -> Result<mir::ir::FunctionDeclaration, CompileError> {
+    Ok(mir::ir::FunctionDeclaration::new(
+        compile_function_name(context, type_)?,
+        compile_function_type(),
+    ))
+}
+
 pub(super) fn compile_function_definition(
     context: &CompileContext,
     type_: &Type,
