@@ -67,15 +67,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::new("check")
                         .long("check")
-                        .takes_value(false)
                         .help("Check if module files are formatted"),
                 )
-                .arg(
-                    clap::Arg::new("stdin")
-                        .long("stdin")
-                        .takes_value(false)
-                        .help("Format stdin"),
-                ),
+                .arg(clap::Arg::new("stdin").long("stdin").help("Format stdin")),
         )
         .subcommand(
             clap::Command::new("document")
@@ -83,21 +77,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::new("name")
                         .long("name")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set a package name"),
                 )
                 .arg(
                     clap::Arg::new("url")
                         .long("url")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set a package URL"),
                 )
                 .arg(
                     clap::Arg::new("description")
                         .long("description")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set package description"),
                 ),
@@ -157,14 +151,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short('p')
                         .long("package-directory")
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("output directory")
                         .short('o')
                         .long("output-directory")
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("prelude interface file")
@@ -172,7 +166,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .long("prelude-interface-file")
                         .action(clap::ArgAction::Append)
                         .number_of_values(1)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -187,9 +181,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("package test information file")
                         .short('o')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
-                .arg(clap::Arg::new("test information file").multiple_values(true)),
+                .arg(clap::Arg::new("test information file").num_args(0..)),
         )
         .subcommand(
             clap::Command::new("link-test")
@@ -199,19 +193,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("test file")
                         .short('o')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("package test information file")
                         .short('i')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
-                .arg(
-                    clap::Arg::new("archive file")
-                        .required(true)
-                        .multiple_values(true),
-                ),
+                .arg(clap::Arg::new("archive file").required(true).num_args(1..)),
         )
         .get_matches()
         .subcommand()
@@ -324,6 +314,6 @@ fn build_target_triple_argument() -> clap::Arg {
     clap::Arg::new("target")
         .short('t')
         .long("target")
-        .takes_value(true)
+        .num_args(1)
         .help("Set a target triple")
 }
