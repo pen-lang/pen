@@ -1,5 +1,4 @@
-use crate::types;
-use crate::types::Type;
+use crate::{types, types::Type};
 use fnv::FnvHashMap;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

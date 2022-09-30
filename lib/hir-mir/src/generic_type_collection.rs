@@ -16,8 +16,8 @@ pub fn collect(
     // We need to visit expressions other than type coercion too because type
     // coercion might be generated just before compilation.
     //
-    // TODO Do such transformation ahead, check types, and collect generic types only from type
-    // coercion.
+    // TODO Do such transformation ahead, check types, and collect generic types
+    // only from type coercion.
     // https://github.com/pen-lang/pen/issues/1271
     expression_visitor::visit(module, |expression| match expression {
         Expression::Call(call) => {
@@ -88,8 +88,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{FunctionDefinitionFake, ModuleFake};
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {
         collect(

@@ -96,7 +96,7 @@ mod tests {
             (
                 mir::types::Type::Boolean,
                 vec![debug::compile_function_name(
-                    &context,
+                    context,
                     &types::Boolean::new(Position::fake()).into(),
                 )
                 .unwrap()],
@@ -104,7 +104,7 @@ mod tests {
             (
                 mir::types::Type::ByteString,
                 vec![debug::compile_function_name(
-                    &context,
+                    context,
                     &types::ByteString::new(Position::fake()).into(),
                 )
                 .unwrap()],
@@ -112,7 +112,7 @@ mod tests {
             (
                 mir::types::Type::None,
                 vec![debug::compile_function_name(
-                    &context,
+                    context,
                     &types::None::new(Position::fake()).into(),
                 )
                 .unwrap()],
@@ -120,7 +120,7 @@ mod tests {
             (
                 mir::types::Type::Number,
                 vec![debug::compile_function_name(
-                    &context,
+                    context,
                     &types::Number::new(Position::fake()).into(),
                 )
                 .unwrap()],
@@ -128,7 +128,7 @@ mod tests {
             (
                 mir::types::Record::new("error").into(),
                 vec![debug::compile_function_name(
-                    &context,
+                    context,
                     &types::Error::new(Position::fake()).into(),
                 )
                 .unwrap()],
