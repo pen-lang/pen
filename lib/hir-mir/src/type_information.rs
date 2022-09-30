@@ -7,7 +7,6 @@ use hir::{
     ir::*,
     types::{self, Type},
 };
-use itertools::Itertools;
 
 pub const DEBUG_FUNCTION_INDEX: usize = 0;
 
@@ -46,6 +45,12 @@ pub fn compile_functions(
         .filter(|definition| definition.is_external())
         .map(|definition| definition.name())
         .collect::<FnvHashSet<_>>();
+    let internal_record_names = module
+        .type_definitions()
+        .iter()
+        .filter(|definition| !definition.is_external())
+        .map(|definition| definition.name())
+        .collect::<FnvHashSet<_>>();
     let (external_types, internal_types) =
         types
             .iter()
@@ -58,18 +63,29 @@ pub fn compile_functions(
         external_types
             .iter()
             .map(|type_| debug::compile_function_declaration(context, type_))
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .unique_by(|declaration| declaration.name().to_owned())
-            .collect(),
+            .collect::<Result<Vec<_>, _>>()?,
         internal_types
             .iter()
-            .map(|type_| debug::compile_function_definition(context, type_))
+            .map(|type_| -> Result<_, CompileError> {
+                Ok(
+                    if let Some(definition) = debug::compile_function_definition(context, type_)? {
+                        Some(mir::ir::GlobalFunctionDefinition::new(
+                            definition,
+                            match type_ {
+                                Type::Record(record) => {
+                                    internal_record_names.contains(record.name())
+                                }
+                                _ => false,
+                            },
+                        ))
+                    } else {
+                        None
+                    },
+                )
+            })
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
-            .unique_by(|definition| definition.name().to_owned())
-            .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, true))
             .collect(),
     ))
 }
@@ -168,7 +184,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_nothing() {
+    fn compile_empty() {
         let module = Module::empty();
         let context = create_context(&module);
 
@@ -179,6 +195,23 @@ mod tests {
                 create_default_type_information(&context)
             )
         );
+
+        for type_ in &[
+            types::Boolean::new(Position::fake()).into(),
+            types::ByteString::new(Position::fake()).into(),
+            types::Error::new(Position::fake()).into(),
+            types::None::new(Position::fake()).into(),
+            types::Number::new(Position::fake()).into(),
+        ] {
+            assert!(!compile_functions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &type_).unwrap())
+                .unwrap()
+                .is_public());
+        }
     }
 
     #[test]
@@ -286,20 +319,14 @@ mod tests {
 
     #[test]
     fn compile_function() {
+        let function_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             Lambda::new(
                 vec![],
                 types::None::new(Position::fake()),
-                List::new(
-                    types::Function::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    vec![],
-                    Position::fake(),
-                ),
+                List::new(function_type.clone(), vec![], Position::fake()),
                 Position::fake(),
             ),
             false,
@@ -310,20 +337,25 @@ mod tests {
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
         );
+        assert!(!compile_functions(&context, &module)
+            .unwrap()
+            .1
+            .iter()
+            .find(|definition| definition.definition().name()
+                == debug::compile_function_name(&context, &function_type.clone().into()).unwrap())
+            .unwrap()
+            .is_public());
     }
 
     #[test]
     fn compile_list() {
+        let list_type = types::List::new(types::Any::new(Position::fake()), Position::fake());
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             Lambda::new(
                 vec![],
                 types::None::new(Position::fake()),
-                List::new(
-                    types::List::new(types::Any::new(Position::fake()), Position::fake()),
-                    vec![],
-                    Position::fake(),
-                ),
+                List::new(list_type.clone(), vec![], Position::fake()),
                 Position::fake(),
             ),
             false,
@@ -334,6 +366,14 @@ mod tests {
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
         );
+        assert!(!compile_functions(&context, &module)
+            .unwrap()
+            .1
+            .iter()
+            .find(|definition| definition.definition().name()
+                == debug::compile_function_name(&context, &list_type.clone().into()).unwrap())
+            .unwrap()
+            .is_public());
     }
 
     #[test]
@@ -378,20 +418,17 @@ mod tests {
 
     #[test]
     fn compile_map() {
+        let map_type = types::Map::new(
+            types::None::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "f",
             Lambda::new(
                 vec![],
                 types::None::new(Position::fake()),
-                List::new(
-                    types::Map::new(
-                        types::None::new(Position::fake()),
-                        types::None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    vec![],
-                    Position::fake(),
-                ),
+                List::new(map_type.clone(), vec![], Position::fake()),
                 Position::fake(),
             ),
             false,
@@ -402,6 +439,14 @@ mod tests {
             compile(&context, &module).unwrap().information().len(),
             create_default_type_information(&context).len() + 1
         );
+        assert!(!compile_functions(&context, &module)
+            .unwrap()
+            .1
+            .iter()
+            .find(|definition| definition.definition().name()
+                == debug::compile_function_name(&context, &map_type.clone().into()).unwrap())
+            .unwrap()
+            .is_public());
     }
 
     #[test]
@@ -495,6 +540,6 @@ mod tests {
                 )
                 .unwrap())
             .unwrap()
-            .is_public(),);
+            .is_public());
     }
 }

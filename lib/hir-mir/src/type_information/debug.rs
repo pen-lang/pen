@@ -1,5 +1,5 @@
 use crate::{context::CompileContext, type_, CompileError};
-use hir::types::Type;
+use hir::{analysis::type_id_calculator, types::Type};
 
 const ARGUMENT_NAME: &str = "$x";
 
@@ -20,7 +20,7 @@ pub(super) fn compile_function_name(
 ) -> Result<String, CompileError> {
     Ok(format!(
         "hir:debug:{}",
-        mir::analysis::type_id::calculate(&type_::compile_concrete(context, type_)?)
+        type_id_calculator::calculate(type_, context.types())?
     ))
 }
 
