@@ -33,20 +33,20 @@ pub fn compile_concrete(
     context: &CompileContext,
     type_: &Type,
 ) -> Result<mir::types::Type, CompileError> {
-    Ok(match &type_ {
-        Type::Function(function_type) => {
-            compile_concrete_function(function_type, context.types())?.into()
-        }
-        Type::List(list_type) => compile_concrete_list(list_type, context.types())?.into(),
-        Type::Map(map_type) => compile_concrete_map(map_type, context.types())?.into(),
-        Type::Boolean(_)
-        | Type::Error(_)
-        | Type::None(_)
-        | Type::Number(_)
-        | Type::Record(_)
-        | Type::String(_) => compile(context, type_)?,
-        Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
-    })
+    Ok(
+        match &type_canonicalizer::canonicalize(type_, context.types())? {
+            Type::Function(type_) => compile_concrete_function(type_, context.types())?.into(),
+            Type::List(type_) => compile_concrete_list(type_, context.types())?.into(),
+            Type::Map(type_) => compile_concrete_map(type_, context.types())?.into(),
+            Type::Boolean(_)
+            | Type::Error(_)
+            | Type::None(_)
+            | Type::Number(_)
+            | Type::Record(_)
+            | Type::String(_) => compile(context, type_)?,
+            Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
+        },
+    )
 }
 
 pub fn compile_function(

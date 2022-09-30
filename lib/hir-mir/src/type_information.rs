@@ -3,7 +3,7 @@ pub mod debug;
 use crate::{context::CompileContext, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
 use hir::{
-    analysis::type_collector,
+    analysis::{type_canonicalizer, type_collector},
     ir::*,
     types::{self, Type},
 };
@@ -21,7 +21,7 @@ pub fn compile(
             .iter()
             .map(|type_| {
                 Ok((
-                    type_::compile(context, type_)?,
+                    type_::compile_concrete(context, type_)?,
                     vec![debug::compile_function_name(context, type_)?],
                 ))
             })
@@ -39,6 +39,7 @@ pub fn compile_function_definitions(
         .map(|type_| debug::compile_function_definition(context, type_))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()
+        .flatten()
         .unique_by(|definition| definition.name().to_owned())
         .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
         .collect())
@@ -68,6 +69,10 @@ fn collect_types(
             .into_values()
             .map(Type::from),
     )
+    .map(|type_| type_canonicalizer::canonicalize(&type_, context.types()))
+    .collect::<Result<Vec<_>, _>>()?
+    .into_iter()
+    .filter(|type_| !matches!(&type_, Type::Any(_) | Type::Union(_)))
     .collect())
 }
 

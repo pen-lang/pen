@@ -347,7 +347,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_compile_duplicate_function_names() {
+    fn compile_duplicate_function_names() {
         let definition = FunctionDefinition::fake(
             "x",
             Lambda::new(
@@ -368,7 +368,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_compile_invalid_try_operator_in_function() {
+    fn compile_invalid_try_operator_in_function() {
         assert_eq!(
             compile_module(&Module::empty().set_function_definitions(vec![
                 FunctionDefinition::fake(
@@ -395,5 +395,22 @@ mod tests {
             ])),
             Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
+    }
+
+    #[test]
+    fn compile_function_to_any() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Any::new(Position::fake()),
+                    Variable::new("x", Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
     }
 }
