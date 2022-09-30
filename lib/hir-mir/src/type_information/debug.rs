@@ -49,7 +49,7 @@ pub(super) fn compile_function_definition(
     let compile_function_definition =
         |body| compile_function_definition_for_concrete_type(context, type_, body);
 
-    // TODO Implement proper type-specfic debug format.
+    // TODO Implement proper type-specific debug format.
     Ok(match type_ {
         Type::Boolean(_) => Some(compile_function_definition(
             mir::ir::If::new(
