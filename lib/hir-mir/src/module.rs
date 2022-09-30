@@ -1,8 +1,11 @@
 use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
-use crate::runtime_function_declaration;
+use crate::{runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
+    let (type_information_function_declarations, type_information_function_definitions) =
+        type_information::compile_functions(context, module)?;
+
     Ok(mir::ir::Module::new(
         module
             .type_definitions()
@@ -54,12 +57,19 @@ pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Mod
             .function_declarations()
             .iter()
             .map(|declaration| compile_function_declaration(context, declaration))
-            .collect::<Result<_, _>>()?,
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .chain(type_information_function_declarations)
+            .collect(),
         module
             .function_definitions()
             .iter()
             .map(|definition| compile_function_definition(context, definition))
-            .collect::<Result<Vec<_>, CompileError>>()?,
+            .collect::<Result<Vec<_>, CompileError>>()?
+            .into_iter()
+            .chain(type_information_function_definitions)
+            .collect(),
+        type_information::compile(context, module)?,
     ))
 }
 
@@ -133,7 +143,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{test::ModuleFake, types};
-    use mir::test::ModuleFake as _;
+    use mir::test::{GlobalFunctionDefinitionFake, ModuleFake as _};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -157,22 +167,33 @@ mod tests {
             Position::fake(),
         )]);
         let context = create_context(&module);
+        let (type_information_function_declarations, type_information_function_definitions) =
+            type_information::compile_functions(&context, &module).unwrap();
 
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
+                .set_type_information(type_information::compile(&context, &module).unwrap())
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Source
-                )],)
-                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
-                    "foo",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::types::Type::None,
-                    mir::ir::Expression::None,
-                )]))
+                )])
+                .set_function_declarations(type_information_function_declarations)
+                .set_global_function_definitions(
+                    [mir::ir::GlobalFunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
+                            "foo",
+                            vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                            mir::types::Type::None,
+                            mir::ir::Expression::None,
+                        )
+                    )]
+                    .into_iter()
+                    .chain(type_information_function_definitions)
+                    .collect()
+                ))
         );
     }
 
@@ -192,22 +213,33 @@ mod tests {
             Position::fake(),
         )]);
         let context = create_context(&module);
+        let (type_information_function_declarations, type_information_function_definitions) =
+            type_information::compile_functions(&context, &module).unwrap();
 
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
+                .set_type_information(type_information::compile(&context, &module).unwrap())
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
-                .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
-                    "foo",
-                    vec![mir::ir::Argument::new("x", mir::types::Type::None)],
-                    mir::types::Type::None,
-                    mir::ir::Expression::None,
-                )]))
+                .set_function_declarations(type_information_function_declarations)
+                .set_global_function_definitions(
+                    [mir::ir::GlobalFunctionDefinition::fake(
+                        mir::ir::FunctionDefinition::new(
+                            "foo",
+                            vec![mir::ir::Argument::new("x", mir::types::Type::None)],
+                            mir::types::Type::None,
+                            mir::ir::Expression::None,
+                        )
+                    )]
+                    .into_iter()
+                    .chain(type_information_function_definitions)
+                    .collect()
+                ))
         );
     }
 }

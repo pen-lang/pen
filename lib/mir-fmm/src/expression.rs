@@ -1,7 +1,7 @@
 use super::error::CompileError;
 use crate::{
     call, closure, context::Context, entry_function, pointer, record, reference_count, type_,
-    variant,
+    type_information, variant,
 };
 use fnv::FnvHashMap;
 
@@ -290,6 +290,26 @@ pub fn compile(
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
         }
+        mir::ir::Expression::TypeInformationFunction(information) => {
+            let value = compile(information.variant(), variables)?;
+
+            reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
+
+            fmm::build::bit_cast(
+                type_::compile_function(
+                    context,
+                    &context.type_information().types()[information.index()],
+                ),
+                builder.deconstruct_record(
+                    type_information::get_custom_information(
+                        builder,
+                        variant::get_tag(builder, &value)?,
+                    )?,
+                    information.index(),
+                )?,
+            )
+            .into()
+        }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
             context,
@@ -364,7 +384,7 @@ fn compile_alternatives(
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
                         result?,
-                        compile_tag_comparison(builder, &argument, type_)?,
+                        compile_tag_comparison(context, builder, &argument, type_)?,
                     )?
                     .into())
                 },
@@ -405,13 +425,14 @@ fn compile_alternatives(
 }
 
 fn compile_tag_comparison(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(pointer::equal(
         builder.deconstruct_record(argument.clone(), 0)?,
-        variant::compile_tag(type_),
+        variant::compile_tag(context, type_),
     )?)
 }
 
@@ -635,7 +656,7 @@ fn compile_try_operation(
     let operand = compile(context, builder, operation.operand(), variables)?;
 
     builder.if_(
-        compile_tag_comparison(builder, &operand, operation.type_())?,
+        compile_tag_comparison(context, builder, &operand, operation.type_())?,
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(compile(
                 context,

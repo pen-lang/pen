@@ -1,7 +1,7 @@
 use super::{
     foreign_declaration::ForeignDeclaration, foreign_definition::ForeignDefinition,
     function_declaration::FunctionDeclaration, type_definition::TypeDefinition,
-    GlobalFunctionDefinition,
+    GlobalFunctionDefinition, TypeInformation,
 };
 
 #[derive(Clone, Debug, PartialEq)]
@@ -11,6 +11,7 @@ pub struct Module {
     foreign_definitions: Vec<ForeignDefinition>,
     function_declarations: Vec<FunctionDeclaration>,
     function_definitions: Vec<GlobalFunctionDefinition>,
+    type_information: TypeInformation,
 }
 
 impl Module {
@@ -20,6 +21,7 @@ impl Module {
         foreign_definitions: Vec<ForeignDefinition>,
         function_declarations: Vec<FunctionDeclaration>,
         function_definitions: Vec<GlobalFunctionDefinition>,
+        type_information: TypeInformation,
     ) -> Self {
         Self {
             type_definitions,
@@ -27,6 +29,7 @@ impl Module {
             foreign_definitions,
             function_declarations,
             function_definitions,
+            type_information,
         }
     }
 
@@ -48,5 +51,9 @@ impl Module {
 
     pub fn function_definitions(&self) -> &[GlobalFunctionDefinition] {
         &self.function_definitions
+    }
+
+    pub fn type_information(&self) -> &TypeInformation {
+        &self.type_information
     }
 }

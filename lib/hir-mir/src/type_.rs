@@ -9,9 +9,7 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
-            Type::Error(_) => {
-                mir::types::Record::new(&context.configuration()?.error_type.error_type_name).into()
-            }
+            Type::Error(_) => compile_error(context)?.into(),
             Type::Function(function) => compile_function(context, &function)?.into(),
             Type::List(_) => compile_list(context)?.into(),
             Type::Map(_) => compile_map(context)?.into(),
@@ -25,24 +23,30 @@ pub fn compile(context: &CompileContext, type_: &Type) -> Result<mir::types::Typ
     )
 }
 
+pub fn compile_error(context: &CompileContext) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(
+        &context.configuration()?.error_type.error_type_name,
+    ))
+}
+
 pub fn compile_concrete(
     context: &CompileContext,
     type_: &Type,
 ) -> Result<mir::types::Type, CompileError> {
-    Ok(match &type_ {
-        Type::Function(function_type) => {
-            compile_concrete_function(function_type, context.types())?.into()
-        }
-        Type::List(list_type) => compile_concrete_list(list_type, context.types())?.into(),
-        Type::Map(map_type) => compile_concrete_map(map_type, context.types())?.into(),
-        Type::Boolean(_)
-        | Type::Error(_)
-        | Type::None(_)
-        | Type::Number(_)
-        | Type::Record(_)
-        | Type::String(_) => compile(context, type_)?,
-        Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
-    })
+    Ok(
+        match &type_canonicalizer::canonicalize(type_, context.types())? {
+            Type::Function(type_) => compile_concrete_function(type_, context.types())?.into(),
+            Type::List(type_) => compile_concrete_list(type_, context.types())?.into(),
+            Type::Map(type_) => compile_concrete_map(type_, context.types())?.into(),
+            Type::Boolean(_)
+            | Type::Error(_)
+            | Type::None(_)
+            | Type::Number(_)
+            | Type::Record(_)
+            | Type::String(_) => compile(context, type_)?,
+            Type::Any(_) | Type::Reference(_) | Type::Union(_) => unreachable!(),
+        },
+    )
 }
 
 pub fn compile_function(

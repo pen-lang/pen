@@ -178,6 +178,9 @@ fn move_expression(
                 ));
             }
         }
+        Expression::TypeInformationFunction(information) => {
+            move_expression(information.variant(), variables)?;
+        }
         Expression::Variable(variable) => {
             drop_variable(variable.name(), variables);
         }
@@ -838,5 +841,18 @@ mod tests {
             ],)),
             Ok(())
         );
+    }
+
+    #[test]
+    fn validate_type_information() {
+        validate(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::Variant)],
+                Type::None,
+                TypeInformationFunction::new(0, Variable::new("x")),
+            )]),
+        )
+        .unwrap();
     }
 }

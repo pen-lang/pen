@@ -537,14 +537,14 @@ fn infer_built_in_call(
     Ok(Call::new(
         Some(
             match function.name() {
+                BuiltInFunctionName::Debug => types::Function::new(
+                    vec![types::Any::new(position.clone()).into()],
+                    types::None::new(position.clone()),
+                    position.clone(),
+                ),
                 BuiltInFunctionName::Error => types::Function::new(
                     vec![types::Any::new(position.clone()).into()],
                     types::Error::new(position.clone()),
-                    position.clone(),
-                ),
-                BuiltInFunctionName::Debug => types::Function::new(
-                    vec![types::ByteString::new(position.clone()).into()],
-                    types::None::new(position.clone()),
                     position.clone(),
                 ),
                 BuiltInFunctionName::Race => {
@@ -602,7 +602,7 @@ mod tests {
         infer(
             &AnalysisContext::new(
                 type_collector::collect(module),
-                type_collector::collect_records(module),
+                type_collector::collect_record_fields(module),
             ),
             module,
         )
@@ -1815,6 +1815,53 @@ mod tests {
     mod built_in_call {
         use super::*;
         use pretty_assertions::assert_eq;
+
+        #[test]
+        fn infer_debug() {
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                                vec![None::new(Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![types::Any::new(Position::fake()).into()],
+                                        types::None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                                vec![None::new(Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
 
         #[test]
         fn infer_race() {

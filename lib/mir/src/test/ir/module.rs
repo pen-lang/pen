@@ -1,6 +1,5 @@
-use crate::ir::*;
-
 use super::GlobalFunctionDefinitionFake;
+use crate::ir::*;
 
 pub trait ModuleFake {
     #[must_use]
@@ -20,11 +19,17 @@ pub trait ModuleFake {
 
     #[must_use]
     fn set_function_definitions(&self, definitions: Vec<FunctionDefinition>) -> Self;
+
+    #[must_use]
+    fn set_global_function_definitions(&self, definitions: Vec<GlobalFunctionDefinition>) -> Self;
+
+    #[must_use]
+    fn set_type_information(&self, information: TypeInformation) -> Self;
 }
 
 impl ModuleFake for Module {
     fn empty() -> Self {
-        Self::new(vec![], vec![], vec![], vec![], vec![])
+        Self::new(vec![], vec![], vec![], vec![], vec![], Default::default())
     }
 
     fn set_type_definitions(&self, definitions: Vec<TypeDefinition>) -> Self {
@@ -34,6 +39,7 @@ impl ModuleFake for Module {
             self.foreign_definitions().to_vec(),
             self.function_declarations().to_vec(),
             self.function_definitions().to_vec(),
+            self.type_information().clone(),
         )
     }
 
@@ -44,6 +50,7 @@ impl ModuleFake for Module {
             self.foreign_definitions().to_vec(),
             self.function_declarations().to_vec(),
             self.function_definitions().to_vec(),
+            self.type_information().clone(),
         )
     }
 
@@ -54,6 +61,7 @@ impl ModuleFake for Module {
             definitions,
             self.function_declarations().to_vec(),
             self.function_definitions().to_vec(),
+            self.type_information().clone(),
         )
     }
 
@@ -64,6 +72,7 @@ impl ModuleFake for Module {
             self.foreign_definitions().to_vec(),
             declarations,
             self.function_definitions().to_vec(),
+            self.type_information().clone(),
         )
     }
 
@@ -77,6 +86,29 @@ impl ModuleFake for Module {
                 .into_iter()
                 .map(GlobalFunctionDefinition::fake)
                 .collect(),
+            self.type_information().clone(),
+        )
+    }
+
+    fn set_global_function_definitions(&self, definitions: Vec<GlobalFunctionDefinition>) -> Self {
+        Self::new(
+            self.type_definitions().to_vec(),
+            self.foreign_declarations().to_vec(),
+            self.foreign_definitions().to_vec(),
+            self.function_declarations().to_vec(),
+            definitions,
+            self.type_information().clone(),
+        )
+    }
+
+    fn set_type_information(&self, type_information: TypeInformation) -> Self {
+        Self::new(
+            self.type_definitions().to_vec(),
+            self.foreign_declarations().to_vec(),
+            self.foreign_definitions().to_vec(),
+            self.function_declarations().to_vec(),
+            self.function_definitions().to_vec(),
+            type_information,
         )
     }
 }

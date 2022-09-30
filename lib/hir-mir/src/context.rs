@@ -17,7 +17,7 @@ impl CompileContext {
         Self {
             analysis_context: AnalysisContext::new(
                 type_collector::collect(module),
-                type_collector::collect_records(module),
+                type_collector::collect_record_fields(module),
             ),
             configuration,
         }

@@ -4,7 +4,7 @@ use crate::{
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
-    type_, CompileError,
+    type_, type_information, CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
@@ -38,9 +38,12 @@ pub fn compile(
     };
 
     Ok(match function.name() {
-        BuiltInFunctionName::Debug => {
-            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
-        }
+        BuiltInFunctionName::Debug => mir::ir::Call::new(
+            mir::types::Function::new(vec![mir::types::Type::ByteString], mir::types::Type::None),
+            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+            vec![type_information::debug::compile_call(arguments[0].clone())],
+        )
+        .into(),
         BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
             arguments,
@@ -176,6 +179,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
@@ -202,7 +206,13 @@ mod tests {
                     .into()
                 ),
                 BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                vec![ByteString::new(vec![], Position::fake()).into()],
+                vec![TypeCoercion::new(
+                    types::None::new(Position::fake()),
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()],
                 Position::fake(),
             ),),
             Ok(mir::ir::Call::new(
@@ -211,7 +221,21 @@ mod tests {
                     mir::types::Type::None
                 ),
                 mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-                vec![mir::ir::ByteString::new(vec![]).into()],
+                vec![mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Variant],
+                        mir::types::Type::ByteString
+                    ),
+                    mir::ir::TypeInformationFunction::new(
+                        type_information::DEBUG_FUNCTION_INDEX,
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
+                    ),
+                    vec![
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
+                            .into()
+                    ],
+                )
+                .into()],
             )
             .into())
         );

@@ -65,6 +65,9 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
                     .filter(|variable| variable != operation.name()),
             )
             .collect(),
+        Expression::TypeInformationFunction(information) => {
+            find_in_expression(information.variant())
+        }
         Expression::Variable(variable) => [variable.name().into()].into_iter().collect(),
         Expression::Variant(variant) => find_in_expression(variant.payload()),
         Expression::Boolean(_)

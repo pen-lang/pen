@@ -192,7 +192,7 @@ mod tests {
         validate(
             &AnalysisContext::new(
                 type_collector::collect(module),
-                type_collector::collect_records(module),
+                type_collector::collect_record_fields(module),
             ),
             module,
         )
