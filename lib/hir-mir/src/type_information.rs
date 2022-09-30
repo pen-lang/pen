@@ -68,8 +68,8 @@ pub fn compile_functions(
             .iter()
             .map(|type_| -> Result<_, CompileError> {
                 Ok(
-                    if let Some(definition) = debug::compile_function_definition(context, type_)? {
-                        Some(mir::ir::GlobalFunctionDefinition::new(
+                    debug::compile_function_definition(context, type_)?.map(|definition| {
+                        mir::ir::GlobalFunctionDefinition::new(
                             definition,
                             match type_ {
                                 Type::Record(record) => {
@@ -77,10 +77,8 @@ pub fn compile_functions(
                                 }
                                 _ => false,
                             },
-                        ))
-                    } else {
-                        None
-                    },
+                        )
+                    }),
                 )
             })
             .collect::<Result<Vec<_>, _>>()?
@@ -208,7 +206,7 @@ mod tests {
                 .1
                 .iter()
                 .find(|definition| definition.definition().name()
-                    == debug::compile_function_name(&context, &type_).unwrap())
+                    == debug::compile_function_name(&context, type_).unwrap())
                 .unwrap()
                 .is_public());
         }
