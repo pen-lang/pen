@@ -217,18 +217,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     {
         ("build", matches) => package_builder::build(
             matches.get_one::<String>("target").map(Deref::deref),
-            matches.contains_id("verbose"),
+            matches.get_one("verbose").copied().unwrap_or_default(),
         ),
         ("test", _) => test_runner::run(),
         ("create", matches) => package_creator::create(
             matches.get_one::<String>("directory").unwrap(),
-            matches.contains_id("library"),
+            matches.get_one("library").copied().unwrap_or_default(),
         ),
         ("format", matches) => {
-            if matches.contains_id("stdin") {
+            if matches.get_one("stdin").copied().unwrap_or_default() {
                 module_formatter::format()
             } else {
-                package_formatter::format(matches.contains_id("check"))
+                package_formatter::format(matches.get_one("check").copied().unwrap_or_default())
             }
         }
         ("document", matches) => package_documentation_generator::generate(
