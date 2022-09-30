@@ -401,11 +401,33 @@ mod tests {
     fn compile_function_to_any() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "x",
+                "f",
                 Lambda::new(
                     vec![],
                     types::Any::new(Position::fake()),
-                    Variable::new("x", Position::fake()),
+                    Variable::new("f", Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_debug() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                        vec![Variable::new("f", Position::fake()).into()],
+                        Position::fake(),
+                    ),
                     Position::fake(),
                 ),
                 false,

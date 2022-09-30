@@ -38,10 +38,11 @@ pub fn compile(
     };
 
     Ok(match function.name() {
-        BuiltInFunctionName::Debug => compile_call(
+        BuiltInFunctionName::Debug => mir::ir::Call::new(
+            mir::types::Function::new(vec![mir::types::Type::ByteString], mir::types::Type::None),
             mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
             vec![type_information::debug::compile_call(arguments[0].clone())],
-        )?
+        )
         .into(),
         BuiltInFunctionName::Error => compile_call(
             mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
