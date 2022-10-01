@@ -14,7 +14,7 @@ Feature: Built-ins
     Given a file named "main.pen" with:
     """pen
     main = \(_ context) none {
-      debug(<value>)
+      debug(<input>)
     }
     """
     When I successfully run `pen build`
@@ -23,8 +23,9 @@ Feature: Built-ins
     Then I successfully run `check_memory_leak.sh ./app`
 
     Examples:
-      | value | output  |
+      | input | output  |
       | false | false   |
       | true  | true    |
       | none  | none    |
       | "foo" | \"foo\" |
+      | 42    | 42      |
