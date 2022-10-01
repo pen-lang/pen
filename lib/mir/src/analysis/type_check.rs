@@ -56,7 +56,14 @@ fn check_type_information(
     type_information: &TypeInformation,
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    for names in type_information.information().values() {
+    for (type_, names) in type_information.information() {
+        if names.len() != type_information.types().len() {
+            return Err(TypeCheckError::TypeInformationFunctionCount(
+                type_.clone(),
+                names.clone(),
+            ));
+        }
+
         for (name, type_) in names.iter().zip(type_information.types()) {
             check_equality(&check_variable(name, variables)?, &type_.clone().into())?;
         }
@@ -271,7 +278,7 @@ fn check_expression(
         }
         Expression::TypeInformationFunction(function) => {
             if function.index() >= context.type_information().types().len() {
-                return Err(TypeCheckError::InvalidTypeInformationFunctionIndex(
+                return Err(TypeCheckError::TypeInformationFunctionIndex(
                     function.clone(),
                 ));
             }
@@ -723,6 +730,7 @@ mod tests {
             .set_type_information(TypeInformation::new(
                 vec![types::Function::new(vec![], Type::None)],
                 Default::default(),
+                vec![],
             ))
             .set_function_definitions(vec![FunctionDefinition::new(
                 "f",
@@ -745,9 +753,7 @@ mod tests {
 
         assert_eq!(
             check(&module),
-            Err(TypeCheckError::InvalidTypeInformationFunctionIndex(
-                function
-            ))
+            Err(TypeCheckError::TypeInformationFunctionIndex(function))
         );
     }
 
@@ -1303,7 +1309,7 @@ mod tests {
         }
 
         #[test]
-        fn check_one() {
+        fn check_function() {
             let module = Module::empty()
                 .set_function_declarations(vec![FunctionDeclaration::new(
                     "f",
@@ -1334,6 +1340,30 @@ mod tests {
             assert_eq!(
                 check(&module),
                 Err(TypeCheckError::VariableNotFound("f".into()))
+            );
+        }
+
+        #[test]
+        fn check_too_many_functions() {
+            let module = Module::empty()
+                .set_function_declarations(vec![FunctionDeclaration::new(
+                    "f",
+                    types::Function::new(vec![], Type::None),
+                )])
+                .set_type_information(TypeInformation::new(
+                    vec![types::Function::new(vec![], Type::None)],
+                    [(Type::None, vec!["f".into(), "f".into()])]
+                        .into_iter()
+                        .collect(),
+                    vec!["f".into()],
+                ));
+
+            assert_eq!(
+                check(&module),
+                Err(TypeCheckError::TypeInformationFunctionCount(
+                    Type::None,
+                    vec!["f".into(), "f".into()]
+                ))
             );
         }
     }
