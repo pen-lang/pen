@@ -163,4 +163,12 @@ mod tests {
         );
         assert_eq!(definition.type_(), &compile_function_type());
     }
+
+    #[test]
+    fn compile_default_function_definition_() {
+        let definition = compile_default_function_definition();
+
+        assert_eq!(definition.name(), compile_default_function_name());
+        assert_eq!(definition.type_(), &compile_function_type());
+    }
 }
