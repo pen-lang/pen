@@ -105,7 +105,6 @@ pub(super) fn compile_function_definition(
         Type::Record(_) => Some(compile_function_definition(
             mir::ir::ByteString::new("<record>").into(),
         )?),
-        Type::Reference(_) => unreachable!(),
         Type::String(_) => Some(compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("\"").into(),
@@ -114,7 +113,7 @@ pub(super) fn compile_function_definition(
             ])
             .into(),
         )?),
-        Type::Any(_) | Type::Union(_) => None,
+        Type::Any(_) | Type::Reference(_) | Type::Union(_) => None,
     })
 }
 
