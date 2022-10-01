@@ -327,7 +327,6 @@ pub fn compile(
                         )))
                     },
                 )?
-                .into()
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
