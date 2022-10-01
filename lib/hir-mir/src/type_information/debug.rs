@@ -88,7 +88,19 @@ pub(super) fn compile_function_definition(
             mir::ir::ByteString::new("none").into(),
         )?),
         Type::Number(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("<number>").into(),
+            if let Ok(configuration) = context.configuration() {
+                mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Number],
+                        mir::types::Type::ByteString,
+                    ),
+                    mir::ir::Variable::new(&configuration.number_type.debug_function_name),
+                    vec![argument.into()],
+                )
+                .into()
+            } else {
+                mir::ir::ByteString::new("<number>").into()
+            },
         )?),
         Type::Record(_) => Some(compile_function_definition(
             mir::ir::ByteString::new("<record>").into(),
