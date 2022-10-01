@@ -1,4 +1,4 @@
-use crate::context::CompileContext;
+use crate::context::Context;
 use fnv::FnvHashSet;
 use hir::{
     analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
@@ -7,10 +7,7 @@ use hir::{
 };
 
 /// Collects generic types potentially up-casted to union types.
-pub fn collect(
-    context: &CompileContext,
-    module: &Module,
-) -> Result<FnvHashSet<Type>, AnalysisError> {
+pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
     // We need to visit expressions other than type coercion too because type
@@ -92,7 +89,7 @@ mod tests {
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {
         collect(
-            &CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone())),
+            &Context::new(module, Some(COMPILE_CONFIGURATION.clone())),
             module,
         )
         .unwrap()

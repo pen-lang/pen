@@ -1,6 +1,6 @@
 use super::{
     built_in_call,
-    context::CompileContext,
+    context::Context,
     downcast,
     transformation::{
         boolean_operation, equal_operation, if_list, if_map, list_literal, map_literal,
@@ -19,7 +19,7 @@ use hir::{
 };
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     expression: &Expression,
 ) -> Result<mir::ir::Expression, CompileError> {
     let compile = |expression| compile(context, expression);
@@ -262,7 +262,7 @@ pub fn compile(
 }
 
 fn compile_lambda(
-    context: &CompileContext,
+    context: &Context,
     lambda: &hir::ir::Lambda,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$closure";
@@ -289,7 +289,7 @@ fn compile_lambda(
 }
 
 fn compile_alternative(
-    context: &CompileContext,
+    context: &Context,
     name: &str,
     type_: &Type,
     expression: &Expression,
@@ -349,7 +349,7 @@ fn compile_generic_type_alternative(
 }
 
 fn compile_list_comprehension(
-    context: &CompileContext,
+    context: &Context,
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
     let compile = |expression| compile(context, expression);
@@ -438,7 +438,7 @@ fn compile_list_comprehension(
 }
 
 fn compile_map_iteration_comprehension(
-    context: &CompileContext,
+    context: &Context,
     comprehension: &MapIterationComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
@@ -489,7 +489,7 @@ fn compile_map_iteration_comprehension(
 }
 
 fn compile_map_iteration_function_definition(
-    context: &CompileContext,
+    context: &Context,
     comprehension: &MapIterationComprehension,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
@@ -625,7 +625,7 @@ fn compile_map_iteration_function_definition(
 }
 
 fn compile_operation(
-    context: &CompileContext,
+    context: &Context,
     operation: &Operation,
 ) -> Result<mir::ir::Expression, CompileError> {
     let compile = |expression| compile(context, expression);
@@ -739,7 +739,7 @@ fn compile_operation(
 }
 
 fn compile_record_fields(
-    context: &CompileContext,
+    context: &Context,
     fields: &[RecordField],
     field_types: &[types::RecordField],
     convert_fields_to_expression: &dyn Fn(
@@ -787,7 +787,7 @@ mod tests {
 
     fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
         compile(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             expression,
         )
     }
@@ -949,7 +949,7 @@ mod tests {
 
         #[test]
         fn compile_function_branch() {
-            let context = CompileContext::dummy(Default::default(), Default::default());
+            let context = Context::dummy(Default::default(), Default::default());
             let function_type =
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
             let concrete_function_type =
@@ -994,7 +994,7 @@ mod tests {
 
         #[test]
         fn compile_list_branch() {
-            let context = CompileContext::dummy(Default::default(), Default::default());
+            let context = Context::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
                 type_::compile_concrete_list(&list_type, context.types()).unwrap();
@@ -1040,7 +1040,7 @@ mod tests {
 
         #[test]
         fn compile_union_branch_including_list() {
-            let context = CompileContext::dummy(Default::default(), Default::default());
+            let context = Context::dummy(Default::default(), Default::default());
             let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
             let concrete_list_type =
                 type_::compile_concrete_list(&list_type, context.types()).unwrap();
@@ -1079,7 +1079,7 @@ mod tests {
 
         #[test]
         fn compile_map_branch() {
-            let context = CompileContext::dummy(Default::default(), Default::default());
+            let context = Context::dummy(Default::default(), Default::default());
             let map_type = types::Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
@@ -1129,7 +1129,7 @@ mod tests {
 
         #[test]
         fn compile_union_branch_including_map() {
-            let context = CompileContext::dummy(Default::default(), Default::default());
+            let context = Context::dummy(Default::default(), Default::default());
             let map_type = types::Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
@@ -1179,7 +1179,7 @@ mod tests {
         fn compile_record_construction() {
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
+                    &Context::dummy(
                         Default::default(),
                         [(
                             "r".into(),
@@ -1219,7 +1219,7 @@ mod tests {
         fn compile_record_construction_with_two_fields() {
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
+                    &Context::dummy(
                         Default::default(),
                         [(
                             "r".into(),
@@ -1270,7 +1270,7 @@ mod tests {
         fn compile_singleton_record_construction() {
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
+                    &Context::dummy(
                         Default::default(),
                         [("r".into(), vec![])].into_iter().collect()
                     ),
@@ -1289,7 +1289,7 @@ mod tests {
         fn compile_record_construction_with_reference_type() {
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(
+                    &Context::dummy(
                         [("r".into(), types::Record::new("r", Position::fake()).into())]
                             .into_iter()
                             .collect(),
@@ -1317,7 +1317,7 @@ mod tests {
 
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(Default::default(), Default::default()),
+                    &Context::dummy(Default::default(), Default::default()),
                     &TryOperation::new(
                         Some(types::None::new(Position::fake()).into()),
                         Variable::new("x", Position::fake()),
@@ -1349,7 +1349,7 @@ mod tests {
 
             assert_eq!(
                 compile(
-                    &CompileContext::dummy(Default::default(), Default::default()),
+                    &Context::dummy(Default::default(), Default::default()),
                     &TryOperation::new(
                         Some(
                             types::Union::new(

@@ -1,6 +1,6 @@
 use super::context_function_name;
 use crate::{
-    context::CompileContext,
+    context::Context,
     transformation::{collection_type, equal_operation, hash_calculation},
     CompileError,
 };
@@ -16,7 +16,7 @@ use hir::{
 };
 use position::Position;
 
-pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileError> {
     Ok(Module::new(
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
@@ -38,7 +38,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
 }
 
 fn transform_map_context_function_definition(
-    context: &CompileContext,
+    context: &Context,
     map_type: &types::Map,
 ) -> Result<FunctionDefinition, CompileError> {
     let position = map_type.position();
@@ -137,7 +137,7 @@ fn compile_fake_hash_function(position: &Position) -> Lambda {
 }
 
 fn collect_map_types(
-    context: &CompileContext,
+    context: &Context,
     module: &Module,
 ) -> Result<FnvHashSet<types::Map>, AnalysisError> {
     let mut map_types = FnvHashSet::default();
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn transform_none_key_and_none_value() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         insta::assert_debug_snapshot!(transform(
             &context,
@@ -210,7 +210,7 @@ mod tests {
 
     #[test]
     fn transform_function_value() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         insta::assert_debug_snapshot!(transform(
             &context,
@@ -238,7 +238,7 @@ mod tests {
 
     #[test]
     fn do_not_create_duplicate_map_contexts() {
-        let context = CompileContext::dummy(
+        let context = Context::dummy(
             [
                 ("foo".into(), types::None::new(Position::fake()).into()),
                 ("bar".into(), types::None::new(Position::fake()).into()),

@@ -1,17 +1,17 @@
 use super::collection_type;
-use crate::{context::CompileContext, CompileError};
+use crate::{context::Context, CompileError};
 use hir::{
     ir::*,
     types::{self, Type},
 };
 use position::Position;
 
-pub fn transform(context: &CompileContext, list: &List) -> Result<Expression, CompileError> {
+pub fn transform(context: &Context, list: &List) -> Result<Expression, CompileError> {
     transform_list(context, list.type_(), list.elements(), list.position())
 }
 
 fn transform_list(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
     elements: &[ListElement],
     position: &Position,
@@ -161,7 +161,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &List::new(types::None::new(Position::fake()), vec![], Position::fake()),
             ),
             Ok(Call::new(
@@ -183,7 +183,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![ListElement::Single(None::new(Position::fake()).into())],
@@ -232,7 +232,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![
@@ -308,7 +308,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![ListElement::Multiple(
@@ -341,7 +341,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &List::new(
                     types::None::new(Position::fake()),
                     vec![

@@ -1,4 +1,4 @@
-use crate::{context::CompileContext, CompileError};
+use crate::{context::Context, CompileError};
 use hir::{
     analysis::{
         type_canonicalizer, type_equality_checker, type_subsumption_checker, AnalysisError,
@@ -10,7 +10,7 @@ use hir::{
 const VALUE_NAME: &str = "$value";
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     from: &Type,
     to: &Type,
     expression: &Expression,
@@ -56,7 +56,7 @@ mod tests {
         expression: &Expression,
     ) -> Result<Expression, CompileError> {
         compile(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             from,
             to,
             expression,

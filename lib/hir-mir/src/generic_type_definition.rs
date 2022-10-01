@@ -1,9 +1,9 @@
-use super::{context::CompileContext, type_, CompileError};
+use super::{context::Context, type_, CompileError};
 use crate::generic_type_collection;
 use hir::{ir::*, types::Type};
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     module: &Module,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
     Ok(generic_type_collection::collect(context, module)?
@@ -16,7 +16,7 @@ pub fn compile(
 }
 
 fn compile_type_definition(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
 ) -> Result<Option<mir::ir::TypeDefinition>, CompileError> {
     Ok(match type_ {
@@ -66,7 +66,7 @@ mod tests {
             types::List::new(types::None::new(Position::fake()), Position::fake()),
             Position::fake(),
         );
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -117,7 +117,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -158,7 +158,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -197,7 +197,7 @@ mod tests {
             types::None::new(Position::fake()),
             Position::fake(),
         );
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let definition = FunctionDefinition::fake(
             "foo",
             Lambda::new(
@@ -232,7 +232,7 @@ mod tests {
     #[test]
     fn collect_type_from_if_type() {
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
 
         assert_eq!(
             compile(
@@ -269,7 +269,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_equal_operation() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -309,7 +309,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_try_operation() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -347,7 +347,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_list_literal() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -387,7 +387,7 @@ mod tests {
 
     #[test]
     fn collect_input_type_from_list_comprehension() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -428,7 +428,7 @@ mod tests {
 
     #[test]
     fn collect_output_type_from_list_comprehension() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let union_type = types::Union::new(
             list_type.clone(),
@@ -469,7 +469,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_if_list() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
         assert_eq!(
@@ -506,7 +506,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_if_map() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
         let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
         let map_type = types::Map::new(key_type.clone(), value_type.clone(), Position::fake());
@@ -560,7 +560,7 @@ mod tests {
 
     #[test]
     fn collect_type_from_map_literal() {
-        let context = CompileContext::dummy(Default::default(), Default::default());
+        let context = Context::dummy(Default::default(), Default::default());
         let key_type = types::List::new(types::Number::new(Position::fake()), Position::fake());
         let value_type = types::List::new(types::None::new(Position::fake()), Position::fake());
 
