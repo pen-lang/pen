@@ -133,25 +133,42 @@ mod tests {
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
         compile(
-            &module.set_type_definitions(
-                module
-                    .type_definitions()
-                    .iter()
-                    .cloned()
-                    .chain([TypeDefinition::new(
-                        "error",
-                        "error",
-                        vec![types::RecordField::new(
-                            "source",
-                            types::Any::new(Position::fake()),
-                        )],
-                        false,
-                        false,
-                        false,
-                        Position::fake(),
-                    )])
-                    .collect(),
-            ),
+            &module
+                .set_type_definitions(
+                    module
+                        .type_definitions()
+                        .iter()
+                        .cloned()
+                        .chain([TypeDefinition::new(
+                            "error",
+                            "error",
+                            vec![types::RecordField::new(
+                                "source",
+                                types::Any::new(Position::fake()),
+                            )],
+                            false,
+                            false,
+                            false,
+                            Position::fake(),
+                        )])
+                        .collect(),
+                )
+                .set_function_declarations(
+                    module
+                        .function_declarations()
+                        .iter()
+                        .cloned()
+                        .chain([FunctionDeclaration::new(
+                            &COMPILE_CONFIGURATION.number_type.debug_function_name,
+                            types::Function::new(
+                                vec![types::Number::new(Position::fake()).into()],
+                                types::ByteString::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        )])
+                        .collect(),
+                ),
             &COMPILE_CONFIGURATION,
         )
     }
