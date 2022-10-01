@@ -1,5 +1,5 @@
 use super::{collection_type, map_context};
-use crate::{context::CompileContext, CompileError};
+use crate::{context::Context, CompileError};
 use hir::{
     ir::*,
     types::{self, Type},
@@ -8,7 +8,7 @@ use position::Position;
 
 const CONTEXT_VARIABLE_NAME: &str = "$ctx";
 
-pub fn transform(context: &CompileContext, map: &Map) -> Result<Expression, CompileError> {
+pub fn transform(context: &Context, map: &Map) -> Result<Expression, CompileError> {
     let key_type = map.key_type();
     let value_type = map.value_type();
     let position = map.position();
@@ -37,7 +37,7 @@ pub fn transform(context: &CompileContext, map: &Map) -> Result<Expression, Comp
 }
 
 fn transform_map(
-    context: &CompileContext,
+    context: &Context,
     map_context: &Expression,
     map_context_type: &Type,
     key_type: &Type,
@@ -166,7 +166,7 @@ mod tests {
     #[test]
     fn transform_empty_map() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn transform_empty_map_with_function_value() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &Map::new(
                 types::None::new(Position::fake()),
                 types::Function::new(vec![], types::None::new(Position::fake()), Position::fake()),
@@ -192,7 +192,7 @@ mod tests {
     #[test]
     fn transform_map_with_entry() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
@@ -210,7 +210,7 @@ mod tests {
     #[test]
     fn transform_map_with_2_entries() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
@@ -236,7 +236,7 @@ mod tests {
     #[test]
     fn transform_map_with_spread_map() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),

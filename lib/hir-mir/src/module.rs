@@ -1,8 +1,8 @@
-use super::{context::CompileContext, expression, generic_type_definition, type_, CompileError};
+use super::{context::Context, expression, generic_type_definition, type_, CompileError};
 use crate::{runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
-pub fn compile(context: &CompileContext, module: &Module) -> Result<mir::ir::Module, CompileError> {
+pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, CompileError> {
     let (type_information_function_declarations, type_information_function_definitions) =
         type_information::compile_functions(context, module)?;
 
@@ -81,7 +81,7 @@ fn compile_calling_convention(calling_convention: CallingConvention) -> mir::ir:
 }
 
 fn compile_type_definition(
-    context: &CompileContext,
+    context: &Context,
     type_definition: &TypeDefinition,
 ) -> Result<mir::ir::TypeDefinition, CompileError> {
     Ok(mir::ir::TypeDefinition::new(
@@ -97,7 +97,7 @@ fn compile_type_definition(
 }
 
 fn compile_function_declaration(
-    context: &CompileContext,
+    context: &Context,
     declaration: &FunctionDeclaration,
 ) -> Result<mir::ir::FunctionDeclaration, CompileError> {
     Ok(mir::ir::FunctionDeclaration::new(
@@ -107,7 +107,7 @@ fn compile_function_declaration(
 }
 
 fn compile_function_definition(
-    context: &CompileContext,
+    context: &Context,
     definition: &FunctionDefinition,
 ) -> Result<mir::ir::GlobalFunctionDefinition, CompileError> {
     let body = expression::compile(context, definition.lambda().body())?;
@@ -147,8 +147,8 @@ mod tests {
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    fn create_context(module: &Module) -> CompileContext {
-        CompileContext::new(module, COMPILE_CONFIGURATION.clone().into())
+    fn create_context(module: &Module) -> Context {
+        Context::new(module, COMPILE_CONFIGURATION.clone().into())
     }
 
     #[test]

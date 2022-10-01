@@ -1,5 +1,5 @@
 use crate::{
-    context::CompileContext,
+    context::Context,
     downcast, expression,
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
@@ -14,7 +14,7 @@ use hir::{
 };
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     call: &Call,
     function: &BuiltInFunction,
 ) -> Result<mir::ir::Expression, CompileError> {
@@ -183,7 +183,7 @@ mod tests {
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             call,
             if let Expression::BuiltInFunction(function) = call.function() {
                 function

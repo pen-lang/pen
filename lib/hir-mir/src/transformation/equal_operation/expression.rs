@@ -1,9 +1,9 @@
 use super::operation;
-use crate::{context::CompileContext, error::CompileError};
+use crate::{context::Context, error::CompileError};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn transform(
-    context: &CompileContext,
+    context: &Context,
     operation: &EqualityOperation,
 ) -> Result<Expression, CompileError> {
     Ok(if operation.operator() == EqualityOperator::Equal {

@@ -1,6 +1,6 @@
 use super::function;
 use crate::{
-    context::CompileContext,
+    context::Context,
     error::CompileError,
     transformation::{collection_type, map_context, record_type_information},
 };
@@ -18,7 +18,7 @@ const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
 pub fn transform(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
     lhs: &Expression,
     rhs: &Expression,
@@ -34,7 +34,7 @@ pub fn transform(
 }
 
 fn transform_canonical(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
     lhs: &Expression,
     rhs: &Expression,
@@ -255,7 +255,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &union_type.into(),
                 &Variable::new("x", Position::fake()).into(),
                 &Variable::new("y", Position::fake()).into(),
@@ -319,7 +319,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(
+                &Context::dummy(
                     Default::default(),
                     [(
                         "foo".into(),
@@ -363,7 +363,7 @@ mod tests {
     fn fail_to_transform_with_any() {
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &types::Any::new(Position::fake()).into(),
                 &Variable::new("x", Position::fake()).into(),
                 &Variable::new("y", Position::fake()).into(),
@@ -380,7 +380,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &function_type.clone().into(),
                 &Variable::new("x", Position::fake()).into(),
                 &Variable::new("y", Position::fake()).into(),

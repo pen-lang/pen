@@ -1,8 +1,8 @@
-use crate::{context::CompileContext, error::CompileError};
+use crate::{context::Context, error::CompileError};
 use fnv::FnvHashMap;
 use hir::{analysis::type_id_calculator, ir::*, types::Type};
 
-pub fn transform(context: &CompileContext, type_: &Type) -> Result<Expression, CompileError> {
+pub fn transform(context: &Context, type_: &Type) -> Result<Expression, CompileError> {
     Ok(Variable::new(
         transform_name(type_, context.types())?,
         type_.position().clone(),

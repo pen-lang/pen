@@ -1,5 +1,5 @@
 use super::{super::error::CompileError, collection_type};
-use crate::{context::CompileContext, downcast};
+use crate::{context::Context, downcast};
 use hir::{
     analysis::{type_equality_checker, AnalysisError},
     ir::*,
@@ -8,7 +8,7 @@ use hir::{
 
 const FIRST_REST_NAME: &str = "$firstRest";
 
-pub fn transform(context: &CompileContext, if_: &IfList) -> Result<Expression, CompileError> {
+pub fn transform(context: &Context, if_: &IfList) -> Result<Expression, CompileError> {
     let configuration = &context.configuration()?.list_type;
     let position = if_.position();
 
@@ -127,7 +127,7 @@ mod tests {
     #[test]
     fn transform_if_list_with_number_type() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &IfList::new(
                 Some(types::Number::new(Position::fake()).into()),
                 Variable::new("xs", Position::fake()),
@@ -143,7 +143,7 @@ mod tests {
     #[test]
     fn transform_if_list_with_any_type() {
         insta::assert_debug_snapshot!(transform(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             &IfList::new(
                 Some(types::Any::new(Position::fake()).into()),
                 Variable::new("xs", Position::fake()),

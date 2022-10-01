@@ -1,4 +1,4 @@
-use crate::{context::CompileContext, CompileError};
+use crate::{context::Context, CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{
@@ -10,7 +10,7 @@ use hir::{
 };
 use position::Position;
 
-pub fn transform_list(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {
+pub fn transform_list(context: &Context, position: &Position) -> Result<Type, CompileError> {
     Ok(types::Reference::new(
         &context.configuration()?.list_type.list_type_name,
         position.clone(),
@@ -18,7 +18,7 @@ pub fn transform_list(context: &CompileContext, position: &Position) -> Result<T
     .into())
 }
 
-pub fn transform_map(context: &CompileContext, position: &Position) -> Result<Type, CompileError> {
+pub fn transform_map(context: &Context, position: &Position) -> Result<Type, CompileError> {
     Ok(types::Reference::new(
         &context.configuration()?.map_type.map_type_name,
         position.clone(),
@@ -26,10 +26,7 @@ pub fn transform_map(context: &CompileContext, position: &Position) -> Result<Ty
     .into())
 }
 
-pub fn transform_map_context(
-    context: &CompileContext,
-    position: &Position,
-) -> Result<Type, CompileError> {
+pub fn transform_map_context(context: &Context, position: &Position) -> Result<Type, CompileError> {
     Ok(types::Reference::new(
         &context.configuration()?.map_type.context_type_name,
         position.clone(),
@@ -38,7 +35,7 @@ pub fn transform_map_context(
 }
 
 pub fn collect_comparable_parameter_types(
-    context: &CompileContext,
+    context: &Context,
     module: &Module,
 ) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut types = FnvHashSet::default();
@@ -109,7 +106,7 @@ mod tests {
 
         fn collect(module: &Module) -> Result<FnvHashSet<Type>, AnalysisError> {
             collect_comparable_parameter_types(
-                &CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone())),
+                &Context::new(module, Some(COMPILE_CONFIGURATION.clone())),
                 module,
             )
         }

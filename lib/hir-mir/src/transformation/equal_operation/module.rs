@@ -1,11 +1,11 @@
 use super::{function, operation};
-use crate::{context::CompileContext, error::CompileError, transformation::collection_type};
+use crate::{context::Context, error::CompileError, transformation::collection_type};
 use hir::{
     ir::*,
     types::{self, Type},
 };
 
-pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileError> {
     Ok(Module::new(
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
@@ -27,7 +27,7 @@ pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, Co
 }
 
 fn compile_function_definition(
-    context: &CompileContext,
+    context: &Context,
     type_: &Type,
 ) -> Result<FunctionDefinition, CompileError> {
     const LHS_NAME: &str = "$lhs";
@@ -87,7 +87,7 @@ mod tests {
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
-            &CompileContext::new(module, Some(COMPILE_CONFIGURATION.clone())),
+            &Context::new(module, Some(COMPILE_CONFIGURATION.clone())),
             module,
         )
     }
