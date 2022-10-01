@@ -87,54 +87,58 @@ mod tests {
         assert_eq!(_pen_prelude_debug_number(42.0.into()), "42".into());
     }
 
-    #[test]
-    fn equal_empty_strings() {
-        let string = ffi::ByteString::default();
+    mod equal_string {
+        use super::*;
 
-        assert_eq!(
-            _pen_prelude_equal_strings(string.clone(), string),
-            true.into()
-        );
-    }
+        #[test]
+        fn equal_empty_strings() {
+            let string = ffi::ByteString::default();
 
-    #[test]
-    fn equal_one_byte_strings() {
-        let string = ffi::ByteString::from(vec![0u8]);
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
 
-        assert_eq!(
-            _pen_prelude_equal_strings(string.clone(), string),
-            true.into()
-        );
-    }
+        #[test]
+        fn equal_one_byte_strings() {
+            let string = ffi::ByteString::from(vec![0u8]);
 
-    #[test]
-    fn not_equal_one_byte_strings() {
-        let one = ffi::ByteString::default();
-        let other = vec![0u8].into();
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
 
-        assert_eq!(_pen_prelude_equal_strings(one, other), false.into());
-    }
+        #[test]
+        fn not_equal_one_byte_strings() {
+            let one = ffi::ByteString::default();
+            let other = vec![0u8].into();
 
-    #[test]
-    fn equal_text_strings() {
-        const TEXT: &[u8] = "hello".as_bytes();
+            assert_eq!(_pen_prelude_equal_strings(one, other), false.into());
+        }
 
-        let string = ffi::ByteString::from(TEXT);
+        #[test]
+        fn equal_text_strings() {
+            const TEXT: &[u8] = "hello".as_bytes();
 
-        assert_eq!(
-            _pen_prelude_equal_strings(string.clone(), string),
-            true.into()
-        );
-    }
+            let string = ffi::ByteString::from(TEXT);
 
-    #[test]
-    fn not_equal_text_strings() {
-        const TEXT: &[u8] = "hello".as_bytes();
-        const OTHER_TEXT: &[u8] = "hell0".as_bytes();
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
 
-        assert_eq!(
-            _pen_prelude_equal_strings(TEXT.into(), OTHER_TEXT.into(),),
-            false.into()
-        );
+        #[test]
+        fn not_equal_text_strings() {
+            const TEXT: &[u8] = "hello".as_bytes();
+            const OTHER_TEXT: &[u8] = "hell0".as_bytes();
+
+            assert_eq!(
+                _pen_prelude_equal_strings(TEXT.into(), OTHER_TEXT.into(),),
+                false.into()
+            );
+        }
     }
 }
