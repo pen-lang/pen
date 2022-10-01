@@ -1293,8 +1293,11 @@ mod tests {
 
         #[test]
         fn check_nothing() {
-            let module = Module::empty()
-                .set_type_information(TypeInformation::new(vec![], Default::default()));
+            let module = Module::empty().set_type_information(TypeInformation::new(
+                vec![],
+                Default::default(),
+                vec![],
+            ));
 
             assert_eq!(check(&module), Ok(()));
         }
@@ -1309,6 +1312,7 @@ mod tests {
                 .set_type_information(TypeInformation::new(
                     vec![types::Function::new(vec![], Type::None)],
                     [(Type::None, vec!["f".into()])].into_iter().collect(),
+                    vec!["f".into()],
                 ));
 
             assert_eq!(check(&module), Ok(()));
@@ -1316,10 +1320,16 @@ mod tests {
 
         #[test]
         fn check_missing_function() {
-            let module = Module::empty().set_type_information(TypeInformation::new(
-                vec![types::Function::new(vec![], Type::None)],
-                [(Type::None, vec!["f".into()])].into_iter().collect(),
-            ));
+            let module = Module::empty()
+                .set_function_declarations(vec![FunctionDeclaration::new(
+                    "g",
+                    types::Function::new(vec![], Type::None),
+                )])
+                .set_type_information(TypeInformation::new(
+                    vec![types::Function::new(vec![], Type::None)],
+                    [(Type::None, vec!["f".into()])].into_iter().collect(),
+                    vec!["g".into()],
+                ));
 
             assert_eq!(
                 check(&module),
