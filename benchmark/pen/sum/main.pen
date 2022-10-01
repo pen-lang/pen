@@ -9,7 +9,6 @@ main = \(ctx context) none {
     File'StdOut(),
     Number'String(sum(0, 100000000)),
   )
-  debug(foo{})
 
   none
 }
