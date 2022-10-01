@@ -1,0 +1,5 @@
+import foreign "c" _pen_prelude_debug_number \(number) string
+
+Debug = \(n number) string {
+  _pen_prelude_debug_number(n)
+}
