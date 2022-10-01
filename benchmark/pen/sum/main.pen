@@ -1,12 +1,15 @@
 import Core'Number
 import Os'File
 
+type foo {}
+
 main = \(ctx context) none {
   _ = File'Write(
     ctx.Os,
     File'StdOut(),
     Number'String(sum(0, 100000000)),
   )
+  debug(foo{})
 
   none
 }
