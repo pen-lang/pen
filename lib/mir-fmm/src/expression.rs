@@ -304,29 +304,28 @@ pub fn compile(
 
             reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
 
-            builder
-                .if_(
-                    fmm::build::comparison_operation(
-                        fmm::ir::ComparisonOperator::Equal,
-                        function_integer.clone(),
-                        fmm::ir::Undefined::new(function_integer.to().clone()),
-                    )?,
-                    |builder| -> Result<_, CompileError> {
-                        Ok(builder.branch(
-                            variables[&context.type_information().fallback()[information.index()]]
-                                .clone(),
-                        ))
-                    },
-                    |builder| {
-                        Ok(builder.branch(fmm::build::bit_cast(
-                            type_::compile_function(
-                                context,
-                                &context.type_information().types()[information.index()],
-                            ),
-                            function.clone(),
-                        )))
-                    },
-                )?
+            builder.if_(
+                fmm::build::comparison_operation(
+                    fmm::ir::ComparisonOperator::Equal,
+                    function_integer.clone(),
+                    fmm::ir::Undefined::new(function_integer.to().clone()),
+                )?,
+                |builder| -> Result<_, CompileError> {
+                    Ok(builder.branch(
+                        variables[&context.type_information().fallback()[information.index()]]
+                            .clone(),
+                    ))
+                },
+                |builder| {
+                    Ok(builder.branch(fmm::build::bit_cast(
+                        type_::compile_function(
+                            context,
+                            &context.type_information().types()[information.index()],
+                        ),
+                        function.clone(),
+                    )))
+                },
+            )?
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
