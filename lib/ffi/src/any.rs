@@ -64,14 +64,14 @@ impl Clone for Any {
     fn clone(&self) -> Self {
         Self {
             type_information: self.type_information,
-            payload: (self.type_information.clone)(self.payload),
+            payload: (self.type_information.clone_fn())(self.payload),
         }
     }
 }
 
 impl Drop for Any {
     fn drop(&mut self) {
-        (self.type_information.drop)(self.payload);
+        (self.type_information.drop_fn())(self.payload);
     }
 }
 

@@ -57,7 +57,7 @@ pub fn generate(
             }
 
             static TYPE_INFORMATION: #crate_path::TypeInformation =
-                #crate_path::TypeInformation { clone, drop, synchronize };
+                #crate_path::TypeInformation::new(clone, drop, synchronize);
 
             impl From<#type_name> for #crate_path::Any {
                 fn from(x: #type_name) -> Self {

@@ -1,6 +1,49 @@
+use core::ptr::null;
+
 #[repr(C)]
 pub struct TypeInformation {
-    pub clone: extern "C" fn(u64) -> u64,
-    pub drop: extern "C" fn(u64),
-    pub synchronize: extern "C" fn(u64),
+    clone_fn: extern "C" fn(u64) -> u64,
+    drop_fn: extern "C" fn(u64),
+    synchronize_fn: extern "C" fn(u64),
+    extra: ExtraTypeInformation,
 }
+
+impl TypeInformation {
+    pub const fn new(
+        clone_fn: extern "C" fn(u64) -> u64,
+        drop_fn: extern "C" fn(u64),
+        synchronize_fn: extern "C" fn(u64),
+    ) -> Self {
+        Self {
+            clone_fn,
+            drop_fn,
+            synchronize_fn,
+            extra: ExtraTypeInformation::new(),
+        }
+    }
+
+    pub fn clone_fn(&self) -> extern "C" fn(u64) -> u64 {
+        self.clone_fn
+    }
+
+    pub fn drop_fn(&self) -> extern "C" fn(u64) {
+        self.drop_fn
+    }
+
+    pub fn synchronize_fn(&self) -> extern "C" fn(u64) {
+        self.synchronize_fn
+    }
+}
+
+#[repr(C)]
+struct ExtraTypeInformation {
+    debug_fn: *const u8,
+}
+
+impl ExtraTypeInformation {
+    pub const fn new() -> Self {
+        Self { debug_fn: null() }
+    }
+}
+
+unsafe impl Sync for ExtraTypeInformation {}
