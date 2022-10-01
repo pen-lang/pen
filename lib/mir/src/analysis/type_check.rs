@@ -1366,5 +1366,27 @@ mod tests {
                 ))
             );
         }
+
+        #[test]
+        fn check_too_many_functions_for_fallback() {
+            let module = Module::empty()
+                .set_function_declarations(vec![FunctionDeclaration::new(
+                    "f",
+                    types::Function::new(vec![], Type::None),
+                )])
+                .set_type_information(TypeInformation::new(
+                    vec![types::Function::new(vec![], Type::None)],
+                    [(Type::None, vec!["f".into()])].into_iter().collect(),
+                    vec!["f".into(), "f".into()],
+                ));
+
+            assert_eq!(
+                check(&module),
+                Err(TypeCheckError::TypeInformationFunctionCount(
+                    Type::None,
+                    vec!["f".into(), "f".into()]
+                ))
+            );
+        }
     }
 }
