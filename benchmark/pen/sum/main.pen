@@ -1,8 +1,6 @@
 import Core'Number
 import Os'File
 
-type foo {}
-
 main = \(ctx context) none {
   _ = File'Write(
     ctx.Os,
