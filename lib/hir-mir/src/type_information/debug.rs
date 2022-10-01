@@ -156,10 +156,20 @@ fn compile_function_definition_for_concrete_type(
 
 #[cfg(test)]
 mod tests {
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+
     use super::*;
     use hir::{ir::*, test::ModuleFake, types};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn compile_default_function_definition_() {
+        let definition = compile_default_function_definition();
+
+        assert_eq!(definition.name(), compile_default_function_name());
+        assert_eq!(definition.type_(), &compile_function_type());
+    }
 
     #[test]
     fn compile_function_definition_for_none() {
@@ -177,10 +187,32 @@ mod tests {
     }
 
     #[test]
-    fn compile_default_function_definition_() {
-        let definition = compile_default_function_definition();
+    fn compile_function_definition_for_number() {
+        let context = Context::new(&Module::empty(), Some(COMPILE_CONFIGURATION.clone()));
+        let type_ = types::Number::new(Position::fake()).into();
+        let definition = compile_function_definition(&context, &type_)
+            .unwrap()
+            .unwrap();
 
-        assert_eq!(definition.name(), compile_default_function_name());
+        assert_eq!(
+            definition.name(),
+            &compile_function_name(&context, &type_).unwrap()
+        );
+        assert_eq!(definition.type_(), &compile_function_type());
+    }
+
+    #[test]
+    fn compile_function_definition_for_number_without_configuration() {
+        let context = Context::new(&Module::empty(), None);
+        let type_ = types::None::new(Position::fake()).into();
+        let definition = compile_function_definition(&context, &type_)
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(
+            definition.name(),
+            &compile_function_name(&context, &type_).unwrap()
+        );
         assert_eq!(definition.type_(), &compile_function_type());
     }
 }
