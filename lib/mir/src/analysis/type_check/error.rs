@@ -14,7 +14,7 @@ pub enum TypeCheckError {
     FunctionExpected(Expression),
     NestedVariant(Expression),
     NoAlternativeFound(Case),
-    TypeInformationFunctionCount(Type, Vec<String>),
+    TypeInformationFunctionCount(Vec<String>),
     TypeInformationFunctionIndex(TypeInformationFunction),
     TypeNotFound(types::Record),
     TypesNotMatched(Type, Type),

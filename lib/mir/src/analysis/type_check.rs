@@ -56,17 +56,26 @@ fn check_type_information(
     type_information: &TypeInformation,
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    for (type_, names) in type_information.information() {
-        if names.len() != type_information.types().len() {
-            return Err(TypeCheckError::TypeInformationFunctionCount(
-                type_.clone(),
-                names.clone(),
-            ));
-        }
+    for names in type_information.information().values() {
+        check_type_information_functions(type_information, names, variables)?;
+    }
 
-        for (name, type_) in names.iter().zip(type_information.types()) {
-            check_equality(&check_variable(name, variables)?, &type_.clone().into())?;
-        }
+    check_type_information_functions(type_information, type_information.fallback(), variables)?;
+
+    Ok(())
+}
+
+fn check_type_information_functions(
+    type_information: &TypeInformation,
+    names: &[String],
+    variables: &FnvHashMap<&str, Type>,
+) -> Result<(), TypeCheckError> {
+    if names.len() != type_information.types().len() {
+        return Err(TypeCheckError::TypeInformationFunctionCount(names.to_vec()));
+    }
+
+    for (name, type_) in names.iter().zip(type_information.types()) {
+        check_equality(&check_variable(name, variables)?, &type_.clone().into())?;
     }
 
     Ok(())
@@ -730,14 +739,18 @@ mod tests {
             .set_type_information(TypeInformation::new(
                 vec![types::Function::new(vec![], Type::None)],
                 Default::default(),
-                vec![],
+                vec!["g".into()],
             ))
-            .set_function_definitions(vec![FunctionDefinition::new(
-                "f",
-                vec![Argument::new("x", Type::Variant)],
-                types::Function::new(vec![], Type::None),
-                TypeInformationFunction::new(0, Variable::new("x")),
-            )]);
+            .set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    types::Function::new(vec![], Type::None),
+                    TypeInformationFunction::new(0, Variable::new("x")),
+                ),
+                FunctionDefinition::new("g", vec![], Type::None, Expression::None),
+            ]);
+
         assert_eq!(check(&module), Ok(()));
     }
 
@@ -1360,10 +1373,10 @@ mod tests {
 
             assert_eq!(
                 check(&module),
-                Err(TypeCheckError::TypeInformationFunctionCount(
-                    Type::None,
-                    vec!["f".into(), "f".into()]
-                ))
+                Err(TypeCheckError::TypeInformationFunctionCount(vec![
+                    "f".into(),
+                    "f".into()
+                ]))
             );
         }
 
@@ -1382,10 +1395,10 @@ mod tests {
 
             assert_eq!(
                 check(&module),
-                Err(TypeCheckError::TypeInformationFunctionCount(
-                    Type::None,
-                    vec!["f".into(), "f".into()]
-                ))
+                Err(TypeCheckError::TypeInformationFunctionCount(vec![
+                    "f".into(),
+                    "f".into()
+                ]))
             );
         }
     }
