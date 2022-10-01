@@ -25,6 +25,7 @@ pub fn compile(
                 ))
             })
             .collect::<Result<_, CompileError>>()?,
+        vec![debug::compile_default_function_name().into()],
     ))
 }
 
@@ -84,6 +85,10 @@ pub fn compile_functions(
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
+            .chain([mir::ir::GlobalFunctionDefinition::new(
+                debug::compile_default_function_definition(),
+                false,
+            )])
             .collect(),
     ))
 }
@@ -127,6 +132,16 @@ mod tests {
 
     fn create_context(module: &Module) -> Context {
         Context::new(module, Some(COMPILE_CONFIGURATION.clone()))
+    }
+
+    fn compile_type_information(
+        information: FnvHashMap<mir::types::Type, Vec<String>>,
+    ) -> mir::ir::TypeInformation {
+        mir::ir::TypeInformation::new(
+            vec![debug::compile_function_type()],
+            information,
+            vec![debug::compile_default_function_name().into()],
+        )
     }
 
     fn create_default_type_information(
@@ -185,10 +200,7 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module).unwrap(),
-            mir::ir::TypeInformation::new(
-                vec![debug::compile_function_type()],
-                create_default_type_information(&context)
-            )
+            compile_type_information(create_default_type_information(&context),)
         );
 
         for type_ in &[
@@ -216,8 +228,7 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module).unwrap(),
-            mir::ir::TypeInformation::new(
-                vec![debug::compile_function_type()],
+            compile_type_information(
                 [
                     (
                         mir::types::Type::Boolean,
@@ -253,7 +264,7 @@ mod tests {
                     ),
                 ]
                 .into_iter()
-                .collect()
+                .collect(),
             )
         );
     }
@@ -274,10 +285,7 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module).unwrap(),
-            mir::ir::TypeInformation::new(
-                vec![debug::compile_function_type()],
-                create_default_type_information(&context)
-            )
+            compile_type_information(create_default_type_information(&context),)
         );
     }
 
@@ -305,10 +313,7 @@ mod tests {
 
         assert_eq!(
             compile(&context, &module).unwrap(),
-            mir::ir::TypeInformation::new(
-                vec![debug::compile_function_type()],
-                create_default_type_information(&context)
-            )
+            compile_type_information(create_default_type_information(&context),)
         )
     }
 

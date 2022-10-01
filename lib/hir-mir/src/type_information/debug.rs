@@ -14,6 +14,10 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
     .into()
 }
 
+pub(super) fn compile_default_function_name() -> &'static str {
+    "hir:debug:default"
+}
+
 pub(super) fn compile_function_name(
     context: &Context,
     type_: &Type,
@@ -100,6 +104,18 @@ pub(super) fn compile_function_definition(
         )?),
         Type::Any(_) | Type::Union(_) => None,
     })
+}
+
+pub(super) fn compile_default_function_definition() -> mir::ir::FunctionDefinition {
+    mir::ir::FunctionDefinition::new(
+        compile_default_function_name(),
+        vec![mir::ir::Argument::new(
+            ARGUMENT_NAME,
+            mir::types::Type::Variant,
+        )],
+        mir::types::Type::ByteString,
+        mir::ir::ByteString::new("<unknown>"),
+    )
 }
 
 fn compile_function_definition_for_concrete_type(

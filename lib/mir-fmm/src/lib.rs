@@ -414,6 +414,7 @@ mod tests {
                     .set_type_information(mir::ir::TypeInformation::new(
                         vec![],
                         [(mir::types::Type::None, vec![])].into_iter().collect(),
+                        vec![],
                     ))
                     .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                         "f",
@@ -733,6 +734,7 @@ mod tests {
                         [(mir::types::Type::None, vec!["f".into()])]
                             .into_iter()
                             .collect(),
+                        vec!["f".into()],
                     ))
                     .set_function_definitions(vec![
                         mir::ir::FunctionDefinition::new(
@@ -771,6 +773,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(mir::types::Type::Number, vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
@@ -798,6 +801,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                             "foo",
@@ -829,6 +833,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                             "foo",
@@ -860,6 +865,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
@@ -888,6 +894,7 @@ mod tests {
                             [(mir::types::Type::ByteString, vec![])]
                                 .into_iter()
                                 .collect(),
+                            vec![],
                         ))
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
@@ -918,6 +925,7 @@ mod tests {
                             ]
                             .into_iter()
                             .collect(),
+                            vec![],
                         ))
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
@@ -1262,6 +1270,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(mir::types::Type::Number, vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
@@ -1281,6 +1290,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                             "foo",
@@ -1307,6 +1317,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                             "foo",
@@ -1333,6 +1344,7 @@ mod tests {
                             [(mir::types::Type::ByteString, vec![])]
                                 .into_iter()
                                 .collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![])
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
@@ -1356,6 +1368,7 @@ mod tests {
                         .set_type_information(mir::ir::TypeInformation::new(
                             vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
+                            vec![],
                         ))
                         .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
@@ -1531,6 +1544,7 @@ mod tests {
                     .set_type_information(mir::ir::TypeInformation::new(
                         vec![],
                         [(mir::types::Type::Number, vec![])].into_iter().collect(),
+                        vec![],
                     ))
                     .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                         "f",
@@ -1598,6 +1612,7 @@ mod tests {
                         ]
                         .into_iter()
                         .collect(),
+                        vec![],
                     ))
                     .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                         "a",
