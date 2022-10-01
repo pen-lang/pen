@@ -14,6 +14,10 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
     .into()
 }
 
+pub(super) fn compile_default_function_name() -> &'static str {
+    "hir:debug:default"
+}
+
 pub(super) fn compile_function_name(
     context: &Context,
     type_: &Type,
@@ -102,6 +106,18 @@ pub(super) fn compile_function_definition(
     })
 }
 
+pub(super) fn compile_default_function_definition() -> mir::ir::FunctionDefinition {
+    mir::ir::FunctionDefinition::new(
+        compile_default_function_name(),
+        vec![mir::ir::Argument::new(
+            ARGUMENT_NAME,
+            mir::types::Type::Variant,
+        )],
+        mir::types::Type::ByteString,
+        mir::ir::ByteString::new("<unknown>"),
+    )
+}
+
 fn compile_function_definition_for_concrete_type(
     context: &Context,
     type_: &Type,
@@ -145,6 +161,14 @@ mod tests {
             definition.name(),
             &compile_function_name(&context, &type_).unwrap()
         );
+        assert_eq!(definition.type_(), &compile_function_type());
+    }
+
+    #[test]
+    fn compile_default_function_definition_() {
+        let definition = compile_default_function_definition();
+
+        assert_eq!(definition.name(), compile_default_function_name());
         assert_eq!(definition.type_(), &compile_function_type());
     }
 }

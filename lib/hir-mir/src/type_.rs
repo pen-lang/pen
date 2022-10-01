@@ -76,7 +76,7 @@ pub fn compile_concrete_function_name(
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
-        "_function_{}",
+        "hir:function:{}",
         type_id_calculator::calculate(&function.clone().into(), types)?,
     ))
 }
@@ -101,7 +101,7 @@ pub fn compile_concrete_list_name(
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
-        "_list_{}",
+        "hir:list:{}",
         type_id_calculator::calculate(list.element(), types)?
     ))
 }
@@ -126,7 +126,7 @@ pub fn compile_concrete_map_name(
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {
     Ok(format!(
-        "_map_{}_{}",
+        "hir:map:{}:{}",
         type_id_calculator::calculate(map.key(), types)?,
         type_id_calculator::calculate(map.value(), types)?,
     ))
