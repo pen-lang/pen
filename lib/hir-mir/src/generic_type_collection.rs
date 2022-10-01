@@ -73,6 +73,13 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
 
     Ok(lower_types
         .into_iter()
+        .chain(
+            module
+                .type_definitions()
+                .iter()
+                .flat_map(|definition| definition.fields())
+                .map(|field| field.type_().clone()),
+        )
         .map(|type_| union_type_member_calculator::calculate(&type_, context.types()))
         .collect::<Result<Vec<_>, _>>()?
         .into_iter()

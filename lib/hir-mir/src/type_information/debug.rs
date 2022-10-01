@@ -1,4 +1,4 @@
-use crate::{context::Context, type_, CompileError};
+use crate::{concrete_type, context::Context, type_, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_id_calculator},
     types::Type,
@@ -120,16 +120,24 @@ pub(super) fn compile_function_definition(
                                 .enumerate()
                                 .map(|(index, field)| {
                                     let type_ = type_::compile(context, field.type_())?;
-                                    let field = mir::ir::RecordField::new(
+                                    let value = mir::ir::RecordField::new(
                                         mir_type.clone(),
                                         index,
                                         argument.clone(),
                                     );
 
                                     Ok(compile_call(if type_ == mir::types::Type::Variant {
-                                        mir::ir::Expression::from(field)
+                                        mir::ir::Expression::from(value)
                                     } else {
-                                        mir::ir::Variant::new(type_, field).into()
+                                        mir::ir::Variant::new(
+                                            type_,
+                                            concrete_type::compile(
+                                                context,
+                                                value.into(),
+                                                field.type_(),
+                                            )?,
+                                        )
+                                        .into()
                                     }))
                                 })
                                 .collect::<Result<Vec<_>, CompileError>>()?
