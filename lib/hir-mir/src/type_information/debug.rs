@@ -1,5 +1,9 @@
 use crate::{context::Context, type_, CompileError};
-use hir::{analysis::type_id_calculator, types::Type};
+use hir::{
+    analysis::{record_field_resolver, type_id_calculator},
+    types::Type,
+};
+use itertools::Itertools;
 
 const ARGUMENT_NAME: &str = "$x";
 
@@ -45,6 +49,7 @@ pub(super) fn compile_function_declaration(
     ))
 }
 
+#[allow(unstable_name_collisions)]
 pub(super) fn compile_function_definition(
     context: &Context,
     type_: &Type,
@@ -102,9 +107,41 @@ pub(super) fn compile_function_definition(
                 mir::ir::ByteString::new("<number>").into()
             },
         )?),
-        Type::Record(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("<record>").into(),
-        )?),
+        Type::Record(record_type) => {
+            let mir_type = type_::compile_record(record_type);
+
+            Some(compile_function_definition(
+                mir::ir::StringConcatenation::new(
+                    [mir::ir::ByteString::new(format!("{}{{", record_type.name())).into()]
+                        .into_iter()
+                        .chain(
+                            record_field_resolver::resolve_record(record_type, context.records())?
+                                .iter()
+                                .enumerate()
+                                .map(|(index, field)| {
+                                    let type_ = type_::compile(context, field.type_())?;
+                                    let field = mir::ir::RecordField::new(
+                                        mir_type.clone(),
+                                        index,
+                                        argument.clone(),
+                                    );
+
+                                    Ok(compile_call(if type_ == mir::types::Type::Variant {
+                                        mir::ir::Expression::from(field)
+                                    } else {
+                                        mir::ir::Variant::new(type_, field).into()
+                                    }))
+                                })
+                                .collect::<Result<Vec<_>, CompileError>>()?
+                                .into_iter()
+                                .intersperse(mir::ir::ByteString::new(",").into()),
+                        )
+                        .chain([mir::ir::ByteString::new("}").into()])
+                        .collect(),
+                )
+                .into(),
+            )?)
+        }
         Type::String(_) => Some(compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("\"").into(),

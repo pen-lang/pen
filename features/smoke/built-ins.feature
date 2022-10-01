@@ -29,3 +29,4 @@ Feature: Built-ins
       | none  | none    |
       | "foo" | \"foo\" |
       | 42    | 42      |
+      |foo{}  | foo{}   |
