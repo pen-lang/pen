@@ -8,7 +8,7 @@ use siphasher::sip::SipHasher;
 const HASH_MULTIPLIER: u64 = 31;
 
 #[ffi::bindgen]
-fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
+fn _pen_prelude_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
     (one.as_slice() == other.as_slice()).into()
 }
 
