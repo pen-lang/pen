@@ -292,23 +292,42 @@ pub fn compile(
         }
         mir::ir::Expression::TypeInformationFunction(information) => {
             let value = compile(information.variant(), variables)?;
+            let function = builder.deconstruct_record(
+                type_information::get_custom_information(
+                    builder,
+                    variant::get_tag(builder, &value)?,
+                )?,
+                information.index(),
+            )?;
+            let function_integer =
+                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, function.clone());
 
             reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
 
-            fmm::build::bit_cast(
-                type_::compile_function(
-                    context,
-                    &context.type_information().types()[information.index()],
-                ),
-                builder.deconstruct_record(
-                    type_information::get_custom_information(
-                        builder,
-                        variant::get_tag(builder, &value)?,
+            builder
+                .if_(
+                    fmm::build::comparison_operation(
+                        fmm::ir::ComparisonOperator::Equal,
+                        function_integer.clone(),
+                        fmm::ir::Undefined::new(function_integer.to().clone()),
                     )?,
-                    information.index(),
-                )?,
-            )
-            .into()
+                    |builder| -> Result<_, CompileError> {
+                        Ok(builder.branch(
+                            variables[&context.type_information().fallback()[information.index()]]
+                                .clone(),
+                        ))
+                    },
+                    |builder| {
+                        Ok(builder.branch(fmm::build::bit_cast(
+                            type_::compile_function(
+                                context,
+                                &context.type_information().types()[information.index()],
+                            ),
+                            function.clone(),
+                        )))
+                    },
+                )?
+                .into()
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
