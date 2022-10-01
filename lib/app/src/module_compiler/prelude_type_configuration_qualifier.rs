@@ -6,6 +6,7 @@ pub fn qualify(
         error_type: qualify_error_type_configuration(&configuration.error_type, prelude_prefix),
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
         map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
+        number_type: qualify_number_type_configuration(&configuration.number_type, prelude_prefix),
         string_type: qualify_string_type_configuration(&configuration.string_type, prelude_prefix),
         spawn_function_name: configuration.spawn_function_name.clone(),
         race_function_name: configuration.race_function_name.clone(),
@@ -76,6 +77,15 @@ fn qualify_map_type_configuration(
             &configuration.iteration,
             prelude_prefix,
         ),
+    }
+}
+
+fn qualify_number_type_configuration(
+    configuration: &hir_mir::NumberTypeConfiguration,
+    prelude_prefix: &str,
+) -> hir_mir::NumberTypeConfiguration {
+    hir_mir::NumberTypeConfiguration {
+        debug_function_name: prelude_prefix.to_owned() + &configuration.debug_function_name,
     }
 }
 

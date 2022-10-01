@@ -13,6 +13,7 @@ mod main_module_configuration;
 mod map_type_configuration;
 mod module;
 mod module_interface;
+mod number_type_configuration;
 mod runtime_function_declaration;
 mod string_type_configuration;
 mod test_function;
@@ -31,6 +32,7 @@ pub use main_module_configuration::*;
 pub use map_type_configuration::{
     HashConfiguration, MapTypeConfiguration, MapTypeIterationConfiguration,
 };
+pub use number_type_configuration::NumberTypeConfiguration;
 pub use string_type_configuration::StringTypeConfiguration;
 pub use test_module_configuration::TestModuleConfiguration;
 use transformation::{

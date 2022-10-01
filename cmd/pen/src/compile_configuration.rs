@@ -61,6 +61,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                         rest_function_name: "MapIteratorRest".into(),
                     },
                 },
+                number_type: app::module_compiler::NumberTypeConfiguration {
+                    debug_function_name: "DebugNumber".into(),
+                },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "EqualStrings".into(),
                 },
