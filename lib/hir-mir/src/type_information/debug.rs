@@ -205,9 +205,8 @@ fn compile_function_definition_for_concrete_type(
 
 #[cfg(test)]
 mod tests {
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-
     use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{ir::*, test::ModuleFake, types};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
