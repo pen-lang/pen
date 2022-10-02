@@ -542,4 +542,49 @@ mod tests {
             .unwrap()
             .is_public());
     }
+
+    #[test]
+    fn compile_record_field() {
+        let field_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
+        let module = Module::empty()
+            .set_type_definitions(vec![TypeDefinition::new(
+                "r",
+                "r",
+                vec![types::RecordField::new("x", field_type.clone())],
+                false,
+                false,
+                false,
+                Position::fake(),
+            )])
+            .set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    List::new(
+                        types::Record::new("r", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]);
+        let context = create_context(&module);
+
+        assert_eq!(
+            compile(&context, &module).unwrap().information().len(),
+            create_default_type_information(&context).len() + 2
+        );
+        assert!(!compile_functions(&context, &module)
+            .unwrap()
+            .1
+            .iter()
+            .find(|definition| definition.definition().name()
+                == debug::compile_function_name(&context, &field_type.clone().into()).unwrap())
+            .unwrap()
+            .is_public());
+    }
 }

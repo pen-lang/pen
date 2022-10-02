@@ -12,9 +12,10 @@ pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
         lazy_function_name: "lazy".into(),
         first_function_name: "first".into(),
         rest_function_name: "rest".into(),
-        list_type_name: "GenericList".into(),
-        first_rest_type_name: "FirstRest".into(),
+        list_type_name: "genericList".into(),
+        first_rest_type_name: "firstRest".into(),
         size_function_name: "listSize".into(),
+        debug_function_name: "debugList".into(),
     });
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -30,4 +31,5 @@ pub struct ListTypeConfiguration {
     pub list_type_name: String,
     pub first_rest_type_name: String,
     pub size_function_name: String,
+    pub debug_function_name: String,
 }

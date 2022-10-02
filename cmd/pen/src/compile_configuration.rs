@@ -33,6 +33,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     list_type_name: "List".into(),
                     first_rest_type_name: "FirstRest".into(),
                     size_function_name: "ListSize".into(),
+                    debug_function_name: "DebugList".into(),
                 },
                 map_type: app::module_compiler::MapTypeConfiguration {
                     context_function_name: "NewMapContext".into(),
@@ -46,6 +47,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                     delete_function_name: "DeleteMap".into(),
                     set_function_name: "SetMap".into(),
                     size_function_name: "MapSize".into(),
+                    debug_function_name: "DebugMap".into(),
                     hash: app::module_compiler::HashConfiguration {
                         combine_function_name: "CombineHashes".into(),
                         number_hash_function_name: "HashNumber".into(),
@@ -60,6 +62,9 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
                         value_function_name: "MapIteratorValue".into(),
                         rest_function_name: "MapIteratorRest".into(),
                     },
+                },
+                number_type: app::module_compiler::NumberTypeConfiguration {
+                    debug_function_name: "DebugNumber".into(),
                 },
                 string_type: app::module_compiler::StringTypeConfiguration {
                     equal_function_name: "EqualStrings".into(),
