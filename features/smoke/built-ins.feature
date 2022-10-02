@@ -13,6 +13,17 @@ Feature: Built-ins
   Scenario Outline: Print a value with a debug function
     Given a file named "main.pen" with:
     """pen
+    type foo {}
+
+    type bar {
+      x number
+    }
+
+    type baz {
+      x number
+      y string
+    }
+
     main = \(_ context) none {
       debug(<input>)
     }
