@@ -6,8 +6,6 @@ set -e
 
 prepare_integration_test $(dirname $PWD/$0)/..
 
-rustup update
-
 for target in \
   i686-unknown-linux-musl \
   x86_64-unknown-linux-musl \
