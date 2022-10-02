@@ -34,4 +34,89 @@ pub fn compile(
     )
 }
 
-// TODO TEST
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use hir::{ir::*, test::ModuleFake, types};
+    use position::test::PositionFake;
+    use position::Position;
+
+    #[test]
+    fn compile_boolean() {
+        let context = Context::new(&Module::empty(), None);
+
+        assert_eq!(
+            compile(
+                &context,
+                mir::ir::Variable::new("x").into(),
+                &types::Boolean::new(Position::fake()).clone().into()
+            ),
+            Ok(mir::ir::Variable::new("x").into())
+        );
+    }
+
+    #[test]
+    fn compile_function() {
+        let context = Context::new(&Module::empty(), None);
+        let function_type = types::Function::new(
+            vec![],
+            types::None::new(Position::fake()),
+            PositionFake::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &context,
+                mir::ir::Variable::new("x").into(),
+                &function_type.clone().into()
+            ),
+            Ok(mir::ir::Record::new(
+                type_::compile_concrete_function(&function_type, context.types()).unwrap(),
+                vec![mir::ir::Variable::new("x").into()]
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn compile_list() {
+        let context = Context::new(&Module::empty(), None);
+        let list_type = types::List::new(types::None::new(Position::fake()), PositionFake::fake());
+
+        assert_eq!(
+            compile(
+                &context,
+                mir::ir::Variable::new("x").into(),
+                &list_type.clone().into()
+            ),
+            Ok(mir::ir::Record::new(
+                type_::compile_concrete_list(&list_type, context.types()).unwrap(),
+                vec![mir::ir::Variable::new("x").into()]
+            )
+            .into())
+        );
+    }
+
+    #[test]
+    fn compile_map() {
+        let context = Context::new(&Module::empty(), None);
+        let map_type = types::Map::new(
+            types::None::new(Position::fake()),
+            types::None::new(Position::fake()),
+            PositionFake::fake(),
+        );
+
+        assert_eq!(
+            compile(
+                &context,
+                mir::ir::Variable::new("x").into(),
+                &map_type.clone().into()
+            ),
+            Ok(mir::ir::Record::new(
+                type_::compile_concrete_map(&map_type, context.types()).unwrap(),
+                vec![mir::ir::Variable::new("x").into()]
+            )
+            .into())
+        );
+    }
+}
