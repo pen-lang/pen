@@ -455,4 +455,44 @@ mod tests {
         )
         .unwrap();
     }
+
+    #[test]
+    fn compile_debug_with_record_with_generic_type_field() {
+        compile_module(
+            &Module::empty()
+                .set_type_definitions(vec![TypeDefinition::fake(
+                    "r",
+                    vec![types::RecordField::new(
+                        "x",
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                    )],
+                    false,
+                    false,
+                    false,
+                )])
+                .set_function_definitions(vec![FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Record::new("r", Position::fake()),
+                        )],
+                        types::None::new(Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )]),
+        )
+        .unwrap();
+    }
 }

@@ -130,7 +130,7 @@ pub(super) fn compile_function_definition(
                                         mir::ir::Expression::from(value)
                                     } else {
                                         mir::ir::Variant::new(
-                                            type_,
+                                            type_::compile_concrete(context, field.type_())?,
                                             concrete_type::compile(
                                                 context,
                                                 value.into(),
