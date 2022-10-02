@@ -11,7 +11,7 @@ pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
         empty_type_name: "notFound".into(),
         equal_function_name: "equalMaps".into(),
         get_function_name: "getMap".into(),
-        map_type_name: "GenericMap".into(),
+        map_type_name: "genericMap".into(),
         merge_function_name: "mergeMaps".into(),
         set_function_name: "setMap".into(),
         size_function_name: "mapSize".into(),
@@ -32,11 +32,11 @@ pub static HASH_CONFIGURATION: Lazy<HashConfiguration> = Lazy::new(|| HashConfig
 #[cfg(test)]
 pub static MAP_TYPE_ITERATION_CONFIGURATION: Lazy<MapTypeIterationConfiguration> =
     Lazy::new(|| MapTypeIterationConfiguration {
-        iterator_type_name: "_mapIterator".into(),
-        iterate_function_name: "_iterateMap".into(),
-        key_function_name: "_mapIteratorKey".into(),
-        value_function_name: "_mapIteratorValue".into(),
-        rest_function_name: "_mapIteratorRest".into(),
+        iterator_type_name: "mapIterator".into(),
+        iterate_function_name: "iterateMap".into(),
+        key_function_name: "mapIteratorKey".into(),
+        value_function_name: "mapIteratorValue".into(),
+        rest_function_name: "mapIteratorRest".into(),
     });
 
 #[derive(Clone, Debug, PartialEq, Eq)]

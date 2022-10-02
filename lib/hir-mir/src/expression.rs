@@ -1,4 +1,3 @@
-use crate::concrete_type;
 use super::{
     built_in_call,
     context::Context,
@@ -9,6 +8,7 @@ use super::{
     },
     type_, CompileError,
 };
+use crate::concrete_type;
 use fnv::FnvHashMap;
 use hir::{
     analysis::{
