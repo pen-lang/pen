@@ -91,7 +91,7 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::{FunctionDefinitionFake, ModuleFake};
+    use hir::test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {
@@ -289,6 +289,25 @@ mod tests {
             [types::None::new(Position::fake()).into()]
                 .into_iter()
                 .collect()
+        );
+    }
+
+    #[test]
+    fn collect_from_record_field() {
+        let field_type =
+            types::Function::new(vec![], types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            collect_module(
+                &Module::empty().set_type_definitions(vec![TypeDefinition::fake(
+                    "r",
+                    vec![types::RecordField::new("x", field_type.clone())],
+                    false,
+                    false,
+                    false,
+                )])
+            ),
+            [field_type.into()].into_iter().collect()
         );
     }
 }

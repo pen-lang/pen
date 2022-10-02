@@ -114,13 +114,6 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
             .into_values()
             .map(Type::from),
     )
-    .chain(
-        module
-            .type_definitions()
-            .iter()
-            .flat_map(|definition| definition.fields())
-            .map(|field| field.type_().clone()),
-    )
     .map(|type_| type_canonicalizer::canonicalize(&type_, context.types()))
     .collect::<Result<Vec<_>, _>>()?
     .into_iter()
