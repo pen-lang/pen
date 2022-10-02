@@ -56,8 +56,8 @@ fn check_type_information(
     type_information: &TypeInformation,
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    for names in type_information.information().values() {
-        check_type_information_functions(type_information, names, variables)?;
+    for name in type_information.information().values() {
+        check_type_information_functions(type_information, name, variables)?;
     }
 
     check_type_information_functions(type_information, type_information.fallback(), variables)?;
@@ -67,19 +67,13 @@ fn check_type_information(
 
 fn check_type_information_functions(
     type_information: &TypeInformation,
-    names: &[String],
+    name: &str,
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    if names.len() != type_information.fallback().len() {
-        return Err(TypeCheckError::TypeInformationFunctionCount(names.to_vec()));
-    }
-
-    for (name, fallback_name) in names.iter().zip(type_information.fallback()) {
-        check_equality(
-            &check_variable(name, variables)?,
-            &check_variable(fallback_name, variables)?,
-        )?;
-    }
+    check_equality(
+        &check_variable(name, variables)?,
+        &check_variable(type_information.fallback(), variables)?,
+    )?;
 
     Ok(())
 }
@@ -289,23 +283,14 @@ fn check_expression(
             type_
         }
         Expression::TypeInformationFunction(function) => {
-            if function.index() >= context.type_information().fallback().len() {
-                return Err(TypeCheckError::TypeInformationFunctionIndex(
-                    function.clone(),
-                ));
-            }
-
             check_equality(
                 &check_expression(function.variant(), variables)?,
                 &Type::Variant,
             )?;
 
-            check_variable(
-                &context.type_information().fallback()[function.index()],
-                variables,
-            )?
-            .clone()
-            .into()
+            check_variable(&context.type_information().fallback(), variables)?
+                .clone()
+                .into()
         }
         Expression::Variable(variable) => check_variable(variable.name(), variables)?,
         Expression::Variant(variant) => {
@@ -444,9 +429,32 @@ mod tests {
         types::{self, Type},
     };
 
+    fn check_module(module: &Module) -> Result<(), TypeCheckError> {
+        const DEFAULT_TYPE_INFORMATION_FUNCTION_NAME: &str = "defaultTypeInformationFunction";
+
+        check(
+            &module
+                .set_type_information(TypeInformation::new(
+                    Default::default(),
+                    DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into(),
+                ))
+                .set_function_declarations(
+                    module
+                        .function_declarations()
+                        .iter()
+                        .cloned()
+                        .chain([FunctionDeclaration::new(
+                            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+                            types::Function::new(vec![], Type::None),
+                        )])
+                        .collect(),
+                ),
+        )
+    }
+
     #[test]
     fn check_types_with_empty_modules() {
-        assert_eq!(check(&Module::empty()), Ok(()));
+        assert_eq!(check_module(&Module::empty()), Ok(()));
     }
 
     #[test]
@@ -457,7 +465,7 @@ mod tests {
             Type::Number,
             Variable::new("x"),
         )]);
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -478,7 +486,7 @@ mod tests {
         ]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
     }
@@ -492,7 +500,7 @@ mod tests {
             42.0,
         )]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -513,7 +521,7 @@ mod tests {
         ]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
     }
@@ -539,7 +547,7 @@ mod tests {
             ),
         ]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -566,7 +574,7 @@ mod tests {
             ),
         ]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -583,7 +591,7 @@ mod tests {
         )]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::FunctionExpected(_))
         ));
     }
@@ -598,7 +606,7 @@ mod tests {
         )]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::VariableNotFound(_))
         ));
     }
@@ -617,7 +625,7 @@ mod tests {
             ),
         )]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -638,7 +646,7 @@ mod tests {
         ]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
     }
@@ -668,7 +676,7 @@ mod tests {
             ),
         )]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -696,7 +704,7 @@ mod tests {
             ),
         )]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -716,7 +724,7 @@ mod tests {
                     vec![Variable::new("x").into()],
                 ),
             )]);
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -734,31 +742,14 @@ mod tests {
             )]);
 
         assert!(matches!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::TypesNotMatched(_, _))
         ));
     }
 
     #[test]
-    fn check_type_information_function() {
-        let module = Module::empty()
-            .set_type_information(TypeInformation::new(Default::default(), vec!["g".into()]))
-            .set_function_definitions(vec![
-                FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Variant)],
-                    types::Function::new(vec![], Type::None),
-                    TypeInformationFunction::new(0, Variable::new("x")),
-                ),
-                FunctionDefinition::new("g", vec![], Type::None, Expression::None),
-            ]);
-
-        assert_eq!(check(&module), Ok(()));
-    }
-
-    #[test]
-    fn check_type_information_function_with_invalid_index() {
-        let function = TypeInformationFunction::new(42, Variable::new("x"));
+    fn check_type_information_function_with_invalid_variable() {
+        let function = TypeInformationFunction::new(Variable::new("y"));
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
             "f",
             vec![Argument::new("x", Type::Variant)],
@@ -767,8 +758,8 @@ mod tests {
         )]);
 
         assert_eq!(
-            check(&module),
-            Err(TypeCheckError::TypeInformationFunctionIndex(function))
+            check_module(&module),
+            Err(TypeCheckError::VariableNotFound("y".into()))
         );
     }
 
@@ -778,14 +769,14 @@ mod tests {
         #[test]
         fn check_() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Type::Number,
                         If::new(true, 42.0, 42.0)
-                    ),])
-                ),
+                    ),
+                ])),
                 Ok(())
             );
         }
@@ -797,8 +788,8 @@ mod tests {
         #[test]
         fn check_only_default_alternative() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Type::Number,
@@ -807,8 +798,8 @@ mod tests {
                             vec![],
                             Some(DefaultAlternative::new("x", 42.0))
                         )
-                    )])
-                ),
+                    )
+                ])),
                 Ok(())
             );
         }
@@ -816,8 +807,8 @@ mod tests {
         #[test]
         fn check_one_alternative() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Type::Number,
@@ -830,8 +821,8 @@ mod tests {
                             )],
                             None
                         )
-                    )])
-                ),
+                    )
+                ])),
                 Ok(())
             );
         }
@@ -846,7 +837,7 @@ mod tests {
             )]);
 
             assert!(matches!(
-                check(&module),
+                check_module(&module),
                 Err(TypeCheckError::NoAlternativeFound(_))
             ));
         }
@@ -869,7 +860,7 @@ mod tests {
             .set_environment(vec![])]);
 
             assert!(matches!(
-                check(&module),
+                check_module(&module),
                 Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
@@ -877,8 +868,8 @@ mod tests {
         #[test]
         fn check_unmatched_case_type() {
             assert!(matches!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         types::Record::new("bar"),
@@ -892,8 +883,8 @@ mod tests {
                             None
                         )
                     )
-                    .set_environment(vec![])])
-                ),
+                    .set_environment(vec![])]
+                )),
                 Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
@@ -901,8 +892,8 @@ mod tests {
         #[test]
         fn check_variant_alternative() {
             assert!(matches!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Type::Variant,
@@ -916,8 +907,8 @@ mod tests {
                             None
                         )
                     )
-                    .set_environment(vec![])])
-                ),
+                    .set_environment(vec![])]
+                )),
                 Err(TypeCheckError::NestedVariant(_))
             ));
         }
@@ -925,8 +916,8 @@ mod tests {
         #[test]
         fn check_multiple_type_alternative() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Type::Variant,
@@ -939,8 +930,8 @@ mod tests {
                             )],
                             None
                         )
-                    )])
-                ),
+                    )
+                ])),
                 Ok(())
             );
         }
@@ -952,31 +943,31 @@ mod tests {
         #[test]
         fn check_() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Type::Number,
                         Synchronize::new(Type::Number, 42.0)
                     )
-                    .set_environment(vec![])],)
-                ),
+                    .set_environment(vec![])],
+                )),
                 Ok(())
             );
         }
 
         #[test]
-        fn fail_to_check() {
+        fn fail_to_check_module() {
             assert!(matches!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Type::Number,
                         Synchronize::new(Type::None, 42.0)
                     )
-                    .set_environment(vec![])],)
-                ),
+                    .set_environment(vec![])],
+                )),
                 Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
@@ -990,7 +981,7 @@ mod tests {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
-                check(
+                check_module(
                     &Module::empty()
                         .set_type_definitions(vec![TypeDefinition::new(
                             "foo",
@@ -1013,7 +1004,7 @@ mod tests {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
-                check(
+                check_module(
                     &Module::empty()
                         .set_type_definitions(vec![TypeDefinition::new(
                             "foo",
@@ -1049,7 +1040,7 @@ mod tests {
                 .set_environment(vec![])]);
 
             assert!(matches!(
-                check(&module),
+                check_module(&module),
                 Err(TypeCheckError::WrongFieldCount(_))
             ));
         }
@@ -1072,7 +1063,7 @@ mod tests {
                 .set_environment(vec![])]);
 
             assert!(matches!(
-                check(&module),
+                check_module(&module),
                 Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
@@ -1082,7 +1073,7 @@ mod tests {
             let record_type = types::Record::new("foo");
 
             assert_eq!(
-                check(
+                check_module(
                     &Module::empty()
                         .set_type_definitions(vec![TypeDefinition::new(
                             "foo",
@@ -1111,15 +1102,15 @@ mod tests {
         #[test]
         fn check_variant() {
             assert_eq!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Number)],
                         Type::Variant,
                         Variant::new(Type::Number, 42.0)
                     )
-                    .set_environment(vec![])],)
-                ),
+                    .set_environment(vec![])],
+                )),
                 Ok(())
             );
         }
@@ -1127,15 +1118,15 @@ mod tests {
         #[test]
         fn fail_to_check_variant_in_variant() {
             assert!(matches!(
-                check(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::new(
                         "f",
                         vec![Argument::new("x", Type::Variant)],
                         Type::Variant,
                         Variant::new(Type::Variant, Variable::new("x"))
                     )
-                    .set_environment(vec![])],)
-                ),
+                    .set_environment(vec![])],
+                )),
                 Err(TypeCheckError::NestedVariant(_))
             ));
         }
@@ -1150,7 +1141,7 @@ mod tests {
             ArithmeticOperation::new(ArithmeticOperator::Add, 42.0, 42.0),
         )
         .set_environment(vec![])]);
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -1162,7 +1153,7 @@ mod tests {
             ComparisonOperation::new(ComparisonOperator::Equal, 42.0, 42.0),
         )
         .set_environment(vec![])]);
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -1175,7 +1166,7 @@ mod tests {
         )
         .set_environment(vec![])]);
 
-        assert_eq!(check(&module), Ok(()));
+        assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
@@ -1196,7 +1187,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            check(&module),
+            check_module(&module),
             Err(TypeCheckError::DuplicateFunctionNames("f".into()))
         );
     }
@@ -1218,7 +1209,8 @@ mod tests {
                 ),
             )
             .set_environment(vec![])]);
-            assert_eq!(check(&module), Ok(()));
+
+            assert_eq!(check_module(&module), Ok(()));
         }
     }
 
@@ -1245,7 +1237,7 @@ mod tests {
                     ),
                 )]);
 
-            assert_eq!(check(&module), Ok(()));
+            assert_eq!(check_module(&module), Ok(()));
         }
 
         #[test]
@@ -1265,7 +1257,7 @@ mod tests {
                 )]);
 
             assert!(matches!(
-                check(&module),
+                check_module(&module),
                 Err(TypeCheckError::TypesNotMatched(_, _))
             ));
         }
@@ -1287,7 +1279,7 @@ mod tests {
                     types::Function::new(vec![Type::Number], Type::Number),
                 )]);
 
-            assert_eq!(check(&module), Ok(()));
+            assert_eq!(check_module(&module), Ok(()));
         }
 
         #[test]
@@ -1305,7 +1297,7 @@ mod tests {
                     Variable::new("x"),
                 )]);
 
-            assert_eq!(check(&module), Ok(()));
+            assert_eq!(check_module(&module), Ok(()));
         }
     }
 
@@ -1313,9 +1305,30 @@ mod tests {
         use super::*;
 
         #[test]
+        fn check_type_information_function() {
+            let module = Module::empty()
+                .set_type_information(TypeInformation::new(Default::default(), "g".into()))
+                .set_function_definitions(vec![
+                    FunctionDefinition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Variant)],
+                        types::Function::new(vec![], Type::None),
+                        TypeInformationFunction::new(Variable::new("x")),
+                    ),
+                    FunctionDefinition::new("g", vec![], Type::None, Expression::None),
+                ]);
+
+            assert_eq!(check(&module), Ok(()));
+        }
+
+        #[test]
         fn check_nothing() {
             let module = Module::empty()
-                .set_type_information(TypeInformation::new(Default::default(), vec![]));
+                .set_function_declarations(vec![FunctionDeclaration::new(
+                    "f",
+                    types::Function::new(vec![], Type::None),
+                )])
+                .set_type_information(TypeInformation::new(Default::default(), "f".into()));
 
             assert_eq!(check(&module), Ok(()));
         }
@@ -1328,8 +1341,8 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    [(Type::None, vec!["f".into()])].into_iter().collect(),
-                    vec!["f".into()],
+                    [(Type::None, "f".into())].into_iter().collect(),
+                    "f".into(),
                 ));
 
             assert_eq!(check(&module), Ok(()));
@@ -1343,56 +1356,13 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    [(Type::None, vec!["f".into()])].into_iter().collect(),
-                    vec!["g".into()],
+                    [(Type::None, "f".into())].into_iter().collect(),
+                    "g".into(),
                 ));
 
             assert_eq!(
                 check(&module),
                 Err(TypeCheckError::VariableNotFound("f".into()))
-            );
-        }
-
-        #[test]
-        fn check_too_many_functions() {
-            let module = Module::empty()
-                .set_function_declarations(vec![FunctionDeclaration::new(
-                    "f",
-                    types::Function::new(vec![], Type::None),
-                )])
-                .set_type_information(TypeInformation::new(
-                    [(Type::None, vec!["f".into(), "f".into()])]
-                        .into_iter()
-                        .collect(),
-                    vec!["f".into()],
-                ));
-
-            assert_eq!(
-                check(&module),
-                Err(TypeCheckError::TypeInformationFunctionCount(vec![
-                    "f".into(),
-                    "f".into()
-                ]))
-            );
-        }
-
-        #[test]
-        fn check_too_many_functions_for_fallback() {
-            let module = Module::empty()
-                .set_function_declarations(vec![FunctionDeclaration::new(
-                    "f",
-                    types::Function::new(vec![], Type::None),
-                )])
-                .set_type_information(TypeInformation::new(
-                    [(Type::None, vec!["f".into()])].into_iter().collect(),
-                    vec!["f".into(), "f".into()],
-                ));
-
-            assert_eq!(
-                check(&module),
-                Err(TypeCheckError::TypeInformationFunctionCount(vec![
-                    "f".into()
-                ]))
             );
         }
     }

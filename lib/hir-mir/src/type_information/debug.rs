@@ -12,7 +12,7 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
 
     mir::ir::Call::new(
         compile_function_type(),
-        mir::ir::TypeInformationFunction::new(super::DEBUG_FUNCTION_INDEX, argument.clone()),
+        mir::ir::TypeInformationFunction::new(argument.clone()),
         vec![argument],
     )
     .into()

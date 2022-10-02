@@ -12,21 +12,14 @@ pub fn compile_global_variable(
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
             reference_count::variant::compile_synchronize_function(context, type_)?,
-            fmm::build::record(
-                context
+            fmm::build::bit_cast(
+                fmm::types::generic_pointer_type(),
+                global_variables[context
                     .type_information()
                     .information()
                     .get(type_)
-                    .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?
-                    .iter()
-                    .map(|name| {
-                        fmm::build::bit_cast(
-                            fmm::types::generic_pointer_type(),
-                            global_variables[name].clone(),
-                        )
-                        .into()
-                    })
-                    .collect(),
+                    .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?]
+                .clone(),
             )
             .into(),
         ]),

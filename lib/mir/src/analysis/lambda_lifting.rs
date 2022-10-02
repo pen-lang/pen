@@ -216,8 +216,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
         )
         .into(),
         Expression::TypeInformationFunction(information) => {
-            TypeInformationFunction::new(information.index(), transform(information.variant()))
-                .into()
+            TypeInformationFunction::new(transform(information.variant())).into()
         }
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()

@@ -65,15 +65,7 @@ pub fn compile_variant_tag(context: &Context) -> fmm::types::Pointer {
             fmm::types::CallingConvention::Target,
         )
         .into(),
-        fmm::types::Record::new(
-            context
-                .type_information()
-                .fallback()
-                .iter()
-                .map(|_| fmm::types::generic_pointer_type())
-                .collect(),
-        )
-        .into(),
+        fmm::types::generic_pointer_type().into(),
     ]))
 }
 

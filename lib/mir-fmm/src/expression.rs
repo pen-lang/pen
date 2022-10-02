@@ -292,33 +292,27 @@ pub fn compile(
         }
         mir::ir::Expression::TypeInformationFunction(information) => {
             let value = compile(information.variant(), variables)?;
-            let function = builder.deconstruct_record(
-                type_information::get_custom_information(
-                    builder,
-                    variant::get_tag(builder, &value)?,
-                )?,
-                information.index(),
+            let function = type_information::get_custom_information(
+                builder,
+                variant::get_tag(builder, &value)?,
             )?;
             let function_integer =
                 fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, function.clone());
 
             reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
 
-            builder.if_(
+            builder.if_::<CompileError>(
                 fmm::build::comparison_operation(
                     fmm::ir::ComparisonOperator::Equal,
                     function_integer.clone(),
                     fmm::ir::Undefined::new(function_integer.to().clone()),
                 )?,
-                |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(
-                        variables[&context.type_information().fallback()[information.index()]]
-                            .clone(),
-                    ))
+                |builder| {
+                    Ok(builder.branch(variables[context.type_information().fallback()].clone()))
                 },
                 |builder| {
                     Ok(builder.branch(fmm::build::bit_cast(
-                        variables[&context.type_information().fallback()[information.index()]]
+                        variables[context.type_information().fallback()]
                             .type_()
                             .clone(),
                         function.clone(),
