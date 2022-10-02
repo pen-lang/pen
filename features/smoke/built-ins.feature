@@ -40,8 +40,8 @@ Feature: Built-ins
       | none                                | none                                    |
       | "foo"                               | \"foo\"                                 |
       | 42                                  | 42                                      |
-      | foo{}                               | foo{}                                   |
-      | bar{x: 42}                          | bar{x: 42}                              |
-      | baz{x: 42, y: "foo"}                | baz{x: 42, y: \"foo\"}                  |
+      | foo{}                               | main.pen:foo{}                          |
+      | bar{x: 42}                          | main.pen:bar{x: 42}                     |
+      | baz{x: 42, y: "foo"}                | main.pen:baz{x: 42, y: \"foo\"}         |
       | [number 42, 42]                     | [number 42, 42]                         |
       | {string: number "foo": 1, "bar": 2} | {string: number \"foo\": 1, \"bar\": 2} |
