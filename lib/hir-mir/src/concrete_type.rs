@@ -38,8 +38,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use hir::{ir::*, test::ModuleFake, types};
-    use position::test::PositionFake;
-    use position::Position;
+    use position::{test::PositionFake, Position};
 
     #[test]
     fn compile_boolean() {
