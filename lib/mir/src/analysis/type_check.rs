@@ -1391,7 +1391,6 @@ mod tests {
             assert_eq!(
                 check(&module),
                 Err(TypeCheckError::TypeInformationFunctionCount(vec![
-                    "f".into(),
                     "f".into()
                 ]))
             );
