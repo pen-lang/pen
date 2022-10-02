@@ -23,10 +23,12 @@ Feature: Built-ins
     Then I successfully run `check_memory_leak.sh ./app`
 
     Examples:
-      | input | output  |
-      | false | false   |
-      | true  | true    |
-      | none  | none    |
-      | "foo" | \"foo\" |
-      | 42    | 42      |
-      |foo{}  | foo{}   |
+      | input                | output               |
+      | false                | false                |
+      | true                 | true                 |
+      | none                 | none                 |
+      | "foo"                | \"foo\"              |
+      | 42                   | 42                   |
+      | foo{}                | foo{}                |
+      | bar{x: 42}           | bar{x: 42}           |
+      | baz{x: 42, y: "foo"} | baz{x: 42, y: "foo"} |
