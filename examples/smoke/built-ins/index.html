@@ -1661,8 +1661,19 @@
 }</code></pre>
 <h2 id="print-a-value-with-a-debug-function">Print a value with a debug function</h2>
 <p><em>Given</em> a file named "main.pen" with:</p>
-<pre class="pen"><code>main = \(_ context) none {
-  debug(&lt;value&gt;)
+<pre class="pen"><code>type foo {}
+
+type bar {
+  x number
+}
+
+type baz {
+  x number
+  y string
+}
+
+main = \(_ context) none {
+  debug(&lt;input&gt;)
 }</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
@@ -1672,7 +1683,7 @@
 <table>
 <thead>
 <tr>
-<th>value</th>
+<th>input</th>
 <th>output</th>
 </tr>
 </thead>
@@ -1692,6 +1703,30 @@
 <tr>
 <td>"foo"</td>
 <td>\"foo\"</td>
+</tr>
+<tr>
+<td>42</td>
+<td>42</td>
+</tr>
+<tr>
+<td>foo{}</td>
+<td>main.pen:foo{}</td>
+</tr>
+<tr>
+<td>bar{x: 42}</td>
+<td>main.pen:bar{x: 42}</td>
+</tr>
+<tr>
+<td>baz{x: 42, y: "foo"}</td>
+<td>main.pen:baz{x: 42, y: \"foo\"}</td>
+</tr>
+<tr>
+<td>[number 42, 42]</td>
+<td>[number 42, 42]</td>
+</tr>
+<tr>
+<td>{string: number "foo": 1, "bar": 2}</td>
+<td>{string: number \"bar\": 2, \"foo\": 1}</td>
 </tr>
 </tbody>
 </table>
