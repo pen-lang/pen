@@ -10,7 +10,7 @@ Feature: String
     }
     """
 
-  Scenario: Concatenate a zero-length string
+  Scenario: Concatenate zero-length strings
     Given a file named "main.pen" with:
     """pen
     import Os'Process
