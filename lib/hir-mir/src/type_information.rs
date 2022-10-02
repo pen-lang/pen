@@ -15,7 +15,6 @@ pub fn compile(
     module: &Module,
 ) -> Result<mir::ir::TypeInformation, CompileError> {
     Ok(mir::ir::TypeInformation::new(
-        vec![debug::compile_function_type()],
         collect_types(context, module)?
             .iter()
             .map(|type_| {
@@ -138,7 +137,6 @@ mod tests {
         information: FnvHashMap<mir::types::Type, Vec<String>>,
     ) -> mir::ir::TypeInformation {
         mir::ir::TypeInformation::new(
-            vec![debug::compile_function_type()],
             information,
             vec![debug::compile_default_function_name().into()],
         )

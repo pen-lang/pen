@@ -70,12 +70,15 @@ fn check_type_information_functions(
     names: &[String],
     variables: &FnvHashMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
-    if names.len() != type_information.types().len() {
+    if names.len() != type_information.fallback().len() {
         return Err(TypeCheckError::TypeInformationFunctionCount(names.to_vec()));
     }
 
-    for (name, type_) in names.iter().zip(type_information.types()) {
-        check_equality(&check_variable(name, variables)?, &type_.clone().into())?;
+    for (name, fallback_name) in names.iter().zip(type_information.fallback()) {
+        check_equality(
+            &check_variable(name, variables)?,
+            &check_variable(fallback_name, variables)?,
+        )?;
     }
 
     Ok(())
@@ -286,7 +289,7 @@ fn check_expression(
             type_
         }
         Expression::TypeInformationFunction(function) => {
-            if function.index() >= context.type_information().types().len() {
+            if function.index() >= context.type_information().fallback().len() {
                 return Err(TypeCheckError::TypeInformationFunctionIndex(
                     function.clone(),
                 ));
@@ -297,9 +300,12 @@ fn check_expression(
                 &Type::Variant,
             )?;
 
-            context.type_information().types()[function.index()]
-                .clone()
-                .into()
+            check_variable(
+                &context.type_information().fallback()[function.index()],
+                variables,
+            )?
+            .clone()
+            .into()
         }
         Expression::Variable(variable) => check_variable(variable.name(), variables)?,
         Expression::Variant(variant) => {
@@ -736,11 +742,7 @@ mod tests {
     #[test]
     fn check_type_information_function() {
         let module = Module::empty()
-            .set_type_information(TypeInformation::new(
-                vec![types::Function::new(vec![], Type::None)],
-                Default::default(),
-                vec!["g".into()],
-            ))
+            .set_type_information(TypeInformation::new(Default::default(), vec!["g".into()]))
             .set_function_definitions(vec![
                 FunctionDefinition::new(
                     "f",
@@ -1312,11 +1314,8 @@ mod tests {
 
         #[test]
         fn check_nothing() {
-            let module = Module::empty().set_type_information(TypeInformation::new(
-                vec![],
-                Default::default(),
-                vec![],
-            ));
+            let module = Module::empty()
+                .set_type_information(TypeInformation::new(Default::default(), vec![]));
 
             assert_eq!(check(&module), Ok(()));
         }
@@ -1329,7 +1328,6 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    vec![types::Function::new(vec![], Type::None)],
                     [(Type::None, vec!["f".into()])].into_iter().collect(),
                     vec!["f".into()],
                 ));
@@ -1345,7 +1343,6 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    vec![types::Function::new(vec![], Type::None)],
                     [(Type::None, vec!["f".into()])].into_iter().collect(),
                     vec!["g".into()],
                 ));
@@ -1364,7 +1361,6 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    vec![types::Function::new(vec![], Type::None)],
                     [(Type::None, vec!["f".into(), "f".into()])]
                         .into_iter()
                         .collect(),
@@ -1388,7 +1384,6 @@ mod tests {
                     types::Function::new(vec![], Type::None),
                 )])
                 .set_type_information(TypeInformation::new(
-                    vec![types::Function::new(vec![], Type::None)],
                     [(Type::None, vec!["f".into()])].into_iter().collect(),
                     vec!["f".into(), "f".into()],
                 ));

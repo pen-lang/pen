@@ -318,10 +318,9 @@ pub fn compile(
                 },
                 |builder| {
                     Ok(builder.branch(fmm::build::bit_cast(
-                        type_::compile_function(
-                            context,
-                            &context.type_information().types()[information.index()],
-                        ),
+                        variables[&context.type_information().fallback()[information.index()]]
+                            .type_()
+                            .clone(),
                         function.clone(),
                     )))
                 },

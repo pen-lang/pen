@@ -412,7 +412,6 @@ mod tests {
             compile_module(
                 &mir::ir::Module::empty()
                     .set_type_information(mir::ir::TypeInformation::new(
-                        vec![],
                         [(mir::types::Type::None, vec![])].into_iter().collect(),
                         vec![],
                     ))
@@ -730,7 +729,6 @@ mod tests {
             compile_module(
                 &mir::ir::Module::empty()
                     .set_type_information(mir::ir::TypeInformation::new(
-                        vec![mir::types::Function::new(vec![], mir::types::Type::None)],
                         [(mir::types::Type::None, vec!["f".into()])]
                             .into_iter()
                             .collect(),
@@ -771,7 +769,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(mir::types::Type::Number, vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -799,7 +796,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -831,7 +827,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -863,7 +858,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -890,7 +884,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(mir::types::Type::ByteString, vec![])]
                                 .into_iter()
                                 .collect(),
@@ -918,7 +911,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [
                                 (mir::types::Type::Number, vec![]),
                                 (mir::types::Type::None, vec![]),
@@ -1268,7 +1260,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(mir::types::Type::Number, vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -1288,7 +1279,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -1315,7 +1305,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -1340,7 +1329,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(mir::types::Type::ByteString, vec![])]
                                 .into_iter()
                                 .collect(),
@@ -1366,7 +1354,6 @@ mod tests {
                 compile_module(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            vec![],
                             [(record_type.clone().into(), vec![])].into_iter().collect(),
                             vec![],
                         ))
@@ -1542,7 +1529,6 @@ mod tests {
             compile_module(
                 &mir::ir::Module::empty()
                     .set_type_information(mir::ir::TypeInformation::new(
-                        vec![],
                         [(mir::types::Type::Number, vec![])].into_iter().collect(),
                         vec![],
                     ))
@@ -1605,7 +1591,6 @@ mod tests {
             compile_module(
                 &mir::ir::Module::empty()
                     .set_type_information(mir::ir::TypeInformation::new(
-                        vec![],
                         [
                             (mir::types::Type::ByteString, vec![]),
                             (record_type.clone().into(), vec![]),

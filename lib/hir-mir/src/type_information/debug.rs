@@ -32,7 +32,7 @@ pub(super) fn compile_function_name(
     ))
 }
 
-pub(super) fn compile_function_type() -> mir::types::Function {
+fn compile_function_type() -> mir::types::Function {
     mir::types::Function::new(
         vec![mir::types::Type::Variant],
         mir::types::Type::ByteString,

@@ -68,7 +68,7 @@ pub fn compile_variant_tag(context: &Context) -> fmm::types::Pointer {
         fmm::types::Record::new(
             context
                 .type_information()
-                .types()
+                .fallback()
                 .iter()
                 .map(|_| fmm::types::generic_pointer_type())
                 .collect(),
