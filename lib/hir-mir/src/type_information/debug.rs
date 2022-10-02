@@ -126,23 +126,28 @@ pub(super) fn compile_function_definition(
                                         argument.clone(),
                                     );
 
-                                    Ok(compile_call(if type_ == mir::types::Type::Variant {
-                                        mir::ir::Expression::from(value)
-                                    } else {
-                                        mir::ir::Variant::new(
-                                            type_::compile_concrete(context, field.type_())?,
-                                            concrete_type::compile(
-                                                context,
-                                                value.into(),
-                                                field.type_(),
-                                            )?,
-                                        )
-                                        .into()
-                                    }))
+                                    Ok(vec![
+                                        mir::ir::ByteString::new(format!("{}: ", field.name()))
+                                            .into(),
+                                        compile_call(if type_ == mir::types::Type::Variant {
+                                            mir::ir::Expression::from(value)
+                                        } else {
+                                            mir::ir::Variant::new(
+                                                type_::compile_concrete(context, field.type_())?,
+                                                concrete_type::compile(
+                                                    context,
+                                                    value.into(),
+                                                    field.type_(),
+                                                )?,
+                                            )
+                                            .into()
+                                        }),
+                                    ])
                                 })
                                 .collect::<Result<Vec<_>, CompileError>>()?
                                 .into_iter()
-                                .intersperse(mir::ir::ByteString::new(",").into()),
+                                .intersperse(vec![mir::ir::ByteString::new(",").into()])
+                                .flatten(),
                         )
                         .chain([mir::ir::ByteString::new("}").into()])
                         .collect(),
