@@ -5,6 +5,7 @@ Feature: Examples
     cp -r $PEN_ROOT/examples .
     """
 
+  @linux
   Scenario Outline: Build and test examples
     When I cd to "examples/<example>"
     Then I successfully run `pen format --check`
@@ -61,6 +62,7 @@ Feature: Examples
     Then I successfully run `./app localhost:4242 hello`
     And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
 
+  @linux
   Scenario: Run SQL client
     Given I cd to "examples/sql-client"
     And I successfully run `pen build`
