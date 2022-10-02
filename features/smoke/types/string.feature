@@ -22,4 +22,4 @@ Feature: String
     When I successfully run `pen build`
     Then I successfully run `check_memory_leak.sh ./app`
     And I successfully run `./app`
-    And the stderr from "./app" should contain exactly "foo"
+    And the stderr from "./app" should contain exactly "\"foo\""
