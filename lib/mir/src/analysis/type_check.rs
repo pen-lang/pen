@@ -288,9 +288,7 @@ fn check_expression(
                 &Type::Variant,
             )?;
 
-            check_variable(&context.type_information().fallback(), variables)?
-                .clone()
-                .into()
+            check_variable(context.type_information().fallback(), variables)?
         }
         Expression::Variable(variable) => check_variable(variable.name(), variables)?,
         Expression::Variant(variant) => {
@@ -754,7 +752,7 @@ mod tests {
             "f",
             vec![Argument::new("x", Type::Variant)],
             types::Function::new(vec![], Type::None),
-            function.clone(),
+            function,
         )]);
 
         assert_eq!(
