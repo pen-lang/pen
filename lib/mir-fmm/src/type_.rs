@@ -65,7 +65,7 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
             fmm::types::CallingConvention::Target,
         )
         .into(),
-        fmm::types::generic_pointer_type().into(),
+        fmm::types::generic_pointer_type(),
     ]))
 }
 
