@@ -14,6 +14,9 @@ for target in \
   rustup target add $target
 done
 
+# Somehow, rls is required for cross compile on macOS.
+rustup component add rls
+
 bundler install
 
 cd $(dirname $0)/..
