@@ -787,33 +787,25 @@ mod tests {
                 compile_module_without_type_information(
                     &mir::ir::Module::empty()
                         .set_type_information(mir::ir::TypeInformation::new(
-                            [(mir::types::Type::Number, "g".into())]
+                            [(mir::types::Type::Number, "f".into())]
                                 .into_iter()
                                 .collect(),
-                            "g".into(),
+                            "f".into(),
                         ))
-                        .set_function_definitions(vec![
-                            mir::ir::FunctionDefinition::new(
-                                "f",
-                                vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
-                                mir::types::Type::Number,
-                                mir::ir::Case::new(
-                                    mir::ir::Variable::new("x"),
-                                    vec![mir::ir::Alternative::new(
-                                        vec![mir::types::Type::Number],
-                                        "y",
-                                        mir::ir::Variable::new("y"),
-                                    )],
-                                    None,
-                                ),
+                        .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
+                            "f",
+                            vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                            mir::types::Type::Number,
+                            mir::ir::Case::new(
+                                mir::ir::Variable::new("x"),
+                                vec![mir::ir::Alternative::new(
+                                    vec![mir::types::Type::Number],
+                                    "y",
+                                    mir::ir::Variable::new("y"),
+                                )],
+                                None,
                             ),
-                            mir::ir::FunctionDefinition::new(
-                                "g",
-                                vec![],
-                                mir::types::Type::None,
-                                mir::ir::Expression::None,
-                            ),
-                        ]),
+                        )]),
                 );
             }
 
@@ -1636,46 +1628,38 @@ mod tests {
                 &mir::ir::Module::empty()
                     .set_type_information(mir::ir::TypeInformation::new(
                         [
-                            (mir::types::Type::ByteString, "g".into()),
-                            (record_type.clone().into(), "g".into()),
+                            (mir::types::Type::ByteString, "f".into()),
+                            (record_type.clone().into(), "f".into()),
                         ]
                         .into_iter()
                         .collect(),
-                        "g".into(),
+                        "f".into(),
                     ))
                     .set_type_definitions(vec![mir::ir::TypeDefinition::new(
                         "a",
                         mir::types::RecordBody::new(vec![]),
                     )])
-                    .set_function_definitions(vec![
-                        mir::ir::FunctionDefinition::new(
-                            "f",
-                            vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
-                            mir::types::Type::ByteString,
-                            mir::ir::Case::new(
-                                mir::ir::Variable::new("x"),
-                                vec![
-                                    mir::ir::Alternative::new(
-                                        vec![mir::types::Type::ByteString],
-                                        "x",
-                                        mir::ir::Variable::new("x"),
-                                    ),
-                                    mir::ir::Alternative::new(
-                                        vec![record_type.into()],
-                                        "x",
-                                        mir::ir::ByteString::new(vec![]),
-                                    ),
-                                ],
-                                None,
-                            ),
+                    .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
+                        "f",
+                        vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
+                        mir::types::Type::ByteString,
+                        mir::ir::Case::new(
+                            mir::ir::Variable::new("x"),
+                            vec![
+                                mir::ir::Alternative::new(
+                                    vec![mir::types::Type::ByteString],
+                                    "x",
+                                    mir::ir::Variable::new("x"),
+                                ),
+                                mir::ir::Alternative::new(
+                                    vec![record_type.into()],
+                                    "x",
+                                    mir::ir::ByteString::new(vec![]),
+                                ),
+                            ],
+                            None,
                         ),
-                        mir::ir::FunctionDefinition::new(
-                            "g",
-                            vec![],
-                            mir::types::Type::None,
-                            mir::ir::Expression::None,
-                        ),
-                    ]),
+                    )]),
             );
         }
     }
