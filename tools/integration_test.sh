@@ -6,6 +6,8 @@ set -e
 
 prepare_integration_test $(dirname $PWD/$0)/..
 
+rustup update
+
 for target in \
   i686-unknown-linux-musl \
   x86_64-unknown-linux-musl \
@@ -13,9 +15,6 @@ for target in \
   wasm32-wasi; do
   rustup target add $target
 done
-
-# Somehow, rls is required for cross compile on macOS.
-rustup component add rls
 
 bundler install
 
