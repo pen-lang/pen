@@ -90,9 +90,6 @@ fn compile_module(
             let module = map_context::module::transform(&context, &module)?;
             let module = equal_operation::module::transform(&context, &module)?;
             let module = hash_calculation::module::transform(&context, &module)?;
-
-            hir::analysis::type_checker::check_types(context.analysis(), &module)?;
-
             let module = module::compile(&context, &module)?;
 
             mir::analysis::type_check::check(&module)?;
