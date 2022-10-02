@@ -63,7 +63,7 @@ pub fn compile_function(
 }
 
 pub fn compile_record(record: &types::Record) -> mir::types::Record {
-    mir::types::Record::new(record.name()).into()
+    mir::types::Record::new(record.name())
 }
 
 pub fn compile_concrete_function(

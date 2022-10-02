@@ -228,7 +228,7 @@ pub fn compile(
                         argument
                     } else {
                         mir::ir::Variant::new(
-                            type_::compile_concrete_list(list_type, context.types())?.clone(),
+                            type_::compile_concrete_list(list_type, context.types())?,
                             concrete_type::compile(context, argument, &from)?,
                         )
                         .into()

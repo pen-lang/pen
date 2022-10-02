@@ -49,7 +49,7 @@ mod tests {
             compile(
                 &context,
                 mir::ir::Variable::new("x").into(),
-                &types::Boolean::new(Position::fake()).clone().into()
+                &types::Boolean::new(Position::fake()).into()
             ),
             Ok(mir::ir::Variable::new("x").into())
         );
