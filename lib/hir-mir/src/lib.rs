@@ -133,6 +133,25 @@ mod tests {
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
+        let debug_function_type = types::Function::new(
+            vec![types::Any::new(Position::fake()).into()],
+            types::ByteString::new(Position::fake()),
+            Position::fake(),
+        );
+        let hash_function_type = types::Function::new(
+            vec![types::Any::new(Position::fake()).into()],
+            types::Number::new(Position::fake()),
+            Position::fake(),
+        );
+        let equal_function_type = types::Function::new(
+            vec![
+                types::Any::new(Position::fake()).into(),
+                types::Any::new(Position::fake()).into(),
+            ],
+            types::Boolean::new(Position::fake()),
+            Position::fake(),
+        );
+
         compile(
             &module
                 .set_type_definitions(
@@ -140,18 +159,25 @@ mod tests {
                         .type_definitions()
                         .iter()
                         .cloned()
-                        .chain([TypeDefinition::new(
-                            "error",
-                            "error",
-                            vec![types::RecordField::new(
-                                "source",
-                                types::Any::new(Position::fake()),
-                            )],
-                            false,
-                            false,
-                            false,
-                            Position::fake(),
-                        )])
+                        .chain([
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.error_type.error_type_name,
+                                vec![types::RecordField::new(
+                                    "source",
+                                    types::Any::new(Position::fake()),
+                                )],
+                                false,
+                                false,
+                                true,
+                            ),
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.map_type.context_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
+                        ])
                         .collect(),
                 )
                 .set_function_declarations(
@@ -159,15 +185,69 @@ mod tests {
                         .function_declarations()
                         .iter()
                         .cloned()
-                        .chain([FunctionDeclaration::new(
-                            &COMPILE_CONFIGURATION.number_type.debug_function_name,
-                            types::Function::new(
-                                vec![types::Number::new(Position::fake()).into()],
-                                types::ByteString::new(Position::fake()),
+                        .chain([
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.debug_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::ByteString::new(Position::fake()).into(),
+                                        types::Record::new(
+                                            &COMPILE_CONFIGURATION.list_type.list_type_name,
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                        debug_function_type.clone().into(),
+                                    ],
+                                    types::ByteString::new(Position::fake()),
+                                    Position::fake(),
+                                ),
                                 Position::fake(),
                             ),
-                            Position::fake(),
-                        )])
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.context_function_name,
+                                types::Function::new(
+                                    vec![
+                                        equal_function_type.clone().into(),
+                                        hash_function_type.clone().into(),
+                                        equal_function_type.into(),
+                                        hash_function_type.into(),
+                                    ],
+                                    types::Record::new(
+                                        &COMPILE_CONFIGURATION.map_type.context_type_name,
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.debug_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::ByteString::new(Position::fake()).into(),
+                                        types::ByteString::new(Position::fake()).into(),
+                                        types::Record::new(
+                                            &COMPILE_CONFIGURATION.map_type.map_type_name,
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                        debug_function_type.into(),
+                                    ],
+                                    types::ByteString::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.number_type.debug_function_name,
+                                types::Function::new(
+                                    vec![types::Number::new(Position::fake()).into()],
+                                    types::ByteString::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                        ])
                         .collect(),
                 ),
             &COMPILE_CONFIGURATION,
@@ -492,6 +572,60 @@ mod tests {
                     ),
                     false,
                 )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_debug_with_list() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                    )],
+                    types::None::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                        vec![Variable::new("x", Position::fake()).into()],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_debug_with_map() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Map::new(
+                            types::None::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        ),
+                    )],
+                    types::None::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                        vec![Variable::new("x", Position::fake()).into()],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
         )
         .unwrap();
     }
