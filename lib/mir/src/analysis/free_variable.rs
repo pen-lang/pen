@@ -52,6 +52,11 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
                     .flat_map(|field| find_in_expression(field.expression())),
             )
             .collect(),
+        Expression::StringConcatenation(concatenation) => concatenation
+            .operands()
+            .iter()
+            .flat_map(find_in_expression)
+            .collect(),
         Expression::TryOperation(operation) => find_in_expression(operation.operand())
             .into_iter()
             .chain(
@@ -60,6 +65,9 @@ fn find_in_expression(expression: &Expression) -> FnvHashSet<String> {
                     .filter(|variable| variable != operation.name()),
             )
             .collect(),
+        Expression::TypeInformationFunction(information) => {
+            find_in_expression(information.variant())
+        }
         Expression::Variable(variable) => [variable.name().into()].into_iter().collect(),
         Expression::Variant(variant) => find_in_expression(variant.payload()),
         Expression::Boolean(_)

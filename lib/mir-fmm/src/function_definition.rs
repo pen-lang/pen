@@ -16,7 +16,7 @@ pub fn compile(
         reference_count::block::compile_static(closure::compile_content(
             entry_function::compile(context, definition, true, global_variables)?,
             closure::metadata::compile(context, definition)?,
-            fmm::ir::Undefined::new(type_::compile_closure_payload(definition, context.types())),
+            fmm::ir::Undefined::new(type_::compile_closure_payload(context, definition)),
         ))?,
         fmm::ir::VariableDefinitionOptions::new()
             .set_address_named(false)

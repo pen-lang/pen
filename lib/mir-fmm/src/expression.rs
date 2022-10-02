@@ -1,7 +1,7 @@
 use super::error::CompileError;
 use crate::{
     call, closure, context::Context, entry_function, pointer, record, reference_count, type_,
-    variant,
+    type_information, variant,
 };
 use fnv::FnvHashMap;
 
@@ -32,10 +32,10 @@ pub fn compile(
                             Ok((
                                 variable.into(),
                                 reference_count::clone(
+                                    context,
                                     builder,
                                     &variables[variable],
                                     type_,
-                                    context.types(),
                                 )?,
                             ))
                         })
@@ -48,7 +48,7 @@ pub fn compile(
         }
         mir::ir::Expression::DropVariables(drop) => {
             for (variable, type_) in drop.variables() {
-                reference_count::drop(builder, &variables[variable], type_, context.types())?;
+                reference_count::drop(context, builder, &variables[variable], type_)?;
             }
 
             compile(drop.expression(), variables)?
@@ -81,12 +81,12 @@ pub fn compile(
             let field = record::get_field(context, builder, &record, field.type_(), field.index())?;
 
             let field = reference_count::clone(
+                context,
                 builder,
                 &field,
                 &context.types()[record_type.name()].fields()[field_index],
-                context.types(),
             )?;
-            reference_count::drop(builder, &record, &record_type.into(), context.types())?;
+            reference_count::drop(context, builder, &record, &record_type.into())?;
 
             field
         }
@@ -98,48 +98,74 @@ pub fn compile(
                 .map(|field| Ok((field.index(), compile(field.expression(), variables)?)))
                 .collect::<Result<FnvHashMap<_, _>, CompileError>>()?;
 
-            let compile_unboxed = |builder: &_, clone: bool| -> Result<_, CompileError> {
-                Ok(fmm::build::record(
-                    context.types()[update.type_().name()]
-                        .fields()
-                        .iter()
-                        .enumerate()
-                        .map(|(index, field_type)| -> Result<_, CompileError> {
-                            let field = record::get_field(
+            let compile_unboxed = |builder: &fmm::build::InstructionBuilder,
+                                   cloned: bool|
+             -> Result<_, CompileError> {
+                let record_fields = context.types()[update.type_().name()].fields();
+                let pointer =
+                    builder.allocate_stack(type_::compile_unboxed_record(context, update.type_()));
+
+                builder.store(
+                    if type_::is_record_boxed(context, update.type_()) {
+                        builder.load(fmm::build::bit_cast(
+                            pointer.type_().clone(),
+                            record.clone(),
+                        ))?
+                    } else {
+                        record.clone()
+                    },
+                    pointer.clone(),
+                );
+
+                if cloned {
+                    for (index, field_type) in record_fields.iter().enumerate() {
+                        if fields.contains_key(&index) {
+                            builder.store(
+                                fmm::ir::Undefined::new(type_::compile(context, field_type)),
+                                fmm::build::record_address(pointer.clone(), index)?,
+                            );
+                        }
+                    }
+
+                    builder.store(
+                        reference_count::record::clone_unboxed(
+                            context,
+                            builder,
+                            &builder.load(pointer.clone())?,
+                            update.type_(),
+                        )?,
+                        pointer.clone(),
+                    )
+                }
+
+                for (index, field_type) in record_fields.iter().enumerate() {
+                    if let Some(expression) = fields.get(&index) {
+                        if !cloned {
+                            reference_count::drop(
                                 context,
                                 builder,
-                                &record,
-                                update.type_(),
-                                index,
-                            )?;
-
-                            Ok(if let Some(expression) = fields.get(&index) {
-                                if !clone {
-                                    reference_count::drop(
-                                        builder,
-                                        &field,
-                                        field_type,
-                                        context.types(),
-                                    )?;
-                                }
-
-                                expression.clone()
-                            } else if clone {
-                                reference_count::clone(
+                                &record::get_field(
+                                    context,
                                     builder,
-                                    &field,
-                                    field_type,
-                                    context.types(),
-                                )?
-                            } else {
-                                field
-                            })
-                        })
-                        .collect::<Result<_, _>>()?,
-                ))
+                                    &record,
+                                    update.type_(),
+                                    index,
+                                )?,
+                                field_type,
+                            )?;
+                        }
+
+                        builder.store(
+                            expression.clone(),
+                            fmm::build::record_address(pointer.clone(), index)?,
+                        );
+                    }
+                }
+
+                Ok(builder.load(pointer)?)
             };
 
-            if type_::is_record_boxed(update.type_(), context.types()) {
+            if type_::is_record_boxed(context, update.type_()) {
                 builder.if_(
                     reference_count::pointer::is_unique(builder, &record)?,
                     |builder| -> Result<_, CompileError> {
@@ -157,17 +183,17 @@ pub fn compile(
                         )?;
 
                         reference_count::drop(
+                            context,
                             &builder,
                             &record,
                             &update.type_().clone().into(),
-                            context.types(),
                         )?;
 
                         Ok(builder.branch(updated_record))
                     },
                 )?
             } else {
-                compile_unboxed(builder, false)?.into()
+                compile_unboxed(builder, false)?
             }
         }
         mir::ir::Expression::ByteString(string) => {
@@ -203,8 +229,103 @@ pub fn compile(
                 .into()
             }
         }
+        // TODO Reuse the first string's heap block.
+        mir::ir::Expression::StringConcatenation(concatenation) => {
+            let operands = concatenation
+                .operands()
+                .iter()
+                .map(|operand| compile(operand, variables))
+                .collect::<Result<Vec<_>, _>>()?;
+            let mut size = fmm::build::TypedExpression::from(fmm::ir::Primitive::PointerInteger(0));
+
+            for operand in &operands {
+                size = fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    size,
+                    builder.load(fmm::build::record_address(operand.clone(), 0)?)?,
+                )?
+                .into();
+            }
+
+            let pointer = reference_count::heap::allocate_variadic(
+                builder,
+                fmm::build::arithmetic_operation(
+                    fmm::ir::ArithmeticOperator::Add,
+                    fmm::build::size_of(fmm::types::Primitive::PointerInteger),
+                    size.clone(),
+                )?,
+            )?;
+
+            builder.store(
+                size,
+                fmm::build::bit_cast(
+                    fmm::types::Pointer::new(fmm::types::Primitive::PointerInteger),
+                    pointer.clone(),
+                ),
+            );
+
+            let mut content_pointer = fmm::build::pointer_address(
+                pointer.clone(),
+                fmm::build::size_of(fmm::types::Primitive::PointerInteger),
+            )?;
+
+            for operand in &operands {
+                let size = builder.load(fmm::build::record_address(operand.clone(), 0)?)?;
+
+                builder.memory_copy(
+                    fmm::build::record_address(operand.clone(), 1)?,
+                    content_pointer.clone(),
+                    size.clone(),
+                );
+
+                content_pointer = fmm::build::pointer_address(content_pointer, size)?;
+            }
+
+            for operand in operands {
+                reference_count::drop(context, builder, &operand, &mir::types::Type::ByteString)?;
+            }
+
+            fmm::build::bit_cast(type_::compile_string(), pointer).into()
+        }
         mir::ir::Expression::TryOperation(operation) => {
             compile_try_operation(context, builder, operation, variables)?
+        }
+        mir::ir::Expression::TypeInformationFunction(information) => {
+            let value = compile(information.variant(), variables)?;
+            let function = builder.deconstruct_record(
+                type_information::get_custom_information(
+                    builder,
+                    variant::get_tag(builder, &value)?,
+                )?,
+                information.index(),
+            )?;
+            let function_integer =
+                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, function.clone());
+
+            reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
+
+            builder.if_(
+                fmm::build::comparison_operation(
+                    fmm::ir::ComparisonOperator::Equal,
+                    function_integer.clone(),
+                    fmm::ir::Undefined::new(function_integer.to().clone()),
+                )?,
+                |builder| -> Result<_, CompileError> {
+                    Ok(builder.branch(
+                        variables[&context.type_information().fallback()[information.index()]]
+                            .clone(),
+                    ))
+                },
+                |builder| {
+                    Ok(builder.branch(fmm::build::bit_cast(
+                        type_::compile_function(
+                            context,
+                            &context.type_information().types()[information.index()],
+                        ),
+                        function.clone(),
+                    )))
+                },
+            )?
         }
         mir::ir::Expression::Variable(variable) => variables[variable.name()].clone(),
         mir::ir::Expression::Variant(variant) => variant::upcast(
@@ -280,7 +401,7 @@ fn compile_alternatives(
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
                         result?,
-                        compile_tag_comparison(builder, &argument, type_)?,
+                        compile_tag_comparison(context, builder, &argument, type_)?,
                     )?
                     .into())
                 },
@@ -321,13 +442,14 @@ fn compile_alternatives(
 }
 
 fn compile_tag_comparison(
+    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(pointer::equal(
         builder.deconstruct_record(argument.clone(), 0)?,
-        variant::compile_tag(type_),
+        variant::compile_tag(context, type_),
     )?)
 }
 
@@ -360,7 +482,7 @@ fn compile_let_recursive(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let closure_pointer = reference_count::heap::allocate(
         builder,
-        type_::compile_sized_closure(let_.definition(), context.types()),
+        type_::compile_sized_closure(context, let_.definition()),
     )?;
 
     builder.store(
@@ -378,7 +500,7 @@ fn compile_let_recursive(
 
                 if let_.definition().is_thunk() {
                     fmm::build::TypedExpression::from(fmm::ir::Union::new(
-                        type_::compile_thunk_payload(let_.definition(), context.types()),
+                        type_::compile_thunk_payload(context, let_.definition()),
                         0,
                         environment,
                     ))
@@ -401,8 +523,8 @@ fn compile_let_recursive(
                 let_.definition().name().into(),
                 fmm::build::bit_cast(
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
+                        context,
                         let_.definition().type_(),
-                        context.types(),
                     )),
                     closure_pointer,
                 )
@@ -420,7 +542,7 @@ fn compile_synchronize(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = compile(context, builder, synchronize.expression(), variables)?;
 
-    reference_count::synchronize(builder, &value, synchronize.type_(), context.types())?;
+    reference_count::synchronize(context, builder, &value, synchronize.type_())?;
 
     Ok(value)
 }
@@ -489,7 +611,7 @@ fn compile_record(
     record: &mir::ir::Record,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(if type_::is_record_boxed(record.type_(), context.types()) {
+    Ok(if type_::is_record_boxed(context, record.type_()) {
         compile_boxed_record(
             builder,
             allocate_record_heap(context, builder, record.type_())?,
@@ -505,10 +627,7 @@ fn allocate_record_heap(
     builder: &fmm::build::InstructionBuilder,
     record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    reference_count::heap::allocate(
-        builder,
-        type_::compile_unboxed_record(record_type, context.types()),
-    )
+    reference_count::heap::allocate(builder, type_::compile_unboxed_record(context, record_type))
 }
 
 fn compile_boxed_record(
@@ -554,7 +673,7 @@ fn compile_try_operation(
     let operand = compile(context, builder, operation.operand(), variables)?;
 
     builder.if_(
-        compile_tag_comparison(builder, &operand, operation.type_())?,
+        compile_tag_comparison(context, builder, &operand, operation.type_())?,
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(compile(
                 context,

@@ -1,6 +1,11 @@
+pub mod alpha_conversion;
 pub mod environment_inference;
+mod expression_conversion;
 pub mod free_variable;
 pub mod lambda_lifting;
+pub mod normalization;
+pub mod optimization;
 pub mod reference_count;
 pub mod type_check;
+pub mod type_id;
 pub mod variant_type_collection;

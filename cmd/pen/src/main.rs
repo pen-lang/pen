@@ -37,8 +37,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             clap::Arg::new("verbose")
                 .short('v')
                 .long("verbose")
+                .help("Use verbose output")
                 .global(true)
-                .help("Use verbose output"),
+                .action(clap::ArgAction::SetTrue),
         )
         .subcommand(clap::Command::new("build").about("Build a package").arg(
             build_target_triple_argument().value_parser(clap::builder::PossibleValuesParser::new(
@@ -53,12 +54,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("library")
                         .short('l')
                         .long("library")
-                        .help("Create a library package instead of an application one"),
+                        .help("Create a library package instead of an application one")
+                        .action(clap::ArgAction::SetTrue),
                 )
                 .arg(
                     clap::Arg::new("directory")
-                        .required(true)
-                        .help("Set a package directory"),
+                        .help("Set a package directory")
+                        .required(true),
                 ),
         )
         .subcommand(
@@ -67,14 +69,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::new("check")
                         .long("check")
-                        .takes_value(false)
-                        .help("Check if module files are formatted"),
+                        .help("Check if module files are formatted")
+                        .action(clap::ArgAction::SetTrue),
                 )
                 .arg(
                     clap::Arg::new("stdin")
                         .long("stdin")
-                        .takes_value(false)
-                        .help("Format stdin"),
+                        .help("Format stdin")
+                        .action(clap::ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -83,21 +85,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     clap::Arg::new("name")
                         .long("name")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set a package name"),
                 )
                 .arg(
                     clap::Arg::new("url")
                         .long("url")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set a package URL"),
                 )
                 .arg(
                     clap::Arg::new("description")
                         .long("description")
-                        .takes_value(true)
+                        .num_args(1)
                         .required(true)
                         .help("Set package description"),
                 ),
@@ -157,14 +159,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .short('p')
                         .long("package-directory")
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("output directory")
                         .short('o')
                         .long("output-directory")
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("prelude interface file")
@@ -172,7 +174,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                         .long("prelude-interface-file")
                         .action(clap::ArgAction::Append)
                         .number_of_values(1)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(clap::Arg::new("source file").required(true))
                 .arg(clap::Arg::new("object file").required(true))
@@ -187,9 +189,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("package test information file")
                         .short('o')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
-                .arg(clap::Arg::new("test information file").multiple_values(true)),
+                .arg(clap::Arg::new("test information file").num_args(0..)),
         )
         .subcommand(
             clap::Command::new("link-test")
@@ -199,19 +201,15 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     clap::Arg::new("test file")
                         .short('o')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
                 .arg(
                     clap::Arg::new("package test information file")
                         .short('i')
                         .required(true)
-                        .takes_value(true),
+                        .num_args(1),
                 )
-                .arg(
-                    clap::Arg::new("archive file")
-                        .required(true)
-                        .multiple_values(true),
-                ),
+                .arg(clap::Arg::new("archive file").required(true).num_args(1..)),
         )
         .get_matches()
         .subcommand()
@@ -219,18 +217,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     {
         ("build", matches) => package_builder::build(
             matches.get_one::<String>("target").map(Deref::deref),
-            matches.contains_id("verbose"),
+            matches.get_one("verbose").copied().unwrap_or_default(),
         ),
         ("test", _) => test_runner::run(),
         ("create", matches) => package_creator::create(
             matches.get_one::<String>("directory").unwrap(),
-            matches.contains_id("library"),
+            matches.get_one("library").copied().unwrap_or_default(),
         ),
         ("format", matches) => {
-            if matches.contains_id("stdin") {
+            if matches.get_one("stdin").copied().unwrap_or_default() {
                 module_formatter::format()
             } else {
-                package_formatter::format(matches.contains_id("check"))
+                package_formatter::format(matches.get_one("check").copied().unwrap_or_default())
             }
         }
         ("document", matches) => package_documentation_generator::generate(
@@ -320,10 +318,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn build_target_triple_argument() -> clap::Arg<'static> {
+fn build_target_triple_argument() -> clap::Arg {
     clap::Arg::new("target")
         .short('t')
         .long("target")
-        .takes_value(true)
+        .num_args(1)
         .help("Set a target triple")
 }

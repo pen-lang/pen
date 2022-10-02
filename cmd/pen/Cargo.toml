@@ -1,11 +1,11 @@
 [package]
 name = "pen"
-version = "0.4.10"
+version = "0.4.13"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-clap = { version = "3", features = ["cargo"] }
+clap = { version = "4", features = ["cargo"] }
 app = { path = "../../lib/app" }
 indoc = "1"
 infra = { path = "../../lib/infra" }

@@ -18,6 +18,7 @@ mod list;
 mod none;
 mod number;
 mod string;
+mod type_information;
 
 pub use any::*;
 pub use arc::*;
@@ -31,3 +32,4 @@ pub use none::*;
 pub use number::*;
 pub use pen_ffi_macro::*;
 pub use string::*;
+pub use type_information::*;

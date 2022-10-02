@@ -11,31 +11,33 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: tools/format.sh -- --check
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v1
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/lint.sh -- -D warnings
   unused_dependencies:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v1
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/unused_dependencies.sh
   spell_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: streetsidesoftware/cspell-action@main
         with:
           files: "**/*.{feature,md,pen,rs,sh}"
-  lint_readme:
+  readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: npx markdown-link-check README.md

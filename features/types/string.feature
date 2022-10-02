@@ -31,3 +31,23 @@ Feature: String
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Concatenate strings
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \() string {
+      "foo" + "bar"
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
+  Scenario: Concatenate 3 strings
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \() string {
+      "foo" + "bar" + "baz"
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0

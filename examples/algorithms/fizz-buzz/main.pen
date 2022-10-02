@@ -1,5 +1,4 @@
 import Core'Number
-import Core'String
 import Os'Context { Context }
 import Os'File
 import Os'Process
@@ -26,7 +25,7 @@ fizzBuzz = \(i number) string {
 
 printLines = \(ctx Context, ss [string]) none | error {
   if [s, ...ss] = ss {
-    File'Write(ctx, File'StdOut(), String'Concatenate([string s(), "\n"]))?
+    File'Write(ctx, File'StdOut(), s() + "\n")?
 
     printLines(ctx, ss)
   } else {

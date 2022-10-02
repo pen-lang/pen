@@ -173,6 +173,10 @@ pub fn extract_from_expression(
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => operation
+                .type_()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(operation.position().clone()))?
+                .clone(),
             Operation::Arithmetic(_) => types::Number::new(expression.position().clone()).into(),
             Operation::Boolean(_)
             | Operation::Equality(_)

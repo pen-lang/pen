@@ -1,0 +1,34 @@
+import Test'Assert
+
+import 'direction
+import 'field { Field }
+import 'game { Game }
+import 'render { Render }
+
+RenderGame = \() none | error {
+  Assert'True(
+    Render(game'New(Field{Width: 2, Height: 2}, \() number { 0 }))
+      == [string
+        "o.",
+        "..",
+      ],
+  )
+}
+
+RenderGameWithMovedSnake = \() none | error {
+  g = game'New(Field{Width: 2, Height: 2}, \() number { 0 })
+  g = game'MoveSnake(g, direction'Down{})
+  g = game'Tick(g)
+
+  if g = g as none {
+    Assert'Fail()
+  } else {
+    Assert'True(
+      Render(g)
+        == [string
+          "..",
+          "o.",
+        ],
+    )
+  }
+}

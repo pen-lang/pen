@@ -1,0 +1,96 @@
+import Core'Number
+
+import 'direction { Direction }
+import 'entity { Entity }
+import 'entity'frog { Frog }
+import 'entity'snake { Snake }
+import 'field { Field }
+import 'position { Position }
+
+type Game {
+  snake Snake
+  frog Frog
+  field Field
+  entities {Position: Entity}
+  random \() number
+}
+
+New = \(field Field, random \() number) Game {
+  p = Position{X: Number'Floor(field.Width / 2), Y: Number'Floor(field.Height / 2)}
+  s = snake'New(p)
+  es = {Position: Entity p: s}
+  f = newFrog(es, field, random)
+
+  Game{
+    snake: s,
+    frog: f,
+    field: field,
+    entities: {Position: Entity ...es, frog'Position(f): f},
+    random: random,
+  }
+}
+
+MoveSnake = \(g Game, d Direction) Game {
+  Game{...g, snake: snake'Move(g.snake, d)}
+}
+
+Tick = \(g Game) Game | none {
+  s = snake'Tick(g.snake)
+
+  if snake'IsCrashed(s, g.field) {
+    none
+  } else if snake'Head(s) == frog'Position(g.frog) {
+    s = snake'Grow(s)
+    f = newFrog(g.entities, g.field, g.random)
+
+    Game{
+      ...g,
+      snake: s,
+      frog: f,
+      entities: {Position: Entity
+        ...putSnake({Position: Entity}, s, snake'Positions(s)),
+        frog'Position(f): f,
+      },
+    }
+  } else {
+    Game{
+      ...g,
+      snake: s,
+      entities: {Position: Entity
+        ...putSnake({Position: Entity}, s, snake'Positions(s)),
+        frog'Position(g.frog): g.frog,
+      },
+    }
+  }
+}
+
+putSnake = \(es {Position: Entity}, s Snake, ps [Position]) {Position: Entity} {
+  if [p, ...ps] = ps {
+    putSnake({Position: Entity ...es, p(): s}, s, ps)
+  } else {
+    es
+  }
+}
+
+newFrog = \(es {Position: Entity}, f Field, random \() number) Frog {
+  p = Position{
+    X: Number'Ceil(f.Width * random()),
+    Y: Number'Ceil(f.Height * random()),
+  }
+
+  if _ = es[p] {
+    newFrog(es, f, random)
+  } else {
+    frog'New(p)
+  }
+}
+
+Field = \(g Game) Field { g.field }
+
+EntityAt = \(g Game, p Position) Entity | none {
+  if e = g.entities[p] {
+    e
+  } else {
+    none
+  }
+}

@@ -32,7 +32,7 @@ argument = \(ctx Context) number | error {
 }
 
 print = \(ctx Context, s string) none | error {
-  File'Write(ctx, File'StdOut(), String'Concatenate([string s, "\n"]))?
+  File'Write(ctx, File'StdOut(), s + "\n")?
 
   none
 }

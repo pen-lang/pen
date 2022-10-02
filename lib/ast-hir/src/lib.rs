@@ -35,10 +35,19 @@ pub fn compile(
                     .ok_or_else(|| CompileError::ModuleNotFound(import.module_path().clone()))?
                     .clone(),
                 module_prefix::compile(import),
-                import.unqualified_names().iter().cloned().collect(),
+                import
+                    .unqualified_names()
+                    .iter()
+                    .map(|name| (name.name().into(), name.position().clone()))
+                    .collect(),
             ))
         })
         .collect::<Result<Vec<_>, _>>()?;
+
+    for module in &imported_modules {
+        imported_module::validation::validate(module)?
+    }
+
     let module = module::compile(module)?;
     let module = import::compile(&module, &imported_modules, prelude_module_interfaces);
 

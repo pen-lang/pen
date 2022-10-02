@@ -19,18 +19,18 @@ pub fn compile_clone_function(
         type_::compile_variant_payload(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
+                context,
                 &builder,
                 &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
                 type_,
-                context.types(),
             )?;
 
             Ok(builder.return_(variant::bit_cast_to_opaque_payload(
                 &builder,
-                &if type_::variant::is_payload_boxed(type_, context.types())? {
+                &if type_::variant::is_payload_boxed(context, type_)? {
                     pointer::clone(&builder, &payload)?
                 } else {
-                    expression::clone(&builder, &payload, type_, context.types())?
+                    expression::clone(context, &builder, &payload, type_)?
                 },
             )?))
         },
@@ -51,23 +51,18 @@ pub fn compile_drop_function(
         fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
+                context,
                 &builder,
                 &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
                 type_,
-                context.types(),
             )?;
 
-            if type_::variant::is_payload_boxed(type_, context.types())? {
+            if type_::variant::is_payload_boxed(context, type_)? {
                 pointer::drop(&builder, &payload, |builder| {
-                    expression::drop(
-                        builder,
-                        &builder.load(payload.clone())?,
-                        type_,
-                        context.types(),
-                    )
+                    expression::drop(context, builder, &builder.load(payload.clone())?, type_)
                 })?
             } else {
-                expression::drop(&builder, &payload, type_, context.types())?;
+                expression::drop(context, &builder, &payload, type_)?;
             }
 
             Ok(builder.return_(fmm::ir::void_value()))
@@ -89,23 +84,23 @@ pub fn compile_synchronize_function(
         fmm::types::void_type(),
         |builder| -> Result<_, CompileError> {
             let payload = variant::bit_cast_from_opaque_payload(
+                context,
                 &builder,
                 &fmm::build::variable(ARGUMENT_NAME, type_::compile_variant_payload()),
                 type_,
-                context.types(),
             )?;
 
-            if type_::variant::is_payload_boxed(type_, context.types())? {
+            if type_::variant::is_payload_boxed(context, type_)? {
                 pointer::synchronize(&builder, &payload, |builder| {
                     expression::synchronize(
+                        context,
                         builder,
                         &builder.load(payload.clone())?,
                         type_,
-                        context.types(),
                     )
                 })?;
             } else {
-                expression::synchronize(&builder, &payload, type_, context.types())?;
+                expression::synchronize(context, &builder, &payload, type_)?;
             }
 
             Ok(builder.return_(fmm::ir::void_value()))

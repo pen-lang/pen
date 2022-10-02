@@ -1,5 +1,9 @@
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
   - package-ecosystem: cargo
     directory: /
     schedule:
@@ -14,5 +18,13 @@ updates:
       interval: daily
   - package-ecosystem: bundler
     directory: /
+    schedule:
+      interval: daily
+  - package-ecosystem: npm
+    directory: /doc
+    schedule:
+      interval: daily
+  - package-ecosystem: pip
+    directory: /doc
     schedule:
       interval: daily

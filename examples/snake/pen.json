@@ -1,0 +1,10 @@
+{
+  "type": "application",
+  "dependencies": {
+    "Console": "../console",
+    "Core": "pen:///core",
+    "Os": "pen:///os",
+    "Random": "pen:///random",
+    "Test": "pen:///test"
+  }
+}

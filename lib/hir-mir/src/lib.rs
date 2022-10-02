@@ -5,6 +5,7 @@ mod downcast;
 mod error;
 mod error_type_configuration;
 mod expression;
+mod generic_type_collection;
 mod generic_type_definition;
 mod list_type_configuration;
 mod main_function;
@@ -18,9 +19,10 @@ mod test_function;
 mod test_module_configuration;
 mod transformation;
 mod type_;
+mod type_information;
 
 pub use compile_configuration::CompileConfiguration;
-use context::CompileContext;
+use context::Context;
 pub use error::CompileError;
 pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
@@ -74,19 +76,21 @@ fn compile_module(
     module: &Module,
     configuration: Option<&CompileConfiguration>,
 ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-    let context = CompileContext::new(module, configuration.cloned());
+    let context = Context::new(module, configuration.cloned());
 
     let module = hir::analysis::analyze(context.analysis(), module)?;
-    let module = record_equal_function::transform(&context, &module)?;
-    let module = record_hash_function::transform(&context, &module)?;
-    let module = map_context::module::transform(&context, &module)?;
-    let module = equal_operation::module::transform(&context, &module)?;
-    let module = hash_calculation::module::transform(&context, &module)?;
 
     Ok((
         {
+            let module = record_equal_function::transform(&context, &module)?;
+            let module = record_hash_function::transform(&context, &module)?;
+            let module = map_context::module::transform(&context, &module)?;
+            let module = equal_operation::module::transform(&context, &module)?;
+            let module = hash_calculation::module::transform(&context, &module)?;
             let module = module::compile(&context, &module)?;
+
             mir::analysis::type_check::check(&module)?;
+
             module
         },
         module_interface::compile(&module)?,
@@ -126,18 +130,81 @@ mod tests {
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
-        compile(module, &COMPILE_CONFIGURATION)
+        compile(
+            &module.set_type_definitions(
+                module
+                    .type_definitions()
+                    .iter()
+                    .cloned()
+                    .chain([TypeDefinition::new(
+                        "error",
+                        "error",
+                        vec![types::RecordField::new(
+                            "source",
+                            types::Any::new(Position::fake()),
+                        )],
+                        false,
+                        false,
+                        false,
+                        Position::fake(),
+                    )])
+                    .collect(),
+            ),
+            &COMPILE_CONFIGURATION,
+        )
     }
 
     #[test]
-    fn compile_empty_module() -> Result<(), CompileError> {
-        compile_module(&Module::empty())?;
-
-        Ok(())
+    fn compile_empty_module() {
+        compile_module(&Module::empty()).unwrap();
     }
 
     #[test]
-    fn compile_boolean() -> Result<(), CompileError> {
+    fn compile_addition_operation_with_numbers() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::Number::new(Position::fake()),
+                    AdditionOperation::new(
+                        Some(types::Number::new(Position::fake()).into()),
+                        Number::new(1.0, Position::fake()),
+                        Number::new(2.0, Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_addition_operation_with_strings() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    AdditionOperation::new(
+                        Some(types::ByteString::new(Position::fake()).into()),
+                        ByteString::new("foo", Position::fake()),
+                        ByteString::new("bar", Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_boolean() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -149,13 +216,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_none() -> Result<(), CompileError> {
+    fn compile_none() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -167,13 +233,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_number() -> Result<(), CompileError> {
+    fn compile_number() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -185,13 +250,12 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
-    fn compile_string() -> Result<(), CompileError> {
+    fn compile_string() {
         compile_module(
             &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
@@ -203,9 +267,8 @@ mod tests {
                 ),
                 false,
             )]),
-        )?;
-
-        Ok(())
+        )
+        .unwrap();
     }
 
     #[test]
@@ -284,7 +347,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_compile_duplicate_function_names() {
+    fn compile_duplicate_function_names() {
         let definition = FunctionDefinition::fake(
             "x",
             Lambda::new(
@@ -305,7 +368,7 @@ mod tests {
     }
 
     #[test]
-    fn fail_to_compile_invalid_try_operator_in_function() {
+    fn compile_invalid_try_operator_in_function() {
         assert_eq!(
             compile_module(&Module::empty().set_function_definitions(vec![
                 FunctionDefinition::fake(
@@ -332,5 +395,44 @@ mod tests {
             ])),
             Err(AnalysisError::InvalidTryOperation(Position::fake()).into())
         );
+    }
+
+    #[test]
+    fn compile_function_to_any() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Any::new(Position::fake()),
+                    Variable::new("f", Position::fake()),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_debug() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                        vec![Variable::new("f", Position::fake()).into()],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
     }
 }

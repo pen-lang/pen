@@ -101,8 +101,9 @@ fn compile_import(context: &mut Context, import: &Import) -> Document {
                     import
                         .unqualified_names()
                         .iter()
-                        .cloned()
-                        .intersperse(", ".into()),
+                        .map(|name| name.name())
+                        .sorted()
+                        .intersperse(", "),
                 ),
                 " }".into(),
             ])
@@ -966,13 +967,16 @@ mod tests {
         }
 
         #[test]
-        fn format_unqualified_module_import() {
+        fn format_import_with_unqualified_names() {
             assert_eq!(
                 format_module(&Module::new(
                     vec![Import::new(
                         InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
                         None,
-                        vec!["Baz".into(), "Blah".into()],
+                        vec![
+                            UnqualifiedName::new("Baz", Position::fake()),
+                            UnqualifiedName::new("Blah", Position::fake())
+                        ],
                         Position::fake()
                     )],
                     vec![],
@@ -981,6 +985,28 @@ mod tests {
                     Position::fake()
                 )),
                 "import 'Foo'Bar { Baz, Blah }\n"
+            );
+        }
+
+        #[test]
+        fn format_import_with_unsorted_unqualified_names() {
+            assert_eq!(
+                format_module(&Module::new(
+                    vec![Import::new(
+                        InternalModulePath::new(vec!["Foo".into()]),
+                        None,
+                        vec![
+                            UnqualifiedName::new("B", Position::fake()),
+                            UnqualifiedName::new("A", Position::fake()),
+                        ],
+                        line_position(2),
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )),
+                "import 'Foo { A, B }\n"
             );
         }
 

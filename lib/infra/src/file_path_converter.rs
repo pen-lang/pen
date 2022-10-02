@@ -17,7 +17,7 @@ impl FilePathConverter {
     pub fn convert_to_os_path(&self, path: &app::infra::FilePath) -> PathBuf {
         self.base_directory.join(
             path.components()
-                .map(|component| component.replace('/', "_").replace('\\', "_"))
+                .map(|component| component.replace(['/', '\\'], "_"))
                 .collect::<PathBuf>(),
         )
     }

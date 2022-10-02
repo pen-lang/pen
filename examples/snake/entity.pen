@@ -1,0 +1,4 @@
+import 'entity'frog { Frog }
+import 'entity'snake { Snake }
+
+type Entity = Snake | Frog

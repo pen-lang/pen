@@ -35,8 +35,8 @@ fn compile_non_thunk(
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
-        compile_arguments(definition, context.types()),
-        type_::compile(definition.result_type(), context.types()),
+        compile_arguments(context, definition),
+        type_::compile(context, definition.result_type()),
         |builder| {
             Ok(builder.return_(compile_body(
                 context, &builder, definition, global, variables,
@@ -74,7 +74,7 @@ fn compile_body(
     global: bool,
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let environment_pointer = compile_environment_pointer(definition, context.types())?;
+    let environment_pointer = compile_environment_pointer(context, definition)?;
 
     expression::compile(
         context,
@@ -92,13 +92,13 @@ fn compile_body(
                         Ok((
                             free_variable.name().into(),
                             reference_count::clone(
+                                context,
                                 builder,
                                 &builder.load(fmm::build::record_address(
                                     environment_pointer.clone(),
                                     index,
                                 )?)?,
                                 free_variable.type_(),
-                                context.types(),
                             )?,
                         ))
                     })
@@ -109,7 +109,7 @@ fn compile_body(
             } else {
                 Some((
                     definition.name().into(),
-                    compile_closure_pointer(definition.type_(), context.types())?,
+                    compile_closure_pointer(context, definition.type_())?,
                 ))
             })
             .chain(definition.arguments().iter().map(|argument| {
@@ -117,7 +117,7 @@ fn compile_body(
                     argument.name().into(),
                     fmm::build::variable(
                         argument.name(),
-                        type_::compile(argument.type_(), context.types()),
+                        type_::compile(context, argument.type_()),
                     ),
                 )
             }))
@@ -134,14 +134,14 @@ fn compile_initial_thunk_entry(
     variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = context.module_builder().generate_name();
-    let arguments = compile_arguments(definition, context.types());
+    let arguments = compile_arguments(context, definition);
 
     context.module_builder().define_function(
         &entry_function_name,
         arguments.clone(),
-        type_::compile(definition.result_type(), context.types()),
+        type_::compile(context, definition.result_type()),
         |builder| {
-            let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
+            let closure_pointer = compile_closure_pointer(context, definition.type_())?;
             let entry_function_pointer =
                 closure::get_entry_function_pointer(closure_pointer.clone())?;
             let synchronized =
@@ -155,7 +155,7 @@ fn compile_initial_thunk_entry(
                             entry_function_pointer.clone(),
                             fmm::build::variable(
                                 &entry_function_name,
-                                type_::compile_entry_function(definition.type_(), context.types()),
+                                type_::compile_entry_function(context, definition.type_()),
                             ),
                             lock_entry_function.clone(),
                             fmm::ir::AtomicOrdering::Acquire,
@@ -182,39 +182,34 @@ fn compile_initial_thunk_entry(
             )?;
 
             let closure_pointer = reference_count::clone(
+                context,
                 &builder,
                 &closure_pointer,
                 &definition.type_().clone().into(),
-                context.types(),
             )?;
 
             let value = compile_body(context, &builder, definition, global, variables)?;
 
-            let environment_pointer = compile_environment_pointer(definition, context.types())?;
+            let environment_pointer = compile_environment_pointer(context, definition)?;
 
             // TODO Remove these extra drops of free variables when we move them into
             // function bodies rather than cloning them.
             // See also https://github.com/pen-lang/pen/issues/295.
             for (index, free_variable) in definition.environment().iter().enumerate() {
                 reference_count::drop(
+                    context,
                     &builder,
                     &builder.load(fmm::build::record_address(
                         environment_pointer.clone(),
                         index,
                     )?)?,
                     free_variable.type_(),
-                    context.types(),
                 )?;
             }
 
             builder.store(
-                reference_count::clone(
-                    &builder,
-                    &value,
-                    definition.result_type(),
-                    context.types(),
-                )?,
-                compile_thunk_value_pointer(definition, context.types())?,
+                reference_count::clone(context, &builder, &value, definition.result_type())?,
+                compile_thunk_value_pointer(context, definition)?,
             );
 
             builder.store(
@@ -244,10 +239,10 @@ fn compile_initial_thunk_entry(
             )?;
 
             reference_count::drop(
+                context,
                 &builder,
                 &closure_pointer,
                 &definition.type_().clone().into(),
-                context.types(),
             )?;
 
             Ok(builder.return_(value))
@@ -261,10 +256,10 @@ fn compile_normal_thunk_entry(
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
-        compile_arguments(definition, context.types()),
-        type_::compile(definition.result_type(), context.types()),
+        compile_arguments(context, definition),
+        type_::compile(context, definition.result_type()),
         |builder| {
-            let closure_pointer = compile_closure_pointer(definition.type_(), context.types())?;
+            let closure_pointer = compile_closure_pointer(context, definition.type_())?;
 
             builder.if_(
                 reference_count::pointer::is_synchronized(&builder, &closure_pointer)?,
@@ -280,17 +275,17 @@ fn compile_normal_thunk_entry(
             )?;
 
             let value = reference_count::clone(
+                context,
                 &builder,
-                &builder.load(compile_thunk_value_pointer(definition, context.types())?)?,
+                &builder.load(compile_thunk_value_pointer(context, definition)?)?,
                 definition.result_type(),
-                context.types(),
             )?;
 
             reference_count::drop(
+                context,
                 &builder,
                 &closure_pointer,
                 &definition.type_().clone().into(),
-                context.types(),
             )?;
 
             Ok(builder.return_(value))
@@ -303,12 +298,12 @@ fn compile_locked_thunk_entry(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let arguments = compile_arguments(definition, context.types());
+    let arguments = compile_arguments(context, definition);
 
     context.module_builder().define_function(
         &context.module_builder().generate_name(),
         arguments.clone(),
-        type_::compile(definition.result_type(), context.types()),
+        type_::compile(context, definition.result_type()),
         |builder| {
             builder.call(
                 fmm::build::variable(
@@ -321,8 +316,8 @@ fn compile_locked_thunk_entry(
             Ok(builder.return_(builder.call(
                 builder.atomic_load(
                     closure::get_entry_function_pointer(compile_closure_pointer(
+                        context,
                         definition.type_(),
-                        context.types(),
                     )?)?,
                     fmm::ir::AtomicOrdering::Relaxed,
                 )?,
@@ -334,8 +329,8 @@ fn compile_locked_thunk_entry(
 }
 
 fn compile_arguments(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Vec<fmm::ir::Argument> {
     [fmm::ir::Argument::new(
         CLOSURE_NAME,
@@ -343,7 +338,7 @@ fn compile_arguments(
     )]
     .into_iter()
     .chain(definition.arguments().iter().map(|argument| {
-        fmm::ir::Argument::new(argument.name(), type_::compile(argument.type_(), types))
+        fmm::ir::Argument::new(argument.name(), type_::compile(context, argument.type_()))
     }))
     .collect()
 }
@@ -356,17 +351,17 @@ fn compile_argument_variables(arguments: &[fmm::ir::Argument]) -> Vec<fmm::build
 }
 
 fn compile_thunk_value_pointer(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(fmm::build::union_address(compile_payload_pointer(definition, types)?, 1)?.into())
+    Ok(fmm::build::union_address(compile_payload_pointer(context, definition)?, 1)?.into())
 }
 
 fn compile_environment_pointer(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    let payload_pointer = compile_payload_pointer(definition, types)?;
+    let payload_pointer = compile_payload_pointer(context, definition)?;
 
     Ok(if definition.is_thunk() {
         fmm::build::union_address(payload_pointer, 0)?.into()
@@ -376,21 +371,21 @@ fn compile_environment_pointer(
 }
 
 fn compile_payload_pointer(
+    context: &Context,
     definition: &mir::ir::FunctionDefinition,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     closure::get_payload_pointer(fmm::build::bit_cast(
-        fmm::types::Pointer::new(type_::compile_sized_closure(definition, types)),
+        fmm::types::Pointer::new(type_::compile_sized_closure(context, definition)),
         compile_untyped_closure_pointer(),
     ))
 }
 
 fn compile_closure_pointer(
+    context: &Context,
     function_type: &mir::types::Function,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::build::TypedExpression, fmm::build::BuildError> {
     Ok(fmm::build::bit_cast(
-        fmm::types::Pointer::new(type_::compile_unsized_closure(function_type, types)),
+        fmm::types::Pointer::new(type_::compile_unsized_closure(context, function_type)),
         compile_untyped_closure_pointer(),
     )
     .into())
@@ -404,7 +399,7 @@ fn compile_untyped_closure_pointer() -> fmm::build::TypedExpression {
 mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
-    use mir::test::{FunctionDefinitionFake, ModuleFake};
+    use mir::test::ModuleFake;
 
     #[test]
     fn do_not_overwrite_global_functions_in_variables() {
@@ -413,23 +408,23 @@ mod tests {
 
         compile(
             &context,
-            &mir::ir::FunctionDefinition::fake(
+            &mir::ir::FunctionDefinition::new(
                 "f",
                 vec![],
+                mir::types::Type::Number,
                 mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::fake(
+                    mir::ir::FunctionDefinition::new(
                         "g",
                         vec![],
+                        mir::types::Type::Number,
                         mir::ir::Call::new(
                             function_type.clone(),
                             mir::ir::Variable::new("f"),
                             vec![],
                         ),
-                        mir::types::Type::Number,
                     ),
                     mir::ir::Call::new(function_type.clone(), mir::ir::Variable::new("g"), vec![]),
                 ),
-                mir::types::Type::Number,
             ),
             true,
             &[(
@@ -437,8 +432,8 @@ mod tests {
                 fmm::build::TypedExpression::new(
                     fmm::ir::Variable::new("f"),
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
+                        &context,
                         &function_type,
-                        &Default::default(),
                     )),
                 ),
             )]
@@ -447,7 +442,7 @@ mod tests {
         )
         .unwrap();
 
-        insta::assert_snapshot!(fmm::analysis::format_module(
+        insta::assert_snapshot!(fmm::analysis::format::format_module(
             &context.module_builder().as_module()
         ));
     }

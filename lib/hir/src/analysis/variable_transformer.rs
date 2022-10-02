@@ -287,6 +287,13 @@ fn transform_operation(
     transform: &dyn Fn(&Variable) -> Expression,
 ) -> Operation {
     match operation {
+        Operation::Addition(operation) => AdditionOperation::new(
+            operation.type_().cloned(),
+            transform_expression(operation.lhs(), transform),
+            transform_expression(operation.rhs(), transform),
+            operation.position().clone(),
+        )
+        .into(),
         Operation::Arithmetic(operation) => ArithmeticOperation::new(
             operation.operator(),
             transform_expression(operation.lhs(), transform),

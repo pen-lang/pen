@@ -3,6 +3,10 @@ import Test'Assert
 import 'Number
 import 'String'Utf8
 
+Characters = \() none | error {
+  Assert'True(Utf8'Characters("🗿😄🐶") == [string "🗿", "😄", "🐶"])
+}
+
 Contains = \() none | error {
   Assert'True(Utf8'Contains("tomato", "mat"))
 }

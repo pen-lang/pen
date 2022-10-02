@@ -8,11 +8,12 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@main
+      - uses: actions/checkout@v3
+      - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
-      - run: tools/build_documents.sh
+      - run: tools/document/build.sh
       - uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: doc/book
+          publish_dir: doc/site

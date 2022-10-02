@@ -1,13 +1,16 @@
 use crate::ir::*;
 
+#[derive(Debug)]
 pub struct Context {
     function_definitions: Vec<GlobalFunctionDefinition>,
+    free_variable_index: usize,
 }
 
 impl Context {
     pub fn new() -> Self {
         Self {
             function_definitions: vec![],
+            free_variable_index: 0,
         }
     }
 
@@ -35,6 +38,14 @@ impl Context {
                 ),
                 false,
             ));
+
+        name
+    }
+
+    pub fn rename_free_variable(&mut self, name: &str) -> String {
+        let name = format!("fv:{}:{}", name, self.free_variable_index);
+
+        self.free_variable_index += 1;
 
         name
     }

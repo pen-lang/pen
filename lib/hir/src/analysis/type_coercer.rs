@@ -401,6 +401,13 @@ fn transform_expression(
             .into()
         }
         Expression::Operation(operation) => match operation {
+            Operation::Addition(operation) => AdditionOperation::new(
+                operation.type_().cloned(),
+                transform_expression(operation.lhs(), variables)?,
+                transform_expression(operation.rhs(), variables)?,
+                operation.position().clone(),
+            )
+            .into(),
             Operation::Arithmetic(operation) => ArithmeticOperation::new(
                 operation.operator(),
                 transform_expression(operation.lhs(), variables)?,
@@ -568,7 +575,7 @@ mod tests {
         coerce_types(
             &AnalysisContext::new(
                 type_collector::collect(module),
-                type_collector::collect_records(module),
+                type_collector::collect_record_fields(module),
             ),
             module,
         )

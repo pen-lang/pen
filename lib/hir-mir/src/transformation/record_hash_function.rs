@@ -1,5 +1,5 @@
 use super::hash_calculation;
-use crate::{context::CompileContext, transformation::record_type_information, CompileError};
+use crate::{context::Context, transformation::record_type_information, CompileError};
 use hir::{
     analysis::type_comparability_checker,
     ir::*,
@@ -11,48 +11,83 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-const RECORD_NAME: &str = "$r";
+const RECORD_NAME: &str = "$record";
 
-pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileError> {
     // We cannot define hash functions for record types if hash configuration is not
     // available.
     if context.configuration().is_err() {
         return Ok(module.clone());
     }
 
-    let mut function_definitions = vec![];
-
-    for type_definition in module.type_definitions() {
-        if !type_definition.is_external()
-            && type_comparability_checker::check(
-                &types::Record::new(type_definition.name(), type_definition.position().clone())
-                    .into(),
-                context.types(),
-                context.records(),
-            )?
-            && !type_definition.is_external()
-        {
-            function_definitions.push(compile_hash_function_definition(context, type_definition)?);
-        }
-    }
+    let (external_type_definitions, internal_type_definitions) = module
+        .type_definitions()
+        .iter()
+        .map(|definition| {
+            Ok(
+                if type_comparability_checker::check(
+                    &types::Record::new(definition.name(), definition.position().clone()).into(),
+                    context.types(),
+                    context.records(),
+                )? {
+                    Some(definition)
+                } else {
+                    None
+                },
+            )
+        })
+        .collect::<Result<Vec<_>, CompileError>>()?
+        .into_iter()
+        .flatten()
+        .partition::<Vec<_>, _>(|definition| definition.is_external());
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
         module.type_aliases().to_vec(),
         module.foreign_declarations().to_vec(),
-        module.function_declarations().to_vec(),
+        module
+            .function_declarations()
+            .iter()
+            .cloned()
+            .chain(
+                external_type_definitions
+                    .iter()
+                    .copied()
+                    .map(compile_function_declaration),
+            )
+            .collect(),
         module
             .function_definitions()
             .iter()
             .cloned()
-            .chain(function_definitions)
+            .chain(
+                internal_type_definitions
+                    .iter()
+                    .map(|definition| compile_function_definition(context, definition))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )
             .collect(),
         module.position().clone(),
     ))
 }
 
-fn compile_hash_function_definition(
-    context: &CompileContext,
+fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
+    let position = type_definition.position();
+    let record_type = types::Record::new(type_definition.name(), position.clone());
+
+    FunctionDeclaration::new(
+        record_type_information::compile_hash_function_name(&record_type),
+        types::Function::new(
+            vec![record_type.clone().into()],
+            compile_hash_type(position),
+            position.clone(),
+        ),
+        position.clone(),
+    )
+}
+
+fn compile_function_definition(
+    context: &Context,
     type_definition: &TypeDefinition,
 ) -> Result<FunctionDefinition, CompileError> {
     let position = type_definition.position();
@@ -146,7 +181,7 @@ mod tests {
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            &Context::new(module, COMPILE_CONFIGURATION.clone().into()),
             module,
         )
     }
@@ -211,8 +246,8 @@ mod tests {
     }
 
     #[test]
-    fn compile_nothing_for_external_type_definition() {
-        let module = Module::empty().set_type_definitions(vec![TypeDefinition::new(
+    fn compile_hash_function_declaration_for_external_type_definition() {
+        let type_definition = TypeDefinition::new(
             "foo",
             "foo",
             vec![
@@ -223,8 +258,21 @@ mod tests {
             false,
             true,
             Position::fake(),
-        )]);
+        );
 
-        assert_eq!(transform_module(&module), Ok(module));
+        assert_eq!(
+            transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
+            Ok(Module::empty()
+                .set_type_definitions(vec![type_definition.clone()])
+                .set_function_declarations(vec![FunctionDeclaration::new(
+                    "foo.$hash",
+                    types::Function::new(
+                        vec![types::Record::new(type_definition.name(), Position::fake()).into()],
+                        HASH_TYPE.clone(),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )]))
+        );
     }
 }
