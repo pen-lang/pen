@@ -388,6 +388,30 @@ hamtIndex = \(ctx MapContext, key any, layer number, level number) number {
   _pen_prelude_hash_to_index(ctx.hashKey(key), layer, level)
 }
 
+DebugMap = \(keyType string, valueType string, m Map, debug \(any) string) string {
+  "{"
+    + keyType
+    + ": "
+    + valueType
+    + if i = IterateMap(m) as MapIterator {
+      " " + debugIterator(i, debug)
+    } else {
+      ""
+    }
+    + "}"
+}
+
+debugIterator = \(i MapIterator, debug \(any) string) string {
+  debug(i.key)
+    + ": "
+    + debug(i.value)
+    + if i = i.rest() as MapIterator {
+      ", " + debugIterator(i, debug)
+    } else {
+      ""
+    }
+}
+
 getEntry = \(hamt hamt, index number) entry {
   if index == 1 {
     hamt.entry1
