@@ -125,3 +125,23 @@ nodeSize = \(n node | none, s number) number {
     s
   }
 }
+
+DebugList = \(elementType string, l List, debug \(any) string) string {
+  "["
+    + elementType
+    + if n = l.node() as node {
+      " " + debugNode(n, debug)
+    } else {
+      ""
+    }
+    + "]"
+}
+
+debugNode = \(n node, debug \(any) string) string {
+  debug(n.first())
+    + if n = n.rest() as node {
+      ", " + debugNode(n, debug)
+    } else {
+      ""
+    }
+}

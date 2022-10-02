@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/map_literal.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapEntry ::\n                new(None :: new(Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into()],\n            Position::fake()))"
+expression: "transform(&Context::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapEntry ::\n                new(None :: new(Position :: fake()), None ::\n                new(Position :: fake()), Position :: fake()).into()],\n            Position::fake()))"
 ---
 Ok(
     Let(
@@ -86,7 +86,7 @@ Ok(
                                     ),
                                     Reference(
                                         Reference {
-                                            name: "GenericMap",
+                                            name: "genericMap",
                                             position: Position {
                                                 path: "",
                                                 line_number: 1,
@@ -118,7 +118,7 @@ Ok(
                                 ],
                                 result: Reference(
                                     Reference {
-                                        name: "GenericMap",
+                                        name: "genericMap",
                                         position: Position {
                                             path: "",
                                             line_number: 1,
@@ -167,7 +167,7 @@ Ok(
                                             arguments: [],
                                             result: Reference(
                                                 Reference {
-                                                    name: "GenericMap",
+                                                    name: "genericMap",
                                                     position: Position {
                                                         path: "",
                                                         line_number: 1,

@@ -1,7 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/if_list.rs
-assertion_line: 129
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n          &IfList::new(Some(types::Number::new(Position::fake()).into()),\n                       Variable::new(\"xs\", Position::fake()), \"x\", \"xs\",\n                       None::new(Position::fake()),\n                       None::new(Position::fake()), Position::fake()))"
+expression: "transform(&Context::dummy(Default::default(), Default::default()),\n    &IfList::new(Some(types::Number::new(Position::fake()).into()),\n            Variable::new(\"xs\", Position::fake()), \"x\", \"xs\",\n            None::new(Position::fake()), None::new(Position::fake()),\n            Position::fake()))"
 ---
 Ok(
     IfType(
@@ -15,7 +14,7 @@ Ok(
                                 arguments: [
                                     Reference(
                                         Reference {
-                                            name: "GenericList",
+                                            name: "genericList",
                                             position: Position {
                                                 path: "",
                                                 line_number: 1,
@@ -29,7 +28,7 @@ Ok(
                                     Union {
                                         lhs: Reference(
                                             Reference {
-                                                name: "FirstRest",
+                                                name: "firstRest",
                                                 position: Position {
                                                     path: "",
                                                     line_number: 1,
@@ -101,7 +100,7 @@ Ok(
                 IfTypeBranch {
                     type_: Reference(
                         Reference {
-                            name: "FirstRest",
+                            name: "firstRest",
                             position: Position {
                                 path: "",
                                 line_number: 1,
@@ -174,7 +173,7 @@ Ok(
                                                         arguments: [
                                                             Reference(
                                                                 Reference {
-                                                                    name: "FirstRest",
+                                                                    name: "firstRest",
                                                                     position: Position {
                                                                         path: "",
                                                                         line_number: 1,
@@ -365,7 +364,7 @@ Ok(
                                     type_: Some(
                                         Reference(
                                             Reference {
-                                                name: "GenericList",
+                                                name: "genericList",
                                                 position: Position {
                                                     path: "",
                                                     line_number: 1,
@@ -383,7 +382,7 @@ Ok(
                                                         arguments: [
                                                             Reference(
                                                                 Reference {
-                                                                    name: "FirstRest",
+                                                                    name: "firstRest",
                                                                     position: Position {
                                                                         path: "",
                                                                         line_number: 1,
@@ -395,7 +394,7 @@ Ok(
                                                         ],
                                                         result: Reference(
                                                             Reference {
-                                                                name: "GenericList",
+                                                                name: "genericList",
                                                                 position: Position {
                                                                     path: "",
                                                                     line_number: 1,

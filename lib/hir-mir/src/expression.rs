@@ -8,6 +8,7 @@ use super::{
     },
     type_, CompileError,
 };
+use crate::concrete_type;
 use fnv::FnvHashMap;
 use hir::{
     analysis::{
@@ -216,26 +217,18 @@ pub fn compile(
                 | Type::String(_) => {
                     mir::ir::Variant::new(type_::compile(context, &from)?, argument).into()
                 }
-                Type::Function(function_type) => {
-                    let concrete_type =
-                        type_::compile_concrete_function(function_type, context.types())?;
-
-                    mir::ir::Variant::new(
-                        concrete_type.clone(),
-                        mir::ir::Record::new(concrete_type, vec![argument]),
-                    )
-                    .into()
-                }
+                Type::Function(function_type) => mir::ir::Variant::new(
+                    type_::compile_concrete_function(function_type, context.types())?,
+                    concrete_type::compile(context, argument, &from)?,
+                )
+                .into(),
                 Type::List(list_type) => {
                     if to.is_list() {
                         argument
                     } else {
-                        let concrete_type =
-                            type_::compile_concrete_list(list_type, context.types())?;
-
                         mir::ir::Variant::new(
-                            concrete_type.clone(),
-                            mir::ir::Record::new(concrete_type, vec![argument]),
+                            type_::compile_concrete_list(list_type, context.types())?,
+                            concrete_type::compile(context, argument, &from)?,
                         )
                         .into()
                     }
@@ -244,11 +237,9 @@ pub fn compile(
                     if to.is_map() {
                         argument
                     } else {
-                        let concrete_type = type_::compile_concrete_map(map_type, context.types())?;
-
                         mir::ir::Variant::new(
-                            concrete_type.clone(),
-                            mir::ir::Record::new(concrete_type, vec![argument]),
+                            type_::compile_concrete_map(map_type, context.types())?,
+                            concrete_type::compile(context, argument, &from)?,
                         )
                         .into()
                     }

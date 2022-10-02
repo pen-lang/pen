@@ -15,7 +15,7 @@ pub fn compile(context: &Context, type_: &Type) -> Result<mir::types::Type, Comp
             Type::Map(_) => compile_map(context)?.into(),
             Type::None(_) => mir::types::Type::None,
             Type::Number(_) => mir::types::Type::Number,
-            Type::Record(record) => mir::types::Record::new(record.name()).into(),
+            Type::Record(record) => compile_record(&record).into(),
             Type::String(_) => mir::types::Type::ByteString,
             Type::Any(_) | Type::Union(_) => mir::types::Type::Variant,
             Type::Reference(_) => unreachable!(),
@@ -60,6 +60,10 @@ pub fn compile_function(
             .collect::<Result<_, _>>()?,
         compile(function.result())?,
     ))
+}
+
+pub fn compile_record(record: &types::Record) -> mir::types::Record {
+    mir::types::Record::new(record.name())
 }
 
 pub fn compile_concrete_function(

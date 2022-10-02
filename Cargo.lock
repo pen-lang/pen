@@ -566,6 +566,7 @@ dependencies = [
  "hir",
  "insta",
  "interface",
+ "itertools",
  "mir",
  "once_cell",
  "position",

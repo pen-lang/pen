@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/map_literal.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()), vec![], Position::fake()))"
+expression: "transform(&Context::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()), vec![], Position::fake()))"
 ---
 Ok(
     Let(
@@ -75,7 +75,7 @@ Ok(
                                 arguments: [],
                                 result: Reference(
                                     Reference {
-                                        name: "GenericMap",
+                                        name: "genericMap",
                                         position: Position {
                                             path: "",
                                             line_number: 1,
