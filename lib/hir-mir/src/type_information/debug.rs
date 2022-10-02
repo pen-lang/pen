@@ -113,7 +113,7 @@ pub(super) fn compile_function_definition(
                     ],
                     mir::types::Type::ByteString,
                 ),
-                mir::ir::Variable::new(&context.configuration()?.list_type.debug_function_name),
+                mir::ir::Variable::new(&context.configuration()?.map_type.debug_function_name),
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
                     mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
