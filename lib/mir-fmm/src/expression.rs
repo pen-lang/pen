@@ -242,7 +242,7 @@ pub fn compile(
                 size = fmm::build::arithmetic_operation(
                     fmm::ir::ArithmeticOperator::Add,
                     size,
-                    builder.load(fmm::build::record_address(operand.clone(), 0)?)?,
+                    compile_string_size(&builder, operand)?,
                 )?
                 .into();
             }
@@ -270,7 +270,7 @@ pub fn compile(
             )?;
 
             for operand in &operands {
-                let size = builder.load(fmm::build::record_address(operand.clone(), 0)?)?;
+                let size = compile_string_size(&builder, operand)?;
 
                 builder.memory_copy(
                     fmm::build::record_address(operand.clone(), 1)?,
@@ -690,5 +690,24 @@ fn compile_try_operation(
             )?))
         },
         |builder| Ok(builder.branch(operand.clone())),
+    )
+}
+
+fn compile_string_size(
+    builder: &fmm::build::InstructionBuilder,
+    operand: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(
+        builder.if_::<CompileError>(
+            fmm::build::comparison_operation(
+                fmm::ir::ComparisonOperator::Equal,
+                fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, operand.clone()),
+                fmm::ir::Primitive::PointerInteger(0),
+            )?,
+            |builder| Ok(builder.branch(fmm::ir::Primitive::PointerInteger(0))),
+            |builder| {
+                Ok(builder.branch(builder.load(fmm::build::record_address(operand.clone(), 0)?)?))
+            },
+        )?,
     )
 }
