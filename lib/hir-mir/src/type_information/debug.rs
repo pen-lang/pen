@@ -146,7 +146,7 @@ pub(super) fn compile_function_definition(
                                 })
                                 .collect::<Result<Vec<_>, CompileError>>()?
                                 .into_iter()
-                                .intersperse(vec![mir::ir::ByteString::new(",").into()])
+                                .intersperse(vec![mir::ir::ByteString::new(", ").into()])
                                 .flatten(),
                         )
                         .chain([mir::ir::ByteString::new("}").into()])
