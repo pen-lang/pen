@@ -1,6 +1,6 @@
 use crate::{concrete_type, context::Context, type_, CompileError};
 use hir::{
-    analysis::{record_field_resolver, type_id_calculator},
+    analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
 };
 use itertools::Itertools;
@@ -83,11 +83,45 @@ pub(super) fn compile_function_definition(
         Type::Function(_) => Some(compile_function_definition(
             mir::ir::ByteString::new("<function>").into(),
         )?),
-        Type::List(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("<list>").into(),
+        Type::List(list_type) => Some(compile_function_definition(
+            mir::ir::Call::new(
+                mir::types::Function::new(
+                    vec![
+                        mir::types::Type::ByteString,
+                        type_::compile_list(context)?.into(),
+                        compile_function_type().into(),
+                    ],
+                    mir::types::Type::ByteString,
+                ),
+                mir::ir::Variable::new(&context.configuration()?.list_type.debug_function_name),
+                vec![
+                    mir::ir::ByteString::new(type_formatter::format(list_type.element())).into(),
+                    compile_unboxed_concrete(context, argument, type_)?,
+                    compile_debug_closure(),
+                ],
+            )
+            .into(),
         )?),
-        Type::Map(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("<map>").into(),
+        Type::Map(map_type) => Some(compile_function_definition(
+            mir::ir::Call::new(
+                mir::types::Function::new(
+                    vec![
+                        mir::types::Type::ByteString,
+                        mir::types::Type::ByteString,
+                        type_::compile_map(context)?.into(),
+                        compile_function_type().into(),
+                    ],
+                    mir::types::Type::ByteString,
+                ),
+                mir::ir::Variable::new(&context.configuration()?.list_type.debug_function_name),
+                vec![
+                    mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
+                    mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
+                    compile_unboxed_concrete(context, argument, type_)?,
+                    compile_debug_closure(),
+                ],
+            )
+            .into(),
         )?),
         Type::None(_) => Some(compile_function_definition(
             mir::ir::ByteString::new("none").into(),
@@ -201,6 +235,39 @@ fn compile_function_definition_for_concrete_type(
             None,
         ),
     ))
+}
+
+fn compile_unboxed_concrete(
+    context: &Context,
+    expression: impl Into<mir::ir::Expression>,
+    type_: &Type,
+) -> Result<mir::ir::Expression, CompileError> {
+    Ok(mir::ir::RecordField::new(
+        type_::compile_concrete(context, type_)?
+            .into_record()
+            .unwrap(),
+        0,
+        expression.into(),
+    )
+    .into())
+}
+
+fn compile_debug_closure() -> mir::ir::Expression {
+    const CLOSURE_NAME: &str = "hir:debug:closure";
+
+    mir::ir::LetRecursive::new(
+        mir::ir::FunctionDefinition::new(
+            CLOSURE_NAME,
+            vec![mir::ir::Argument::new(
+                ARGUMENT_NAME,
+                mir::types::Type::Variant,
+            )],
+            mir::types::Type::ByteString,
+            compile_call(mir::ir::Variable::new(ARGUMENT_NAME)),
+        ),
+        mir::ir::Variable::new(CLOSURE_NAME),
+    )
+    .into()
 }
 
 #[cfg(test)]
