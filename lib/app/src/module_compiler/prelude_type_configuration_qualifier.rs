@@ -3,7 +3,6 @@ pub fn qualify(
     prelude_prefix: &str,
 ) -> hir_mir::CompileConfiguration {
     hir_mir::CompileConfiguration {
-        error_type: qualify_error_type_configuration(&configuration.error_type, prelude_prefix),
         list_type: qualify_list_type_configuration(&configuration.list_type, prelude_prefix),
         map_type: qualify_map_type_configuration(&configuration.map_type, prelude_prefix),
         number_type: qualify_number_type_configuration(&configuration.number_type, prelude_prefix),
@@ -43,17 +42,6 @@ fn qualify_string_type_configuration(
 ) -> hir_mir::StringTypeConfiguration {
     hir_mir::StringTypeConfiguration {
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
-    }
-}
-
-fn qualify_error_type_configuration(
-    configuration: &hir_mir::ErrorTypeConfiguration,
-    prelude_prefix: &str,
-) -> hir_mir::ErrorTypeConfiguration {
-    hir_mir::ErrorTypeConfiguration {
-        error_type_name: prelude_prefix.to_owned() + &configuration.error_type_name,
-        error_function_name: prelude_prefix.to_owned() + &configuration.error_function_name,
-        source_function_name: prelude_prefix.to_owned() + &configuration.source_function_name,
     }
 }
 
