@@ -1,5 +1,4 @@
 use crate::error_type;
-
 use super::{context::Context, CompileError};
 use fnv::FnvHashMap;
 use hir::{
