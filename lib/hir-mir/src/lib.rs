@@ -4,7 +4,7 @@ mod concrete_type;
 mod context;
 mod downcast;
 mod error;
-mod error_type_configuration;
+mod error_type;
 mod expression;
 mod generic_type_collection;
 mod generic_type_definition;
@@ -26,7 +26,6 @@ mod type_information;
 pub use compile_configuration::CompileConfiguration;
 use context::Context;
 pub use error::CompileError;
-pub use error_type_configuration::ErrorTypeConfiguration;
 use hir::ir::*;
 pub use list_type_configuration::ListTypeConfiguration;
 pub use main_module_configuration::*;
@@ -159,25 +158,13 @@ mod tests {
                         .type_definitions()
                         .iter()
                         .cloned()
-                        .chain([
-                            TypeDefinition::fake(
-                                &COMPILE_CONFIGURATION.error_type.error_type_name,
-                                vec![types::RecordField::new(
-                                    "source",
-                                    types::Any::new(Position::fake()),
-                                )],
-                                false,
-                                false,
-                                true,
-                            ),
-                            TypeDefinition::fake(
-                                &COMPILE_CONFIGURATION.map_type.context_type_name,
-                                vec![],
-                                false,
-                                false,
-                                true,
-                            ),
-                        ])
+                        .chain([TypeDefinition::fake(
+                            &COMPILE_CONFIGURATION.map_type.context_type_name,
+                            vec![],
+                            false,
+                            false,
+                            true,
+                        )])
                         .collect(),
                 )
                 .set_function_declarations(

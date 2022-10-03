@@ -1,5 +1,5 @@
 use super::{context::Context, expression, generic_type_definition, type_, CompileError};
-use crate::{runtime_function_declaration, type_information};
+use crate::{error_type, runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -14,6 +14,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(generic_type_definition::compile(context, module)?)
+            .chain([error_type::compile_type_definition()])
             .collect(),
         module
             .foreign_declarations()
@@ -180,6 +181,7 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Source
                 )])
+                .set_type_definitions(vec![error_type::compile_type_definition()])
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
@@ -226,6 +228,7 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
+                .set_type_definitions(vec![error_type::compile_type_definition()])
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
