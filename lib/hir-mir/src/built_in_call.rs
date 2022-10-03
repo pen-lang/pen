@@ -44,7 +44,7 @@ pub fn compile(
             vec![type_information::debug::compile_call(arguments[0].clone())],
         )
         .into(),
-        BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()).into(),
+        BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
@@ -90,7 +90,7 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunctionName::Source => error_type::compile_source(arguments[0].clone()).into(),
+        BuiltInFunctionName::Source => error_type::compile_source(arguments[0].clone()),
         BuiltInFunctionName::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";
