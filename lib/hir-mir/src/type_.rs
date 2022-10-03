@@ -1,5 +1,5 @@
-use crate::error_type;
 use super::{context::Context, CompileError};
+use crate::error_type;
 use fnv::FnvHashMap;
 use hir::{
     analysis::{type_canonicalizer, type_id_calculator},
