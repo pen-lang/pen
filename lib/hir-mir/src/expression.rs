@@ -1299,12 +1299,14 @@ mod tests {
     }
 
     mod try_operation {
+        use crate::error_type;
+
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
         fn compile_with_none() {
-            let error_type = mir::types::Record::new("error");
+            let error_type = error_type::compile_type();
 
             assert_eq!(
                 compile(
@@ -1336,7 +1338,7 @@ mod tests {
 
         #[test]
         fn compile_with_union() {
-            let error_type = mir::types::Record::new("error");
+            let error_type = error_type::compile_type();
 
             assert_eq!(
                 compile(

@@ -1,4 +1,4 @@
-use crate::{concrete_type, context::Context, type_, CompileError};
+use crate::{concrete_type, context::Context, error_type, type_, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
@@ -70,11 +70,7 @@ pub(super) fn compile_function_definition(
         Type::Error(_) => Some(compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("error(").into(),
-                compile_call(mir::ir::RecordField::new(
-                    type_::compile_error(context)?,
-                    0,
-                    argument,
-                )),
+                compile_call(error_type::compile_source(argument.into())),
                 mir::ir::ByteString::new(")").into(),
             ])
             .into(),

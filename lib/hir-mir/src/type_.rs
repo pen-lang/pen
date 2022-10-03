@@ -1,3 +1,5 @@
+use crate::error_type;
+
 use super::{context::Context, CompileError};
 use fnv::FnvHashMap;
 use hir::{
@@ -9,7 +11,7 @@ pub fn compile(context: &Context, type_: &Type) -> Result<mir::types::Type, Comp
     Ok(
         match type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_) => mir::types::Type::Boolean,
-            Type::Error(_) => compile_error(context)?.into(),
+            Type::Error(_) => compile_error().into(),
             Type::Function(function) => compile_function(context, &function)?.into(),
             Type::List(_) => compile_list(context)?.into(),
             Type::Map(_) => compile_map(context)?.into(),
@@ -23,10 +25,8 @@ pub fn compile(context: &Context, type_: &Type) -> Result<mir::types::Type, Comp
     )
 }
 
-pub fn compile_error(context: &Context) -> Result<mir::types::Record, CompileError> {
-    Ok(mir::types::Record::new(
-        &context.configuration()?.error_type.error_type_name,
-    ))
+pub fn compile_error() -> mir::types::Record {
+    error_type::compile_type()
 }
 
 pub fn compile_concrete(context: &Context, type_: &Type) -> Result<mir::types::Type, CompileError> {

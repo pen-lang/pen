@@ -166,7 +166,7 @@ mod tests {
                     .unwrap(),
             ),
             (
-                mir::types::Record::new("error").into(),
+                mir::types::Record::new("hir:error").into(),
                 debug::compile_function_name(context, &types::Error::new(Position::fake()).into())
                     .unwrap(),
             ),

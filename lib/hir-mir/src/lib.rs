@@ -4,6 +4,7 @@ mod concrete_type;
 mod context;
 mod downcast;
 mod error;
+mod error_type;
 mod error_type_configuration;
 mod expression;
 mod generic_type_collection;
