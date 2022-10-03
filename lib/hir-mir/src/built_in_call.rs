@@ -226,10 +226,10 @@ mod tests {
                         vec![mir::types::Type::Variant],
                         mir::types::Type::ByteString
                     ),
-                    mir::ir::TypeInformationFunction::new(
-                        type_information::DEBUG_FUNCTION_INDEX,
-                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
-                    ),
+                    mir::ir::TypeInformationFunction::new(mir::ir::Variant::new(
+                        mir::types::Type::None,
+                        mir::ir::Expression::None
+                    )),
                     vec![
                         mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
                             .into()
