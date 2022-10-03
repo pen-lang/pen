@@ -121,7 +121,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use crate::{compile_configuration::COMPILE_CONFIGURATION, error_type};
     use fnv::FnvHashMap;
     use hir::test::{FunctionDefinitionFake, ModuleFake};
     use position::{test::PositionFake, Position};
@@ -166,7 +166,7 @@ mod tests {
                     .unwrap(),
             ),
             (
-                mir::types::Record::new("error").into(),
+                error_type::compile_type().into(),
                 debug::compile_function_name(context, &types::Error::new(Position::fake()).into())
                     .unwrap(),
             ),

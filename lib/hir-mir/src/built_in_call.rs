@@ -1,6 +1,6 @@
 use crate::{
     context::Context,
-    downcast, expression,
+    downcast, error_type, expression,
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
@@ -44,11 +44,7 @@ pub fn compile(
             vec![type_information::debug::compile_call(arguments[0].clone())],
         )
         .into(),
-        BuiltInFunctionName::Error => compile_call(
-            mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
-            arguments,
-        )?
-        .into(),
+        BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
@@ -94,11 +90,7 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunctionName::Source => compile_call(
-            mir::ir::Variable::new(&context.configuration()?.error_type.source_function_name),
-            arguments,
-        )?
-        .into(),
+        BuiltInFunctionName::Source => error_type::compile_source(arguments[0].clone()),
         BuiltInFunctionName::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";

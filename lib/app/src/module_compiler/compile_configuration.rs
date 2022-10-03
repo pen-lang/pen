@@ -13,4 +13,3 @@ pub type MapTypeConfiguration = hir_mir::MapTypeConfiguration;
 pub type MapTypeIterationConfiguration = hir_mir::MapTypeIterationConfiguration;
 pub type NumberTypeConfiguration = hir_mir::NumberTypeConfiguration;
 pub type StringTypeConfiguration = hir_mir::StringTypeConfiguration;
-pub type ErrorTypeConfiguration = hir_mir::ErrorTypeConfiguration;
