@@ -1677,7 +1677,7 @@ main = \(_ context) none {
 }</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> I successfully run <code>./app</code></p>
-<p><em>And</em> the stderr from "./app" should contain exactly "<output>"</p>
+<p><em>And</em> the stderr from "./app" should contain exactly '<output>'</p>
 <p><em>Then</em> I successfully run <code>check_memory_leak.sh ./app</code>.</p>
 <h3 id="examples">Examples</h3>
 <table>
@@ -1702,7 +1702,7 @@ main = \(_ context) none {
 </tr>
 <tr>
 <td>"foo"</td>
-<td>\"foo\"</td>
+<td>"foo"</td>
 </tr>
 <tr>
 <td>42</td>
@@ -1718,7 +1718,7 @@ main = \(_ context) none {
 </tr>
 <tr>
 <td>baz{x: 42, y: "foo"}</td>
-<td>main.pen:baz{x: 42, y: \"foo\"}</td>
+<td>main.pen:baz{x: 42, y: "foo"}</td>
 </tr>
 <tr>
 <td>[number 42, 42]</td>
@@ -1726,7 +1726,15 @@ main = \(_ context) none {
 </tr>
 <tr>
 <td>{string: number "foo": 1, "bar": 2}</td>
-<td>{string: number \"bar\": 2, \"foo\": 1}</td>
+<td>{string: number "bar": 2, "foo": 1}</td>
+</tr>
+<tr>
+<td>error("foo")</td>
+<td>error("foo")</td>
+</tr>
+<tr>
+<td>(x none) none { x }</td>
+<td><function></td>
 </tr>
 </tbody>
 </table>
