@@ -3,11 +3,8 @@ use crate::{box_, context::Context, type_, CompileError};
 const VARIANT_TAG_FIELD_INDEX: usize = 0;
 const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
 
-pub fn compile_tag(context: &Context, type_: &mir::types::Type) -> fmm::build::TypedExpression {
-    fmm::build::variable(
-        type_::compile_id(type_),
-        type_::compile_variant_tag(context),
-    )
+pub fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
+    fmm::build::variable(type_::compile_id(type_), type_::compile_variant_tag())
 }
 
 pub fn get_tag(
@@ -55,7 +52,7 @@ pub fn upcast(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(fmm::build::record(vec![
-        compile_tag(context, type_),
+        compile_tag(type_),
         bit_cast_to_opaque_payload(builder, &box_payload(context, builder, value, type_)?)?,
     ])
     .into())

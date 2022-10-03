@@ -292,36 +292,29 @@ pub fn compile(
         }
         mir::ir::Expression::TypeInformationFunction(information) => {
             let value = compile(information.variant(), variables)?;
-            let function = builder.deconstruct_record(
-                type_information::get_custom_information(
-                    builder,
-                    variant::get_tag(builder, &value)?,
-                )?,
-                information.index(),
+            let function = type_information::get_custom_information(
+                builder,
+                variant::get_tag(builder, &value)?,
             )?;
             let function_integer =
                 fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, function.clone());
 
             reference_count::drop(context, builder, &value, &mir::types::Type::Variant)?;
 
-            builder.if_(
+            builder.if_::<CompileError>(
                 fmm::build::comparison_operation(
                     fmm::ir::ComparisonOperator::Equal,
                     function_integer.clone(),
                     fmm::ir::Undefined::new(function_integer.to().clone()),
                 )?,
-                |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(
-                        variables[&context.type_information().fallback()[information.index()]]
-                            .clone(),
-                    ))
+                |builder| {
+                    Ok(builder.branch(variables[context.type_information().fallback()].clone()))
                 },
                 |builder| {
                     Ok(builder.branch(fmm::build::bit_cast(
-                        type_::compile_function(
-                            context,
-                            &context.type_information().types()[information.index()],
-                        ),
+                        variables[context.type_information().fallback()]
+                            .type_()
+                            .clone(),
                         function.clone(),
                     )))
                 },
@@ -401,7 +394,7 @@ fn compile_alternatives(
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
                         result?,
-                        compile_tag_comparison(context, builder, &argument, type_)?,
+                        compile_tag_comparison(builder, &argument, type_)?,
                     )?
                     .into())
                 },
@@ -442,14 +435,13 @@ fn compile_alternatives(
 }
 
 fn compile_tag_comparison(
-    context: &Context,
     builder: &fmm::build::InstructionBuilder,
     argument: &fmm::build::TypedExpression,
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(pointer::equal(
         builder.deconstruct_record(argument.clone(), 0)?,
-        variant::compile_tag(context, type_),
+        variant::compile_tag(type_),
     )?)
 }
 
@@ -673,7 +665,7 @@ fn compile_try_operation(
     let operand = compile(context, builder, operation.operand(), variables)?;
 
     builder.if_(
-        compile_tag_comparison(context, builder, &operand, operation.type_())?,
+        compile_tag_comparison(builder, &operand, operation.type_())?,
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(compile(
                 context,
