@@ -1,5 +1,5 @@
 use super::{context::Context, expression, generic_type_definition, type_, CompileError};
-use crate::{error_type, runtime_function_declaration, type_information};
+use crate::{error_type, reflection, runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, CompileError> {
@@ -69,6 +69,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .collect::<Result<Vec<_>, CompileError>>()?
             .into_iter()
             .chain(type_information_function_definitions)
+            .chain(reflection::compile_function_definitions())
             .collect(),
         type_information::compile(context, module)?,
     ))
