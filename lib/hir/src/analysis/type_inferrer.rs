@@ -561,6 +561,11 @@ fn infer_built_in_call(
                         position.clone(),
                     )
                 }
+                BuiltInFunctionName::ReflectDebug => types::Function::new(
+                    vec![types::Any::new(position.clone()).into()],
+                    types::ByteString::new(position.clone()),
+                    position.clone(),
+                ),
                 BuiltInFunctionName::Size => types::Function::new(
                     argument_types,
                     types::Number::new(position.clone()),
@@ -1905,6 +1910,59 @@ mod tests {
                                 ),
                                 BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
+        fn infer_reflect_debug() {
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::ByteString::new(Position::fake()),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(
+                                    BuiltInFunctionName::ReflectDebug,
+                                    Position::fake()
+                                ),
+                                vec![None::new(Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            types::ByteString::new(Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![types::Any::new(Position::fake()).into()],
+                                        types::ByteString::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(
+                                    BuiltInFunctionName::ReflectDebug,
+                                    Position::fake()
+                                ),
+                                vec![None::new(Position::fake()).into()],
                                 Position::fake()
                             ),
                             Position::fake(),

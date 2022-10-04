@@ -531,7 +531,10 @@ fn check_built_in_call(
                 return Err(AnalysisError::WrongArgumentCount(position.clone()));
             }
         }
-        BuiltInFunctionName::Debug | BuiltInFunctionName::Error | BuiltInFunctionName::Source => {}
+        BuiltInFunctionName::Debug
+        | BuiltInFunctionName::Error
+        | BuiltInFunctionName::ReflectDebug
+        | BuiltInFunctionName::Source => {}
     }
 
     Ok(())

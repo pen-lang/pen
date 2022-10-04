@@ -616,4 +616,26 @@ mod tests {
         )
         .unwrap();
     }
+
+    #[test]
+    fn compile_reflect_debug() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, Position::fake()),
+                        vec![None::new(Position::fake()).into()],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
 }

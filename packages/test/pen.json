@@ -1,4 +1,6 @@
 {
   "type": "library",
-  "dependencies": {}
+  "dependencies": {
+    "Reflect": "pen:///reflect"
+  }
 }
