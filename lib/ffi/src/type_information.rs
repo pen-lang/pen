@@ -5,7 +5,7 @@ pub struct TypeInformation {
     clone_fn: extern "C" fn(u64) -> u64,
     drop_fn: extern "C" fn(u64),
     synchronize_fn: extern "C" fn(u64),
-    extra: ExtraTypeInformation,
+    extra: *const (),
 }
 
 impl TypeInformation {
@@ -18,7 +18,7 @@ impl TypeInformation {
             clone_fn,
             drop_fn,
             synchronize_fn,
-            extra: ExtraTypeInformation::new(),
+            extra: null(),
         }
     }
 
@@ -35,15 +35,4 @@ impl TypeInformation {
     }
 }
 
-#[repr(C)]
-struct ExtraTypeInformation {
-    debug_fn: *const u8,
-}
-
-impl ExtraTypeInformation {
-    pub const fn new() -> Self {
-        Self { debug_fn: null() }
-    }
-}
-
-unsafe impl Sync for ExtraTypeInformation {}
+unsafe impl Sync for TypeInformation {}
