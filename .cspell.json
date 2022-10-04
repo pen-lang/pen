@@ -13,6 +13,7 @@
     "canonicalize",
     "canonicalizer",
     "clippy",
+    "codesign",
     "combinator",
     "combinators",
     "concat",

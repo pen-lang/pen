@@ -371,7 +371,7 @@ Feature: Os
     When I successfully run `pen build`
     Then I successfully run `./app`
 
-  Scenario: Get os time
+  Scenario: Get system time
     Given a file named "main.pen" with:
     """pen
     import Core'Number
