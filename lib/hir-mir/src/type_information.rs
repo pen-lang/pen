@@ -29,13 +29,17 @@ pub fn compile_type_information(
     ))
 }
 
-fn compile_value(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expression {
+fn compile_value(argument: impl Into<mir::ir::Expression>, index: usize) -> mir::ir::Expression {
     let argument = argument.into();
 
-    mir::ir::Call::new(
-        compile_function_type(),
-        mir::ir::TypeInformationFunction::new(argument.clone()),
-        vec![],
+    mir::ir::RecordField::new(
+        compile_type_information_type(),
+        index,
+        mir::ir::Call::new(
+            compile_function_type(),
+            mir::ir::TypeInformationFunction::new(argument.clone()),
+            vec![],
+        ),
     )
     .into()
 }

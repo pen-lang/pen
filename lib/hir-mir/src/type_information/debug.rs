@@ -13,11 +13,7 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
 
     mir::ir::Call::new(
         compile_function_type(),
-        mir::ir::RecordField::new(
-            type_information::compile_type_information_type(),
-            0,
-            type_information::compile_value(argument.clone()),
-        ),
+        type_information::compile_value(argument.clone(), 0),
         vec![argument],
     )
     .into()
