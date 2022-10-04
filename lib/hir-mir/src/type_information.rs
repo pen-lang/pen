@@ -146,21 +146,21 @@ fn compile_function_definitions(
 fn compile_default_function_definitions() -> Vec<mir::ir::GlobalFunctionDefinition> {
     let type_information_type = compile_type_information_type();
 
-    vec![
-        mir::ir::GlobalFunctionDefinition::new(debug::compile_default_function_definition(), false),
-        mir::ir::GlobalFunctionDefinition::new(
-            mir::ir::FunctionDefinition::new(
-                DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
-                vec![],
-                type_information_type.clone(),
-                mir::ir::Record::new(
-                    type_information_type,
-                    vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
-                ),
+    [
+        debug::compile_default_function_definition(),
+        mir::ir::FunctionDefinition::new(
+            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+            vec![],
+            type_information_type.clone(),
+            mir::ir::Record::new(
+                type_information_type,
+                vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
             ),
-            false,
         ),
     ]
+    .into_iter()
+    .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+    .collect()
 }
 
 fn compile_type_information_type() -> mir::types::Record {
