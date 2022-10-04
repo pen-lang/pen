@@ -336,6 +336,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://pen-lang.org/references/standard-packages/reflect/</loc>
+         <lastmod>2022-10-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://pen-lang.org/references/standard-packages/regex/</loc>
          <lastmod>2022-10-04</lastmod>
          <changefreq>daily</changefreq>
