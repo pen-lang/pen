@@ -222,7 +222,7 @@ mod tests {
         Context::new(module, Some(COMPILE_CONFIGURATION.clone()))
     }
 
-    fn compile_type_information_from_types(
+    fn create_type_information(
         information: FnvHashMap<mir::types::Type, String>,
     ) -> mir::ir::TypeInformation {
         mir::ir::TypeInformation::new(information, DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into())
@@ -266,7 +266,7 @@ mod tests {
 
         assert_eq!(
             compile_type_information(&context, &module).unwrap(),
-            compile_type_information_from_types(create_default_type_information(&context),)
+            create_type_information(create_default_type_information(&context),)
         );
 
         for type_ in &[
@@ -296,7 +296,7 @@ mod tests {
 
         assert_eq!(
             compile_type_information(&context, &module).unwrap(),
-            compile_type_information_from_types(
+            create_type_information(
                 [
                     (
                         mir::types::Type::Boolean,
@@ -350,7 +350,7 @@ mod tests {
 
         assert_eq!(
             compile_type_information(&context, &module).unwrap(),
-            compile_type_information_from_types(create_default_type_information(&context),)
+            create_type_information(create_default_type_information(&context),)
         );
     }
 
@@ -378,7 +378,7 @@ mod tests {
 
         assert_eq!(
             compile_type_information(&context, &module).unwrap(),
-            compile_type_information_from_types(create_default_type_information(&context))
+            create_type_information(create_default_type_information(&context))
         )
     }
 
