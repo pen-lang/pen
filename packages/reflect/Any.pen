@@ -1,3 +1,6 @@
+# This module provides utility functions for the `any` type.
+
+# Pretty-print a value.
 Debug = \(x any) string {
   _builtin_debug(x)
 }
