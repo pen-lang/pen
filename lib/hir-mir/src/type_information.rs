@@ -143,9 +143,8 @@ fn compile_function_definitions(
 
     Ok([
         debug::compile_function_definition(context, type_)?,
-        mir::ir::FunctionDefinition::new(
+        mir::ir::FunctionDefinition::thunk(
             compile_function_name(context, type_)?,
-            vec![],
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
