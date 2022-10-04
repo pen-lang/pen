@@ -70,7 +70,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .into_iter()
             .chain(type_information_function_definitions)
             .collect(),
-        type_information::compile(context, module)?,
+        type_information::compile_type_information(context, module)?,
     ))
 }
 
@@ -181,7 +181,9 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_type_information(type_information::compile(&context, &module).unwrap())
+                .set_type_information(
+                    type_information::compile_type_information(&context, &module).unwrap()
+                )
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
@@ -228,7 +230,9 @@ mod tests {
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_type_information(type_information::compile(&context, &module).unwrap())
+                .set_type_information(
+                    type_information::compile_type_information(&context, &module).unwrap()
+                )
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",

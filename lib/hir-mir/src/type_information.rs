@@ -11,7 +11,7 @@ use hir::{
 const DEFAULT_TYPE_INFORMATION_FUNCTION_NAME: &str = "hir:type_information:default";
 const TYPE_INFORMATION_RECORD_NAME: &str = "hir:type_information:record";
 
-pub fn compile(
+pub fn compile_type_information(
     context: &Context,
     module: &Module,
 ) -> Result<mir::ir::TypeInformation, CompileError> {
@@ -27,6 +27,17 @@ pub fn compile(
             .collect::<Result<_, CompileError>>()?,
         DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into(),
     ))
+}
+
+fn compile_value(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expression {
+    let argument = argument.into();
+
+    mir::ir::Call::new(
+        compile_function_type(),
+        mir::ir::TypeInformationFunction::new(argument.clone()),
+        vec![],
+    )
+    .into()
 }
 
 pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
@@ -208,7 +219,7 @@ mod tests {
         Context::new(module, Some(COMPILE_CONFIGURATION.clone()))
     }
 
-    fn compile_type_information(
+    fn compile_type_information_from_types(
         information: FnvHashMap<mir::types::Type, String>,
     ) -> mir::ir::TypeInformation {
         mir::ir::TypeInformation::new(information, DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into())
@@ -251,8 +262,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context),)
+            compile_type_information(&context, &module).unwrap(),
+            compile_type_information_from_types(create_default_type_information(&context),)
         );
 
         for type_ in &[
@@ -279,8 +290,8 @@ mod tests {
         let context = Context::new(&module, None);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(
+            compile_type_information(&context, &module).unwrap(),
+            compile_type_information_from_types(
                 [
                     (
                         mir::types::Type::Boolean,
@@ -333,8 +344,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context),)
+            compile_type_information(&context, &module).unwrap(),
+            compile_type_information_from_types(create_default_type_information(&context),)
         );
     }
 
@@ -361,8 +372,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context))
+            compile_type_information(&context, &module).unwrap(),
+            compile_type_information_from_types(create_default_type_information(&context))
         )
     }
 
@@ -383,7 +394,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert!(!compile_functions(&context, &module)
@@ -412,7 +426,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert!(!compile_functions(&context, &module)
@@ -460,7 +477,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 2
         );
     }
@@ -485,7 +505,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert!(!compile_functions(&context, &module)
@@ -527,7 +550,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert_eq!(
@@ -575,7 +601,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert!(compile_functions(&context, &module)
@@ -624,7 +653,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 2
         );
         assert!(!compile_functions(&context, &module)
