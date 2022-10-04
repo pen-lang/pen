@@ -70,6 +70,11 @@ build_package_document \
   Test \
   "This package provides test utilities."
 
+build_package_document \
+  reflect \
+  Reflect \
+  "This package provides reflection."
+
 go run github.com/raviqqe/gherkin2markdown features doc/docs/examples
 
 curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/docs/icon.svg
