@@ -14,7 +14,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(generic_type_definition::compile(context, module)?)
-            .chain([error_type::compile_type_definition()])
+            .chain(compile_internal_type_definitions())
             .collect(),
         module
             .foreign_declarations()
@@ -95,6 +95,13 @@ fn compile_type_definition(
                 .collect::<Result<_, _>>()?,
         ),
     ))
+}
+
+fn compile_internal_type_definitions() -> Vec<mir::ir::TypeDefinition> {
+    vec![
+        error_type::compile_type_definition(),
+        type_information::compile_type_information_type_definition(),
+    ]
 }
 
 fn compile_function_declaration(
@@ -181,7 +188,7 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Source
                 )])
-                .set_type_definitions(vec![error_type::compile_type_definition()])
+                .set_type_definitions(compile_internal_type_definitions())
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
@@ -228,7 +235,7 @@ mod tests {
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
-                .set_type_definitions(vec![error_type::compile_type_definition()])
+                .set_type_definitions(compile_internal_type_definitions())
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(

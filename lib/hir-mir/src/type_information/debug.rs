@@ -1,3 +1,4 @@
+use crate::type_information;
 use crate::{concrete_type, context::Context, error_type, type_, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
@@ -12,7 +13,15 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
 
     mir::ir::Call::new(
         compile_function_type(),
-        mir::ir::TypeInformationFunction::new(argument.clone()),
+        mir::ir::RecordField::new(
+            type_information::compile_type_information_type(),
+            0,
+            mir::ir::Call::new(
+                type_information::compile_function_type(),
+                mir::ir::TypeInformationFunction::new(argument.clone()),
+                vec![],
+            ),
+        ),
         vec![argument],
     )
     .into()
@@ -32,7 +41,7 @@ pub(super) fn compile_function_name(
     ))
 }
 
-fn compile_function_type() -> mir::types::Function {
+pub(super) fn compile_function_type() -> mir::types::Function {
     mir::types::Function::new(
         vec![mir::types::Type::Variant],
         mir::types::Type::ByteString,

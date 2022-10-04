@@ -3,7 +3,7 @@ pub mod debug;
 use crate::{context::Context, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{type_canonicalizer, type_collector},
+    analysis::{type_canonicalizer, type_collector, type_id_calculator},
     ir::*,
     types::{self, Type},
 };
@@ -21,12 +21,19 @@ pub fn compile(
             .map(|type_| {
                 Ok((
                     type_::compile_concrete(context, type_)?,
-                    debug::compile_function_name(context, type_)?,
+                    compile_function_name(context, type_)?,
                 ))
             })
             .collect::<Result<_, CompileError>>()?,
         DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into(),
     ))
+}
+
+pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
+    mir::ir::TypeDefinition::new(
+        TYPE_INFORMATION_RECORD_NAME,
+        mir::types::RecordBody::new(vec![debug::compile_function_type().into()]),
+    )
 }
 
 pub fn compile_functions(
@@ -63,75 +70,99 @@ pub fn compile_functions(
     Ok((
         external_types
             .iter()
-            .map(|type_| debug::compile_function_declaration(context, type_))
-            .collect::<Result<Vec<_>, _>>()?,
+            .map(|type_| compile_function_declarations(context, type_))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .flatten()
+            .collect(),
         internal_types
             .iter()
             .map(|type_| -> Result<_, CompileError> {
-                Ok(
-                    debug::compile_function_definition(context, type_)?.map(|definition| {
-                        mir::ir::GlobalFunctionDefinition::new(
-                            definition,
-                            match type_ {
-                                Type::Record(record) => {
-                                    internal_record_names.contains(record.name())
-                                }
-                                _ => false,
-                            },
-                        )
-                    }),
+                compile_function_definitions(
+                    context,
+                    type_,
+                    match type_ {
+                        Type::Record(record) => internal_record_names.contains(record.name()),
+                        _ => false,
+                    },
                 )
             })
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
-            .chain([
-                mir::ir::GlobalFunctionDefinition::new(
-                    debug::compile_default_function_definition(),
-                    false,
-                ),
-                {
-                    let type_information_type = compile_type_information_type();
-
-                    mir::ir::GlobalFunctionDefinition::new(
-                        mir::ir::FunctionDefinition::new(
-                            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
-                            vec![],
-                            type_information_type.clone(),
-                            mir::ir::Record::new(
-                                type_information_type,
-                                vec![
-                                    mir::ir::Variable::new(debug::compile_default_function_name())
-                                        .into(),
-                                ],
-                            ),
-                        ),
-                        false,
-                    )
-                },
-            ])
+            .chain(compile_default_function_definitions())
             .collect(),
     ))
+}
+
+fn compile_function_name(context: &Context, type_: &Type) -> Result<String, CompileError> {
+    Ok(format!(
+        "hir:type_information:{}",
+        type_id_calculator::calculate(type_, context.types())?
+    ))
+}
+
+fn compile_function_type() -> mir::types::Function {
+    mir::types::Function::new(vec![], compile_type_information_type())
+}
+
+fn compile_function_declarations(
+    context: &Context,
+    type_: &Type,
+) -> Result<Vec<mir::ir::FunctionDeclaration>, CompileError> {
+    Ok(vec![
+        debug::compile_function_declaration(context, type_)?,
+        mir::ir::FunctionDeclaration::new(
+            compile_function_name(context, type_)?,
+            compile_function_type(),
+        ),
+    ])
 }
 
 fn compile_function_definitions(
     context: &Context,
     type_: &Type,
-) -> Result<Vec<mir::ir::FunctionDefinition>, CompileError> {
+    public: bool,
+) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
     let type_information_type = compile_type_information_type();
 
-    Ok(vec![
+    Ok([
         debug::compile_function_definition(context, type_)?,
         mir::ir::FunctionDefinition::new(
-            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+            compile_function_name(context, type_)?,
             vec![],
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
-                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)).into()],
+                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)?).into()],
             ),
         ),
-    ])
+    ]
+    .into_iter()
+    .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, public))
+    .collect())
+}
+
+fn compile_default_function_definitions() -> Vec<mir::ir::GlobalFunctionDefinition> {
+    vec![
+        mir::ir::GlobalFunctionDefinition::new(debug::compile_default_function_definition(), false),
+        {
+            let type_information_type = compile_type_information_type();
+
+            mir::ir::GlobalFunctionDefinition::new(
+                mir::ir::FunctionDefinition::new(
+                    DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+                    vec![],
+                    type_information_type.clone(),
+                    mir::ir::Record::new(
+                        type_information_type,
+                        vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
+                    ),
+                ),
+                false,
+            )
+        },
+    ]
 }
 
 fn compile_type_information_type() -> mir::types::Record {

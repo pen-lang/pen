@@ -190,50 +190,25 @@ mod tests {
 
     #[test]
     fn compile_debug() {
-        assert_eq!(
-            compile_call(&Call::new(
-                Some(
-                    types::Function::new(
-                        vec![types::ByteString::new(Position::fake()).into()],
-                        types::None::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into()
-                ),
-                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                vec![TypeCoercion::new(
+        insta::assert_debug_snapshot!(compile_call(&Call::new(
+            Some(
+                types::Function::new(
+                    vec![types::ByteString::new(Position::fake()).into()],
                     types::None::new(Position::fake()),
-                    types::Any::new(Position::fake()),
-                    None::new(Position::fake()),
                     Position::fake()
                 )
-                .into()],
-                Position::fake(),
-            ),),
-            Ok(mir::ir::Call::new(
-                mir::types::Function::new(
-                    vec![mir::types::Type::ByteString],
-                    mir::types::Type::None
-                ),
-                mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-                vec![mir::ir::Call::new(
-                    mir::types::Function::new(
-                        vec![mir::types::Type::Variant],
-                        mir::types::Type::ByteString
-                    ),
-                    mir::ir::TypeInformationFunction::new(mir::ir::Variant::new(
-                        mir::types::Type::None,
-                        mir::ir::Expression::None
-                    )),
-                    vec![
-                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
-                            .into()
-                    ],
-                )
-                .into()],
+                .into()
+            ),
+            BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+            vec![TypeCoercion::new(
+                types::None::new(Position::fake()),
+                types::Any::new(Position::fake()),
+                None::new(Position::fake()),
+                Position::fake()
             )
-            .into())
-        );
+            .into()],
+            Position::fake(),
+        )));
     }
 
     mod spawn {
