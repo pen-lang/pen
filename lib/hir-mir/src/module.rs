@@ -4,7 +4,7 @@ use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, CompileError> {
     let (type_information_function_declarations, type_information_function_definitions) =
-        type_information::compile_functions(context, module)?;
+        type_information::compile_function_declarations_and_definitions(context, module)?;
 
     Ok(mir::ir::Module::new(
         module
@@ -176,7 +176,8 @@ mod tests {
         )]);
         let context = create_context(&module);
         let (type_information_function_declarations, type_information_function_definitions) =
-            type_information::compile_functions(&context, &module).unwrap();
+            type_information::compile_function_declarations_and_definitions(&context, &module)
+                .unwrap();
 
         assert_eq!(
             compile(&context, &module),
@@ -225,7 +226,8 @@ mod tests {
         )]);
         let context = create_context(&module);
         let (type_information_function_declarations, type_information_function_definitions) =
-            type_information::compile_functions(&context, &module).unwrap();
+            type_information::compile_function_declarations_and_definitions(&context, &module)
+                .unwrap();
 
         assert_eq!(
             compile(&context, &module),

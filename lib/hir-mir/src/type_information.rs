@@ -29,7 +29,7 @@ pub fn compile_type_information(
     ))
 }
 
-fn compile_value(argument: impl Into<mir::ir::Expression>, index: usize) -> mir::ir::Expression {
+fn compile_function(argument: impl Into<mir::ir::Expression>, index: usize) -> mir::ir::Expression {
     let argument = argument.into();
 
     mir::ir::RecordField::new(
@@ -51,7 +51,7 @@ pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
     )
 }
 
-pub fn compile_functions(
+pub fn compile_function_declarations_and_definitions(
     context: &Context,
     module: &Module,
 ) -> Result<
@@ -277,14 +277,16 @@ mod tests {
             types::None::new(Position::fake()).into(),
             types::Number::new(Position::fake()).into(),
         ] {
-            assert!(!compile_functions(&context, &module)
-                .unwrap()
-                .1
-                .iter()
-                .find(|definition| definition.definition().name()
-                    == debug::compile_function_name(&context, type_).unwrap())
-                .unwrap()
-                .is_public());
+            assert!(
+                !compile_function_declarations_and_definitions(&context, &module)
+                    .unwrap()
+                    .1
+                    .iter()
+                    .find(|definition| definition.definition().name()
+                        == debug::compile_function_name(&context, type_).unwrap())
+                    .unwrap()
+                    .is_public()
+            );
         }
     }
 
@@ -404,14 +406,17 @@ mod tests {
                 .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &function_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &function_type.clone().into())
+                        .unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -436,14 +441,16 @@ mod tests {
                 .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &list_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &list_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -515,14 +522,16 @@ mod tests {
                 .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &map_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &map_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -561,7 +570,7 @@ mod tests {
             create_default_type_information(&context).len() + 1
         );
         assert_eq!(
-            compile_functions(&context, &module)
+            compile_function_declarations_and_definitions(&context, &module)
                 .unwrap()
                 .0
                 .iter()
@@ -611,18 +620,20 @@ mod tests {
                 .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(
-                    &context,
-                    &types::Record::new("r", Position::fake()).into()
-                )
-                .unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(
+                        &context,
+                        &types::Record::new("r", Position::fake()).into()
+                    )
+                    .unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -663,13 +674,15 @@ mod tests {
                 .len(),
             create_default_type_information(&context).len() + 2
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &field_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &field_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 }
