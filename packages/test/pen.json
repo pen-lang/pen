@@ -1,6 +1,6 @@
 {
   "type": "library",
   "dependencies": {
-    "Reflect": "pen://reflect"
+    "Reflect": "pen:///reflect"
   }
 }
