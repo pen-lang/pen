@@ -3,12 +3,15 @@ pub mod debug;
 use crate::{context::Context, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{type_canonicalizer, type_collector},
+    analysis::{type_canonicalizer, type_collector, type_id_calculator},
     ir::*,
     types::{self, Type},
 };
 
-pub fn compile(
+const DEFAULT_TYPE_INFORMATION_FUNCTION_NAME: &str = "hir:type_information:default";
+const TYPE_INFORMATION_RECORD_NAME: &str = "hir:type_information:record";
+
+pub fn compile_type_information(
     context: &Context,
     module: &Module,
 ) -> Result<mir::ir::TypeInformation, CompileError> {
@@ -18,15 +21,37 @@ pub fn compile(
             .map(|type_| {
                 Ok((
                     type_::compile_concrete(context, type_)?,
-                    debug::compile_function_name(context, type_)?,
+                    compile_function_name(context, type_)?,
                 ))
             })
             .collect::<Result<_, CompileError>>()?,
-        debug::compile_default_function_name().into(),
+        DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into(),
     ))
 }
 
-pub fn compile_functions(
+fn compile_function(argument: impl Into<mir::ir::Expression>, index: usize) -> mir::ir::Expression {
+    let argument = argument.into();
+
+    mir::ir::RecordField::new(
+        compile_type_information_type(),
+        index,
+        mir::ir::Call::new(
+            compile_function_type(),
+            mir::ir::TypeInformationFunction::new(argument),
+            vec![],
+        ),
+    )
+    .into()
+}
+
+pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
+    mir::ir::TypeDefinition::new(
+        TYPE_INFORMATION_RECORD_NAME,
+        mir::types::RecordBody::new(vec![debug::compile_function_type().into()]),
+    )
+}
+
+pub fn compile_function_declarations_and_definitions(
     context: &Context,
     module: &Module,
 ) -> Result<
@@ -60,34 +85,100 @@ pub fn compile_functions(
     Ok((
         external_types
             .iter()
-            .map(|type_| debug::compile_function_declaration(context, type_))
-            .collect::<Result<Vec<_>, _>>()?,
+            .map(|type_| compile_function_declarations(context, type_))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .flatten()
+            .collect(),
         internal_types
             .iter()
             .map(|type_| -> Result<_, CompileError> {
-                Ok(
-                    debug::compile_function_definition(context, type_)?.map(|definition| {
-                        mir::ir::GlobalFunctionDefinition::new(
-                            definition,
-                            match type_ {
-                                Type::Record(record) => {
-                                    internal_record_names.contains(record.name())
-                                }
-                                _ => false,
-                            },
-                        )
-                    }),
+                compile_function_definitions(
+                    context,
+                    type_,
+                    match type_ {
+                        Type::Record(record) => internal_record_names.contains(record.name()),
+                        _ => false,
+                    },
                 )
             })
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
-            .chain([mir::ir::GlobalFunctionDefinition::new(
-                debug::compile_default_function_definition(),
-                false,
-            )])
+            .chain(compile_default_function_definitions())
             .collect(),
     ))
+}
+
+fn compile_function_name(context: &Context, type_: &Type) -> Result<String, CompileError> {
+    Ok(format!(
+        "hir:type_information:{}",
+        type_id_calculator::calculate(type_, context.types())?
+    ))
+}
+
+fn compile_function_type() -> mir::types::Function {
+    mir::types::Function::new(vec![], compile_type_information_type())
+}
+
+fn compile_function_declarations(
+    context: &Context,
+    type_: &Type,
+) -> Result<Vec<mir::ir::FunctionDeclaration>, CompileError> {
+    Ok(vec![
+        debug::compile_function_declaration(context, type_)?,
+        mir::ir::FunctionDeclaration::new(
+            compile_function_name(context, type_)?,
+            compile_function_type(),
+        ),
+    ])
+}
+
+fn compile_function_definitions(
+    context: &Context,
+    type_: &Type,
+    public: bool,
+) -> Result<Vec<mir::ir::GlobalFunctionDefinition>, CompileError> {
+    let type_information_type = compile_type_information_type();
+
+    Ok([
+        debug::compile_function_definition(context, type_)?,
+        mir::ir::FunctionDefinition::thunk(
+            compile_function_name(context, type_)?,
+            type_information_type.clone(),
+            mir::ir::Record::new(
+                type_information_type,
+                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)?).into()],
+            ),
+        ),
+    ]
+    .into_iter()
+    .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, public))
+    .collect())
+}
+
+fn compile_default_function_definitions() -> Vec<mir::ir::GlobalFunctionDefinition> {
+    let type_information_type = compile_type_information_type();
+
+    [
+        debug::compile_default_function_definition(),
+        mir::ir::FunctionDefinition::new(
+            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+            vec![],
+            type_information_type.clone(),
+            mir::ir::Record::new(
+                type_information_type,
+                vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
+            ),
+        ),
+    ]
+    .into_iter()
+    .map(|definition| mir::ir::GlobalFunctionDefinition::new(definition, false))
+    .collect()
+}
+
+fn compile_type_information_type() -> mir::types::Record {
+    mir::types::Record::new(TYPE_INFORMATION_RECORD_NAME)
 }
 
 fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, CompileError> {
@@ -131,43 +222,36 @@ mod tests {
         Context::new(module, Some(COMPILE_CONFIGURATION.clone()))
     }
 
-    fn compile_type_information(
+    fn create_type_information(
         information: FnvHashMap<mir::types::Type, String>,
     ) -> mir::ir::TypeInformation {
-        mir::ir::TypeInformation::new(information, debug::compile_default_function_name().into())
+        mir::ir::TypeInformation::new(information, DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into())
     }
 
     fn create_default_type_information(context: &Context) -> FnvHashMap<mir::types::Type, String> {
         [
             (
                 mir::types::Type::Boolean,
-                debug::compile_function_name(
-                    context,
-                    &types::Boolean::new(Position::fake()).into(),
-                )
-                .unwrap(),
-            ),
-            (
-                mir::types::Type::ByteString,
-                debug::compile_function_name(
-                    context,
-                    &types::ByteString::new(Position::fake()).into(),
-                )
-                .unwrap(),
-            ),
-            (
-                mir::types::Type::None,
-                debug::compile_function_name(context, &types::None::new(Position::fake()).into())
+                compile_function_name(context, &types::Boolean::new(Position::fake()).into())
                     .unwrap(),
             ),
             (
+                mir::types::Type::ByteString,
+                compile_function_name(context, &types::ByteString::new(Position::fake()).into())
+                    .unwrap(),
+            ),
+            (
+                mir::types::Type::None,
+                compile_function_name(context, &types::None::new(Position::fake()).into()).unwrap(),
+            ),
+            (
                 mir::types::Type::Number,
-                debug::compile_function_name(context, &types::Number::new(Position::fake()).into())
+                compile_function_name(context, &types::Number::new(Position::fake()).into())
                     .unwrap(),
             ),
             (
                 error_type::compile_type().into(),
-                debug::compile_function_name(context, &types::Error::new(Position::fake()).into())
+                compile_function_name(context, &types::Error::new(Position::fake()).into())
                     .unwrap(),
             ),
         ]
@@ -181,8 +265,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context),)
+            compile_type_information(&context, &module).unwrap(),
+            create_type_information(create_default_type_information(&context),)
         );
 
         for type_ in &[
@@ -192,14 +276,16 @@ mod tests {
             types::None::new(Position::fake()).into(),
             types::Number::new(Position::fake()).into(),
         ] {
-            assert!(!compile_functions(&context, &module)
-                .unwrap()
-                .1
-                .iter()
-                .find(|definition| definition.definition().name()
-                    == debug::compile_function_name(&context, type_).unwrap())
-                .unwrap()
-                .is_public());
+            assert!(
+                !compile_function_declarations_and_definitions(&context, &module)
+                    .unwrap()
+                    .1
+                    .iter()
+                    .find(|definition| definition.definition().name()
+                        == debug::compile_function_name(&context, type_).unwrap())
+                    .unwrap()
+                    .is_public()
+            );
         }
     }
 
@@ -209,12 +295,12 @@ mod tests {
         let context = Context::new(&module, None);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(
+            compile_type_information(&context, &module).unwrap(),
+            create_type_information(
                 [
                     (
                         mir::types::Type::Boolean,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::Boolean::new(Position::fake()).into()
                         )
@@ -222,7 +308,7 @@ mod tests {
                     ),
                     (
                         mir::types::Type::ByteString,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::ByteString::new(Position::fake()).into()
                         )
@@ -230,15 +316,12 @@ mod tests {
                     ),
                     (
                         mir::types::Type::None,
-                        debug::compile_function_name(
-                            &context,
-                            &types::None::new(Position::fake()).into()
-                        )
-                        .unwrap()
+                        compile_function_name(&context, &types::None::new(Position::fake()).into())
+                            .unwrap()
                     ),
                     (
                         mir::types::Type::Number,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::Number::new(Position::fake()).into()
                         )
@@ -266,8 +349,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context),)
+            compile_type_information(&context, &module).unwrap(),
+            create_type_information(create_default_type_information(&context),)
         );
     }
 
@@ -294,8 +377,8 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap(),
-            compile_type_information(create_default_type_information(&context))
+            compile_type_information(&context, &module).unwrap(),
+            create_type_information(create_default_type_information(&context))
         )
     }
 
@@ -316,17 +399,23 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &function_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &function_type.clone().into())
+                        .unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -345,17 +434,22 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &list_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &list_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -393,7 +487,10 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 2
         );
     }
@@ -418,17 +515,22 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &map_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &map_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -460,11 +562,14 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
         assert_eq!(
-            compile_functions(&context, &module)
+            compile_function_declarations_and_definitions(&context, &module)
                 .unwrap()
                 .0
                 .iter()
@@ -508,21 +613,26 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 1
         );
-        assert!(compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(
-                    &context,
-                    &types::Record::new("r", Position::fake()).into()
-                )
-                .unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(
+                        &context,
+                        &types::Record::new("r", Position::fake()).into()
+                    )
+                    .unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 
     #[test]
@@ -557,16 +667,21 @@ mod tests {
         let context = create_context(&module);
 
         assert_eq!(
-            compile(&context, &module).unwrap().information().len(),
+            compile_type_information(&context, &module)
+                .unwrap()
+                .information()
+                .len(),
             create_default_type_information(&context).len() + 2
         );
-        assert!(!compile_functions(&context, &module)
-            .unwrap()
-            .1
-            .iter()
-            .find(|definition| definition.definition().name()
-                == debug::compile_function_name(&context, &field_type.clone().into()).unwrap())
-            .unwrap()
-            .is_public());
+        assert!(
+            !compile_function_declarations_and_definitions(&context, &module)
+                .unwrap()
+                .1
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == debug::compile_function_name(&context, &field_type.clone().into()).unwrap())
+                .unwrap()
+                .is_public()
+        );
     }
 }

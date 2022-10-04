@@ -4,7 +4,7 @@ use hir::{analysis::AnalysisError, ir::*};
 
 pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, CompileError> {
     let (type_information_function_declarations, type_information_function_definitions) =
-        type_information::compile_functions(context, module)?;
+        type_information::compile_function_declarations_and_definitions(context, module)?;
 
     Ok(mir::ir::Module::new(
         module
@@ -14,7 +14,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .chain(generic_type_definition::compile(context, module)?)
-            .chain([error_type::compile_type_definition()])
+            .chain(compile_internal_type_definitions())
             .collect(),
         module
             .foreign_declarations()
@@ -70,7 +70,7 @@ pub fn compile(context: &Context, module: &Module) -> Result<mir::ir::Module, Co
             .into_iter()
             .chain(type_information_function_definitions)
             .collect(),
-        type_information::compile(context, module)?,
+        type_information::compile_type_information(context, module)?,
     ))
 }
 
@@ -95,6 +95,13 @@ fn compile_type_definition(
                 .collect::<Result<_, _>>()?,
         ),
     ))
+}
+
+fn compile_internal_type_definitions() -> Vec<mir::ir::TypeDefinition> {
+    vec![
+        error_type::compile_type_definition(),
+        type_information::compile_type_information_type_definition(),
+    ]
 }
 
 fn compile_function_declaration(
@@ -169,19 +176,22 @@ mod tests {
         )]);
         let context = create_context(&module);
         let (type_information_function_declarations, type_information_function_definitions) =
-            type_information::compile_functions(&context, &module).unwrap();
+            type_information::compile_function_declarations_and_definitions(&context, &module)
+                .unwrap();
 
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_type_information(type_information::compile(&context, &module).unwrap())
+                .set_type_information(
+                    type_information::compile_type_information(&context, &module).unwrap()
+                )
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Source
                 )])
-                .set_type_definitions(vec![error_type::compile_type_definition()])
+                .set_type_definitions(compile_internal_type_definitions())
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
@@ -216,19 +226,22 @@ mod tests {
         )]);
         let context = create_context(&module);
         let (type_information_function_declarations, type_information_function_definitions) =
-            type_information::compile_functions(&context, &module).unwrap();
+            type_information::compile_function_declarations_and_definitions(&context, &module)
+                .unwrap();
 
         assert_eq!(
             compile(&context, &module),
             Ok(mir::ir::Module::empty()
-                .set_type_information(type_information::compile(&context, &module).unwrap())
+                .set_type_information(
+                    type_information::compile_type_information(&context, &module).unwrap()
+                )
                 .set_foreign_declarations(runtime_function_declaration::compile(&context).unwrap())
                 .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                     "foo",
                     "bar",
                     mir::ir::CallingConvention::Target
                 )])
-                .set_type_definitions(vec![error_type::compile_type_definition()])
+                .set_type_definitions(compile_internal_type_definitions())
                 .set_function_declarations(type_information_function_declarations)
                 .set_global_function_definitions(
                     [mir::ir::GlobalFunctionDefinition::fake(
