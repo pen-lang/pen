@@ -18,4 +18,10 @@ bundler install
 
 cd $(dirname $0)/..
 
-cucumber --publish-quiet --strict-undefined "$@"
+tags=''
+
+if [ $(uname) != Linux ]; then
+  tags='not @linux'
+fi
+
+cucumber --publish-quiet --strict-undefined ${tags:+--tags "$tags"} "$@"
