@@ -174,7 +174,6 @@ pub fn compile(
 mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
-    
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(

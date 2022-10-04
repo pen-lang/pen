@@ -1,5 +1,4 @@
-use crate::type_information;
-use crate::{concrete_type, context::Context, error_type, type_, CompileError};
+use crate::{concrete_type, context::Context, error_type, type_, type_information, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
