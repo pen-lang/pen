@@ -15,6 +15,7 @@ mod map_type_configuration;
 mod module;
 mod module_interface;
 mod number_type_configuration;
+mod reflection;
 mod runtime_function_declaration;
 mod string_type_configuration;
 mod test_function;
