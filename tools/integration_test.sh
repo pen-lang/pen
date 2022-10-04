@@ -14,8 +14,6 @@ for target in \
   rustup target add $target
 done
 
-rustup component remove rls
-
 bundler install
 
 cd $(dirname $0)/..
