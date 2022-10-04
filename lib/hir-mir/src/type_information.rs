@@ -8,6 +8,9 @@ use hir::{
     types::{self, Type},
 };
 
+const DEFAULT_TYPE_INFORMATION_FUNCTION_NAME: &str = "hir:type_information:default";
+const TYPE_INFORMATION_RECORD_NAME: &str = "hir:type_information:record";
+
 pub fn compile(
     context: &Context,
     module: &Module,
@@ -22,7 +25,7 @@ pub fn compile(
                 ))
             })
             .collect::<Result<_, CompileError>>()?,
-        debug::compile_default_function_name().into(),
+        DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into(),
     ))
 }
 
@@ -82,12 +85,57 @@ pub fn compile_functions(
             .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .flatten()
-            .chain([mir::ir::GlobalFunctionDefinition::new(
-                debug::compile_default_function_definition(),
-                false,
-            )])
+            .chain([
+                mir::ir::GlobalFunctionDefinition::new(
+                    debug::compile_default_function_definition(),
+                    false,
+                ),
+                {
+                    let type_information_type = compile_type_information_type();
+
+                    mir::ir::GlobalFunctionDefinition::new(
+                        mir::ir::FunctionDefinition::new(
+                            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+                            vec![],
+                            type_information_type.clone(),
+                            mir::ir::Record::new(
+                                type_information_type,
+                                vec![
+                                    mir::ir::Variable::new(debug::compile_default_function_name())
+                                        .into(),
+                                ],
+                            ),
+                        ),
+                        false,
+                    )
+                },
+            ])
             .collect(),
     ))
+}
+
+fn compile_function_definitions(
+    context: &Context,
+    type_: &Type,
+) -> Result<Vec<mir::ir::FunctionDefinition>, CompileError> {
+    let type_information_type = compile_type_information_type();
+
+    Ok(vec![
+        debug::compile_function_definition(context, type_)?,
+        mir::ir::FunctionDefinition::new(
+            DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
+            vec![],
+            type_information_type.clone(),
+            mir::ir::Record::new(
+                type_information_type,
+                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)).into()],
+            ),
+        ),
+    ])
+}
+
+fn compile_type_information_type() -> mir::types::Record {
+    mir::types::Record::new(TYPE_INFORMATION_RECORD_NAME)
 }
 
 fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, CompileError> {

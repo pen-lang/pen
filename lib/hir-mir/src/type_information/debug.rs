@@ -53,32 +53,32 @@ pub(super) fn compile_function_declaration(
 pub(super) fn compile_function_definition(
     context: &Context,
     type_: &Type,
-) -> Result<Option<mir::ir::FunctionDefinition>, CompileError> {
+) -> Result<mir::ir::FunctionDefinition, CompileError> {
     let argument = mir::ir::Variable::new(ARGUMENT_NAME);
     let compile_function_definition =
         |body| compile_function_definition_for_concrete_type(context, type_, body);
 
     Ok(match type_ {
-        Type::Boolean(_) => Some(compile_function_definition(
+        Type::Boolean(_) => compile_function_definition(
             mir::ir::If::new(
                 argument,
                 mir::ir::ByteString::new("true"),
                 mir::ir::ByteString::new("false"),
             )
             .into(),
-        )?),
-        Type::Error(_) => Some(compile_function_definition(
+        )?,
+        Type::Error(_) => compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("error(").into(),
                 compile_call(error_type::compile_source(argument.into())),
                 mir::ir::ByteString::new(")").into(),
             ])
             .into(),
-        )?),
-        Type::Function(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("<function>").into(),
-        )?),
-        Type::List(list_type) => Some(compile_function_definition(
+        )?,
+        Type::Function(_) => {
+            compile_function_definition(mir::ir::ByteString::new("<function>").into())?
+        }
+        Type::List(list_type) => compile_function_definition(
             mir::ir::Call::new(
                 mir::types::Function::new(
                     vec![
@@ -96,8 +96,8 @@ pub(super) fn compile_function_definition(
                 ],
             )
             .into(),
-        )?),
-        Type::Map(map_type) => Some(compile_function_definition(
+        )?,
+        Type::Map(map_type) => compile_function_definition(
             mir::ir::Call::new(
                 mir::types::Function::new(
                     vec![
@@ -117,12 +117,10 @@ pub(super) fn compile_function_definition(
                 ],
             )
             .into(),
-        )?),
-        Type::None(_) => Some(compile_function_definition(
-            mir::ir::ByteString::new("none").into(),
-        )?),
-        Type::Number(_) => Some(compile_function_definition(
-            if let Ok(configuration) = context.configuration() {
+        )?,
+        Type::None(_) => compile_function_definition(mir::ir::ByteString::new("none").into())?,
+        Type::Number(_) => {
+            compile_function_definition(if let Ok(configuration) = context.configuration() {
                 mir::ir::Call::new(
                     mir::types::Function::new(
                         vec![mir::types::Type::Number],
@@ -134,12 +132,12 @@ pub(super) fn compile_function_definition(
                 .into()
             } else {
                 mir::ir::ByteString::new("<number>").into()
-            },
-        )?),
+            })?
+        }
         Type::Record(record_type) => {
             let mir_type = type_::compile_record(record_type);
 
-            Some(compile_function_definition(
+            compile_function_definition(
                 mir::ir::StringConcatenation::new(
                     [mir::ir::ByteString::new(format!("{}{{", record_type.name())).into()]
                         .into_iter()
@@ -182,17 +180,19 @@ pub(super) fn compile_function_definition(
                         .collect(),
                 )
                 .into(),
-            )?)
+            )?
         }
-        Type::String(_) => Some(compile_function_definition(
+        Type::String(_) => compile_function_definition(
             mir::ir::StringConcatenation::new(vec![
                 mir::ir::ByteString::new("\"").into(),
                 argument.into(),
                 mir::ir::ByteString::new("\"").into(),
             ])
             .into(),
-        )?),
-        Type::Any(_) | Type::Reference(_) | Type::Union(_) => None,
+        )?,
+        Type::Any(_) | Type::Reference(_) | Type::Union(_) => {
+            return Err(CompileError::InvalidVariantType(type_.clone()))
+        }
     })
 }
 
@@ -285,9 +285,7 @@ mod tests {
     fn compile_function_definition_for_none() {
         let context = Context::new(&Module::empty(), None);
         let type_ = types::None::new(Position::fake()).into();
-        let definition = compile_function_definition(&context, &type_)
-            .unwrap()
-            .unwrap();
+        let definition = compile_function_definition(&context, &type_).unwrap();
 
         assert_eq!(
             definition.name(),
@@ -300,9 +298,7 @@ mod tests {
     fn compile_function_definition_for_number() {
         let context = Context::new(&Module::empty(), Some(COMPILE_CONFIGURATION.clone()));
         let type_ = types::Number::new(Position::fake()).into();
-        let definition = compile_function_definition(&context, &type_)
-            .unwrap()
-            .unwrap();
+        let definition = compile_function_definition(&context, &type_).unwrap();
 
         assert_eq!(
             definition.name(),
@@ -315,14 +311,23 @@ mod tests {
     fn compile_function_definition_for_number_without_configuration() {
         let context = Context::new(&Module::empty(), None);
         let type_ = types::None::new(Position::fake()).into();
-        let definition = compile_function_definition(&context, &type_)
-            .unwrap()
-            .unwrap();
+        let definition = compile_function_definition(&context, &type_).unwrap();
 
         assert_eq!(
             definition.name(),
             &compile_function_name(&context, &type_).unwrap()
         );
         assert_eq!(definition.type_(), &compile_function_type());
+    }
+
+    #[test]
+    fn compile_function_definition_for_any() {
+        let context = Context::new(&Module::empty(), None);
+        let type_ = types::Any::new(Position::fake()).into();
+
+        assert_eq!(
+            compile_function_definition(&context, &type_),
+            Err(CompileError::InvalidVariantType(type_.into()))
+        );
     }
 }
