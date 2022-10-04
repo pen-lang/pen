@@ -56,6 +56,11 @@ build_package_document \
   "This package provides random number generation."
 
 build_package_document \
+  reflect \
+  Reflect \
+  "This package provides reflection."
+
+build_package_document \
   regex \
   Regex \
   "This package provides regular expressions."
@@ -69,11 +74,6 @@ build_package_document \
   test \
   Test \
   "This package provides test utilities."
-
-build_package_document \
-  reflect \
-  Reflect \
-  "This package provides reflection."
 
 go run github.com/raviqqe/gherkin2markdown features doc/docs/examples
 
