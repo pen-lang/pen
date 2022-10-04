@@ -1,4 +1,4 @@
-use crate::{import, Boolean, BoxAny, ByteString, Error, List, Number};
+use crate::{import, Boolean, BoxAny, ByteString, Error, List, Number, TypeInformation};
 
 import!(pen_ffi_any_is_boolean, fn(any: BoxAny) -> Boolean);
 import!(pen_ffi_any_is_error, fn(any: BoxAny) -> Boolean);
@@ -64,22 +64,15 @@ impl Clone for Any {
     fn clone(&self) -> Self {
         Self {
             type_information: self.type_information,
-            payload: (self.type_information.clone)(self.payload),
+            payload: (self.type_information.clone_fn())(self.payload),
         }
     }
 }
 
 impl Drop for Any {
     fn drop(&mut self) {
-        (self.type_information.drop)(self.payload);
+        (self.type_information.drop_fn())(self.payload);
     }
-}
-
-#[repr(C)]
-pub struct TypeInformation {
-    pub clone: extern "C" fn(u64) -> u64,
-    pub drop: extern "C" fn(u64),
-    pub synchronize: extern "C" fn(u64),
 }
 
 impl TryFrom<Any> for Boolean {

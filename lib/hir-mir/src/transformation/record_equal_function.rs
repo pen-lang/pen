@@ -1,10 +1,10 @@
-use crate::{context::CompileContext, transformation::record_type_information, CompileError};
+use crate::{context::Context, transformation::record_type_information, CompileError};
 use hir::{analysis::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
-pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileError> {
     let (external_type_definitions, internal_type_definitions) = module
         .type_definitions()
         .iter()
@@ -132,7 +132,7 @@ mod tests {
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            &Context::new(module, COMPILE_CONFIGURATION.clone().into()),
             module,
         )
     }

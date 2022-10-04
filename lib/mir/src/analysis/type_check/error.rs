@@ -16,7 +16,7 @@ pub enum TypeCheckError {
     NoAlternativeFound(Case),
     TypeNotFound(types::Record),
     TypesNotMatched(Type, Type),
-    VariableNotFound(Variable),
+    VariableNotFound(String),
     WrongArgumentCount(Call),
     WrongFieldCount(Record),
 }

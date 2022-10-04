@@ -122,6 +122,9 @@ fn transform_expression(expression: &Expression, variables: &hamt::Map<&str, &st
             transform_expression(operation.then(), &variables.remove(operation.name())),
         )
         .into(),
+        Expression::TypeInformationFunction(information) => {
+            TypeInformationFunction::new(transform(information.variant())).into()
+        }
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }

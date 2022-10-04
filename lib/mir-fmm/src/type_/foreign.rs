@@ -1,13 +1,12 @@
-use crate::{type_, CompileError};
-use fnv::FnvHashMap;
+use crate::{context::Context, type_, CompileError};
 
 pub fn compile(
+    context: &Context,
     type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::types::Type, CompileError> {
-    let fmm_type = type_::compile(type_, types);
+    let fmm_type = type_::compile(context, type_);
 
-    Ok(if is_payload_boxed(type_, types)? {
+    Ok(if is_payload_boxed(context, type_)? {
         fmm::types::Pointer::new(fmm_type).into()
     } else {
         fmm_type
@@ -15,32 +14,31 @@ pub fn compile(
 }
 
 pub fn compile_function(
+    context: &Context,
     function: &mir::types::Function,
     calling_convention: mir::ir::CallingConvention,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
 ) -> Result<fmm::types::Function, CompileError> {
     Ok(fmm::types::Function::new(
         function
             .arguments()
             .iter()
-            .map(|type_| compile(type_, types))
+            .map(|type_| compile(context, type_))
             .collect::<Result<_, _>>()?,
-        compile(function.result(), types)?,
+        compile(context, function.result())?,
         type_::compile_calling_convention(calling_convention),
     ))
 }
 
-pub fn is_payload_boxed(
-    type_: &mir::types::Type,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> Result<bool, CompileError> {
+pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<bool, CompileError> {
     Ok(match type_ {
         mir::types::Type::Record(record_type) => {
-            if type_::is_record_boxed(record_type, types) && !is_record_boxed(record_type, types) {
+            if type_::is_record_boxed(context, record_type)
+                && !is_record_boxed(context, record_type)
+            {
                 return Err(CompileError::UnboxedRecord);
             }
 
-            type_::is_record_boxed(record_type, types) != is_record_boxed(record_type, types)
+            type_::is_record_boxed(context, record_type) != is_record_boxed(context, record_type)
         }
         mir::types::Type::Variant => true,
         mir::types::Type::Boolean
@@ -51,15 +49,12 @@ pub fn is_payload_boxed(
     })
 }
 
-fn is_record_boxed(
-    record: &mir::types::Record,
-    types: &FnvHashMap<String, mir::types::RecordBody>,
-) -> bool {
+fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
     // TODO Implement the full C calling convention and use the exactly the same
     // strategy as native records.
     //
     // ```rust
     // type_::is_record_boxed(record, types)
     // ```
-    !types[record.name()].fields().is_empty()
+    !context.types()[record.name()].fields().is_empty()
 }

@@ -32,6 +32,7 @@ pub fn transform(module: &Module) -> Module {
                 )
             })
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -227,6 +228,11 @@ fn transform_expression(
                     )
                     .into(),
                 )
+            })
+        }
+        Expression::TypeInformationFunction(information) => {
+            transform_expression(information.variant(), &|expression| {
+                continue_(TypeInformationFunction::new(expression).into())
             })
         }
         Expression::Variant(variant) => transform_expression(variant.payload(), &|expression| {
@@ -892,6 +898,36 @@ mod tests {
                     Type::None,
                     Expression::None,
                     TryOperation::new(Variable::new("x"), "e", Type::None, Variable::new("e")),
+                )
+            )])
+        );
+    }
+
+    #[test]
+    fn transform_type_information() {
+        assert_eq!(
+            transform(
+                &Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                    "f",
+                    vec![],
+                    Type::None,
+                    TypeInformationFunction::new(Let::new(
+                        "x",
+                        Type::Variant,
+                        Variant::new(Type::None, Expression::None),
+                        Variable::new("x")
+                    ),)
+                )])
+            ),
+            Module::empty().set_function_definitions(vec![FunctionDefinition::new(
+                "f",
+                vec![],
+                Type::None,
+                Let::new(
+                    "x",
+                    Type::Variant,
+                    Variant::new(Type::None, Expression::None),
+                    TypeInformationFunction::new(Variable::new("x"))
                 )
             )])
         );

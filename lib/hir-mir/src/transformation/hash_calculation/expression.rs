@@ -1,6 +1,6 @@
 use super::function;
 use crate::{
-    context::CompileContext,
+    context::Context,
     transformation::{collection_type, map_context, record_type_information},
     CompileError,
 };
@@ -18,7 +18,7 @@ const BOOLEAN_TRUE_HASH: f64 = 1.0;
 const BOOLEAN_FALSE_HASH: f64 = 2.0;
 
 pub fn transform(
-    context: &CompileContext,
+    context: &Context,
     value: &Expression,
     type_: &Type,
     position: &Position,
@@ -192,7 +192,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &Variable::new("x", Position::fake()).into(),
                 &union_type.into(),
                 &Position::fake(),
@@ -238,7 +238,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(
+                &Context::dummy(
                     Default::default(),
                     [(
                         "foo".into(),
@@ -280,7 +280,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &Variable::new("x", Position::fake()).into(),
                 &any_type.clone().into(),
                 &Position::fake(),
@@ -296,7 +296,7 @@ mod tests {
 
         assert_eq!(
             transform(
-                &CompileContext::dummy(Default::default(), Default::default()),
+                &Context::dummy(Default::default(), Default::default()),
                 &Variable::new("x", Position::fake()).into(),
                 &function_type.clone().into(),
                 &Position::fake(),

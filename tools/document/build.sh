@@ -56,6 +56,11 @@ build_package_document \
   "This package provides random number generation."
 
 build_package_document \
+  reflect \
+  Reflect \
+  "This package provides reflection."
+
+build_package_document \
   regex \
   Regex \
   "This package provides regular expressions."

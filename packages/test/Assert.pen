@@ -1,5 +1,7 @@
 # This module provides a collection of assertion logic for testing.
 
+import Reflect'Any
+
 # Assert that a condition is true.
 True = \(x boolean) none | error {
   if x {
@@ -14,7 +16,7 @@ Error = \(x any) none | error {
   if x = x as error {
     none
   } else {
-    error("error expected")
+    error("error expected: " + Any'Debug(x))
   }
 }
 

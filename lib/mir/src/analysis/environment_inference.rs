@@ -13,6 +13,7 @@ pub fn transform(module: &Module) -> Module {
             .iter()
             .map(transform_global_function_definition)
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -219,6 +220,9 @@ fn transform_expression(
             ),
         )
         .into(),
+        Expression::TypeInformationFunction(information) => {
+            TypeInformationFunction::new(transform(information.variant())).into()
+        }
         Expression::Variant(variant) => {
             Variant::new(variant.type_().clone(), transform(variant.payload())).into()
         }

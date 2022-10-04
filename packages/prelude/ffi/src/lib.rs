@@ -2,13 +2,19 @@
 
 extern crate alloc;
 
+use alloc::string::ToString;
 use core::hash::{Hash, Hasher};
 use siphasher::sip::SipHasher;
 
 const HASH_MULTIPLIER: u64 = 31;
 
 #[ffi::bindgen]
-fn _pen_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
+fn _pen_prelude_debug_number(number: ffi::Number) -> ffi::ByteString {
+    f64::from(number).to_string().into()
+}
+
+#[ffi::bindgen]
+fn _pen_prelude_equal_strings(one: ffi::ByteString, other: ffi::ByteString) -> ffi::Boolean {
     (one.as_slice() == other.as_slice()).into()
 }
 
@@ -77,44 +83,62 @@ mod tests {
     use alloc::vec;
 
     #[test]
-    fn equal_empty_strings() {
-        let string = ffi::ByteString::default();
-
-        assert_eq!(_pen_equal_strings(string.clone(), string), true.into());
+    fn debug_number() {
+        assert_eq!(_pen_prelude_debug_number(42.0.into()), "42".into());
     }
 
-    #[test]
-    fn equal_one_byte_strings() {
-        let string = ffi::ByteString::from(vec![0u8]);
+    mod equal_string {
+        use super::*;
 
-        assert_eq!(_pen_equal_strings(string.clone(), string), true.into());
-    }
+        #[test]
+        fn equal_empty_strings() {
+            let string = ffi::ByteString::default();
 
-    #[test]
-    fn not_equal_one_byte_strings() {
-        let one = ffi::ByteString::default();
-        let other = vec![0u8].into();
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
 
-        assert_eq!(_pen_equal_strings(one, other), false.into());
-    }
+        #[test]
+        fn equal_one_byte_strings() {
+            let string = ffi::ByteString::from(vec![0u8]);
 
-    #[test]
-    fn equal_text_strings() {
-        const TEXT: &[u8] = "hello".as_bytes();
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
 
-        let string = ffi::ByteString::from(TEXT);
+        #[test]
+        fn not_equal_one_byte_strings() {
+            let one = ffi::ByteString::default();
+            let other = vec![0u8].into();
 
-        assert_eq!(_pen_equal_strings(string.clone(), string), true.into());
-    }
+            assert_eq!(_pen_prelude_equal_strings(one, other), false.into());
+        }
 
-    #[test]
-    fn not_equal_text_strings() {
-        const TEXT: &[u8] = "hello".as_bytes();
-        const OTHER_TEXT: &[u8] = "hell0".as_bytes();
+        #[test]
+        fn equal_text_strings() {
+            const TEXT: &[u8] = "hello".as_bytes();
 
-        assert_eq!(
-            _pen_equal_strings(TEXT.into(), OTHER_TEXT.into(),),
-            false.into()
-        );
+            let string = ffi::ByteString::from(TEXT);
+
+            assert_eq!(
+                _pen_prelude_equal_strings(string.clone(), string),
+                true.into()
+            );
+        }
+
+        #[test]
+        fn not_equal_text_strings() {
+            const TEXT: &[u8] = "hello".as_bytes();
+            const OTHER_TEXT: &[u8] = "hell0".as_bytes();
+
+            assert_eq!(
+                _pen_prelude_equal_strings(TEXT.into(), OTHER_TEXT.into(),),
+                false.into()
+            );
+        }
     }
 }

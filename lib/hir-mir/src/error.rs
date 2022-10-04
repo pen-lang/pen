@@ -1,4 +1,7 @@
-use hir::analysis::AnalysisError;
+use hir::{
+    analysis::{type_formatter, AnalysisError},
+    types::Type,
+};
 use position::Position;
 use std::{
     error::Error,
@@ -13,6 +16,7 @@ pub enum CompileError {
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::type_check::TypeCheckError),
     NewContextFunctionNotFound(Position),
+    UnsupportedTypeInformation(Type),
     VariantTypeInFfi(Position),
 }
 
@@ -38,6 +42,14 @@ impl Display for CompileError {
             }
             Self::NewContextFunctionNotFound(position) => {
                 write!(formatter, "new context function not found\n{}", position)
+            }
+            Self::UnsupportedTypeInformation(type_) => {
+                write!(
+                    formatter,
+                    "unsupported type information: {}\n{}",
+                    type_formatter::format(type_),
+                    type_.position()
+                )
             }
             Self::VariantTypeInFfi(position) => {
                 write!(

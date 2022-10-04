@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/if_map.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &IfMap::new(Some(types::Number::new(Position::fake()).into()),\n            Some(types::None::new(Position::fake()).into()), \"x\",\n            Variable::new(\"xs\", Position::fake()),\n            Variable::new(\"k\", Position::fake()),\n            Variable::new(\"x\", Position::fake()), None::new(Position::fake()),\n            Position::fake()))"
+expression: "transform(&Context::dummy(Default::default(), Default::default()),\n    &IfMap::new(Some(types::Number::new(Position::fake()).into()),\n            Some(types::None::new(Position::fake()).into()), \"x\",\n            Variable::new(\"xs\", Position::fake()),\n            Variable::new(\"k\", Position::fake()),\n            Variable::new(\"x\", Position::fake()), None::new(Position::fake()),\n            Position::fake()))"
 ---
 Ok(
     IfType(
@@ -25,7 +25,7 @@ Ok(
                                     ),
                                     Reference(
                                         Reference {
-                                            name: "GenericMap",
+                                            name: "genericMap",
                                             position: Position {
                                                 path: "",
                                                 line_number: 1,

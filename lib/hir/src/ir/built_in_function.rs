@@ -5,6 +5,7 @@ pub enum BuiltInFunctionName {
     Debug,
     Error,
     Race,
+    ReflectDebug,
     Size,
     Source,
     Spawn,

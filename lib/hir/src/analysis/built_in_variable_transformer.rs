@@ -15,6 +15,9 @@ pub fn transform(module: &Module) -> Module {
             "size" => BuiltInFunction::new(BuiltInFunctionName::Size, position.clone()).into(),
             "source" => BuiltInFunction::new(BuiltInFunctionName::Source, position.clone()).into(),
             "true" => Boolean::new(true, position.clone()).into(),
+            "_reflect_debug" => {
+                BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, position.clone()).into()
+            }
             _ => variable.clone().into(),
         }
     })

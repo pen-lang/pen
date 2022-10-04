@@ -2,7 +2,8 @@ use super::{
     arithmetic_operation::ArithmeticOperation, byte_string::ByteString, call::Call, case::Case,
     clone_variables::CloneVariables, comparison_operation::ComparisonOperation,
     drop_variables::DropVariables, if_::If, let_::Let, let_recursive::LetRecursive, record::Record,
-    record_field::RecordField, try_operation::TryOperation, variable::Variable, variant::Variant,
+    record_field::RecordField, try_operation::TryOperation,
+    type_information_function::TypeInformationFunction, variable::Variable, variant::Variant,
     RecordUpdate, StringConcatenation, Synchronize,
 };
 
@@ -27,6 +28,7 @@ pub enum Expression {
     RecordUpdate(RecordUpdate),
     StringConcatenation(StringConcatenation),
     TryOperation(TryOperation),
+    TypeInformationFunction(TypeInformationFunction),
     Variable(Variable),
     Variant(Variant),
 }
@@ -136,6 +138,12 @@ impl From<StringConcatenation> for Expression {
 impl From<TryOperation> for Expression {
     fn from(operation: TryOperation) -> Self {
         Self::TryOperation(operation)
+    }
+}
+
+impl From<TypeInformationFunction> for Expression {
+    fn from(information: TypeInformationFunction) -> Self {
+        Self::TypeInformationFunction(information)
     }
 }
 

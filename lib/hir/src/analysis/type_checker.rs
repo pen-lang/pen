@@ -531,7 +531,10 @@ fn check_built_in_call(
                 return Err(AnalysisError::WrongArgumentCount(position.clone()));
             }
         }
-        BuiltInFunctionName::Debug | BuiltInFunctionName::Error | BuiltInFunctionName::Source => {}
+        BuiltInFunctionName::Debug
+        | BuiltInFunctionName::Error
+        | BuiltInFunctionName::ReflectDebug
+        | BuiltInFunctionName::Source => {}
     }
 
     Ok(())
@@ -668,7 +671,7 @@ mod tests {
         check_types(
             &AnalysisContext::new(
                 type_collector::collect(module),
-                type_collector::collect_records(module),
+                type_collector::collect_record_fields(module),
             ),
             module,
         )

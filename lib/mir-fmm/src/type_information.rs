@@ -1,8 +1,10 @@
 use crate::{context::Context, error::CompileError, reference_count, type_};
+use fnv::FnvHashMap;
 
 pub fn compile_global_variable(
     context: &Context,
     type_: &mir::types::Type,
+    global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         type_::compile_id(type_),
@@ -10,6 +12,16 @@ pub fn compile_global_variable(
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
             reference_count::variant::compile_synchronize_function(context, type_)?,
+            fmm::build::bit_cast(
+                fmm::types::generic_pointer_type(),
+                global_variables[context
+                    .type_information()
+                    .information()
+                    .get(type_)
+                    .ok_or_else(|| CompileError::TypeInformationNotFound(type_.clone()))?]
+                .clone(),
+            )
+            .into(),
         ]),
         fmm::ir::VariableDefinitionOptions::new()
             .set_address_named(true)
@@ -24,24 +36,31 @@ pub fn get_clone_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 0)
+    get_field(builder, tag, 0)
 }
 
 pub fn get_drop_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 1)
+    get_field(builder, tag, 1)
 }
 
 pub fn get_synchronize_function(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    get_function(builder, tag, 2)
+    get_field(builder, tag, 2)
 }
 
-fn get_function(
+pub fn get_custom_information(
+    builder: &fmm::build::InstructionBuilder,
+    tag: impl Into<fmm::build::TypedExpression>,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    get_field(builder, tag, 3)
+}
+
+fn get_field(
     builder: &fmm::build::InstructionBuilder,
     tag: impl Into<fmm::build::TypedExpression>,
     index: usize,

@@ -31,6 +31,7 @@ pub fn transform(module: &Module) -> Module {
             .into_iter()
             .chain(context.into_function_definitions())
             .collect(),
+        module.type_information().clone(),
     )
 }
 
@@ -135,7 +136,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         )
                     })
                     .collect::<Vec<_>>();
-                let transform_expression = |expression| {
+                let transform = |expression| {
                     save_free_variables(
                         definition.environment(),
                         &free_variable_names,
@@ -155,7 +156,7 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         vec![],
                         arguments.clone(),
                         definition.result_type().clone(),
-                        transform_expression(definition.body()),
+                        transform(definition.body()),
                         definition.is_thunk(),
                     ));
 
@@ -170,18 +171,13 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
                         definition.type_().result().clone(),
                     ),
                     Variable::new(function_name),
-                    transform_expression(&expression),
+                    transform(&expression),
                 )
                 .into()
             } else {
                 LetRecursive::new(definition, expression).into()
             }
         }
-        Expression::Synchronize(synchronize) => Synchronize::new(
-            synchronize.type_().clone(),
-            transform(synchronize.expression()),
-        )
-        .into(),
         Expression::Record(record) => Record::new(
             record.type_().clone(),
             record.fields().iter().map(transform).collect(),
@@ -207,18 +203,24 @@ fn transform_expression(context: &mut Context, expression: &Expression) -> Expre
             StringConcatenation::new(concatenation.operands().iter().map(transform).collect())
                 .into()
         }
+        Expression::Synchronize(synchronize) => Synchronize::new(
+            synchronize.type_().clone(),
+            transform(synchronize.expression()),
+        )
+        .into(),
         Expression::TryOperation(operation) => TryOperation::new(
-            transform_expression(context, operation.operand()),
+            transform(operation.operand()),
             operation.name(),
             operation.type_().clone(),
-            transform_expression(context, operation.then()),
+            transform(operation.then()),
         )
         .into(),
-        Expression::Variant(variant) => Variant::new(
-            variant.type_().clone(),
-            transform_expression(context, variant.payload()),
-        )
-        .into(),
+        Expression::TypeInformationFunction(information) => {
+            TypeInformationFunction::new(transform(information.variant())).into()
+        }
+        Expression::Variant(variant) => {
+            Variant::new(variant.type_().clone(), transform(variant.payload())).into()
+        }
         Expression::Boolean(_)
         | Expression::ByteString(_)
         | Expression::None

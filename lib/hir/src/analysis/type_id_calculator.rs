@@ -46,7 +46,7 @@ fn calculate_string(type_: &Type) -> String {
         ),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
-        Type::Record(record) => record.name().into(),
+        Type::Record(record) => format!("record({})", record.name()),
         Type::String(_) => "string".into(),
         Type::Union(union) => format!(
             "({}|{})",

@@ -1,5 +1,5 @@
 use super::hash_calculation;
-use crate::{context::CompileContext, transformation::record_type_information, CompileError};
+use crate::{context::Context, transformation::record_type_information, CompileError};
 use hir::{
     analysis::type_comparability_checker,
     ir::*,
@@ -13,7 +13,7 @@ use std::{
 
 const RECORD_NAME: &str = "$record";
 
-pub fn transform(context: &CompileContext, module: &Module) -> Result<Module, CompileError> {
+pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileError> {
     // We cannot define hash functions for record types if hash configuration is not
     // available.
     if context.configuration().is_err() {
@@ -87,7 +87,7 @@ fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDec
 }
 
 fn compile_function_definition(
-    context: &CompileContext,
+    context: &Context,
     type_definition: &TypeDefinition,
 ) -> Result<FunctionDefinition, CompileError> {
     let position = type_definition.position();
@@ -181,7 +181,7 @@ mod tests {
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
-            &CompileContext::new(module, COMPILE_CONFIGURATION.clone().into()),
+            &Context::new(module, COMPILE_CONFIGURATION.clone().into()),
             module,
         )
     }

@@ -1,10 +1,10 @@
 use crate::{
-    context::CompileContext,
-    downcast, expression,
+    context::Context,
+    downcast, error_type, expression,
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
-    type_, CompileError,
+    type_, type_information, CompileError,
 };
 use hir::{
     analysis::{type_canonicalizer, AnalysisError},
@@ -14,7 +14,7 @@ use hir::{
 };
 
 pub fn compile(
-    context: &CompileContext,
+    context: &Context,
     call: &Call,
     function: &BuiltInFunction,
 ) -> Result<mir::ir::Expression, CompileError> {
@@ -38,14 +38,13 @@ pub fn compile(
     };
 
     Ok(match function.name() {
-        BuiltInFunctionName::Debug => {
-            compile_call(mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME), arguments)?.into()
-        }
-        BuiltInFunctionName::Error => compile_call(
-            mir::ir::Variable::new(&context.configuration()?.error_type.error_function_name),
-            arguments,
-        )?
+        BuiltInFunctionName::Debug => mir::ir::Call::new(
+            mir::types::Function::new(vec![mir::types::Type::ByteString], mir::types::Type::None),
+            mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
+            vec![type_information::debug::compile_call(arguments[0].clone())],
+        )
         .into(),
+        BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
@@ -77,6 +76,9 @@ pub fn compile(
             )?
             .into()
         }
+        BuiltInFunctionName::ReflectDebug => {
+            type_information::debug::compile_call(arguments[0].clone())
+        }
         BuiltInFunctionName::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {
@@ -91,11 +93,7 @@ pub fn compile(
             arguments,
         )
         .into(),
-        BuiltInFunctionName::Source => compile_call(
-            mir::ir::Variable::new(&context.configuration()?.error_type.source_function_name),
-            arguments,
-        )?
-        .into(),
+        BuiltInFunctionName::Source => error_type::compile_source(arguments[0].clone()),
         BuiltInFunctionName::Spawn => {
             const ANY_THUNK_NAME: &str = "$any_thunk";
             const THUNK_NAME: &str = "$thunk";
@@ -176,10 +174,11 @@ pub fn compile(
 mod tests {
     use super::*;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
-            &CompileContext::dummy(Default::default(), Default::default()),
+            &Context::dummy(Default::default(), Default::default()),
             call,
             if let Expression::BuiltInFunction(function) = call.function() {
                 function
@@ -202,7 +201,13 @@ mod tests {
                     .into()
                 ),
                 BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                vec![ByteString::new(vec![], Position::fake()).into()],
+                vec![TypeCoercion::new(
+                    types::None::new(Position::fake()),
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()],
                 Position::fake(),
             ),),
             Ok(mir::ir::Call::new(
@@ -211,7 +216,21 @@ mod tests {
                     mir::types::Type::None
                 ),
                 mir::ir::Variable::new(LOCAL_DEBUG_FUNCTION_NAME),
-                vec![mir::ir::ByteString::new(vec![]).into()],
+                vec![mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![mir::types::Type::Variant],
+                        mir::types::Type::ByteString
+                    ),
+                    mir::ir::TypeInformationFunction::new(mir::ir::Variant::new(
+                        mir::types::Type::None,
+                        mir::ir::Expression::None
+                    )),
+                    vec![
+                        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None)
+                            .into()
+                    ],
+                )
+                .into()],
             )
             .into())
         );

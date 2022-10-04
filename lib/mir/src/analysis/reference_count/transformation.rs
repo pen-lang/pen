@@ -19,6 +19,7 @@ pub fn transform(module: &Module) -> Result<Module, ReferenceCountError> {
                 ))
             })
             .collect::<Result<_, _>>()?,
+        module.type_information().clone(),
     ))
 }
 
@@ -528,6 +529,15 @@ fn transform_expression(
                 operand_moved_variables,
             )
         }
+        Expression::TypeInformationFunction(information) => {
+            let (expression, moved_variables) =
+                transform_expression(information.variant(), owned_variables, moved_variables)?;
+
+            (
+                TypeInformationFunction::new(expression).into(),
+                moved_variables,
+            )
+        }
         Expression::Variable(variable) => {
             if should_clone_variable(variable.name(), owned_variables, moved_variables) {
                 (
@@ -661,7 +671,23 @@ mod tests {
         );
     }
 
-    mod calls {
+    #[test]
+    fn transform_type_information() {
+        assert_eq!(
+            transform_expression(
+                &TypeInformationFunction::new(Variable::new("x")).into(),
+                &[("x".into(), Type::Variant)].into_iter().collect(),
+                &Default::default()
+            )
+            .unwrap(),
+            (
+                TypeInformationFunction::new(Variable::new("x")).into(),
+                ["x".into()].into_iter().collect()
+            ),
+        );
+    }
+
+    mod call {
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -1389,7 +1415,7 @@ mod tests {
         }
     }
 
-    mod definitions {
+    mod definition {
 
         use super::*;
         use pretty_assertions::assert_eq;
