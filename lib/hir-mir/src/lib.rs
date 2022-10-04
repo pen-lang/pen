@@ -15,7 +15,6 @@ mod map_type_configuration;
 mod module;
 mod module_interface;
 mod number_type_configuration;
-mod reflection;
 mod runtime_function_declaration;
 mod string_type_configuration;
 mod test_function;
@@ -608,6 +607,28 @@ mod tests {
                         None,
                         BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                         vec![Variable::new("x", Position::fake()).into()],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn compile_reflect_debug() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::ByteString::new(Position::fake()),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, Position::fake()),
+                        vec![None::new(Position::fake()).into()],
                         Position::fake(),
                     ),
                     Position::fake(),
