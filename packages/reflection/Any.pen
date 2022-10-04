@@ -1,0 +1,3 @@
+Debug = \(x any) string {
+  _builtin_debug(x)
+}
