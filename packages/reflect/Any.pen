@@ -2,5 +2,5 @@
 
 # Pretty-print a value.
 Debug = \(x any) string {
-  _builtin_debug(x)
+  _reflect_debug(x)
 }
