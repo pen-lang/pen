@@ -34,7 +34,7 @@ impl<T: Into<Any>> From<core::result::Result<T, alloc::boxed::Box<dyn std::error
         use alloc::string::ToString;
 
         result
-            .map_err(|error| Error::new(crate::ByteString::from(error.to_string())))
+            .map_err(|error| crate::ByteString::from(error.to_string()))
             .into()
     }
 }
