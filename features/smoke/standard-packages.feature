@@ -19,6 +19,7 @@ Feature: Standard packages
       | os      |
       | os-sync |
       | random  |
+      | reflect |
       | regex   |
       | sql     |
       | test    |
