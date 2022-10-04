@@ -328,7 +328,7 @@ mod tests {
 
         assert_eq!(
             compile_function_definition(&context, &type_),
-            Err(CompileError::InvalidVariantType(type_.into()))
+            Err(CompileError::InvalidVariantType(type_))
         );
     }
 }

@@ -37,7 +37,7 @@ fn compile_value(argument: impl Into<mir::ir::Expression>, index: usize) -> mir:
         index,
         mir::ir::Call::new(
             compile_function_type(),
-            mir::ir::TypeInformationFunction::new(argument.clone()),
+            mir::ir::TypeInformationFunction::new(argument),
             vec![],
         ),
     )
