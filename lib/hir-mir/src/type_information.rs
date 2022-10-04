@@ -213,40 +213,33 @@ mod tests {
     fn compile_type_information(
         information: FnvHashMap<mir::types::Type, String>,
     ) -> mir::ir::TypeInformation {
-        mir::ir::TypeInformation::new(information, debug::compile_default_function_name().into())
+        mir::ir::TypeInformation::new(information, DEFAULT_TYPE_INFORMATION_FUNCTION_NAME.into())
     }
 
     fn create_default_type_information(context: &Context) -> FnvHashMap<mir::types::Type, String> {
         [
             (
                 mir::types::Type::Boolean,
-                debug::compile_function_name(
-                    context,
-                    &types::Boolean::new(Position::fake()).into(),
-                )
-                .unwrap(),
-            ),
-            (
-                mir::types::Type::ByteString,
-                debug::compile_function_name(
-                    context,
-                    &types::ByteString::new(Position::fake()).into(),
-                )
-                .unwrap(),
-            ),
-            (
-                mir::types::Type::None,
-                debug::compile_function_name(context, &types::None::new(Position::fake()).into())
+                compile_function_name(context, &types::Boolean::new(Position::fake()).into())
                     .unwrap(),
             ),
             (
+                mir::types::Type::ByteString,
+                compile_function_name(context, &types::ByteString::new(Position::fake()).into())
+                    .unwrap(),
+            ),
+            (
+                mir::types::Type::None,
+                compile_function_name(context, &types::None::new(Position::fake()).into()).unwrap(),
+            ),
+            (
                 mir::types::Type::Number,
-                debug::compile_function_name(context, &types::Number::new(Position::fake()).into())
+                compile_function_name(context, &types::Number::new(Position::fake()).into())
                     .unwrap(),
             ),
             (
                 error_type::compile_type().into(),
-                debug::compile_function_name(context, &types::Error::new(Position::fake()).into())
+                compile_function_name(context, &types::Error::new(Position::fake()).into())
                     .unwrap(),
             ),
         ]
@@ -293,7 +286,7 @@ mod tests {
                 [
                     (
                         mir::types::Type::Boolean,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::Boolean::new(Position::fake()).into()
                         )
@@ -301,7 +294,7 @@ mod tests {
                     ),
                     (
                         mir::types::Type::ByteString,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::ByteString::new(Position::fake()).into()
                         )
@@ -309,15 +302,12 @@ mod tests {
                     ),
                     (
                         mir::types::Type::None,
-                        debug::compile_function_name(
-                            &context,
-                            &types::None::new(Position::fake()).into()
-                        )
-                        .unwrap()
+                        compile_function_name(&context, &types::None::new(Position::fake()).into())
+                            .unwrap()
                     ),
                     (
                         mir::types::Type::Number,
-                        debug::compile_function_name(
+                        compile_function_name(
                             &context,
                             &types::Number::new(Position::fake()).into()
                         )
