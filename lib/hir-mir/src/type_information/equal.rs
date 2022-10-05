@@ -145,41 +145,41 @@ pub(super) fn compile_function_definition(
             let mir_type = type_::compile_record(record_type);
 
             compile_function_definition(
-                mir::ir::Variant::new(
-                    mir::types::Type::Boolean,
-                    record_field_resolver::resolve_record(record_type, context.records())?
-                        .iter()
-                        .enumerate()
-                        .fold(
-                            Ok(mir::ir::Expression::Boolean(true)),
-                            |result, (index, field)| -> Result<_, CompileError> {
-                                Ok(compile_merged_result(
-                                    result?,
-                                    compile_call(
-                                        utility::compile_any(
-                                            context,
-                                            mir::ir::RecordField::new(
-                                                mir_type.clone(),
-                                                index,
-                                                lhs.clone(),
-                                            ),
-                                            field.type_(),
-                                        )?,
-                                        utility::compile_any(
-                                            context,
-                                            mir::ir::RecordField::new(
-                                                mir_type.clone(),
-                                                index,
-                                                rhs.clone(),
-                                            ),
-                                            field.type_(),
-                                        )?,
-                                    ),
-                                ))
-                            },
-                        )?,
-                )
-                .into(),
+                record_field_resolver::resolve_record(record_type, context.records())?
+                    .iter()
+                    .enumerate()
+                    .fold(
+                        Ok(mir::ir::Variant::new(
+                            mir::types::Type::Boolean,
+                            mir::ir::Expression::Boolean(true),
+                        )
+                        .into()),
+                        |result, (index, field)| -> Result<_, CompileError> {
+                            Ok(compile_merged_result(
+                                result?,
+                                compile_call(
+                                    utility::compile_any(
+                                        context,
+                                        mir::ir::RecordField::new(
+                                            mir_type.clone(),
+                                            index,
+                                            lhs.clone(),
+                                        ),
+                                        field.type_(),
+                                    )?,
+                                    utility::compile_any(
+                                        context,
+                                        mir::ir::RecordField::new(
+                                            mir_type.clone(),
+                                            index,
+                                            rhs.clone(),
+                                        ),
+                                        field.type_(),
+                                    )?,
+                                ),
+                            ))
+                        },
+                    )?,
             )?
         }
         Type::String(_) => compile_function_definition(
@@ -222,6 +222,13 @@ fn compile_function_definition_for_concrete_type(
     body: mir::ir::Expression,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     let mir_type = type_::compile_concrete(context, type_)?;
+    let default_alternative = Some(mir::ir::DefaultAlternative::new(
+        "",
+        mir::ir::Variant::new(
+            mir::types::Type::Boolean,
+            mir::ir::Expression::Boolean(false),
+        ),
+    ));
 
     Ok(mir::ir::FunctionDefinition::new(
         compile_function_name(context, type_)?,
@@ -238,16 +245,10 @@ fn compile_function_definition_for_concrete_type(
                 mir::ir::Case::new(
                     mir::ir::Variable::new(RHS_NAME),
                     vec![mir::ir::Alternative::new(vec![mir_type], RHS_NAME, body)],
-                    Some(mir::ir::DefaultAlternative::new(
-                        "",
-                        mir::ir::Expression::Boolean(false),
-                    )),
+                    default_alternative.clone(),
                 ),
             )],
-            Some(mir::ir::DefaultAlternative::new(
-                "",
-                mir::ir::Expression::Boolean(false),
-            )),
+            default_alternative,
         ),
     ))
 }

@@ -234,6 +234,18 @@ mod tests {
                                 ),
                                 Position::fake(),
                             ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.string_type.equal_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::ByteString::new(Position::fake()).into(),
+                                        types::ByteString::new(Position::fake()).into(),
+                                    ],
+                                    types::Boolean::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
                         ])
                         .collect(),
                 ),
