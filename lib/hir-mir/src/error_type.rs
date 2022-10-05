@@ -8,7 +8,7 @@ pub fn compile_type_definition() -> mir::ir::TypeDefinition {
 }
 
 pub fn compile_error(source: mir::ir::Expression) -> mir::ir::Expression {
-    const VALUE_NAME: &str = "$x";
+    const VALUE_NAME: &str = "$source";
     let error_type = compile_type();
 
     mir::ir::Let::new(
