@@ -78,14 +78,18 @@ concatenateNodes = \(x \() node | none, y \() node | none) \() node | none {
   }
 }
 
-EqualLists = \(f \(any, any) boolean, x List, y List) boolean {
+EqualLists = \(f \(any, any) boolean | none, x List, y List) boolean | none {
   equalNodes(f, x.node(), y.node())
 }
 
-equalNodes = \(f \(any, any) boolean, x node | none, y node | none) boolean {
+equalNodes = \(f \(any, any) boolean | none, x node | none, y node | none) boolean | none {
   if x = x as node {
     if y = y as node {
-      f(x.first(), y.first()) & equalNodes(f, x.rest(), y.rest())
+      if b = f(x.first(), y.first()) as boolean {
+        equalNodes(f, x.rest(), y.rest())
+      } else if none {
+        none
+      }
     } else {
       false
     }
