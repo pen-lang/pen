@@ -155,27 +155,19 @@ pub(super) fn compile_function_definition(
                         )
                         .into()),
                         |result, (index, field)| -> Result<_, CompileError> {
+                            let compile_field = |record| {
+                                utility::compile_any(
+                                    context,
+                                    mir::ir::RecordField::new(mir_type.clone(), index, record),
+                                    field.type_(),
+                                )
+                            };
+
                             Ok(compile_merged_result(
                                 result?,
                                 compile_call(
-                                    utility::compile_any(
-                                        context,
-                                        mir::ir::RecordField::new(
-                                            mir_type.clone(),
-                                            index,
-                                            lhs.clone(),
-                                        ),
-                                        field.type_(),
-                                    )?,
-                                    utility::compile_any(
-                                        context,
-                                        mir::ir::RecordField::new(
-                                            mir_type.clone(),
-                                            index,
-                                            rhs.clone(),
-                                        ),
-                                        field.type_(),
-                                    )?,
+                                    compile_field(lhs.clone())?,
+                                    compile_field(rhs.clone())?,
                                 ),
                             ))
                         },
@@ -257,6 +249,9 @@ fn compile_merged_result(
     lhs: impl Into<mir::ir::Expression>,
     rhs: impl Into<mir::ir::Expression>,
 ) -> mir::ir::Expression {
+    const LHS_NAME: &str = "$lhs_result";
+    const RHS_NAME: &str = "$lhs_result";
+
     let default_alternative = Some(mir::ir::DefaultAlternative::new(
         "",
         mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None),
@@ -272,10 +267,13 @@ fn compile_merged_result(
                 vec![mir::ir::Alternative::new(
                     vec![mir::types::Type::Boolean],
                     RHS_NAME,
-                    mir::ir::If::new(
-                        mir::ir::Variable::new(LHS_NAME).clone(),
-                        mir::ir::Variable::new(RHS_NAME).clone(),
-                        mir::ir::Expression::Boolean(false),
+                    mir::ir::Variant::new(
+                        mir::types::Type::Boolean,
+                        mir::ir::If::new(
+                            mir::ir::Variable::new(LHS_NAME).clone(),
+                            mir::ir::Variable::new(RHS_NAME).clone(),
+                            mir::ir::Expression::Boolean(false),
+                        ),
                     ),
                 )],
                 default_alternative.clone(),
