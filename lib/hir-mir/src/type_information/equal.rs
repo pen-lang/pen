@@ -264,6 +264,39 @@ fn compile_unboxed_concrete(
     .into())
 }
 
+fn compile_merged_result(
+    lhs: mir::ir::Expression,
+    rhs: mir::ir::Expression,
+) -> mir::ir::Expression {
+    let default_alternative = Some(mir::ir::DefaultAlternative::new(
+        "",
+        mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None),
+    ));
+
+    mir::ir::Case::new(
+        lhs,
+        vec![mir::ir::Alternative::new(
+            vec![mir::types::Type::Boolean],
+            LHS_NAME,
+            mir::ir::Case::new(
+                rhs,
+                vec![mir::ir::Alternative::new(
+                    vec![mir::types::Type::Boolean],
+                    RHS_NAME,
+                    mir::ir::If::new(
+                        mir::ir::Variable::new(LHS_NAME).clone(),
+                        mir::ir::Variable::new(RHS_NAME).clone(),
+                        mir::ir::Expression::Boolean(false),
+                    ),
+                )],
+                default_alternative.clone(),
+            ),
+        )],
+        default_alternative.clone(),
+    )
+    .into()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
