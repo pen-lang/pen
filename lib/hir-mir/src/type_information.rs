@@ -49,7 +49,10 @@ fn compile_function(argument: impl Into<mir::ir::Expression>, index: usize) -> m
 pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
     mir::ir::TypeDefinition::new(
         TYPE_INFORMATION_RECORD_NAME,
-        mir::types::RecordBody::new(vec![debug::compile_function_type().into()]),
+        mir::types::RecordBody::new(vec![
+            debug::compile_function_type().into(),
+            equal::compile_function_type().into(),
+        ]),
     )
 }
 
@@ -129,6 +132,7 @@ fn compile_function_declarations(
 ) -> Result<Vec<mir::ir::FunctionDeclaration>, CompileError> {
     Ok(vec![
         debug::compile_function_declaration(context, type_)?,
+        equal::compile_function_declaration(context, type_)?,
         mir::ir::FunctionDeclaration::new(
             compile_function_name(context, type_)?,
             compile_function_type(),
@@ -145,12 +149,19 @@ fn compile_function_definitions(
 
     Ok([
         debug::compile_function_definition(context, type_)?,
+        equal::compile_function_definition(context, type_)?,
         mir::ir::FunctionDefinition::thunk(
             compile_function_name(context, type_)?,
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
-                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)?).into()],
+                [
+                    debug::compile_function_name(context, type_)?,
+                    equal::compile_function_name(context, type_)?,
+                ]
+                .into_iter()
+                .map(|name| mir::ir::Variable::new(name).into())
+                .collect(),
             ),
         ),
     ]
@@ -164,13 +175,20 @@ fn compile_default_function_definitions() -> Vec<mir::ir::GlobalFunctionDefiniti
 
     [
         debug::compile_default_function_definition(),
+        equal::compile_default_function_definition(),
         mir::ir::FunctionDefinition::new(
             DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
             vec![],
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
-                vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
+                [
+                    debug::compile_default_function_name(),
+                    equal::compile_default_function_name(),
+                ]
+                .into_iter()
+                .map(|name| mir::ir::Variable::new(name).into())
+                .collect(),
             ),
         ),
     ]
