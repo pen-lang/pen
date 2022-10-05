@@ -18,7 +18,7 @@ pub fn compile_call(
     mir::ir::Call::new(
         compile_function_type(),
         type_information::compile_function(lhs.clone(), 1),
-        vec![lhs.into(), rhs.into()],
+        vec![lhs, rhs.into()],
     )
     .into()
 }
@@ -267,8 +267,8 @@ fn compile_merged_result(
                     mir::ir::Variant::new(
                         mir::types::Type::Boolean,
                         mir::ir::If::new(
-                            mir::ir::Variable::new(LHS_NAME).clone(),
-                            mir::ir::Variable::new(RHS_NAME).clone(),
+                            mir::ir::Variable::new(LHS_NAME),
+                            mir::ir::Variable::new(RHS_NAME),
                             mir::ir::Expression::Boolean(false),
                         ),
                     ),
@@ -276,7 +276,7 @@ fn compile_merged_result(
                 default_alternative.clone(),
             ),
         )],
-        default_alternative.clone(),
+        default_alternative,
     )
     .into()
 }
