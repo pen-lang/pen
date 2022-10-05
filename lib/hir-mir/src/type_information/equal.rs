@@ -141,7 +141,6 @@ pub(super) fn compile_function_definition(
             )
             .into(),
         )?,
-        // TODO
         Type::Record(record_type) => {
             let mir_type = type_::compile_record(record_type);
 
