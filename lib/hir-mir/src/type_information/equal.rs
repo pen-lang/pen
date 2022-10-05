@@ -6,6 +6,7 @@ use hir::{
 
 use super::utility;
 
+const FUNCTION_PREFIX: &str = "hir:reflect:equal:";
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
 
@@ -23,18 +24,15 @@ pub fn compile_call(
     .into()
 }
 
-pub(super) fn compile_default_function_name() -> &'static str {
-    "hir:equal:default"
+pub(super) fn compile_default_function_name() -> String {
+    FUNCTION_PREFIX.to_owned() + "default"
 }
 
 pub(super) fn compile_function_name(
     context: &Context,
     type_: &Type,
 ) -> Result<String, CompileError> {
-    Ok(format!(
-        "hir:equal:{}",
-        type_id_calculator::calculate(type_, context.types())?
-    ))
+    Ok(FUNCTION_PREFIX.to_owned() + &type_id_calculator::calculate(type_, context.types())?)
 }
 
 pub(super) fn compile_function_type() -> mir::types::Function {

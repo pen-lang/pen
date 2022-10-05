@@ -6,6 +6,7 @@ use hir::{
 };
 use itertools::Itertools;
 
+const FUNCTION_PREFIX: &str = "hir:reflect:debug:";
 const ARGUMENT_NAME: &str = "$x";
 
 pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expression {
@@ -19,18 +20,15 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
     .into()
 }
 
-pub(super) fn compile_default_function_name() -> &'static str {
-    "hir:debug:default"
+pub(super) fn compile_default_function_name() -> String {
+    FUNCTION_PREFIX.to_owned() + "default"
 }
 
 pub(super) fn compile_function_name(
     context: &Context,
     type_: &Type,
 ) -> Result<String, CompileError> {
-    Ok(format!(
-        "hir:debug:{}",
-        type_id_calculator::calculate(type_, context.types())?
-    ))
+    Ok(FUNCTION_PREFIX.to_owned() + &type_id_calculator::calculate(type_, context.types())?)
 }
 
 pub(super) fn compile_function_type() -> mir::types::Function {
