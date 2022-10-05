@@ -290,7 +290,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_without_compile_configuration() {
+    fn compile_empty_without_compile_configuration() {
         let module = Module::empty();
         let context = Context::new(&module, None);
 
@@ -332,6 +332,30 @@ mod tests {
                 .collect(),
             )
         );
+    }
+
+    #[test]
+    fn compile_type_information_as_thunks() {
+        let module = Module::empty();
+        let context = create_context(&module);
+        let (_, definitions) =
+            compile_function_declarations_and_definitions(&context, &module).unwrap();
+
+        for type_ in &[
+            types::Boolean::new(Position::fake()).into(),
+            types::ByteString::new(Position::fake()).into(),
+            types::Error::new(Position::fake()).into(),
+            types::None::new(Position::fake()).into(),
+            types::Number::new(Position::fake()).into(),
+        ] {
+            assert!(definitions
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == compile_function_name(&context, type_).unwrap())
+                .unwrap()
+                .definition()
+                .is_thunk());
+        }
     }
 
     #[test]
