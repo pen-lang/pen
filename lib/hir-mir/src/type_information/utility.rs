@@ -1,5 +1,4 @@
-use crate::context::Context;
-use crate::{concrete_type, type_, CompileError};
+use crate::{concrete_type, context::Context, type_, CompileError};
 use hir::types::Type;
 
 pub fn compile_any(
