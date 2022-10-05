@@ -1,8 +1,10 @@
-use crate::{concrete_type, context::Context, error_type, type_, type_information, CompileError};
+use crate::{context::Context, error_type, type_, type_information, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
 };
+
+use super::utility;
 
 const LHS_NAME: &str = "$lhs";
 const RHS_NAME: &str = "$rhs";
@@ -68,7 +70,7 @@ pub(super) fn compile_function_definition(
                 mir::types::Type::Boolean,
                 mir::ir::If::new(
                     lhs,
-                    rhs,
+                    rhs.clone(),
                     mir::ir::If::new(
                         rhs,
                         mir::ir::Expression::Boolean(false),
@@ -99,7 +101,7 @@ pub(super) fn compile_function_definition(
                 mir::ir::Variable::new(&context.configuration()?.list_type.equal_function_name),
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(list_type.element())).into(),
-                    compile_unboxed_concrete(context, lhs, type_)?,
+                    utility::compile_unboxed_concrete(context, lhs, type_)?,
                 ],
             )
             .into(),
@@ -120,7 +122,7 @@ pub(super) fn compile_function_definition(
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
                     mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
-                    compile_unboxed_concrete(context, lhs, type_)?,
+                    utility::compile_unboxed_concrete(context, lhs, type_)?,
                 ],
             )
             .into(),
@@ -151,28 +153,32 @@ pub(super) fn compile_function_definition(
                         .enumerate()
                         .fold(
                             Ok(mir::ir::Expression::Boolean(true)),
-                            |result, (index, field)| {
+                            |result, (index, field)| -> Result<_, CompileError> {
                                 let type_ = type_::compile(context, field.type_())?;
 
-                                Ok(mir::ir::If::new(
+                                Ok(compile_merged_result(
                                     result?,
-                                    mir::ir::Call::new(
-                                        type_::compile_concrete(context, field.type_())?,
-                                        mir::ir::Variable::new(),
-                                        [lhs.clone(), rhs.clone()]
-                                            .into_iter()
-                                            .map(|value| {
-                                                mir::ir::RecordField::new(
-                                                    mir_type.clone(),
-                                                    index,
-                                                    value,
-                                                )
-                                            })
-                                            .collect(),
+                                    compile_call(
+                                        utility::compile_any(
+                                            context,
+                                            mir::ir::RecordField::new(
+                                                mir_type.clone(),
+                                                index,
+                                                lhs.clone(),
+                                            ),
+                                            field.type_(),
+                                        )?,
+                                        utility::compile_any(
+                                            context,
+                                            mir::ir::RecordField::new(
+                                                mir_type.clone(),
+                                                index,
+                                                rhs.clone(),
+                                            ),
+                                            field.type_(),
+                                        )?,
                                     ),
-                                    mir::ir::Expression::Boolean(false),
-                                )
-                                .into())
+                                ))
                             },
                         )?,
                 )
@@ -249,24 +255,9 @@ fn compile_function_definition_for_concrete_type(
     ))
 }
 
-fn compile_unboxed_concrete(
-    context: &Context,
-    expression: impl Into<mir::ir::Expression>,
-    type_: &Type,
-) -> Result<mir::ir::Expression, CompileError> {
-    Ok(mir::ir::RecordField::new(
-        type_::compile_concrete(context, type_)?
-            .into_record()
-            .unwrap(),
-        0,
-        expression.into(),
-    )
-    .into())
-}
-
 fn compile_merged_result(
-    lhs: mir::ir::Expression,
-    rhs: mir::ir::Expression,
+    lhs: impl Into<mir::ir::Expression>,
+    rhs: impl Into<mir::ir::Expression>,
 ) -> mir::ir::Expression {
     let default_alternative = Some(mir::ir::DefaultAlternative::new(
         "",
