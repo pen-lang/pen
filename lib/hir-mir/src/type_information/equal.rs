@@ -1,10 +1,9 @@
+use super::utility;
 use crate::{context::Context, error_type, type_, type_information, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
 };
-
-use super::utility;
 
 const FUNCTION_PREFIX: &str = "hir:reflect:equal:";
 const LHS_NAME: &str = "$lhs";
