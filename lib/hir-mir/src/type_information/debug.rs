@@ -147,7 +147,6 @@ pub(super) fn compile_function_definition(
                                 .iter()
                                 .enumerate()
                                 .map(|(index, field)| {
-                                    let type_ = type_::compile(context, field.type_())?;
                                     let value = mir::ir::RecordField::new(
                                         mir_type.clone(),
                                         index,

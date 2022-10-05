@@ -153,8 +153,6 @@ pub(super) fn compile_function_definition(
                         .fold(
                             Ok(mir::ir::Expression::Boolean(true)),
                             |result, (index, field)| -> Result<_, CompileError> {
-                                let type_ = type_::compile(context, field.type_())?;
-
                                 Ok(compile_merged_result(
                                     result?,
                                     compile_call(
