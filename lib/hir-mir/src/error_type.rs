@@ -8,7 +8,27 @@ pub fn compile_type_definition() -> mir::ir::TypeDefinition {
 }
 
 pub fn compile_error(source: mir::ir::Expression) -> mir::ir::Expression {
-    mir::ir::Record::new(compile_type(), vec![source]).into()
+    const VALUE_NAME: &str = "$x";
+    let error_type = compile_type();
+
+    mir::ir::Let::new(
+        VALUE_NAME,
+        mir::types::Type::Variant,
+        source,
+        mir::ir::Case::new(
+            mir::ir::Variable::new(VALUE_NAME),
+            vec![mir::ir::Alternative::new(
+                vec![error_type.clone().into()],
+                VALUE_NAME,
+                mir::ir::Variable::new(VALUE_NAME),
+            )],
+            Some(mir::ir::DefaultAlternative::new(
+                VALUE_NAME,
+                mir::ir::Record::new(error_type, vec![mir::ir::Variable::new(VALUE_NAME).into()]),
+            )),
+        ),
+    )
+    .into()
 }
 
 pub fn compile_source(error: mir::ir::Expression) -> mir::ir::Expression {
