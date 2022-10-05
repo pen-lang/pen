@@ -1,4 +1,5 @@
 pub mod debug;
+pub mod equal;
 
 use crate::{context::Context, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
