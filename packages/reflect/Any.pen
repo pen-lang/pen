@@ -6,6 +6,6 @@ Debug = \(x any) string {
 }
 
 # Check if values are equal. It returns `none` if values are not comparable.
-Debug = \(x any, y any) boolean | none {
-  _reflect_equal(x)
+Equal = \(x any, y any) boolean | none {
+  _reflect_equal(x, y)
 }

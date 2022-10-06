@@ -294,7 +294,13 @@ mergeHamt = \(ctx MapContext, m Map, h hamt, i number) Map {
 
 EqualMaps = \(ctx MapContext, x Map, y Map) boolean {
   if x.size == y.size {
-    if b = equalHamts(ctx.equalKeys, ctx.equalValues, ctx, x.hamt, y.hamt, 1) as boolean {
+    if b = equalHamts(
+      \(x any, y any) boolean | none { ctx.equalKeys(x, y) },
+      \(x any, y any) boolean | none { ctx.equalValues(x, y) },
+      x.hamt,
+      y.hamt,
+      1,
+    ) as boolean {
       b
     } else {
       false
