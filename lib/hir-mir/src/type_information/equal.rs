@@ -1,7 +1,7 @@
 use super::utility;
 use crate::{context::Context, error_type, type_, type_information, CompileError};
 use hir::{
-    analysis::{record_field_resolver, type_formatter, type_id_calculator},
+    analysis::{record_field_resolver, type_id_calculator},
     types::Type,
 };
 
@@ -84,46 +84,48 @@ pub(super) fn compile_function_definition(
         Type::Function(_) => compile_function_definition(
             mir::ir::Variant::new(mir::types::Type::None, mir::ir::Expression::None).into(),
         )?,
-        // TODO
-        Type::List(list_type) => compile_function_definition(
-            mir::ir::Call::new(
-                mir::types::Function::new(
+        Type::List(_) => {
+            let list_type = mir::types::Type::from(type_::compile_list(context)?);
+
+            compile_function_definition(
+                mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![compile_function_type().into(), list_type.clone(), list_type],
+                        mir::types::Type::Variant,
+                    ),
+                    mir::ir::Variable::new(
+                        &context.configuration()?.list_type.maybe_equal_function_name,
+                    ),
                     vec![
-                        mir::types::Type::ByteString,
-                        type_::compile_list(context)?.into(),
-                        compile_function_type().into(),
+                        compile_element_function(),
+                        utility::compile_unboxed_concrete(context, lhs, type_)?,
+                        utility::compile_unboxed_concrete(context, rhs, type_)?,
                     ],
-                    mir::types::Type::ByteString,
-                ),
-                mir::ir::Variable::new(&context.configuration()?.list_type.equal_function_name),
-                vec![
-                    mir::ir::ByteString::new(type_formatter::format(list_type.element())).into(),
-                    utility::compile_unboxed_concrete(context, lhs, type_)?,
-                ],
-            )
-            .into(),
-        )?,
-        // TODO
-        Type::Map(map_type) => compile_function_definition(
-            mir::ir::Call::new(
-                mir::types::Function::new(
+                )
+                .into(),
+            )?
+        }
+        Type::Map(_) => {
+            let map_type = mir::types::Type::from(type_::compile_map(context)?);
+
+            compile_function_definition(
+                mir::ir::Call::new(
+                    mir::types::Function::new(
+                        vec![compile_function_type().into(), map_type.clone(), map_type],
+                        mir::types::Type::Variant,
+                    ),
+                    mir::ir::Variable::new(
+                        &context.configuration()?.map_type.maybe_equal_function_name,
+                    ),
                     vec![
-                        mir::types::Type::ByteString,
-                        mir::types::Type::ByteString,
-                        type_::compile_map(context)?.into(),
-                        compile_function_type().into(),
+                        compile_element_function(),
+                        utility::compile_unboxed_concrete(context, lhs, type_)?,
+                        utility::compile_unboxed_concrete(context, rhs, type_)?,
                     ],
-                    mir::types::Type::ByteString,
-                ),
-                mir::ir::Variable::new(&context.configuration()?.map_type.equal_function_name),
-                vec![
-                    mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
-                    mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
-                    utility::compile_unboxed_concrete(context, lhs, type_)?,
-                ],
-            )
-            .into(),
-        )?,
+                )
+                .into(),
+            )?
+        }
         Type::None(_) => compile_function_definition(
             mir::ir::Variant::new(
                 mir::types::Type::Boolean,
@@ -277,6 +279,27 @@ fn compile_merged_result(
             ),
         )],
         default_alternative,
+    )
+    .into()
+}
+
+fn compile_element_function() -> mir::ir::Expression {
+    const CLOSURE_NAME: &str = "hir:equal:element";
+
+    mir::ir::LetRecursive::new(
+        mir::ir::FunctionDefinition::new(
+            CLOSURE_NAME,
+            vec![
+                mir::ir::Argument::new(LHS_NAME, mir::types::Type::Variant),
+                mir::ir::Argument::new(RHS_NAME, mir::types::Type::Variant),
+            ],
+            mir::types::Type::Variant,
+            compile_call(
+                mir::ir::Variable::new(LHS_NAME),
+                mir::ir::Variable::new(RHS_NAME),
+            ),
+        ),
+        mir::ir::Variable::new(CLOSURE_NAME),
     )
     .into()
 }

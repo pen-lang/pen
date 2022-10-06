@@ -108,7 +108,7 @@ mod tests {
     use hir::{
         analysis::AnalysisError,
         test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
-        types,
+        types::{self, Type},
     };
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
@@ -150,6 +150,26 @@ mod tests {
             types::Boolean::new(Position::fake()),
             Position::fake(),
         );
+        let list_type = Type::from(types::Record::new(
+            &COMPILE_CONFIGURATION.list_type.list_type_name,
+            Position::fake(),
+        ));
+        let map_type = Type::from(types::Record::new(
+            &COMPILE_CONFIGURATION.map_type.map_type_name,
+            Position::fake(),
+        ));
+        let maybe_equal_function_type = Type::from(types::Function::new(
+            vec![
+                types::Any::new(Position::fake()).into(),
+                types::Any::new(Position::fake()).into(),
+            ],
+            types::Union::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            ),
+            Position::fake(),
+        ));
 
         compile(
             &module
@@ -178,14 +198,27 @@ mod tests {
                                 types::Function::new(
                                     vec![
                                         types::ByteString::new(Position::fake()).into(),
-                                        types::Record::new(
-                                            &COMPILE_CONFIGURATION.list_type.list_type_name,
-                                            Position::fake(),
-                                        )
-                                        .into(),
+                                        list_type.clone(),
                                         debug_function_type.clone().into(),
                                     ],
                                     types::ByteString::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.maybe_equal_function_name,
+                                types::Function::new(
+                                    vec![
+                                        maybe_equal_function_type.clone(),
+                                        list_type.clone(),
+                                        list_type,
+                                    ],
+                                    types::Union::new(
+                                        types::Boolean::new(Position::fake()),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -213,14 +246,23 @@ mod tests {
                                     vec![
                                         types::ByteString::new(Position::fake()).into(),
                                         types::ByteString::new(Position::fake()).into(),
-                                        types::Record::new(
-                                            &COMPILE_CONFIGURATION.map_type.map_type_name,
-                                            Position::fake(),
-                                        )
-                                        .into(),
+                                        map_type.clone(),
                                         debug_function_type.into(),
                                     ],
                                     types::ByteString::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.maybe_equal_function_name,
+                                types::Function::new(
+                                    vec![maybe_equal_function_type, map_type.clone(), map_type],
+                                    types::Union::new(
+                                        types::Boolean::new(Position::fake()),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
                                     Position::fake(),
                                 ),
                                 Position::fake(),

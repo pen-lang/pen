@@ -91,7 +91,7 @@ pub(super) fn compile_function_definition(
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(list_type.element())).into(),
                     utility::compile_unboxed_concrete(context, argument, type_)?,
-                    compile_debug_closure(),
+                    compile_element_function(),
                 ],
             )
             .into(),
@@ -112,7 +112,7 @@ pub(super) fn compile_function_definition(
                     mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
                     mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
                     utility::compile_unboxed_concrete(context, argument, type_)?,
-                    compile_debug_closure(),
+                    compile_element_function(),
                 ],
             )
             .into(),
@@ -222,8 +222,8 @@ fn compile_function_definition_for_concrete_type(
     ))
 }
 
-fn compile_debug_closure() -> mir::ir::Expression {
-    const CLOSURE_NAME: &str = "hir:debug:closure";
+fn compile_element_function() -> mir::ir::Expression {
+    const CLOSURE_NAME: &str = "hir:debug:element";
 
     mir::ir::LetRecursive::new(
         mir::ir::FunctionDefinition::new(
