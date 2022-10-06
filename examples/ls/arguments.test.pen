@@ -5,13 +5,13 @@ import 'arguments
 ParseNoArgument = \() none | error {
   args = arguments'Parse([string])?
 
-  Assert'True(args.Directory == ".")
+  Assert'Equal(args.Directory, ".")
 }
 
 ParseArgument = \() none | error {
   args = arguments'Parse([string "foo"])?
 
-  Assert'True(args.Directory == "foo")
+  Assert'Equal(args.Directory, "foo")
 }
 
 FailToParseWithTooManyArguments = \() none | error {
@@ -23,7 +23,7 @@ FailToParseWithTooManyArguments = \() none | error {
 assertStringError = \(x any, expected string) none | error {
   if e = x as error {
     if s = source(e) as string {
-      Assert'True(s == expected)
+      Assert'Equal(s, expected)
     } else {
       Assert'Fail()
     }

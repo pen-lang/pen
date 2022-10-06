@@ -18,7 +18,7 @@ import Test'Assert
 import 'Foo
 
 CheckFoo = \() none | error {
-  Assert'True(Foo'Foo() == 42)
+  Assert'Equal(Foo'Foo(), 42)
 }
 ```
 

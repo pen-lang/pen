@@ -6,12 +6,12 @@ import 'game { Game }
 import 'render { Render }
 
 RenderGame = \() none | error {
-  Assert'True(
-    Render(game'New(Field{Width: 2, Height: 2}, \() number { 0 }))
-      == [string
-        "o.",
-        "..",
-      ],
+  Assert'Equal(
+    Render(game'New(Field{Width: 2, Height: 2}, \() number { 0 })),
+    [string
+      "o.",
+      "..",
+    ],
   )
 }
 
@@ -23,12 +23,12 @@ RenderGameWithMovedSnake = \() none | error {
   if g = g as none {
     Assert'Fail()
   } else {
-    Assert'True(
-      Render(g)
-        == [string
-          "..",
-          "o.",
-        ],
+    Assert'Equal(
+      Render(g),
+      [string
+        "..",
+        "o.",
+      ],
     )
   }
 }

@@ -17,29 +17,29 @@ IsNotMatch = \() none | error {
 Match = \() none | error {
   e = Expression'New("foo")?
 
-  Assert'True(Expression'Match(e, "foo") == [string | none "foo"])
+  Assert'Equal(Expression'Match(e, "foo"), [string | none "foo"])
 }
 
 MatchGroup = \() none | error {
   e = Expression'New("(foo)")?
 
-  Assert'True(Expression'Match(e, "foo") == [string | none "foo", "foo"])
+  Assert'Equal(Expression'Match(e, "foo"), [string | none "foo", "foo"])
 }
 
 MatchGroups = \() none | error {
   e = Expression'New("(foo)(bar)")?
 
-  Assert'True(Expression'Match(e, "foobar") == [string | none "foobar", "foo", "bar"])
+  Assert'Equal(Expression'Match(e, "foobar"), [string | none "foobar", "foo", "bar"])
 }
 
 MatchSuccessfulAndFailedGroups = \() none | error {
   e = Expression'New("(foo)(bar)?")?
 
-  Assert'True(Expression'Match(e, "foo") == [string | none "foo", "foo", none])
+  Assert'Equal(Expression'Match(e, "foo"), [string | none "foo", "foo", none])
 }
 
 MatchFail = \() none | error {
   e = Expression'New("foo")?
 
-  Assert'True(Expression'Match(e, "bar") == none)
+  Assert'Equal(Expression'Match(e, "bar"), none)
 }

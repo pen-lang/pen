@@ -4,50 +4,50 @@ import 'Encode { Encode }
 import 'Value { Value }
 
 EncodeNull = \() none | error {
-  Assert'True(Encode(Value'New(none)) == "null")
+  Assert'Equal(Encode(Value'New(none)), "null")
 }
 
 EncodeNumber = \() none | error {
-  Assert'True(Encode(Value'New(42)) == "42")
+  Assert'Equal(Encode(Value'New(42)), "42")
 }
 
 EncodeTrue = \() none | error {
-  Assert'True(Encode(Value'New(true)) == "true")
+  Assert'Equal(Encode(Value'New(true)), "true")
 }
 
 EncodeFalse = \() none | error {
-  Assert'True(Encode(Value'New(false)) == "false")
+  Assert'Equal(Encode(Value'New(false)), "false")
 }
 
 EncodeString = \() none | error {
-  Assert'True(Encode(Value'New("foo")) == "\"foo\"")
+  Assert'Equal(Encode(Value'New("foo")), "\"foo\"")
 }
 
 EncodeEscapedDoubleQuoteInString = \() none | error {
-  Assert'True(Encode(Value'New("\"")) == "\"\\\"\"")
+  Assert'Equal(Encode(Value'New("\"")), "\"\\\"\"")
 }
 
 EncodeEscapedBackSlashInString = \() none | error {
-  Assert'True(Encode(Value'New("\\")) == "\"\\\\\"")
+  Assert'Equal(Encode(Value'New("\\")), "\"\\\\\"")
 }
 
 EncodeArrayWithNoElement = \() none | error {
-  Assert'True(Encode(Value'New([Value])) == "[]")
+  Assert'Equal(Encode(Value'New([Value])), "[]")
 }
 
 EncodeArrayWithElement = \() none | error {
-  Assert'True(Encode(Value'New([Value Value'New(1)])) == "[1]")
+  Assert'Equal(Encode(Value'New([Value Value'New(1)])), "[1]")
 }
 
 EncodeArrayWith2Elements = \() none | error {
-  Assert'True(
-    Encode(Value'New([Value Value'New(1), Value'New(2)]))
-      == "[1,2]",
+  Assert'Equal(
+    Encode(Value'New([Value Value'New(1), Value'New(2)])),
+    "[1,2]",
   )
 }
 
 EncodeArrayWith3Elements = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Encode(
       Value'New(
         [Value
@@ -56,30 +56,30 @@ EncodeArrayWith3Elements = \() none | error {
           Value'New(3),
         ],
       ),
-    )
-      == "[1,2,3]",
+    ),
+    "[1,2,3]",
   )
 }
 
 EncodeObjectWithNoEntry = \() none | error {
-  Assert'True(Encode(Value'New({string: Value})) == "{}")
+  Assert'Equal(Encode(Value'New({string: Value})), "{}")
 }
 
 EncodeObjectWithEntry = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Encode(
       Value'New(
         {string: Value
           "foo": Value'New(1),
         },
       ),
-    )
-      == "{\"foo\":1}",
+    ),
+    "{\"foo\":1}",
   )
 }
 
 EncodeObjectWith2Entries = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Encode(
       Value'New(
         {string: Value
@@ -87,13 +87,13 @@ EncodeObjectWith2Entries = \() none | error {
           "bar": Value'New(2),
         },
       ),
-    )
-      == "{\"bar\":2,\"foo\":1}",
+    ),
+    "{\"bar\":2,\"foo\":1}",
   )
 }
 
 EncodeObjectWith3Entries = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Encode(
       Value'New(
         {string: Value
@@ -102,7 +102,7 @@ EncodeObjectWith3Entries = \() none | error {
           "baz": Value'New(3),
         },
       ),
-    )
-      == "{\"bar\":2,\"baz\":3,\"foo\":1}",
+    ),
+    "{\"bar\":2,\"baz\":3,\"foo\":1}",
   )
 }
