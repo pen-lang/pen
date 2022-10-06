@@ -304,7 +304,7 @@ EqualMaps = \(ctx MapContext, x Map, y Map) boolean {
   }
 }
 
-ReflectEqualMaps = \(
+MaybeEqualMaps = \(
   f \(any, any) boolean | none,
   x Map,
   y Map,
