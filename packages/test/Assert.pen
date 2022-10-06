@@ -2,6 +2,23 @@
 
 import Reflect'Any
 
+# Assert that values are equal. Also, if it finds values not comparable, it returns an error.
+Equal = \(x any, y any) none | error {
+  if b = Any'Equal(x, y) as boolean {
+    if b {
+      none
+    } else {
+      error("values are not equal " + formatValues(x, y))
+    }
+  } else {
+    error("values are not comparable " + formatValues(x, y))
+  }
+}
+
+formatValues = \(x any, y any) string {
+  "(found: " + Any'Debug(x) + ") (expected: " + Any'Debug(y) + ")"
+}
+
 # Assert that a condition is true.
 True = \(x boolean) none | error {
   if x {
