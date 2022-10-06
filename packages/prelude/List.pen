@@ -98,6 +98,34 @@ equalNodes = \(f \(any, any) boolean, x node | none, y node | none) boolean {
   }
 }
 
+ReflectEqualLists = \(f \(any, any) boolean | none, x List, y List) boolean {
+  reflectEqualNodes(f, x.node(), y.node())
+}
+
+reflectEqualNodes = \(f \(any, any) boolean | none, x node | none, y node | none) boolean {
+  if x = x as node {
+    if y = y as node {
+      if b = f(x.first(), y.first()) as boolean {
+        if b {
+          reflectEqualNodes(f, x.rest(), y.rest())
+        } else {
+          false
+        }
+      } else if none {
+        none
+      }
+    } else {
+      false
+    }
+  } else {
+    if y = y as node {
+      false
+    } else {
+      true
+    }
+  }
+}
+
 HashList = \(f \(any) number, l List) number {
   hashNode(f, l.node, 0)
 }
