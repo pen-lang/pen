@@ -2030,7 +2030,7 @@ mod tests {
                                             types::Any::new(Position::fake()).into(),
                                             types::Any::new(Position::fake()).into()
                                         ],
-                                        result_type.clone(),
+                                        result_type,
                                         Position::fake()
                                     )
                                     .into()
