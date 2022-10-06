@@ -692,4 +692,33 @@ mod tests {
         )
         .unwrap();
     }
+
+    #[test]
+    fn compile_reflect_equal() {
+        compile_module(
+            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "f",
+                Lambda::new(
+                    vec![],
+                    types::Union::new(
+                        types::Boolean::new(Position::fake()),
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    Call::new(
+                        None,
+                        BuiltInFunction::new(BuiltInFunctionName::ReflectEqual, Position::fake()),
+                        vec![
+                            None::new(Position::fake()).into(),
+                            None::new(Position::fake()).into(),
+                        ],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]),
+        )
+        .unwrap();
+    }
 }

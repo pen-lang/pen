@@ -79,6 +79,9 @@ pub fn compile(
         BuiltInFunctionName::ReflectDebug => {
             type_information::debug::compile_call(arguments[0].clone())
         }
+        BuiltInFunctionName::ReflectEqual => {
+            type_information::equal::compile_call(arguments[0].clone(), arguments[1].clone())
+        }
         BuiltInFunctionName::Size => mir::ir::Call::new(
             type_::compile_function(context, &function_type)?,
             match &function_type.arguments()[0] {

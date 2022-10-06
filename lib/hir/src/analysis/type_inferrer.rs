@@ -566,6 +566,18 @@ fn infer_built_in_call(
                     types::ByteString::new(position.clone()),
                     position.clone(),
                 ),
+                BuiltInFunctionName::ReflectEqual => types::Function::new(
+                    vec![
+                        types::Any::new(position.clone()).into(),
+                        types::Any::new(position.clone()).into(),
+                    ],
+                    types::Union::new(
+                        types::Boolean::new(position.clone()),
+                        types::None::new(position.clone()),
+                        position.clone(),
+                    ),
+                    position.clone(),
+                ),
                 BuiltInFunctionName::Size => types::Function::new(
                     argument_types,
                     types::Number::new(position.clone()),
@@ -1963,6 +1975,74 @@ mod tests {
                                     Position::fake()
                                 ),
                                 vec![None::new(Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
+        fn infer_reflect_equal() {
+            let result_type = types::Union::new(
+                types::Boolean::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            result_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(
+                                    BuiltInFunctionName::ReflectEqual,
+                                    Position::fake()
+                                ),
+                                vec![
+                                    None::new(Position::fake()).into(),
+                                    None::new(Position::fake()).into()
+                                ],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            result_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![
+                                            types::Any::new(Position::fake()).into(),
+                                            types::Any::new(Position::fake()).into()
+                                        ],
+                                        result_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(
+                                    BuiltInFunctionName::ReflectEqual,
+                                    Position::fake()
+                                ),
+                                vec![
+                                    None::new(Position::fake()).into(),
+                                    None::new(Position::fake()).into()
+                                ],
                                 Position::fake()
                             ),
                             Position::fake(),

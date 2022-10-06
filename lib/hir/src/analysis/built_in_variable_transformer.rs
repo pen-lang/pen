@@ -18,6 +18,9 @@ pub fn transform(module: &Module) -> Module {
             "_reflect_debug" => {
                 BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, position.clone()).into()
             }
+            "_reflect_equal" => {
+                BuiltInFunction::new(BuiltInFunctionName::ReflectEqual, position.clone()).into()
+            }
             _ => variable.clone().into(),
         }
     })
