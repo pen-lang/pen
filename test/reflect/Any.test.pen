@@ -1,0 +1,32 @@
+import Reflect'Any
+import Test'Assert
+
+DebugBoolean = \() none | error {
+  Assert'True(Any'Debug(false) == "false")?
+  Assert'True(Any'Debug(true) == "true")
+}
+
+DebugList = \() none | error {
+  Assert'True(Any'Debug([none]) == "[none]")?
+  Assert'True(Any'Debug([number 1, 2, 3]) == "[number 1, 2, 3]")
+}
+
+DebugMap = \() none | error {
+  Assert'True(Any'Debug({none: none}) == "{none: none}")?
+  Assert'True(
+    Any'Debug({string: number "foo": 1, "bar": 2})
+      == "{string: number \"bar\": 2, \"foo\": 1}",
+  )
+}
+
+DebugNone = \() none | error {
+  Assert'True(Any'Debug(none) == "none")
+}
+
+DebugNumber = \() none | error {
+  Assert'True(Any'Debug(42) == "42")
+}
+
+DebugString = \() none | error {
+  Assert'True(Any'Debug("foo") == "\"foo\"")
+}
