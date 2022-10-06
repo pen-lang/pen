@@ -11,8 +11,8 @@ RenderElement = \() none | error {
         Attributes: [Attribute],
         Children: [Node],
       },
-    )?
-     , "<html/>",
+    )?,
+    "<html/>",
   )
 }
 
@@ -36,8 +36,8 @@ RenderAttribute = \() none | error {
         Attributes: [Attribute Attribute{Key: "foo", Value: "bar"}],
         Children: [Node],
       },
-    )?
-     , "<html foo=\"bar\"/>",
+    )?,
+    "<html foo=\"bar\"/>",
   )
 }
 
@@ -52,8 +52,8 @@ RenderAttributes = \() none | error {
         ],
         Children: [Node],
       },
-    )?
-     , "<html foo=\"bar\"baz=\"blah\"/>",
+    )?,
+    "<html foo=\"bar\"baz=\"blah\"/>",
   )
 }
 
@@ -71,8 +71,8 @@ RenderAttributeWithChild = \() none | error {
           },
         ],
       },
-    )?
-     , "<html foo=\"bar\"><body/></html>",
+    )?,
+    "<html foo=\"bar\"><body/></html>",
   )
 }
 
@@ -98,8 +98,8 @@ RenderEscapedAttribute = \() none | error {
         Attributes: [Attribute Attribute{Key: "foo", Value: "\"<foo />"}],
         Children: [Node],
       },
-    )?
-     , "<html foo=\"&quot;&lt;foo /&gt;\"/>",
+    )?,
+    "<html foo=\"&quot;&lt;foo /&gt;\"/>",
   )
 }
 
@@ -117,8 +117,8 @@ RenderChild = \() none | error {
           },
         ],
       },
-    )?
-     , "<html><body/></html>",
+    )?,
+    "<html><body/></html>",
   )
 }
 
@@ -141,8 +141,8 @@ RenderChildren = \() none | error {
           },
         ],
       },
-    )?
-     , "<html><head/><body/></html>",
+    )?,
+    "<html><head/><body/></html>",
   )
 }
 
@@ -166,8 +166,8 @@ RenderNestedChildren = \() none | error {
           },
         ],
       },
-    )?
-     , "<html><body><div/></body></html>",
+    )?,
+    "<html><body><div/></body></html>",
   )
 }
 
@@ -179,8 +179,8 @@ RenderTextNode = \() none | error {
         Attributes: [Attribute],
         Children: [Node "foo"],
       },
-    )?
-     , "<html>foo</html>",
+    )?,
+    "<html>foo</html>",
   )
 }
 
@@ -192,7 +192,7 @@ RenderEscapedTextNode = \() none | error {
         Attributes: [Attribute],
         Children: [Node "<html />"],
       },
-    )?
-     , "<html>&lt;html /&gt;</html>",
+    )?,
+    "<html>&lt;html /&gt;</html>",
   )
 }

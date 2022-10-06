@@ -91,20 +91,20 @@ DecodeObjectWithEntry = \() none | error {
 
 DecodeObjectWithTwoEntries = \() none | error {
   Assert'Equal(
-    Decode("{\"foo\": null, \"bar\": null}")?
-     , Value'New({string: Value "foo": Value'New(none), "bar": Value'New(none)}),
+    Decode("{\"foo\": null, \"bar\": null}")?,
+    Value'New({string: Value "foo": Value'New(none), "bar": Value'New(none)}),
   )
 }
 
 DecodeObjectWithSpaces = \() none | error {
   Assert'Equal(
-    Decode("{ \"foo\" : null , \"bar\" : null }")?
-     , Value'New(
-        {string: Value
-          "foo": Value'New(none),
-          "bar": Value'New(none),
-        },
-      ),
+    Decode("{ \"foo\" : null , \"bar\" : null }")?,
+    Value'New(
+      {string: Value
+        "foo": Value'New(none),
+        "bar": Value'New(none),
+      },
+    ),
   )?
 }
 

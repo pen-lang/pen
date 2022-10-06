@@ -41,8 +41,8 @@ EncodeArrayWithElement = \() none | error {
 
 EncodeArrayWith2Elements = \() none | error {
   Assert'Equal(
-    Encode(Value'New([Value Value'New(1), Value'New(2)]))
-     , "[1,2]",
+    Encode(Value'New([Value Value'New(1), Value'New(2)])),
+    "[1,2]",
   )
 }
 
@@ -56,8 +56,8 @@ EncodeArrayWith3Elements = \() none | error {
           Value'New(3),
         ],
       ),
-    )
-     , "[1,2,3]",
+    ),
+    "[1,2,3]",
   )
 }
 
@@ -73,8 +73,8 @@ EncodeObjectWithEntry = \() none | error {
           "foo": Value'New(1),
         },
       ),
-    )
-     , "{\"foo\":1}",
+    ),
+    "{\"foo\":1}",
   )
 }
 
@@ -87,8 +87,8 @@ EncodeObjectWith2Entries = \() none | error {
           "bar": Value'New(2),
         },
       ),
-    )
-     , "{\"bar\":2,\"foo\":1}",
+    ),
+    "{\"bar\":2,\"foo\":1}",
   )
 }
 
@@ -102,7 +102,7 @@ EncodeObjectWith3Entries = \() none | error {
           "baz": Value'New(3),
         },
       ),
-    )
-     , "{\"bar\":2,\"baz\":3,\"foo\":1}",
+    ),
+    "{\"bar\":2,\"baz\":3,\"foo\":1}",
   )
 }

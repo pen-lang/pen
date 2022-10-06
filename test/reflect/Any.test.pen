@@ -14,8 +14,8 @@ DebugList = \() none | error {
 DebugMap = \() none | error {
   Assert'Equal(Any'Debug({none: none}), "{none: none}")?
   Assert'Equal(
-    Any'Debug({string: number "foo": 1, "bar": 2})
-     , "{string: number \"bar\": 2, \"foo\": 1}",
+    Any'Debug({string: number "foo": 1, "bar": 2}),
+    "{string: number \"bar\": 2, \"foo\": 1}",
   )
 }
 
