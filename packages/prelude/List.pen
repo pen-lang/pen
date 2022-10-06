@@ -79,35 +79,23 @@ concatenateNodes = \(x \() node | none, y \() node | none) \() node | none {
 }
 
 EqualLists = \(f \(any, any) boolean, x List, y List) boolean {
-  equalNodes(f, x.node(), y.node())
-}
-
-equalNodes = \(f \(any, any) boolean, x node | none, y node | none) boolean {
-  if x = x as node {
-    if y = y as node {
-      f(x.first(), y.first()) & equalNodes(f, x.rest(), y.rest())
-    } else {
-      false
-    }
-  } else {
-    if y = y as node {
-      false
-    } else {
-      true
-    }
+  if b = ReflectEqualLists(\(x any, y any) boolean | none { f(x, y) }, x, y) as boolean {
+    b
+  } else if none {
+    false
   }
 }
 
-ReflectEqualLists = \(f \(any, any) boolean | none, x List, y List) boolean {
-  reflectEqualNodes(f, x.node(), y.node())
+ReflectEqualLists = \(f \(any, any) boolean | none, x List, y List) boolean | none {
+  equalNodes(f, x.node(), y.node())
 }
 
-reflectEqualNodes = \(f \(any, any) boolean | none, x node | none, y node | none) boolean {
+equalNodes = \(f \(any, any) boolean | none, x node | none, y node | none) boolean | none {
   if x = x as node {
     if y = y as node {
       if b = f(x.first(), y.first()) as boolean {
         if b {
-          reflectEqualNodes(f, x.rest(), y.rest())
+          equalNodes(f, x.rest(), y.rest())
         } else {
           false
         }
