@@ -13,3 +13,4 @@ Feature: Test packages
       | package |
       | prelude |
       | reflect |
+      | test    |
