@@ -293,29 +293,86 @@ mergeHamt = \(ctx MapContext, m Map, h hamt, i number) Map {
 }
 
 EqualMaps = \(ctx MapContext, x Map, y Map) boolean {
-  x.size == y.size & equalHamts(ctx, x.hamt, y.hamt, 1)
+  if x.size == y.size {
+    if b = equalHamts(
+      \(x any, y any) boolean | none { ctx.equalKeys(x, y) },
+      \(x any, y any) boolean | none { ctx.equalValues(x, y) },
+      x.hamt,
+      y.hamt,
+      1,
+    ) as boolean {
+      b
+    } else {
+      false
+    }
+  } else {
+    false
+  }
 }
 
-equalHamts = \(ctx MapContext, h1 hamt, h2 hamt, i number) boolean {
+MaybeEqualMaps = \(
+  f \(any, any) boolean | none,
+  x Map,
+  y Map,
+) boolean | none {
+  if x.size == y.size {
+    equalHamts(f, f, x.hamt, y.hamt, 1)
+  } else {
+    false
+  }
+}
+
+equalHamts = \(
+  fk \(any, any) boolean | none,
+  fv \(any, any) boolean | none,
+  h1 hamt,
+  h2 hamt,
+  i number,
+) boolean | none {
   if i > 32 {
     true
   } else {
-    rest = \() boolean { equalHamts(ctx, h1, h2, i + 1) }
+    rest = \() boolean | none { equalHamts(fk, fv, h1, h2, i + 1) }
+    e2 = getEntry(h2, i)
 
     if e1 = getEntry(h1, i) as keyValue {
-      if e2 = getEntry(h2, i) as keyValue {
-        ctx.equalKeys(e1.key, e2.key) & ctx.equalValues(e1.value, e2.value) & rest()
+      if e2 = e2 as keyValue {
+        if b = fk(e1.key, e2.key) as boolean {
+          if b {
+            if b = fv(e1.value, e2.value) as boolean {
+              if b {
+                rest()
+              } else {
+                false
+              }
+            } else {
+              none
+            }
+          } else {
+            false
+          }
+        } else {
+          none
+        }
       } else {
         false
       }
     } else if hamt {
-      if e2 = getEntry(h2, i) as hamt {
-        equalHamts(ctx, e1, e2, 1) & rest()
+      if e2 = e2 as hamt {
+        if b = equalHamts(fk, fv, e1, e2, 1) as boolean {
+          if b {
+            rest()
+          } else {
+            false
+          }
+        } else {
+          none
+        }
       } else {
         false
       }
     } else if none {
-      if _ = getEntry(h2, i) as none {
+      if _ = e2 as none {
         rest()
       } else {
         false

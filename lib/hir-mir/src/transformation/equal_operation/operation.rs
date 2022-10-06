@@ -43,12 +43,7 @@ fn transform_canonical(
     Ok(match type_ {
         Type::Boolean(_) => If::new(
             lhs.clone(),
-            If::new(
-                rhs.clone(),
-                Boolean::new(true, position.clone()),
-                Boolean::new(false, position.clone()),
-                position.clone(),
-            ),
+            rhs.clone(),
             If::new(
                 rhs.clone(),
                 Boolean::new(false, position.clone()),

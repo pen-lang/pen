@@ -1,4 +1,6 @@
 pub mod debug;
+pub mod equal;
+mod utility;
 
 use crate::{context::Context, generic_type_collection, type_, CompileError};
 use fnv::FnvHashSet;
@@ -47,7 +49,10 @@ fn compile_function(argument: impl Into<mir::ir::Expression>, index: usize) -> m
 pub fn compile_type_information_type_definition() -> mir::ir::TypeDefinition {
     mir::ir::TypeDefinition::new(
         TYPE_INFORMATION_RECORD_NAME,
-        mir::types::RecordBody::new(vec![debug::compile_function_type().into()]),
+        mir::types::RecordBody::new(vec![
+            debug::compile_function_type().into(),
+            equal::compile_function_type().into(),
+        ]),
     )
 }
 
@@ -127,6 +132,7 @@ fn compile_function_declarations(
 ) -> Result<Vec<mir::ir::FunctionDeclaration>, CompileError> {
     Ok(vec![
         debug::compile_function_declaration(context, type_)?,
+        equal::compile_function_declaration(context, type_)?,
         mir::ir::FunctionDeclaration::new(
             compile_function_name(context, type_)?,
             compile_function_type(),
@@ -143,12 +149,19 @@ fn compile_function_definitions(
 
     Ok([
         debug::compile_function_definition(context, type_)?,
+        equal::compile_function_definition(context, type_)?,
         mir::ir::FunctionDefinition::thunk(
             compile_function_name(context, type_)?,
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
-                vec![mir::ir::Variable::new(debug::compile_function_name(context, type_)?).into()],
+                [
+                    debug::compile_function_name(context, type_)?,
+                    equal::compile_function_name(context, type_)?,
+                ]
+                .into_iter()
+                .map(|name| mir::ir::Variable::new(name).into())
+                .collect(),
             ),
         ),
     ]
@@ -162,13 +175,20 @@ fn compile_default_function_definitions() -> Vec<mir::ir::GlobalFunctionDefiniti
 
     [
         debug::compile_default_function_definition(),
+        equal::compile_default_function_definition(),
         mir::ir::FunctionDefinition::new(
             DEFAULT_TYPE_INFORMATION_FUNCTION_NAME,
             vec![],
             type_information_type.clone(),
             mir::ir::Record::new(
                 type_information_type,
-                vec![mir::ir::Variable::new(debug::compile_default_function_name()).into()],
+                [
+                    debug::compile_default_function_name(),
+                    equal::compile_default_function_name(),
+                ]
+                .into_iter()
+                .map(|name| mir::ir::Variable::new(name).into())
+                .collect(),
             ),
         ),
     ]
@@ -186,7 +206,6 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
 
     Ok([
         types::Boolean::new(position.clone()).into(),
-        types::ByteString::new(position.clone()).into(),
         types::None::new(position.clone()).into(),
         types::Number::new(position.clone()).into(),
     ]
@@ -194,7 +213,15 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
     .chain(
         context
             .configuration()
-            .map(|_| types::Error::new(position.clone()).into()),
+            .map(|_| {
+                vec![
+                    types::Error::new(position.clone()).into(),
+                    // TODO Move this line out of here when string equal operation is implemented
+                    // internally in a compiler.
+                    types::ByteString::new(position.clone()).into(),
+                ]
+            })
+            .unwrap_or_default(),
     )
     .chain(generic_type_collection::collect(context, module)?)
     .chain(
@@ -290,7 +317,7 @@ mod tests {
     }
 
     #[test]
-    fn compile_without_compile_configuration() {
+    fn compile_empty_without_compile_configuration() {
         let module = Module::empty();
         let context = Context::new(&module, None);
 
@@ -303,14 +330,6 @@ mod tests {
                         compile_function_name(
                             &context,
                             &types::Boolean::new(Position::fake()).into()
-                        )
-                        .unwrap()
-                    ),
-                    (
-                        mir::types::Type::ByteString,
-                        compile_function_name(
-                            &context,
-                            &types::ByteString::new(Position::fake()).into()
                         )
                         .unwrap()
                     ),
@@ -332,6 +351,30 @@ mod tests {
                 .collect(),
             )
         );
+    }
+
+    #[test]
+    fn compile_type_information_as_thunks() {
+        let module = Module::empty();
+        let context = create_context(&module);
+        let (_, definitions) =
+            compile_function_declarations_and_definitions(&context, &module).unwrap();
+
+        for type_ in &[
+            types::Boolean::new(Position::fake()).into(),
+            types::ByteString::new(Position::fake()).into(),
+            types::Error::new(Position::fake()).into(),
+            types::None::new(Position::fake()).into(),
+            types::Number::new(Position::fake()).into(),
+        ] {
+            assert!(definitions
+                .iter()
+                .find(|definition| definition.definition().name()
+                    == compile_function_name(&context, type_).unwrap())
+                .unwrap()
+                .definition()
+                .is_thunk());
+        }
     }
 
     #[test]

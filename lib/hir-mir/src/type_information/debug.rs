@@ -1,10 +1,12 @@
-use crate::{concrete_type, context::Context, error_type, type_, type_information, CompileError};
+use super::utility;
+use crate::{context::Context, error_type, type_, type_information, CompileError};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
 };
 use itertools::Itertools;
 
+const FUNCTION_PREFIX: &str = "hir:reflect:debug:";
 const ARGUMENT_NAME: &str = "$x";
 
 pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expression {
@@ -18,18 +20,15 @@ pub fn compile_call(argument: impl Into<mir::ir::Expression>) -> mir::ir::Expres
     .into()
 }
 
-pub(super) fn compile_default_function_name() -> &'static str {
-    "hir:debug:default"
+pub(super) fn compile_default_function_name() -> String {
+    FUNCTION_PREFIX.to_owned() + "default"
 }
 
 pub(super) fn compile_function_name(
     context: &Context,
     type_: &Type,
 ) -> Result<String, CompileError> {
-    Ok(format!(
-        "hir:debug:{}",
-        type_id_calculator::calculate(type_, context.types())?
-    ))
+    Ok(FUNCTION_PREFIX.to_owned() + &type_id_calculator::calculate(type_, context.types())?)
 }
 
 pub(super) fn compile_function_type() -> mir::types::Function {
@@ -91,8 +90,8 @@ pub(super) fn compile_function_definition(
                 mir::ir::Variable::new(&context.configuration()?.list_type.debug_function_name),
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(list_type.element())).into(),
-                    compile_unboxed_concrete(context, argument, type_)?,
-                    compile_debug_closure(),
+                    utility::compile_unboxed_concrete(context, argument, type_)?,
+                    compile_element_function(),
                 ],
             )
             .into(),
@@ -112,8 +111,8 @@ pub(super) fn compile_function_definition(
                 vec![
                     mir::ir::ByteString::new(type_formatter::format(map_type.key())).into(),
                     mir::ir::ByteString::new(type_formatter::format(map_type.value())).into(),
-                    compile_unboxed_concrete(context, argument, type_)?,
-                    compile_debug_closure(),
+                    utility::compile_unboxed_concrete(context, argument, type_)?,
+                    compile_element_function(),
                 ],
             )
             .into(),
@@ -146,7 +145,6 @@ pub(super) fn compile_function_definition(
                                 .iter()
                                 .enumerate()
                                 .map(|(index, field)| {
-                                    let type_ = type_::compile(context, field.type_())?;
                                     let value = mir::ir::RecordField::new(
                                         mir_type.clone(),
                                         index,
@@ -156,19 +154,11 @@ pub(super) fn compile_function_definition(
                                     Ok(vec![
                                         mir::ir::ByteString::new(format!("{}: ", field.name()))
                                             .into(),
-                                        compile_call(if type_ == mir::types::Type::Variant {
-                                            mir::ir::Expression::from(value)
-                                        } else {
-                                            mir::ir::Variant::new(
-                                                type_::compile_concrete(context, field.type_())?,
-                                                concrete_type::compile(
-                                                    context,
-                                                    value.into(),
-                                                    field.type_(),
-                                                )?,
-                                            )
-                                            .into()
-                                        }),
+                                        compile_call(utility::compile_any(
+                                            context,
+                                            value,
+                                            field.type_(),
+                                        )?),
                                     ])
                                 })
                                 .collect::<Result<Vec<_>, CompileError>>()?
@@ -232,23 +222,8 @@ fn compile_function_definition_for_concrete_type(
     ))
 }
 
-fn compile_unboxed_concrete(
-    context: &Context,
-    expression: impl Into<mir::ir::Expression>,
-    type_: &Type,
-) -> Result<mir::ir::Expression, CompileError> {
-    Ok(mir::ir::RecordField::new(
-        type_::compile_concrete(context, type_)?
-            .into_record()
-            .unwrap(),
-        0,
-        expression.into(),
-    )
-    .into())
-}
-
-fn compile_debug_closure() -> mir::ir::Expression {
-    const CLOSURE_NAME: &str = "hir:debug:closure";
+fn compile_element_function() -> mir::ir::Expression {
+    const CLOSURE_NAME: &str = "hir:debug:element";
 
     mir::ir::LetRecursive::new(
         mir::ir::FunctionDefinition::new(
