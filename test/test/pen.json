@@ -1,6 +1,0 @@
-{
-  "type": "library",
-  "dependencies": {
-    "Test": "pen:///test"
-  }
-}

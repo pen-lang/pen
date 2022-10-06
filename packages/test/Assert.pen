@@ -33,7 +33,7 @@ Error = \(x any) none | error {
   if x = x as error {
     none
   } else {
-    error("error expected: " + Any'Debug(x))
+    error("error expected (found: " + Any'Debug(x) + ")")
   }
 }
 

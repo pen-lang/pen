@@ -1,0 +1,39 @@
+import 'Assert
+
+EqualSameValues = \() none | error {
+  Assert'Equal(Assert'Equal(none, none), none)
+}
+
+EqualDifferentValues = \() none | error {
+  Assert'Equal(
+    Assert'Equal(42, none),
+    error("values are not equal (found: 42) (expected: none)"),
+  )
+}
+
+EqualFunctions = \() none | error {
+  Assert'Equal(
+    Assert'Equal(\() none { none }, \() none { none }),
+    error("values are not comparable (found: <function>) (expected: <function>)"),
+  )
+}
+
+CheckTrue = \() none | error {
+  Assert'Equal(Assert'True(true), none)
+}
+
+CheckFalse = \() none | error {
+  Assert'Equal(Assert'True(false), error("condition is false"))
+}
+
+CheckError = \() none | error {
+  Assert'Equal(Assert'Error(error(none)), none)
+}
+
+CheckNonError = \() none | error {
+  Assert'Equal(Assert'Error(none), error("error expected (found: none)"))
+}
+
+Fail = \() none | error {
+  Assert'Equal(Assert'Fail(), error("assertion failed"))
+}
