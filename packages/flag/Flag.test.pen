@@ -3,9 +3,9 @@ import Test'Assert
 import 'Flag
 
 ParseNone = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string},
         Positional: [string],
       },
@@ -13,9 +13,9 @@ ParseNone = \() none | error {
 }
 
 ParseNamed = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "-foo", "bar"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string "foo": "bar"},
         Positional: [string],
       },
@@ -23,9 +23,9 @@ ParseNamed = \() none | error {
 }
 
 ParseTwoNamed = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "-foo", "bar", "-baz", "blah"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string "foo": "bar", "baz": "blah"},
         Positional: [string],
       },
@@ -33,9 +33,9 @@ ParseTwoNamed = \() none | error {
 }
 
 ParsePositional = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "foo"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string},
         Positional: [string "foo"],
       },
@@ -43,9 +43,9 @@ ParsePositional = \() none | error {
 }
 
 ParseTwoPositional = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "foo", "bar"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string},
         Positional: [string "foo", "bar"],
       },
@@ -53,9 +53,9 @@ ParseTwoPositional = \() none | error {
 }
 
 ParseSeparator = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "--"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string},
         Positional: [string],
       },
@@ -63,9 +63,9 @@ ParseSeparator = \() none | error {
 }
 
 ParseSeparatorWithPositional = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "--", "-foo"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string},
         Positional: [string "-foo"],
       },
@@ -73,9 +73,9 @@ ParseSeparatorWithPositional = \() none | error {
 }
 
 ParseSeparatorWithNamedAndPositional = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Flag'Parse([string "-foo", "bar", "--", "-baz"])?
-      == Flag'Set{
+     , Flag'Set{
         Named: {string: string "foo": "bar"},
         Positional: [string "-baz"],
       },

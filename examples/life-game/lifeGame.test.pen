@@ -4,9 +4,9 @@ import Test'Assert
 import 'lifeGame
 
 Render3x4 = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(initializeEmpty(3, 4))
-      == String'Join(
+     , String'Join(
         [string
           "....",
           "....",
@@ -18,9 +18,9 @@ Render3x4 = \() none | error {
 }
 
 Render4x4 = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(initializeEmpty(4, 4))
-      == String'Join(
+     , String'Join(
         [string
           "....",
           "....",
@@ -33,7 +33,7 @@ Render4x4 = \() none | error {
 }
 
 RenderLife = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(
       [[boolean]
         [boolean false, false, false],
@@ -41,7 +41,7 @@ RenderLife = \() none | error {
         [boolean false, false, false],
       ],
     )
-      == String'Join(
+     , String'Join(
         [string
           "...",
           ".o.",
@@ -53,7 +53,7 @@ RenderLife = \() none | error {
 }
 
 RenderTwoLives = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(
       [[boolean]
         [boolean false, true, false],
@@ -61,7 +61,7 @@ RenderTwoLives = \() none | error {
         [boolean false, false, true],
       ],
     )
-      == String'Join(
+     , String'Join(
         [string
           ".o.",
           "...",
@@ -73,14 +73,14 @@ RenderTwoLives = \() none | error {
 }
 
 StepEmpty = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(lifeGame'Step(initializeEmpty(3, 3))?)
-      == lifeGame'Render(initializeEmpty(3, 3)),
+     , lifeGame'Render(initializeEmpty(3, 3)),
   )
 }
 
 StepDyingLife = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(
       lifeGame'Step(
         [[boolean]
@@ -90,7 +90,7 @@ StepDyingLife = \() none | error {
         ],
       )?,
     )
-      == lifeGame'Render(initializeEmpty(3, 3)),
+     , lifeGame'Render(initializeEmpty(3, 3)),
   )
 }
 
@@ -101,14 +101,14 @@ StepSteadyCube = \() none | error {
     [boolean false, true, true],
   ]
 
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(lifeGame'Step(xs)?)
-      == lifeGame'Render(xs),
+     , lifeGame'Render(xs),
   )
 }
 
 StepStick = \() none | error {
-  Assert'True(
+  Assert'Equal(
     lifeGame'Render(
       lifeGame'Step(
         [[boolean]
@@ -119,7 +119,7 @@ StepStick = \() none | error {
         ],
       )?,
     )
-      == lifeGame'Render(
+     , lifeGame'Render(
         [[boolean]
           [boolean false, false, false, false],
           [boolean false, false, false, false],

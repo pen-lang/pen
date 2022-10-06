@@ -8,41 +8,41 @@ import 'position { Position }
 Head = \() none | error {
   p = Position{X: 1, Y: 1}
 
-  Assert'True(snake'Head(snake'New(p)) == p)
+  Assert'Equal(snake'Head(snake'New(p)), p)
 }
 
 Positions = \() none | error {
   p = Position{X: 1, Y: 1}
 
-  Assert'True(snake'Positions(snake'New(p)) == [Position p])
+  Assert'Equal(snake'Positions(snake'New(p)), [Position p])
 }
 
 PositionsWithTick = \() none | error {
   p = Position{X: 1, Y: 1}
 
-  Assert'True(snake'Positions(snake'Tick(snake'New(p))) == [Position p])
+  Assert'Equal(snake'Positions(snake'Tick(snake'New(p))), [Position p])
 }
 
 MoveHead = \() none | error {
-  Assert'True(
+  Assert'Equal(
     snake'Head(snake'Tick(snake'Move(snake'New(Position{X: 1, Y: 1}), direction'Up{})))
-      == Position{X: 1, Y: 0},
+     , Position{X: 1, Y: 0},
   )
 }
 
 Move = \() none | error {
-  Assert'True(
+  Assert'Equal(
     snake'Positions(snake'Tick(snake'Move(snake'New(Position{X: 1, Y: 1}), direction'Up{})))
-      == [Position Position{X: 1, Y: 0}],
+     , [Position Position{X: 1, Y: 0}],
   )
 }
 
 Grow = \() none | error {
   p = Position{X: 1, Y: 1}
 
-  Assert'True(
+  Assert'Equal(
     snake'Positions(snake'Tick(snake'Move(snake'Grow(snake'New(p)), direction'Up{})))
-      == [Position Position{X: 1, Y: 0}, p],
+     , [Position Position{X: 1, Y: 0}, p],
   )
 }
 

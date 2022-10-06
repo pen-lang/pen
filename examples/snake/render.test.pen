@@ -6,9 +6,9 @@ import 'game { Game }
 import 'render { Render }
 
 RenderGame = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(game'New(Field{Width: 2, Height: 2}, \() number { 0 }))
-      == [string
+     , [string
         "o.",
         "..",
       ],
@@ -23,9 +23,9 @@ RenderGameWithMovedSnake = \() none | error {
   if g = g as none {
     Assert'Fail()
   } else {
-    Assert'True(
+    Assert'Equal(
       Render(g)
-        == [string
+       , [string
           "..",
           "o.",
         ],

@@ -3,11 +3,11 @@ import Test'Assert
 import 'Number
 
 AbsolutePositive = \() none | error {
-  Assert'True(Number'Absolute(1) == 1)
+  Assert'Equal(Number'Absolute(1), 1)
 }
 
 AbsoluteNegative = \() none | error {
-  Assert'True(Number'Absolute(-1) == 1)
+  Assert'Equal(Number'Absolute(-1), 1)
 }
 
 Epsilon = \() none | error {
@@ -22,30 +22,30 @@ Exponential = \() none | error {
 }
 
 FractionPositive = \() none | error {
-  Assert'True(Number'Fraction(0.5) == 0.5)
+  Assert'Equal(Number'Fraction(0.5), 0.5)
 }
 
 FractionNegative = \() none | error {
-  Assert'True(Number'Fraction(-0.5) == -0.5)
+  Assert'Equal(Number'Fraction(-0.5), -0.5)
 }
 
 Parse = \() none | error {
-  Assert'True(Number'Parse("42")? == 42)?
-  Assert'True(Number'Parse("0.5")? == 0.5)
+  Assert'Equal(Number'Parse("42")?, 42)?
+  Assert'Equal(Number'Parse("0.5")?, 0.5)
 }
 
 RoundLarge = \() none | error {
-  Assert'True(Number'Round(1.1) == 1)
+  Assert'Equal(Number'Round(1.1), 1)
 }
 
 RoundSmall = \() none | error {
-  Assert'True(Number'Round(0.9) == 1)
+  Assert'Equal(Number'Round(0.9), 1)
 }
 
 TruncateLarge = \() none | error {
-  Assert'True(Number'Truncate(1.1) == 1)
+  Assert'Equal(Number'Truncate(1.1), 1)
 }
 
 TruncateSmall = \() none | error {
-  Assert'True(Number'Truncate(0.9) == 0)
+  Assert'Equal(Number'Truncate(0.9), 0)
 }

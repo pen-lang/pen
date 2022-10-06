@@ -3,9 +3,9 @@ import Test'Assert
 import 'Character
 
 FromCodePoint = \() none | error {
-  Assert'True(Character'FromCodePoint(0x61) == "a")
+  Assert'Equal(Character'FromCodePoint(0x61), "a")
 }
 
 ToCodePoint = \() none | error {
-  Assert'True(Character'ToCodePoint("a") == 0x61)
+  Assert'Equal(Character'ToCodePoint("a"), 0x61)
 }

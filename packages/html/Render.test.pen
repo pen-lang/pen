@@ -4,7 +4,7 @@ import 'Node { Attribute, Element, Node }
 import 'Render { Render }
 
 RenderElement = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -12,7 +12,7 @@ RenderElement = \() none | error {
         Children: [Node],
       },
     )?
-      == "<html/>",
+     , "<html/>",
   )
 }
 
@@ -29,7 +29,7 @@ RenderInvalidElement = \() none | error {
 }
 
 RenderAttribute = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -37,12 +37,12 @@ RenderAttribute = \() none | error {
         Children: [Node],
       },
     )?
-      == "<html foo=\"bar\"/>",
+     , "<html foo=\"bar\"/>",
   )
 }
 
 RenderAttributes = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -53,12 +53,12 @@ RenderAttributes = \() none | error {
         Children: [Node],
       },
     )?
-      == "<html foo=\"bar\"baz=\"blah\"/>",
+     , "<html foo=\"bar\"baz=\"blah\"/>",
   )
 }
 
 RenderAttributeWithChild = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -72,7 +72,7 @@ RenderAttributeWithChild = \() none | error {
         ],
       },
     )?
-      == "<html foo=\"bar\"><body/></html>",
+     , "<html foo=\"bar\"><body/></html>",
   )
 }
 
@@ -91,7 +91,7 @@ RenderInvalidAttribute = \() none | error {
 }
 
 RenderEscapedAttribute = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -99,12 +99,12 @@ RenderEscapedAttribute = \() none | error {
         Children: [Node],
       },
     )?
-      == "<html foo=\"&quot;&lt;foo /&gt;\"/>",
+     , "<html foo=\"&quot;&lt;foo /&gt;\"/>",
   )
 }
 
 RenderChild = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -118,12 +118,12 @@ RenderChild = \() none | error {
         ],
       },
     )?
-      == "<html><body/></html>",
+     , "<html><body/></html>",
   )
 }
 
 RenderChildren = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -142,12 +142,12 @@ RenderChildren = \() none | error {
         ],
       },
     )?
-      == "<html><head/><body/></html>",
+     , "<html><head/><body/></html>",
   )
 }
 
 RenderNestedChildren = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -167,12 +167,12 @@ RenderNestedChildren = \() none | error {
         ],
       },
     )?
-      == "<html><body><div/></body></html>",
+     , "<html><body><div/></body></html>",
   )
 }
 
 RenderTextNode = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -180,12 +180,12 @@ RenderTextNode = \() none | error {
         Children: [Node "foo"],
       },
     )?
-      == "<html>foo</html>",
+     , "<html>foo</html>",
   )
 }
 
 RenderEscapedTextNode = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Render(
       Element{
         Tag: "html",
@@ -193,6 +193,6 @@ RenderEscapedTextNode = \() none | error {
         Children: [Node "<html />"],
       },
     )?
-      == "<html>&lt;html /&gt;</html>",
+     , "<html>&lt;html /&gt;</html>",
   )
 }

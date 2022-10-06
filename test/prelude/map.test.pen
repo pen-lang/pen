@@ -8,11 +8,11 @@ type Bar {}
 type Union = Foo | Bar
 
 SetNoKey = \() none | error {
-  Assert'True(Number'Sum([number k for k, _ in {number: none}]) == 0)
+  Assert'Equal(Number'Sum([number k for k, _ in {number: none}]), 0)
 }
 
 SetKey = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -21,12 +21,12 @@ SetKey = \() none | error {
         }
       ],
     )
-      == 1,
+     , 1,
   )
 }
 
 Set2Keys = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -36,12 +36,12 @@ Set2Keys = \() none | error {
         }
       ],
     )
-      == 3,
+     , 3,
   )
 }
 
 Set3Keys = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -52,12 +52,12 @@ Set3Keys = \() none | error {
         }
       ],
     )
-      == 6,
+     , 6,
   )
 }
 
 Set4Keys = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -69,7 +69,7 @@ Set4Keys = \() none | error {
         }
       ],
     )
-      == 10,
+     , 10,
   )
 }
 
@@ -88,37 +88,37 @@ SetVeryManyKeys = \() none | error {
 }
 
 IterateKey = \() none | error {
-  Assert'True(
-    Number'Sum([number k for k, _ in {number: none 1: none}]) == 1,
+  Assert'Equal(
+    Number'Sum([number k for k, _ in {number: none 1: none}]), 1,
   )
 }
 
 Iterate2Keys = \() none | error {
-  Assert'True(
-    Number'Sum([number k for k, _ in {number: none 1: none, 2: none}]) == 3,
+  Assert'Equal(
+    Number'Sum([number k for k, _ in {number: none 1: none, 2: none}]), 3,
   )
 }
 
 IterateManyKeys = \() none | error {
   ks = Number'Sequence(42)
 
-  Assert'True(
+  Assert'Equal(
     Number'Sum([number k for k, _ in numberSet(ks)])
-      == Number'Sum(ks),
+     , Number'Sum(ks),
   )
 }
 
 IterateVeryManyKeys = \() none | error {
   ks = Number'Sequence(1024)
 
-  Assert'True(
+  Assert'Equal(
     Number'Sum([number k for k, _ in numberSet(ks)])
-      == Number'Sum(ks),
+     , Number'Sum(ks),
   )
 }
 
 Set3KeysWith0 = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -129,7 +129,7 @@ Set3KeysWith0 = \() none | error {
         }
       ],
     )
-      == 3,
+     , 3,
   )
 }
 
@@ -140,7 +140,7 @@ SetUnionKeys = \() none | error {
 }
 
 RemoveKey = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -150,12 +150,12 @@ RemoveKey = \() none | error {
         }
       ],
     )
-      == 0,
+     , 0,
   )
 }
 
 Merge2Maps = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -165,12 +165,12 @@ Merge2Maps = \() none | error {
         }
       ],
     )
-      == 3,
+     , 3,
   )
 }
 
 Merge3Maps = \() none | error {
-  Assert'True(
+  Assert'Equal(
     Number'Sum(
       [number
         k
@@ -181,7 +181,7 @@ Merge3Maps = \() none | error {
         }
       ],
     )
-      == 6,
+     , 6,
   )
 }
 
@@ -230,7 +230,7 @@ GetKeyInMergedMap = \() none | error {
 }
 
 CompareMaps = \() none | error {
-  Assert'True({string: number "foo": 1} == {string: number "foo": 1})
+  Assert'Equal({string: number "foo": 1}, {string: number "foo": 1})
 }
 
 CompareMapsWithDifferentKeys = \() none | error {
@@ -242,7 +242,7 @@ CompareMapsWithDifferentValues = \() none | error {
 }
 
 CompareMapsWithMultipleKeys = \() none | error {
-  Assert'True({string: number "foo": 1, "bar": 2} == {string: number "foo": 1, "bar": 2})
+  Assert'Equal({string: number "foo": 1, "bar": 2}, {string: number "foo": 1, "bar": 2})
 }
 
 CompareMapsWithMultipleDifferentKeys = \() none | error {
@@ -250,19 +250,19 @@ CompareMapsWithMultipleDifferentKeys = \() none | error {
 }
 
 SizeZero = \() none | error {
-  Assert'True(size({none: none}) == 0)
+  Assert'Equal(size({none: none}), 0)
 }
 
 SizeOne = \() none | error {
-  Assert'True(size({number: none 1: none}) == 1)
+  Assert'Equal(size({number: none 1: none}), 1)
 }
 
 SizeTwo = \() none | error {
-  Assert'True(size({number: none 1: none, 2: none}) == 2)
+  Assert'Equal(size({number: none 1: none, 2: none}), 2)
 }
 
 SizeMany = \() none | error {
-  Assert'True(size(numberSet(Number'Sequence(42))) == 42)
+  Assert'Equal(size(numberSet(Number'Sequence(42))), 42)
 }
 
 assertKeys = \(xs {number: none}, ks [number]) none | error {

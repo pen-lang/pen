@@ -5,17 +5,17 @@ import 'arguments
 ParseNoArgument = \() none | error {
   args = arguments'Parse([string])
 
-  Assert'True(args.Message == "yes")
+  Assert'Equal(args.Message, "yes")
 }
 
 ParseOneArgument = \() none | error {
   args = arguments'Parse([string "foo"])
 
-  Assert'True(args.Message == "foo")
+  Assert'Equal(args.Message, "foo")
 }
 
 ParseTwoArgument = \() none | error {
   args = arguments'Parse([string "foo", "bar"])
 
-  Assert'True(args.Message == "foo bar")
+  Assert'Equal(args.Message, "foo bar")
 }
