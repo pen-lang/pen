@@ -4,3 +4,8 @@
 Debug = \(x any) string {
   _reflect_debug(x)
 }
+
+# Check if values are equal. It returns `none` if values are not comparable.
+Equal = \(x any, y any) boolean | none {
+  _reflect_equal(x, y)
+}

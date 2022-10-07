@@ -6,7 +6,7 @@ import 'knapsack { Bag, Item }
 PackNothing = \() none | error {
   is = knapsack'Pack(Bag{Capacity: 0}, [Item])
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 0)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 0)
 }
 
 PackItemMoreValuableAndSameCost = \() none | error {
@@ -18,7 +18,7 @@ PackItemMoreValuableAndSameCost = \() none | error {
     ],
   )
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 2)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 2)
 }
 
 PackTwoItems = \() none | error {
@@ -27,7 +27,7 @@ PackTwoItems = \() none | error {
     [Item Item{Cost: 1, Value: 1}],
   )
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 2)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 2)
 }
 
 PackThreeItems = \() none | error {
@@ -36,7 +36,7 @@ PackThreeItems = \() none | error {
     [Item Item{Cost: 1, Value: 1}],
   )
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 3)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 3)
 }
 
 RemoveSmallValueItem = \() none | error {
@@ -48,7 +48,7 @@ RemoveSmallValueItem = \() none | error {
     ],
   )
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 4)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 4)
 }
 
 PackDiamond = \() none | error {
@@ -61,5 +61,5 @@ PackDiamond = \() none | error {
     ],
   )
 
-  Assert'True(Number'Sum([number i().Value for i in is]) == 42)
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 42)
 }

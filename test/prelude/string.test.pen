@@ -2,7 +2,7 @@ import Core'Number
 import Test'Assert
 
 CompareStrings = \() none | error {
-  Assert'True("foo" == "foo")
+  Assert'Equal("foo", "foo")
 }
 
 CompareDifferentStrings = \() none | error {

@@ -13,11 +13,10 @@ pub enum CompileError {
     Analysis(AnalysisError),
     CompileConfigurationNotProvided,
     InvalidRecordEqualOperation(Position),
+    InvalidVariantType(Type),
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::type_check::TypeCheckError),
     NewContextFunctionNotFound(Position),
-    UnsupportedTypeInformation(Type),
-    VariantTypeInFfi(Position),
 }
 
 impl Display for CompileError {
@@ -43,19 +42,12 @@ impl Display for CompileError {
             Self::NewContextFunctionNotFound(position) => {
                 write!(formatter, "new context function not found\n{}", position)
             }
-            Self::UnsupportedTypeInformation(type_) => {
+            Self::InvalidVariantType(type_) => {
                 write!(
                     formatter,
                     "unsupported type information: {}\n{}",
                     type_formatter::format(type_),
                     type_.position()
-                )
-            }
-            Self::VariantTypeInFfi(position) => {
-                write!(
-                    formatter,
-                    "union and any type not supported in FFI\n{}",
-                    position
                 )
             }
         }

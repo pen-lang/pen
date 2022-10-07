@@ -23,7 +23,7 @@ Feature: Testing packages
     import 'Foo
 
     Add = \() none | error {
-      Assert'True(Foo'Add(41, 1) == 42)
+      Assert'Equal(Foo'Add(41, 1), 42)
     }
     """
     When I run `pen test`
@@ -37,7 +37,7 @@ Feature: Testing packages
     import 'Foo
 
     Add = \() none | error {
-      Assert'True(Foo'Add(41, 0) == 42)
+      Assert'Equal(Foo'Add(41, 0), 42)
     }
     """
     When I run `pen test`
@@ -51,11 +51,11 @@ Feature: Testing packages
     import 'Foo
 
     Add = \() none | error {
-      Assert'True(Foo'Add(41, 1) == 42)
+      Assert'Equal(Foo'Add(41, 1), 42)
     }
 
     AddMore = \() none | error {
-      Assert'True(Foo'Add(40, 2) == 42)
+      Assert'Equal(Foo'Add(40, 2), 42)
     }
     """
     When I successfully run `pen test`

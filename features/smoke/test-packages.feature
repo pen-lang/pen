@@ -12,3 +12,4 @@ Feature: Test packages
     Examples:
       | package |
       | prelude |
+      | reflect |

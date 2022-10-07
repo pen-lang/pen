@@ -3,9 +3,11 @@ use hir::{analysis::type_canonicalizer, types::Type};
 
 pub fn compile(
     context: &Context,
-    expression: mir::ir::Expression,
+    expression: impl Into<mir::ir::Expression>,
     type_: &Type,
 ) -> Result<mir::ir::Expression, CompileError> {
+    let expression = expression.into();
+
     Ok(
         match &type_canonicalizer::canonicalize(type_, context.types())? {
             Type::Boolean(_)
@@ -47,7 +49,7 @@ mod tests {
         assert_eq!(
             compile(
                 &context,
-                mir::ir::Variable::new("x").into(),
+                mir::ir::Variable::new("x"),
                 &types::Boolean::new(Position::fake()).into()
             ),
             Ok(mir::ir::Variable::new("x").into())
@@ -66,7 +68,7 @@ mod tests {
         assert_eq!(
             compile(
                 &context,
-                mir::ir::Variable::new("x").into(),
+                mir::ir::Variable::new("x"),
                 &function_type.clone().into()
             ),
             Ok(mir::ir::Record::new(
@@ -85,7 +87,7 @@ mod tests {
         assert_eq!(
             compile(
                 &context,
-                mir::ir::Variable::new("x").into(),
+                mir::ir::Variable::new("x"),
                 &list_type.clone().into()
             ),
             Ok(mir::ir::Record::new(
@@ -108,7 +110,7 @@ mod tests {
         assert_eq!(
             compile(
                 &context,
-                mir::ir::Variable::new("x").into(),
+                mir::ir::Variable::new("x"),
                 &map_type.clone().into()
             ),
             Ok(mir::ir::Record::new(

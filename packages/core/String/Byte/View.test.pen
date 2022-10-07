@@ -11,33 +11,33 @@ HasPrefixInMiddle = \() none | error {
 }
 
 Length = \() none | error {
-  Assert'True(View'Length(View'New("foo")) == 3)
+  Assert'Equal(View'Length(View'New("foo")), 3)
 }
 
 ToString = \() none | error {
-  Assert'True(View'ToString(View'New("foo")) == "foo")
+  Assert'Equal(View'ToString(View'New("foo")), "foo")
 }
 
 Seek = \() none | error {
-  Assert'True(View'ToString(View'Seek(View'New("foo"), 1)) == "oo")
+  Assert'Equal(View'ToString(View'Seek(View'New("foo"), 1)), "oo")
 }
 
 SeekToBeforeEnd = \() none | error {
-  Assert'True(View'ToString(View'Seek(View'New("foo"), 2)) == "o")
+  Assert'Equal(View'ToString(View'Seek(View'New("foo"), 2)), "o")
 }
 
 SeekToEnd = \() none | error {
-  Assert'True(View'ToString(View'Seek(View'New("foo"), 3)) == "")
+  Assert'Equal(View'ToString(View'Seek(View'New("foo"), 3)), "")
 }
 
 Slice = \() none | error {
-  Assert'True(View'ToString(View'Slice(View'New("hello"), 2, 4)) == "ell")
+  Assert'Equal(View'ToString(View'Slice(View'New("hello"), 2, 4)), "ell")
 }
 
 SliceBeforeEnd = \() none | error {
-  Assert'True(View'ToString(View'Slice(View'New("hello"), 5, 5)) == "o")
+  Assert'Equal(View'ToString(View'Slice(View'New("hello"), 5, 5)), "o")
 }
 
 SliceToEnd = \() none | error {
-  Assert'True(View'ToString(View'Slice(View'New("hello"), 6, 5)) == "")
+  Assert'Equal(View'ToString(View'Slice(View'New("hello"), 6, 5)), "")
 }

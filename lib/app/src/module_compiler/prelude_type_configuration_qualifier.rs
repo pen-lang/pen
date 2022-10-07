@@ -23,6 +23,8 @@ fn qualify_list_type_configuration(
         concatenate_function_name: prelude_prefix.to_owned()
             + &configuration.concatenate_function_name,
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
+        maybe_equal_function_name: prelude_prefix.to_owned()
+            + &configuration.maybe_equal_function_name,
         prepend_function_name: prelude_prefix.to_owned() + &configuration.prepend_function_name,
         deconstruct_function_name: prelude_prefix.to_owned()
             + &configuration.deconstruct_function_name,
@@ -54,6 +56,8 @@ fn qualify_map_type_configuration(
         context_type_name: prelude_prefix.to_owned() + &configuration.context_type_name,
         empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,
+        maybe_equal_function_name: prelude_prefix.to_owned()
+            + &configuration.maybe_equal_function_name,
         get_function_name: prelude_prefix.to_owned() + &configuration.get_function_name,
         map_type_name: prelude_prefix.to_owned() + &configuration.map_type_name,
         merge_function_name: prelude_prefix.to_owned() + &configuration.merge_function_name,
