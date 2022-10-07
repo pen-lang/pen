@@ -131,6 +131,10 @@ mod tests {
             types::Boolean::new(Position::fake()),
             Position::fake(),
         );
+        let first_rest_type = Type::from(types::Record::new(
+            &COMPILE_CONFIGURATION.list_type.first_rest_type_name,
+            Position::fake(),
+        ));
         let list_type = Type::from(types::Record::new(
             &COMPILE_CONFIGURATION.list_type.list_type_name,
             Position::fake(),
@@ -160,6 +164,13 @@ mod tests {
                         .iter()
                         .cloned()
                         .chain([
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.list_type.first_rest_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
                             TypeDefinition::fake(
                                 &COMPILE_CONFIGURATION.list_type.list_type_name,
                                 vec![],
@@ -221,6 +232,32 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.deconstruct_function_name,
+                                types::Function::new(
+                                    vec![list_type.clone().into()],
+                                    types::Union::new(
+                                        first_rest_type.clone(),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.first_function_name,
+                                types::Function::new(
+                                    vec![first_rest_type.clone().into()],
+                                    types::Function::new(
+                                        vec![],
+                                        types::Any::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.lazy_function_name,
                                 types::Function::new(
                                     vec![types::Function::new(
@@ -230,6 +267,23 @@ mod tests {
                                     )
                                     .into()],
                                     list_type.clone(),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.maybe_equal_function_name,
+                                types::Function::new(
+                                    vec![
+                                        maybe_equal_function_type.clone(),
+                                        list_type.clone(),
+                                        list_type.clone(),
+                                    ],
+                                    types::Union::new(
+                                        types::Boolean::new(Position::fake()),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -252,18 +306,10 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
-                                &COMPILE_CONFIGURATION.list_type.maybe_equal_function_name,
+                                &COMPILE_CONFIGURATION.list_type.rest_function_name,
                                 types::Function::new(
-                                    vec![
-                                        maybe_equal_function_type.clone(),
-                                        list_type.clone(),
-                                        list_type,
-                                    ],
-                                    types::Union::new(
-                                        types::Boolean::new(Position::fake()),
-                                        types::None::new(Position::fake()),
-                                        Position::fake(),
-                                    ),
+                                    vec![first_rest_type.clone().into()],
+                                    list_type.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -605,6 +651,37 @@ mod tests {
                             vec![ListElement::Multiple(
                                 Variable::new("x", Position::fake()).into(),
                             )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_comprehension() {
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        list_type.clone(),
+                        ListComprehension::new(
+                            None,
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                None,
+                                Variable::new("x", Position::fake()),
+                                vec![],
+                                Position::fake(),
+                            ),
+                            "x",
+                            Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
                         Position::fake(),
