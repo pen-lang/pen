@@ -143,6 +143,14 @@ mod tests {
             &COMPILE_CONFIGURATION.map_type.map_type_name,
             Position::fake(),
         ));
+        let map_context_type = Type::from(types::Record::new(
+            &COMPILE_CONFIGURATION.map_type.context_type_name,
+            Position::fake(),
+        ));
+        let map_iterator_type = Type::from(types::Record::new(
+            &COMPILE_CONFIGURATION.map_type.iteration.iterator_type_name,
+            Position::fake(),
+        ));
         let maybe_equal_function_type = Type::from(types::Function::new(
             vec![
                 types::Any::new(Position::fake()).into(),
@@ -186,6 +194,13 @@ mod tests {
                                 true,
                             ),
                             TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.map_type.iteration.iterator_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
+                            TypeDefinition::fake(
                                 &COMPILE_CONFIGURATION.map_type.map_type_name,
                                 vec![],
                                 false,
@@ -201,18 +216,6 @@ mod tests {
                         .iter()
                         .cloned()
                         .chain([
-                            FunctionDeclaration::new(
-                                &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
-                                types::Function::new(
-                                    vec![
-                                        types::Number::new(Position::fake()).into(),
-                                        types::Number::new(Position::fake()).into(),
-                                    ],
-                                    types::Number::new(Position::fake()),
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.debug_function_name,
                                 types::Function::new(
@@ -323,10 +326,7 @@ mod tests {
                                         equal_function_type.into(),
                                         hash_function_type.into(),
                                     ],
-                                    types::Record::new(
-                                        &COMPILE_CONFIGURATION.map_type.context_type_name,
-                                        Position::fake(),
-                                    ),
+                                    map_context_type.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -346,14 +346,120 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.empty_function_name,
+                                types::Function::new(vec![], map_type.clone(), Position::fake()),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::Number::new(Position::fake()).into(),
+                                        types::Number::new(Position::fake()).into(),
+                                    ],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION
+                                    .map_type
+                                    .hash
+                                    .number_hash_function_name,
+                                types::Function::new(
+                                    vec![types::Number::new(Position::fake()).into()],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION
+                                    .map_type
+                                    .hash
+                                    .string_hash_function_name,
+                                types::Function::new(
+                                    vec![types::ByteString::new(Position::fake()).into()],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION
+                                    .map_type
+                                    .iteration
+                                    .iterate_function_name,
+                                types::Function::new(
+                                    vec![map_type.clone().into()],
+                                    types::Union::new(
+                                        map_iterator_type.clone(),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.iteration.key_function_name,
+                                types::Function::new(
+                                    vec![map_iterator_type.clone().into()],
+                                    types::Any::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.iteration.rest_function_name,
+                                types::Function::new(
+                                    vec![map_iterator_type.clone().into()],
+                                    types::Union::new(
+                                        map_iterator_type.clone(),
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.iteration.value_function_name,
+                                types::Function::new(
+                                    vec![map_iterator_type.clone().into()],
+                                    types::Any::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.map_type.maybe_equal_function_name,
                                 types::Function::new(
-                                    vec![maybe_equal_function_type, map_type.clone(), map_type],
+                                    vec![
+                                        maybe_equal_function_type,
+                                        map_type.clone(),
+                                        map_type.clone(),
+                                    ],
                                     types::Union::new(
                                         types::Boolean::new(Position::fake()),
                                         types::None::new(Position::fake()),
                                         Position::fake(),
                                     ),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.set_function_name,
+                                types::Function::new(
+                                    vec![
+                                        map_context_type.clone().into(),
+                                        map_type.clone(),
+                                        types::Any::new(Position::fake()).into(),
+                                        types::Any::new(Position::fake()).into(),
+                                    ],
+                                    map_type.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -681,6 +787,195 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+    }
+
+    mod map {
+        use super::*;
+
+        #[test]
+        fn compile_empty_map() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            map_type.key().clone(),
+                            map_type.value().clone(),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_map_with_entry() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            map_type.key().clone(),
+                            map_type.value().clone(),
+                            vec![MapEntry::new(
+                                ByteString::new("foo", Position::fake()),
+                                Number::new(42.0, Position::fake()),
+                                Position::fake(),
+                            )
+                            .into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_map_with_entries() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            map_type.key().clone(),
+                            map_type.value().clone(),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(1.0, Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into(),
+                                MapEntry::new(
+                                    ByteString::new("bar", Position::fake()),
+                                    Number::new(2.0, Position::fake()),
+                                    Position::fake(),
+                                )
+                                .into(),
+                            ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_map_with_map_element() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        map_type.clone(),
+                        Map::new(
+                            map_type.key().clone(),
+                            map_type.value().clone(),
+                            vec![
+                                MapElement::Map(Variable::new("x", Position::fake()).into()).into(),
+                            ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_map_comprehension() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![
+                            Argument::new("k", map_type.key().clone()),
+                            Argument::new("v", map_type.value().clone()),
+                        ],
+                        types::None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+                FunctionDefinition::fake(
+                    "g",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        MapIterationComprehension::new(
+                            None,
+                            None,
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                None,
+                                Variable::new("f", Position::fake()),
+                                vec![
+                                    Variable::new("k", Position::fake()).into(),
+                                    Variable::new("v", Position::fake()).into(),
+                                ],
+                                Position::fake(),
+                            ),
+                            "k",
+                            "v",
                             Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),
