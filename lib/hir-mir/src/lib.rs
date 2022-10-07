@@ -554,52 +554,80 @@ mod tests {
         .unwrap();
     }
 
-    #[test]
-    fn compile_debug() {
-        compile_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                Lambda::new(
-                    vec![],
-                    types::None::new(Position::fake()),
-                    Call::new(
-                        None,
-                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                        vec![Variable::new("f", Position::fake()).into()],
-                        Position::fake(),
-                    ),
-                    Position::fake(),
-                ),
-                false,
-            )]),
-        )
-        .unwrap();
-    }
+    mod built_in {
+        use super::*;
 
-    #[test]
-    fn compile_debug_with_record_with_generic_type_field() {
-        compile_module(
-            &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
-                    "r",
-                    vec![types::RecordField::new(
-                        "x",
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
+        #[test]
+        fn compile_debug() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                            vec![Variable::new("f", Position::fake()).into()],
                             Position::fake(),
                         ),
-                    )],
+                        Position::fake(),
+                    ),
                     false,
-                    false,
-                    false,
-                )])
-                .set_function_definitions(vec![FunctionDefinition::fake(
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_debug_with_record_with_generic_type_field() {
+            compile_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "r",
+                        vec![types::RecordField::new(
+                            "x",
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Record::new("r", Position::fake()),
+                            )],
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_debug_with_list() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
                     "f",
                     Lambda::new(
                         vec![Argument::new(
                             "x",
-                            types::Record::new("r", Position::fake()),
+                            types::List::new(types::None::new(Position::fake()), Position::fake()),
                         )],
                         types::None::new(Position::fake()),
                         Call::new(
@@ -611,113 +639,99 @@ mod tests {
                         Position::fake(),
                     ),
                     false,
-                )]),
-        )
-        .unwrap();
-    }
+                ),
+            ]))
+            .unwrap();
+        }
 
-    #[test]
-    fn compile_debug_with_list() {
-        compile_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                Lambda::new(
-                    vec![Argument::new(
-                        "x",
-                        types::List::new(types::None::new(Position::fake()), Position::fake()),
-                    )],
-                    types::None::new(Position::fake()),
-                    Call::new(
-                        None,
-                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                        vec![Variable::new("x", Position::fake()).into()],
+        #[test]
+        fn compile_debug_with_map() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Map::new(
+                                types::None::new(Position::fake()),
+                                types::None::new(Position::fake()),
+                                Position::fake(),
+                            ),
+                        )],
+                        types::None::new(Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
+                            vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     ),
-                    Position::fake(),
+                    false,
                 ),
-                false,
-            )]),
-        )
-        .unwrap();
+            ]))
+            .unwrap();
+        }
     }
 
-    #[test]
-    fn compile_debug_with_map() {
-        compile_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                Lambda::new(
-                    vec![Argument::new(
-                        "x",
-                        types::Map::new(
-                            types::None::new(Position::fake()),
+    mod reflect {
+        use super::*;
+
+        #[test]
+        fn compile_reflect_debug() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::ByteString::new(Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(
+                                BuiltInFunctionName::ReflectDebug,
+                                Position::fake(),
+                            ),
+                            vec![None::new(Position::fake()).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_reflect_equal() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::Union::new(
+                            types::Boolean::new(Position::fake()),
                             types::None::new(Position::fake()),
                             Position::fake(),
                         ),
-                    )],
-                    types::None::new(Position::fake()),
-                    Call::new(
-                        None,
-                        BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-                        vec![Variable::new("x", Position::fake()).into()],
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(
+                                BuiltInFunctionName::ReflectEqual,
+                                Position::fake(),
+                            ),
+                            vec![
+                                None::new(Position::fake()).into(),
+                                None::new(Position::fake()).into(),
+                            ],
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     ),
-                    Position::fake(),
+                    false,
                 ),
-                false,
-            )]),
-        )
-        .unwrap();
-    }
-
-    #[test]
-    fn compile_reflect_debug() {
-        compile_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                Lambda::new(
-                    vec![],
-                    types::ByteString::new(Position::fake()),
-                    Call::new(
-                        None,
-                        BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, Position::fake()),
-                        vec![None::new(Position::fake()).into()],
-                        Position::fake(),
-                    ),
-                    Position::fake(),
-                ),
-                false,
-            )]),
-        )
-        .unwrap();
-    }
-
-    #[test]
-    fn compile_reflect_equal() {
-        compile_module(
-            &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                "f",
-                Lambda::new(
-                    vec![],
-                    types::Union::new(
-                        types::Boolean::new(Position::fake()),
-                        types::None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    Call::new(
-                        None,
-                        BuiltInFunction::new(BuiltInFunctionName::ReflectEqual, Position::fake()),
-                        vec![
-                            None::new(Position::fake()).into(),
-                            None::new(Position::fake()).into(),
-                        ],
-                        Position::fake(),
-                    ),
-                    Position::fake(),
-                ),
-                false,
-            )]),
-        )
-        .unwrap();
+            ]))
+            .unwrap();
+        }
     }
 }
