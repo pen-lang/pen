@@ -18,8 +18,7 @@ fn qualify_list_type_configuration(
     prelude_prefix: &str,
 ) -> hir_mir::ListTypeConfiguration {
     hir_mir::ListTypeConfiguration {
-        empty_list_function_name: prelude_prefix.to_owned()
-            + &configuration.empty_list_function_name,
+        empty_function_name: prelude_prefix.to_owned() + &configuration.empty_function_name,
         concatenate_function_name: prelude_prefix.to_owned()
             + &configuration.concatenate_function_name,
         equal_function_name: prelude_prefix.to_owned() + &configuration.equal_function_name,

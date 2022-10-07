@@ -22,7 +22,7 @@ pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfigur
             },
             hir: app::module_compiler::HirConfiguration {
                 list_type: app::module_compiler::ListTypeConfiguration {
-                    empty_list_function_name: "EmptyList".into(),
+                    empty_function_name: "EmptyList".into(),
                     concatenate_function_name: "ConcatenateLists".into(),
                     equal_function_name: "EqualLists".into(),
                     maybe_equal_function_name: "MaybeEqualLists".into(),

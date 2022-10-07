@@ -2,7 +2,7 @@ pub mod debug;
 pub mod equal;
 mod utility;
 
-use crate::{context::Context, generic_type_collection, type_, CompileError};
+use crate::{context::Context, type_, variant_type_collection, CompileError};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{type_canonicalizer, type_collector, type_id_calculator},
@@ -223,7 +223,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
             })
             .unwrap_or_default(),
     )
-    .chain(generic_type_collection::collect(context, module)?)
+    .chain(variant_type_collection::collect(context, module)?)
     .chain(
         type_collector::collect_records(module)
             .into_values()
