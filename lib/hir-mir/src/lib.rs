@@ -412,81 +412,6 @@ mod tests {
     }
 
     #[test]
-    fn compile_record_construction() {
-        let reference_type = types::Reference::new("foo", Position::fake());
-
-        compile_module(
-            &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
-                    "foo",
-                    vec![types::RecordField::new(
-                        "x",
-                        types::None::new(Position::fake()),
-                    )],
-                    false,
-                    false,
-                    false,
-                )])
-                .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_function_definitions(vec![FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        reference_type.clone(),
-                        RecordConstruction::new(
-                            reference_type,
-                            vec![RecordField::new(
-                                "x",
-                                None::new(Position::fake()),
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )]),
-        )
-        .unwrap();
-    }
-
-    #[test]
-    fn compile_record_deconstruction() {
-        let reference_type = types::Reference::new("foo", Position::fake());
-
-        compile_module(
-            &Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
-                    "foo",
-                    vec![types::RecordField::new(
-                        "x",
-                        types::None::new(Position::fake()),
-                    )],
-                    false,
-                    false,
-                    false,
-                )])
-                .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
-                .set_function_definitions(vec![FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![Argument::new("r", reference_type)],
-                        types::None::new(Position::fake()),
-                        RecordDeconstruction::new(
-                            None,
-                            Variable::new("r", Position::fake()),
-                            "x",
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )]),
-        )
-        .unwrap();
-    }
-
-    #[test]
     fn compile_duplicate_function_names() {
         let definition = FunctionDefinition::fake(
             "x",
@@ -552,6 +477,85 @@ mod tests {
             )]),
         )
         .unwrap();
+    }
+
+    mod record {
+        use super::*;
+
+        #[test]
+        fn compile_record_construction() {
+            let reference_type = types::Reference::new("foo", Position::fake());
+
+            compile_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "foo",
+                        vec![types::RecordField::new(
+                            "x",
+                            types::None::new(Position::fake()),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            reference_type.clone(),
+                            RecordConstruction::new(
+                                reference_type,
+                                vec![RecordField::new(
+                                    "x",
+                                    None::new(Position::fake()),
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_record_deconstruction() {
+            let reference_type = types::Reference::new("foo", Position::fake());
+
+            compile_module(
+                &Module::empty()
+                    .set_type_definitions(vec![TypeDefinition::fake(
+                        "foo",
+                        vec![types::RecordField::new(
+                            "x",
+                            types::None::new(Position::fake()),
+                        )],
+                        false,
+                        false,
+                        false,
+                    )])
+                    .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new("r", reference_type)],
+                            types::None::new(Position::fake()),
+                            RecordDeconstruction::new(
+                                None,
+                                Variable::new("r", Position::fake()),
+                                "x",
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
     }
 
     mod built_in {
