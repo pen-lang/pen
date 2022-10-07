@@ -237,7 +237,7 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.deconstruct_function_name,
                                 types::Function::new(
-                                    vec![list_type.clone().into()],
+                                    vec![list_type.clone()],
                                     types::Union::new(
                                         first_rest_type.clone(),
                                         types::None::new(Position::fake()),
@@ -250,7 +250,7 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.first_function_name,
                                 types::Function::new(
-                                    vec![first_rest_type.clone().into()],
+                                    vec![first_rest_type.clone()],
                                     types::Function::new(
                                         vec![],
                                         types::Any::new(Position::fake()),
@@ -311,8 +311,8 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.rest_function_name,
                                 types::Function::new(
-                                    vec![first_rest_type.clone().into()],
-                                    list_type.clone(),
+                                    vec![first_rest_type],
+                                    list_type,
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -392,7 +392,7 @@ mod tests {
                                     .iteration
                                     .iterate_function_name,
                                 types::Function::new(
-                                    vec![map_type.clone().into()],
+                                    vec![map_type.clone()],
                                     types::Union::new(
                                         map_iterator_type.clone(),
                                         types::None::new(Position::fake()),
@@ -405,7 +405,7 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.map_type.iteration.key_function_name,
                                 types::Function::new(
-                                    vec![map_iterator_type.clone().into()],
+                                    vec![map_iterator_type.clone()],
                                     types::Any::new(Position::fake()),
                                     Position::fake(),
                                 ),
@@ -414,7 +414,7 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.map_type.iteration.rest_function_name,
                                 types::Function::new(
-                                    vec![map_iterator_type.clone().into()],
+                                    vec![map_iterator_type.clone()],
                                     types::Union::new(
                                         map_iterator_type.clone(),
                                         types::None::new(Position::fake()),
@@ -427,7 +427,7 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.map_type.iteration.value_function_name,
                                 types::Function::new(
-                                    vec![map_iterator_type.clone().into()],
+                                    vec![map_iterator_type],
                                     types::Any::new(Position::fake()),
                                     Position::fake(),
                                 ),
@@ -454,12 +454,12 @@ mod tests {
                                 &COMPILE_CONFIGURATION.map_type.set_function_name,
                                 types::Function::new(
                                     vec![
-                                        map_context_type.clone().into(),
+                                        map_context_type,
                                         map_type.clone(),
                                         types::Any::new(Position::fake()).into(),
                                         types::Any::new(Position::fake()).into(),
                                     ],
-                                    map_type.clone(),
+                                    map_type,
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -751,7 +751,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        list_type.clone(),
+                        list_type,
                         List::new(
                             types::None::new(Position::fake()),
                             vec![ListElement::Multiple(
@@ -776,7 +776,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", list_type.clone())],
-                        list_type.clone(),
+                        list_type,
                         ListComprehension::new(
                             None,
                             types::None::new(Position::fake()),
@@ -921,9 +921,7 @@ mod tests {
                         Map::new(
                             map_type.key().clone(),
                             map_type.value().clone(),
-                            vec![
-                                MapElement::Map(Variable::new("x", Position::fake()).into()).into(),
-                            ],
+                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
                             Position::fake(),
                         ),
                         Position::fake(),
