@@ -6,7 +6,7 @@ use hir::{
     types::{self, Type},
 };
 
-/// Collects generic types potentially up-casted to union types.
+/// Collects types potentially up-casted to variant (union or `any`) types.
 pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
@@ -74,6 +74,7 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
     Ok(lower_types
         .into_iter()
         .chain(
+            // Collect types from record fields for type information generation.
             module
                 .type_definitions()
                 .iter()
