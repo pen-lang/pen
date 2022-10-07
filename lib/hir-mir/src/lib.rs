@@ -102,31 +102,13 @@ fn compile_module(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        compile_configuration::COMPILE_CONFIGURATION, map_type_configuration::HASH_CONFIGURATION,
-    };
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{
         analysis::AnalysisError,
         test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
         types::{self, Type},
     };
-    use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
-
-    static COMBINE_HASH_FUNCTION_DECLARATION: Lazy<FunctionDeclaration> = Lazy::new(|| {
-        FunctionDeclaration::new(
-            &HASH_CONFIGURATION.combine_function_name,
-            types::Function::new(
-                vec![
-                    types::Number::new(Position::fake()).into(),
-                    types::Number::new(Position::fake()).into(),
-                ],
-                types::Number::new(Position::fake()),
-                Position::fake(),
-            ),
-            Position::fake(),
-        )
-    });
 
     fn compile_module(
         module: &Module,
@@ -177,13 +159,29 @@ mod tests {
                         .type_definitions()
                         .iter()
                         .cloned()
-                        .chain([TypeDefinition::fake(
-                            &COMPILE_CONFIGURATION.map_type.context_type_name,
-                            vec![],
-                            false,
-                            false,
-                            true,
-                        )])
+                        .chain([
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.list_type.list_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.map_type.context_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
+                            TypeDefinition::fake(
+                                &COMPILE_CONFIGURATION.map_type.map_type_name,
+                                vec![],
+                                false,
+                                false,
+                                true,
+                            ),
+                        ])
                         .collect(),
                 )
                 .set_function_declarations(
@@ -192,6 +190,18 @@ mod tests {
                         .iter()
                         .cloned()
                         .chain([
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::Number::new(Position::fake()).into(),
+                                        types::Number::new(Position::fake()).into(),
+                                    ],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.debug_function_name,
                                 types::Function::new(
@@ -203,6 +213,11 @@ mod tests {
                                     types::ByteString::new(Position::fake()),
                                     Position::fake(),
                                 ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.empty_list_function_name,
+                                types::Function::new(vec![], list_type.clone(), Position::fake()),
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
@@ -479,6 +494,27 @@ mod tests {
         .unwrap();
     }
 
+    mod list {
+        use super::*;
+
+        #[test]
+        fn compile_empty_list() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+    }
+
     mod record {
         use super::*;
 
@@ -498,7 +534,6 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                     .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
@@ -537,7 +572,6 @@ mod tests {
                         false,
                         false,
                     )])
-                    .set_function_declarations(vec![COMBINE_HASH_FUNCTION_DECLARATION.clone()])
                     .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(

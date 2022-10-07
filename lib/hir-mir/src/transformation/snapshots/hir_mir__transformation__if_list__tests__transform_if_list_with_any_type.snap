@@ -14,7 +14,7 @@ Ok(
                                 arguments: [
                                     Reference(
                                         Reference {
-                                            name: "genericList",
+                                            name: "anyList",
                                             position: Position {
                                                 path: "",
                                                 line_number: 1,
@@ -225,7 +225,7 @@ Ok(
                                     type_: Some(
                                         Reference(
                                             Reference {
-                                                name: "genericList",
+                                                name: "anyList",
                                                 position: Position {
                                                     path: "",
                                                     line_number: 1,
@@ -255,7 +255,7 @@ Ok(
                                                         ],
                                                         result: Reference(
                                                             Reference {
-                                                                name: "genericList",
+                                                                name: "anyList",
                                                                 position: Position {
                                                                     path: "",
                                                                     line_number: 1,
