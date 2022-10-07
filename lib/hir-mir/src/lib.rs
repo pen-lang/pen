@@ -128,7 +128,6 @@ mod tests {
         )
     });
 
-    // TODO Test types included in prelude modules by mocking them.
     fn compile_module(
         module: &Module,
     ) -> Result<(mir::ir::Module, interface::Module), CompileError> {
