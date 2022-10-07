@@ -6,7 +6,6 @@ mod downcast;
 mod error;
 mod error_type;
 mod expression;
-mod generic_type_collection;
 mod generic_type_definition;
 mod list_type_configuration;
 mod main_function;
@@ -22,6 +21,7 @@ mod test_module_configuration;
 mod transformation;
 mod type_;
 mod type_information;
+mod variant_type_collection;
 
 pub use compile_configuration::CompileConfiguration;
 use context::Context;

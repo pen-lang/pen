@@ -1,12 +1,12 @@
 use super::{context::Context, type_, CompileError};
-use crate::generic_type_collection;
+use crate::variant_type_collection;
 use hir::{ir::*, types::Type};
 
 pub fn compile(
     context: &Context,
     module: &Module,
 ) -> Result<Vec<mir::ir::TypeDefinition>, CompileError> {
-    Ok(generic_type_collection::collect(context, module)?
+    Ok(variant_type_collection::collect(context, module)?
         .into_iter()
         .map(|type_| compile_type_definition(context, &type_))
         .collect::<Result<Vec<_>, _>>()?
