@@ -216,8 +216,39 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
-                                &COMPILE_CONFIGURATION.list_type.empty_list_function_name,
+                                &COMPILE_CONFIGURATION.list_type.empty_function_name,
                                 types::Function::new(vec![], list_type.clone(), Position::fake()),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.lazy_function_name,
+                                types::Function::new(
+                                    vec![types::Function::new(
+                                        vec![],
+                                        list_type.clone(),
+                                        Position::fake(),
+                                    )
+                                    .into()],
+                                    list_type.clone(),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.prepend_function_name,
+                                types::Function::new(
+                                    vec![
+                                        types::Function::new(
+                                            vec![],
+                                            types::Any::new(Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                        list_type.clone(),
+                                    ],
+                                    list_type.clone(),
+                                    Position::fake(),
+                                ),
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
@@ -506,6 +537,76 @@ mod tests {
                         vec![],
                         types::List::new(types::None::new(Position::fake()), Position::fake()),
                         List::new(types::None::new(Position::fake()), vec![], Position::fake()),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_with_element() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Single(None::new(Position::fake()).into())],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_with_elements() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        List::new(
+                            types::None::new(Position::fake()),
+                            vec![
+                                ListElement::Single(None::new(Position::fake()).into()),
+                                ListElement::Single(None::new(Position::fake()).into()),
+                            ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_with_spread_element() {
+            let list_type = types::List::new(types::None::new(Position::fake()), Position::fake());
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", list_type.clone())],
+                        list_type.clone(),
+                        List::new(
+                            types::None::new(Position::fake()),
+                            vec![ListElement::Multiple(
+                                Variable::new("x", Position::fake()).into(),
+                            )],
+                            Position::fake(),
+                        ),
                         Position::fake(),
                     ),
                     false,
