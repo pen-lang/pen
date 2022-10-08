@@ -566,7 +566,7 @@ mod tests {
     use super::*;
     use crate::{
         analysis::type_collector,
-        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
     };
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;

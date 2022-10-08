@@ -63,7 +63,7 @@ fn check_with_cache(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types;
+    use crate::{test::RecordFake, types};
     use position::{test::PositionFake, Position};
 
     #[test]

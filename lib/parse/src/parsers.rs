@@ -2725,7 +2725,8 @@ mod tests {
 
             assert_eq!(
                 expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2734,13 +2735,15 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
                 .into()
             );
 
             assert_eq!(
                 record().parse(stream("Foo{foo:42}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2749,12 +2752,14 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
             );
 
             assert_eq!(
                 record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     None,
                     vec![
                         RecordField::new(
@@ -2773,7 +2778,8 @@ mod tests {
                             ),
                             Position::fake()
                         )
-                    ])
+                    ]
+                )
             );
 
             assert!(record().parse(stream("Foo{foo:42,foo:42}", "")).is_err());
@@ -2785,7 +2791,8 @@ mod tests {
                     .0,
                 Call::new(
                     Variable::new("foo", Position::fake()),
-                    vec![types::Record::fake("Foo",
+                    vec![types::Record::fake(
+                        "Foo",
                         None,
                         vec![RecordField::new(
                             "foo",
@@ -2794,7 +2801,8 @@ mod tests {
                                 Position::fake()
                             ),
                             Position::fake()
-                        )])
+                        )]
+                    )
                     .into()],
                     Position::fake()
                 )
@@ -2803,7 +2811,8 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     None,
                     vec![RecordField::new(
                         "foo",
@@ -2817,14 +2826,16 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
             );
 
             assert!(record().parse(stream("Foo{...foo,}", "")).is_err());
 
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2833,12 +2844,14 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
             );
 
             assert_eq!(
                 record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2847,7 +2860,8 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
             );
 
             assert_eq!(
@@ -2855,7 +2869,8 @@ mod tests {
                     .parse(stream("Foo{...foo,bar:42}", ""))
                     .unwrap()
                     .0,
-                types::Record::fake("Foo",
+                types::Record::fake(
+                    "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
                     vec![RecordField::new(
                         "bar",
@@ -2864,7 +2879,8 @@ mod tests {
                             Position::fake()
                         ),
                         Position::fake()
-                    )])
+                    )]
+                )
                 .into(),
             );
 

@@ -77,7 +77,7 @@ fn collect_existent_records(module: &Module) -> FnvHashSet<&str> {
 mod tests {
     use super::*;
     use crate::{
-        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
+        test::{ModuleFake, RecordFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -120,16 +120,15 @@ mod tests {
             validate(
                 &Module::empty().set_type_definitions(vec![TypeDefinition::fake(
                     "x",
-                    vec![types::RecordField::new(
-                        "x",
-                        types::Record::fake("foo")
-                    )],
+                    vec![types::RecordField::new("x", types::Record::fake("foo"))],
                     false,
                     false,
                     false
                 )]),
             ),
-            Err(AnalysisError::RecordNotFound(types::types::Record::fake("foo")))
+            Err(AnalysisError::RecordNotFound(types::types::Record::fake(
+                "foo"
+            )))
         );
     }
 
@@ -197,7 +196,7 @@ mod tests {
                         false
                     )]),
             ),
-            Err(AnalysisError::RecordNotFound(types::types::Record::fake("Foo")))
+            Err(AnalysisError::RecordNotFound(types::Record::fake("Foo")))
         );
     }
 

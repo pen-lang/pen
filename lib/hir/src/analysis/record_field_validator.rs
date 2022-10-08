@@ -82,7 +82,7 @@ mod tests {
     use super::*;
     use crate::{
         analysis::type_collector,
-        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};

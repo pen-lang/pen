@@ -90,7 +90,7 @@ fn are_any_type_recursive<'a>(
 mod tests {
     use super::{super::type_collector, *};
     use crate::{
-        test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
+        test::{ModuleFake, RecordFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
     use position::{test::PositionFake, Position};
@@ -138,10 +138,7 @@ mod tests {
     fn validate_recursive_record_with_one_field() {
         let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
             "a",
-            vec![types::RecordField::new(
-                "x",
-                types::Record::fake("a"),
-            )],
+            vec![types::RecordField::new("x", types::Record::fake("a"))],
             false,
             false,
             false,
@@ -269,20 +266,14 @@ mod tests {
         let module = Module::empty().set_type_definitions(vec![
             TypeDefinition::fake(
                 "a",
-                vec![types::RecordField::new(
-                    "x",
-                    types::Record::fake("b"),
-                )],
+                vec![types::RecordField::new("x", types::Record::fake("b"))],
                 false,
                 false,
                 false,
             ),
             TypeDefinition::fake(
                 "b",
-                vec![types::RecordField::new(
-                    "x",
-                    types::Record::fake("a"),
-                )],
+                vec![types::RecordField::new("x", types::Record::fake("a"))],
                 false,
                 false,
                 false,
@@ -314,10 +305,7 @@ mod tests {
             ),
             TypeDefinition::fake(
                 "b",
-                vec![types::RecordField::new(
-                    "x",
-                    types::Record::fake("a"),
-                )],
+                vec![types::RecordField::new("x", types::Record::fake("a"))],
                 false,
                 false,
                 false,
@@ -332,20 +320,14 @@ mod tests {
         let module = Module::empty().set_type_definitions(vec![
             TypeDefinition::fake(
                 "a",
-                vec![types::RecordField::new(
-                    "x",
-                    types::Record::fake("b"),
-                )],
+                vec![types::RecordField::new("x", types::Record::fake("b"))],
                 false,
                 false,
                 false,
             ),
             TypeDefinition::fake(
                 "b",
-                vec![types::RecordField::new(
-                    "x",
-                    types::Record::fake("b"),
-                )],
+                vec![types::RecordField::new("x", types::Record::fake("b"))],
                 false,
                 false,
                 false,
