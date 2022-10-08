@@ -73,6 +73,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
                     .get(record.name())
                     .map(|string| string.as_str())
                     .unwrap_or_else(|| record.name()),
+                record.original_name(),
                 record.position().clone(),
             )
             .into(),
