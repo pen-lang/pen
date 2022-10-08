@@ -1064,6 +1064,8 @@ mod tests {
     }
 
     mod built_in {
+        use hir::test::RecordFake;
+
         use super::*;
 
         #[test]
@@ -1109,10 +1111,7 @@ mod tests {
                     .set_function_definitions(vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Record::fake("r"),
-                            )],
+                            vec![Argument::new("x", types::Record::fake("r"))],
                             types::None::new(Position::fake()),
                             Call::new(
                                 None,
