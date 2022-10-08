@@ -206,6 +206,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
 
     Ok([
         types::Boolean::new(position.clone()).into(),
+        types::Error::new(position.clone()).into(),
         types::None::new(position.clone()).into(),
         types::Number::new(position.clone()).into(),
     ]
@@ -213,15 +214,9 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
     .chain(
         context
             .configuration()
-            .map(|_| {
-                vec![
-                    types::Error::new(position.clone()).into(),
-                    // TODO Move this line out of here when string equal operation is implemented
-                    // internally in a compiler.
-                    types::ByteString::new(position.clone()).into(),
-                ]
-            })
-            .unwrap_or_default(),
+            // TODO Move this line out of here when string equal operation is implemented
+            // internally in a compiler.
+            .map(|_| types::ByteString::new(position.clone()).into()),
     )
     .chain(variant_type_collection::collect(context, module)?)
     .chain(
