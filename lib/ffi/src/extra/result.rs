@@ -1,8 +1,8 @@
-use crate::{Any, BoxAny, Error, None};
+use crate::{Any, Error, None};
 
 // This type must be used only as a return type.
 #[repr(transparent)]
-pub struct Result(BoxAny);
+pub struct Result(Any);
 
 impl<E: Into<Any>> From<core::result::Result<(), E>> for Result {
     fn from(result: core::result::Result<(), E>) -> Self {
@@ -12,7 +12,7 @@ impl<E: Into<Any>> From<core::result::Result<(), E>> for Result {
 
 impl<T: Into<Any>, E: Into<Any>> From<core::result::Result<T, E>> for Result {
     fn from(result: core::result::Result<T, E>) -> Self {
-        Self(BoxAny::from(match result {
+        Self(Any::from(match result {
             Ok(value) => value.into(),
             Err(error) => Error::new(error.into()).into(),
         }))
