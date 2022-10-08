@@ -19,7 +19,7 @@ pub fn format(type_: &Type) -> String {
         Type::Map(map) => format!("{{{}: {}}}", format(map.key()), format(map.value())),
         Type::None(_) => "none".into(),
         Type::Number(_) => "number".into(),
-        Type::Record(record) => record.name().into(),
+        Type::Record(record) => record.original_name().into(),
         Type::Reference(reference) => reference.name().into(),
         Type::String(_) => "string".into(),
         Type::Union(union) => format!("{} | {}", format(union.lhs()), format(union.rhs())),
@@ -29,10 +29,7 @@ pub fn format(type_: &Type) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        test::RecordFake,
-        types::{self, *},
-    };
+    use crate::types::{self, *};
     use position::{test::PositionFake, Position};
 
     #[test]
@@ -120,7 +117,10 @@ mod tests {
 
     #[test]
     fn format_record() {
-        assert_eq!(format(&types::Record::fake("foo").into(),), "foo");
+        assert_eq!(
+            format(&types::Record::new("foo", "bar", Position::fake()).into(),),
+            "bar"
+        );
     }
 
     #[test]

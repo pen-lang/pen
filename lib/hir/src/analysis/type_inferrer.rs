@@ -997,10 +997,7 @@ mod tests {
                     .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Record::fake("r")
-                            )],
+                            vec![Argument::new("x", types::Record::fake("r"))],
                             types::None::new(Position::fake()),
                             RecordDeconstruction::new(
                                 None,

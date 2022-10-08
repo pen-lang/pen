@@ -103,10 +103,9 @@ fn compile_module(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::RecordFake;
     use hir::{
         analysis::AnalysisError,
-        test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
+        test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
         types::{self, Type},
     };
     use position::{test::PositionFake, Position};
