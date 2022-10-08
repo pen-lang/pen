@@ -151,7 +151,7 @@ mod tests {
             false,
             Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::fake());
+        let record_type = types::Record::fake(type_definition.name());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -220,7 +220,7 @@ mod tests {
 
     #[test]
     fn compile_equal_function_declaration_for_external_type_definition() {
-        let record_type = types::Record::new("foo", Position::fake());
+        let record_type = types::Record::fake("foo");
         let type_definition = TypeDefinition::new(
             "foo",
             "foo",

@@ -138,8 +138,8 @@ mod tests {
     #[test]
     fn check_records() {
         assert!(!check(
-            &Record::new("x", Position::fake()).into(),
-            &Record::new("y", Position::fake()).into(),
+            &types::Record::fake("x").into(),
+            &types::Record::fake("y").into(),
             &Default::default(),
         )
         .unwrap());

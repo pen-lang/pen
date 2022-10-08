@@ -200,7 +200,7 @@ mod tests {
             false,
             Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::fake());
+        let record_type = types::Record::fake(type_definition.name());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -267,7 +267,7 @@ mod tests {
                 .set_function_declarations(vec![FunctionDeclaration::new(
                     "foo.$hash",
                     types::Function::new(
-                        vec![types::Record::new(type_definition.name(), Position::fake()).into()],
+                        vec![types::Record::fake(type_definition.name()).into()],
                         HASH_TYPE.clone(),
                         Position::fake()
                     ),

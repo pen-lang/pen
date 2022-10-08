@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn validate_record_construction() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -138,7 +138,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_construction() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn validate_record_deconstruction() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -212,7 +212,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_deconstruction() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn validate_record_update() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -287,7 +287,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn fail_to_validate_record_update() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -339,7 +339,7 @@ mod tests {
 
     #[test]
     fn validate_record_construction_with_external_private_open_record() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()
@@ -368,7 +368,7 @@ mod tests {
 
     #[test]
     fn validate_record_deconstruction_with_external_private_open_record() {
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         validate_module(
             &Module::empty()

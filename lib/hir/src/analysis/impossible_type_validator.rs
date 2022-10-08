@@ -140,7 +140,7 @@ mod tests {
             "a",
             vec![types::RecordField::new(
                 "x",
-                types::Record::new("a", Position::fake()),
+                types::Record::fake("a"),
             )],
             false,
             false,
@@ -158,8 +158,8 @@ mod tests {
         let module = Module::empty().set_type_definitions(vec![TypeDefinition::fake(
             "a",
             vec![
-                types::RecordField::new("x", types::Record::new("a", Position::fake())),
-                types::RecordField::new("y", types::Record::new("a", Position::fake())),
+                types::RecordField::new("x", types::Record::fake("a")),
+                types::RecordField::new("y", types::Record::fake("a")),
             ],
             false,
             false,
@@ -178,7 +178,7 @@ mod tests {
             "a",
             vec![
                 types::RecordField::new("x", types::None::new(Position::fake())),
-                types::RecordField::new("y", types::Record::new("a", Position::fake())),
+                types::RecordField::new("y", types::Record::fake("a")),
             ],
             false,
             false,
@@ -198,7 +198,7 @@ mod tests {
             vec![types::RecordField::new(
                 "x",
                 types::Union::new(
-                    types::Record::new("a", Position::fake()),
+                    types::Record::fake("a"),
                     types::None::new(Position::fake()),
                     Position::fake(),
                 ),
@@ -253,7 +253,7 @@ mod tests {
             .set_type_aliases(vec![TypeAlias::fake(
                 "b",
                 types::Union::new(
-                    types::Record::new("a", Position::fake()),
+                    types::Record::fake("a"),
                     types::None::new(Position::fake()),
                     Position::fake(),
                 ),
@@ -271,7 +271,7 @@ mod tests {
                 "a",
                 vec![types::RecordField::new(
                     "x",
-                    types::Record::new("b", Position::fake()),
+                    types::Record::fake("b"),
                 )],
                 false,
                 false,
@@ -281,7 +281,7 @@ mod tests {
                 "b",
                 vec![types::RecordField::new(
                     "x",
-                    types::Record::new("a", Position::fake()),
+                    types::Record::fake("a"),
                 )],
                 false,
                 false,
@@ -303,7 +303,7 @@ mod tests {
                 vec![types::RecordField::new(
                     "x",
                     types::Union::new(
-                        types::Record::new("b", Position::fake()),
+                        types::Record::fake("b"),
                         types::None::new(Position::fake()),
                         Position::fake(),
                     ),
@@ -316,7 +316,7 @@ mod tests {
                 "b",
                 vec![types::RecordField::new(
                     "x",
-                    types::Record::new("a", Position::fake()),
+                    types::Record::fake("a"),
                 )],
                 false,
                 false,
@@ -334,7 +334,7 @@ mod tests {
                 "a",
                 vec![types::RecordField::new(
                     "x",
-                    types::Record::new("b", Position::fake()),
+                    types::Record::fake("b"),
                 )],
                 false,
                 false,
@@ -344,7 +344,7 @@ mod tests {
                 "b",
                 vec![types::RecordField::new(
                     "x",
-                    types::Record::new("b", Position::fake()),
+                    types::Record::fake("b"),
                 )],
                 false,
                 false,

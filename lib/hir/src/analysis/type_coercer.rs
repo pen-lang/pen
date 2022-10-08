@@ -1169,7 +1169,7 @@ mod tests {
             false,
             false,
         );
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         assert_eq!(
             coerce_module(
@@ -1236,7 +1236,7 @@ mod tests {
             false,
             false,
         );
-        let record_type = types::Record::new("r", Position::fake());
+        let record_type = types::Record::fake("r");
 
         assert_eq!(
             coerce_module(

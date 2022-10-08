@@ -999,7 +999,7 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Record::new("r", Position::fake())
+                                types::Record::fake("r")
                             )],
                             types::None::new(Position::fake()),
                             RecordDeconstruction::new(

@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn format_record() {
-        assert_eq!(format(&Record::new("foo", Position::fake()).into(),), "foo");
+        assert_eq!(format(&types::Record::fake("foo").into(),), "foo");
     }
 
     #[test]

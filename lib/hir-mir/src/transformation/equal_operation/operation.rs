@@ -310,7 +310,7 @@ mod tests {
 
     #[test]
     fn transform_with_record() {
-        let record_type = types::Record::new("foo", Position::fake());
+        let record_type = types::Record::fake("foo");
 
         assert_eq!(
             transform(

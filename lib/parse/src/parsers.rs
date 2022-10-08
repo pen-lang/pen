@@ -2720,7 +2720,7 @@ mod tests {
 
             assert_eq!(
                 record().parse(stream("Foo{}", "")).unwrap().0,
-                Record::new("Foo", None, vec![], Position::fake())
+                types::Record::fake("Foo", None, vec![])
             );
 
             assert_eq!(

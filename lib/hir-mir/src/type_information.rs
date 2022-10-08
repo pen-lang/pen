@@ -594,7 +594,7 @@ mod tests {
                     vec![],
                     types::None::new(Position::fake()),
                     List::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![],
                         Position::fake(),
                     ),
@@ -619,7 +619,7 @@ mod tests {
                 .filter(|declaration| declaration.name()
                     == debug::compile_function_name(
                         &context,
-                        &types::Record::new("r", Position::fake()).into()
+                        &types::Record::fake("r").into()
                     )
                     .unwrap())
                 .count(),
@@ -645,7 +645,7 @@ mod tests {
                     vec![],
                     types::None::new(Position::fake()),
                     List::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![],
                         Position::fake(),
                     ),
@@ -670,7 +670,7 @@ mod tests {
                 .find(|definition| definition.definition().name()
                     == debug::compile_function_name(
                         &context,
-                        &types::Record::new("r", Position::fake()).into()
+                        &types::Record::fake("r").into()
                     )
                     .unwrap())
                 .unwrap()
@@ -699,7 +699,7 @@ mod tests {
                     vec![],
                     types::None::new(Position::fake()),
                     List::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![],
                         Position::fake(),
                     ),

@@ -3304,7 +3304,7 @@ mod tests {
             #[test]
             fn format_empty() {
                 assert_eq!(
-                    format(&Record::new("foo", None, vec![], Position::fake()).into()),
+                    format(&types::Record::fake("foo", None, vec![]).into()),
                     "foo{}"
                 );
             }

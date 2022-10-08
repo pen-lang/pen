@@ -122,7 +122,7 @@ mod tests {
                     "x",
                     vec![types::RecordField::new(
                         "x",
-                        types::Record::new("foo", Position::fake())
+                        types::Record::fake("foo")
                     )],
                     false,
                     false,
@@ -195,7 +195,7 @@ mod tests {
                     )])
                     .set_type_aliases(vec![TypeAlias::fake(
                         "Bar",
-                        types::Record::new("Foo", Position::fake()),
+                        types::Record::fake("Foo"),
                         false,
                         false
                     )]),

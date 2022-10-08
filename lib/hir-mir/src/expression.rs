@@ -1183,7 +1183,7 @@ mod tests {
                         .collect()
                     ),
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![RecordField::new(
                             "x",
                             None::new(Position::fake()),
@@ -1223,7 +1223,7 @@ mod tests {
                         .collect()
                     ),
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![
                             RecordField::new(
                                 "x",
@@ -1266,7 +1266,7 @@ mod tests {
                         [("r".into(), vec![])].into_iter().collect()
                     ),
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![],
                         Position::fake()
                     )
@@ -1281,7 +1281,7 @@ mod tests {
             assert_eq!(
                 compile(
                     &Context::dummy(
-                        [("r".into(), types::Record::new("r", Position::fake()).into())]
+                        [("r".into(), types::Record::fake("r").into())]
                             .into_iter()
                             .collect(),
                         [("r".into(), vec![])].into_iter().collect()
