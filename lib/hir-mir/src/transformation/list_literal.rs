@@ -23,7 +23,7 @@ fn transform_list(
     Ok(match elements {
         [] => Call::new(
             Some(types::Function::new(vec![], any_list_type, position.clone()).into()),
-            Variable::new(&configuration.empty_list_function_name, position.clone()),
+            Variable::new(&configuration.empty_function_name, position.clone()),
             vec![],
             position.clone(),
         )
@@ -167,7 +167,7 @@ mod tests {
             Ok(Call::new(
                 Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                 Variable::new(
-                    &LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                    &LIST_TYPE_CONFIGURATION.empty_function_name,
                     Position::fake()
                 ),
                 vec![],
@@ -211,7 +211,7 @@ mod tests {
                     Call::new(
                         Some(types::Function::new(vec![], list_type, Position::fake()).into()),
                         Variable::new(
-                            &LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                            &LIST_TYPE_CONFIGURATION.empty_function_name,
                             Position::fake()
                         ),
                         vec![],
@@ -284,7 +284,7 @@ mod tests {
                                         .into()
                                 ),
                                 Variable::new(
-                                    &LIST_TYPE_CONFIGURATION.empty_list_function_name,
+                                    &LIST_TYPE_CONFIGURATION.empty_function_name,
                                     Position::fake()
                                 ),
                                 vec![],
