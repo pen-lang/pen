@@ -1,17 +1,17 @@
-use crate::{import, Boolean, BoxAny, ByteString, Error, List, Number, TypeInformation};
+use crate::{import, Boolean, ByteString, Error, List, Number, TypeInformation};
 
-import!(pen_ffi_any_is_boolean, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_is_error, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_is_none, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_is_list, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_is_number, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_is_string, fn(any: BoxAny) -> Boolean);
+import!(pen_ffi_any_is_boolean, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_is_error, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_is_none, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_is_list, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_is_number, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_is_string, fn(any: Any) -> Boolean);
 
-import!(pen_ffi_any_to_boolean, fn(any: BoxAny) -> Boolean);
-import!(pen_ffi_any_to_error, fn(any: BoxAny) -> Error);
-import!(pen_ffi_any_to_list, fn(any: BoxAny) -> List);
-import!(pen_ffi_any_to_number, fn(any: BoxAny) -> Number);
-import!(pen_ffi_any_to_string, fn(any: BoxAny) -> ByteString);
+import!(pen_ffi_any_to_boolean, fn(any: Any) -> Boolean);
+import!(pen_ffi_any_to_error, fn(any: Any) -> Error);
+import!(pen_ffi_any_to_list, fn(any: Any) -> List);
+import!(pen_ffi_any_to_number, fn(any: Any) -> Number);
+import!(pen_ffi_any_to_string, fn(any: Any) -> ByteString);
 
 #[repr(C)]
 pub struct Any {

@@ -38,14 +38,14 @@ pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<b
                 return Err(CompileError::UnboxedRecord);
             }
 
-            type_::is_record_boxed(context, record_type) != is_record_boxed(context, record_type)
+            !type_::is_record_boxed(context, record_type) && is_record_boxed(context, record_type)
         }
-        mir::types::Type::Variant => true,
         mir::types::Type::Boolean
         | mir::types::Type::ByteString
         | mir::types::Type::Function(_)
         | mir::types::Type::None
-        | mir::types::Type::Number => false,
+        | mir::types::Type::Number
+        | mir::types::Type::Variant => false,
     })
 }
 
