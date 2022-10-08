@@ -129,10 +129,7 @@ mod tests {
                     false
                 )]),
             ),
-            Err(AnalysisError::RecordNotFound(types::Record::new(
-                "foo",
-                Position::fake()
-            )))
+            Err(AnalysisError::RecordNotFound(types::types::Record::fake("foo")))
         );
     }
 
@@ -200,10 +197,7 @@ mod tests {
                         false
                     )]),
             ),
-            Err(AnalysisError::RecordNotFound(types::Record::new(
-                "Foo",
-                Position::fake()
-            )))
+            Err(AnalysisError::RecordNotFound(types::types::Record::fake("Foo")))
         );
     }
 
