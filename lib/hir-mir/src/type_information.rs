@@ -341,6 +341,14 @@ mod tests {
                         )
                         .unwrap()
                     ),
+                    (
+                        error_type::compile_type().into(),
+                        compile_function_name(
+                            &context,
+                            &types::Error::new(Position::fake()).into()
+                        )
+                        .unwrap(),
+                    ),
                 ]
                 .into_iter()
                 .collect(),
