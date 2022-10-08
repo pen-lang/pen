@@ -1,6 +1,17 @@
 import Reflect'Any
 import Test'Assert
 
+type foo {}
+
+type bar {
+  x number
+}
+
+type baz {
+  x number
+  y string
+}
+
 DebugBoolean = \() none | error {
   Assert'Equal(Any'Debug(false), "false")?
   Assert'Equal(Any'Debug(true), "true")
@@ -25,6 +36,18 @@ DebugNone = \() none | error {
 
 DebugNumber = \() none | error {
   Assert'Equal(Any'Debug(42), "42")
+}
+
+DebugRecord = \() none | error {
+  Assert'Equal(Any'Debug(foo{}), "foo{}")
+}
+
+DebugRecordWithField = \() none | error {
+  Assert'Equal(Any'Debug(bar{x: 42}), "bar{x: 42}")
+}
+
+DebugRecordWithFields = \() none | error {
+  Assert'Equal(Any'Debug(baz{x: 42, y: "foo"}), "baz{x: 42, y: \"foo\"}")
 }
 
 DebugString = \() none | error {

@@ -241,7 +241,7 @@ mod tests {
     use super::*;
     use crate::{compile_configuration::COMPILE_CONFIGURATION, error_type};
     use fnv::FnvHashMap;
-    use hir::test::{FunctionDefinitionFake, ModuleFake};
+    use hir::test::{FunctionDefinitionFake, ModuleFake, RecordFake};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -593,11 +593,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::fake()),
-                    List::new(
-                        types::Record::new("r", Position::fake()),
-                        vec![],
-                        Position::fake(),
-                    ),
+                    List::new(types::Record::fake("r"), vec![], Position::fake()),
                     Position::fake(),
                 ),
                 false,
@@ -617,11 +613,8 @@ mod tests {
                 .0
                 .iter()
                 .filter(|declaration| declaration.name()
-                    == debug::compile_function_name(
-                        &context,
-                        &types::Record::new("r", Position::fake()).into()
-                    )
-                    .unwrap())
+                    == debug::compile_function_name(&context, &types::Record::fake("r").into())
+                        .unwrap())
                 .count(),
             1
         );
@@ -644,11 +637,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::fake()),
-                    List::new(
-                        types::Record::new("r", Position::fake()),
-                        vec![],
-                        Position::fake(),
-                    ),
+                    List::new(types::Record::fake("r"), vec![], Position::fake()),
                     Position::fake(),
                 ),
                 false,
@@ -668,11 +657,8 @@ mod tests {
                 .1
                 .iter()
                 .find(|definition| definition.definition().name()
-                    == debug::compile_function_name(
-                        &context,
-                        &types::Record::new("r", Position::fake()).into()
-                    )
-                    .unwrap())
+                    == debug::compile_function_name(&context, &types::Record::fake("r").into())
+                        .unwrap())
                 .unwrap()
                 .is_public()
         );
@@ -698,11 +684,7 @@ mod tests {
                 Lambda::new(
                     vec![],
                     types::None::new(Position::fake()),
-                    List::new(
-                        types::Record::new("r", Position::fake()),
-                        vec![],
-                        Position::fake(),
-                    ),
+                    List::new(types::Record::fake("r"), vec![], Position::fake()),
                     Position::fake(),
                 ),
                 false,

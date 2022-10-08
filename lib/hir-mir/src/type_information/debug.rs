@@ -138,36 +138,38 @@ pub(super) fn compile_function_definition(
 
             compile_function_definition(
                 mir::ir::StringConcatenation::new(
-                    [mir::ir::ByteString::new(format!("{}{{", record_type.name())).into()]
-                        .into_iter()
-                        .chain(
-                            record_field_resolver::resolve_record(record_type, context.records())?
-                                .iter()
-                                .enumerate()
-                                .map(|(index, field)| {
-                                    let value = mir::ir::RecordField::new(
-                                        mir_type.clone(),
-                                        index,
-                                        argument.clone(),
-                                    );
+                    [
+                        mir::ir::ByteString::new(format!("{}{{", record_type.original_name()))
+                            .into(),
+                    ]
+                    .into_iter()
+                    .chain(
+                        record_field_resolver::resolve_record(record_type, context.records())?
+                            .iter()
+                            .enumerate()
+                            .map(|(index, field)| {
+                                let value = mir::ir::RecordField::new(
+                                    mir_type.clone(),
+                                    index,
+                                    argument.clone(),
+                                );
 
-                                    Ok(vec![
-                                        mir::ir::ByteString::new(format!("{}: ", field.name()))
-                                            .into(),
-                                        compile_call(utility::compile_any(
-                                            context,
-                                            value,
-                                            field.type_(),
-                                        )?),
-                                    ])
-                                })
-                                .collect::<Result<Vec<_>, CompileError>>()?
-                                .into_iter()
-                                .intersperse(vec![mir::ir::ByteString::new(", ").into()])
-                                .flatten(),
-                        )
-                        .chain([mir::ir::ByteString::new("}").into()])
-                        .collect(),
+                                Ok(vec![
+                                    mir::ir::ByteString::new(format!("{}: ", field.name())).into(),
+                                    compile_call(utility::compile_any(
+                                        context,
+                                        value,
+                                        field.type_(),
+                                    )?),
+                                ])
+                            })
+                            .collect::<Result<Vec<_>, CompileError>>()?
+                            .into_iter()
+                            .intersperse(vec![mir::ir::ByteString::new(", ").into()])
+                            .flatten(),
+                    )
+                    .chain([mir::ir::ByteString::new("}").into()])
+                    .collect(),
                 )
                 .into(),
             )?

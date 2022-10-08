@@ -11,7 +11,12 @@ pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileEr
         .map(|definition| {
             Ok(
                 if type_comparability_checker::check(
-                    &types::Record::new(definition.name(), definition.position().clone()).into(),
+                    &types::Record::new(
+                        definition.name(),
+                        definition.original_name(),
+                        definition.position().clone(),
+                    )
+                    .into(),
                     context.types(),
                     context.records(),
                 )? {
@@ -58,7 +63,11 @@ pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileEr
 
 fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
     let position = type_definition.position();
-    let record_type = types::Record::new(type_definition.name(), position.clone());
+    let record_type = types::Record::new(
+        type_definition.name(),
+        type_definition.original_name(),
+        position.clone(),
+    );
 
     FunctionDeclaration::new(
         record_type_information::compile_equal_function_name(&record_type),
@@ -73,7 +82,11 @@ fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDec
 
 fn compile_function_definition(type_definition: &TypeDefinition) -> FunctionDefinition {
     let position = type_definition.position();
-    let record_type = types::Record::new(type_definition.name(), position.clone());
+    let record_type = types::Record::new(
+        type_definition.name(),
+        type_definition.original_name(),
+        position.clone(),
+    );
 
     let function_name = record_type_information::compile_equal_function_name(&record_type);
 
@@ -126,7 +139,7 @@ fn compile_function_definition(type_definition: &TypeDefinition) -> FunctionDefi
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
+    use hir::test::{ModuleFake, RecordFake};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
@@ -151,7 +164,7 @@ mod tests {
             false,
             Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::fake());
+        let record_type = types::Record::fake(type_definition.name());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -220,7 +233,7 @@ mod tests {
 
     #[test]
     fn compile_equal_function_declaration_for_external_type_definition() {
-        let record_type = types::Record::new("foo", Position::fake());
+        let record_type = types::Record::fake("foo");
         let type_definition = TypeDefinition::new(
             "foo",
             "foo",

@@ -35,7 +35,11 @@ pub fn compile(
         false,
         position.clone(),
     );
-    let context_type = types::Record::new(context_type_definition.name(), position.clone());
+    let context_type = types::Record::new(
+        context_type_definition.name(),
+        context_type_definition.original_name(),
+        position.clone(),
+    );
     let new_context_function_declarations = main_module_configuration
         .contexts
         .iter()

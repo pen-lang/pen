@@ -176,6 +176,7 @@ fn compile_any_function_type(position: &Position) -> types::Function {
 mod tests {
     use super::*;
     use crate::map_type_configuration::HASH_CONFIGURATION;
+    use hir::test::RecordFake;
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -234,7 +235,7 @@ mod tests {
 
     #[test]
     fn transform_with_record() {
-        let record_type = types::Record::new("foo", Position::fake());
+        let record_type = types::Record::fake("foo");
 
         assert_eq!(
             transform(

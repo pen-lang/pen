@@ -18,7 +18,7 @@ pub fn compile(type_: &ast::types::Type) -> Type {
         )
         .into(),
         ast::types::Type::Record(record) => {
-            types::Record::new(record.name(), record.position().clone()).into()
+            types::Record::new(record.name(), record.name(), record.position().clone()).into()
         }
         ast::types::Type::Reference(reference) => {
             types::Reference::new(reference.name(), reference.position().clone()).into()

@@ -610,7 +610,7 @@ mod tests {
     use super::*;
     use crate::{
         analysis::type_collector,
-        test::{FunctionDefinitionFake, ModuleFake},
+        test::{FunctionDefinitionFake, ModuleFake, RecordFake},
     };
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -997,10 +997,7 @@ mod tests {
                     .set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
-                            vec![Argument::new(
-                                "x",
-                                types::Record::new("r", Position::fake())
-                            )],
+                            vec![Argument::new("x", types::Record::fake("r"))],
                             types::None::new(Position::fake()),
                             RecordDeconstruction::new(
                                 None,
@@ -1018,13 +1015,10 @@ mod tests {
                 .set_function_definitions(vec![FunctionDefinition::fake(
                     "x",
                     Lambda::new(
-                        vec![Argument::new(
-                            "x",
-                            types::Record::new("r", Position::fake())
-                        )],
+                        vec![Argument::new("x", types::Record::fake("r"))],
                         types::None::new(Position::fake()),
                         RecordDeconstruction::new(
-                            Some(types::Record::new("r", Position::fake()).into()),
+                            Some(types::Record::fake("r").into()),
                             Variable::new("x", Position::fake()),
                             "x",
                             Position::fake()

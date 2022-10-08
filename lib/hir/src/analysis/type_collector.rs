@@ -23,7 +23,12 @@ pub fn collect_records(module: &Module) -> FnvHashMap<String, Type> {
         .map(|definition| {
             (
                 definition.name().into(),
-                types::Record::new(definition.name(), definition.position().clone()).into(),
+                types::Record::new(
+                    definition.name(),
+                    definition.original_name(),
+                    definition.position().clone(),
+                )
+                .into(),
             )
         })
         .collect()

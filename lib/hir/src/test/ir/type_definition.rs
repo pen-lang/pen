@@ -19,6 +19,16 @@ impl TypeDefinitionFake for TypeDefinition {
         public: bool,
         external: bool,
     ) -> Self {
-        Self::new(name, "", fields, open, public, external, Position::fake())
+        let name = name.into();
+
+        Self::new(
+            name.clone(),
+            name,
+            fields,
+            open,
+            public,
+            external,
+            Position::fake(),
+        )
     }
 }
