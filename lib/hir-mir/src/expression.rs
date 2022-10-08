@@ -1164,6 +1164,7 @@ mod tests {
 
     mod records {
         use super::*;
+        use hir::test::RecordFake;
         use pretty_assertions::assert_eq;
 
         #[test]
@@ -1183,7 +1184,7 @@ mod tests {
                         .collect()
                     ),
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![RecordField::new(
                             "x",
                             None::new(Position::fake()),
@@ -1223,7 +1224,7 @@ mod tests {
                         .collect()
                     ),
                     &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
+                        types::Record::fake("r"),
                         vec![
                             RecordField::new(
                                 "x",
@@ -1265,12 +1266,8 @@ mod tests {
                         Default::default(),
                         [("r".into(), vec![])].into_iter().collect()
                     ),
-                    &RecordConstruction::new(
-                        types::Record::new("r", Position::fake()),
-                        vec![],
-                        Position::fake()
-                    )
-                    .into(),
+                    &RecordConstruction::new(types::Record::fake("r"), vec![], Position::fake())
+                        .into(),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );
@@ -1281,7 +1278,7 @@ mod tests {
             assert_eq!(
                 compile(
                     &Context::dummy(
-                        [("r".into(), types::Record::new("r", Position::fake()).into())]
+                        [("r".into(), types::Record::fake("r").into())]
                             .into_iter()
                             .collect(),
                         [("r".into(), vec![])].into_iter().collect()

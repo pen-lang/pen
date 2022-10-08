@@ -47,7 +47,10 @@ fn check_canonical(one: &Type, other: &Type) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::*;
+    use crate::{
+        test::RecordFake,
+        types::{self, *},
+    };
     use position::{test::PositionFake, Position};
 
     #[test]
@@ -138,8 +141,8 @@ mod tests {
     #[test]
     fn check_records() {
         assert!(!check(
-            &Record::new("x", Position::fake()).into(),
-            &Record::new("y", Position::fake()).into(),
+            &types::Record::fake("x").into(),
+            &types::Record::fake("y").into(),
             &Default::default(),
         )
         .unwrap());

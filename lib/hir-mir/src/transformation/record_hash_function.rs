@@ -26,7 +26,12 @@ pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileEr
         .map(|definition| {
             Ok(
                 if type_comparability_checker::check(
-                    &types::Record::new(definition.name(), definition.position().clone()).into(),
+                    &types::Record::new(
+                        definition.name(),
+                        definition.original_name(),
+                        definition.position().clone(),
+                    )
+                    .into(),
                     context.types(),
                     context.records(),
                 )? {
@@ -73,7 +78,11 @@ pub fn transform(context: &Context, module: &Module) -> Result<Module, CompileEr
 
 fn compile_function_declaration(type_definition: &TypeDefinition) -> FunctionDeclaration {
     let position = type_definition.position();
-    let record_type = types::Record::new(type_definition.name(), position.clone());
+    let record_type = types::Record::new(
+        type_definition.name(),
+        type_definition.original_name(),
+        position.clone(),
+    );
 
     FunctionDeclaration::new(
         record_type_information::compile_hash_function_name(&record_type),
@@ -91,7 +100,11 @@ fn compile_function_definition(
     type_definition: &TypeDefinition,
 ) -> Result<FunctionDefinition, CompileError> {
     let position = type_definition.position();
-    let record_type = types::Record::new(type_definition.name(), position.clone());
+    let record_type = types::Record::new(
+        type_definition.name(),
+        type_definition.original_name(),
+        position.clone(),
+    );
     let function_name = record_type_information::compile_hash_function_name(&record_type);
     let hash_type = compile_hash_type(position);
     let configuration = &context.configuration()?.map_type.hash;
@@ -164,7 +177,7 @@ fn compile_identity_hash(type_definition: &TypeDefinition) -> Number {
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use hir::test::ModuleFake;
+    use hir::test::{ModuleFake, RecordFake};
     use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
@@ -200,7 +213,7 @@ mod tests {
             false,
             Position::fake(),
         );
-        let record_type = types::Record::new(type_definition.name(), Position::fake());
+        let record_type = types::Record::fake(type_definition.name());
 
         assert_eq!(
             transform_module(&Module::empty().set_type_definitions(vec![type_definition.clone()])),
@@ -267,7 +280,7 @@ mod tests {
                 .set_function_declarations(vec![FunctionDeclaration::new(
                     "foo.$hash",
                     types::Function::new(
-                        vec![types::Record::new(type_definition.name(), Position::fake()).into()],
+                        vec![types::Record::fake(type_definition.name()).into()],
                         HASH_TYPE.clone(),
                         Position::fake()
                     ),
