@@ -29,7 +29,10 @@ pub fn format(type_: &Type) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::*;
+    use crate::{
+        test::RecordFake,
+        types::{self, *},
+    };
     use position::{test::PositionFake, Position};
 
     #[test]

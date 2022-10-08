@@ -126,9 +126,7 @@ mod tests {
                     false
                 )]),
             ),
-            Err(AnalysisError::RecordNotFound(types::types::Record::fake(
-                "foo"
-            )))
+            Err(AnalysisError::RecordNotFound(types::Record::fake("foo")))
         );
     }
 

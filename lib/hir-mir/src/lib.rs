@@ -103,6 +103,7 @@ fn compile_module(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
+    use hir::test::RecordFake;
     use hir::{
         analysis::AnalysisError,
         test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
@@ -131,25 +132,20 @@ mod tests {
             types::Boolean::new(Position::fake()),
             Position::fake(),
         );
-        let first_rest_type = Type::from(types::Record::new(
+        let first_rest_type = Type::from(types::Record::fake(
             &COMPILE_CONFIGURATION.list_type.first_rest_type_name,
-            Position::fake(),
         ));
-        let list_type = Type::from(types::Record::new(
+        let list_type = Type::from(types::Record::fake(
             &COMPILE_CONFIGURATION.list_type.list_type_name,
-            Position::fake(),
         ));
-        let map_type = Type::from(types::Record::new(
+        let map_type = Type::from(types::Record::fake(
             &COMPILE_CONFIGURATION.map_type.map_type_name,
-            Position::fake(),
         ));
-        let map_context_type = Type::from(types::Record::new(
+        let map_context_type = Type::from(types::Record::fake(
             &COMPILE_CONFIGURATION.map_type.context_type_name,
-            Position::fake(),
         ));
-        let map_iterator_type = Type::from(types::Record::new(
+        let map_iterator_type = Type::from(types::Record::fake(
             &COMPILE_CONFIGURATION.map_type.iteration.iterator_type_name,
-            Position::fake(),
         ));
         let maybe_equal_function_type = Type::from(types::Function::new(
             vec![
@@ -1064,8 +1060,6 @@ mod tests {
     }
 
     mod built_in {
-        use hir::test::RecordFake;
-
         use super::*;
 
         #[test]

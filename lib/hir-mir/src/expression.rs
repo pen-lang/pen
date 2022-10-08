@@ -1164,6 +1164,7 @@ mod tests {
 
     mod records {
         use super::*;
+        use hir::test::RecordFake;
         use pretty_assertions::assert_eq;
 
         #[test]
@@ -1265,12 +1266,8 @@ mod tests {
                         Default::default(),
                         [("r".into(), vec![])].into_iter().collect()
                     ),
-                    &RecordConstruction::new(
-                        types::Record::fake("r"),
-                        vec![],
-                        Position::fake()
-                    )
-                    .into(),
+                    &RecordConstruction::new(types::Record::fake("r"), vec![], Position::fake())
+                        .into(),
                 ),
                 Ok(mir::ir::Record::new(mir::types::Record::new("r"), vec![]).into())
             );

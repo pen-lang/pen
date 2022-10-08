@@ -236,7 +236,7 @@ fn compile_any_function_type(position: &Position) -> types::Function {
 mod tests {
     use super::*;
     use crate::transformation::record_type_information;
-    use hir::types;
+    use hir::{test::RecordFake, types};
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 

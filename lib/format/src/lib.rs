@@ -3304,7 +3304,7 @@ mod tests {
             #[test]
             fn format_empty() {
                 assert_eq!(
-                    format(&types::Record::fake("foo", None, vec![]).into()),
+                    format(&Record::new("foo", None, vec![], Position::fake()).into()),
                     "foo{}"
                 );
             }
@@ -3313,13 +3313,16 @@ mod tests {
             fn format_field() {
                 assert_eq!(
                     format(
-                        &types::Record::fake("foo",
+                        &Record::new(
+                            "foo",
                             None,
                             vec![RecordField::new(
                                 "x",
                                 Variable::new("none", Position::fake()),
                                 Position::fake()
-                            )])
+                            )],
+                            Position::fake()
+                        )
                         .into()
                     ),
                     "foo{x: none}"
@@ -3330,7 +3333,8 @@ mod tests {
             fn format_two_fields() {
                 assert_eq!(
                     format(
-                        &types::Record::fake("foo",
+                        &Record::new(
+                            "foo",
                             None,
                             vec![
                                 RecordField::new(
@@ -3349,7 +3353,9 @@ mod tests {
                                     ),
                                     Position::fake()
                                 )
-                            ])
+                            ],
+                            Position::fake()
+                        )
                         .into()
                     ),
                     "foo{x: 1, y: 2}"
@@ -3360,13 +3366,16 @@ mod tests {
             fn format_update() {
                 assert_eq!(
                     format(
-                        &types::Record::fake("foo",
+                        &Record::new(
+                            "foo",
                             Some(Variable::new("r", Position::fake()).into()),
                             vec![RecordField::new(
                                 "x",
                                 Variable::new("none", Position::fake()),
                                 Position::fake()
-                            )])
+                            )],
+                            Position::fake()
+                        )
                         .into()
                     ),
                     "foo{...r, x: none}"

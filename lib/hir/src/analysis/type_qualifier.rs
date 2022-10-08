@@ -113,12 +113,14 @@ mod tests {
                 "foo."
             ),
             Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
+                .set_type_definitions(vec![TypeDefinition::new(
                     "foo.x",
+                    "x",
                     vec![],
                     false,
                     false,
-                    false
+                    false,
+                    Position::fake(),
                 )])
                 .set_function_definitions(vec![])
         );
@@ -143,15 +145,17 @@ mod tests {
                 "foo."
             ),
             Module::empty()
-                .set_type_definitions(vec![TypeDefinition::fake(
+                .set_type_definitions(vec![TypeDefinition::new(
                     "foo.x",
+                    "x",
                     vec![types::RecordField::new(
                         "x",
                         types::Reference::new("foo.x", Position::fake())
                     )],
                     false,
                     false,
-                    false
+                    false,
+                    Position::fake(),
                 )])
                 .set_function_definitions(vec![])
         );

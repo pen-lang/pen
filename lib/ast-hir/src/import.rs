@@ -165,6 +165,7 @@ fn rename_types(module: &ir::Module, imported_modules: &[ImportedModule]) -> ir:
                 .get(record.name())
                 .cloned()
                 .unwrap_or_else(|| record.name().into()),
+            record.original_name(),
             record.position().clone(),
         )
         .into(),
@@ -465,7 +466,14 @@ mod tests {
         #[test]
         fn prefer_public_definition_of_same_type_definition() {
             let create_type_definition = |public| {
-                interface::TypeDefinition::new("Foo", "", vec![], false, public, Position::fake())
+                interface::TypeDefinition::new(
+                    "Foo",
+                    "Foo",
+                    vec![],
+                    false,
+                    public,
+                    Position::fake(),
+                )
             };
 
             assert_eq!(
