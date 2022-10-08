@@ -50,11 +50,5 @@ pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<b
 }
 
 fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
-    // TODO Implement the full C calling convention and use the exactly the same
-    // strategy as native records.
-    //
-    // ```rust
-    // type_::is_record_boxed(record, types)
-    // ```
-    !context.types()[record.name()].fields().is_empty()
+    type_::is_record_boxed(context, record)
 }
