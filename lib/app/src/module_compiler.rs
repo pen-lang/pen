@@ -211,8 +211,10 @@ fn compile_mir_module(
 ) -> Result<(), Box<dyn Error>> {
     let module = mir_fmm::compile(module, &compile_configuration.mir)?;
     let module = fmm::analysis::cps::transform(&module, fmm::types::void_type())?;
+    fmm::analysis::type_check::check(&module).unwrap();
     let module =
         fmm::analysis::c_calling_convention::transform(&module, word_bytes(target_triple)?)?;
+    fmm::analysis::type_check::check(&module).unwrap();
     let module = fmm_llvm::compile_to_bit_code(&module, &compile_configuration.fmm, target_triple)?;
 
     infrastructure.file_system.write(object_file, &module)?;
