@@ -248,6 +248,7 @@ mod tests {
                 ("wasm64-wasi", 8),
                 ("i386-unknown-linux-gnu", 4),
                 ("x86_64-unknown-linux-gnu", 8),
+                // spell-checker: disable-next-line
                 ("armv7-unknown-linux-gnu", 4),
                 ("aarch64-unknown-linux-gnu", 8),
             ] {
