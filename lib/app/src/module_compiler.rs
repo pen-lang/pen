@@ -223,6 +223,7 @@ fn compile_mir_module(
 fn word_bytes(target_triple: Option<&str>) -> Result<usize, Box<dyn Error>> {
     Ok(if let Some(target_triple) = target_triple {
         let error = ApplicationError::ArchitectureWordSize(target_triple.to_owned());
+
         Triple::from_str(target_triple)
             .map_err(|_| error.clone())?
             .pointer_width()
