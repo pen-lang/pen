@@ -17,15 +17,15 @@ struct PoolOptions {
 
 #[ffi::into_any(fn = "_pen_sql_pool_to_any")]
 #[repr(C)]
-struct Pool(ffi::Arc<ffi::Any>);
+struct Pool(ffi::Any);
 
 impl Pool {
     pub fn new(pool: AnyPool) -> Self {
-        Self(ffi::Arc::new(PoolInner { pool }.into()))
+        Self(PoolInner { pool }.into())
     }
 
     pub fn as_inner(&self) -> &AnyPool {
-        let pool: &PoolInner = TryFrom::try_from(&*self.0).unwrap();
+        let pool: &PoolInner = TryFrom::try_from(&self.0).unwrap();
 
         &pool.pool
     }

@@ -31,16 +31,13 @@ impl File {
 
 #[ffi::into_any(fn = "_pen_os_file_metadata_to_any")]
 #[repr(C)]
-struct FileMetadata(ffi::Arc<FileMetadataInner>);
-
-#[repr(C)]
-struct FileMetadataInner {
+struct FileMetadata {
     size: ffi::Number,
 }
 
 impl FileMetadata {
     pub fn new(size: ffi::Number) -> Self {
-        Self(FileMetadataInner { size }.into())
+        Self { size }
     }
 }
 
