@@ -37,12 +37,15 @@ pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<b
 fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
     let body_type = &context.types()[record.name()];
 
-    // Variants always take two words.
     body_type.fields().len() > 1
-        || body_type
-            .fields()
-            .iter()
-            .any(|type_| matches!(type_, mir::types::Type::Variant))
+        || body_type.fields().iter().any(|type_| match type_ {
+            mir::types::Type::Record(record) => {
+                !type_::is_record_boxed(context, record) && is_record_boxed(context, record)
+            }
+            // Variants always take two words.
+            mir::types::Type::Variant => true,
+            _ => false,
+        })
 }
 
 #[cfg(test)]
@@ -149,7 +152,7 @@ mod tests {
 
         #[test]
         fn check_record_with_field_of_record_with_variant_field() {
-            assert!(!is_payload_boxed(
+            assert!(is_payload_boxed(
                 &Context::new(
                     &mir::ir::Module::empty().set_type_definitions(vec![
                         mir::ir::TypeDefinition::new(
@@ -239,7 +242,7 @@ mod tests {
 
         #[test]
         fn check_record_with_field_of_record_with_variant_field() {
-            assert!(!is_record_boxed(
+            assert!(is_record_boxed(
                 &Context::new(
                     &mir::ir::Module::empty().set_type_definitions(vec![
                         mir::ir::TypeDefinition::new(
