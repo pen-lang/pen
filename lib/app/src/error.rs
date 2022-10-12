@@ -1,7 +1,8 @@
 use std::{error::Error, fmt::Display};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ApplicationError {
+    ArchitectureWordSize(String),
     Build,
     ContextTypeNotFound,
     ModuleFilesNotFormatted(Vec<String>),
@@ -18,6 +19,13 @@ impl Error for ApplicationError {}
 impl Display for ApplicationError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         match self {
+            Self::ArchitectureWordSize(target_triple) => {
+                write!(
+                    formatter,
+                    "cannot infer word size from target triple: {}",
+                    target_triple
+                )
+            }
             Self::Build => write!(formatter, "build failed"),
             Self::ContextTypeNotFound => {
                 write!(formatter, "context type not found")
