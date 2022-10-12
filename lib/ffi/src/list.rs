@@ -20,7 +20,7 @@ impl List {
     }
 
     pub fn prepend(self, x: impl Into<Any>) -> Self {
-        unsafe { pen_ffi_list_prepend(x.into().into(), self) }
+        unsafe { pen_ffi_list_prepend(x.into(), self) }
     }
 
     pub fn lazy(xs: Closure) -> Self {

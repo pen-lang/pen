@@ -36,27 +36,27 @@ impl Any {
     }
 
     pub fn is_boolean(&self) -> bool {
-        unsafe { pen_ffi_any_is_boolean(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_boolean(self.clone()) }.into()
     }
 
     pub fn is_error(&self) -> bool {
-        unsafe { pen_ffi_any_is_error(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_error(self.clone()) }.into()
     }
 
     pub fn is_none(&self) -> bool {
-        unsafe { pen_ffi_any_is_none(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_none(self.clone()) }.into()
     }
 
     pub fn is_list(&self) -> bool {
-        unsafe { pen_ffi_any_is_list(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_list(self.clone()) }.into()
     }
 
     pub fn is_number(&self) -> bool {
-        unsafe { pen_ffi_any_is_number(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_number(self.clone()) }.into()
     }
 
     pub fn is_string(&self) -> bool {
-        unsafe { pen_ffi_any_is_string(self.clone().into()) }.into()
+        unsafe { pen_ffi_any_is_string(self.clone()) }.into()
     }
 }
 
@@ -80,7 +80,7 @@ impl TryFrom<Any> for Boolean {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_boolean() {
-            Ok(unsafe { pen_ffi_any_to_boolean(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_boolean(value) })
         } else {
             Err(())
         }
@@ -92,7 +92,7 @@ impl TryFrom<Any> for Error {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_error() {
-            Ok(unsafe { pen_ffi_any_to_error(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_error(value) })
         } else {
             Err(())
         }
@@ -104,7 +104,7 @@ impl TryFrom<Any> for List {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_list() {
-            Ok(unsafe { pen_ffi_any_to_list(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_list(value) })
         } else {
             Err(())
         }
@@ -116,7 +116,7 @@ impl TryFrom<Any> for Number {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_number() {
-            Ok(unsafe { pen_ffi_any_to_number(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_number(value) })
         } else {
             Err(())
         }
@@ -128,7 +128,7 @@ impl TryFrom<Any> for ByteString {
 
     fn try_from(value: Any) -> Result<Self, ()> {
         if value.is_string() {
-            Ok(unsafe { pen_ffi_any_to_string(value.into()) })
+            Ok(unsafe { pen_ffi_any_to_string(value) })
         } else {
             Err(())
         }
