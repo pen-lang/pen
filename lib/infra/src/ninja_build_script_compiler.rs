@@ -513,7 +513,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
-        .chain(["build ffi: phony".into()])
+        .chain([format!("build {}: phony", FFI_PHONY_TARGET)])
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
