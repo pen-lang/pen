@@ -88,7 +88,8 @@ pub fn compile_record(context: &Context, record: &mir::types::Record) -> fmm::ty
 // Box large records. This logic needs to be simple because we also use exactly
 // the same one for FFI.
 pub fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
-    context.types()[record.name()].fields().len() > 1
+    // TODO Unbox small records.
+    !context.types()[record.name()].fields().is_empty()
 }
 
 pub fn compile_boxed_record() -> fmm::types::Type {
