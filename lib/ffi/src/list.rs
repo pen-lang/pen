@@ -1,8 +1,8 @@
-use crate::{import, Any, Arc, BoxAny, Closure};
+use crate::{import, Any, Arc, Closure};
 
 import!(pen_ffi_list_create, fn() -> List);
 import!(pen_ffi_list_lazy, fn(xs: Closure) -> List);
-import!(pen_ffi_list_prepend, fn(x: BoxAny, xs: List) -> List);
+import!(pen_ffi_list_prepend, fn(x: Any, xs: List) -> List);
 
 #[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_list_to_any")]
 #[repr(C)]
@@ -20,7 +20,7 @@ impl List {
     }
 
     pub fn prepend(self, x: impl Into<Any>) -> Self {
-        unsafe { pen_ffi_list_prepend(x.into().into(), self) }
+        unsafe { pen_ffi_list_prepend(x.into(), self) }
     }
 
     pub fn lazy(xs: Closure) -> Self {

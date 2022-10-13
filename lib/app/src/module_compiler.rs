@@ -5,6 +5,7 @@ mod prelude_type_configuration_qualifier;
 use crate::{
     application_configuration::ApplicationConfiguration,
     common::{dependency_serializer, interface_serializer, module_test_information_serializer},
+    error::ApplicationError,
     infra::{FilePath, Infrastructure},
     test_configuration::TestModuleConfiguration,
 };
@@ -14,7 +15,8 @@ pub use compile_configuration::{
     NumberTypeConfiguration, StringTypeConfiguration,
 };
 use fnv::FnvHashMap;
-use std::{collections::BTreeMap, error::Error};
+use std::{collections::BTreeMap, error::Error, mem::size_of, str::FromStr};
+use target_lexicon::Triple;
 
 const PRELUDE_PREFIX: &str = "prelude:";
 
@@ -207,17 +209,51 @@ fn compile_mir_module(
     target_triple: Option<&str>,
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
-    infrastructure.file_system.write(
-        object_file,
-        &fmm_llvm::compile_to_bit_code(
-            &fmm::analysis::cps::transform(
-                &mir_fmm::compile(module, &compile_configuration.mir)?,
-                fmm::types::void_type(),
-            )?,
-            &compile_configuration.fmm,
-            target_triple,
-        )?,
-    )?;
+    let module = mir_fmm::compile(module, &compile_configuration.mir)?;
+    let module = fmm::analysis::cps::transform(&module, fmm::types::void_type())?;
+    let module =
+        fmm::analysis::c_calling_convention::transform(&module, word_bytes(target_triple)?)?;
+    let module = fmm_llvm::compile_to_bit_code(&module, &compile_configuration.fmm, target_triple)?;
+
+    infrastructure.file_system.write(object_file, &module)?;
 
     Ok(())
+}
+
+fn word_bytes(target_triple: Option<&str>) -> Result<usize, Box<dyn Error>> {
+    Ok(if let Some(target_triple) = target_triple {
+        let error = ApplicationError::ArchitectureWordSize(target_triple.to_owned());
+
+        Triple::from_str(target_triple)
+            .map_err(|_| error.clone())?
+            .pointer_width()
+            .map_err(|_| error)?
+            .bytes() as usize
+    } else {
+        size_of::<usize>()
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod word_size {
+        use super::*;
+
+        #[test]
+        fn calculate() {
+            for (triple, size) in [
+                ("wasm32-wasi", 4),
+                ("wasm64-wasi", 8),
+                ("i386-unknown-linux-gnu", 4),
+                ("x86_64-unknown-linux-gnu", 8),
+                // spell-checker: disable-next-line
+                ("armv7-unknown-linux-gnu", 4),
+                ("aarch64-unknown-linux-gnu", 8),
+            ] {
+                assert_eq!(word_bytes(Some(triple)).unwrap(), size);
+            }
+        }
+    }
 }

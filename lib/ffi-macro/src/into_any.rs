@@ -29,7 +29,7 @@ pub fn generate(
 
             impl From<#type_name> for #crate_path::Any {
                 fn from(x: #type_name) -> Self {
-                    #crate_path::import!(#function_name, fn(x: #type_name) -> #crate_path::BoxAny);
+                    #crate_path::import!(#function_name, fn(x: #type_name) -> #crate_path::Any);
 
                     unsafe { #function_name(x) }.into()
                 }

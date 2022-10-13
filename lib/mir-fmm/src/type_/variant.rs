@@ -22,7 +22,7 @@ pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<b
                 return Err(CompileError::UnboxedRecord);
             }
 
-            type_::is_record_boxed(context, record_type) != is_record_boxed(context, record_type)
+            !type_::is_record_boxed(context, record_type) && is_record_boxed(context, record_type)
         }
         mir::types::Type::Variant => return Err(CompileError::NestedVariant),
         mir::types::Type::Boolean
@@ -33,10 +33,8 @@ pub fn is_payload_boxed(context: &Context, type_: &mir::types::Type) -> Result<b
     })
 }
 
-// Box records to stuff them into one word.
+// Box large records to stuff them into one word.
 fn is_record_boxed(context: &Context, record: &mir::types::Record) -> bool {
-    let body_type = &context.types()[record.name()];
-
     // TODO Unbox small records.
-    !body_type.fields().is_empty()
+    type_::is_record_boxed(context, record)
 }
