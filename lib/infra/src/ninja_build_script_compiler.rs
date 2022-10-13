@@ -11,6 +11,7 @@ use std::{
 };
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
+const FFI_PHONY_TARGET: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
@@ -123,7 +124,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of module $module_name $in_package_name",
             "rule compile_ffi",
-            "  command = $in -t $target $out",
+            "  command = $script_file -t $target $out",
             "  description = compiling FFI module $in_package_name",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
@@ -361,12 +362,14 @@ impl NinjaBuildScriptCompiler {
 
                 [
                     format!(
-                        "build {}: compile_ffi {}",
+                        "build {}: compile_ffi {} {}",
                         self.file_path_converter
                             .convert_to_os_path(&ffi_archive_file)
                             .display(),
-                        script.display()
+                        script.display(),
+                        FFI_PHONY_TARGET,
                     ),
+                    format!("  script_file = {}", script.display()),
                     self.format_in_package_name_variable(package_name),
                 ]
                 .into_iter()
@@ -510,6 +513,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
+        .chain(["build ffi: phony".into()])
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
