@@ -1,25 +1,25 @@
-use alloc::{sync, vec::Vec};
+use alloc::{boxed::Box, vec::Vec};
 
 const INITIAL_STRING_BUILDER_CAPACITY: usize = 16;
 
 #[repr(C)]
-struct StringBuilder(ffi::Any);
+struct StringBuilder(ffi::Arc<ffi::Any>);
 
 #[ffi::any]
 #[derive(Clone)]
 struct StringBuilderInner {
     #[allow(clippy::box_collection)]
-    strings: sync::Arc<Vec<ffi::ByteString>>,
+    strings: Box<Vec<ffi::ByteString>>,
 }
 
 impl StringBuilder {
     pub fn new() -> Self {
-        Self(
+        Self(ffi::Arc::new(
             StringBuilderInner {
                 strings: Vec::with_capacity(INITIAL_STRING_BUILDER_CAPACITY).into(),
             }
             .into(),
-        )
+        ))
     }
 }
 
@@ -30,16 +30,16 @@ fn _pen_core_string_builder_create() -> StringBuilder {
 
 #[ffi::bindgen]
 fn _pen_core_string_builder_append(
-    builder: StringBuilder,
+    mut builder: StringBuilder,
     string: ffi::ByteString,
 ) -> StringBuilder {
-    let mut inner = StringBuilderInner::try_from(builder.0).unwrap();
+    if let Some(builder) = ffi::Arc::get_mut(&mut builder.0) {
+        let inner: &mut StringBuilderInner = builder.try_into().unwrap();
 
-    if let Some(strings) = sync::Arc::get_mut(&mut inner.strings) {
-        strings.push(string);
+        inner.strings.push(string);
     }
 
-    StringBuilder(inner.into())
+    builder
 }
 
 #[ffi::bindgen]
@@ -47,7 +47,7 @@ fn _pen_core_string_builder_build(
     builder: StringBuilder,
     separator: ffi::ByteString,
 ) -> ffi::ByteString {
-    let inner: &StringBuilderInner = (&builder.0).try_into().unwrap();
+    let inner: &StringBuilderInner = (&*builder.0).try_into().unwrap();
 
     inner
         .strings

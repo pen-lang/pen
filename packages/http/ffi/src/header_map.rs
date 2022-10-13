@@ -1,6 +1,6 @@
 #[repr(C)]
 #[derive(Clone)]
-pub struct HeaderMap(ffi::Any);
+pub struct HeaderMap(ffi::Arc<ffi::Any>);
 
 impl HeaderMap {
     pub fn new() -> Self {
