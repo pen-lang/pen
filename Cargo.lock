@@ -30,7 +30,7 @@ dependencies = [
  "ast_hir",
  "bincode",
  "doc",
- "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
+ "fmm",
  "fmm-llvm",
  "fnv",
  "format",
@@ -284,7 +284,7 @@ name = "fmm-c"
 version = "0.1.0"
 source = "git+https://github.com/raviqqe/fmm?branch=main#e004307f3b4f9aeeb773ba1ed2c37dc1b560df5b"
 dependencies = [
- "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
+ "fmm",
  "fnv",
  "tempfile",
 ]
@@ -294,7 +294,7 @@ name = "fmm-llvm"
 version = "0.1.0"
 source = "git+https://github.com/raviqqe/fmm?branch=main#e004307f3b4f9aeeb773ba1ed2c37dc1b560df5b"
 dependencies = [
- "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
+ "fmm",
  "fnv",
  "inkwell",
  "llvm-sys",
@@ -706,7 +706,7 @@ dependencies = [
 name = "mir-fmm"
 version = "0.1.0"
 dependencies = [
- "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=main)",
+ "fmm",
  "fmm-c",
  "fmm-llvm",
  "fnv",
