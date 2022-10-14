@@ -30,7 +30,7 @@ dependencies = [
  "ast_hir",
  "bincode",
  "doc",
- "fmm",
+ "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
  "fmm-llvm",
  "fnv",
  "format",
@@ -271,6 +271,18 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#db00bf5355b48fdf2b37545f15eeafae69c42bba"
+dependencies = [
+ "fnv",
+ "hamt",
+ "once_cell",
+ "petgraph",
+ "regex",
+]
+
+[[package]]
+name = "fmm"
+version = "0.1.0"
 source = "git+https://github.com/raviqqe/fmm?branch=main#4fb64edffe17e266126bd30a2fbbcf46754fb0d2"
 dependencies = [
  "fnv",
@@ -283,9 +295,9 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#4fb64edffe17e266126bd30a2fbbcf46754fb0d2"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#db00bf5355b48fdf2b37545f15eeafae69c42bba"
 dependencies = [
- "fmm",
+ "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
  "fnv",
  "tempfile",
 ]
@@ -293,9 +305,9 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#4fb64edffe17e266126bd30a2fbbcf46754fb0d2"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#db00bf5355b48fdf2b37545f15eeafae69c42bba"
 dependencies = [
- "fmm",
+ "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=chore/opt)",
  "fnv",
  "hamt",
  "inkwell",
@@ -707,7 +719,7 @@ dependencies = [
 name = "mir-fmm"
 version = "0.1.0"
 dependencies = [
- "fmm",
+ "fmm 0.1.0 (git+https://github.com/raviqqe/fmm?branch=main)",
  "fmm-c",
  "fmm-llvm",
  "fnv",
