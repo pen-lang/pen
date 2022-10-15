@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#b0b61e3c4e040d91c58b90e2ca5b4da31ed1a927"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#afb2aca27e746036eddc950d7b657c5252d5d980"
 dependencies = [
  "fnv",
  "hamt",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#b0b61e3c4e040d91c58b90e2ca5b4da31ed1a927"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#afb2aca27e746036eddc950d7b657c5252d5d980"
 dependencies = [
  "fmm",
  "fnv",
@@ -293,7 +293,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#b0b61e3c4e040d91c58b90e2ca5b4da31ed1a927"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#afb2aca27e746036eddc950d7b657c5252d5d980"
 dependencies = [
  "fmm",
  "fnv",
