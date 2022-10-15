@@ -213,6 +213,7 @@ fn compile_mir_module(
     let module = fmm::analysis::cps::transform(&module, fmm::types::void_type())?;
     let module =
         fmm::analysis::c_calling_convention::transform(&module, word_bytes(target_triple)?)?;
+    println!("{}", fmm::analysis::format::format_module(&module));
     let module = fmm_llvm::compile_to_bit_code(&module, &compile_configuration.fmm, target_triple)?;
 
     infrastructure.file_system.write(object_file, &module)?;
