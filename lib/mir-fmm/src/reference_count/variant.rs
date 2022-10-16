@@ -114,6 +114,6 @@ fn compile_function_name(type_: &mir::types::Type, operation: &str) -> String {
         "{}:{}:{}",
         FUNCTION_PREFIX,
         operation,
-        type_::compile_id(type_)
+        mir::analysis::type_id::calculate(type_)
     )
 }
