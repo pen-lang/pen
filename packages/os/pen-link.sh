@@ -58,3 +58,7 @@ if [ -r $binary.wasm ]; then
 fi
 
 cp $binary $output
+
+if [ $(uname) = Darwin ]; then
+  codesign -s - $output
+fi
