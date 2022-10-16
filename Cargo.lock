@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#92f204cd3f622c2abef7d780390898b46684b93f"
+source = "git+https://github.com/raviqqe/fmm?branch=main#60d936a95da6f22cd1e2e903e7b3df7f6256ef7d"
 dependencies = [
  "fnv",
  "hamt",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#92f204cd3f622c2abef7d780390898b46684b93f"
+source = "git+https://github.com/raviqqe/fmm?branch=main#60d936a95da6f22cd1e2e903e7b3df7f6256ef7d"
 dependencies = [
  "fmm",
  "fnv",
@@ -293,7 +293,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#92f204cd3f622c2abef7d780390898b46684b93f"
+source = "git+https://github.com/raviqqe/fmm?branch=main#60d936a95da6f22cd1e2e903e7b3df7f6256ef7d"
 dependencies = [
  "fmm",
  "fnv",
@@ -886,9 +886,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.46"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94e2ef8dbfc347b10c094890f778ee2e36ca9bb4262e86dc99cd217e35f3470b"
+checksum = "5ea3d908b0e36316caf9e9e2c4625cdde190a7e6f440d794667ed17a1855e725"
 dependencies = [
  "unicode-ident",
 ]
