@@ -4,7 +4,10 @@ const VARIANT_TAG_FIELD_INDEX: usize = 0;
 const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
 
 pub fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
-    fmm::build::variable(type_::compile_id(type_), type_::compile_variant_tag())
+    fmm::build::variable(
+        mir::analysis::type_id::calculate(type_),
+        type_::compile_variant_tag(),
+    )
 }
 
 pub fn get_tag(

@@ -73,10 +73,6 @@ pub fn compile_variant_payload() -> fmm::types::Primitive {
     fmm::types::Primitive::Integer64
 }
 
-pub fn compile_id(type_: &mir::types::Type) -> String {
-    format!("{:?}", type_)
-}
-
 pub fn compile_record(context: &Context, record: &mir::types::Record) -> fmm::types::Type {
     if is_record_boxed(context, record) {
         compile_boxed_record()
