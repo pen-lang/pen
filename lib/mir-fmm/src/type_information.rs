@@ -1,4 +1,4 @@
-use crate::{context::Context, error::CompileError, reference_count, type_};
+use crate::{context::Context, error::CompileError, reference_count};
 use fnv::FnvHashMap;
 
 pub fn compile_global_variable(
@@ -7,7 +7,7 @@ pub fn compile_global_variable(
     global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
-        type_::compile_id(type_),
+        mir::analysis::type_id::calculate(type_),
         fmm::build::record(vec![
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
