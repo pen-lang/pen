@@ -89,13 +89,25 @@ fn canonicalize_union(
 
 fn collect_types(
     type_: &Type,
-    types: &FnvHashMap<String, Type>,
+    all_types: &FnvHashMap<String, Type>,
 ) -> Result<BTreeSet<Type>, AnalysisError> {
-    Ok(match type_ {
-        Type::Union(union) => collect_types(union.lhs(), types)?
-            .into_iter()
-            .chain(collect_types(union.rhs(), types)?)
-            .collect(),
+    let mut types = BTreeSet::<Type>::new();
+
+    collect_types_in_place(type_, &mut types, all_types)?;
+
+    Ok(types)
+}
+
+fn collect_types_in_place(
+    type_: &Type,
+    collected_types: &mut BTreeSet<Type>,
+    types: &FnvHashMap<String, Type>,
+) -> Result<(), AnalysisError> {
+    match type_ {
+        Type::Union(union) => {
+            collect_types_in_place(union.lhs(), collected_types, types)?;
+            collect_types_in_place(union.rhs(), collected_types, types)?;
+        }
         Type::Any(_)
         | Type::Boolean(_)
         | Type::Error(_)
@@ -105,11 +117,19 @@ fn collect_types(
         | Type::Map(_)
         | Type::None(_)
         | Type::Number(_)
-        | Type::String(_) => [canonicalize(type_, types)?].into_iter().collect(),
-        Type::Reference(reference) => {
-            collect_types(&type_resolver::resolve(reference, types)?, types)?
+        | Type::String(_) => {
+            collected_types.insert(canonicalize(type_, types)?);
         }
-    })
+        Type::Reference(reference) => {
+            collect_types_in_place(
+                &type_resolver::resolve(reference, types)?,
+                collected_types,
+                types,
+            )?;
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
