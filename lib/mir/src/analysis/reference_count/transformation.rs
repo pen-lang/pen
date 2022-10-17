@@ -162,7 +162,7 @@ fn transform_expression(
                                 .iter()
                                 .cloned()
                                 .filter(|variable| variable != alternative.name())
-                                .collect::<FnvHashSet<String>>()
+                                .collect::<FnvHashSet<_>>()
                         }),
                 )
                 .collect::<FnvHashSet<_>>();
