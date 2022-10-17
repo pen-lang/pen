@@ -160,12 +160,11 @@ fn transform_expression(
                         .flat_map(|(alternative, moved_variables)| {
                             moved_variables
                                 .iter()
+                                .filter(|&variable| variable != alternative.name())
                                 .cloned()
-                                .filter(|variable| variable != alternative.name())
-                                .collect::<FnvHashSet<_>>()
                         }),
                 )
-                .collect::<FnvHashSet<_>>();
+                .collect::<hamt::Set<_>>();
 
             let (argument, moved_variables) = transform_expression(
                 case.argument(),
@@ -189,21 +188,12 @@ fn transform_expression(
                                 drop_variables(
                                     alternative.expression().clone(),
                                     alternative_moved_variables
-                                        .clone()
-                                        .into_iter()
-                                        .chain([alternative.name().into()])
-                                        .collect::<FnvHashSet<_>>()
-                                        .difference(&moved_variables)
-                                        .cloned()
-                                        .collect(),
-                                    &owned_variables
-                                        .clone()
-                                        .into_iter()
-                                        .chain([(
-                                            alternative.name().into(),
-                                            alternative.type_().clone(),
-                                        )])
-                                        .collect(),
+                                        .insert(alternative.name().into())
+                                        .difference(&moved_variables),
+                                    &owned_variables.insert(
+                                        alternative.name().into(),
+                                        alternative.type_().clone(),
+                                    ),
                                 ),
                             )
                         })
@@ -214,12 +204,8 @@ fn transform_expression(
                             drop_variables(
                                 alternative.expression().clone(),
                                 alternative_moved_variables
-                                    .into_iter()
-                                    .chain([alternative.name().into()])
-                                    .collect::<FnvHashSet<_>>()
-                                    .difference(&default_alternative_moved_variables)
-                                    .cloned()
-                                    .collect(),
+                                    .insert(alternative.name().into())
+                                    .difference(&default_alternative_moved_variables),
                                 &owned_variables
                                     .clone()
                                     .into_iter()
@@ -287,18 +273,12 @@ fn transform_expression(
                     condition,
                     drop_variables(
                         then,
-                        all_moved_variables
-                            .difference(&then_moved_variables)
-                            .cloned()
-                            .collect(),
+                        all_moved_variables.difference(&then_moved_variables),
                         owned_variables,
                     ),
                     drop_variables(
                         else_,
-                        all_moved_variables
-                            .difference(&else_moved_variables)
-                            .cloned()
-                            .collect(),
+                        all_moved_variables.difference(&else_moved_variables),
                         owned_variables,
                     ),
                 )
@@ -388,10 +368,8 @@ fn transform_expression(
                 .environment()
                 .iter()
                 .map(|argument| argument.name().into())
-                .collect::<FnvHashSet<_>>()
-                .intersection(&moved_variables)
-                .cloned()
-                .collect::<FnvHashSet<_>>();
+                .collect::<hamt::Set<_>>()
+                .intersection(&moved_variables);
 
             (
                 clone_variables(
@@ -410,15 +388,12 @@ fn transform_expression(
                     cloned_variables,
                     owned_variables,
                 ),
-                moved_variables
-                    .into_iter()
-                    .chain(
-                        let_.definition()
-                            .environment()
-                            .iter()
-                            .map(|argument| argument.name().into()),
-                    )
-                    .collect::<FnvHashSet<String>>(),
+                moved_variables.extend(
+                    let_.definition()
+                        .environment()
+                        .iter()
+                        .map(|argument| argument.name().into()),
+                ),
             )
         }
         Expression::Synchronize(synchronize) => {
