@@ -1,6 +1,6 @@
 use super::error::ReferenceCountError;
 use crate::{ir::*, types::Type};
-use fnv::{FnvHashMap, FnvHashSet};
+use fnv::FnvHashSet;
 
 // Closure environments need to be inferred before reference counting.
 pub fn transform(module: &Module) -> Result<Module, ReferenceCountError> {
@@ -75,9 +75,9 @@ fn transform_function_definition(
 //   in their expressions.
 fn transform_expression(
     expression: &Expression,
-    owned_variables: &FnvHashMap<String, Type>,
-    moved_variables: &FnvHashSet<String>,
-) -> Result<(Expression, FnvHashSet<String>), ReferenceCountError> {
+    owned_variables: &hamt::Map<String, Type>,
+    moved_variables: &hamt::Set<String>,
+) -> Result<(Expression, hamt::Set<String>), ReferenceCountError> {
     Ok(match expression {
         Expression::ArithmeticOperation(operation) => {
             let (rhs, moved_variables) =
@@ -583,7 +583,7 @@ fn transform_expression(
 fn clone_variables(
     expression: impl Into<Expression>,
     cloned_variables: FnvHashSet<String>,
-    owned_variables: &FnvHashMap<String, Type>,
+    owned_variables: &hamt::Map<String, Type>,
 ) -> Expression {
     let expression = expression.into();
 
@@ -605,7 +605,7 @@ fn clone_variables(
 fn drop_variables(
     expression: impl Into<Expression>,
     dropped_variables: FnvHashSet<String>,
-    owned_variables: &FnvHashMap<String, Type>,
+    owned_variables: &hamt::Map<String, Type>,
 ) -> Expression {
     let expression = expression.into();
 
@@ -626,8 +626,8 @@ fn drop_variables(
 
 fn should_clone_variable(
     variable: &str,
-    owned_variables: &FnvHashMap<String, Type>,
-    moved_variables: &FnvHashSet<String>,
+    owned_variables: &hamt::Map<String, Type>,
+    moved_variables: &hamt::Set<String>,
 ) -> bool {
     owned_variables.contains_key(variable) && moved_variables.contains(variable)
 }
