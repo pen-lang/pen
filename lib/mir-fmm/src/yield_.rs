@@ -1,16 +1,18 @@
 use crate::context::Context;
-use once_cell::sync::Lazy;
+use once_cell::unsync::Lazy;
 
-static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
-    fmm::types::Function::new(
-        vec![],
-        fmm::types::void_type(),
-        fmm::types::CallingConvention::Source,
-    )
-});
+thread_local! {
+    static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
+        fmm::types::Function::new(
+            vec![],
+            fmm::types::void_type(),
+            fmm::types::CallingConvention::Source,
+        )
+    });
+}
 
 pub fn yield_function_type() -> fmm::types::Function {
-    YIELD_FUNCTION_TYPE.clone()
+    YIELD_FUNCTION_TYPE.with(|function| (**function).clone())
 }
 
 pub fn compile_function_declaration(context: &Context) {
