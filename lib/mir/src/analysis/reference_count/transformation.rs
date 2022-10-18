@@ -95,11 +95,7 @@ fn transform_expression(
                 if let Some(alternative) = case.default_alternative() {
                     let (expression, moved_variables) = transform_expression(
                         alternative.expression(),
-                        &owned_variables
-                            .clone()
-                            .into_iter()
-                            .chain([(alternative.name().into(), Type::Variant)])
-                            .collect(),
+                        &owned_variables.insert(alternative.name().into(), Type::Variant),
                         &moved_variables
                             .clone()
                             .into_iter()
@@ -122,10 +118,7 @@ fn transform_expression(
                     let (expression, moved_variables) = transform_expression(
                         alternative.expression(),
                         &owned_variables
-                            .clone()
-                            .into_iter()
-                            .chain([(alternative.name().into(), alternative.type_().clone())])
-                            .collect(),
+                            .insert(alternative.name().into(), alternative.type_().clone()),
                         &moved_variables
                             .clone()
                             .into_iter()
@@ -169,11 +162,7 @@ fn transform_expression(
             let (argument, moved_variables) = transform_expression(
                 case.argument(),
                 owned_variables,
-                &moved_variables
-                    .iter()
-                    .cloned()
-                    .chain(alternative_moved_variables.clone())
-                    .collect(),
+                &moved_variables.extend(alternative_moved_variables.clone()),
             )?;
 
             (
@@ -187,9 +176,11 @@ fn transform_expression(
                                 alternative.name(),
                                 drop_variables(
                                     alternative.expression().clone(),
-                                    alternative_moved_variables
-                                        .insert(alternative.name().into())
-                                        .difference(&moved_variables),
+                                    FnvHashSet::from_iter(
+                                        alternative_moved_variables
+                                            .insert(alternative.name().into())
+                                            .difference(&moved_variables),
+                                    ),
                                     &owned_variables.insert(
                                         alternative.name().into(),
                                         alternative.type_().clone(),
@@ -203,14 +194,12 @@ fn transform_expression(
                             alternative.name(),
                             drop_variables(
                                 alternative.expression().clone(),
-                                alternative_moved_variables
-                                    .insert(alternative.name().into())
-                                    .difference(&default_alternative_moved_variables),
-                                &owned_variables
-                                    .clone()
-                                    .into_iter()
-                                    .chain([(alternative.name().into(), Type::Variant)])
-                                    .collect(),
+                                FnvHashSet::from_iter(
+                                    alternative_moved_variables
+                                        .insert(alternative.name().into())
+                                        .difference(&default_alternative_moved_variables),
+                                ),
+                                &owned_variables.insert(alternative.name().into(), Type::Variant),
                             ),
                         )
                     }),
@@ -259,11 +248,7 @@ fn transform_expression(
             let (else_, else_moved_variables) =
                 transform_expression(if_.else_(), owned_variables, moved_variables)?;
 
-            let all_moved_variables = then_moved_variables
-                .clone()
-                .into_iter()
-                .chain(else_moved_variables.clone())
-                .collect();
+            let all_moved_variables = then_moved_variables.extend(else_moved_variables.clone());
 
             let (condition, moved_variables) =
                 transform_expression(if_.condition(), owned_variables, &all_moved_variables)?;
@@ -273,12 +258,16 @@ fn transform_expression(
                     condition,
                     drop_variables(
                         then,
-                        all_moved_variables.difference(&then_moved_variables),
+                        FnvHashSet::from_iter(
+                            all_moved_variables.difference(&then_moved_variables),
+                        ),
                         owned_variables,
                     ),
                     drop_variables(
                         else_,
-                        all_moved_variables.difference(&else_moved_variables),
+                        FnvHashSet::from_iter(
+                            all_moved_variables.difference(&else_moved_variables),
+                        ),
                         owned_variables,
                     ),
                 )
@@ -287,11 +276,8 @@ fn transform_expression(
             )
         }
         Expression::Let(let_) => {
-            let let_owned_variables = owned_variables
-                .clone()
-                .into_iter()
-                .chain([(let_.name().into(), let_.type_().clone())])
-                .collect();
+            let let_owned_variables =
+                owned_variables.insert(let_.name().into(), let_.type_().clone());
             let (expression, expression_moved_variables) = transform_expression(
                 let_.expression(),
                 &let_owned_variables,
@@ -304,16 +290,12 @@ fn transform_expression(
             let (bound_expression, moved_variables) = transform_expression(
                 let_.bound_expression(),
                 owned_variables,
-                &moved_variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        expression_moved_variables
-                            .iter()
-                            .cloned()
-                            .filter(|variable| variable != let_.name()),
-                    )
-                    .collect(),
+                &moved_variables.extend(
+                    expression_moved_variables
+                        .iter()
+                        .cloned()
+                        .filter(|variable| variable != let_.name()),
+                ),
             )?;
 
             (
@@ -336,14 +318,10 @@ fn transform_expression(
             )
         }
         Expression::LetRecursive(let_) => {
-            let let_owned_variables = owned_variables
-                .clone()
-                .into_iter()
-                .chain([(
-                    let_.definition().name().into(),
-                    let_.definition().type_().clone().into(),
-                )])
-                .collect();
+            let let_owned_variables = owned_variables.insert(
+                let_.definition().name().into(),
+                let_.definition().type_().clone().into(),
+            );
             let (expression, expression_moved_variables) = transform_expression(
                 let_.expression(),
                 &let_owned_variables,
@@ -353,16 +331,12 @@ fn transform_expression(
                     .filter(|variable| variable != let_.definition().name())
                     .collect(),
             )?;
-            let moved_variables = moved_variables
-                .clone()
-                .into_iter()
-                .chain(
-                    expression_moved_variables
-                        .iter()
-                        .cloned()
-                        .filter(|variable| variable != let_.definition().name()),
-                )
-                .collect();
+            let moved_variables = moved_variables.extend(
+                expression_moved_variables
+                    .iter()
+                    .cloned()
+                    .filter(|variable| variable != let_.definition().name()),
+            );
             let cloned_variables = let_
                 .definition()
                 .environment()
@@ -385,7 +359,7 @@ fn transform_expression(
                             )
                         },
                     ),
-                    cloned_variables,
+                    FnvHashSet::from_iter(cloned_variables),
                     owned_variables,
                 ),
                 moved_variables.extend(
@@ -469,13 +443,9 @@ fn transform_expression(
             let then_moved_variables = then_moved_variables
                 .into_iter()
                 .filter(|name| name != operation.name())
-                .collect::<FnvHashSet<_>>();
+                .collect::<hamt::Set<_>>();
 
-            let all_moved_variables = then_moved_variables
-                .clone()
-                .into_iter()
-                .chain(moved_variables.clone())
-                .collect();
+            let all_moved_variables = then_moved_variables.extend(moved_variables.clone());
 
             let (operand, operand_moved_variables) =
                 transform_expression(operation.operand(), owned_variables, &all_moved_variables)?;
@@ -488,17 +458,13 @@ fn transform_expression(
                         operation.type_().clone(),
                         drop_variables(
                             then,
-                            all_moved_variables
-                                .difference(&then_moved_variables)
-                                .cloned()
-                                .collect(),
+                            FnvHashSet::from_iter(
+                                all_moved_variables.difference(&then_moved_variables),
+                            ),
                             owned_variables,
                         ),
                     ),
-                    all_moved_variables
-                        .difference(moved_variables)
-                        .cloned()
-                        .collect(),
+                    FnvHashSet::from_iter(all_moved_variables.difference(moved_variables)),
                     owned_variables,
                 ),
                 operand_moved_variables,
@@ -526,11 +492,7 @@ fn transform_expression(
             } else {
                 (
                     variable.clone().into(),
-                    moved_variables
-                        .clone()
-                        .into_iter()
-                        .chain([variable.name().into()])
-                        .collect(),
+                    moved_variables.insert(variable.name().into()),
                 )
             }
         }
