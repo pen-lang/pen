@@ -6,7 +6,11 @@ use crate::context::Context;
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
 pub fn compile(context: &Context, type_: &mir::types::Type) -> fmm::types::Type {
-    match type_ {
+    if let Some(type_) = context.fmm_types().borrow().get(type_) {
+        return type_.clone();
+    }
+
+    let fmm_type = match type_ {
         mir::types::Type::Boolean => fmm::types::Primitive::Boolean.into(),
         mir::types::Type::Function(function) => compile_function(context, function),
         mir::types::Type::None => compile_none(),
@@ -14,7 +18,14 @@ pub fn compile(context: &Context, type_: &mir::types::Type) -> fmm::types::Type 
         mir::types::Type::Record(record) => compile_record(context, record),
         mir::types::Type::ByteString => compile_string().into(),
         mir::types::Type::Variant => compile_variant().into(),
-    }
+    };
+
+    context
+        .fmm_types()
+        .borrow_mut()
+        .insert(type_.clone(), fmm_type.clone());
+
+    fmm_type
 }
 
 pub fn compile_function(context: &Context, function: &mir::types::Function) -> fmm::types::Type {
