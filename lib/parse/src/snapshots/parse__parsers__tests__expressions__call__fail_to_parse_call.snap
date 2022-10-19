@@ -25,11 +25,13 @@ Some(
             "string literal",
             "variable",
         ],
-        position: Position {
-            path: "",
-            line_number: 1,
-            column_number: 5,
-            line: "f(1+)",
-        },
+        position: Position(
+            PositionInner {
+                path: "",
+                line_number: 1,
+                column_number: 5,
+                line: "f(1+)",
+            },
+        ),
     },
 )
