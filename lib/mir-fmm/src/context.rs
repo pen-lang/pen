@@ -1,9 +1,11 @@
 use crate::configuration::Configuration;
 use fnv::FnvHashMap;
+use std::cell::RefCell;
 
 pub struct Context {
     module_builder: fmm::build::ModuleBuilder,
     types: FnvHashMap<String, mir::types::RecordBody>,
+    fmm_types: RefCell<FnvHashMap<mir::types::Type, fmm::types::Type>>,
     type_information: mir::ir::TypeInformation,
     configuration: Configuration,
 }
@@ -17,6 +19,7 @@ impl Context {
                 .iter()
                 .map(|definition| (definition.name().into(), definition.type_().clone()))
                 .collect(),
+            fmm_types: Default::default(),
             type_information: module.type_information().clone(),
             configuration,
         }
@@ -32,6 +35,10 @@ impl Context {
 
     pub fn type_information(&self) -> &mir::ir::TypeInformation {
         &self.type_information
+    }
+
+    pub fn fmm_types(&self) -> &RefCell<FnvHashMap<mir::types::Type, fmm::types::Type>> {
+        &self.fmm_types
     }
 
     pub fn configuration(&self) -> &Configuration {
