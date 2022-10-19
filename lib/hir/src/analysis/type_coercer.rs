@@ -30,7 +30,7 @@ pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module
 fn transform_function_definition(
     context: &AnalysisContext,
     definition: &FunctionDefinition,
-    variables: &plist::Map<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<FunctionDefinition, AnalysisError> {
     Ok(FunctionDefinition::new(
         definition.name(),
@@ -44,7 +44,7 @@ fn transform_function_definition(
 
 fn transform_lambda(
     lambda: &Lambda,
-    variables: &plist::Map<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Lambda, AnalysisError> {
     let variables = variables.insert_many(
@@ -70,7 +70,7 @@ fn transform_lambda(
 fn transform_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &plist::Map<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let transform_expression =
         |expression, variables: &_| transform_expression(context, expression, variables);
@@ -82,7 +82,7 @@ fn transform_expression(
             variables,
         )
     };
-    let extract_type = |expression, variables: &plist::Map<String, Type>| {
+    let extract_type = |expression, variables: &plist::FlailMap<String, Type>| {
         type_extractor::extract_from_expression(
             context,
             expression,
@@ -486,7 +486,7 @@ fn transform_expression(
 fn transform_record_fields(
     fields: &[RecordField],
     record_type: &Type,
-    variables: &plist::Map<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
     let field_types =
@@ -517,7 +517,7 @@ fn coerce_expression(
     context: &AnalysisContext,
     expression: &Expression,
     upper_type: &Type,
-    variables: &plist::Map<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let lower_type = type_extractor::extract_from_expression(
         context,
