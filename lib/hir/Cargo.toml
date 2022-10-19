@@ -6,8 +6,8 @@ edition = "2021"
 
 [dependencies]
 fnv = "1"
-hamt = { git = "https://github.com/raviqqe/hamt-rs", branch = "main" }
 petgraph = "0.6"
+plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 position = { path = "../position" }
 serde = { version = "1", features = ["derive", "rc"] }
 

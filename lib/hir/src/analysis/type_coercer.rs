@@ -30,7 +30,7 @@ pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module
 fn transform_function_definition(
     context: &AnalysisContext,
     definition: &FunctionDefinition,
-    variables: &hamt::Map<String, Type>,
+    variables: &plist::Map<String, Type>,
 ) -> Result<FunctionDefinition, AnalysisError> {
     Ok(FunctionDefinition::new(
         definition.name(),
@@ -44,10 +44,10 @@ fn transform_function_definition(
 
 fn transform_lambda(
     lambda: &Lambda,
-    variables: &hamt::Map<String, Type>,
+    variables: &plist::Map<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Lambda, AnalysisError> {
-    let variables = variables.extend(
+    let variables = variables.insert_many(
         lambda
             .arguments()
             .iter()
@@ -70,7 +70,7 @@ fn transform_lambda(
 fn transform_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &hamt::Map<String, Type>,
+    variables: &plist::Map<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let transform_expression =
         |expression, variables: &_| transform_expression(context, expression, variables);
@@ -82,11 +82,14 @@ fn transform_expression(
             variables,
         )
     };
-    let extract_type = |expression, variables: &hamt::Map<_, _>| {
+    let extract_type = |expression, variables: &plist::Map<String, Type>| {
         type_extractor::extract_from_expression(
             context,
             expression,
-            &variables.clone().into_iter().collect(),
+            &variables
+                .into_iter()
+                .map(|(name, type_)| (name.clone(), type_.clone()))
+                .collect(),
         )
     };
 
@@ -140,7 +143,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     if_.then(),
                     &result_type,
-                    &variables.extend([
+                    &variables.insert_many([
                         (
                             if_.first_name().into(),
                             types::Function::new(
@@ -239,7 +242,7 @@ fn transform_expression(
             transform_expression(let_.bound_expression(), variables)?,
             transform_expression(
                 let_.expression(),
-                &variables.extend(
+                &variables.insert_many(
                     let_.name()
                         .map(|name| {
                             Ok((
@@ -360,7 +363,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.element_type(),
-                    &variables.extend([
+                    &variables.insert_many([
                         (comprehension.key_name().into(), key_type.clone()),
                         (comprehension.value_name().into(), value_type.clone()),
                     ]),
@@ -483,7 +486,7 @@ fn transform_expression(
 fn transform_record_fields(
     fields: &[RecordField],
     record_type: &Type,
-    variables: &hamt::Map<String, Type>,
+    variables: &plist::Map<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
     let field_types =
@@ -514,12 +517,15 @@ fn coerce_expression(
     context: &AnalysisContext,
     expression: &Expression,
     upper_type: &Type,
-    variables: &hamt::Map<String, Type>,
+    variables: &plist::Map<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let lower_type = type_extractor::extract_from_expression(
         context,
         expression,
-        &variables.clone().into_iter().collect(),
+        &variables
+            .into_iter()
+            .map(|(name, type_)| (name.clone(), type_.clone()))
+            .collect(),
     )?;
 
     Ok(
