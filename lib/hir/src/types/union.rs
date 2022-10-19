@@ -17,8 +17,8 @@ impl Union {
     pub fn new(lhs: impl Into<Type>, rhs: impl Into<Type>, position: Position) -> Self {
         Self(
             UnionInner {
-                lhs: lhs.into().into(),
-                rhs: rhs.into().into(),
+                lhs: lhs.into(),
+                rhs: rhs.into(),
                 position,
             }
             .into(),

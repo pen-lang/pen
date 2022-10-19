@@ -20,8 +20,8 @@ impl Record {
     ) -> Self {
         Self(
             RecordInner {
-                name: name.into().into(),
-                original_name: original_name.into().into(),
+                name: name.into(),
+                original_name: original_name.into(),
                 position,
             }
             .into(),
