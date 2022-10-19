@@ -9,7 +9,7 @@ pub struct Function(Arc<FunctionInner>);
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 struct FunctionInner {
     arguments: Arc<[Type]>,
-    result: Arc<Type>,
+    result: Type,
     position: Position,
 }
 
@@ -18,7 +18,7 @@ impl Function {
         Self(
             FunctionInner {
                 arguments: arguments.into(),
-                result: Arc::new(result.into()),
+                result: result.into(),
                 position,
             }
             .into(),

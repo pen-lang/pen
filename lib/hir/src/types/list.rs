@@ -4,29 +4,40 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct List {
-    element: Arc<Type>,
+pub struct List(Arc<ListInner>);
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+struct ListInner {
+    element: Type,
     position: Position,
 }
 
 impl List {
     pub fn new(element: impl Into<Type>, position: Position) -> Self {
-        Self {
-            element: Arc::new(element.into()),
-            position,
-        }
+        Self(
+            ListInner {
+                element: element.into(),
+                position,
+            }
+            .into(),
+        )
     }
 
     pub fn element(&self) -> &Type {
-        &self.element
+        &self.0.element
     }
 
     pub fn position(&self) -> &Position {
-        &self.position
+        &self.0.position
     }
 
-    pub fn set_position(mut self, position: Position) -> Self {
-        self.position = position;
-        self
+    pub fn set_position(&self, position: Position) -> Self {
+        Self(
+            ListInner {
+                element: self.0.element.clone(),
+                position,
+            }
+            .into(),
+        )
     }
 }
