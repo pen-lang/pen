@@ -460,6 +460,7 @@ name = "hir"
 version = "0.1.0"
 dependencies = [
  "fnv",
+ "hamt",
  "once_cell",
  "petgraph",
  "position",

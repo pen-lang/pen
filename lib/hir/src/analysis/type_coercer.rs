@@ -7,10 +7,11 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use fnv::FnvHashMap;
 
 pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = module_environment_creator::create(module);
+    let variables = module_environment_creator::create(module)
+        .into_iter()
+        .collect();
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
@@ -29,7 +30,7 @@ pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module
 fn transform_function_definition(
     context: &AnalysisContext,
     definition: &FunctionDefinition,
-    variables: &FnvHashMap<String, Type>,
+    variables: &hamt::Map<String, Type>,
 ) -> Result<FunctionDefinition, AnalysisError> {
     Ok(FunctionDefinition::new(
         definition.name(),
@@ -43,19 +44,15 @@ fn transform_function_definition(
 
 fn transform_lambda(
     lambda: &Lambda,
-    variables: &FnvHashMap<String, Type>,
+    variables: &hamt::Map<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Lambda, AnalysisError> {
-    let variables = variables
-        .clone()
-        .into_iter()
-        .chain(
-            lambda
-                .arguments()
-                .iter()
-                .map(|argument| (argument.name().into(), argument.type_().clone())),
-        )
-        .collect();
+    let variables = variables.extend(
+        lambda
+            .arguments()
+            .iter()
+            .map(|argument| (argument.name().into(), argument.type_().clone())),
+    );
 
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
@@ -73,7 +70,7 @@ fn transform_lambda(
 fn transform_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &FnvHashMap<String, Type>,
+    variables: &hamt::Map<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let transform_expression =
         |expression, variables: &_| transform_expression(context, expression, variables);
@@ -85,8 +82,12 @@ fn transform_expression(
             variables,
         )
     };
-    let extract_type = |expression, variables| {
-        type_extractor::extract_from_expression(context, expression, variables)
+    let extract_type = |expression, variables: &hamt::Map<_, _>| {
+        type_extractor::extract_from_expression(
+            context,
+            expression,
+            &variables.clone().into_iter().collect(),
+        )
     };
 
     Ok(match expression {
@@ -139,22 +140,18 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     if_.then(),
                     &result_type,
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([
-                            (
-                                if_.first_name().into(),
-                                types::Function::new(
-                                    vec![],
-                                    list_type.element().clone(),
-                                    if_.position().clone(),
-                                )
-                                .into(),
-                            ),
-                            (if_.rest_name().into(), list_type.clone().into()),
-                        ])
-                        .collect(),
+                    &variables.extend([
+                        (
+                            if_.first_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                if_.position().clone(),
+                            )
+                            .into(),
+                        ),
+                        (if_.rest_name().into(), list_type.clone().into()),
+                    ]),
                 )?,
                 transform_and_coerce_expression(if_.else_(), &result_type, variables)?,
                 if_.position().clone(),
@@ -182,11 +179,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     if_.then(),
                     &result_type,
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(if_.name().into(), map_type.value().clone())])
-                        .collect(),
+                    &variables.insert(if_.name().into(), map_type.value().clone()),
                 )?,
                 transform_and_coerce_expression(if_.else_(), &result_type, variables)?,
                 if_.position().clone(),
@@ -207,11 +200,7 @@ fn transform_expression(
                             transform_and_coerce_expression(
                                 branch.expression(),
                                 &result_type,
-                                &variables
-                                    .clone()
-                                    .into_iter()
-                                    .chain([(if_.name().into(), branch.type_().clone())])
-                                    .collect(),
+                                &variables.insert(if_.name().into(), branch.type_().clone()),
                             )?,
                         ))
                     })
@@ -223,21 +212,17 @@ fn transform_expression(
                             transform_and_coerce_expression(
                                 branch.expression(),
                                 &result_type,
-                                &variables
-                                    .clone()
-                                    .into_iter()
-                                    .chain([(
-                                        if_.name().into(),
-                                        branch
-                                            .type_()
-                                            .ok_or_else(|| {
-                                                AnalysisError::TypeNotInferred(
-                                                    branch.position().clone(),
-                                                )
-                                            })?
-                                            .clone(),
-                                    )])
-                                    .collect(),
+                                &variables.insert(
+                                    if_.name().into(),
+                                    branch
+                                        .type_()
+                                        .ok_or_else(|| {
+                                            AnalysisError::TypeNotInferred(
+                                                branch.position().clone(),
+                                            )
+                                        })?
+                                        .clone(),
+                                ),
                             )?,
                             branch.position().clone(),
                         ))
@@ -254,26 +239,22 @@ fn transform_expression(
             transform_expression(let_.bound_expression(), variables)?,
             transform_expression(
                 let_.expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(
-                        let_.name()
-                            .map(|name| {
-                                Ok((
-                                    name.into(),
-                                    let_.type_()
-                                        .ok_or_else(|| {
-                                            AnalysisError::TypeNotInferred(
-                                                let_.bound_expression().position().clone(),
-                                            )
-                                        })?
-                                        .clone(),
-                                ))
-                            })
-                            .transpose()?,
-                    )
-                    .collect(),
+                &variables.extend(
+                    let_.name()
+                        .map(|name| {
+                            Ok((
+                                name.into(),
+                                let_.type_()
+                                    .ok_or_else(|| {
+                                        AnalysisError::TypeNotInferred(
+                                            let_.bound_expression().position().clone(),
+                                        )
+                                    })?
+                                    .clone(),
+                            ))
+                        })
+                        .transpose()?,
+                ),
             )?,
             let_.position().clone(),
         )
@@ -313,15 +294,10 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.output_type(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(
-                            comprehension.element_name().into(),
-                            types::Function::new(vec![], input_type.clone(), position.clone())
-                                .into(),
-                        )])
-                        .collect(),
+                    &variables.insert(
+                        comprehension.element_name().into(),
+                        types::Function::new(vec![], input_type.clone(), position.clone()).into(),
+                    ),
                 )?,
                 comprehension.element_name(),
                 transform_expression(comprehension.list(), variables)?,
@@ -384,14 +360,10 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.element_type(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([
-                            (comprehension.key_name().into(), key_type.clone()),
-                            (comprehension.value_name().into(), value_type.clone()),
-                        ])
-                        .collect(),
+                    &variables.extend([
+                        (comprehension.key_name().into(), key_type.clone()),
+                        (comprehension.value_name().into(), value_type.clone()),
+                    ]),
                 )?,
                 comprehension.key_name(),
                 comprehension.value_name(),
@@ -511,7 +483,7 @@ fn transform_expression(
 fn transform_record_fields(
     fields: &[RecordField],
     record_type: &Type,
-    variables: &FnvHashMap<String, Type>,
+    variables: &hamt::Map<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
     let field_types =
@@ -542,9 +514,13 @@ fn coerce_expression(
     context: &AnalysisContext,
     expression: &Expression,
     upper_type: &Type,
-    variables: &FnvHashMap<String, Type>,
+    variables: &hamt::Map<String, Type>,
 ) -> Result<Expression, AnalysisError> {
-    let lower_type = type_extractor::extract_from_expression(context, expression, variables)?;
+    let lower_type = type_extractor::extract_from_expression(
+        context,
+        expression,
+        &variables.clone().into_iter().collect(),
+    )?;
 
     Ok(
         if type_equality_checker::check(&lower_type, upper_type, context.types())? {
