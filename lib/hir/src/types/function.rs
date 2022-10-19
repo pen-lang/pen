@@ -4,35 +4,47 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Function {
-    arguments: Vec<Type>,
+pub struct Function(Arc<FunctionInner>);
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+struct FunctionInner {
+    arguments: Arc<[Type]>,
     result: Arc<Type>,
     position: Position,
 }
 
 impl Function {
     pub fn new(arguments: Vec<Type>, result: impl Into<Type>, position: Position) -> Self {
-        Self {
-            arguments,
-            result: Arc::new(result.into()),
-            position,
-        }
+        Self(
+            FunctionInner {
+                arguments: arguments.into(),
+                result: Arc::new(result.into()),
+                position,
+            }
+            .into(),
+        )
     }
 
     pub fn arguments(&self) -> &[Type] {
-        &self.arguments
+        &self.0.arguments
     }
 
     pub fn result(&self) -> &Type {
-        &self.result
+        &self.0.result
     }
 
     pub fn position(&self) -> &Position {
-        &self.position
+        &self.0.position
     }
 
-    pub fn set_position(mut self, position: Position) -> Self {
-        self.position = position;
-        self
+    pub fn set_position(self, position: Position) -> Self {
+        Self(
+            FunctionInner {
+                arguments: self.0.arguments.clone(),
+                result: self.0.result.clone(),
+                position,
+            }
+            .into(),
+        )
     }
 }
