@@ -37,7 +37,7 @@ impl Union {
         &self.0.position
     }
 
-    pub fn set_position(mut self, position: Position) -> Self {
+    pub fn set_position(&self, position: Position) -> Self {
         Self(
             UnionInner {
                 lhs: self.0.lhs.clone(),
