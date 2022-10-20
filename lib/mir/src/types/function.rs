@@ -15,7 +15,7 @@ impl Function {
         Self(
             FunctionInner {
                 arguments,
-                result: result.into().into(),
+                result: result.into(),
             }
             .into(),
         )
