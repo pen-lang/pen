@@ -10,115 +10,145 @@ Ok(
             ),
             type_: Some(
                 Reference(
-                    Reference {
-                        name: "mapContext",
-                        position: Position {
-                            path: "",
-                            line_number: 1,
-                            column_number: 1,
-                            line: "",
+                    Reference(
+                        ReferenceInner {
+                            name: "mapContext",
+                            position: Position(
+                                PositionInner {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            ),
                         },
-                    },
+                    ),
                 ),
             ),
             bound_expression: Call(
                 Call {
                     function_type: Some(
                         Function(
-                            Function {
-                                arguments: [],
-                                result: Reference(
-                                    Reference {
-                                        name: "mapContext",
-                                        position: Position {
+                            Function(
+                                FunctionInner {
+                                    arguments: [],
+                                    result: Reference(
+                                        Reference(
+                                            ReferenceInner {
+                                                name: "mapContext",
+                                                position: Position(
+                                                    PositionInner {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                    position: Position(
+                                        PositionInner {
                                             path: "",
                                             line_number: 1,
                                             column_number: 1,
                                             line: "",
                                         },
-                                    },
-                                ),
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
+                                    ),
                                 },
-                            },
+                            ),
                         ),
                     ),
                     function: Variable(
                         Variable {
                             name: "hir:map:context:8bbb62926defb736",
-                            position: Position {
-                                path: "",
-                                line_number: 1,
-                                column_number: 1,
-                                line: "",
-                            },
+                            position: Position(
+                                PositionInner {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            ),
                         },
                     ),
                     arguments: [],
-                    position: Position {
-                        path: "",
-                        line_number: 1,
-                        column_number: 1,
-                        line: "",
-                    },
+                    position: Position(
+                        PositionInner {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    ),
                 },
             ),
             expression: Call(
                 Call {
                     function_type: Some(
                         Function(
-                            Function {
-                                arguments: [],
-                                result: Reference(
-                                    Reference {
-                                        name: "genericMap",
-                                        position: Position {
+                            Function(
+                                FunctionInner {
+                                    arguments: [],
+                                    result: Reference(
+                                        Reference(
+                                            ReferenceInner {
+                                                name: "genericMap",
+                                                position: Position(
+                                                    PositionInner {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                    position: Position(
+                                        PositionInner {
                                             path: "",
                                             line_number: 1,
                                             column_number: 1,
                                             line: "",
                                         },
-                                    },
-                                ),
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
+                                    ),
                                 },
-                            },
+                            ),
                         ),
                     ),
                     function: Variable(
                         Variable {
                             name: "emptyMap",
-                            position: Position {
-                                path: "",
-                                line_number: 1,
-                                column_number: 1,
-                                line: "",
-                            },
+                            position: Position(
+                                PositionInner {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            ),
                         },
                     ),
                     arguments: [],
-                    position: Position {
-                        path: "",
-                        line_number: 1,
-                        column_number: 1,
-                        line: "",
-                    },
+                    position: Position(
+                        PositionInner {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    ),
                 },
             ),
-            position: Position {
-                path: "",
-                line_number: 1,
-                column_number: 1,
-                line: "",
-            },
+            position: Position(
+                PositionInner {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
+            ),
         },
     ),
 )

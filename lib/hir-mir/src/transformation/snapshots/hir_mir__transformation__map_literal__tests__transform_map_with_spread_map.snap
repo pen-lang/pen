@@ -1,6 +1,6 @@
 ---
 source: lib/hir-mir/src/transformation/map_literal.rs
-expression: "transform(&CompileContext::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapElement :: Map(None :: new(Position :: fake()).into())],\n            Position::fake()))"
+expression: "transform(&Context::dummy(Default::default(), Default::default()),\n    &Map::new(types::None::new(Position::fake()),\n            types::None::new(Position::fake()),\n            vec![MapElement :: Map(None :: new(Position :: fake()).into())],\n            Position::fake()))"
 ---
 Ok(
     Let(
@@ -10,79 +10,99 @@ Ok(
             ),
             type_: Some(
                 Reference(
-                    Reference {
-                        name: "mapContext",
-                        position: Position {
-                            path: "",
-                            line_number: 1,
-                            column_number: 1,
-                            line: "",
+                    Reference(
+                        ReferenceInner {
+                            name: "mapContext",
+                            position: Position(
+                                PositionInner {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            ),
                         },
-                    },
+                    ),
                 ),
             ),
             bound_expression: Call(
                 Call {
                     function_type: Some(
                         Function(
-                            Function {
-                                arguments: [],
-                                result: Reference(
-                                    Reference {
-                                        name: "mapContext",
-                                        position: Position {
+                            Function(
+                                FunctionInner {
+                                    arguments: [],
+                                    result: Reference(
+                                        Reference(
+                                            ReferenceInner {
+                                                name: "mapContext",
+                                                position: Position(
+                                                    PositionInner {
+                                                        path: "",
+                                                        line_number: 1,
+                                                        column_number: 1,
+                                                        line: "",
+                                                    },
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                    position: Position(
+                                        PositionInner {
                                             path: "",
                                             line_number: 1,
                                             column_number: 1,
                                             line: "",
                                         },
-                                    },
-                                ),
-                                position: Position {
-                                    path: "",
-                                    line_number: 1,
-                                    column_number: 1,
-                                    line: "",
+                                    ),
                                 },
-                            },
+                            ),
                         ),
                     ),
                     function: Variable(
                         Variable {
                             name: "hir:map:context:829f738c8f9ee2f4",
-                            position: Position {
-                                path: "",
-                                line_number: 1,
-                                column_number: 1,
-                                line: "",
-                            },
+                            position: Position(
+                                PositionInner {
+                                    path: "",
+                                    line_number: 1,
+                                    column_number: 1,
+                                    line: "",
+                                },
+                            ),
                         },
                     ),
                     arguments: [],
-                    position: Position {
-                        path: "",
-                        line_number: 1,
-                        column_number: 1,
-                        line: "",
-                    },
+                    position: Position(
+                        PositionInner {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    ),
                 },
             ),
             expression: None(
                 None {
-                    position: Position {
-                        path: "",
-                        line_number: 1,
-                        column_number: 1,
-                        line: "",
-                    },
+                    position: Position(
+                        PositionInner {
+                            path: "",
+                            line_number: 1,
+                            column_number: 1,
+                            line: "",
+                        },
+                    ),
                 },
             ),
-            position: Position {
-                path: "",
-                line_number: 1,
-                column_number: 1,
-                line: "",
-            },
+            position: Position(
+                PositionInner {
+                    path: "",
+                    line_number: 1,
+                    column_number: 1,
+                    line: "",
+                },
+            ),
         },
     ),
 )

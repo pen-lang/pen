@@ -1,7 +1,6 @@
 ---
 source: lib/parse/src/parsers.rs
-expression: "external_module_path().parse(stream(source,\n                                    \"\")).map_err(|error|\n                                                     ParseError::new(source,\n                                                                     \"\",\n                                                                     error)).err()"
-
+expression: "external_module_path().parse(stream(source,\n                \"\")).map_err(|error| ParseError::new(source, \"\", error)).err()"
 ---
 Some(
     ParseError {
@@ -9,11 +8,13 @@ Some(
         expected: [
             "public module path",
         ],
-        position: Position {
-            path: "",
-            line_number: 1,
-            column_number: 5,
-            line: "Foo'bar'Baz",
-        },
+        position: Position(
+            PositionInner {
+                path: "",
+                line_number: 1,
+                column_number: 5,
+                line: "Foo'bar'Baz",
+            },
+        ),
     },
 )
