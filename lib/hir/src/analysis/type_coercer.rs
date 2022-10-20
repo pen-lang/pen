@@ -83,14 +83,7 @@ fn transform_expression(
         )
     };
     let extract_type = |expression, variables: &plist::FlailMap<String, Type>| {
-        type_extractor::extract_from_expression(
-            context,
-            expression,
-            &variables
-                .into_iter()
-                .map(|(name, type_)| (name.clone(), type_.clone()))
-                .collect(),
-        )
+        type_extractor::extract_from_expression(context, expression, &variables)
     };
 
     Ok(match expression {
@@ -519,14 +512,7 @@ fn coerce_expression(
     upper_type: &Type,
     variables: &plist::FlailMap<String, Type>,
 ) -> Result<Expression, AnalysisError> {
-    let lower_type = type_extractor::extract_from_expression(
-        context,
-        expression,
-        &variables
-            .into_iter()
-            .map(|(name, type_)| (name.clone(), type_.clone()))
-            .collect(),
-    )?;
+    let lower_type = type_extractor::extract_from_expression(context, expression, variables)?;
 
     Ok(
         if type_equality_checker::check(&lower_type, upper_type, context.types())? {
