@@ -1,4 +1,4 @@
-use super::{context::AnalysisContext, module_environment_creator, AnalysisError};
+use super::{context::AnalysisContext, module_environment, AnalysisError};
 use crate::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
@@ -10,7 +10,7 @@ use crate::{
 use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
-    let variables = plist::FlailMap::new(module_environment_creator::create(module));
+    let variables = plist::FlailMap::new(module_environment::create(module));
 
     for definition in module.function_definitions() {
         check_lambda(context, definition.lambda(), &variables)?;

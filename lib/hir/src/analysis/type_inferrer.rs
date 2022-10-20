@@ -1,6 +1,6 @@
 use super::{
-    context::AnalysisContext, module_environment_creator, type_canonicalizer,
-    type_difference_calculator, type_extractor, union_type_creator, AnalysisError,
+    context::AnalysisContext, module_environment, type_canonicalizer, type_difference_calculator,
+    type_extractor, union_type_creator, AnalysisError,
 };
 use crate::{
     ir::*,
@@ -8,7 +8,7 @@ use crate::{
 };
 
 pub fn infer(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = plist::FlailMap::new(module_environment_creator::create(module));
+    let variables = plist::FlailMap::new(module_environment::create(module));
 
     Ok(Module::new(
         module.type_definitions().to_vec(),

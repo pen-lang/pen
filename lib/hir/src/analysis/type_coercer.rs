@@ -1,15 +1,15 @@
 use super::{context::AnalysisContext, AnalysisError};
 use crate::{
     analysis::{
-        module_environment_creator, record_field_resolver, type_canonicalizer,
-        type_equality_checker, type_extractor,
+        module_environment, record_field_resolver, type_canonicalizer, type_equality_checker,
+        type_extractor,
     },
     ir::*,
     types::{self, Type},
 };
 
 pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = plist::FlailMap::new(module_environment_creator::create(module));
+    let variables = plist::FlailMap::new(module_environment::create(module));
 
     Ok(Module::new(
         module.type_definitions().to_vec(),

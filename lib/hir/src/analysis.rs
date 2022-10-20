@@ -7,7 +7,7 @@ mod error;
 pub mod expression_visitor;
 pub mod function_definition_qualifier;
 pub mod impossible_type_validator;
-pub mod module_environment_creator;
+mod module_environment;
 pub mod record_field_resolver;
 pub mod record_field_validator;
 pub mod recursive_type_alias_validator;
