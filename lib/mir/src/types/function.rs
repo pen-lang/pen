@@ -1,8 +1,8 @@
 use super::type_::Type;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Function(Arc<FunctionInner>);
+pub struct Function(Rc<FunctionInner>);
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 struct FunctionInner {

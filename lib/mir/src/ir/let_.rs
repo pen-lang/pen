@@ -1,13 +1,13 @@
 use super::expression::Expression;
 use crate::types::Type;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Let {
     name: String,
     type_: Type,
-    bound_expression: Arc<Expression>,
-    expression: Arc<Expression>,
+    bound_expression: Rc<Expression>,
+    expression: Rc<Expression>,
 }
 
 impl Let {

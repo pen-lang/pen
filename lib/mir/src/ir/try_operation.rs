@@ -1,15 +1,15 @@
 use super::expression::Expression;
 use crate::types::Type;
-use std::sync::Arc;
+use std::rc::Rc;
 
 // A try operation matches an operand with a type and returns it from a function
 // if it matches.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TryOperation {
-    operand: Arc<Expression>,
+    operand: Rc<Expression>,
     name: String,
     type_: Type,
-    then: Arc<Expression>,
+    then: Rc<Expression>,
 }
 
 impl TryOperation {

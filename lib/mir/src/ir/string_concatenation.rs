@@ -1,9 +1,9 @@
 use super::expression::Expression;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct StringConcatenation {
-    operands: Arc<Vec<Expression>>,
+    operands: Rc<Vec<Expression>>,
 }
 
 impl StringConcatenation {
