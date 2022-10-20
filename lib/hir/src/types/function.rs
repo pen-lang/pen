@@ -1,14 +1,14 @@
 use super::Type;
 use position::Position;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Function(Arc<FunctionInner>);
+pub struct Function(Rc<FunctionInner>);
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 struct FunctionInner {
-    arguments: Arc<[Type]>,
+    arguments: Rc<[Type]>,
     result: Type,
     position: Position,
 }

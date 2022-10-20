@@ -1,13 +1,13 @@
 use super::{Argument, Expression};
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lambda {
     arguments: Vec<Argument>,
     result_type: Type,
-    body: Arc<Expression>,
+    body: Rc<Expression>,
     position: Position,
 }
 

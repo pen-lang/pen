@@ -1,13 +1,13 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AdditionOperation {
     type_: Option<Type>,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
     position: Position,
 }
 

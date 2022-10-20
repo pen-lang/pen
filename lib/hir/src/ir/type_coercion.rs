@@ -1,13 +1,13 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TypeCoercion {
     from: Type,
     to: Type,
-    argument: Arc<Expression>,
+    argument: Rc<Expression>,
     position: Position,
 }
 
@@ -21,7 +21,7 @@ impl TypeCoercion {
         Self {
             from: from.into(),
             to: to.into(),
-            argument: Arc::new(argument.into()),
+            argument: Rc::new(argument.into()),
             position,
         }
     }
