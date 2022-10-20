@@ -1,15 +1,14 @@
 use super::{
-    context::AnalysisContext, module_environment_creator, type_canonicalizer,
-    type_difference_calculator, type_extractor, union_type_creator, AnalysisError,
+    context::AnalysisContext, module_environment, type_canonicalizer, type_difference_calculator,
+    type_extractor, union_type_creator, AnalysisError,
 };
 use crate::{
     ir::*,
     types::{self, Type},
 };
-use fnv::FnvHashMap;
 
 pub fn infer(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = module_environment_creator::create(module);
+    let variables = plist::FlailMap::new(module_environment::create(module));
 
     Ok(Module::new(
         module.type_definitions().to_vec(),
@@ -28,7 +27,7 @@ pub fn infer(context: &AnalysisContext, module: &Module) -> Result<Module, Analy
 fn infer_definition(
     context: &AnalysisContext,
     definition: &FunctionDefinition,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<FunctionDefinition, AnalysisError> {
     Ok(FunctionDefinition::new(
         definition.name(),
@@ -43,7 +42,7 @@ fn infer_definition(
 fn infer_lambda(
     context: &AnalysisContext,
     lambda: &Lambda,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Lambda, AnalysisError> {
     Ok(Lambda::new(
         lambda.arguments().to_vec(),
@@ -51,16 +50,12 @@ fn infer_lambda(
         infer_expression(
             context,
             lambda.body(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain(
-                    lambda
-                        .arguments()
-                        .iter()
-                        .map(|argument| (argument.name().into(), argument.type_().clone())),
-                )
-                .collect(),
+            &variables.insert_many(
+                lambda
+                    .arguments()
+                    .iter()
+                    .map(|argument| (argument.name().into(), argument.type_().clone())),
+            ),
         )?,
         lambda.position().clone(),
     ))
@@ -69,7 +64,7 @@ fn infer_lambda(
 fn infer_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Expression, AnalysisError> {
     let infer_expression =
         |expression, variables: &_| infer_expression(context, expression, variables);
@@ -115,22 +110,18 @@ fn infer_expression(
 
             let then = infer_expression(
                 if_.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([
-                        (
-                            if_.first_name().into(),
-                            types::Function::new(
-                                vec![],
-                                list_type.element().clone(),
-                                if_.position().clone(),
-                            )
-                            .into(),
-                        ),
-                        (if_.rest_name().into(), list_type.clone().into()),
-                    ])
-                    .collect(),
+                &variables.insert_many([
+                    (
+                        if_.first_name().into(),
+                        types::Function::new(
+                            vec![],
+                            list_type.element().clone(),
+                            if_.position().clone(),
+                        )
+                        .into(),
+                    ),
+                    (if_.rest_name().into(), list_type.clone().into()),
+                ]),
             )?;
             let else_ = infer_expression(if_.else_(), variables)?;
 
@@ -154,11 +145,7 @@ fn infer_expression(
 
             let then = infer_expression(
                 if_.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(if_.name().into(), map_type.value().clone())])
-                    .collect(),
+                &variables.insert(if_.name().into(), map_type.value().clone()),
             )?;
             let else_ = infer_expression(if_.else_(), variables)?;
 
@@ -184,11 +171,7 @@ fn infer_expression(
                         branch.type_().clone(),
                         infer_expression(
                             branch.expression(),
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain([(if_.name().into(), branch.type_().clone())])
-                                .collect(),
+                            &variables.insert(if_.name().into(), branch.type_().clone()),
                         )?,
                     ))
                 })
@@ -215,11 +198,7 @@ fn infer_expression(
                         Some(type_.clone()),
                         infer_expression(
                             branch.expression(),
-                            &variables
-                                .clone()
-                                .into_iter()
-                                .chain([(if_.name().into(), type_)])
-                                .collect(),
+                            &variables.insert(if_.name().into(), type_),
                         )?,
                         branch.position().clone(),
                     ))
@@ -247,11 +226,7 @@ fn infer_expression(
                 bound_expression,
                 infer_expression(
                     let_.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain(let_.name().map(|name| (name.into(), bound_type)))
-                        .collect(),
+                    &variables.insert_many(let_.name().map(|name| (name.into(), bound_type))),
                 )?,
                 let_.position().clone(),
             )
@@ -286,19 +261,15 @@ fn infer_expression(
                 comprehension.output_type().clone(),
                 infer_expression(
                     comprehension.element(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(
-                            comprehension.element_name().into(),
-                            types::Function::new(
-                                vec![],
-                                list_type.element().clone(),
-                                comprehension.position().clone(),
-                            )
-                            .into(),
-                        )])
-                        .collect(),
+                    &variables.insert(
+                        comprehension.element_name().into(),
+                        types::Function::new(
+                            vec![],
+                            list_type.element().clone(),
+                            comprehension.position().clone(),
+                        )
+                        .into(),
+                    ),
                 )?,
                 comprehension.element_name(),
                 list,
@@ -340,14 +311,10 @@ fn infer_expression(
                 comprehension.element_type().clone(),
                 infer_expression(
                     comprehension.element(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([
-                            (comprehension.key_name().into(), map_type.key().clone()),
-                            (comprehension.value_name().into(), map_type.value().clone()),
-                        ])
-                        .collect(),
+                    &variables.insert_many([
+                        (comprehension.key_name().into(), map_type.key().clone()),
+                        (comprehension.value_name().into(), map_type.value().clone()),
+                    ]),
                 )?,
                 comprehension.key_name(),
                 comprehension.value_name(),
@@ -521,7 +488,7 @@ fn infer_built_in_call(
     context: &AnalysisContext,
     call: &Call,
     function: &BuiltInFunction,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Call, AnalysisError> {
     let position = call.position();
     let arguments = call

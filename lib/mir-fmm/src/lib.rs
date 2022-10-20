@@ -23,6 +23,7 @@ pub use configuration::Configuration;
 use context::Context;
 pub use error::CompileError;
 use fnv::FnvHashMap;
+use std::collections::HashMap;
 
 pub fn compile(
     module: &mir::ir::Module,
@@ -60,6 +61,8 @@ pub fn compile(
     for declaration in module.function_declarations() {
         function_declaration::compile(&context, declaration);
     }
+
+    let global_variables = plist::FlailMap::new(global_variables);
 
     for definition in module.function_definitions() {
         function_definition::compile(&context, definition, &global_variables)?;
@@ -100,7 +103,7 @@ pub fn compile(
 fn compile_global_variables(
     context: &Context,
     module: &mir::ir::Module,
-) -> Result<FnvHashMap<String, fmm::build::TypedExpression>, CompileError> {
+) -> Result<HashMap<String, fmm::build::TypedExpression>, CompileError> {
     module
         .foreign_declarations()
         .iter()
