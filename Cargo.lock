@@ -713,6 +713,7 @@ dependencies = [
  "insta",
  "mir",
  "once_cell",
+ "plist",
  "tempfile",
 ]
 

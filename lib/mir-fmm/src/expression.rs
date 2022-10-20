@@ -9,7 +9,7 @@ pub fn compile(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     expression: &mir::ir::Expression,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let compile = |expression, variables: &_| compile(context, builder, expression, variables);
 
@@ -21,27 +21,18 @@ pub fn compile(
         mir::ir::Expression::Case(case) => compile_case(context, builder, case, variables)?,
         mir::ir::Expression::CloneVariables(clone) => compile(
             clone.expression(),
-            &variables
-                .iter()
-                .map(|(name, expression)| (name.clone(), expression.clone()))
-                .chain(
-                    clone
-                        .variables()
-                        .iter()
-                        .map(|(variable, type_)| {
-                            Ok((
-                                variable.into(),
-                                reference_count::clone(
-                                    context,
-                                    builder,
-                                    &variables[variable],
-                                    type_,
-                                )?,
-                            ))
-                        })
-                        .collect::<Result<Vec<_>, CompileError>>()?,
-                )
-                .collect(),
+            &variables.insert_many(
+                clone
+                    .variables()
+                    .iter()
+                    .map(|(variable, type_)| {
+                        Ok((
+                            variable.into(),
+                            reference_count::clone(context, builder, &variables[variable], type_)?,
+                        ))
+                    })
+                    .collect::<Result<Vec<_>, CompileError>>()?,
+            ),
         )?,
         mir::ir::Expression::ComparisonOperation(operation) => {
             compile_comparison_operation(context, builder, operation, variables)?.into()
@@ -334,7 +325,7 @@ fn compile_if(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     if_: &mir::ir::If,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let compile = |builder: &_, expression| compile(context, builder, expression, variables);
 
@@ -349,7 +340,7 @@ fn compile_case(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     case: &mir::ir::Case,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(compile_alternatives(
         context,
@@ -368,7 +359,7 @@ fn compile_alternatives(
     argument: fmm::build::TypedExpression,
     alternatives: &[mir::ir::Alternative],
     default_alternative: Option<&mir::ir::DefaultAlternative>,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<Option<fmm::build::TypedExpression>, CompileError> {
     Ok(match alternatives {
         [] => default_alternative
@@ -377,11 +368,7 @@ fn compile_alternatives(
                     context,
                     builder,
                     alternative.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(alternative.name().into(), argument)])
-                        .collect(),
+                    &variables.insert(alternative.name().into(), argument),
                 )
             })
             .transpose()?,
@@ -404,14 +391,10 @@ fn compile_alternatives(
                     context,
                     &builder,
                     alternative.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(
-                            alternative.name().into(),
-                            variant::downcast(context, &builder, &argument, alternative.type_())?,
-                        )])
-                        .collect(),
+                    &variables.insert(
+                        alternative.name().into(),
+                        variant::downcast(context, &builder, &argument, alternative.type_())?,
+                    ),
                 )?))
             },
             |builder| {
@@ -449,20 +432,16 @@ fn compile_let(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::Let,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let compile = |expression, variables| compile(context, builder, expression, variables);
 
     compile(
         let_.expression(),
-        &variables
-            .iter()
-            .map(|(name, expression)| (name.clone(), expression.clone()))
-            .chain([(
-                let_.name().into(),
-                compile(let_.bound_expression(), variables)?,
-            )])
-            .collect(),
+        &variables.insert(
+            let_.name().into(),
+            compile(let_.bound_expression(), variables)?,
+        ),
     )
 }
 
@@ -470,7 +449,7 @@ fn compile_let_recursive(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     let_: &mir::ir::LetRecursive,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let closure_pointer = reference_count::heap::allocate(
         builder,
@@ -508,21 +487,17 @@ fn compile_let_recursive(
         context,
         builder,
         let_.expression(),
-        &variables
-            .clone()
-            .into_iter()
-            .chain([(
-                let_.definition().name().into(),
-                fmm::build::bit_cast(
-                    fmm::types::Pointer::new(type_::compile_unsized_closure(
-                        context,
-                        let_.definition().type_(),
-                    )),
-                    closure_pointer,
-                )
-                .into(),
-            )])
-            .collect(),
+        &variables.insert(
+            let_.definition().name().into(),
+            fmm::build::bit_cast(
+                fmm::types::Pointer::new(type_::compile_unsized_closure(
+                    context,
+                    let_.definition().type_(),
+                )),
+                closure_pointer,
+            )
+            .into(),
+        ),
     )
 }
 
@@ -530,7 +505,7 @@ fn compile_synchronize(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     synchronize: &mir::ir::Synchronize,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let value = compile(context, builder, synchronize.expression(), variables)?;
 
@@ -543,7 +518,7 @@ fn compile_arithmetic_operation(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ArithmeticOperation,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::ir::ArithmeticOperation, CompileError> {
     let compile = |expression| compile(context, builder, expression, variables);
 
@@ -570,7 +545,7 @@ fn compile_comparison_operation(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::ComparisonOperation,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::ir::ComparisonOperation, CompileError> {
     let compile = |expression| compile(context, builder, expression, variables);
 
@@ -601,7 +576,7 @@ fn compile_record(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &mir::ir::Record,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if type_::is_record_boxed(context, record.type_()) {
         compile_boxed_record(
@@ -645,7 +620,7 @@ fn compile_unboxed_record(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     record: &mir::ir::Record,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::ir::Record, CompileError> {
     Ok(fmm::build::record(
         record
@@ -660,7 +635,7 @@ fn compile_try_operation(
     context: &Context,
     builder: &fmm::build::InstructionBuilder,
     operation: &mir::ir::TryOperation,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let operand = compile(context, builder, operation.operand(), variables)?;
 
@@ -671,14 +646,10 @@ fn compile_try_operation(
                 context,
                 &builder,
                 operation.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(
-                        operation.name().into(),
-                        variant::downcast(context, &builder, &operand, operation.type_())?,
-                    )])
-                    .collect(),
+                &variables.insert(
+                    operation.name().into(),
+                    variant::downcast(context, &builder, &operand, operation.type_())?,
+                ),
             )?))
         },
         |builder| Ok(builder.branch(operand.clone())),
