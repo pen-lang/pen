@@ -2,17 +2,23 @@ use super::type_::Type;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Function {
+pub struct Function(Arc<FunctionInner>);
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+struct FunctionInner {
     arguments: Vec<Type>,
-    result: Arc<Type>,
+    result: Type,
 }
 
 impl Function {
     pub fn new(arguments: Vec<Type>, result: impl Into<Type>) -> Self {
-        Self {
-            arguments,
-            result: result.into().into(),
-        }
+        Self(
+            FunctionInner {
+                arguments,
+                result: result.into().into(),
+            }
+            .into(),
+        )
     }
 
     pub fn arguments(&self) -> &[Type] {
