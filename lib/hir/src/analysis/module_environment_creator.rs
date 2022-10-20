@@ -2,7 +2,7 @@ use super::type_extractor;
 use crate::{ir::*, types::Type};
 use std::collections::HashMap;
 
-// TODO Use FnvHashMap for determinisism.
+// TODO Use FnvHashMap for deterministic build.
 pub fn create(module: &Module) -> HashMap<String, Type> {
     module
         .function_declarations()
