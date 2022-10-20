@@ -4,7 +4,7 @@ use std::sync::Arc;
 #[derive(Clone, Debug, PartialEq)]
 pub struct ArithmeticOperation(Arc<ArithmeticOperationInner>);
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 struct ArithmeticOperationInner {
     operator: ArithmeticOperator,
     lhs: Expression,

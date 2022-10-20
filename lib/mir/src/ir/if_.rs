@@ -4,7 +4,7 @@ use std::sync::Arc;
 #[derive(Clone, Debug, PartialEq)]
 pub struct If(Arc<IfInner>);
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 struct IfInner {
     condition: Expression,
     then: Expression,
