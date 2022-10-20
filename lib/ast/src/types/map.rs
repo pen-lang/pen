@@ -1,19 +1,19 @@
 use super::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Map {
-    key: Arc<Type>,
-    value: Arc<Type>,
+    key: Rc<Type>,
+    value: Rc<Type>,
     position: Position,
 }
 
 impl Map {
     pub fn new(key: impl Into<Type>, value: impl Into<Type>, position: Position) -> Self {
         Self {
-            key: Arc::new(key.into()),
-            value: Arc::new(value.into()),
+            key: Rc::new(key.into()),
+            value: Rc::new(value.into()),
             position,
         }
     }

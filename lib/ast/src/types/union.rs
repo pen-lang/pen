@@ -1,11 +1,11 @@
 use super::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Union {
-    lhs: Arc<Type>,
-    rhs: Arc<Type>,
+    lhs: Rc<Type>,
+    rhs: Rc<Type>,
     position: Position,
 }
 

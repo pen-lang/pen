@@ -1,12 +1,12 @@
 use super::{binary_operator::BinaryOperator, expression::Expression};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BinaryOperation {
     operator: BinaryOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
     position: Position,
 }
 
