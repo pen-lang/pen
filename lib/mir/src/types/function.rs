@@ -22,10 +22,10 @@ impl Function {
     }
 
     pub fn arguments(&self) -> &[Type] {
-        &self.arguments
+        &self.0.arguments
     }
 
     pub fn result(&self) -> &Type {
-        &self.result
+        &self.0.result
     }
 }
