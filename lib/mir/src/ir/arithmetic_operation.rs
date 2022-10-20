@@ -1,11 +1,11 @@
 use super::{arithmetic_operator::ArithmeticOperator, expression::Expression};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ArithmeticOperation {
     operator: ArithmeticOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
 }
 
 impl ArithmeticOperation {
@@ -16,8 +16,8 @@ impl ArithmeticOperation {
     ) -> Self {
         Self {
             operator,
-            lhs: Arc::new(lhs.into()),
-            rhs: Arc::new(rhs.into()),
+            lhs: Rc::new(lhs.into()),
+            rhs: Rc::new(rhs.into()),
         }
     }
 

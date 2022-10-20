@@ -1,11 +1,11 @@
 use super::{
     alternative::Alternative, default_alternative::DefaultAlternative, expression::Expression,
 };
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Case {
-    argument: Arc<Expression>,
+    argument: Rc<Expression>,
     alternatives: Vec<Alternative>,
     default_alternative: Option<DefaultAlternative>,
 }
@@ -17,7 +17,7 @@ impl Case {
         default_alternative: Option<DefaultAlternative>,
     ) -> Self {
         Self {
-            argument: Arc::new(argument.into()),
+            argument: Rc::new(argument.into()),
             alternatives,
             default_alternative,
         }

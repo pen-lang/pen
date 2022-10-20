@@ -1,11 +1,11 @@
 use super::{comparison_operator::ComparisonOperator, expression::Expression};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ComparisonOperation {
     operator: ComparisonOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
 }
 
 impl ComparisonOperation {
@@ -16,8 +16,8 @@ impl ComparisonOperation {
     ) -> Self {
         Self {
             operator,
-            lhs: Arc::new(lhs.into()),
-            rhs: Arc::new(rhs.into()),
+            lhs: Rc::new(lhs.into()),
+            rhs: Rc::new(rhs.into()),
         }
     }
 

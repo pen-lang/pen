@@ -1,12 +1,12 @@
 use super::expression::Expression;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct If {
-    condition: Arc<Expression>,
-    then: Arc<Expression>,
-    else_: Arc<Expression>,
+    condition: Rc<Expression>,
+    then: Rc<Expression>,
+    else_: Rc<Expression>,
     position: Position,
 }
 
@@ -18,7 +18,7 @@ impl If {
         position: Position,
     ) -> Self {
         Self {
-            condition: Arc::new(condition.into()),
+            condition: Rc::new(condition.into()),
             then: then.into().into(),
             else_: else_.into().into(),
             position,

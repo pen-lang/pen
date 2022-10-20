@@ -1,14 +1,14 @@
 use super::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Let {
     name: Option<String>,
     type_: Option<Type>,
-    bound_expression: Arc<Expression>,
-    expression: Arc<Expression>,
+    bound_expression: Rc<Expression>,
+    expression: Rc<Expression>,
     position: Position,
 }
 

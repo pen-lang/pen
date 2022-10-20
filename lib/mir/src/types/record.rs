@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Record {
-    name: Arc<str>,
+    name: Rc<str>,
 }
 
 impl Record {

@@ -1,17 +1,17 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfMap {
     key_type: Option<Type>,
     value_type: Option<Type>,
     name: String,
-    map: Arc<Expression>,
-    key: Arc<Expression>,
-    then: Arc<Expression>,
-    else_: Arc<Expression>,
+    map: Rc<Expression>,
+    key: Rc<Expression>,
+    then: Rc<Expression>,
+    else_: Rc<Expression>,
     position: Position,
 }
 

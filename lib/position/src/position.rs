@@ -4,11 +4,11 @@ use std::{
     cmp::Ordering,
     fmt::{self, Display, Formatter},
     hash::{Hash, Hasher},
-    sync::Arc,
+    rc::Rc,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Position(Arc<PositionInner>);
+pub struct Position(Rc<PositionInner>);
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 struct PositionInner {

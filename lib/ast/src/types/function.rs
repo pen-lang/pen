@@ -1,11 +1,11 @@
 use super::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Function {
     arguments: Vec<Type>,
-    result: Arc<Type>,
+    result: Rc<Type>,
     position: Position,
 }
 
@@ -13,7 +13,7 @@ impl Function {
     pub fn new(arguments: Vec<Type>, result: impl Into<Type>, position: Position) -> Self {
         Self {
             arguments,
-            result: Arc::new(result.into()),
+            result: Rc::new(result.into()),
             position,
         }
     }

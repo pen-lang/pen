@@ -1,10 +1,10 @@
 use position::Position; use super::{Expression, Statement};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Block {
     statements: Vec<Statement>,
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
 }
 
 impl Block {

@@ -1,14 +1,14 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ListComprehension {
     type_: Type,
-    element: Arc<Expression>,
+    element: Rc<Expression>,
     element_name: String,
-    list: Arc<Expression>,
+    list: Rc<Expression>,
     position: Position,
 }
 
