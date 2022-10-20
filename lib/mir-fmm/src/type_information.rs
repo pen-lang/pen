@@ -1,10 +1,10 @@
 use crate::{context::Context, error::CompileError, reference_count};
-use fnv::FnvHashMap;
+use std::collections::HashMap;
 
 pub fn compile_global_variable(
     context: &Context,
     type_: &mir::types::Type,
-    global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    global_variables: &HashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
         mir::analysis::type_id::calculate(type_),

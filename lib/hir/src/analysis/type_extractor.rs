@@ -4,12 +4,11 @@ use crate::{
     ir::*,
     types::{self, Type},
 };
-use fnv::FnvHashMap;
 
 pub fn extract_from_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Type, AnalysisError> {
     let extract_from_expression =
         |expression, variables: &_| extract_from_expression(context, expression, variables);
@@ -45,22 +44,18 @@ pub fn extract_from_expression(
             types::Union::new(
                 extract_from_expression(
                     if_.then(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([
-                            (
-                                if_.first_name().into(),
-                                types::Function::new(
-                                    vec![],
-                                    list_type.element().clone(),
-                                    if_.position().clone(),
-                                )
-                                .into(),
-                            ),
-                            (if_.rest_name().into(), list_type.clone().into()),
-                        ])
-                        .collect(),
+                    &variables.insert_many([
+                        (
+                            if_.first_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                if_.position().clone(),
+                            )
+                            .into(),
+                        ),
+                        (if_.rest_name().into(), list_type.clone().into()),
+                    ]),
                 )?,
                 extract_from_expression(if_.else_(), variables)?,
                 if_.position().clone(),
@@ -75,11 +70,7 @@ pub fn extract_from_expression(
             types::Union::new(
                 extract_from_expression(
                     if_.then(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(if_.name().into(), map_type.value().clone())])
-                        .collect(),
+                    &variables.insert(if_.name().into(), map_type.value().clone()),
                 )?,
                 extract_from_expression(if_.else_(), variables)?,
                 if_.position().clone(),
@@ -92,11 +83,7 @@ pub fn extract_from_expression(
                 .map(|branch| {
                     extract_from_expression(
                         branch.expression(),
-                        &variables
-                            .clone()
-                            .into_iter()
-                            .chain([(if_.name().into(), branch.type_().clone())])
-                            .collect(),
+                        &variables.insert(if_.name().into(), branch.type_().clone()),
                     )
                 })
                 .collect::<Result<Vec<_>, _>>()?
@@ -106,21 +93,17 @@ pub fn extract_from_expression(
                         .map(|branch| {
                             extract_from_expression(
                                 branch.expression(),
-                                &variables
-                                    .clone()
-                                    .into_iter()
-                                    .chain([(
-                                        if_.name().into(),
-                                        branch
-                                            .type_()
-                                            .ok_or_else(|| {
-                                                AnalysisError::TypeNotInferred(
-                                                    branch.position().clone(),
-                                                )
-                                            })?
-                                            .clone(),
-                                    )])
-                                    .collect(),
+                                &variables.insert(
+                                    if_.name().into(),
+                                    branch
+                                        .type_()
+                                        .ok_or_else(|| {
+                                            AnalysisError::TypeNotInferred(
+                                                branch.position().clone(),
+                                            )
+                                        })?
+                                        .clone(),
+                                ),
                             )
                         })
                         .transpose()?,
@@ -140,24 +123,20 @@ pub fn extract_from_expression(
         .into(),
         Expression::Let(let_) => extract_from_expression(
             let_.expression(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain(
-                    let_.name()
-                        .map(|name| -> Result<_, AnalysisError> {
-                            Ok((
-                                name.into(),
-                                let_.type_()
-                                    .ok_or_else(|| {
-                                        AnalysisError::TypeNotInferred(let_.position().clone())
-                                    })?
-                                    .clone(),
-                            ))
-                        })
-                        .transpose()?,
-                )
-                .collect(),
+            &variables.insert_many(
+                let_.name()
+                    .map(|name| -> Result<_, AnalysisError> {
+                        Ok((
+                            name.into(),
+                            let_.type_()
+                                .ok_or_else(|| {
+                                    AnalysisError::TypeNotInferred(let_.position().clone())
+                                })?
+                                .clone(),
+                        ))
+                    })
+                    .transpose()?,
+            ),
         )?,
         Expression::Map(map) => types::Map::new(
             map.key_type().clone(),

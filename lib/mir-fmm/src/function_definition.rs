@@ -1,12 +1,11 @@
 use crate::{
     closure, context::Context, entry_function, error::CompileError, reference_count, type_,
 };
-use fnv::FnvHashMap;
 
 pub fn compile(
     context: &Context,
     definition: &mir::ir::GlobalFunctionDefinition,
-    global_variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    global_variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     let public = definition.is_public();
     let definition = definition.definition();
