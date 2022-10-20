@@ -9,9 +9,7 @@ use crate::{
 };
 
 pub fn coerce_types(context: &AnalysisContext, module: &Module) -> Result<Module, AnalysisError> {
-    let variables = module_environment_creator::create(module)
-        .into_iter()
-        .collect();
+    let variables = plist::FlailMap::new(module_environment_creator::create(module));
 
     Ok(Module::new(
         module.type_definitions().to_vec(),

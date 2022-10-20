@@ -1,8 +1,8 @@
 use super::type_extractor;
 use crate::{ir::*, types::Type};
-use fnv::FnvHashMap;
+use std::collections::HashMap;
 
-pub fn create(module: &Module) -> FnvHashMap<String, Type> {
+pub fn create(module: &Module) -> HashMap<String, Type> {
     module
         .function_declarations()
         .iter()

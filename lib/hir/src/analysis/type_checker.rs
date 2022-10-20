@@ -10,9 +10,7 @@ use crate::{
 use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
-    let variables = module_environment_creator::create(module)
-        .into_iter()
-        .collect();
+    let variables = plist::FlailMap::new(module_environment_creator::create(module));
 
     for definition in module.function_definitions() {
         check_lambda(context, definition.lambda(), &variables)?;
