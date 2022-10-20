@@ -81,7 +81,7 @@ fn transform_expression(
         )
     };
     let extract_type = |expression, variables: &plist::FlailMap<String, Type>| {
-        type_extractor::extract_from_expression(context, expression, &variables)
+        type_extractor::extract_from_expression(context, expression, variables)
     };
 
     Ok(match expression {
