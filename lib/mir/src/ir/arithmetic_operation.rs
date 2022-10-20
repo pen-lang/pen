@@ -2,10 +2,13 @@ use super::{arithmetic_operator::ArithmeticOperator, expression::Expression};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ArithmeticOperation {
+pub struct ArithmeticOperation(Arc<ArithmeticOperationInner>);
+
+#[derive(Clone, Debug, PartialEq)]
+struct ArithmeticOperationInner {
     operator: ArithmeticOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Expression,
+    rhs: Expression,
 }
 
 impl ArithmeticOperation {
@@ -14,22 +17,25 @@ impl ArithmeticOperation {
         lhs: impl Into<Expression>,
         rhs: impl Into<Expression>,
     ) -> Self {
-        Self {
-            operator,
-            lhs: Arc::new(lhs.into()),
-            rhs: Arc::new(rhs.into()),
-        }
+        Self(
+            ArithmeticOperationInner {
+                operator,
+                lhs: (lhs.into()),
+                rhs: (rhs.into()),
+            }
+            .into(),
+        )
     }
 
     pub fn operator(&self) -> ArithmeticOperator {
-        self.operator
+        self.0.operator
     }
 
     pub fn lhs(&self) -> &Expression {
-        &self.lhs
+        &self.0.lhs
     }
 
     pub fn rhs(&self) -> &Expression {
-        &self.rhs
+        &self.0.rhs
     }
 }

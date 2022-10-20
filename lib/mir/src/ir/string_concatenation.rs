@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct StringConcatenation {
-    operands: Arc<Vec<Expression>>,
+    operands: Arc<[Expression]>,
 }
 
 impl StringConcatenation {

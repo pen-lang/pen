@@ -4,24 +4,30 @@ use fnv::FnvHashMap;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CloneVariables {
+pub struct CloneVariables(Arc<CloneVariablesInner>);
+
+#[derive(Debug, PartialEq)]
+struct CloneVariablesInner {
     variables: FnvHashMap<String, Type>,
-    expression: Arc<Expression>,
+    expression: Expression,
 }
 
 impl CloneVariables {
     pub fn new(variables: FnvHashMap<String, Type>, expression: impl Into<Expression>) -> Self {
-        Self {
-            variables,
-            expression: expression.into().into(),
-        }
+        Self(
+            CloneVariablesInner {
+                variables,
+                expression: expression.into().into(),
+            }
+            .into(),
+        )
     }
 
     pub fn variables(&self) -> &FnvHashMap<String, Type> {
-        &self.variables
+        &self.0.variables
     }
 
     pub fn expression(&self) -> &Expression {
-        &self.expression
+        &self.0.expression
     }
 }

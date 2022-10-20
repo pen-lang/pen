@@ -17,24 +17,30 @@ use std::sync::Arc;
 //   effectively.
 //   - e.g. list comprehension
 #[derive(Clone, Debug, PartialEq)]
-pub struct LetRecursive {
-    definition: Arc<FunctionDefinition>,
-    expression: Arc<Expression>,
+pub struct LetRecursive(Arc<LetRecursiveInner>);
+
+#[derive(Debug, PartialEq)]
+struct LetRecursiveInner {
+    definition: FunctionDefinition,
+    expression: Expression,
 }
 
 impl LetRecursive {
     pub fn new(definition: FunctionDefinition, expression: impl Into<Expression>) -> Self {
-        Self {
-            definition: definition.into(),
-            expression: Arc::new(expression.into()),
-        }
+        Self(
+            LetRecursiveInner {
+                definition: definition.into(),
+                expression: (expression.into()),
+            }
+            .into(),
+        )
     }
 
     pub fn definition(&self) -> &FunctionDefinition {
-        &self.definition
+        &self.0.definition
     }
 
     pub fn expression(&self) -> &Expression {
-        &self.expression
+        &self.0.expression
     }
 }
