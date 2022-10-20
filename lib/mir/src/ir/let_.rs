@@ -24,8 +24,8 @@ impl Let {
             LetInner {
                 name: name.into(),
                 type_: type_.into(),
-                bound_expression: bound_expression.into().into(),
-                expression: expression.into().into(),
+                bound_expression: bound_expression.into(),
+                expression: expression.into(),
             }
             .into(),
         )

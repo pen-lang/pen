@@ -17,7 +17,7 @@ impl DropVariables {
         Self(
             DropVariablesInner {
                 variables,
-                expression: expression.into().into(),
+                expression: expression.into(),
             }
             .into(),
         )

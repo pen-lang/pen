@@ -16,7 +16,7 @@ impl Variant {
         Self(
             VariantInner {
                 type_: type_.into(),
-                payload: payload.into().into(),
+                payload: payload.into(),
             }
             .into(),
         )

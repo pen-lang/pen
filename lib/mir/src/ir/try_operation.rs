@@ -24,10 +24,10 @@ impl TryOperation {
     ) -> Self {
         Self(
             TryOperationInner {
-                operand: operand.into().into(),
+                operand: operand.into(),
                 name: name.into(),
                 type_: type_.into(),
-                then: then.into().into(),
+                then: then.into(),
             }
             .into(),
         )

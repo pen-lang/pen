@@ -16,7 +16,7 @@ impl Synchronize {
         Self(
             SynchronizeInner {
                 type_: type_.into(),
-                expression: expression.into().into(),
+                expression: expression.into(),
             }
             .into(),
         )

@@ -18,7 +18,7 @@ impl RecordField {
             RecordFieldInner {
                 type_,
                 index,
-                record: record.into().into(),
+                record: record.into(),
             }
             .into(),
         )

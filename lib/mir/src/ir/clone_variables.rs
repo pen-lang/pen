@@ -17,7 +17,7 @@ impl CloneVariables {
         Self(
             CloneVariablesInner {
                 variables,
-                expression: expression.into().into(),
+                expression: expression.into(),
             }
             .into(),
         )

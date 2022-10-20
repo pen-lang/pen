@@ -29,7 +29,7 @@ impl LetRecursive {
     pub fn new(definition: FunctionDefinition, expression: impl Into<Expression>) -> Self {
         Self(
             LetRecursiveInner {
-                definition: definition.into(),
+                definition,
                 expression: (expression.into()),
             }
             .into(),
