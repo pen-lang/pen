@@ -210,9 +210,8 @@ fn compile_mir_module(
     compile_configuration: &CompileConfiguration,
 ) -> Result<(), Box<dyn Error>> {
     let module = mir_fmm::compile(module, &compile_configuration.mir)?;
-    let module = fmm::analysis::cps::transform(&module, fmm::types::void_type())?;
-    let module =
-        fmm::analysis::c_calling_convention::transform(&module, word_bytes(target_triple)?)?;
+    let mut module = fmm::analysis::cps::transform(&module, fmm::types::void_type())?;
+    fmm::analysis::c_calling_convention::transform(&mut module, word_bytes(target_triple)?)?;
 
     fmm::analysis::validation::validate(&module)?;
 
