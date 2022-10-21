@@ -155,9 +155,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "4.0.17"
+version = "4.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06badb543e734a2d6568e19a40af66ed5364360b9226184926f89d229b4b4267"
+checksum = "335867764ed2de42325fafe6d18b8af74ba97ee0c590fa016f157535b42ab04b"
 dependencies = [
  "atty",
  "bitflags",
@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#d70a700bea9b91d1cc1a8f7fc84bcd5cd2036d61"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#f502ad4dadf3409add13f2aa97e3ecde4107e866"
 dependencies = [
  "fnv",
  "once_cell",
@@ -282,7 +282,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#d70a700bea9b91d1cc1a8f7fc84bcd5cd2036d61"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#f502ad4dadf3409add13f2aa97e3ecde4107e866"
 dependencies = [
  "fmm",
  "fnv",
@@ -292,7 +292,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/opt#d70a700bea9b91d1cc1a8f7fc84bcd5cd2036d61"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#f502ad4dadf3409add13f2aa97e3ecde4107e866"
 dependencies = [
  "fmm",
  "fnv",
@@ -417,9 +417,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4eb1a864a501629691edf6c15a593b7a51eebaa1e8468e9ddc623de7c9b58ec6"
+checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
 dependencies = [
  "cfg-if",
  "libc",
@@ -1076,9 +1076,9 @@ version = "0.1.0"
 
 [[package]]
 name = "syn"
-version = "1.0.102"
+version = "1.0.103"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fcd952facd492f9be3ef0d0b7032a6e442ee9b361d4acc2b1d0c4aaa5f613a1"
+checksum = "a864042229133ada95abf3b54fdc62ef5ccabe9515b64717bcb9a1919e59445d"
 dependencies = [
  "proc-macro2",
  "quote",
