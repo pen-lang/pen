@@ -1,6 +1,6 @@
 use super::expression::Expression;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum BooleanOperator {
@@ -11,8 +11,8 @@ pub enum BooleanOperator {
 #[derive(Clone, Debug, PartialEq)]
 pub struct BooleanOperation {
     operator: BooleanOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
     position: Position,
 }
 

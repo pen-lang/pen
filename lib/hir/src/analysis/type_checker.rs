@@ -1,4 +1,4 @@
-use super::{context::AnalysisContext, module_environment_creator, AnalysisError};
+use super::{context::AnalysisContext, module_environment, AnalysisError};
 use crate::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
@@ -10,7 +10,7 @@ use crate::{
 use fnv::{FnvHashMap, FnvHashSet};
 
 pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), AnalysisError> {
-    let variables = module_environment_creator::create(module);
+    let variables = plist::FlailMap::new(module_environment::create(module));
 
     for definition in module.function_definitions() {
         check_lambda(context, definition.lambda(), &variables)?;
@@ -22,22 +22,18 @@ pub fn check_types(context: &AnalysisContext, module: &Module) -> Result<(), Ana
 fn check_lambda(
     context: &AnalysisContext,
     lambda: &Lambda,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<types::Function, AnalysisError> {
     check_subsumption(
         &check_expression(
             context,
             lambda.body(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain(
-                    lambda
-                        .arguments()
-                        .iter()
-                        .map(|argument| (argument.name().into(), argument.type_().clone())),
-                )
-                .collect(),
+            &variables.insert_many(
+                lambda
+                    .arguments()
+                    .iter()
+                    .map(|argument| (argument.name().into(), argument.type_().clone())),
+            ),
         )?,
         lambda.result_type(),
         context.types(),
@@ -49,7 +45,7 @@ fn check_lambda(
 fn check_expression(
     context: &AnalysisContext,
     expression: &Expression,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Type, AnalysisError> {
     let check_expression =
         |expression, variables: &_| check_expression(context, expression, variables);
@@ -111,22 +107,18 @@ fn check_expression(
 
             check_expression(
                 if_.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([
-                        (
-                            if_.first_name().into(),
-                            types::Function::new(
-                                vec![],
-                                list_type.element().clone(),
-                                if_.position().clone(),
-                            )
-                            .into(),
-                        ),
-                        (if_.rest_name().into(), list_type.into()),
-                    ])
-                    .collect(),
+                &variables.insert_many([
+                    (
+                        if_.first_name().into(),
+                        types::Function::new(
+                            vec![],
+                            list_type.element().clone(),
+                            if_.position().clone(),
+                        )
+                        .into(),
+                    ),
+                    (if_.rest_name().into(), list_type.into()),
+                ]),
             )?;
             check_expression(if_.else_(), variables)?;
 
@@ -151,11 +143,7 @@ fn check_expression(
 
             check_expression(
                 if_.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(if_.name().into(), map_type.value().clone())])
-                    .collect(),
+                &variables.insert(if_.name().into(), map_type.value().clone()),
             )?;
             check_expression(if_.else_(), variables)?;
 
@@ -176,11 +164,7 @@ fn check_expression(
 
                 check_expression(
                     branch.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(if_.name().into(), branch.type_().clone())])
-                        .collect(),
+                    &variables.insert(if_.name().into(), branch.type_().clone()),
                 )?;
 
                 if type_canonicalizer::canonicalize(branch.type_(), context.types())?.is_any() {
@@ -193,19 +177,15 @@ fn check_expression(
             if let Some(branch) = if_.else_() {
                 check_expression(
                     branch.expression(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(
-                            if_.name().into(),
-                            branch
-                                .type_()
-                                .ok_or_else(|| {
-                                    AnalysisError::TypeNotInferred(branch.position().clone())
-                                })?
-                                .clone(),
-                        )])
-                        .collect(),
+                    &variables.insert(
+                        if_.name().into(),
+                        branch
+                            .type_()
+                            .ok_or_else(|| {
+                                AnalysisError::TypeNotInferred(branch.position().clone())
+                            })?
+                            .clone(),
+                    ),
                 )?;
             } else if !type_equality_checker::check(
                 &argument_type,
@@ -235,22 +215,16 @@ fn check_expression(
 
             check_expression(
                 let_.expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain(if let Some(name) = let_.name() {
-                        Some((
-                            name.into(),
-                            let_.type_()
-                                .ok_or_else(|| {
-                                    AnalysisError::TypeNotInferred(let_.position().clone())
-                                })?
-                                .clone(),
-                        ))
-                    } else {
-                        None
-                    })
-                    .collect(),
+                &variables.insert_many(if let Some(name) = let_.name() {
+                    Some((
+                        name.into(),
+                        let_.type_()
+                            .ok_or_else(|| AnalysisError::TypeNotInferred(let_.position().clone()))?
+                            .clone(),
+                    ))
+                } else {
+                    None
+                }),
             )?
         }
         Expression::List(list) => {
@@ -283,15 +257,10 @@ fn check_expression(
             check_subsumption(
                 &check_expression(
                     comprehension.element(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([(
-                            comprehension.element_name().into(),
-                            types::Function::new(vec![], input_type.clone(), position.clone())
-                                .into(),
-                        )])
-                        .collect(),
+                    &variables.insert(
+                        comprehension.element_name().into(),
+                        types::Function::new(vec![], input_type.clone(), position.clone()).into(),
+                    ),
                 )?,
                 comprehension.output_type(),
             )?;
@@ -353,14 +322,10 @@ fn check_expression(
             check_subsumption(
                 &check_expression(
                     comprehension.element(),
-                    &variables
-                        .clone()
-                        .into_iter()
-                        .chain([
-                            (comprehension.key_name().into(), key_type.clone()),
-                            (comprehension.value_name().into(), value_type.clone()),
-                        ])
-                        .collect(),
+                    &variables.insert_many([
+                        (comprehension.key_name().into(), key_type.clone()),
+                        (comprehension.value_name().into(), value_type.clone()),
+                    ]),
                 )?,
                 comprehension.element_type(),
             )?;
@@ -544,7 +509,7 @@ fn check_built_in_call(
 fn check_operation(
     context: &AnalysisContext,
     operation: &Operation,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Result<Type, AnalysisError> {
     let check_expression = |expression| check_expression(context, expression, variables);
     let check_subsumption = |lower: &_, upper| check_subsumption(lower, upper, context.types());

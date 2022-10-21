@@ -1,12 +1,12 @@
 use super::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Thunk {
     type_: Option<Type>,
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
     position: Position,
 }
 

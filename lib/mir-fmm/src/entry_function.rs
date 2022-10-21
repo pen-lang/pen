@@ -2,7 +2,6 @@ use super::error::CompileError;
 use crate::{
     closure, context::Context, expression, reference_count, type_, yield_::yield_function_type,
 };
-use fnv::FnvHashMap;
 use once_cell::sync::Lazy;
 
 const CLOSURE_NAME: &str = "_closure";
@@ -19,7 +18,7 @@ pub fn compile(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
     global: bool,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(if definition.is_thunk() {
         compile_thunk(context, definition, global, variables)?
@@ -32,7 +31,7 @@ fn compile_non_thunk(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
     global: bool,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     context.module_builder().define_anonymous_function(
         compile_arguments(context, definition),
@@ -55,7 +54,7 @@ fn compile_thunk(
     context: &Context,
     definition: &mir::ir::FunctionDefinition,
     global: bool,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     compile_initial_thunk_entry(
         context,
@@ -72,7 +71,7 @@ fn compile_body(
     builder: &fmm::build::InstructionBuilder,
     definition: &mir::ir::FunctionDefinition,
     global: bool,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let environment_pointer = compile_environment_pointer(context, definition)?;
 
@@ -81,9 +80,7 @@ fn compile_body(
         builder,
         definition.body(),
         &variables
-            .clone()
-            .into_iter()
-            .chain(
+            .insert_many(
                 definition
                     .environment()
                     .iter()
@@ -104,7 +101,7 @@ fn compile_body(
                     })
                     .collect::<Result<Vec<_>, _>>()?,
             )
-            .chain(if global {
+            .insert_many(if global {
                 None
             } else {
                 Some((
@@ -112,7 +109,7 @@ fn compile_body(
                     compile_closure_pointer(context, definition.type_())?,
                 ))
             })
-            .chain(definition.arguments().iter().map(|argument| {
+            .insert_many(definition.arguments().iter().map(|argument| {
                 (
                     argument.name().into(),
                     fmm::build::variable(
@@ -120,8 +117,7 @@ fn compile_body(
                         type_::compile(context, argument.type_()),
                     ),
                 )
-            }))
-            .collect(),
+            })),
     )
 }
 
@@ -131,7 +127,7 @@ fn compile_initial_thunk_entry(
     global: bool,
     normal_entry_function: fmm::build::TypedExpression,
     lock_entry_function: fmm::build::TypedExpression,
-    variables: &FnvHashMap<String, fmm::build::TypedExpression>,
+    variables: &plist::FlailMap<String, fmm::build::TypedExpression>,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let entry_function_name = context.module_builder().generate_name();
     let arguments = compile_arguments(context, definition);

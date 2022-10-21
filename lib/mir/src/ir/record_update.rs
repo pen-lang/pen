@@ -1,11 +1,11 @@
 use super::{Expression, RecordUpdateField};
 use crate::types;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordUpdate {
     type_: types::Record,
-    record: Arc<Expression>,
+    record: Rc<Expression>,
     fields: Vec<RecordUpdateField>,
 }
 

@@ -177,11 +177,12 @@ mod tests {
     use super::*;
     use crate::map_type_configuration::HASH_CONFIGURATION;
     use hir::test::RecordFake;
-    use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    static HASH_TYPE: Lazy<Type> = Lazy::new(|| types::Number::new(Position::fake()).into());
+    fn hash_type() -> Type {
+        types::Number::new(Position::fake()).into()
+    }
 
     #[test]
     fn transform_with_union() {
@@ -212,7 +213,7 @@ mod tests {
                             Some(
                                 types::Function::new(
                                     vec![types::Number::new(Position::fake()).into()],
-                                    HASH_TYPE.clone(),
+                                    hash_type(),
                                     Position::fake()
                                 )
                                 .into()
@@ -259,7 +260,7 @@ mod tests {
                 Some(
                     types::Function::new(
                         vec![record_type.clone().into()],
-                        HASH_TYPE.clone(),
+                        hash_type(),
                         Position::fake(),
                     )
                     .into(),

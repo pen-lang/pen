@@ -1,17 +1,17 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapIterationComprehension {
     key_type: Option<Type>,
     value_type: Option<Type>,
     element_type: Type,
-    element: Arc<Expression>,
+    element: Rc<Expression>,
     key_name: String,
     value_name: String,
-    map: Arc<Expression>,
+    map: Rc<Expression>,
     position: Position,
 }
 

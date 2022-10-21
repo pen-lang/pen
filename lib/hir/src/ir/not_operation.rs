@@ -1,10 +1,10 @@
 use super::expression::Expression;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct NotOperation {
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
     position: Position,
 }
 

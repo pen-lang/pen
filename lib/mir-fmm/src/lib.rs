@@ -23,6 +23,7 @@ pub use configuration::Configuration;
 use context::Context;
 pub use error::CompileError;
 use fnv::FnvHashMap;
+use std::collections::HashMap;
 
 pub fn compile(
     module: &mir::ir::Module,
@@ -60,6 +61,8 @@ pub fn compile(
     for declaration in module.function_declarations() {
         function_declaration::compile(&context, declaration);
     }
+
+    let global_variables = plist::FlailMap::new(global_variables);
 
     for definition in module.function_definitions() {
         function_definition::compile(&context, definition, &global_variables)?;
@@ -100,7 +103,7 @@ pub fn compile(
 fn compile_global_variables(
     context: &Context,
     module: &mir::ir::Module,
-) -> Result<FnvHashMap<String, fmm::build::TypedExpression>, CompileError> {
+) -> Result<HashMap<String, fmm::build::TypedExpression>, CompileError> {
     module
         .foreign_declarations()
         .iter()
@@ -154,21 +157,20 @@ mod tests {
     use super::*;
     use crate::configuration::CONFIGURATION;
     use mir::test::ModuleFake;
-    use once_cell::sync::Lazy;
 
-    static FOREIGN_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
+    fn foreign_unboxed_record_definition() -> mir::ir::TypeDefinition {
         mir::ir::TypeDefinition::new(
             "a",
             mir::types::RecordBody::new(vec![mir::types::Type::Number]),
         )
-    });
+    }
 
-    static VARIANT_UNBOXED_RECORD_DEFINITION: Lazy<mir::ir::TypeDefinition> = Lazy::new(|| {
+    fn variant_unboxed_record_definition() -> mir::ir::TypeDefinition {
         mir::ir::TypeDefinition::new(
             "a",
             mir::types::RecordBody::new(vec![mir::types::Type::Number, mir::types::Type::Number]),
         )
-    });
+    }
 
     fn compile_module(module: &mir::ir::Module) {
         const DEFAULT_TYPE_INFORMATION_FUNCTION_NAME: &str = "defaultTypeInformationFunction";
@@ -305,7 +307,7 @@ mod tests {
         fn compile_with_unboxed_record_argument() {
             compile_module(
                 &mir::ir::Module::empty()
-                    .set_type_definitions(vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()])
+                    .set_type_definitions(vec![foreign_unboxed_record_definition()])
                     .set_foreign_declarations(vec![mir::ir::ForeignDeclaration::new(
                         "f",
                         "g",
@@ -322,7 +324,7 @@ mod tests {
         fn compile_with_unboxed_record_result() {
             compile_module(
                 &mir::ir::Module::empty()
-                    .set_type_definitions(vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()])
+                    .set_type_definitions(vec![foreign_unboxed_record_definition()])
                     .set_foreign_declarations(vec![mir::ir::ForeignDeclaration::new(
                         "f",
                         "g",
@@ -456,7 +458,7 @@ mod tests {
         fn compile_with_unboxed_record_argument() {
             compile_module(
                 &mir::ir::Module::empty()
-                    .set_type_definitions(vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()])
+                    .set_type_definitions(vec![foreign_unboxed_record_definition()])
                     .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                         "f",
                         "g",
@@ -477,7 +479,7 @@ mod tests {
 
             compile_module(
                 &mir::ir::Module::empty()
-                    .set_type_definitions(vec![FOREIGN_UNBOXED_RECORD_DEFINITION.clone()])
+                    .set_type_definitions(vec![foreign_unboxed_record_definition()])
                     .set_foreign_definitions(vec![mir::ir::ForeignDefinition::new(
                         "f",
                         "g",
@@ -887,7 +889,7 @@ mod tests {
                                 .collect(),
                             "f".into(),
                         ))
-                        .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
+                        .set_type_definitions(vec![variant_unboxed_record_definition()])
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", mir::types::Type::Variant)],
@@ -1391,7 +1393,7 @@ mod tests {
                                 .collect(),
                             "f".into(),
                         ))
-                        .set_type_definitions(vec![VARIANT_UNBOXED_RECORD_DEFINITION.clone()])
+                        .set_type_definitions(vec![variant_unboxed_record_definition()])
                         .set_function_definitions(vec![mir::ir::FunctionDefinition::new(
                             "f",
                             vec![mir::ir::Argument::new("x", record_type.clone())],

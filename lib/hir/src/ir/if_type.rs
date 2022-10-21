@@ -1,11 +1,11 @@
 use super::{else_branch::ElseBranch, expression::Expression, if_type_branch::IfTypeBranch};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfType {
     name: String,
-    argument: Arc<Expression>,
+    argument: Rc<Expression>,
     branches: Vec<IfTypeBranch>,
     else_: Option<ElseBranch>,
     position: Position,

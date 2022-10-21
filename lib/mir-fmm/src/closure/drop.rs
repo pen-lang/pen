@@ -5,8 +5,10 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 
-static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
-    Lazy::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
+thread_local! {
+    static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
+        Lazy::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
+}
 
 pub fn compile(
     context: &Context,
@@ -71,7 +73,7 @@ fn compile_with_builder(
                 &super::get_payload_pointer(fmm::build::bit_cast(
                     fmm::types::Pointer::new(type_::compile_unsized_closure(
                         context,
-                        &DUMMY_FUNCTION_TYPE,
+                        &DUMMY_FUNCTION_TYPE.with(|function| (*function).clone()),
                     )),
                     fmm::build::variable(argument.name(), argument.type_().clone()),
                 ))?,

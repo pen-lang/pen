@@ -1,14 +1,14 @@
 use super::{expression::Expression, Block};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfList {
-    list: Arc<Expression>,
+    list: Rc<Expression>,
     first_name: String,
     rest_name: String,
-    then: Arc<Block>,
-    else_: Arc<Block>,
+    then: Rc<Block>,
+    else_: Rc<Block>,
     position: Position,
 }
 
@@ -22,7 +22,7 @@ impl IfList {
         position: Position,
     ) -> Self {
         Self {
-            list: Arc::new(list.into()),
+            list: Rc::new(list.into()),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
             then: then.into(),

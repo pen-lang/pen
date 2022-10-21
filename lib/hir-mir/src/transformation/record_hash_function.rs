@@ -178,19 +178,21 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{ModuleFake, RecordFake};
-    use once_cell::sync::Lazy;
     use position::{test::PositionFake, Position};
     use pretty_assertions::assert_eq;
 
-    static HASH_TYPE: Lazy<Type> = Lazy::new(|| compile_hash_type(&Position::fake()));
-    static COMBINE_HASH_FUNCTION_TYPE: Lazy<Type> = Lazy::new(|| {
+    fn hash_type() -> Type {
+        compile_hash_type(&Position::fake())
+    }
+
+    fn combine_hash_function_type() -> Type {
         types::Function::new(
-            vec![HASH_TYPE.clone(), HASH_TYPE.clone()],
-            HASH_TYPE.clone(),
+            vec![hash_type(), hash_type()],
+            hash_type(),
             Position::fake(),
         )
         .into()
-    });
+    }
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(
@@ -224,16 +226,16 @@ mod tests {
                     "foo.$hash",
                     Lambda::new(
                         vec![Argument::new(RECORD_NAME, record_type),],
-                        HASH_TYPE.clone(),
+                        hash_type(),
                         Call::new(
-                            Some(COMBINE_HASH_FUNCTION_TYPE.clone()),
+                            Some(combine_hash_function_type()),
                             Variable::new(
                                 &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
                                 Position::fake()
                             ),
                             vec![
                                 Call::new(
-                                    Some(COMBINE_HASH_FUNCTION_TYPE.clone()),
+                                    Some(combine_hash_function_type()),
                                     Variable::new(
                                         &COMPILE_CONFIGURATION.map_type.hash.combine_function_name,
                                         Position::fake()
@@ -281,7 +283,7 @@ mod tests {
                     "foo.$hash",
                     types::Function::new(
                         vec![types::Record::fake(type_definition.name()).into()],
-                        HASH_TYPE.clone(),
+                        hash_type(),
                         Position::fake()
                     ),
                     Position::fake()

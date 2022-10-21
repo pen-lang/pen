@@ -1,30 +1,42 @@
 use position::Position;
 use serde::{Deserialize, Serialize};
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Reference {
+pub struct Reference(Rc<ReferenceInner>);
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+struct ReferenceInner {
     name: String,
     position: Position,
 }
 
 impl Reference {
     pub fn new(name: impl Into<String>, position: Position) -> Self {
-        Self {
-            name: name.into(),
-            position,
-        }
+        Self(
+            ReferenceInner {
+                name: name.into(),
+                position,
+            }
+            .into(),
+        )
     }
 
     pub fn name(&self) -> &str {
-        &self.name
+        &self.0.name
     }
 
     pub fn position(&self) -> &Position {
-        &self.position
+        &self.0.position
     }
 
-    pub fn set_position(mut self, position: Position) -> Self {
-        self.position = position;
-        self
+    pub fn set_position(&self, position: Position) -> Self {
+        Self(
+            ReferenceInner {
+                name: self.0.name.clone(),
+                position,
+            }
+            .into(),
+        )
     }
 }

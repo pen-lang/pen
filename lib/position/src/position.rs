@@ -4,10 +4,14 @@ use std::{
     cmp::Ordering,
     fmt::{self, Display, Formatter},
     hash::{Hash, Hasher},
+    rc::Rc,
 };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Position {
+pub struct Position(Rc<PositionInner>);
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+struct PositionInner {
     path: String,
     line_number: usize,
     column_number: usize,
@@ -21,28 +25,31 @@ impl Position {
         column_number: usize,
         line: impl Into<String>,
     ) -> Self {
-        Self {
-            path: path.into(),
-            line_number,
-            column_number,
-            line: line.into(),
-        }
+        Self(
+            PositionInner {
+                path: path.into(),
+                line_number,
+                column_number,
+                line: line.into(),
+            }
+            .into(),
+        )
     }
 
     pub fn path(&self) -> &str {
-        &self.path
+        &self.0.path
     }
 
     pub fn line_number(&self) -> usize {
-        self.line_number
+        self.0.line_number
     }
 
     pub fn column_number(&self) -> usize {
-        self.column_number
+        self.0.column_number
     }
 
     pub fn line(&self) -> &str {
-        &self.line
+        &self.0.line
     }
 }
 

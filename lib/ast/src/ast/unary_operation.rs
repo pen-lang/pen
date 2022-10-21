@@ -1,11 +1,11 @@
 use super::{expression::Expression, unary_operator::UnaryOperator};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct UnaryOperation {
     operator: UnaryOperator,
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
     position: Position,
 }
 

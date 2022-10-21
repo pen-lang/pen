@@ -1,12 +1,12 @@
 use super::expression::Expression;
 use crate::types::Type;
 use fnv::FnvHashMap;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CloneVariables {
     variables: FnvHashMap<String, Type>,
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
 }
 
 impl CloneVariables {

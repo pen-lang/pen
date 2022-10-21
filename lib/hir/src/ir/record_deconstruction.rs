@@ -1,13 +1,13 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordDeconstruction {
     type_: Option<Type>,
     field_name: String,
-    record: Arc<Expression>,
+    record: Rc<Expression>,
     position: Position,
 }
 
@@ -21,7 +21,7 @@ impl RecordDeconstruction {
         Self {
             type_,
             field_name: field_name.into(),
-            record: Arc::new(record.into()),
+            record: Rc::new(record.into()),
             position,
         }
     }

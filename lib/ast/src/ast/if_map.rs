@@ -1,14 +1,14 @@
 use super::{expression::Expression, Block};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfMap {
     name: String,
-    map: Arc<Expression>,
-    key: Arc<Expression>,
-    then: Arc<Block>,
-    else_: Arc<Block>,
+    map: Rc<Expression>,
+    key: Rc<Expression>,
+    then: Rc<Block>,
+    else_: Rc<Block>,
     position: Position,
 }
 

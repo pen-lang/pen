@@ -1,17 +1,17 @@
 use super::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct List {
-    element: Arc<Type>,
+    element: Rc<Type>,
     position: Position,
 }
 
 impl List {
     pub fn new(element: impl Into<Type>, position: Position) -> Self {
         Self {
-            element: Arc::new(element.into()),
+            element: Rc::new(element.into()),
             position,
         }
     }

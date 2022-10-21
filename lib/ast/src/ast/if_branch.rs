@@ -1,10 +1,10 @@
 use super::{expression::Expression, Block};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfBranch {
-    condition: Arc<Expression>,
-    block: Arc<Block>,
+    condition: Rc<Expression>,
+    block: Rc<Block>,
 }
 
 impl IfBranch {

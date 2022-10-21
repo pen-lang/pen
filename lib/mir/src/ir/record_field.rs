@@ -1,12 +1,12 @@
 use super::expression::Expression;
 use crate::types;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct RecordField {
     type_: types::Record,
     index: usize,
-    record: Arc<Expression>,
+    record: Rc<Expression>,
 }
 
 impl RecordField {

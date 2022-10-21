@@ -1,11 +1,11 @@
 use super::{Block, IfBranch};
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct If {
     branches: Vec<IfBranch>,
-    else_: Arc<Block>,
+    else_: Rc<Block>,
     position: Position,
 }
 

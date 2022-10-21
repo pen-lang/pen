@@ -1,16 +1,16 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct IfList {
     type_: Option<Type>, // element type
-    list: Arc<Expression>,
+    list: Rc<Expression>,
     first_name: String,
     rest_name: String,
-    then: Arc<Expression>,
-    else_: Arc<Expression>,
+    then: Rc<Expression>,
+    else_: Rc<Expression>,
     position: Position,
 }
 
@@ -26,7 +26,7 @@ impl IfList {
     ) -> Self {
         Self {
             type_,
-            list: Arc::new(list.into()),
+            list: Rc::new(list.into()),
             first_name: first_name.into(),
             rest_name: rest_name.into(),
             then: then.into().into(),
