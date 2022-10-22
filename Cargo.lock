@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#53b05699ec2efad3927868e4141ba837bc3ce133"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#32359d921b26aa6f4fadf09d8812b65f5bca2874"
 dependencies = [
  "fnv",
  "once_cell",
@@ -282,7 +282,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#53b05699ec2efad3927868e4141ba837bc3ce133"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#32359d921b26aa6f4fadf09d8812b65f5bca2874"
 dependencies = [
  "fmm",
  "fnv",
@@ -292,7 +292,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#53b05699ec2efad3927868e4141ba837bc3ce133"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/box-instruction#32359d921b26aa6f4fadf09d8812b65f5bca2874"
 dependencies = [
  "fmm",
  "fnv",
