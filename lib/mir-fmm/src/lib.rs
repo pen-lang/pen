@@ -199,9 +199,10 @@ mod tests {
         let mut module = compile(module, &CONFIGURATION).unwrap();
 
         compile_final_module(&module);
-        compile_final_module(
-            &fmm::analysis::cps::transform(&mut module, fmm::types::Record::new(vec![])).unwrap(),
-        );
+
+        fmm::analysis::cps::transform(&mut module, fmm::types::Record::new(vec![])).unwrap();
+
+        compile_final_module(&module);
     }
 
     fn compile_final_module(module: &fmm::ir::Module) {
