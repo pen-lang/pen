@@ -44,7 +44,7 @@ pub fn extract_from_expression(
             types::Union::new(
                 extract_from_expression(
                     if_.then(),
-                    &variables.insert_many([
+                    &variables.insert_iter([
                         (
                             if_.first_name().into(),
                             types::Function::new(
@@ -123,7 +123,7 @@ pub fn extract_from_expression(
         .into(),
         Expression::Let(let_) => extract_from_expression(
             let_.expression(),
-            &variables.insert_many(
+            &variables.insert_iter(
                 let_.name()
                     .map(|name| -> Result<_, AnalysisError> {
                         Ok((

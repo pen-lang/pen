@@ -50,7 +50,7 @@ fn infer_lambda(
         infer_expression(
             context,
             lambda.body(),
-            &variables.insert_many(
+            &variables.insert_iter(
                 lambda
                     .arguments()
                     .iter()
@@ -110,7 +110,7 @@ fn infer_expression(
 
             let then = infer_expression(
                 if_.then(),
-                &variables.insert_many([
+                &variables.insert_iter([
                     (
                         if_.first_name().into(),
                         types::Function::new(
@@ -226,7 +226,7 @@ fn infer_expression(
                 bound_expression,
                 infer_expression(
                     let_.expression(),
-                    &variables.insert_many(let_.name().map(|name| (name.into(), bound_type))),
+                    &variables.insert_iter(let_.name().map(|name| (name.into(), bound_type))),
                 )?,
                 let_.position().clone(),
             )
@@ -311,7 +311,7 @@ fn infer_expression(
                 comprehension.element_type().clone(),
                 infer_expression(
                     comprehension.element(),
-                    &variables.insert_many([
+                    &variables.insert_iter([
                         (comprehension.key_name().into(), map_type.key().clone()),
                         (comprehension.value_name().into(), map_type.value().clone()),
                     ]),
