@@ -44,4 +44,8 @@ impl Context {
     pub fn configuration(&self) -> &Configuration {
         &self.configuration
     }
+
+    pub fn into_module_builder(self) -> fmm::build::ModuleBuilder {
+        self.module_builder
+    }
 }

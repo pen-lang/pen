@@ -1,5 +1,5 @@
 use super::{expression::Expression, function_definition::FunctionDefinition};
-use std::sync::Arc;
+use std::rc::Rc;
 
 // Function definitions in let-recursive expressions are recursive for the
 // following reasons although we don't have any recursive function

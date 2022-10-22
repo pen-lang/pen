@@ -1,9 +1,9 @@
 use position::Position;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Reference(Arc<ReferenceInner>);
+pub struct Reference(Rc<ReferenceInner>);
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 struct ReferenceInner {

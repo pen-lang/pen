@@ -80,7 +80,7 @@ fn compile_body(
         builder,
         definition.body(),
         &variables
-            .insert_many(
+            .insert_iter(
                 definition
                     .environment()
                     .iter()
@@ -101,7 +101,7 @@ fn compile_body(
                     })
                     .collect::<Result<Vec<_>, _>>()?,
             )
-            .insert_many(if global {
+            .insert_iter(if global {
                 None
             } else {
                 Some((
@@ -109,7 +109,7 @@ fn compile_body(
                     compile_closure_pointer(context, definition.type_())?,
                 ))
             })
-            .insert_many(definition.arguments().iter().map(|argument| {
+            .insert_iter(definition.arguments().iter().map(|argument| {
                 (
                     argument.name().into(),
                     fmm::build::variable(
@@ -439,7 +439,7 @@ mod tests {
         .unwrap();
 
         insta::assert_snapshot!(fmm::analysis::format::format_module(
-            &context.module_builder().as_module()
+            &context.into_module_builder().into_module()
         ));
     }
 }

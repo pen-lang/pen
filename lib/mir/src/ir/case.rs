@@ -1,7 +1,7 @@
 use super::{
     alternative::Alternative, default_alternative::DefaultAlternative, expression::Expression,
 };
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Case(Arc<CaseInner>);

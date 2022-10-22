@@ -1,11 +1,11 @@
 use crate::Expression;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapEntry {
-    key: Arc<Expression>,
-    value: Arc<Expression>,
+    key: Rc<Expression>,
+    value: Rc<Expression>,
     position: Position,
 }
 

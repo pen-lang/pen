@@ -27,4 +27,3 @@ exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 
 [profile.release]
 lto = true
-strip = true

@@ -1,6 +1,6 @@
 use super::expression::Expression;
 use crate::types::Type;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Variant(Arc<VariantInner>);

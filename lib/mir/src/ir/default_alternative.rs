@@ -1,10 +1,10 @@
 use super::expression::Expression;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct DefaultAlternative {
     name: String,
-    expression: Arc<Expression>,
+    expression: Rc<Expression>,
 }
 
 impl DefaultAlternative {

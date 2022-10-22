@@ -1,12 +1,12 @@
 use super::expression::Expression;
 use crate::types::Type;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Call {
     function_type: Option<Type>,
-    function: Arc<Expression>,
+    function: Rc<Expression>,
     arguments: Vec<Expression>,
     position: Position,
 }
@@ -20,7 +20,7 @@ impl Call {
     ) -> Self {
         Self {
             function_type,
-            function: Arc::new(function.into()),
+            function: Rc::new(function.into()),
             arguments,
             position,
         }

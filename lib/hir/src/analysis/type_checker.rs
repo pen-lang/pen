@@ -28,7 +28,7 @@ fn check_lambda(
         &check_expression(
             context,
             lambda.body(),
-            &variables.insert_many(
+            &variables.insert_iter(
                 lambda
                     .arguments()
                     .iter()
@@ -107,7 +107,7 @@ fn check_expression(
 
             check_expression(
                 if_.then(),
-                &variables.insert_many([
+                &variables.insert_iter([
                     (
                         if_.first_name().into(),
                         types::Function::new(
@@ -215,7 +215,7 @@ fn check_expression(
 
             check_expression(
                 let_.expression(),
-                &variables.insert_many(if let Some(name) = let_.name() {
+                &variables.insert_iter(if let Some(name) = let_.name() {
                     Some((
                         name.into(),
                         let_.type_()
@@ -322,7 +322,7 @@ fn check_expression(
             check_subsumption(
                 &check_expression(
                     comprehension.element(),
-                    &variables.insert_many([
+                    &variables.insert_iter([
                         (comprehension.key_name().into(), key_type.clone()),
                         (comprehension.value_name().into(), value_type.clone()),
                     ]),

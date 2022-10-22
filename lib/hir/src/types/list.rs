@@ -1,10 +1,10 @@
 use super::Type;
 use position::Position;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct List(Arc<ListInner>);
+pub struct List(Rc<ListInner>);
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 struct ListInner {

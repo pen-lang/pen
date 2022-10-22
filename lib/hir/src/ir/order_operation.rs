@@ -1,6 +1,6 @@
 use super::expression::Expression;
 use position::Position;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum OrderOperator {
@@ -13,8 +13,8 @@ pub enum OrderOperator {
 #[derive(Clone, Debug, PartialEq)]
 pub struct OrderOperation {
     operator: OrderOperator,
-    lhs: Arc<Expression>,
-    rhs: Arc<Expression>,
+    lhs: Rc<Expression>,
+    rhs: Rc<Expression>,
     position: Position,
 }
 

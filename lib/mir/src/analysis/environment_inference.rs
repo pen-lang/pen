@@ -45,7 +45,7 @@ fn transform_global_function_definition(
 
 fn transform_local_function_definition(
     definition: &FunctionDefinition,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> FunctionDefinition {
     let local_variables = [(definition.name().into(), definition.type_().clone().into())]
         .into_iter()
@@ -70,21 +70,14 @@ fn transform_local_function_definition(
             .collect(),
         definition.arguments().to_vec(),
         definition.result_type().clone(),
-        transform_expression(
-            definition.body(),
-            &variables
-                .clone()
-                .into_iter()
-                .chain(local_variables)
-                .collect(),
-        ),
+        transform_expression(definition.body(), &variables.insert_iter(local_variables)),
         definition.is_thunk(),
     )
 }
 
 fn transform_expression(
     expression: &Expression,
-    variables: &FnvHashMap<String, Type>,
+    variables: &plist::FlailMap<String, Type>,
 ) -> Expression {
     let transform = |expression| transform_expression(expression, variables);
 
@@ -106,25 +99,24 @@ fn transform_expression(
             case.alternatives()
                 .iter()
                 .map(|alternative| {
-                    let mut variables = variables.clone();
-
-                    variables.insert(alternative.name().into(), alternative.type_().clone());
-
                     Alternative::new(
                         alternative.types().to_vec(),
                         alternative.name(),
-                        transform_expression(alternative.expression(), &variables),
+                        transform_expression(
+                            alternative.expression(),
+                            &variables
+                                .insert(alternative.name().into(), alternative.type_().clone()),
+                        ),
                     )
                 })
                 .collect(),
             case.default_alternative().map(|alternative| {
-                let mut variables = variables.clone();
-
-                variables.insert(alternative.name().into(), Type::Variant);
-
                 DefaultAlternative::new(
                     alternative.name(),
-                    transform_expression(alternative.expression(), &variables),
+                    transform_expression(
+                        alternative.expression(),
+                        &variables.insert(alternative.name().into(), Type::Variant),
+                    ),
                 )
             }),
         )
@@ -153,11 +145,7 @@ fn transform_expression(
             transform(let_.bound_expression()),
             transform_expression(
                 let_.expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(let_.name().into(), let_.type_().clone())])
-                    .collect(),
+                &variables.insert(let_.name().into(), let_.type_().clone()),
             ),
         )
         .into(),
@@ -165,14 +153,10 @@ fn transform_expression(
             transform_local_function_definition(let_.definition(), variables),
             transform_expression(
                 let_.expression(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(
-                        let_.definition().name().into(),
-                        let_.definition().type_().clone().into(),
-                    )])
-                    .collect(),
+                &variables.insert(
+                    let_.definition().name().into(),
+                    let_.definition().type_().clone().into(),
+                ),
             ),
         )
         .into(),
@@ -212,11 +196,7 @@ fn transform_expression(
             operation.type_().clone(),
             transform_expression(
                 operation.then(),
-                &variables
-                    .clone()
-                    .into_iter()
-                    .chain([(operation.name().into(), operation.type_().clone())])
-                    .collect(),
+                &variables.insert(operation.name().into(), operation.type_().clone()),
             ),
         )
         .into(),
