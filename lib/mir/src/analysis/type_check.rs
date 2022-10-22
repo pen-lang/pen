@@ -9,6 +9,7 @@ use crate::{
 };
 pub use error::TypeCheckError;
 use fnv::FnvHashMap;
+use std::collections::HashMap;
 
 pub fn check(module: &Module) -> Result<(), TypeCheckError> {
     let context = Context::new(module.type_information());
@@ -19,21 +20,23 @@ pub fn check(module: &Module) -> Result<(), TypeCheckError> {
         .iter()
         .map(|definition| (definition.name(), definition.type_()))
         .collect();
-    let mut variables = hamt::Map::<&str, Type>::default();
+    let mut variables = HashMap::<&str, Type>::new();
 
     for declaration in module.foreign_declarations() {
-        variables = variables.insert(declaration.name(), declaration.type_().clone().into());
+        variables.insert(declaration.name(), declaration.type_().clone().into());
     }
 
     for declaration in module.function_declarations() {
-        variables = variables.insert(declaration.name(), declaration.type_().clone().into());
+        variables.insert(declaration.name(), declaration.type_().clone().into());
     }
 
     for definition in module.function_definitions() {
         let definition = definition.definition();
 
-        variables = variables.insert(definition.name(), definition.type_().clone().into());
+        variables.insert(definition.name(), definition.type_().clone().into());
     }
+
+    let variables = plist::FlailMap::new(variables);
 
     for definition in module.function_definitions() {
         check_function_definition(&context, definition.definition(), &variables, &types)?;
@@ -54,7 +57,7 @@ pub fn check(module: &Module) -> Result<(), TypeCheckError> {
 
 fn check_type_information(
     type_information: &TypeInformation,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
     for name in type_information.information().values() {
         check_type_information_functions(type_information, name, variables)?;
@@ -68,7 +71,7 @@ fn check_type_information(
 fn check_type_information_functions(
     type_information: &TypeInformation,
     name: &str,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
 ) -> Result<(), TypeCheckError> {
     check_equality(
         &check_variable(name, variables)?,
@@ -81,14 +84,14 @@ fn check_type_information_functions(
 fn check_function_definition(
     context: &Context,
     definition: &FunctionDefinition,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<(), TypeCheckError> {
     check_equality(
         &check_expression(
             context,
             definition.body(),
-            &variables.extend(
+            &variables.insert_iter(
                 definition
                     .environment()
                     .iter()
@@ -105,7 +108,7 @@ fn check_function_definition(
 fn check_expression(
     context: &Context,
     expression: &Expression,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
@@ -183,10 +186,10 @@ fn check_expression(
             then
         }
         Expression::LetRecursive(let_) => {
-            let variables = variables.extend([(
+            let variables = variables.insert(
                 let_.definition().name(),
                 let_.definition().type_().clone().into(),
-            )]);
+            );
 
             check_function_definition(context, let_.definition(), &variables, types)?;
             check_expression(let_.expression(), &variables)?
@@ -199,7 +202,7 @@ fn check_expression(
 
             check_expression(
                 let_.expression(),
-                &variables.extend([(let_.name(), let_.type_().clone())]),
+                &variables.insert(let_.name(), let_.type_().clone()),
             )?
         }
         Expression::Synchronize(synchronize) => {
@@ -254,7 +257,8 @@ fn check_expression(
             Type::ByteString
         }
         Expression::TryOperation(operation) => {
-            let then_variables = variables.extend([(operation.name(), operation.type_().clone())]);
+            let then_variables = variables.insert(operation.name(), operation.type_().clone());
+
             check_equality(
                 &check_expression(operation.then(), &then_variables)?,
                 result_type,
@@ -293,7 +297,7 @@ fn check_expression(
 fn check_case(
     context: &Context,
     case: &Case,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
@@ -350,7 +354,7 @@ fn check_case(
 fn check_drop_variables(
     context: &Context,
     drop: &DropVariables,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
@@ -364,7 +368,7 @@ fn check_drop_variables(
 fn check_record(
     context: &Context,
     record: &Record,
-    variables: &hamt::Map<&str, Type>,
+    variables: &plist::FlailMap<&str, Type>,
     result_type: &Type,
     types: &FnvHashMap<&str, &types::RecordBody>,
 ) -> Result<Type, TypeCheckError> {
@@ -386,7 +390,10 @@ fn check_record(
     Ok(record.type_().clone().into())
 }
 
-fn check_variable(name: &str, variables: &hamt::Map<&str, Type>) -> Result<Type, TypeCheckError> {
+fn check_variable(
+    name: &str,
+    variables: &plist::FlailMap<&str, Type>,
+) -> Result<Type, TypeCheckError> {
     variables
         .get(name)
         .cloned()
