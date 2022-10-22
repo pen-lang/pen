@@ -45,7 +45,7 @@ fn transform_lambda(
     variables: &plist::FlailMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Lambda, AnalysisError> {
-    let variables = variables.insert_many(
+    let variables = variables.insert_iter(
         lambda
             .arguments()
             .iter()
@@ -134,7 +134,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     if_.then(),
                     &result_type,
-                    &variables.insert_many([
+                    &variables.insert_iter([
                         (
                             if_.first_name().into(),
                             types::Function::new(
@@ -233,7 +233,7 @@ fn transform_expression(
             transform_expression(let_.bound_expression(), variables)?,
             transform_expression(
                 let_.expression(),
-                &variables.insert_many(
+                &variables.insert_iter(
                     let_.name()
                         .map(|name| {
                             Ok((
@@ -354,7 +354,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.element_type(),
-                    &variables.insert_many([
+                    &variables.insert_iter([
                         (comprehension.key_name().into(), key_type.clone()),
                         (comprehension.value_name().into(), value_type.clone()),
                     ]),

@@ -21,7 +21,7 @@ pub fn compile(
         mir::ir::Expression::Case(case) => compile_case(context, builder, case, variables)?,
         mir::ir::Expression::CloneVariables(clone) => compile(
             clone.expression(),
-            &variables.insert_many(
+            &variables.insert_iter(
                 clone
                     .variables()
                     .iter()
