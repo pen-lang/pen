@@ -439,7 +439,7 @@ mod tests {
         .unwrap();
 
         insta::assert_snapshot!(fmm::analysis::format::format_module(
-            &context.module_builder().as_module()
+            &context.into_module_builder().into_module()
         ));
     }
 }
