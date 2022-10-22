@@ -214,6 +214,8 @@ fn compile_mir_module(
     fmm::analysis::cps::transform(&mut module, fmm::types::void_type())?;
     fmm::analysis::c_calling_convention::transform(&mut module, word_bytes(target_triple)?)?;
 
+    fmm::analysis::cps::transform(&mut module, fmm::types::void_type())?;
+    fmm::analysis::c_calling_convention::transform(&mut module, word_bytes(target_triple)?)?;
     fmm::analysis::validation::validate(&module)?;
 
     let module = fmm_llvm::compile_to_bit_code(&module, &compile_configuration.fmm, target_triple)?;
