@@ -17,7 +17,7 @@ use std::rc::Rc;
 //   effectively.
 //   - e.g. list comprehension
 #[derive(Clone, Debug, PartialEq)]
-pub struct LetRecursive(Arc<LetRecursiveInner>);
+pub struct LetRecursive(Rc<LetRecursiveInner>);
 
 #[derive(Debug, PartialEq)]
 struct LetRecursiveInner {

@@ -3,7 +3,7 @@ use crate::types;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordUpdate(Arc<RecordUpdateInner>);
+pub struct RecordUpdate(Rc<RecordUpdateInner>);
 
 #[derive(Debug, PartialEq)]
 struct RecordUpdateInner {

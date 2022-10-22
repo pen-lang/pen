@@ -3,7 +3,7 @@ use crate::types::Type;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Let(Arc<LetInner>);
+pub struct Let(Rc<LetInner>);
 
 #[derive(Clone, Debug, PartialEq)]
 struct LetInner {

@@ -3,7 +3,7 @@ use crate::types;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Call(Arc<CallInner>);
+pub struct Call(Rc<CallInner>);
 
 #[derive(Debug, PartialEq)]
 struct CallInner {

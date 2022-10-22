@@ -2,7 +2,7 @@ use super::{arithmetic_operator::ArithmeticOperator, expression::Expression};
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ArithmeticOperation(Arc<ArithmeticOperationInner>);
+pub struct ArithmeticOperation(Rc<ArithmeticOperationInner>);
 
 #[derive(Debug, PartialEq)]
 struct ArithmeticOperationInner {

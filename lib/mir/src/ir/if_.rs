@@ -2,7 +2,7 @@ use super::expression::Expression;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct If(Arc<IfInner>);
+pub struct If(Rc<IfInner>);
 
 #[derive(Debug, PartialEq)]
 struct IfInner {

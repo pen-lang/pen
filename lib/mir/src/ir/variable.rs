@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Variable {
-    name: Arc<str>,
+    name: Rc<str>,
 }
 
 impl Variable {

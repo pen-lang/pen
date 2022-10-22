@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ByteString {
-    value: Arc<[u8]>,
+    value: Rc<[u8]>,
 }
 
 impl ByteString {

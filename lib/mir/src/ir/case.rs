@@ -4,7 +4,7 @@ use super::{
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Case(Arc<CaseInner>);
+pub struct Case(Rc<CaseInner>);
 
 #[derive(Debug, PartialEq)]
 struct CaseInner {

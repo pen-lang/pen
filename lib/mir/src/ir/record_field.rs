@@ -3,7 +3,7 @@ use crate::types;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordField(Arc<RecordFieldInner>);
+pub struct RecordField(Rc<RecordFieldInner>);
 
 #[derive(Debug, PartialEq)]
 struct RecordFieldInner {

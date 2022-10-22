@@ -3,7 +3,7 @@ use crate::types::Type;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Variant(Arc<VariantInner>);
+pub struct Variant(Rc<VariantInner>);
 
 #[derive(Debug, PartialEq)]
 struct VariantInner {

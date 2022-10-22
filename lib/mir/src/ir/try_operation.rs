@@ -5,7 +5,7 @@ use std::rc::Rc;
 // A try operation matches an operand with a type and returns it from a function
 // if it matches.
 #[derive(Clone, Debug, PartialEq)]
-pub struct TryOperation(Arc<TryOperationInner>);
+pub struct TryOperation(Rc<TryOperationInner>);
 
 #[derive(Debug, PartialEq)]
 struct TryOperationInner {

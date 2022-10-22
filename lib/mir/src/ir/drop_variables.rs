@@ -4,7 +4,7 @@ use fnv::FnvHashMap;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct DropVariables(Arc<DropVariablesInner>);
+pub struct DropVariables(Rc<DropVariablesInner>);
 
 #[derive(Debug, PartialEq)]
 struct DropVariablesInner {

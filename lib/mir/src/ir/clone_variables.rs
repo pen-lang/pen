@@ -4,7 +4,7 @@ use fnv::FnvHashMap;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CloneVariables(Arc<CloneVariablesInner>);
+pub struct CloneVariables(Rc<CloneVariablesInner>);
 
 #[derive(Debug, PartialEq)]
 struct CloneVariablesInner {

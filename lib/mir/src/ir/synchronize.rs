@@ -3,7 +3,7 @@ use crate::types::Type;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Synchronize(Arc<SynchronizeInner>);
+pub struct Synchronize(Rc<SynchronizeInner>);
 
 #[derive(Debug, PartialEq)]
 struct SynchronizeInner {
