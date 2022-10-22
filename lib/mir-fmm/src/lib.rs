@@ -97,7 +97,7 @@ pub fn compile(
 
     yield_::compile_function_declaration(&context);
 
-    Ok(context.module_builder().as_module())
+    Ok(context.into_module_builder().into_module())
 }
 
 fn compile_global_variables(
