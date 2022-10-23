@@ -1,7 +1,7 @@
 use super::{
     super::error::CompileError, expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
 };
-use crate::{context::Context, type_, variant};
+use crate::{context::Context, type_, type_information, variant};
 
 const FUNCTION_PREFIX: &str = "mir:variant:";
 const ARGUMENT_NAME: &str = "_payload";
@@ -116,4 +116,57 @@ fn compile_function_name(type_: &mir::types::Type, operation: &str) -> String {
         operation,
         mir::analysis::type_id::calculate(type_)
     )
+}
+
+pub fn clone(
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    let tag = variant::get_tag(builder, expression)?;
+
+    // We check if variants are "undefined" values for intermediate states during record updates.
+    Ok(builder.if_::<CompileError>(
+        fmm::build::comparison_operation(
+            fmm::ir::ComparisonOperator::Equal,
+            fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, tag.clone()),
+            fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
+        )?,
+        |builder| Ok(builder.branch(expression.clone())),
+        |builder| {
+            Ok(builder.branch(fmm::build::record(vec![
+                tag.clone(),
+                builder.call(
+                    type_information::get_clone_function(&builder, tag.clone())?,
+                    vec![variant::get_payload(&builder, expression)?],
+                )?,
+            ])))
+        },
+    )?)
+}
+
+pub fn drop(
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+) -> Result<(), CompileError> {
+    builder.call(
+        type_information::get_drop_function(builder, variant::get_tag(builder, expression)?)?,
+        vec![variant::get_payload(builder, expression)?],
+    )?;
+
+    Ok(())
+}
+
+pub fn synchronize(
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+) -> Result<(), CompileError> {
+    builder.call(
+        type_information::get_synchronize_function(
+            builder,
+            variant::get_tag(builder, expression)?,
+        )?,
+        vec![variant::get_payload(builder, expression)?],
+    )?;
+
+    Ok(())
 }
