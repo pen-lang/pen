@@ -55,7 +55,7 @@ fn compile_variant() -> fmm::types::Record {
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
     thread_local! {
-        static VARIANT_TAG_TYPE: Lazy<Type> = Lazy::new(|| {
+        static VARIANT_TAG_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
             let payload = fmm::types::Type::from(compile_variant_payload());
 
             fmm::types::Pointer::new(fmm::types::Record::new(vec![
