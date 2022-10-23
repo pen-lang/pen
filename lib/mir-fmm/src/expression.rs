@@ -1,6 +1,6 @@
 use super::error::CompileError;
 use crate::{
-    call, closure, context::Context, entry_function, pointer, record, reference_count, type_,
+    call, closure, context::Context, entry_function, record, reference_count, type_,
     type_information, variant,
 };
 use fnv::FnvHashMap;
@@ -381,7 +381,7 @@ fn compile_alternatives(
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
                         result?,
-                        compile_tag_comparison(builder, &argument, type_)?,
+                        variant::compile_tag_comparison(builder, &argument, type_)?,
                     )?
                     .into())
                 },
@@ -415,17 +415,6 @@ fn compile_alternatives(
             },
         )?),
     })
-}
-
-fn compile_tag_comparison(
-    builder: &fmm::build::InstructionBuilder,
-    argument: &fmm::build::TypedExpression,
-    type_: &mir::types::Type,
-) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(pointer::equal(
-        builder.deconstruct_record(argument.clone(), 0)?,
-        variant::compile_tag(type_),
-    )?)
 }
 
 fn compile_let(
@@ -640,7 +629,7 @@ fn compile_try_operation(
     let operand = compile(context, builder, operation.operand(), variables)?;
 
     builder.if_(
-        compile_tag_comparison(builder, &operand, operation.type_())?,
+        variant::compile_tag_comparison(builder, &operand, operation.type_())?,
         |builder| -> Result<_, CompileError> {
             Ok(builder.return_(compile(
                 context,
