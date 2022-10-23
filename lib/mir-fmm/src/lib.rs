@@ -47,6 +47,8 @@ pub fn compile(
         type_information::compile_global_variable(&context, type_, &global_variables)?;
     }
 
+    reference_count::pointer::compile_clone_function(&context)?;
+
     for definition in module.type_definitions() {
         reference_count::record::compile_clone_function(&context, definition)?;
         reference_count::record::compile_clone_unboxed_function(&context, definition)?;

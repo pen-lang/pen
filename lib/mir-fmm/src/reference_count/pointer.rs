@@ -1,4 +1,5 @@
 use super::{super::error::CompileError, block, count, heap};
+use crate::{context::Context, reference_count::REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS};
 
 // Reference counts are negative for synchronized memory blocks and otherwise
 // positive. References to static memory blocks are tagged.
@@ -14,7 +15,7 @@ pub fn compile_clone_function(context: &Context) -> Result<(), CompileError> {
         |builder| -> Result<_, CompileError> {
             let pointer = fmm::build::variable(ARGUMENT_NAME, pointer_type.clone());
 
-            Ok(builder.return_(builder.if_(
+            Ok(builder.return_(builder.if_::<CompileError>(
                 is_null(&pointer)?,
                 |builder| Ok(builder.branch(pointer.clone())),
                 |builder| {
