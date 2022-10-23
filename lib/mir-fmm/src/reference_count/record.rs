@@ -243,15 +243,13 @@ pub fn clone(
     expression: &fmm::build::TypedExpression,
     record_type: &mir::types::Record,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(builder
-        .call(
-            fmm::build::variable(
-                utilities::get_clone_function_name(record_type.name()),
-                utilities::compile_clone_function_type(context, record_type),
-            ),
-            vec![expression.clone()],
-        )?
-        .into())
+    Ok(builder.call(
+        fmm::build::variable(
+            utilities::get_clone_function_name(record_type.name()),
+            utilities::compile_clone_function_type(context, record_type),
+        ),
+        vec![expression.clone()],
+    )?)
 }
 
 pub fn drop(
