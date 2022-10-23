@@ -124,7 +124,8 @@ pub fn clone(
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     let tag = variant::get_tag(builder, expression)?;
 
-    // We check if variants are "undefined" values for intermediate states during record updates.
+    // We check if variants are "undefined" values for intermediate states during
+    // record updates.
     builder.if_::<CompileError>(
         fmm::build::comparison_operation(
             fmm::ir::ComparisonOperator::Equal,
