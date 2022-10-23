@@ -125,7 +125,7 @@ pub fn clone(
     let tag = variant::get_tag(builder, expression)?;
 
     // We check if variants are "undefined" values for intermediate states during record updates.
-    Ok(builder.if_::<CompileError>(
+    builder.if_::<CompileError>(
         fmm::build::comparison_operation(
             fmm::ir::ComparisonOperator::Equal,
             fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, tag.clone()),
@@ -141,7 +141,7 @@ pub fn clone(
                 )?,
             ])))
         },
-    )?)
+    )
 }
 
 pub fn drop(

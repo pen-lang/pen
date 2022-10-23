@@ -62,7 +62,7 @@ pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     expression: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    Ok(pointer::clone(builder, expression)?)
+    pointer::clone(builder, expression)
 }
 
 pub fn drop(
