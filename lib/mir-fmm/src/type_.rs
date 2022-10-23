@@ -38,23 +38,35 @@ pub fn compile_none() -> fmm::types::Type {
 }
 
 pub fn compile_string() -> fmm::types::Pointer {
-    fmm::types::Pointer::new(fmm::types::Record::new(vec![
-        fmm::types::Primitive::PointerInteger.into(),
-        // The first byte of a string
-        fmm::types::Primitive::Integer8.into(),
-    ]))
+    thread_local! {
+        static TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+            fmm::types::Pointer::new(fmm::types::Record::new(vec![
+                fmm::types::Primitive::PointerInteger.into(),
+                // The first byte of a string
+                fmm::types::Primitive::Integer8.into(),
+            ]))
+        });
+    }
+
+    TYPE.with(|type_| (*type_).clone())
 }
 
 fn compile_variant() -> fmm::types::Record {
-    fmm::types::Record::new(vec![
-        compile_variant_tag().into(),
-        compile_variant_payload().into(),
-    ])
+    thread_local! {
+        static TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
+            fmm::types::Record::new(vec![
+                compile_variant_tag().into(),
+                compile_variant_payload().into(),
+            ])
+        });
+    }
+
+    TYPE.with(|type_| (*type_).clone())
 }
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
     thread_local! {
-        static VARIANT_TAG_TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+        static TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
             let payload = fmm::types::Type::from(compile_variant_payload());
 
             fmm::types::Pointer::new(fmm::types::Record::new(vec![
@@ -84,7 +96,7 @@ pub fn compile_variant_tag() -> fmm::types::Pointer {
         });
     }
 
-    VARIANT_TAG_TYPE.with(|type_| (*type_).clone())
+    TYPE.with(|type_| (*type_).clone())
 }
 
 pub fn compile_variant_payload() -> fmm::types::Primitive {

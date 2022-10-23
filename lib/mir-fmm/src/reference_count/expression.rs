@@ -1,5 +1,5 @@
-use super::{super::error::CompileError, function, pointer, record};
-use crate::{context::Context, type_information, variant};
+use super::{super::error::CompileError, function, record, string, variant};
+use crate::context::Context;
 
 pub fn clone(
     context: &Context,
@@ -8,36 +8,10 @@ pub fn clone(
     type_: &mir::types::Type,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
     Ok(match type_ {
-        mir::types::Type::ByteString => pointer::clone(builder, expression)?,
+        mir::types::Type::ByteString => string::clone(builder, expression)?,
         mir::types::Type::Function(_) => function::clone(builder, expression)?,
-        mir::types::Type::Record(record) => builder.call(
-            fmm::build::variable(
-                record::utilities::get_clone_function_name(record.name()),
-                record::utilities::compile_clone_function_type(context, record),
-            ),
-            vec![expression.clone()],
-        )?,
-        mir::types::Type::Variant => {
-            let tag = variant::get_tag(builder, expression)?;
-
-            builder.if_::<CompileError>(
-                fmm::build::comparison_operation(
-                    fmm::ir::ComparisonOperator::Equal,
-                    fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, tag.clone()),
-                    fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
-                )?,
-                |builder| Ok(builder.branch(expression.clone())),
-                |builder| {
-                    Ok(builder.branch(fmm::build::record(vec![
-                        tag.clone(),
-                        builder.call(
-                            type_information::get_clone_function(&builder, tag.clone())?,
-                            vec![variant::get_payload(&builder, expression)?],
-                        )?,
-                    ])))
-                },
-            )?
-        }
+        mir::types::Type::Record(record) => record::clone(context, builder, expression, record)?,
+        mir::types::Type::Variant => variant::clone(builder, expression)?,
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {
             expression.clone()
         }
@@ -51,26 +25,10 @@ pub fn drop(
     type_: &mir::types::Type,
 ) -> Result<(), CompileError> {
     match type_ {
-        mir::types::Type::ByteString => pointer::drop(builder, expression, |_| Ok(()))?,
-        mir::types::Type::Function(_) => function::drop(builder, expression)?,
-        mir::types::Type::Record(record) => {
-            builder.call(
-                fmm::build::variable(
-                    record::utilities::get_drop_function_name(record.name()),
-                    record::utilities::compile_drop_function_type(context, record),
-                ),
-                vec![expression.clone()],
-            )?;
-        }
-        mir::types::Type::Variant => {
-            builder.call(
-                type_information::get_drop_function(
-                    builder,
-                    variant::get_tag(builder, expression)?,
-                )?,
-                vec![variant::get_payload(builder, expression)?],
-            )?;
-        }
+        mir::types::Type::ByteString => string::drop(builder, expression)?,
+        mir::types::Type::Function(_) => function::drop(context, builder, expression)?,
+        mir::types::Type::Record(record) => record::drop(context, builder, expression, record)?,
+        mir::types::Type::Variant => variant::drop(builder, expression)?,
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
     }
 
@@ -84,30 +42,12 @@ pub fn synchronize(
     type_: &mir::types::Type,
 ) -> Result<(), CompileError> {
     match type_ {
-        mir::types::Type::ByteString => {
-            pointer::synchronize(builder, expression, |_| Ok(()))?;
-        }
-        mir::types::Type::Function(_) => {
-            function::synchronize(builder, expression)?;
-        }
+        mir::types::Type::ByteString => string::synchronize(builder, expression)?,
+        mir::types::Type::Function(_) => function::synchronize(context, builder, expression)?,
         mir::types::Type::Record(record) => {
-            builder.call(
-                fmm::build::variable(
-                    record::utilities::get_synchronize_function_name(record.name()),
-                    record::utilities::compile_synchronize_function_type(context, record),
-                ),
-                vec![expression.clone()],
-            )?;
+            record::synchronize(context, builder, expression, record)?
         }
-        mir::types::Type::Variant => {
-            builder.call(
-                type_information::get_synchronize_function(
-                    builder,
-                    variant::get_tag(builder, expression)?,
-                )?,
-                vec![variant::get_payload(builder, expression)?],
-            )?;
-        }
+        mir::types::Type::Variant => variant::synchronize(builder, expression)?,
         mir::types::Type::Boolean | mir::types::Type::None | mir::types::Type::Number => {}
     }
 
