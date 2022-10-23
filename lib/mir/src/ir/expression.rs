@@ -158,3 +158,14 @@ impl From<Variant> for Expression {
         Self::Variant(variant)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::mem::size_of;
+
+    #[test]
+    fn type_size() {
+        assert_eq!(size_of::<Expression>(), 3 * size_of::<usize>());
+    }
+}

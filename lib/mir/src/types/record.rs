@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Record {
-    name: Rc<str>,
+    name: Rc<String>,
 }
 
 impl Record {

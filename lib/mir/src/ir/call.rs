@@ -3,9 +3,12 @@ use crate::types;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Call {
+pub struct Call(Rc<CallInner>);
+
+#[derive(Debug, PartialEq)]
+struct CallInner {
     type_: types::Function,
-    function: Rc<Expression>,
+    function: Expression,
     arguments: Vec<Expression>,
 }
 
@@ -15,22 +18,25 @@ impl Call {
         function: impl Into<Expression>,
         arguments: Vec<Expression>,
     ) -> Self {
-        Self {
-            type_,
-            function: function.into().into(),
-            arguments,
-        }
+        Self(
+            CallInner {
+                type_,
+                function: function.into(),
+                arguments,
+            }
+            .into(),
+        )
     }
 
     pub fn type_(&self) -> &types::Function {
-        &self.type_
+        &self.0.type_
     }
 
     pub fn function(&self) -> &Expression {
-        &self.function
+        &self.0.function
     }
 
     pub fn arguments(&self) -> &[Expression] {
-        &self.arguments
+        &self.0.arguments
     }
 }
