@@ -7,7 +7,7 @@ pub fn compile_global_variable(
     global_variables: &HashMap<String, fmm::build::TypedExpression>,
 ) -> Result<(), CompileError> {
     context.module_builder().define_variable(
-        mir::analysis::type_id::calculate(type_),
+        get_global_variable_name(type_),
         fmm::build::record(vec![
             reference_count::variant::compile_clone_function(context, type_)?,
             reference_count::variant::compile_drop_function(context, type_)?,
@@ -30,6 +30,13 @@ pub fn compile_global_variable(
     );
 
     Ok(())
+}
+
+pub fn get_global_variable_name(type_: &mir::types::Type) -> String {
+    format!(
+        "mir:type_information:{}",
+        mir::analysis::type_id::calculate(type_),
+    )
 }
 
 pub fn get_clone_function(

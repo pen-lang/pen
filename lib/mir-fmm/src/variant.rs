@@ -1,11 +1,11 @@
-use crate::{box_, context::Context, pointer, type_, CompileError};
+use crate::{box_, context::Context, pointer, type_, type_information, CompileError};
 
 const VARIANT_TAG_FIELD_INDEX: usize = 0;
 const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;
 
 fn compile_tag(type_: &mir::types::Type) -> fmm::build::TypedExpression {
     fmm::build::variable(
-        mir::analysis::type_id::calculate(type_),
+        type_information::get_global_variable_name(type_),
         type_::compile_variant_tag(),
     )
 }
