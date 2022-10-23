@@ -1,6 +1,8 @@
 pub mod foreign;
 pub mod variant;
 
+use once_cell::unsync::Lazy;
+
 use crate::context::Context;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
@@ -52,32 +54,38 @@ fn compile_variant() -> fmm::types::Record {
 }
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
-    let payload = fmm::types::Type::from(compile_variant_payload());
+    thread_local! {
+        static VARIANT_TAG_TYPE: Lazy<Type> = Lazy::new(|| {
+            let payload = fmm::types::Type::from(compile_variant_payload());
 
-    fmm::types::Pointer::new(fmm::types::Record::new(vec![
-        // clone function
-        fmm::types::Function::new(
-            vec![payload.clone()],
-            payload.clone(),
-            fmm::types::CallingConvention::Target,
-        )
-        .into(),
-        // drop function
-        fmm::types::Function::new(
-            vec![payload.clone()],
-            fmm::types::void_type(),
-            fmm::types::CallingConvention::Target,
-        )
-        .into(),
-        // synchronize function
-        fmm::types::Function::new(
-            vec![payload],
-            fmm::types::void_type(),
-            fmm::types::CallingConvention::Target,
-        )
-        .into(),
-        fmm::types::generic_pointer_type(),
-    ]))
+            fmm::types::Pointer::new(fmm::types::Record::new(vec![
+                // clone function
+                fmm::types::Function::new(
+                    vec![payload.clone()],
+                    payload.clone(),
+                    fmm::types::CallingConvention::Target,
+                )
+                .into(),
+                // drop function
+                fmm::types::Function::new(
+                    vec![payload.clone()],
+                    fmm::types::void_type(),
+                    fmm::types::CallingConvention::Target,
+                )
+                .into(),
+                // synchronize function
+                fmm::types::Function::new(
+                    vec![payload],
+                    fmm::types::void_type(),
+                    fmm::types::CallingConvention::Target,
+                )
+                .into(),
+                fmm::types::generic_pointer_type(),
+            ]))
+        });
+    }
+
+    VARIANT_TAG_TYPE.with(|type_| (*type_).clone())
 }
 
 pub fn compile_variant_payload() -> fmm::types::Primitive {
