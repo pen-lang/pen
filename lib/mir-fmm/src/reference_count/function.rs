@@ -1,5 +1,3 @@
-use fmm::types;
-
 use super::{super::error::CompileError, pointer};
 use crate::{
     closure, context::Context, reference_count::REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS, type_,
@@ -104,7 +102,7 @@ pub fn drop(
             fmm::types::Function::new(
                 vec![closure_type.clone()],
                 fmm::types::void_type(),
-                types::CallingConvention::Target,
+                fmm::types::CallingConvention::Target,
             ),
         ),
         vec![fmm::build::bit_cast(closure_type, closure_pointer.clone()).into()],
@@ -126,7 +124,7 @@ pub fn synchronize(
             fmm::types::Function::new(
                 vec![closure_type.clone()],
                 fmm::types::void_type(),
-                types::CallingConvention::Target,
+                fmm::types::CallingConvention::Target,
             ),
         ),
         vec![fmm::build::bit_cast(closure_type, closure_pointer.clone()).into()],
