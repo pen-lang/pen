@@ -236,3 +236,54 @@ fn synchronize_unboxed(
 
     Ok(())
 }
+
+pub fn clone(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<fmm::build::TypedExpression, CompileError> {
+    Ok(builder
+        .call(
+            fmm::build::variable(
+                utilities::get_clone_function_name(record_type.name()),
+                utilities::compile_clone_function_type(context, record_type),
+            ),
+            vec![expression.clone()],
+        )?
+        .into())
+}
+
+pub fn drop(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<(), CompileError> {
+    builder.call(
+        fmm::build::variable(
+            utilities::get_drop_function_name(record_type.name()),
+            utilities::compile_drop_function_type(context, record_type),
+        ),
+        vec![expression.clone()],
+    )?;
+
+    Ok(())
+}
+
+pub fn synchronize(
+    context: &Context,
+    builder: &fmm::build::InstructionBuilder,
+    expression: &fmm::build::TypedExpression,
+    record_type: &mir::types::Record,
+) -> Result<(), CompileError> {
+    builder.call(
+        fmm::build::variable(
+            utilities::get_synchronize_function_name(record_type.name()),
+            utilities::compile_synchronize_function_type(context, record_type),
+        ),
+        vec![expression.clone()],
+    )?;
+
+    Ok(())
+}
