@@ -1,9 +1,8 @@
 pub mod foreign;
 pub mod variant;
 
-use once_cell::unsync::Lazy;
-
 use crate::context::Context;
+use once_cell::unsync::Lazy;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
