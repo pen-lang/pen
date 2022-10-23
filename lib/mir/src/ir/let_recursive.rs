@@ -17,24 +17,30 @@ use std::rc::Rc;
 //   effectively.
 //   - e.g. list comprehension
 #[derive(Clone, Debug, PartialEq)]
-pub struct LetRecursive {
-    definition: Rc<FunctionDefinition>,
-    expression: Rc<Expression>,
+pub struct LetRecursive(Rc<LetRecursiveInner>);
+
+#[derive(Debug, PartialEq)]
+struct LetRecursiveInner {
+    definition: FunctionDefinition,
+    expression: Expression,
 }
 
 impl LetRecursive {
     pub fn new(definition: FunctionDefinition, expression: impl Into<Expression>) -> Self {
-        Self {
-            definition: definition.into(),
-            expression: Rc::new(expression.into()),
-        }
+        Self(
+            LetRecursiveInner {
+                definition,
+                expression: (expression.into()),
+            }
+            .into(),
+        )
     }
 
     pub fn definition(&self) -> &FunctionDefinition {
-        &self.definition
+        &self.0.definition
     }
 
     pub fn expression(&self) -> &Expression {
-        &self.expression
+        &self.0.expression
     }
 }

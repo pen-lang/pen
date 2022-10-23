@@ -5,11 +5,14 @@ use std::rc::Rc;
 // A try operation matches an operand with a type and returns it from a function
 // if it matches.
 #[derive(Clone, Debug, PartialEq)]
-pub struct TryOperation {
-    operand: Rc<Expression>,
+pub struct TryOperation(Rc<TryOperationInner>);
+
+#[derive(Debug, PartialEq)]
+struct TryOperationInner {
+    operand: Expression,
     name: String,
     type_: Type,
-    then: Rc<Expression>,
+    then: Expression,
 }
 
 impl TryOperation {
@@ -19,27 +22,30 @@ impl TryOperation {
         type_: impl Into<Type>,
         then: impl Into<Expression>,
     ) -> Self {
-        Self {
-            operand: operand.into().into(),
-            name: name.into(),
-            type_: type_.into(),
-            then: then.into().into(),
-        }
+        Self(
+            TryOperationInner {
+                operand: operand.into(),
+                name: name.into(),
+                type_: type_.into(),
+                then: then.into(),
+            }
+            .into(),
+        )
     }
 
     pub fn operand(&self) -> &Expression {
-        &self.operand
+        &self.0.operand
     }
 
     pub fn name(&self) -> &str {
-        &self.name
+        &self.0.name
     }
 
     pub fn type_(&self) -> &Type {
-        &self.type_
+        &self.0.type_
     }
 
     pub fn then(&self) -> &Expression {
-        &self.then
+        &self.0.then
     }
 }

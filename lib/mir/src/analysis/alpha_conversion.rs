@@ -61,7 +61,7 @@ pub fn transform(module: &Module) -> Module {
 fn transform_expression<'a>(
     context: &Context<'a>,
     expression: &'a Expression,
-    variables: &hamt::Map<&'a str, String>,
+    variables: &plist::Map<&'a str, String>,
 ) -> Expression {
     let transform = |expression| transform_expression(context, expression, variables);
 
@@ -150,7 +150,7 @@ fn transform_expression<'a>(
 
             LetRecursive::new(
                 {
-                    let variables = variables.extend(
+                    let variables = variables.insert_iter(
                         definition
                             .arguments()
                             .iter()

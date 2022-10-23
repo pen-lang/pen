@@ -3,9 +3,12 @@ use crate::types;
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RecordUpdate {
+pub struct RecordUpdate(Rc<RecordUpdateInner>);
+
+#[derive(Debug, PartialEq)]
+struct RecordUpdateInner {
     type_: types::Record,
-    record: Rc<Expression>,
+    record: Expression,
     fields: Vec<RecordUpdateField>,
 }
 
@@ -15,22 +18,25 @@ impl RecordUpdate {
         record: impl Into<Expression>,
         fields: Vec<RecordUpdateField>,
     ) -> Self {
-        Self {
-            type_,
-            record: record.into().into(),
-            fields,
-        }
+        Self(
+            RecordUpdateInner {
+                type_,
+                record: record.into(),
+                fields,
+            }
+            .into(),
+        )
     }
 
     pub fn type_(&self) -> &types::Record {
-        &self.type_
+        &self.0.type_
     }
 
     pub fn record(&self) -> &Expression {
-        &self.record
+        &self.0.record
     }
 
     pub fn fields(&self) -> &[RecordUpdateField] {
-        &self.fields
+        &self.0.fields
     }
 }

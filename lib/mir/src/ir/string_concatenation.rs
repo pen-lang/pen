@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct StringConcatenation {
-    operands: Rc<Vec<Expression>>,
+    operands: Rc<[Expression]>,
 }
 
 impl StringConcatenation {

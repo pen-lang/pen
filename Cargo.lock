@@ -699,6 +699,7 @@ dependencies = [
  "fnv",
  "hamt",
  "once_cell",
+ "plist",
  "pretty_assertions",
 ]
 
