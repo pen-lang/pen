@@ -21,7 +21,7 @@ thread_local! {
 }
 
 pub fn compile_clone_function(context: &Context) -> Result<(), CompileError> {
-    const ARGUMENT_NAME: &str = "p";
+    const ARGUMENT_NAME: &str = "x";
     let pointer_type = fmm::types::generic_pointer_type();
 
     context.module_builder().define_function(

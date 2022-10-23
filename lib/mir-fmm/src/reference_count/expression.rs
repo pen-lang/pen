@@ -46,7 +46,7 @@ pub fn drop(
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => pointer::drop(builder, expression, |_| Ok(()))?,
-        mir::types::Type::Function(_) => function::drop(builder, expression)?,
+        mir::types::Type::Function(_) => function::drop(context, builder, expression)?,
         mir::types::Type::Record(record) => record::drop(context, builder, expression, record)?,
         mir::types::Type::Variant => {
             builder.call(
@@ -71,7 +71,7 @@ pub fn synchronize(
 ) -> Result<(), CompileError> {
     match type_ {
         mir::types::Type::ByteString => pointer::synchronize(builder, expression, |_| Ok(()))?,
-        mir::types::Type::Function(_) => function::synchronize(builder, expression)?,
+        mir::types::Type::Function(_) => function::synchronize(context, builder, expression)?,
         mir::types::Type::Record(record) => {
             record::synchronize(context, builder, expression, record)?
         }

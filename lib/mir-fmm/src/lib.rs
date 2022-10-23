@@ -48,6 +48,8 @@ pub fn compile(
     }
 
     reference_count::pointer::compile_clone_function(&context)?;
+    reference_count::function::compile_drop_function(&context)?;
+    reference_count::function::compile_synchronize_function(&context)?;
 
     for definition in module.type_definitions() {
         reference_count::record::compile_clone_function(&context, definition)?;
