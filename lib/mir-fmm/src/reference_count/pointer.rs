@@ -1,15 +1,31 @@
 use super::{super::error::CompileError, block, count, heap};
 use crate::{context::Context, reference_count::REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS};
+use once_cell::unsync::Lazy;
 
 // Reference counts are negative for synchronized memory blocks and otherwise
 // positive. References to static memory blocks are tagged.
+
+const CLONE_FUNCTION_NAME: &str = "mir:clone:pointer";
+
+thread_local! {
+    static CLONE_FUNCTION_VARIABLE: Lazy<fmm::build::TypedExpression> = Lazy::new(|| {
+        fmm::build::variable(
+            CLONE_FUNCTION_NAME,
+            fmm::types::Function::new(
+                vec![fmm::types::generic_pointer_type()],
+                fmm::types::generic_pointer_type(),
+                fmm::types::CallingConvention::Target,
+            ),
+        )
+    });
+}
 
 pub fn compile_clone_function(context: &Context) -> Result<(), CompileError> {
     const ARGUMENT_NAME: &str = "p";
     let pointer_type = fmm::types::generic_pointer_type();
 
     context.module_builder().define_function(
-        "mir:clone:pointer",
+        CLONE_FUNCTION_NAME,
         vec![fmm::ir::Argument::new(ARGUMENT_NAME, pointer_type.clone())],
         pointer_type.clone(),
         |builder| -> Result<_, CompileError> {
@@ -69,49 +85,14 @@ pub fn clone(
     builder: &fmm::build::InstructionBuilder,
     pointer: &fmm::build::TypedExpression,
 ) -> Result<fmm::build::TypedExpression, CompileError> {
-    builder.if_(
-        is_null(pointer)?,
-        |builder| Ok(builder.branch(pointer.clone())),
-        |builder| {
-            let count_pointer = block::compile_count_pointer(pointer)?;
-            let count =
-                builder.atomic_load(count_pointer.clone(), fmm::ir::AtomicOrdering::Relaxed)?;
-
-            builder.if_(
-                count::is_synchronized(&count)?,
-                |builder| -> Result<_, CompileError> {
-                    Ok(builder.branch(builder.if_(
-                        count::is_static(&count)?,
-                        |builder| Ok(builder.branch(fmm::ir::void_value())),
-                        |builder| -> Result<_, CompileError> {
-                            builder.atomic_operation(
-                                fmm::ir::AtomicOperator::Subtract,
-                                count_pointer.clone(),
-                                count::compile(1),
-                                fmm::ir::AtomicOrdering::Relaxed,
-                            )?;
-
-                            Ok(builder.branch(fmm::ir::void_value()))
-                        },
-                    )?))
-                },
-                |builder| {
-                    builder.store(
-                        fmm::build::arithmetic_operation(
-                            fmm::ir::ArithmeticOperator::Add,
-                            count.clone(),
-                            count::compile(1),
-                        )?,
-                        count_pointer.clone(),
-                    );
-
-                    Ok(builder.branch(fmm::ir::void_value()))
-                },
-            )?;
-
-            Ok(builder.branch(pointer.clone()))
-        },
+    Ok(fmm::build::bit_cast(
+        pointer.type_().clone(),
+        builder.call(
+            CLONE_FUNCTION_VARIABLE.with(|variable| (*variable).clone()),
+            vec![fmm::build::bit_cast(fmm::types::generic_pointer_type(), pointer.clone()).into()],
+        )?,
     )
+    .into())
 }
 
 pub fn drop(
