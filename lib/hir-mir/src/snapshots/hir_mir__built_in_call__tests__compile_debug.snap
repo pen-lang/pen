@@ -4,75 +4,87 @@ expression: "compile_call(&Call::new(Some(types::Function::new(vec![types :: Byt
 ---
 Ok(
     Call(
-        Call {
-            type_: Function(
-                FunctionInner {
-                    arguments: [
-                        ByteString,
-                    ],
-                    result: None,
-                },
-            ),
-            function: Variable(
-                Variable {
-                    name: "__debug",
-                },
-            ),
-            arguments: [
-                Call(
-                    Call {
-                        type_: Function(
-                            FunctionInner {
-                                arguments: [
-                                    Variant,
-                                ],
-                                result: ByteString,
-                            },
-                        ),
-                        function: RecordField(
-                            RecordField {
-                                type_: Record {
-                                    name: "hir:type_information:record",
-                                },
-                                index: 0,
-                                record: Call(
-                                    Call {
-                                        type_: Function(
-                                            FunctionInner {
-                                                arguments: [],
-                                                result: Record(
-                                                    Record {
-                                                        name: "hir:type_information:record",
-                                                    },
-                                                ),
-                                            },
-                                        ),
-                                        function: TypeInformationFunction(
-                                            TypeInformationFunction {
-                                                variant: Variant(
-                                                    Variant {
-                                                        type_: None,
-                                                        payload: None,
-                                                    },
-                                                ),
-                                            },
-                                        ),
-                                        arguments: [],
-                                    },
-                                ),
-                            },
-                        ),
+        Call(
+            CallInner {
+                type_: Function(
+                    FunctionInner {
                         arguments: [
-                            Variant(
-                                Variant {
-                                    type_: None,
-                                    payload: None,
-                                },
-                            ),
+                            ByteString,
                         ],
+                        result: None,
                     },
                 ),
-            ],
-        },
+                function: Variable(
+                    Variable {
+                        name: "__debug",
+                    },
+                ),
+                arguments: [
+                    Call(
+                        Call(
+                            CallInner {
+                                type_: Function(
+                                    FunctionInner {
+                                        arguments: [
+                                            Variant,
+                                        ],
+                                        result: ByteString,
+                                    },
+                                ),
+                                function: RecordField(
+                                    RecordField(
+                                        RecordFieldInner {
+                                            type_: Record {
+                                                name: "hir:type_information:record",
+                                            },
+                                            index: 0,
+                                            record: Call(
+                                                Call(
+                                                    CallInner {
+                                                        type_: Function(
+                                                            FunctionInner {
+                                                                arguments: [],
+                                                                result: Record(
+                                                                    Record {
+                                                                        name: "hir:type_information:record",
+                                                                    },
+                                                                ),
+                                                            },
+                                                        ),
+                                                        function: TypeInformationFunction(
+                                                            TypeInformationFunction {
+                                                                variant: Variant(
+                                                                    Variant(
+                                                                        VariantInner {
+                                                                            type_: None,
+                                                                            payload: None,
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            },
+                                                        ),
+                                                        arguments: [],
+                                                    },
+                                                ),
+                                            ),
+                                        },
+                                    ),
+                                ),
+                                arguments: [
+                                    Variant(
+                                        Variant(
+                                            VariantInner {
+                                                type_: None,
+                                                payload: None,
+                                            },
+                                        ),
+                                    ),
+                                ],
+                            },
+                        ),
+                    ),
+                ],
+            },
+        ),
     ),
 )

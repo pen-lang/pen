@@ -4,8 +4,11 @@ use super::{
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct Case {
-    argument: Rc<Expression>,
+pub struct Case(Rc<CaseInner>);
+
+#[derive(Debug, PartialEq)]
+struct CaseInner {
+    argument: Expression,
     alternatives: Vec<Alternative>,
     default_alternative: Option<DefaultAlternative>,
 }
@@ -16,22 +19,25 @@ impl Case {
         alternatives: Vec<Alternative>,
         default_alternative: Option<DefaultAlternative>,
     ) -> Self {
-        Self {
-            argument: Rc::new(argument.into()),
-            alternatives,
-            default_alternative,
-        }
+        Self(
+            CaseInner {
+                argument: argument.into(),
+                alternatives,
+                default_alternative,
+            }
+            .into(),
+        )
     }
 
     pub fn argument(&self) -> &Expression {
-        &self.argument
+        &self.0.argument
     }
 
     pub fn alternatives(&self) -> &[Alternative] {
-        &self.alternatives
+        &self.0.alternatives
     }
 
     pub fn default_alternative(&self) -> Option<&DefaultAlternative> {
-        self.default_alternative.as_ref()
+        self.0.default_alternative.as_ref()
     }
 }
