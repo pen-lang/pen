@@ -1,4 +1,4 @@
-pub(super) mod utilities;
+mod utilities;
 
 use super::{
     super::{error::CompileError, type_},
