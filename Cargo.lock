@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#5a931bad3d57b8ea3444967e16f01f21355d52cd"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#153b865f714ee0b2a25cf60a17f9ba944f2d94bd"
 dependencies = [
  "fnv",
  "indexmap",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#5a931bad3d57b8ea3444967e16f01f21355d52cd"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#153b865f714ee0b2a25cf60a17f9ba944f2d94bd"
 dependencies = [
  "fmm",
  "fnv",
@@ -293,7 +293,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#5a931bad3d57b8ea3444967e16f01f21355d52cd"
+source = "git+https://github.com/raviqqe/fmm?branch=chore/environment-analysis#153b865f714ee0b2a25cf60a17f9ba944f2d94bd"
 dependencies = [
  "fmm",
  "fnv",
