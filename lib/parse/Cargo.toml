@@ -8,6 +8,7 @@ edition = "2021"
 ast = { path = "../ast" }
 combine = { version = "4", features = ["regex"] }
 fnv = "1"
+nom = "7.1.1"
 once_cell = "1"
 position = { path = "../position" }
 regex = "1"
