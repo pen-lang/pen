@@ -143,9 +143,9 @@ checksum = "ec8a7b6a70fde80372154c65702f00a0f56f3e1c36abbc6c440484be248856db"
 
 [[package]]
 name = "cc"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+checksum = "581f5dba903aac52ea3feb5ec4810848460ee833876f1f9b0fdeab1f19091574"
 
 [[package]]
 name = "cfg-if"
@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#4ac83a74226a860182ca8b71eef6b0a4b8dc96cd"
+source = "git+https://github.com/raviqqe/fmm?branch=main#67404ed43fb05dc8702d8b3f94f27722f40e0f61"
 dependencies = [
  "fnv",
  "indexmap",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#4ac83a74226a860182ca8b71eef6b0a4b8dc96cd"
+source = "git+https://github.com/raviqqe/fmm?branch=main#67404ed43fb05dc8702d8b3f94f27722f40e0f61"
 dependencies = [
  "fmm",
  "fnv",
@@ -293,7 +293,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#4ac83a74226a860182ca8b71eef6b0a4b8dc96cd"
+source = "git+https://github.com/raviqqe/fmm?branch=main#67404ed43fb05dc8702d8b3f94f27722f40e0f61"
 dependencies = [
  "fmm",
  "fnv",
@@ -559,7 +559,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#27b8ab5623696709c8948fabfc62ce47d5a32edd"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#4a0025d3ca3d7bb489228f274f203139739241b7"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -572,7 +572,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.5.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#27b8ab5623696709c8948fabfc62ce47d5a32edd"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#4a0025d3ca3d7bb489228f274f203139739241b7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -740,9 +740,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e82dad04139b71a90c080c8463fe0dc7902db5192d939bd0950f074d014339e1"
+checksum = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860"
 
 [[package]]
 name = "ordered-float"
