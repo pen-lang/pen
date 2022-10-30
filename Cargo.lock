@@ -271,7 +271,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#2ae3a5d87bec23df0c302d322baf18390f64edaf"
+source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#4cec7d5f81c5ec5f66544bacf26a8750a9ba3deb"
 dependencies = [
  "fnv",
  "indexmap",
@@ -283,7 +283,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#2ae3a5d87bec23df0c302d322baf18390f64edaf"
+source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#4cec7d5f81c5ec5f66544bacf26a8750a9ba3deb"
 dependencies = [
  "fmm",
  "fnv",
@@ -293,7 +293,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#2ae3a5d87bec23df0c302d322baf18390f64edaf"
+source = "git+https://github.com/raviqqe/fmm?branch=feature/optimal-stack-sort#4cec7d5f81c5ec5f66544bacf26a8750a9ba3deb"
 dependencies = [
  "fmm",
  "fnv",
