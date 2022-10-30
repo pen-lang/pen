@@ -136,6 +136,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bytecount"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c676a478f63e9fa2dd5368a42f28bba0d6c560b775f38583c8bbaa7fcd67c9c"
+
+[[package]]
 name = "bytes"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -736,6 +742,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom_locate"
+version = "4.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "37794436ca3029a3089e0b95d42da1f0b565ad271e4d3bb4bad0c7bb70b10605"
+dependencies = [
+ "bytecount",
+ "memchr",
+ "nom",
+]
+
+[[package]]
 name = "num-traits"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -817,6 +834,7 @@ dependencies = [
  "indoc",
  "insta",
  "nom",
+ "nom_locate",
  "once_cell",
  "position",
  "pretty_assertions",
