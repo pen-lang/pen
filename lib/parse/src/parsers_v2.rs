@@ -1,5 +1,10 @@
+use ast::*;
 use nom::IResult;
 
-fn comment(input: &str) -> IResult<&str, Foo> {
-    foo
+struct Input<'a> {
+    string: &'a str,
+}
+
+fn comment(input: Input) -> IResult<Input, Comment> {
+    let (input, foo) = input;
 }
