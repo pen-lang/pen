@@ -1,4 +1,4 @@
-use ast::*;
+use ast::{types::Type, *};
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -7,8 +7,8 @@ use nom::{
         one_of,
     },
     combinator::{all_consuming, map, not, opt, peek, recognize, value, verify},
-    multi::many0,
-    sequence::tuple,
+    multi::{many0, separated_list0, separated_list1},
+    sequence::{delimited, tuple},
     IResult, Parser,
 };
 use nom_locate::LocatedSpan;
@@ -45,6 +45,68 @@ pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
     ))
 }
 
+fn type_(input: Input) -> IResult<Input, Type> {
+    alt((map(function_type, From::from), union_type))(input)
+}
+
+fn function_type(input: Input) -> IResult<Input, types::Function> {
+    let position = position(input);
+
+    let (input, (_, arguments, _, result)) = tuple((
+        sign("\\("),
+        separated_list0(sign(","), type_),
+        sign(")"),
+        type_,
+    ))(input)?;
+
+    Ok((input, types::Function::new(arguments, result, position)))
+}
+
+fn union_type(input: Input) -> IResult<Input, Type> {
+    let (input, types) = separated_list1(sign("|"), atomic_type)(input)?;
+
+    Ok((
+        input,
+        types
+            .into_iter()
+            .reduce(|lhs, rhs| types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into())
+            .unwrap(),
+    ))
+}
+
+fn list_type(input: Input) -> IResult<Input, types::List> {
+    let position = position(input);
+
+    let (input, element) = delimited(sign("["), type_, sign("]"))(input)?;
+
+    Ok((input, types::List::new(element, position)))
+}
+
+fn map_type(input: Input) -> IResult<Input, types::Map> {
+    let position = position(input);
+
+    let (input, (_, key, _, value, _)) =
+        tuple((sign("{"), type_, sign(":"), type_, sign("}")))(input)?;
+
+    Ok((input, types::Map::new(key, value, position)))
+}
+
+fn atomic_type(input: Input) -> IResult<Input, Type> {
+    alt((
+        map(reference_type, From::from),
+        map(list_type, From::from),
+        map(map_type, From::from),
+        delimited(sign("("), type_, sign(")")),
+    ))(input)
+}
+
+fn reference_type(input: Input) -> IResult<Input, types::Reference> {
+    let position = position(input);
+    let (input, identifier) = token(qualified_identifier)(input)?;
+
+    Ok((input, types::Reference::new(identifier, position)))
+}
+
 fn string_literal(input: Input) -> IResult<Input, ByteString> {
     token(raw_string_literal)(input)
 }
@@ -52,7 +114,7 @@ fn string_literal(input: Input) -> IResult<Input, ByteString> {
 fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
     let position = position(input);
 
-    let (input, (_, strings, _)) = tuple((
+    let (input, strings) = delimited(
         char('"'),
         many0(alt((
             recognize(none_of("\\\"")),
@@ -65,7 +127,7 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
             recognize(tuple((tag("\\x"), hex_digit1))),
         ))),
         char('"'),
-    ))(input)?;
+    )(input)?;
 
     Ok((
         input,
@@ -142,18 +204,17 @@ fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<Input, ()> {
 }
 
 fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> {
-    if !sign
-        .chars()
-        .any(|character| OPERATOR_CHARACTERS.contains(character))
-    {
-        unreachable!();
-    }
-
     move |input| {
-        value(
-            (),
-            tuple((tag(sign), peek(not(one_of(OPERATOR_CHARACTERS))))),
-        )(input)
+        let parser = token(tag(sign));
+
+        if sign
+            .chars()
+            .any(|character| OPERATOR_CHARACTERS.contains(character))
+        {
+            value((), tuple((parser, peek(not(one_of(OPERATOR_CHARACTERS))))))(input)
+        } else {
+            value((), parser)(input)
+        }
     }
 }
 
@@ -771,213 +832,201 @@ mod tests {
     //     }
     // }
 
-    // mod types_ {
-    //     use super::*;
-    //     use pretty_assertions::assert_eq;
+    mod type_ {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    //     #[test]
-    //     fn parse_type() {
-    //         assert!(type_().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             type_().parse(input("boolean", "")).unwrap().0,
-    //             types::Reference::new("boolean", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("none", "")).unwrap().0,
-    //             types::Reference::new("none", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("number", "")).unwrap().0,
-    //             types::Reference::new("number", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("Foo", "")).unwrap().0,
-    //             types::Reference::new("Foo", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("Foo'Bar", "")).unwrap().0,
-    //             types::Reference::new("Foo'Bar", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("\\(number)number", "")).unwrap().0,
-    //             types::Function::new(
-    //                 vec![types::Reference::new("number", Position::fake()).into()],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_()
-    //                 .parse(input("\\(number,number)number", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             types::Function::new(
-    //                 vec![
-    //                     types::Reference::new("number", Position::fake()).into(),
-    //                     types::Reference::new("number", Position::fake()).into(),
-    //                 ],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_()
-    //                 .parse(input("\\(\\(number)number)number", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             types::Function::new(
-    //                 vec![types::Function::new(
-    //                     vec![types::Reference::new("number", Position::fake()).into()],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 )
-    //                 .into()],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("number|none", "")).unwrap().0,
-    //             types::Union::new(
-    //                 types::Reference::new("number", Position::fake()),
-    //                 types::Reference::new("none", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("boolean|number|none", "")).unwrap().0,
-    //             types::Union::new(
-    //                 types::Union::new(
-    //                     types::Reference::new("boolean", Position::fake()),
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 types::Reference::new("none", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_()
-    //                 .parse(input("\\(number)number|none", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             types::Function::new(
-    //                 vec![types::Reference::new("number", Position::fake()).into()],
-    //                 types::Union::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             type_()
-    //                 .parse(input("(\\(number)number)|none", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             types::Union::new(
-    //                 types::Function::new(
-    //                     vec![types::Reference::new("number", Position::fake()).into()],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 types::Reference::new("none", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //     }
+        #[test]
+        fn parse_type() {
+            assert!(type_(input("", "")).is_err());
+            assert_eq!(
+                type_(input("boolean", "")).unwrap().1,
+                types::Reference::new("boolean", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("none", "")).unwrap().1,
+                types::Reference::new("none", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("number", "")).unwrap().1,
+                types::Reference::new("number", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("Foo", "")).unwrap().1,
+                types::Reference::new("Foo", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("Foo'Bar", "")).unwrap().1,
+                types::Reference::new("Foo'Bar", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("\\(number)number", "")).unwrap().1,
+                types::Function::new(
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("\\(number,number)number", "")).unwrap().1,
+                types::Function::new(
+                    vec![
+                        types::Reference::new("number", Position::fake()).into(),
+                        types::Reference::new("number", Position::fake()).into(),
+                    ],
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("\\(\\(number)number)number", "")).unwrap().1,
+                types::Function::new(
+                    vec![types::Function::new(
+                        vec![types::Reference::new("number", Position::fake()).into()],
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("number|none", "")).unwrap().1,
+                types::Union::new(
+                    types::Reference::new("number", Position::fake()),
+                    types::Reference::new("none", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("boolean|number|none", "")).unwrap().1,
+                types::Union::new(
+                    types::Union::new(
+                        types::Reference::new("boolean", Position::fake()),
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
+                    types::Reference::new("none", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("\\(number)number|none", "")).unwrap().1,
+                types::Function::new(
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Union::new(
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                type_(input("(\\(number)number)|none", "")).unwrap().1,
+                types::Union::new(
+                    types::Function::new(
+                        vec![types::Reference::new("number", Position::fake()).into()],
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
+                    types::Reference::new("none", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
 
-    //     #[test]
-    //     fn parse_reference_type() {
-    //         assert!(type_().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             type_().parse(input("Foo", "")).unwrap().0,
-    //             types::Reference::new("Foo", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             type_().parse(input("Foo'Bar", "")).unwrap().0,
-    //             types::Reference::new("Foo'Bar", Position::fake()).into()
-    //         );
-    //     }
+        #[test]
+        fn parse_reference_type() {
+            assert!(type_(input("", "")).is_err());
+            assert_eq!(
+                type_(input("Foo", "")).unwrap().1,
+                types::Reference::new("Foo", Position::fake()).into()
+            );
+            assert_eq!(
+                type_(input("Foo'Bar", "")).unwrap().1,
+                types::Reference::new("Foo'Bar", Position::fake()).into()
+            );
+        }
 
-    //     #[test]
-    //     fn parse_list_type() {
-    //         assert_eq!(
-    //             type_().parse(input("[number]", "")).unwrap().0,
-    //             types::List::new(
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
+        #[test]
+        fn parse_list_type() {
+            assert_eq!(
+                type_(input("[number]", "")).unwrap().1,
+                types::List::new(
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
 
-    //         assert_eq!(
-    //             type_().parse(input("[[number]]", "")).unwrap().0,
-    //             types::List::new(
-    //                 types::List::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
+            assert_eq!(
+                type_(input("[[number]]", "")).unwrap().1,
+                types::List::new(
+                    types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
 
-    //         assert_eq!(
-    //             type_().parse(input("[number]|[none]", "")).unwrap().0,
-    //             types::Union::new(
-    //                 types::List::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 types::List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
+            assert_eq!(
+                type_(input("[number]|[none]", "")).unwrap().1,
+                types::Union::new(
+                    types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    ),
+                    types::List::new(
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
 
-    //         assert_eq!(
-    //             type_().parse(input("\\([number])[none]", "")).unwrap().0,
-    //             types::Function::new(
-    //                 vec![types::List::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 )
-    //                 .into()],
-    //                 types::List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //     }
+            assert_eq!(
+                type_(input("\\([number])[none]", "")).unwrap().1,
+                types::Function::new(
+                    vec![types::List::new(
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    types::List::new(
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
 
-    //     #[test]
-    //     fn parse_map_type() {
-    //         assert_eq!(
-    //             type_().parse(input("{number:none}", "")).unwrap().0,
-    //             types::Map::new(
-    //                 types::Reference::new("number", Position::fake()),
-    //                 types::Reference::new("none", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //     }
-    // }
+        #[test]
+        fn parse_map_type() {
+            assert_eq!(
+                type_(input("{number:none}", "")).unwrap().1,
+                types::Map::new(
+                    types::Reference::new("number", Position::fake()),
+                    types::Reference::new("none", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
+    }
 
     // mod expressions {
     //     use super::*;
@@ -2579,6 +2628,7 @@ mod tests {
         assert!(sign("+")(input("+", "")).is_ok());
         assert!(sign("++")(input("++", "")).is_ok());
         assert!(sign("+")(input("++", "")).is_err());
+        assert!(sign("\\")(input("\\", "")).is_ok());
     }
 
     #[test]
