@@ -3,16 +3,19 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{
-        alpha1, alphanumeric0, alphanumeric1, char, hex_digit1, multispace0, multispace1, none_of,
-        one_of,
+        alpha1, alphanumeric0, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1,
+        none_of, one_of,
     },
-    combinator::{all_consuming, map, not, opt, peek, recognize, value, verify},
-    multi::{many0, separated_list0, separated_list1},
-    sequence::{delimited, tuple},
+    combinator::{all_consuming, into, map, not, opt, peek, recognize, value, verify},
+    multi::{many0, many1, separated_list0, separated_list1},
+    number::complete::recognize_float,
+    sequence::{delimited, preceded, terminated, tuple},
     IResult, Parser,
 };
 use nom_locate::LocatedSpan;
 use position::Position;
+
+use crate::operations::{reduce_operations, SuffixOperator};
 
 const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -107,6 +110,166 @@ fn reference_type(input: Input) -> IResult<Input, types::Reference> {
     Ok((input, types::Reference::new(identifier, position)))
 }
 
+fn expression(input: Input) -> IResult<Input, Expression> {
+    binary_operation_like(input)
+}
+
+fn binary_operation_like(input: Input) -> IResult<Input, Expression> {
+    let (input, (expression, pairs)): (_, (_, Vec<_>)) = tuple((
+        prefix_operation_like,
+        many0(map(
+            tuple((position_parser, binary_operator, prefix_operation_like)),
+            |(position, operator, expression)| (operator, expression, position),
+        )),
+    ))(input)?;
+
+    Ok((input, reduce_operations(expression, &pairs)))
+}
+
+fn binary_operator(input: Input) -> IResult<Input, BinaryOperator> {
+    alt((
+        value(BinaryOperator::Add, sign("+")),
+        value(BinaryOperator::Subtract, sign("-")),
+        value(BinaryOperator::Multiply, sign("*")),
+        value(BinaryOperator::Divide, sign("/")),
+        value(BinaryOperator::Equal, sign("==")),
+        value(BinaryOperator::NotEqual, sign("!=")),
+        value(BinaryOperator::LessThan, sign("<")),
+        value(BinaryOperator::LessThanOrEqual, sign("<=")),
+        value(BinaryOperator::GreaterThan, sign(">")),
+        value(BinaryOperator::GreaterThanOrEqual, sign(">=")),
+        value(BinaryOperator::And, sign("&")),
+        value(BinaryOperator::Or, sign("|")),
+    ))(input)
+}
+
+fn prefix_operation_like(input: Input) -> IResult<Input, Expression> {
+    alt((
+        map(prefix_operation, From::from),
+        map(suffix_operation_like, From::from),
+    ))(input)
+}
+
+fn prefix_operation(input: Input) -> IResult<Input, UnaryOperation> {
+    let position = position(input);
+
+    let (input, (operator, expression)) = tuple((prefix_operator, prefix_operation_like))(input)?;
+
+    Ok((input, UnaryOperation::new(operator, expression, position)))
+}
+
+fn prefix_operator(input: Input) -> IResult<Input, UnaryOperator> {
+    value(UnaryOperator::Not, sign("!"))(input)
+}
+
+fn suffix_operation_like(input: Input) -> IResult<Input, Expression> {
+    let (input, (expression, suffix_operators)) =
+        tuple((atomic_expression, many0(suffix_operator)))(input)?;
+
+    Ok((
+        input,
+        suffix_operators
+            .into_iter()
+            .fold(expression, |expression, operator| match operator {
+                SuffixOperator::Call(arguments, position) => {
+                    Call::new(expression, arguments, position).into()
+                }
+                SuffixOperator::RecordField(name, position) => {
+                    RecordDeconstruction::new(expression, name, position).into()
+                }
+                SuffixOperator::Try(position) => {
+                    UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                }
+            }),
+    ))
+}
+
+fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
+    alt((call_operator, record_field_operator, try_operator))(input)
+}
+
+fn call_operator(input: Input) -> IResult<Input, SuffixOperator> {
+    let position = position(input);
+
+    let (input, arguments) =
+        delimited(sign("("), separated_list0(sign(","), expression), sign(")"))(input)?;
+
+    Ok((input, SuffixOperator::Call(arguments, position)))
+}
+
+fn record_field_operator(input: Input) -> IResult<Input, SuffixOperator> {
+    let position = position(input);
+
+    let (input, identifier) = preceded(sign("."), identifier)(input)?;
+
+    Ok((input, SuffixOperator::RecordField(identifier, position)))
+}
+
+fn try_operator(input: Input) -> IResult<Input, SuffixOperator> {
+    let position = position(input);
+
+    let (input, _) = sign("?")(input)?;
+
+    Ok((input, SuffixOperator::Try(position)))
+}
+
+fn atomic_expression(input: Input) -> IResult<Input, Expression> {
+    alt((
+        // if_list().map(Expression::from),
+        // if_map().map(Expression::from),
+        // if_type().map(Expression::from),
+        // if_().map(Expression::from),
+        // lambda().map(Expression::from),
+        // record().map(Expression::from),
+        // list_comprehension().map(Expression::from),
+        // list_literal().map(Expression::from),
+        into(map_literal),
+        into(number_literal),
+        into(string_literal),
+        into(variable),
+        delimited(sign("("), expression, sign(")")),
+    ))(input)
+}
+
+fn number_literal(input: Input) -> IResult<Input, Number> {
+    let position = position(input);
+    let (input, number) = token(terminated(
+        alt((binary_literal, hexadecimal_literal, decimal_literal)),
+        peek(not(digit1)),
+    ))(input)?;
+
+    Ok((input, Number::new(number, position)))
+}
+
+fn binary_literal(input: Input) -> IResult<Input, NumberRepresentation> {
+    let (input, characters) = preceded(tag("0b"), many1(one_of("01")))(input)?;
+
+    Ok((
+        input,
+        NumberRepresentation::Binary(String::from_iter(characters)),
+    ))
+}
+
+fn hexadecimal_literal(input: Input) -> IResult<Input, NumberRepresentation> {
+    let (input, characters) = preceded(tag("0x"), many1(one_of("0123456789abcdefABCDEF")))(input)?;
+
+    Ok((
+        input,
+        NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase()),
+    ))
+}
+
+fn decimal_literal(input: Input) -> IResult<Input, NumberRepresentation> {
+    let (input, characters) = recognize_float(input)?;
+
+    Ok((
+        input,
+        NumberRepresentation::FloatingPoint(
+            String::from_utf8_lossy(characters.as_bytes()).to_string(),
+        ),
+    ))
+}
+
 fn string_literal(input: Input) -> IResult<Input, ByteString> {
     token(raw_string_literal)(input)
 }
@@ -140,6 +303,32 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
             position,
         ),
     ))
+}
+
+fn map_literal(input: Input) -> IResult<Input, Map> {
+    let position = position(input);
+
+    let (input, (_, key_type, _, value_type, elements, _)) = tuple((
+        sign("{"),
+        type_,
+        sign(":"),
+        type_,
+        separated_list0(sign(","), map_element),
+        sign("}"),
+    ))(input)?;
+
+    Ok((input, Map::new(key_type, value_type, elements, position)))
+}
+
+fn map_element(input: Input) -> IResult<Input, MapElement> {
+    alt((
+        map(
+            tuple((position_parser, expression, sign(":"), expression)),
+            |(position, key, _, value)| MapEntry::new(key, value, position).into(),
+        ),
+        map(preceded(sign("..."), expression), MapElement::Map),
+        map(expression, MapElement::Removal),
+    ))(input)
 }
 
 fn variable(input: Input) -> IResult<Input, Variable> {
@@ -241,6 +430,7 @@ fn comment(input: Input) -> IResult<Input, Comment> {
     Ok((input, Comment::new(String::from_iter(comment), position)))
 }
 
+// TODO Replace use of this with `position_parser`.
 fn position(input: Input) -> Position {
     Position::new(
         input.extra,
@@ -248,6 +438,20 @@ fn position(input: Input) -> Position {
         input.get_column(),
         String::from_utf8_lossy(input.get_line_beginning()),
     )
+}
+
+fn position_parser(input: Input) -> IResult<Input, Position> {
+    let (input, _) = multispace0(input)?;
+
+    Ok((
+        input,
+        Position::new(
+            input.extra,
+            input.location_line() as usize,
+            input.get_column(),
+            String::from_utf8_lossy(input.get_line_beginning()),
+        ),
+    ))
 }
 
 #[cfg(test)]
@@ -1028,1578 +1232,1577 @@ mod tests {
         }
     }
 
-    // mod expressions {
-    //     use super::*;
-    //     use pretty_assertions::assert_eq;
+    mod expression {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    //     #[test]
-    //     fn parse_expression() {
-    //         assert!(expression().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             expression().parse(input("1", "")).unwrap().0,
-    //             Number::new(
-    //                 NumberRepresentation::FloatingPoint("1".into()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             expression().parse(input("x", "")).unwrap().0,
-    //             Variable::new("x", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             expression().parse(input("x + 1", "")).unwrap().0,
-    //             BinaryOperation::new(
-    //                 BinaryOperator::Add,
-    //                 Variable::new("x", Position::fake()),
-    //                 Number::new(
-    //                     NumberRepresentation::FloatingPoint("1".into()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             expression().parse(input("x + y(z)", "")).unwrap().0,
-    //             BinaryOperation::new(
-    //                 BinaryOperator::Add,
-    //                 Variable::new("x", Position::fake()),
-    //                 Call::new(
-    //                     Variable::new("y", Position::fake()),
-    //                     vec![Variable::new("z", Position::fake()).into()],
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             expression().parse(input("(x + y)(z)", "")).unwrap().0,
-    //             Call::new(
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     Variable::new("x", Position::fake()),
-    //                     Variable::new("y", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 vec![Variable::new("z", Position::fake()).into()],
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_expression() {
+        //         assert!(expression().parse(input("", "")).is_err());
+        //         assert_eq!(
+        //             expression().parse(input("1", "")).unwrap().0,
+        //             Number::new(
+        //                 NumberRepresentation::FloatingPoint("1".into()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //         assert_eq!(
+        //             expression().parse(input("x", "")).unwrap().0,
+        //             Variable::new("x", Position::fake()).into()
+        //         );
+        //         assert_eq!(
+        //             expression().parse(input("x + 1", "")).unwrap().0,
+        //             BinaryOperation::new(
+        //                 BinaryOperator::Add,
+        //                 Variable::new("x", Position::fake()),
+        //                 Number::new(
+        //                     NumberRepresentation::FloatingPoint("1".into()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //         assert_eq!(
+        //             expression().parse(input("x + y(z)", "")).unwrap().0,
+        //             BinaryOperation::new(
+        //                 BinaryOperator::Add,
+        //                 Variable::new("x", Position::fake()),
+        //                 Call::new(
+        //                     Variable::new("y", Position::fake()),
+        //                     vec![Variable::new("z", Position::fake()).into()],
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //         assert_eq!(
+        //             expression().parse(input("(x + y)(z)", "")).unwrap().0,
+        //             Call::new(
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Variable::new("x", Position::fake()),
+        //                     Variable::new("y", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 vec![Variable::new("z", Position::fake()).into()],
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_deeply_nested_expression() {
-    //         assert_eq!(
-    //             expression().parse(input("(((((42)))))", "")).unwrap().0,
-    //             Number::new(
-    //                 NumberRepresentation::FloatingPoint("42".into()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         )
-    //     }
+        //     #[test]
+        //     fn parse_deeply_nested_expression() {
+        //         assert_eq!(
+        //             expression().parse(input("(((((42)))))", "")).unwrap().0,
+        //             Number::new(
+        //                 NumberRepresentation::FloatingPoint("42".into()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         )
+        //     }
 
-    //     #[test]
-    //     fn parse_atomic_expression() {
-    //         assert!(atomic_expression().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             atomic_expression().parse(input("1", "")).unwrap().0,
-    //             Number::new(
-    //                 NumberRepresentation::FloatingPoint("1".into()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //         assert_eq!(
-    //             atomic_expression().parse(input("x", "")).unwrap().0,
-    //             Variable::new("x", Position::fake()).into()
-    //         );
-    //         assert_eq!(
-    //             atomic_expression().parse(input("(x)", "")).unwrap().0,
-    //             Variable::new("x", Position::fake()).into()
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_atomic_expression() {
+        //         assert!(atomic_expression().parse(input("", "")).is_err());
+        //         assert_eq!(
+        //             atomic_expression().parse(input("1", "")).unwrap().0,
+        //             Number::new(
+        //                 NumberRepresentation::FloatingPoint("1".into()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //         assert_eq!(
+        //             atomic_expression().parse(input("x", "")).unwrap().0,
+        //             Variable::new("x", Position::fake()).into()
+        //         );
+        //         assert_eq!(
+        //             atomic_expression().parse(input("(x)", "")).unwrap().0,
+        //             Variable::new("x", Position::fake()).into()
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_lambda() {
-    //         assert_eq!(
-    //             lambda()
-    //                 .parse(input("\\(x number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Lambda::new(
-    //                 vec![Argument::new(
-    //                     "x",
-    //                     types::Reference::new("number", Position::fake())
-    //                 )],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             ),
-    //         );
+        //     #[test]
+        //     fn parse_lambda() {
+        //         assert_eq!(
+        //             lambda()
+        //                 .parse(input("\\(x number)number{42}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             Lambda::new(
+        //                 vec![Argument::new(
+        //                     "x",
+        //                     types::Reference::new("number", Position::fake())
+        //                 )],
+        //                 types::Reference::new("number", Position::fake()),
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             ),
+        //         );
 
-    //         assert_eq!(
-    //             lambda()
-    //                 .parse(input("\\(x number,y number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Lambda::new(
-    //                 vec![
-    //                     Argument::new("x", types::Reference::new("number", Position::fake())),
-    //                     Argument::new("y", types::Reference::new("number", Position::fake()))
-    //                 ],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        //         assert_eq!(
+        //             lambda()
+        //                 .parse(input("\\(x number,y number)number{42}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             Lambda::new(
+        //                 vec![
+        //                     Argument::new("x", types::Reference::new("number", Position::fake())),
+        //                     Argument::new("y", types::Reference::new("number", Position::fake()))
+        //                 ],
+        //                 types::Reference::new("number", Position::fake()),
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_lambda_with_reference_type() {
-    //         assert_eq!(
-    //             lambda().parse(input("\\() Foo { 42 }", "")).unwrap().0,
-    //             Lambda::new(
-    //                 vec![],
-    //                 types::Reference::new("Foo", Position::fake()),
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_lambda_with_reference_type() {
+        //         assert_eq!(
+        //             lambda().parse(input("\\() Foo { 42 }", "")).unwrap().0,
+        //             Lambda::new(
+        //                 vec![],
+        //                 types::Reference::new("Foo", Position::fake()),
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_block() {
-    //         assert_eq!(
-    //             block().parse(input("{none}", "")).unwrap().0,
-    //             Block::new(
-    //                 vec![],
-    //                 Variable::new("none", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //         assert_eq!(
-    //             block().parse(input("{none none}", "")).unwrap().0,
-    //             Block::new(
-    //                 vec![Statement::new(
-    //                     None,
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 )],
-    //                 Variable::new("none", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //         assert_eq!(
-    //             block().parse(input("{none none none}", "")).unwrap().0,
-    //             Block::new(
-    //                 vec![
-    //                     Statement::new(
-    //                         None,
-    //                         Variable::new("none", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                     Statement::new(
-    //                         None,
-    //                         Variable::new("none", Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 Variable::new("none", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //         assert_eq!(
-    //             block().parse(input("{x=none none}", "")).unwrap().0,
-    //             Block::new(
-    //                 vec![Statement::new(
-    //                     Some("x".into()),
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 )],
-    //                 Variable::new("none", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //         assert_eq!(
-    //             block().parse(input("{x==x}", "")).unwrap().0,
-    //             Block::new(
-    //                 vec![],
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Equal,
-    //                     Variable::new("x", Position::fake()),
-    //                     Variable::new("x", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_block() {
+        //         assert_eq!(
+        //             block().parse(input("{none}", "")).unwrap().0,
+        //             Block::new(
+        //                 vec![],
+        //                 Variable::new("none", Position::fake()),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //         assert_eq!(
+        //             block().parse(input("{none none}", "")).unwrap().0,
+        //             Block::new(
+        //                 vec![Statement::new(
+        //                     None,
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 )],
+        //                 Variable::new("none", Position::fake()),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //         assert_eq!(
+        //             block().parse(input("{none none none}", "")).unwrap().0,
+        //             Block::new(
+        //                 vec![
+        //                     Statement::new(
+        //                         None,
+        //                         Variable::new("none", Position::fake()),
+        //                         Position::fake()
+        //                     ),
+        //                     Statement::new(
+        //                         None,
+        //                         Variable::new("none", Position::fake()),
+        //                         Position::fake()
+        //                     )
+        //                 ],
+        //                 Variable::new("none", Position::fake()),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //         assert_eq!(
+        //             block().parse(input("{x=none none}", "")).unwrap().0,
+        //             Block::new(
+        //                 vec![Statement::new(
+        //                     Some("x".into()),
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 )],
+        //                 Variable::new("none", Position::fake()),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //         assert_eq!(
+        //             block().parse(input("{x==x}", "")).unwrap().0,
+        //             Block::new(
+        //                 vec![],
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Equal,
+        //                     Variable::new("x", Position::fake()),
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_statement() {
-    //         assert_eq!(
-    //             statement().parse(input("x==x", "")).unwrap().0,
-    //             Statement::new(
-    //                 None,
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Equal,
-    //                     Variable::new("x", Position::fake()),
-    //                     Variable::new("x", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_statement() {
+        //         assert_eq!(
+        //             statement().parse(input("x==x", "")).unwrap().0,
+        //             Statement::new(
+        //                 None,
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Equal,
+        //                     Variable::new("x", Position::fake()),
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake()
+        //             ),
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_if() {
-    //         assert_eq!(
-    //             if_()
-    //                 .parse(input("if true { 42 } else { 13 }", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             If::new(
-    //                 vec![IfBranch::new(
-    //                     Variable::new("true", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                 )],
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("13".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //         );
-    //         assert_eq!(
-    //             if_()
-    //                 .parse(input("if if true {true}else{true}{42}else{13}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             If::new(
-    //                 vec![IfBranch::new(
-    //                     If::new(
-    //                         vec![IfBranch::new(
-    //                             Variable::new("true", Position::fake()),
-    //                             Block::new(
-    //                                 vec![],
-    //                                 Variable::new("true", Position::fake()),
-    //                                 Position::fake()
-    //                             ),
-    //                         )],
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("true", Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                 )],
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("13".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //         );
-    //         assert_eq!(
-    //             if_()
-    //                 .parse(input("if true {1}else if true {2}else{3}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             If::new(
-    //                 vec![
-    //                     IfBranch::new(
-    //                         Variable::new("true", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("1".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                     ),
-    //                     IfBranch::new(
-    //                         Variable::new("true", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                     )
-    //                 ],
-    //                 Block::new(
-    //                     vec![],
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("3".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_if() {
+        //         assert_eq!(
+        //             if_()
+        //                 .parse(input("if true { 42 } else { 13 }", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             If::new(
+        //                 vec![IfBranch::new(
+        //                     Variable::new("true", Position::fake()),
+        //                     Block::new(
+        //                         vec![],
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     ),
+        //                 )],
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("13".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //         );
+        //         assert_eq!(
+        //             if_()
+        //                 .parse(input("if if true {true}else{true}{42}else{13}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             If::new(
+        //                 vec![IfBranch::new(
+        //                     If::new(
+        //                         vec![IfBranch::new(
+        //                             Variable::new("true", Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 Variable::new("true", Position::fake()),
+        //                                 Position::fake()
+        //                             ),
+        //                         )],
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("true", Position::fake()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Block::new(
+        //                         vec![],
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     ),
+        //                 )],
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("13".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //         );
+        //         assert_eq!(
+        //             if_()
+        //                 .parse(input("if true {1}else if true {2}else{3}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             If::new(
+        //                 vec![
+        //                     IfBranch::new(
+        //                         Variable::new("true", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("1".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         ),
+        //                     ),
+        //                     IfBranch::new(
+        //                         Variable::new("true", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Number::new(
+        //                                 NumberRepresentation::FloatingPoint("2".into()),
+        //                                 Position::fake()
+        //                             ),
+        //                             Position::fake()
+        //                         ),
+        //                     )
+        //                 ],
+        //                 Block::new(
+        //                     vec![],
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("3".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_if_with_equal_operator() {
-    //         assert_eq!(
-    //             expression()
-    //                 .parse(input("if x==y {none}else{none}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             If::new(
-    //                 vec![IfBranch::new(
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Equal,
-    //                         Variable::new("x", Position::fake()),
-    //                         Variable::new("y", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                     Block::new(
-    //                         vec![],
-    //                         Variable::new("none", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                 )],
-    //                 Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //             .into()
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_if_with_equal_operator() {
+        //         assert_eq!(
+        //             expression()
+        //                 .parse(input("if x==y {none}else{none}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             If::new(
+        //                 vec![IfBranch::new(
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Equal,
+        //                         Variable::new("x", Position::fake()),
+        //                         Variable::new("y", Position::fake()),
+        //                         Position::fake()
+        //                     ),
+        //                     Block::new(
+        //                         vec![],
+        //                         Variable::new("none", Position::fake()),
+        //                         Position::fake()
+        //                     ),
+        //                 )],
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //             .into()
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_if_type() {
-    //         assert_eq!(
-    //             if_type()
-    //                 .parse(input("if x=y as boolean {none}else{none}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             IfType::new(
-    //                 "x",
-    //                 Variable::new("y", Position::fake()),
-    //                 vec![IfTypeBranch::new(
-    //                     types::Reference::new("boolean", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Variable::new("none", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                 )],
-    //                 Some(Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 )),
-    //                 Position::fake(),
-    //             )
-    //         );
+        //     #[test]
+        //     fn parse_if_type() {
+        //         assert_eq!(
+        //             if_type()
+        //                 .parse(input("if x=y as boolean {none}else{none}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             IfType::new(
+        //                 "x",
+        //                 Variable::new("y", Position::fake()),
+        //                 vec![IfTypeBranch::new(
+        //                     types::Reference::new("boolean", Position::fake()),
+        //                     Block::new(
+        //                         vec![],
+        //                         Variable::new("none", Position::fake()),
+        //                         Position::fake()
+        //                     ),
+        //                 )],
+        //                 Some(Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 )),
+        //                 Position::fake(),
+        //             )
+        //         );
 
-    //         assert_eq!(
-    //             if_type()
-    //                 .parse(input(
-    //                     "if x=y as boolean{none}else if none{none}else{none}",
-    //                     ""
-    //                 ))
-    //                 .unwrap()
-    //                 .0,
-    //             IfType::new(
-    //                 "x",
-    //                 Variable::new("y", Position::fake()),
-    //                 vec![
-    //                     IfTypeBranch::new(
-    //                         types::Reference::new("boolean", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                     ),
-    //                     IfTypeBranch::new(
-    //                         types::Reference::new("none", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                     )
-    //                 ],
-    //                 Some(Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 )),
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             if_type()
+        //                 .parse(input(
+        //                     "if x=y as boolean{none}else if none{none}else{none}",
+        //                     ""
+        //                 ))
+        //                 .unwrap()
+        //                 .0,
+        //             IfType::new(
+        //                 "x",
+        //                 Variable::new("y", Position::fake()),
+        //                 vec![
+        //                     IfTypeBranch::new(
+        //                         types::Reference::new("boolean", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("none", Position::fake()),
+        //                             Position::fake()
+        //                         ),
+        //                     ),
+        //                     IfTypeBranch::new(
+        //                         types::Reference::new("none", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("none", Position::fake()),
+        //                             Position::fake()
+        //                         ),
+        //                     )
+        //                 ],
+        //                 Some(Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 )),
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert_eq!(
-    //             if_type()
-    //                 .parse(input("if x=y as boolean{none}else if none{none}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             IfType::new(
-    //                 "x",
-    //                 Variable::new("y", Position::fake()),
-    //                 vec![
-    //                     IfTypeBranch::new(
-    //                         types::Reference::new("boolean", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                     ),
-    //                     IfTypeBranch::new(
-    //                         types::Reference::new("none", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake()
-    //                         ),
-    //                     )
-    //                 ],
-    //                 None,
-    //                 Position::fake()
-    //             )
-    //         );
-    //     }
+        //         assert_eq!(
+        //             if_type()
+        //                 .parse(input("if x=y as boolean{none}else if none{none}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             IfType::new(
+        //                 "x",
+        //                 Variable::new("y", Position::fake()),
+        //                 vec![
+        //                     IfTypeBranch::new(
+        //                         types::Reference::new("boolean", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("none", Position::fake()),
+        //                             Position::fake()
+        //                         ),
+        //                     ),
+        //                     IfTypeBranch::new(
+        //                         types::Reference::new("none", Position::fake()),
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("none", Position::fake()),
+        //                             Position::fake()
+        //                         ),
+        //                     )
+        //                 ],
+        //                 None,
+        //                 Position::fake()
+        //             )
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_if_list() {
-    //         assert_eq!(
-    //             if_list()
-    //                 .parse(input("if[x,...xs]=xs {none}else{none}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             IfList::new(
-    //                 Variable::new("xs", Position::fake()),
-    //                 "x",
-    //                 "xs",
-    //                 Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_if_list() {
+        //         assert_eq!(
+        //             if_list()
+        //                 .parse(input("if[x,...xs]=xs {none}else{none}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             IfList::new(
+        //                 Variable::new("xs", Position::fake()),
+        //                 "x",
+        //                 "xs",
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_if_map() {
-    //         assert_eq!(
-    //             if_map()
-    //                 .parse(input("if x=xs[42]{none}else{none}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             IfMap::new(
-    //                 "x",
-    //                 Variable::new("xs", Position::fake()),
-    //                 Number::new(
-    //                     NumberRepresentation::FloatingPoint("42".into()),
-    //                     Position::fake()
-    //                 ),
-    //                 Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Block::new(
-    //                     vec![],
-    //                     Variable::new("none", Position::fake()),
-    //                     Position::fake()
-    //                 ),
-    //                 Position::fake(),
-    //             )
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_if_map() {
+        //         assert_eq!(
+        //             if_map()
+        //                 .parse(input("if x=xs[42]{none}else{none}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             IfMap::new(
+        //                 "x",
+        //                 Variable::new("xs", Position::fake()),
+        //                 Number::new(
+        //                     NumberRepresentation::FloatingPoint("42".into()),
+        //                     Position::fake()
+        //                 ),
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Block::new(
+        //                     vec![],
+        //                     Variable::new("none", Position::fake()),
+        //                     Position::fake()
+        //                 ),
+        //                 Position::fake(),
+        //             )
+        //         );
+        //     }
 
-    //     mod call {
-    //         use super::*;
-    //         use pretty_assertions::assert_eq;
+        //     mod call {
+        //         use super::*;
+        //         use pretty_assertions::assert_eq;
 
-    //         #[test]
-    //         fn parse_call() {
-    //             assert_eq!(
-    //                 expression().parse(input("f()", "")).unwrap().0,
-    //                 Call::new(
-    //                     Variable::new("f", Position::fake()),
-    //                     vec![],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
+        //         #[test]
+        //         fn parse_call() {
+        //             assert_eq!(
+        //                 expression().parse(input("f()", "")).unwrap().0,
+        //                 Call::new(
+        //                     Variable::new("f", Position::fake()),
+        //                     vec![],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
 
-    //             assert_eq!(
-    //                 expression().parse(input("f()()", "")).unwrap().0,
-    //                 Call::new(
-    //                     Call::new(
-    //                         Variable::new("f", Position::fake()),
-    //                         vec![],
-    //                         Position::fake()
-    //                     ),
-    //                     vec![],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
+        //             assert_eq!(
+        //                 expression().parse(input("f()()", "")).unwrap().0,
+        //                 Call::new(
+        //                     Call::new(
+        //                         Variable::new("f", Position::fake()),
+        //                         vec![],
+        //                         Position::fake()
+        //                     ),
+        //                     vec![],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
 
-    //             assert_eq!(
-    //                 expression().parse(input("f(1)", "")).unwrap().0,
-    //                 Call::new(
-    //                     Variable::new("f", Position::fake()),
-    //                     vec![Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
+        //             assert_eq!(
+        //                 expression().parse(input("f(1)", "")).unwrap().0,
+        //                 Call::new(
+        //                     Variable::new("f", Position::fake()),
+        //                     vec![Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake()
+        //                     )
+        //                     .into()],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
 
-    //             assert_eq!(
-    //                 expression().parse(input("f(1,)", "")).unwrap().0,
-    //                 Call::new(
-    //                     Variable::new("f", Position::fake()),
-    //                     vec![Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake()
-    //                     )
-    //                     .into()],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
+        //             assert_eq!(
+        //                 expression().parse(input("f(1,)", "")).unwrap().0,
+        //                 Call::new(
+        //                     Variable::new("f", Position::fake()),
+        //                     vec![Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake()
+        //                     )
+        //                     .into()],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
 
-    //             assert_eq!(
-    //                 expression().parse(input("f(1, 2)", "")).unwrap().0,
-    //                 Call::new(
-    //                     Variable::new("f", Position::fake()),
-    //                     vec![
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake()
-    //                         )
-    //                         .into(),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake()
-    //                         )
-    //                         .into()
-    //                     ],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
+        //             assert_eq!(
+        //                 expression().parse(input("f(1, 2)", "")).unwrap().0,
+        //                 Call::new(
+        //                     Variable::new("f", Position::fake()),
+        //                     vec![
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake()
+        //                         )
+        //                         .into(),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake()
+        //                         )
+        //                         .into()
+        //                     ],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
 
-    //             assert_eq!(
-    //                 expression().parse(input("f(1, 2,)", "")).unwrap().0,
-    //                 Call::new(
-    //                     Variable::new("f", Position::fake()),
-    //                     vec![
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake()
-    //                         )
-    //                         .into(),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake()
-    //                         )
-    //                         .into()
-    //                     ],
-    //                     Position::fake()
-    //                 )
-    //                 .into()
-    //             );
-    //         }
+        //             assert_eq!(
+        //                 expression().parse(input("f(1, 2,)", "")).unwrap().0,
+        //                 Call::new(
+        //                     Variable::new("f", Position::fake()),
+        //                     vec![
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake()
+        //                         )
+        //                         .into(),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake()
+        //                         )
+        //                         .into()
+        //                     ],
+        //                     Position::fake()
+        //                 )
+        //                 .into()
+        //             );
+        //         }
 
-    //         #[test]
-    //         fn fail_to_parse_call() {
-    //             let source = "f(1+)";
+        //         #[test]
+        //         fn fail_to_parse_call() {
+        //             let source = "f(1+)";
 
-    //             insta::assert_debug_snapshot!(expression()
-    //                 .parse(input(source, ""))
-    //                 .map_err(|error| ParseError::new(source, "", error))
-    //                 .err());
-    //         }
-    //     }
+        //             insta::assert_debug_snapshot!(expression()
+        //                 .parse(input(source, ""))
+        //                 .map_err(|error| ParseError::new(source, "", error))
+        //                 .err());
+        //         }
+        //     }
 
-    //     #[test]
-    //     fn parse_try_operation() {
-    //         assert_eq!(
-    //             expression().parse(input("x?", "")).unwrap().0,
-    //             UnaryOperation::new(
-    //                 UnaryOperator::Try,
-    //                 Variable::new("x", Position::fake()),
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
-    //     }
+        //     #[test]
+        //     fn parse_try_operation() {
+        //         assert_eq!(
+        //             expression().parse(input("x?", "")).unwrap().0,
+        //             UnaryOperation::new(
+        //                 UnaryOperator::Try,
+        //                 Variable::new("x", Position::fake()),
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_unary_operation() {
-    //         assert!(prefix_operation().parse(input("", "")).is_err());
+        //     #[test]
+        //     fn parse_unary_operation() {
+        //         assert!(prefix_operation().parse(input("", "")).is_err());
 
-    //         for (source, expected) in &[
-    //             (
-    //                 "!42",
-    //                 UnaryOperation::new(
-    //                     UnaryOperator::Not,
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "!f(42)",
-    //                 UnaryOperation::new(
-    //                     UnaryOperator::Not,
-    //                     Call::new(
-    //                         Variable::new("f", Position::fake()),
-    //                         vec![Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake(),
-    //                         )
-    //                         .into()],
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "!if true {true}else{true}",
-    //                 UnaryOperation::new(
-    //                     UnaryOperator::Not,
-    //                     If::new(
-    //                         vec![IfBranch::new(
-    //                             Variable::new("true", Position::fake()),
-    //                             Block::new(
-    //                                 vec![],
-    //                                 Variable::new("true", Position::fake()),
-    //                                 Position::fake(),
-    //                             ),
-    //                         )],
-    //                         Block::new(
-    //                             vec![],
-    //                             Variable::new("true", Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "!!42",
-    //                 UnaryOperation::new(
-    //                     UnaryOperator::Not,
-    //                     UnaryOperation::new(
-    //                         UnaryOperator::Not,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //         ] {
-    //             assert_eq!(
-    //                 prefix_operation().parse(input(source, "")).unwrap().0,
-    //                 *expected
-    //             );
-    //         }
-    //     }
+        //         for (source, expected) in &[
+        //             (
+        //                 "!42",
+        //                 UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "!f(42)",
+        //                 UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     Call::new(
+        //                         Variable::new("f", Position::fake()),
+        //                         vec![Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake(),
+        //                         )
+        //                         .into()],
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "!if true {true}else{true}",
+        //                 UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     If::new(
+        //                         vec![IfBranch::new(
+        //                             Variable::new("true", Position::fake()),
+        //                             Block::new(
+        //                                 vec![],
+        //                                 Variable::new("true", Position::fake()),
+        //                                 Position::fake(),
+        //                             ),
+        //                         )],
+        //                         Block::new(
+        //                             vec![],
+        //                             Variable::new("true", Position::fake()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "!!42",
+        //                 UnaryOperation::new(
+        //                     UnaryOperator::Not,
+        //                     UnaryOperation::new(
+        //                         UnaryOperator::Not,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //         ] {
+        //             assert_eq!(
+        //                 prefix_operation().parse(input(source, "")).unwrap().0,
+        //                 *expected
+        //             );
+        //         }
+        //     }
 
-    //     #[test]
-    //     fn parse_prefix_operator() {
-    //         assert!(prefix_operator().parse(input("", "")).is_err());
+        //     #[test]
+        //     fn parse_prefix_operator() {
+        //         assert!(prefix_operator().parse(input("", "")).is_err());
 
-    //         assert_eq!(
-    //             prefix_operator().parse(input("!", "")).unwrap().0,
-    //             UnaryOperator::Not
-    //         );
-    //     }
+        //         assert_eq!(
+        //             prefix_operator().parse(input("!", "")).unwrap().0,
+        //             UnaryOperator::Not
+        //         );
+        //     }
 
-    //     #[test]
-    //     fn parse_binary_operation() {
-    //         for (source, target) in vec![
-    //             (
-    //                 "1+1",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1+1+1",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1+(1+1)",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1*2-3",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Subtract,
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Multiply,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("3".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1+2*3",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Multiply,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("3".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1*2-3/4",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Subtract,
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Multiply,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Divide,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("3".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("4".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "1==1",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Equal,
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("1".into()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "true&true",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::And,
-    //                     Variable::new("true", Position::fake()),
-    //                     Variable::new("true", Position::fake()),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "true|true",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Or,
-    //                     Variable::new("true", Position::fake()),
-    //                     Variable::new("true", Position::fake()),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "true&1<2",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::And,
-    //                     Variable::new("true", Position::fake()),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::LessThan,
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("1".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("2".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "true|true&true",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Or,
-    //                     Variable::new("true", Position::fake()),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::And,
-    //                         Variable::new("true", Position::fake()),
-    //                         Variable::new("true", Position::fake()),
-    //                         Position::fake(),
-    //                     ),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "true|true&true|true",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Or,
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Or,
-    //                         Variable::new("true", Position::fake()),
-    //                         BinaryOperation::new(
-    //                             BinaryOperator::And,
-    //                             Variable::new("true", Position::fake()),
-    //                             Variable::new("true", Position::fake()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     Variable::new("true", Position::fake()),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "x+x",
-    //                 BinaryOperation::new(
-    //                     BinaryOperator::Add,
-    //                     Variable::new("x", Position::fake()),
-    //                     Variable::new("x", Position::fake()),
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //         ] {
-    //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
-    //         }
-    //     }
+        //     #[test]
+        //     fn parse_binary_operation() {
+        //         for (source, target) in vec![
+        //             (
+        //                 "1+1",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1+1+1",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Add,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1+(1+1)",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Add,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1*2-3",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Subtract,
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Multiply,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("3".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1+2*3",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Multiply,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("3".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1*2-3/4",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Subtract,
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Multiply,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Divide,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("3".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("4".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "1==1",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Equal,
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("1".into()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "true&true",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::And,
+        //                     Variable::new("true", Position::fake()),
+        //                     Variable::new("true", Position::fake()),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "true|true",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Or,
+        //                     Variable::new("true", Position::fake()),
+        //                     Variable::new("true", Position::fake()),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "true&1<2",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::And,
+        //                     Variable::new("true", Position::fake()),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::LessThan,
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("1".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("2".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "true|true&true",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Or,
+        //                     Variable::new("true", Position::fake()),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::And,
+        //                         Variable::new("true", Position::fake()),
+        //                         Variable::new("true", Position::fake()),
+        //                         Position::fake(),
+        //                     ),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "true|true&true|true",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Or,
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Or,
+        //                         Variable::new("true", Position::fake()),
+        //                         BinaryOperation::new(
+        //                             BinaryOperator::And,
+        //                             Variable::new("true", Position::fake()),
+        //                             Variable::new("true", Position::fake()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     Variable::new("true", Position::fake()),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //             (
+        //                 "x+x",
+        //                 BinaryOperation::new(
+        //                     BinaryOperator::Add,
+        //                     Variable::new("x", Position::fake()),
+        //                     Variable::new("x", Position::fake()),
+        //                     Position::fake(),
+        //                 )
+        //                 .into(),
+        //             ),
+        //         ] {
+        //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
+        //         }
+        //     }
 
-    //     #[test]
-    //     fn parse_binary_operator() {
-    //         assert!(binary_operator().parse(input("", "")).is_err());
-    //         assert!(binary_operator().parse(input("++", "")).is_err());
+        //     #[test]
+        //     fn parse_binary_operator() {
+        //         assert!(binary_operator().parse(input("", "")).is_err());
+        //         assert!(binary_operator().parse(input("++", "")).is_err());
 
-    //         for (source, expected) in &[
-    //             ("+", BinaryOperator::Add),
-    //             ("-", BinaryOperator::Subtract),
-    //             ("*", BinaryOperator::Multiply),
-    //             ("/", BinaryOperator::Divide),
-    //             ("==", BinaryOperator::Equal),
-    //             ("!=", BinaryOperator::NotEqual),
-    //             ("<", BinaryOperator::LessThan),
-    //             ("<=", BinaryOperator::LessThanOrEqual),
-    //             (">", BinaryOperator::GreaterThan),
-    //             (">=", BinaryOperator::GreaterThanOrEqual),
-    //             ("&", BinaryOperator::And),
-    //             ("|", BinaryOperator::Or),
-    //         ] {
-    //             assert_eq!(
-    //                 binary_operator().parse(input(source, "")).unwrap().0,
-    //                 *expected
-    //             );
-    //         }
-    //     }
+        //         for (source, expected) in &[
+        //             ("+", BinaryOperator::Add),
+        //             ("-", BinaryOperator::Subtract),
+        //             ("*", BinaryOperator::Multiply),
+        //             ("/", BinaryOperator::Divide),
+        //             ("==", BinaryOperator::Equal),
+        //             ("!=", BinaryOperator::NotEqual),
+        //             ("<", BinaryOperator::LessThan),
+        //             ("<=", BinaryOperator::LessThanOrEqual),
+        //             (">", BinaryOperator::GreaterThan),
+        //             (">=", BinaryOperator::GreaterThanOrEqual),
+        //             ("&", BinaryOperator::And),
+        //             ("|", BinaryOperator::Or),
+        //         ] {
+        //             assert_eq!(
+        //                 binary_operator().parse(input(source, "")).unwrap().0,
+        //                 *expected
+        //             );
+        //         }
+        //     }
 
-    //     #[test]
-    //     fn parse_record() {
-    //         assert!(record().parse(input("Foo", "")).is_err());
+        //     #[test]
+        //     fn parse_record() {
+        //         assert!(record().parse(input("Foo", "")).is_err());
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{}", "")).unwrap().0,
-    //             Record::new("Foo", None, vec![], Position::fake())
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{}", "")).unwrap().0,
+        //             Record::new("Foo", None, vec![], Position::fake())
+        //         );
 
-    //         assert_eq!(
-    //             expression().parse(input("Foo{foo:42}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 None,
-    //                 vec![RecordField::new(
-    //                     "foo",
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
+        //         assert_eq!(
+        //             expression().parse(input("Foo{foo:42}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 None,
+        //                 vec![RecordField::new(
+        //                     "foo",
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{foo:42}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 None,
-    //                 vec![RecordField::new(
-    //                     "foo",
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{foo:42}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 None,
+        //                 vec![RecordField::new(
+        //                     "foo",
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{foo:42,bar:42}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 None,
-    //                 vec![
-    //                     RecordField::new(
-    //                         "foo",
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     RecordField::new(
-    //                         "bar",
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{foo:42,bar:42}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 None,
+        //                 vec![
+        //                     RecordField::new(
+        //                         "foo",
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     ),
+        //                     RecordField::new(
+        //                         "bar",
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     )
+        //                 ],
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert!(record().parse(input("Foo{foo:42,foo:42}", "")).is_err());
+        //         assert!(record().parse(input("Foo{foo:42,foo:42}", "")).is_err());
 
-    //         assert_eq!(
-    //             expression()
-    //                 .parse(input("foo(Foo{foo:42})", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Call::new(
-    //                 Variable::new("foo", Position::fake()),
-    //                 vec![Record::new(
-    //                     "Foo",
-    //                     None,
-    //                     vec![RecordField::new(
-    //                         "foo",
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     )],
-    //                     Position::fake()
-    //                 )
-    //                 .into()],
-    //                 Position::fake()
-    //             )
-    //             .into()
-    //         );
+        //         assert_eq!(
+        //             expression()
+        //                 .parse(input("foo(Foo{foo:42})", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             Call::new(
+        //                 Variable::new("foo", Position::fake()),
+        //                 vec![Record::new(
+        //                     "Foo",
+        //                     None,
+        //                     vec![RecordField::new(
+        //                         "foo",
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         ),
+        //                         Position::fake()
+        //                     )],
+        //                     Position::fake()
+        //                 )
+        //                 .into()],
+        //                 Position::fake()
+        //             )
+        //             .into()
+        //         );
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{foo:bar(42)}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 None,
-    //                 vec![RecordField::new(
-    //                     "foo",
-    //                     Call::new(
-    //                         Variable::new("bar", Position::fake()),
-    //                         vec![Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         )
-    //                         .into()],
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{foo:bar(42)}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 None,
+        //                 vec![RecordField::new(
+        //                     "foo",
+        //                     Call::new(
+        //                         Variable::new("bar", Position::fake()),
+        //                         vec![Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake()
+        //                         )
+        //                         .into()],
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert!(record().parse(input("Foo{...foo,}", "")).is_err());
+        //         assert!(record().parse(input("Foo{...foo,}", "")).is_err());
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{...foo,bar:42}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 Some(Variable::new("foo", Position::fake()).into()),
-    //                 vec![RecordField::new(
-    //                     "bar",
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{...foo,bar:42}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 Some(Variable::new("foo", Position::fake()).into()),
+        //                 vec![RecordField::new(
+        //                     "bar",
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert_eq!(
-    //             record().parse(input("Foo{...foo,bar:42,}", "")).unwrap().0,
-    //             Record::new(
-    //                 "Foo",
-    //                 Some(Variable::new("foo", Position::fake()).into()),
-    //                 vec![RecordField::new(
-    //                     "bar",
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //         );
+        //         assert_eq!(
+        //             record().parse(input("Foo{...foo,bar:42,}", "")).unwrap().0,
+        //             Record::new(
+        //                 "Foo",
+        //                 Some(Variable::new("foo", Position::fake()).into()),
+        //                 vec![RecordField::new(
+        //                     "bar",
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //         );
 
-    //         assert_eq!(
-    //             expression()
-    //                 .parse(input("Foo{...foo,bar:42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Record::new(
-    //                 "Foo",
-    //                 Some(Variable::new("foo", Position::fake()).into()),
-    //                 vec![RecordField::new(
-    //                     "bar",
-    //                     Number::new(
-    //                         NumberRepresentation::FloatingPoint("42".into()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //             .into(),
-    //         );
+        //         assert_eq!(
+        //             expression()
+        //                 .parse(input("Foo{...foo,bar:42}", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             Record::new(
+        //                 "Foo",
+        //                 Some(Variable::new("foo", Position::fake()).into()),
+        //                 vec![RecordField::new(
+        //                     "bar",
+        //                     Number::new(
+        //                         NumberRepresentation::FloatingPoint("42".into()),
+        //                         Position::fake()
+        //                     ),
+        //                     Position::fake()
+        //                 )],
+        //                 Position::fake()
+        //             )
+        //             .into(),
+        //         );
 
-    //         assert!(record().parse(input("Foo{...foo}", "")).is_err());
-    //         assert!(record()
-    //             .parse(input("Foo{...foo,bar:42,bar:42}", ""))
-    //             .is_err());
-    //         assert!(record().parse(input("Foo{...(foo),bar:42}", "")).is_ok());
-    //         assert!(record()
-    //             .parse(input("Foo{...foo(bar),bar:42}", ""))
-    //             .is_ok());
-    //         assert!(record()
-    //             .parse(input("Foo{...if true { none } else { none },bar:42}", ""))
-    //             .is_ok());
-    //     }
+        //         assert!(record().parse(input("Foo{...foo}", "")).is_err());
+        //         assert!(record()
+        //             .parse(input("Foo{...foo,bar:42,bar:42}", ""))
+        //             .is_err());
+        //         assert!(record().parse(input("Foo{...(foo),bar:42}", "")).is_ok());
+        //         assert!(record()
+        //             .parse(input("Foo{...foo(bar),bar:42}", ""))
+        //             .is_ok());
+        //         assert!(record()
+        //             .parse(input("Foo{...if true { none } else { none },bar:42}", ""))
+        //             .is_ok());
+        //     }
 
-    #[test]
-    fn parse_variable() {
-        assert!(variable(input("", "")).is_err());
+        #[test]
+        fn parse_variable() {
+            assert!(variable(input("", "")).is_err());
 
-        assert_eq!(
-            variable(input("x", "")).unwrap().1,
-            Variable::new("x", Position::fake()),
-        );
-
-        assert_eq!(
-            variable(input("Foo.x", "")).unwrap().1,
-            Variable::new("Foo", Position::fake()),
-        );
-    }
-
-    //     #[test]
-    //     fn parse_number_literal() {
-    //         assert!(number_literal().parse(input("", "")).is_err());
-    //         assert!(number_literal().parse(input("foo", "")).is_err());
-    //         assert!(number_literal().parse(input("01", "")).is_err());
-
-    //         for (source, value) in [
-    //             ("0", NumberRepresentation::FloatingPoint("0".into())),
-    //             ("1", NumberRepresentation::FloatingPoint("1".into())),
-    //             (
-    //                 "123456789",
-    //                 NumberRepresentation::FloatingPoint("123456789".into()),
-    //             ),
-    //             ("-1", NumberRepresentation::FloatingPoint("-1".into())),
-    //             ("0.1", NumberRepresentation::FloatingPoint("0.1".into())),
-    //             ("0.01", NumberRepresentation::FloatingPoint("0.01".into())),
-    //             ("0b1", NumberRepresentation::Binary("1".into())),
-    //             ("0b10", NumberRepresentation::Binary("10".into())),
-    //             ("0x1", NumberRepresentation::Hexadecimal("1".into())),
-    //             ("0xFA", NumberRepresentation::Hexadecimal("fa".into())),
-    //             ("0xfa", NumberRepresentation::Hexadecimal("fa".into())),
-    //         ] {
-    //             assert_eq!(
-    //                 number_literal().parse(input(source, "")).unwrap().0,
-    //                 Number::new(value, Position::fake())
-    //             );
-    //         }
-    //     }
-
-    #[test]
-    fn parse_string_literal() {
-        assert!(string_literal(input("", "")).is_err());
-        assert!(string_literal(input("foo", "")).is_err());
-        assert!(string_literal(input("\\a", "")).is_err());
-
-        for (source, value) in &[
-            (r#""""#, ""),
-            (r#""foo""#, "foo"),
-            (r#" "foo""#, "foo"),
-            (r#""foo bar""#, "foo bar"),
-            (r#""\"""#, "\\\""),
-            (r#""\n""#, "\\n"),
-            (r#""\r""#, "\\r"),
-            (r#""\t""#, "\\t"),
-            (r#""\\""#, "\\\\"),
-            (r#""\x42""#, "\\x42"),
-            (r#""\n\n""#, "\\n\\n"),
-        ] {
             assert_eq!(
-                string_literal(input(source, "")).unwrap().1,
-                ByteString::new(*value, Position::fake())
+                variable(input("x", "")).unwrap().1,
+                Variable::new("x", Position::fake()),
+            );
+
+            assert_eq!(
+                variable(input("Foo.x", "")).unwrap().1,
+                Variable::new("Foo", Position::fake()),
             );
         }
+
+        #[test]
+        fn parse_number_literal() {
+            assert!(number_literal(input("", "")).is_err());
+            assert!(number_literal(input("foo", "")).is_err());
+
+            for (source, value) in [
+                ("0", NumberRepresentation::FloatingPoint("0".into())),
+                ("1", NumberRepresentation::FloatingPoint("1".into())),
+                (
+                    "123456789",
+                    NumberRepresentation::FloatingPoint("123456789".into()),
+                ),
+                ("-1", NumberRepresentation::FloatingPoint("-1".into())),
+                ("0.1", NumberRepresentation::FloatingPoint("0.1".into())),
+                ("0.01", NumberRepresentation::FloatingPoint("0.01".into())),
+                ("0b1", NumberRepresentation::Binary("1".into())),
+                ("0b10", NumberRepresentation::Binary("10".into())),
+                ("0x1", NumberRepresentation::Hexadecimal("1".into())),
+                ("0xFA", NumberRepresentation::Hexadecimal("fa".into())),
+                ("0xfa", NumberRepresentation::Hexadecimal("fa".into())),
+            ] {
+                assert_eq!(
+                    number_literal(input(source, "")).unwrap().1,
+                    Number::new(value, Position::fake())
+                );
+            }
+        }
+
+        #[test]
+        fn parse_string_literal() {
+            assert!(string_literal(input("", "")).is_err());
+            assert!(string_literal(input("foo", "")).is_err());
+            assert!(string_literal(input("\\a", "")).is_err());
+
+            for (source, value) in &[
+                (r#""""#, ""),
+                (r#""foo""#, "foo"),
+                (r#" "foo""#, "foo"),
+                (r#""foo bar""#, "foo bar"),
+                (r#""\"""#, "\\\""),
+                (r#""\n""#, "\\n"),
+                (r#""\r""#, "\\r"),
+                (r#""\t""#, "\\t"),
+                (r#""\\""#, "\\\\"),
+                (r#""\x42""#, "\\x42"),
+                (r#""\n\n""#, "\\n\\n"),
+            ] {
+                assert_eq!(
+                    string_literal(input(source, "")).unwrap().1,
+                    ByteString::new(*value, Position::fake())
+                );
+            }
+        }
+
+        //     #[test]
+        //     fn parse_list() {
+        //         for (source, target) in vec![
+        //             (
+        //                 "[none]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none none]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![ListElement::Single(
+        //                         Variable::new("none", Position::fake()).into(),
+        //                     )],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none none,]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![ListElement::Single(
+        //                         Variable::new("none", Position::fake()).into(),
+        //                     )],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none none,none]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
+        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none none,none,]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
+        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none ...foo]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![ListElement::Multiple(
+        //                         Variable::new("foo", Position::fake()).into(),
+        //                     )],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none ...foo,]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![ListElement::Multiple(
+        //                         Variable::new("foo", Position::fake()).into(),
+        //                     )],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none ...foo,...bar]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none ...foo,...bar,]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none foo,...bar]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Single(Variable::new("foo", Position::fake()).into()),
+        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[none ...foo,bar]",
+        //                 List::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     vec![
+        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+        //                         ListElement::Single(Variable::new("bar", Position::fake()).into()),
+        //                     ],
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //         ] {
+        //             assert_eq!(
+        //                 expression().parse(input(source, "")).unwrap().0,
+        //                 target.into()
+        //             );
+        //         }
+        //     }
+
+        //     #[test]
+        //     fn parse_list_comprehension() {
+        //         for (source, target) in vec![
+        //             (
+        //                 "[none x for x in xs]",
+        //                 ListComprehension::new(
+        //                     types::Reference::new("none", Position::fake()),
+        //                     Variable::new("x", Position::fake()),
+        //                     "x",
+        //                     Variable::new("xs", Position::fake()),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //             (
+        //                 "[number x + 42 for x in xs]",
+        //                 ListComprehension::new(
+        //                     types::Reference::new("number", Position::fake()),
+        //                     BinaryOperation::new(
+        //                         BinaryOperator::Add,
+        //                         Variable::new("x", Position::fake()),
+        //                         Number::new(
+        //                             NumberRepresentation::FloatingPoint("42".into()),
+        //                             Position::fake(),
+        //                         ),
+        //                         Position::fake(),
+        //                     ),
+        //                     "x",
+        //                     Variable::new("xs", Position::fake()),
+        //                     Position::fake(),
+        //                 ),
+        //             ),
+        //         ] {
+        //             assert_eq!(
+        //                 list_comprehension().parse(input(source, "")).unwrap().0,
+        //                 target.into()
+        //             );
+        //         }
+        //     }
+
+        #[test]
+        fn parse_map() {
+            for (source, target) in vec![
+                (
+                    "{none:none}",
+                    Map::new(
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none:none}",
+                    Map::new(
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![MapEntry::new(
+                            Variable::new("none", Position::fake()),
+                            Variable::new("none", Position::fake()),
+                            Position::fake(),
+                        )
+                        .into()],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{number:none 1:none,2:none}",
+                    Map::new(
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            MapEntry::new(
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake(),
+                                ),
+                                Variable::new("none", Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                            MapEntry::new(
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake(),
+                                ),
+                                Variable::new("none", Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                        ],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none ...none}",
+                    Map::new(
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![MapElement::Map(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "{none:none none}",
+                    Map::new(
+                        types::Reference::new("none", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        vec![MapElement::Removal(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+            ] {
+                assert_eq!(expression(input(source, "")).unwrap().1, target);
+            }
+        }
+
+        //     #[test]
+        //     fn parse_map_iteration_comprehension() {
+        //         assert_eq!(
+        //             list_comprehension()
+        //                 .parse(input("[none v for k, v in xs]", ""))
+        //                 .unwrap()
+        //                 .0,
+        //             MapIterationComprehension::new(
+        //                 types::Reference::new("none", Position::fake()),
+        //                 Variable::new("v", Position::fake()),
+        //                 "k",
+        //                 "v",
+        //                 Variable::new("xs", Position::fake()),
+        //                 Position::fake(),
+        //             )
+        //             .into()
+        //         );
+        //     }
     }
-
-    //     #[test]
-    //     fn parse_list() {
-    //         for (source, target) in vec![
-    //             (
-    //                 "[none]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none none]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![ListElement::Single(
-    //                         Variable::new("none", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none none,]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![ListElement::Single(
-    //                         Variable::new("none", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none none,none]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-    //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none none,none,]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-    //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none ...foo]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![ListElement::Multiple(
-    //                         Variable::new("foo", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none ...foo,]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![ListElement::Multiple(
-    //                         Variable::new("foo", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none ...foo,...bar]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-    //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none ...foo,...bar,]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-    //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none foo,...bar]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Single(Variable::new("foo", Position::fake()).into()),
-    //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[none ...foo,bar]",
-    //                 List::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-    //                         ListElement::Single(Variable::new("bar", Position::fake()).into()),
-    //                     ],
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //         ] {
-    //             assert_eq!(
-    //                 expression().parse(input(source, "")).unwrap().0,
-    //                 target.into()
-    //             );
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn parse_list_comprehension() {
-    //         for (source, target) in vec![
-    //             (
-    //                 "[none x for x in xs]",
-    //                 ListComprehension::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     Variable::new("x", Position::fake()),
-    //                     "x",
-    //                     Variable::new("xs", Position::fake()),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //             (
-    //                 "[number x + 42 for x in xs]",
-    //                 ListComprehension::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     BinaryOperation::new(
-    //                         BinaryOperator::Add,
-    //                         Variable::new("x", Position::fake()),
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake(),
-    //                         ),
-    //                         Position::fake(),
-    //                     ),
-    //                     "x",
-    //                     Variable::new("xs", Position::fake()),
-    //                     Position::fake(),
-    //                 ),
-    //             ),
-    //         ] {
-    //             assert_eq!(
-    //                 list_comprehension().parse(input(source, "")).unwrap().0,
-    //                 target.into()
-    //             );
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn parse_map() {
-    //         for (source, target) in vec![
-    //             (
-    //                 "{none:none}",
-    //                 Map::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![],
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "{none:none none:none}",
-    //                 Map::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![MapEntry::new(
-    //                         Variable::new("none", Position::fake()),
-    //                         Variable::new("none", Position::fake()),
-    //                         Position::fake(),
-    //                     )
-    //                     .into()],
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "{number:none 1:none,2:none}",
-    //                 Map::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![
-    //                         MapEntry::new(
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("1".into()),
-    //                                 Position::fake(),
-    //                             ),
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake(),
-    //                         )
-    //                         .into(),
-    //                         MapEntry::new(
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("2".into()),
-    //                                 Position::fake(),
-    //                             ),
-    //                             Variable::new("none", Position::fake()),
-    //                             Position::fake(),
-    //                         )
-    //                         .into(),
-    //                     ],
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "{none:none ...none}",
-    //                 Map::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![MapElement::Map(
-    //                         Variable::new("none", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //             (
-    //                 "{none:none none}",
-    //                 Map::new(
-    //                     types::Reference::new("none", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     vec![MapElement::Removal(
-    //                         Variable::new("none", Position::fake()).into(),
-    //                     )],
-    //                     Position::fake(),
-    //                 )
-    //                 .into(),
-    //             ),
-    //         ] {
-    //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
-    //         }
-    //     }
-
-    //     #[test]
-    //     fn parse_map_iteration_comprehension() {
-    //         assert_eq!(
-    //             list_comprehension()
-    //                 .parse(input("[none v for k, v in xs]", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             MapIterationComprehension::new(
-    //                 types::Reference::new("none", Position::fake()),
-    //                 Variable::new("v", Position::fake()),
-    //                 "k",
-    //                 "v",
-    //                 Variable::new("xs", Position::fake()),
-    //                 Position::fake(),
-    //             )
-    //             .into()
-    //         );
-    //     }
-    // }
 
     #[test]
     fn parse_identifier() {
