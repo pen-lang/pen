@@ -742,6 +742,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom-regex"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72e5c7731c4c1370b61604ed52a2475e861aac9e08dec9f23903d4ddfdc91c18"
+dependencies = [
+ "nom",
+ "regex",
+]
+
+[[package]]
 name = "nom_locate"
 version = "4.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -834,6 +844,7 @@ dependencies = [
  "indoc",
  "insta",
  "nom",
+ "nom-regex",
  "nom_locate",
  "once_cell",
  "position",

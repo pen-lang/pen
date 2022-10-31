@@ -1,14 +1,74 @@
 use ast::*;
 use nom::{
+    branch::alt,
     bytes::complete::tag,
-    character::complete::{line_ending, none_of},
+    character::complete::{char, hex_digit1, line_ending, multispace0, none_of},
+    combinator::{complete, eof, map, recognize},
     multi::many0,
+    number::complete::hex_u32,
+    sequence::tuple,
     IResult,
 };
 use nom_locate::LocatedSpan;
+use nom_regex::str::re_find;
+use once_cell::sync::Lazy;
 use position::Position;
 
 type Input<'a> = LocatedSpan<&'a str, &'a str>;
+
+fn input<'a>(source: &'a str, path: &'a str) -> Input<'a> {
+    LocatedSpan::new_extra(source, path)
+}
+
+pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
+    let (input, comments) = complete(many0(tuple((
+        multispace0,
+        alt((
+            map(comment, Some),
+            map(raw_string_literal, |_| None),
+            map(none_of("\"#"), |_| None),
+        )),
+        multispace0,
+    ))))(input)?;
+
+    Ok((
+        input,
+        comments
+            .into_iter()
+            .flat_map(|(_, comment, _)| comment)
+            .collect(),
+    ))
+}
+
+fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
+    let position = position(input);
+
+    let (input, (_, strings, _)) = tuple((
+        char('"'),
+        many0(alt((
+            recognize(none_of("\\\"")),
+            tag("\\\\"),
+            tag("\\\""),
+            tag("\\n"),
+            tag("\\r"),
+            tag("\\t"),
+            recognize(tuple((tag("\\x"), hex_digit1))),
+        ))),
+        char('"'),
+    ))(input)?;
+
+    Ok((
+        input,
+        ByteString::new(
+            strings
+                .iter()
+                .map(|span| String::from_utf8_lossy(span.as_bytes()))
+                .collect::<Vec<_>>()
+                .concat(),
+            position,
+        ),
+    ))
+}
 
 fn comment(input: Input) -> IResult<Input, Comment> {
     let position = position(input);
@@ -2422,11 +2482,6 @@ mod tests {
     // }
 
     // #[test]
-    // fn parse_position() {
-    //     assert!(position().parse(stream("", "")).is_ok());
-    // }
-
-    // #[test]
     // fn parse_blank() {
     //     assert!(blank().with(eof()).parse(stream(" ", "")).is_ok());
     //     assert!(blank().with(eof()).parse(stream("\n", "")).is_ok());
@@ -2435,12 +2490,12 @@ mod tests {
     //     assert!(blank().with(eof()).parse(stream("# foo", "")).is_ok());
     // }
 
-    // #[test]
-    // fn parse_comment() {
-    //     assert!(comment().parse(stream("#", "")).is_ok());
-    //     assert!(comment().parse(stream("#\n", "")).is_ok());
-    //     assert!(comment().parse(stream("#x\n", "")).is_ok());
-    // }
+    #[test]
+    fn parse_comment() {
+        assert!(comment(input("#", "")).is_ok());
+        assert!(comment(input("#\n", "")).is_ok());
+        assert!(comment(input("#x\n", "")).is_ok());
+    }
 
     mod comments {
         use super::*;
@@ -2449,7 +2504,7 @@ mod tests {
         #[test]
         fn parse_comment() {
             assert_eq!(
-                comments().parse(stream("#foo", "")).unwrap().0,
+                comments(input("#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2457,7 +2512,7 @@ mod tests {
         #[test]
         fn parse_comment_after_space() {
             assert_eq!(
-                comments().parse(stream(" #foo", "")).unwrap().0,
+                comments(input(" #foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2465,7 +2520,7 @@ mod tests {
         #[test]
         fn parse_comment_before_space() {
             assert_eq!(
-                comments().parse(stream("#foo\n #bar", "")).unwrap().0,
+                comments(input("#foo\n #bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -2476,7 +2531,7 @@ mod tests {
         #[test]
         fn parse_comment_before_newlines() {
             assert_eq!(
-                comments().parse(stream("#foo\n\n", "")).unwrap().0,
+                comments(input("#foo\n\n", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2484,18 +2539,17 @@ mod tests {
         #[test]
         fn parse_two_line_comments() {
             assert_eq!(
-                comments()
-                    .parse(stream(
-                        indoc!(
-                            "
+                comments(input(
+                    indoc!(
+                        "
                             #foo
                             #bar
                             "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
+                    ),
+                    ""
+                ))
+                .unwrap()
+                .1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -2506,7 +2560,7 @@ mod tests {
         #[test]
         fn parse_comment_after_identifier() {
             assert_eq!(
-                comments().parse(stream("foo#foo", "")).unwrap().0,
+                comments(input("foo#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2514,7 +2568,7 @@ mod tests {
         #[test]
         fn parse_comment_before_identifier() {
             assert_eq!(
-                comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                comments(input("#foo\nfoo#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -2525,7 +2579,7 @@ mod tests {
         #[test]
         fn parse_comment_after_keyword() {
             assert_eq!(
-                comments().parse(stream("if#foo", "")).unwrap().0,
+                comments(input("if#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2533,7 +2587,7 @@ mod tests {
         #[test]
         fn parse_comment_before_keyword() {
             assert_eq!(
-                comments().parse(stream("#foo\nif#bar", "")).unwrap().0,
+                comments(input("#foo\nif#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -2544,7 +2598,7 @@ mod tests {
         #[test]
         fn parse_comment_after_sign() {
             assert_eq!(
-                comments().parse(stream("+#foo", "")).unwrap().0,
+                comments(input("+#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2552,7 +2606,7 @@ mod tests {
         #[test]
         fn parse_comment_before_sign() {
             assert_eq!(
-                comments().parse(stream("#foo\n+#bar", "")).unwrap().0,
+                comments(input("#foo\n+#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -2563,7 +2617,7 @@ mod tests {
         #[test]
         fn parse_comment_after_string() {
             assert_eq!(
-                comments().parse(stream("\"string\"#foo", "")).unwrap().0,
+                comments(input("\"string\"#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -2571,10 +2625,7 @@ mod tests {
         #[test]
         fn parse_comment_before_string() {
             assert_eq!(
-                comments()
-                    .parse(stream("#foo\n\"string\"#bar", ""))
-                    .unwrap()
-                    .0,
+                comments(input("#foo\n\"string\"#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
