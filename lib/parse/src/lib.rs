@@ -1,3 +1,4 @@
+mod combinator;
 mod error;
 mod operations;
 mod parsers;

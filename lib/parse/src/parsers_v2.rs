@@ -7,15 +7,19 @@ use nom::{
         none_of, one_of,
     },
     combinator::{all_consuming, into, map, not, opt, peek, recognize, value, verify},
+    error::ParseError,
     multi::{many0, many1, separated_list0, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, preceded, terminated, tuple},
-    IResult, Parser,
+    IResult, InputLength, Parser,
 };
 use nom_locate::LocatedSpan;
 use position::Position;
 
-use crate::operations::{reduce_operations, SuffixOperator};
+use crate::{
+    combinator::separated_or_terminated_list0,
+    operations::{reduce_operations, SuffixOperator},
+};
 
 const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -57,7 +61,7 @@ fn function_type(input: Input) -> IResult<Input, types::Function> {
 
     let (input, (_, arguments, _, result)) = tuple((
         sign("\\("),
-        separated_list0(sign(","), type_),
+        separated_or_terminated_list0(sign(","), type_),
         sign(")"),
         type_,
     ))(input)?;
@@ -191,8 +195,11 @@ fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
 fn call_operator(input: Input) -> IResult<Input, SuffixOperator> {
     let position = position(input);
 
-    let (input, arguments) =
-        delimited(sign("("), separated_list0(sign(","), expression), sign(")"))(input)?;
+    let (input, arguments) = delimited(
+        sign("("),
+        separated_or_terminated_list0(sign(","), expression),
+        sign(")"),
+    )(input)?;
 
     Ok((input, SuffixOperator::Call(arguments, position)))
 }
@@ -221,8 +228,8 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         // if_().map(Expression::from),
         // lambda().map(Expression::from),
         // record().map(Expression::from),
-        // list_comprehension().map(Expression::from),
-        // list_literal().map(Expression::from),
+        into(list_comprehension),
+        into(list_literal),
         into(map_literal),
         into(number_literal),
         into(string_literal),
@@ -305,6 +312,58 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
     ))
 }
 
+fn list_literal(input: Input) -> IResult<Input, List> {
+    let (input, position) = position_parser(input)?;
+    let (input, (_, type_, elements, _)) = tuple((
+        sign("["),
+        type_,
+        separated_or_terminated_list0(sign(","), list_element),
+        sign("]"),
+    ))(input)?;
+
+    Ok((input, List::new(type_, elements, position)))
+}
+
+fn list_element(input: Input) -> IResult<Input, ListElement> {
+    alt((
+        map(expression, ListElement::Single),
+        map(preceded(sign("..."), expression), ListElement::Multiple),
+    ))(input)
+}
+
+fn list_comprehension(input: Input) -> IResult<Input, Expression> {
+    let (input, (position, _, type_, element, _, element_name, value_name, _, iterator, _)) =
+        tuple((
+            position_parser,
+            sign("["),
+            type_,
+            expression,
+            keyword("for"),
+            identifier,
+            opt(preceded(sign(","), identifier)),
+            keyword("in"),
+            expression,
+            sign("]"),
+        ))(input)?;
+
+    Ok((
+        input,
+        if let Some(value_name) = value_name {
+            MapIterationComprehension::new(
+                type_,
+                element,
+                element_name,
+                value_name,
+                iterator,
+                position,
+            )
+            .into()
+        } else {
+            ListComprehension::new(type_, element, element_name, iterator, position).into()
+        },
+    ))
+}
+
 fn map_literal(input: Input) -> IResult<Input, Map> {
     let position = position(input);
 
@@ -313,7 +372,7 @@ fn map_literal(input: Input) -> IResult<Input, Map> {
         type_,
         sign(":"),
         type_,
-        separated_list0(sign(","), map_element),
+        separated_or_terminated_list0(sign(","), map_element),
         sign("}"),
     ))(input)?;
 
@@ -392,7 +451,7 @@ fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<Input, ()> {
     }
 }
 
-fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> {
+fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> + Clone {
     move |input| {
         let parser = token(tag(sign));
 
@@ -2534,169 +2593,166 @@ mod tests {
             }
         }
 
-        //     #[test]
-        //     fn parse_list() {
-        //         for (source, target) in vec![
-        //             (
-        //                 "[none]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none none]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![ListElement::Single(
-        //                         Variable::new("none", Position::fake()).into(),
-        //                     )],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none none,]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![ListElement::Single(
-        //                         Variable::new("none", Position::fake()).into(),
-        //                     )],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none none,none]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none none,none,]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-        //                         ListElement::Single(Variable::new("none", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none ...foo]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![ListElement::Multiple(
-        //                         Variable::new("foo", Position::fake()).into(),
-        //                     )],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none ...foo,]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![ListElement::Multiple(
-        //                         Variable::new("foo", Position::fake()).into(),
-        //                     )],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none ...foo,...bar]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none ...foo,...bar,]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none foo,...bar]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Single(Variable::new("foo", Position::fake()).into()),
-        //                         ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[none ...foo,bar]",
-        //                 List::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     vec![
-        //                         ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
-        //                         ListElement::Single(Variable::new("bar", Position::fake()).into()),
-        //                     ],
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //         ] {
-        //             assert_eq!(
-        //                 expression().parse(input(source, "")).unwrap().0,
-        //                 target.into()
-        //             );
-        //         }
-        //     }
+        #[test]
+        fn parse_list() {
+            for (source, target) in vec![
+                (
+                    "[none]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none none]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Single(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none none,]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Single(
+                            Variable::new("none", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none none,none]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none none,none,]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                            ListElement::Single(Variable::new("none", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none ...foo]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Multiple(
+                            Variable::new("foo", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none ...foo,]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![ListElement::Multiple(
+                            Variable::new("foo", Position::fake()).into(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none ...foo,...bar]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none ...foo,...bar,]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none foo,...bar]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Single(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Multiple(Variable::new("bar", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[none ...foo,bar]",
+                    List::new(
+                        types::Reference::new("none", Position::fake()),
+                        vec![
+                            ListElement::Multiple(Variable::new("foo", Position::fake()).into()),
+                            ListElement::Single(Variable::new("bar", Position::fake()).into()),
+                        ],
+                        Position::fake(),
+                    ),
+                ),
+            ] {
+                assert_eq!(expression(input(source, "")).unwrap().1, target.into());
+            }
+        }
 
-        //     #[test]
-        //     fn parse_list_comprehension() {
-        //         for (source, target) in vec![
-        //             (
-        //                 "[none x for x in xs]",
-        //                 ListComprehension::new(
-        //                     types::Reference::new("none", Position::fake()),
-        //                     Variable::new("x", Position::fake()),
-        //                     "x",
-        //                     Variable::new("xs", Position::fake()),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "[number x + 42 for x in xs]",
-        //                 ListComprehension::new(
-        //                     types::Reference::new("number", Position::fake()),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Add,
-        //                         Variable::new("x", Position::fake()),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     "x",
-        //                     Variable::new("xs", Position::fake()),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //         ] {
-        //             assert_eq!(
-        //                 list_comprehension().parse(input(source, "")).unwrap().0,
-        //                 target.into()
-        //             );
-        //         }
-        //     }
+        #[test]
+        fn parse_list_comprehension() {
+            for (source, target) in vec![
+                (
+                    "[none x for x in xs]",
+                    ListComprehension::new(
+                        types::Reference::new("none", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[number x + 42 for x in xs]",
+                    ListComprehension::new(
+                        types::Reference::new("number", Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Variable::new("x", Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        "x",
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    ),
+                ),
+            ] {
+                assert_eq!(
+                    list_comprehension(input(source, "")).unwrap().1,
+                    target.into()
+                );
+            }
+        }
 
         #[test]
         fn parse_map() {
@@ -2784,24 +2840,23 @@ mod tests {
             }
         }
 
-        //     #[test]
-        //     fn parse_map_iteration_comprehension() {
-        //         assert_eq!(
-        //             list_comprehension()
-        //                 .parse(input("[none v for k, v in xs]", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             MapIterationComprehension::new(
-        //                 types::Reference::new("none", Position::fake()),
-        //                 Variable::new("v", Position::fake()),
-        //                 "k",
-        //                 "v",
-        //                 Variable::new("xs", Position::fake()),
-        //                 Position::fake(),
-        //             )
-        //             .into()
-        //         );
-        //     }
+        #[test]
+        fn parse_map_iteration_comprehension() {
+            assert_eq!(
+                list_comprehension(input("[none v for k, v in xs]", ""))
+                    .unwrap()
+                    .1,
+                MapIterationComprehension::new(
+                    types::Reference::new("none", Position::fake()),
+                    Variable::new("v", Position::fake()),
+                    "k",
+                    "v",
+                    Variable::new("xs", Position::fake()),
+                    Position::fake(),
+                )
+                .into()
+            );
+        }
     }
 
     #[test]
