@@ -103,19 +103,19 @@ mod tests {
     //     #[test]
     //     fn parse_module() {
     //         assert_eq!(
-    //             module().parse(stream("", "")).unwrap().0,
+    //             module().parse(input("", "")).unwrap().0,
     //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
     //         );
     //         assert_eq!(
-    //             module().parse(stream(" ", "")).unwrap().0,
+    //             module().parse(input(" ", "")).unwrap().0,
     //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
     //         );
     //         assert_eq!(
-    //             module().parse(stream("\n", "")).unwrap().0,
+    //             module().parse(input("\n", "")).unwrap().0,
     //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
     //         );
     //         assert_eq!(
-    //             module().parse(stream("import Foo'Bar", "")).unwrap().0,
+    //             module().parse(input("import Foo'Bar", "")).unwrap().0,
     //             Module::new(
     //                 vec![Import::new(
     //                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
@@ -130,7 +130,7 @@ mod tests {
     //             )
     //         );
     //         assert_eq!(
-    //             module().parse(stream("type foo = number", "")).unwrap().0,
+    //             module().parse(input("type foo = number", "")).unwrap().0,
     //             Module::new(
     //                 vec![],
     //                 vec![],
@@ -146,7 +146,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             module()
-    //                 .parse(stream("x=\\(x number)number{42}", ""))
+    //                 .parse(input("x=\\(x number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             Module::new(
@@ -179,7 +179,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             module()
-    //                 .parse(stream(
+    //                 .parse(input(
     //                     "x=\\(x number)number{42}y=\\(y number)number{42}",
     //                     ""
     //                 ))
@@ -242,7 +242,7 @@ mod tests {
     //     fn parse_import_foreign_after_import() {
     //         assert_eq!(
     //             module()
-    //                 .parse(stream("import Foo'Bar import foreign foo \\() number", ""))
+    //                 .parse(input("import Foo'Bar import foreign foo \\() number", ""))
     //                 .unwrap()
     //                 .0,
     //             Module::new(
@@ -273,7 +273,7 @@ mod tests {
     //     fn parse_record_definition_after_type_alias() {
     //         assert_eq!(
     //             module()
-    //                 .parse(stream("type foo = number type bar {}", ""))
+    //                 .parse(input("type foo = number type bar {}", ""))
     //                 .unwrap()
     //                 .0,
     //             Module::new(
@@ -302,7 +302,7 @@ mod tests {
     //     #[test]
     //     fn parse_import() {
     //         assert_eq!(
-    //             import().parse(stream("import 'Foo", "")).unwrap().0,
+    //             import().parse(input("import 'Foo", "")).unwrap().0,
     //             Import::new(
     //                 InternalModulePath::new(vec!["Foo".into()]),
     //                 None,
@@ -311,7 +311,7 @@ mod tests {
     //             ),
     //         );
     //         assert_eq!(
-    //             import().parse(stream("import Foo'Bar", "")).unwrap().0,
+    //             import().parse(input("import Foo'Bar", "")).unwrap().0,
     //             Import::new(
     //                 ExternalModulePath::new("Foo", vec!["Bar".into()]),
     //                 None,
@@ -324,7 +324,7 @@ mod tests {
     //     #[test]
     //     fn parse_import_with_custom_prefix() {
     //         assert_eq!(
-    //             import().parse(stream("import 'Foo as foo", "")).unwrap().0,
+    //             import().parse(input("import 'Foo as foo", "")).unwrap().0,
     //             Import::new(
     //                 InternalModulePath::new(vec!["Foo".into()]),
     //                 Some("foo".into()),
@@ -337,7 +337,7 @@ mod tests {
     //     #[test]
     //     fn parse_unqualified_import() {
     //         assert_eq!(
-    //             import().parse(stream("import 'Foo { Foo }", "")).unwrap().0,
+    //             import().parse(input("import 'Foo { Foo }", "")).unwrap().0,
     //             Import::new(
     //                 InternalModulePath::new(vec!["Foo".into()]),
     //                 None,
@@ -351,7 +351,7 @@ mod tests {
     //     fn parse_unqualified_import_with_multiple_identifiers() {
     //         assert_eq!(
     //             import()
-    //                 .parse(stream("import 'Foo { Foo, Bar }", ""))
+    //                 .parse(input("import 'Foo { Foo, Bar }", ""))
     //                 .unwrap()
     //                 .0,
     //             Import::new(
@@ -368,27 +368,27 @@ mod tests {
 
     //     #[test]
     //     fn parse_module_path() {
-    //         assert!(module_path().parse(stream("", "")).is_err());
+    //         assert!(module_path().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             module_path().parse(stream("'Foo", "")).unwrap().0,
+    //             module_path().parse(input("'Foo", "")).unwrap().0,
     //             InternalModulePath::new(vec!["Foo".into()]).into(),
     //         );
     //         assert_eq!(
-    //             module_path().parse(stream("Foo'Bar", "")).unwrap().0,
+    //             module_path().parse(input("Foo'Bar", "")).unwrap().0,
     //             ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
     //         );
     //     }
 
     //     #[test]
     //     fn parse_internal_module_path() {
-    //         assert!(internal_module_path().parse(stream("", "")).is_err());
+    //         assert!(internal_module_path().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             internal_module_path().parse(stream("'Foo", "")).unwrap().0,
+    //             internal_module_path().parse(input("'Foo", "")).unwrap().0,
     //             InternalModulePath::new(vec!["Foo".into()]),
     //         );
     //         assert_eq!(
     //             internal_module_path()
-    //                 .parse(stream("'Foo'Bar", ""))
+    //                 .parse(input("'Foo'Bar", ""))
     //                 .unwrap()
     //                 .0,
     //             InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
@@ -397,10 +397,10 @@ mod tests {
 
     //     #[test]
     //     fn parse_external_module_path() {
-    //         assert!(external_module_path().parse(stream("", "")).is_err());
+    //         assert!(external_module_path().parse(input("", "")).is_err());
     //         assert_eq!(
     //             external_module_path()
-    //                 .parse(stream("Foo'Bar", ""))
+    //                 .parse(input("Foo'Bar", ""))
     //                 .unwrap()
     //                 .0,
     //             ExternalModulePath::new("Foo", vec!["Bar".into()]),
@@ -412,7 +412,7 @@ mod tests {
     //         let source = "Foo'bar";
 
     //         insta::assert_debug_snapshot!(external_module_path()
-    //             .parse(stream(source, ""))
+    //             .parse(input(source, ""))
     //             .map_err(|error| ParseError::new(source, "", error))
     //             .err());
     //     }
@@ -422,7 +422,7 @@ mod tests {
     //         let source = "Foo'bar'Baz";
 
     //         insta::assert_debug_snapshot!(external_module_path()
-    //             .parse(stream(source, ""))
+    //             .parse(input(source, ""))
     //             .map_err(|error| ParseError::new(source, "", error))
     //             .err());
     //     }
@@ -432,7 +432,7 @@ mod tests {
     // fn parse_foreign_import() {
     //     assert_eq!(
     //         foreign_import()
-    //             .parse(stream("import foreign foo \\(number) number", ""))
+    //             .parse(input("import foreign foo \\(number) number", ""))
     //             .unwrap()
     //             .0,
     //         ForeignImport::new(
@@ -449,7 +449,7 @@ mod tests {
 
     //     assert_eq!(
     //         foreign_import()
-    //             .parse(stream("import foreign \"c\" foo \\(number) number", ""))
+    //             .parse(input("import foreign \"c\" foo \\(number) number", ""))
     //             .unwrap()
     //             .0,
     //         ForeignImport::new(
@@ -473,7 +473,7 @@ mod tests {
     //     fn parse() {
     //         assert_eq!(
     //             definition()
-    //                 .parse(stream("x=\\(x number)number{42}", ""))
+    //                 .parse(input("x=\\(x number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             FunctionDefinition::new(
@@ -504,7 +504,7 @@ mod tests {
     //     fn parse_foreign_definition() {
     //         assert_eq!(
     //             definition()
-    //                 .parse(stream("foreign x=\\(x number)number{42}", ""))
+    //                 .parse(input("foreign x=\\(x number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             FunctionDefinition::new(
@@ -535,7 +535,7 @@ mod tests {
     //     fn parse_foreign_definition_with_c_calling_convention() {
     //         assert_eq!(
     //             definition()
-    //                 .parse(stream("foreign \"c\" x=\\(x number)number{42}", ""))
+    //                 .parse(input("foreign \"c\" x=\\(x number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             FunctionDefinition::new(
@@ -566,7 +566,7 @@ mod tests {
     //     fn parse_keyword_like_name() {
     //         assert_eq!(
     //             definition()
-    //                 .parse(stream("importA = \\() number { 42 }", ""))
+    //                 .parse(input("importA = \\() number { 42 }", ""))
     //                 .unwrap()
     //                 .0,
     //             FunctionDefinition::new(
@@ -628,7 +628,7 @@ mod tests {
     //         ),
     //     ] {
     //         assert_eq!(
-    //             &record_definition().parse(stream(source, "")).unwrap().0,
+    //             &record_definition().parse(input(source, "")).unwrap().0,
     //             expected
     //         );
     //     }
@@ -666,7 +666,7 @@ mod tests {
     //             ),
     //         ),
     //     ] {
-    //         assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
+    //         assert_eq!(&type_alias().parse(input(source, "")).unwrap().0, expected);
     //     }
     // }
 
@@ -676,29 +676,29 @@ mod tests {
 
     //     #[test]
     //     fn parse_type() {
-    //         assert!(type_().parse(stream("", "")).is_err());
+    //         assert!(type_().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             type_().parse(stream("boolean", "")).unwrap().0,
+    //             type_().parse(input("boolean", "")).unwrap().0,
     //             types::Reference::new("boolean", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("none", "")).unwrap().0,
+    //             type_().parse(input("none", "")).unwrap().0,
     //             types::Reference::new("none", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("number", "")).unwrap().0,
+    //             type_().parse(input("number", "")).unwrap().0,
     //             types::Reference::new("number", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("Foo", "")).unwrap().0,
+    //             type_().parse(input("Foo", "")).unwrap().0,
     //             types::Reference::new("Foo", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("Foo'Bar", "")).unwrap().0,
+    //             type_().parse(input("Foo'Bar", "")).unwrap().0,
     //             types::Reference::new("Foo'Bar", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("\\(number)number", "")).unwrap().0,
+    //             type_().parse(input("\\(number)number", "")).unwrap().0,
     //             types::Function::new(
     //                 vec![types::Reference::new("number", Position::fake()).into()],
     //                 types::Reference::new("number", Position::fake()),
@@ -708,7 +708,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             type_()
-    //                 .parse(stream("\\(number,number)number", ""))
+    //                 .parse(input("\\(number,number)number", ""))
     //                 .unwrap()
     //                 .0,
     //             types::Function::new(
@@ -723,7 +723,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             type_()
-    //                 .parse(stream("\\(\\(number)number)number", ""))
+    //                 .parse(input("\\(\\(number)number)number", ""))
     //                 .unwrap()
     //                 .0,
     //             types::Function::new(
@@ -739,7 +739,7 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("number|none", "")).unwrap().0,
+    //             type_().parse(input("number|none", "")).unwrap().0,
     //             types::Union::new(
     //                 types::Reference::new("number", Position::fake()),
     //                 types::Reference::new("none", Position::fake()),
@@ -748,7 +748,7 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("boolean|number|none", "")).unwrap().0,
+    //             type_().parse(input("boolean|number|none", "")).unwrap().0,
     //             types::Union::new(
     //                 types::Union::new(
     //                     types::Reference::new("boolean", Position::fake()),
@@ -762,7 +762,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             type_()
-    //                 .parse(stream("\\(number)number|none", ""))
+    //                 .parse(input("\\(number)number|none", ""))
     //                 .unwrap()
     //                 .0,
     //             types::Function::new(
@@ -778,7 +778,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             type_()
-    //                 .parse(stream("(\\(number)number)|none", ""))
+    //                 .parse(input("(\\(number)number)|none", ""))
     //                 .unwrap()
     //                 .0,
     //             types::Union::new(
@@ -796,13 +796,13 @@ mod tests {
 
     //     #[test]
     //     fn parse_reference_type() {
-    //         assert!(type_().parse(stream("", "")).is_err());
+    //         assert!(type_().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             type_().parse(stream("Foo", "")).unwrap().0,
+    //             type_().parse(input("Foo", "")).unwrap().0,
     //             types::Reference::new("Foo", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             type_().parse(stream("Foo'Bar", "")).unwrap().0,
+    //             type_().parse(input("Foo'Bar", "")).unwrap().0,
     //             types::Reference::new("Foo'Bar", Position::fake()).into()
     //         );
     //     }
@@ -810,7 +810,7 @@ mod tests {
     //     #[test]
     //     fn parse_list_type() {
     //         assert_eq!(
-    //             type_().parse(stream("[number]", "")).unwrap().0,
+    //             type_().parse(input("[number]", "")).unwrap().0,
     //             types::List::new(
     //                 types::Reference::new("number", Position::fake()),
     //                 Position::fake()
@@ -819,7 +819,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             type_().parse(stream("[[number]]", "")).unwrap().0,
+    //             type_().parse(input("[[number]]", "")).unwrap().0,
     //             types::List::new(
     //                 types::List::new(
     //                     types::Reference::new("number", Position::fake()),
@@ -831,7 +831,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             type_().parse(stream("[number]|[none]", "")).unwrap().0,
+    //             type_().parse(input("[number]|[none]", "")).unwrap().0,
     //             types::Union::new(
     //                 types::List::new(
     //                     types::Reference::new("number", Position::fake()),
@@ -847,7 +847,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             type_().parse(stream("\\([number])[none]", "")).unwrap().0,
+    //             type_().parse(input("\\([number])[none]", "")).unwrap().0,
     //             types::Function::new(
     //                 vec![types::List::new(
     //                     types::Reference::new("number", Position::fake()),
@@ -867,7 +867,7 @@ mod tests {
     //     #[test]
     //     fn parse_map_type() {
     //         assert_eq!(
-    //             type_().parse(stream("{number:none}", "")).unwrap().0,
+    //             type_().parse(input("{number:none}", "")).unwrap().0,
     //             types::Map::new(
     //                 types::Reference::new("number", Position::fake()),
     //                 types::Reference::new("none", Position::fake()),
@@ -884,9 +884,9 @@ mod tests {
 
     //     #[test]
     //     fn parse_expression() {
-    //         assert!(expression().parse(stream("", "")).is_err());
+    //         assert!(expression().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             expression().parse(stream("1", "")).unwrap().0,
+    //             expression().parse(input("1", "")).unwrap().0,
     //             Number::new(
     //                 NumberRepresentation::FloatingPoint("1".into()),
     //                 Position::fake()
@@ -894,11 +894,11 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             expression().parse(stream("x", "")).unwrap().0,
+    //             expression().parse(input("x", "")).unwrap().0,
     //             Variable::new("x", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             expression().parse(stream("x + 1", "")).unwrap().0,
+    //             expression().parse(input("x + 1", "")).unwrap().0,
     //             BinaryOperation::new(
     //                 BinaryOperator::Add,
     //                 Variable::new("x", Position::fake()),
@@ -911,7 +911,7 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             expression().parse(stream("x + y(z)", "")).unwrap().0,
+    //             expression().parse(input("x + y(z)", "")).unwrap().0,
     //             BinaryOperation::new(
     //                 BinaryOperator::Add,
     //                 Variable::new("x", Position::fake()),
@@ -925,7 +925,7 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             expression().parse(stream("(x + y)(z)", "")).unwrap().0,
+    //             expression().parse(input("(x + y)(z)", "")).unwrap().0,
     //             Call::new(
     //                 BinaryOperation::new(
     //                     BinaryOperator::Add,
@@ -943,7 +943,7 @@ mod tests {
     //     #[test]
     //     fn parse_deeply_nested_expression() {
     //         assert_eq!(
-    //             expression().parse(stream("(((((42)))))", "")).unwrap().0,
+    //             expression().parse(input("(((((42)))))", "")).unwrap().0,
     //             Number::new(
     //                 NumberRepresentation::FloatingPoint("42".into()),
     //                 Position::fake()
@@ -954,9 +954,9 @@ mod tests {
 
     //     #[test]
     //     fn parse_atomic_expression() {
-    //         assert!(atomic_expression().parse(stream("", "")).is_err());
+    //         assert!(atomic_expression().parse(input("", "")).is_err());
     //         assert_eq!(
-    //             atomic_expression().parse(stream("1", "")).unwrap().0,
+    //             atomic_expression().parse(input("1", "")).unwrap().0,
     //             Number::new(
     //                 NumberRepresentation::FloatingPoint("1".into()),
     //                 Position::fake()
@@ -964,11 +964,11 @@ mod tests {
     //             .into()
     //         );
     //         assert_eq!(
-    //             atomic_expression().parse(stream("x", "")).unwrap().0,
+    //             atomic_expression().parse(input("x", "")).unwrap().0,
     //             Variable::new("x", Position::fake()).into()
     //         );
     //         assert_eq!(
-    //             atomic_expression().parse(stream("(x)", "")).unwrap().0,
+    //             atomic_expression().parse(input("(x)", "")).unwrap().0,
     //             Variable::new("x", Position::fake()).into()
     //         );
     //     }
@@ -977,7 +977,7 @@ mod tests {
     //     fn parse_lambda() {
     //         assert_eq!(
     //             lambda()
-    //                 .parse(stream("\\(x number)number{42}", ""))
+    //                 .parse(input("\\(x number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             Lambda::new(
@@ -1000,7 +1000,7 @@ mod tests {
 
     //         assert_eq!(
     //             lambda()
-    //                 .parse(stream("\\(x number,y number)number{42}", ""))
+    //                 .parse(input("\\(x number,y number)number{42}", ""))
     //                 .unwrap()
     //                 .0,
     //             Lambda::new(
@@ -1025,7 +1025,7 @@ mod tests {
     //     #[test]
     //     fn parse_lambda_with_reference_type() {
     //         assert_eq!(
-    //             lambda().parse(stream("\\() Foo { 42 }", "")).unwrap().0,
+    //             lambda().parse(input("\\() Foo { 42 }", "")).unwrap().0,
     //             Lambda::new(
     //                 vec![],
     //                 types::Reference::new("Foo", Position::fake()),
@@ -1045,7 +1045,7 @@ mod tests {
     //     #[test]
     //     fn parse_block() {
     //         assert_eq!(
-    //             block().parse(stream("{none}", "")).unwrap().0,
+    //             block().parse(input("{none}", "")).unwrap().0,
     //             Block::new(
     //                 vec![],
     //                 Variable::new("none", Position::fake()),
@@ -1053,7 +1053,7 @@ mod tests {
     //             ),
     //         );
     //         assert_eq!(
-    //             block().parse(stream("{none none}", "")).unwrap().0,
+    //             block().parse(input("{none none}", "")).unwrap().0,
     //             Block::new(
     //                 vec![Statement::new(
     //                     None,
@@ -1065,7 +1065,7 @@ mod tests {
     //             ),
     //         );
     //         assert_eq!(
-    //             block().parse(stream("{none none none}", "")).unwrap().0,
+    //             block().parse(input("{none none none}", "")).unwrap().0,
     //             Block::new(
     //                 vec![
     //                     Statement::new(
@@ -1084,7 +1084,7 @@ mod tests {
     //             ),
     //         );
     //         assert_eq!(
-    //             block().parse(stream("{x=none none}", "")).unwrap().0,
+    //             block().parse(input("{x=none none}", "")).unwrap().0,
     //             Block::new(
     //                 vec![Statement::new(
     //                     Some("x".into()),
@@ -1096,7 +1096,7 @@ mod tests {
     //             ),
     //         );
     //         assert_eq!(
-    //             block().parse(stream("{x==x}", "")).unwrap().0,
+    //             block().parse(input("{x==x}", "")).unwrap().0,
     //             Block::new(
     //                 vec![],
     //                 BinaryOperation::new(
@@ -1113,7 +1113,7 @@ mod tests {
     //     #[test]
     //     fn parse_statement() {
     //         assert_eq!(
-    //             statement().parse(stream("x==x", "")).unwrap().0,
+    //             statement().parse(input("x==x", "")).unwrap().0,
     //             Statement::new(
     //                 None,
     //                 BinaryOperation::new(
@@ -1131,7 +1131,7 @@ mod tests {
     //     fn parse_if() {
     //         assert_eq!(
     //             if_()
-    //                 .parse(stream("if true { 42 } else { 13 }", ""))
+    //                 .parse(input("if true { 42 } else { 13 }", ""))
     //                 .unwrap()
     //                 .0,
     //             If::new(
@@ -1159,7 +1159,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             if_()
-    //                 .parse(stream("if if true {true}else{true}{42}else{13}", ""))
+    //                 .parse(input("if if true {true}else{true}{42}else{13}", ""))
     //                 .unwrap()
     //                 .0,
     //             If::new(
@@ -1202,7 +1202,7 @@ mod tests {
     //         );
     //         assert_eq!(
     //             if_()
-    //                 .parse(stream("if true {1}else if true {2}else{3}", ""))
+    //                 .parse(input("if true {1}else if true {2}else{3}", ""))
     //                 .unwrap()
     //                 .0,
     //             If::new(
@@ -1247,7 +1247,7 @@ mod tests {
     //     fn parse_if_with_equal_operator() {
     //         assert_eq!(
     //             expression()
-    //                 .parse(stream("if x==y {none}else{none}", ""))
+    //                 .parse(input("if x==y {none}else{none}", ""))
     //                 .unwrap()
     //                 .0,
     //             If::new(
@@ -1279,7 +1279,7 @@ mod tests {
     //     fn parse_if_type() {
     //         assert_eq!(
     //             if_type()
-    //                 .parse(stream("if x=y as boolean {none}else{none}", ""))
+    //                 .parse(input("if x=y as boolean {none}else{none}", ""))
     //                 .unwrap()
     //                 .0,
     //             IfType::new(
@@ -1304,7 +1304,7 @@ mod tests {
 
     //         assert_eq!(
     //             if_type()
-    //                 .parse(stream(
+    //                 .parse(input(
     //                     "if x=y as boolean{none}else if none{none}else{none}",
     //                     ""
     //                 ))
@@ -1342,7 +1342,7 @@ mod tests {
 
     //         assert_eq!(
     //             if_type()
-    //                 .parse(stream("if x=y as boolean{none}else if none{none}", ""))
+    //                 .parse(input("if x=y as boolean{none}else if none{none}", ""))
     //                 .unwrap()
     //                 .0,
     //             IfType::new(
@@ -1376,7 +1376,7 @@ mod tests {
     //     fn parse_if_list() {
     //         assert_eq!(
     //             if_list()
-    //                 .parse(stream("if[x,...xs]=xs {none}else{none}", ""))
+    //                 .parse(input("if[x,...xs]=xs {none}else{none}", ""))
     //                 .unwrap()
     //                 .0,
     //             IfList::new(
@@ -1402,7 +1402,7 @@ mod tests {
     //     fn parse_if_map() {
     //         assert_eq!(
     //             if_map()
-    //                 .parse(stream("if x=xs[42]{none}else{none}", ""))
+    //                 .parse(input("if x=xs[42]{none}else{none}", ""))
     //                 .unwrap()
     //                 .0,
     //             IfMap::new(
@@ -1434,7 +1434,7 @@ mod tests {
     //         #[test]
     //         fn parse_call() {
     //             assert_eq!(
-    //                 expression().parse(stream("f()", "")).unwrap().0,
+    //                 expression().parse(input("f()", "")).unwrap().0,
     //                 Call::new(
     //                     Variable::new("f", Position::fake()),
     //                     vec![],
@@ -1444,7 +1444,7 @@ mod tests {
     //             );
 
     //             assert_eq!(
-    //                 expression().parse(stream("f()()", "")).unwrap().0,
+    //                 expression().parse(input("f()()", "")).unwrap().0,
     //                 Call::new(
     //                     Call::new(
     //                         Variable::new("f", Position::fake()),
@@ -1458,7 +1458,7 @@ mod tests {
     //             );
 
     //             assert_eq!(
-    //                 expression().parse(stream("f(1)", "")).unwrap().0,
+    //                 expression().parse(input("f(1)", "")).unwrap().0,
     //                 Call::new(
     //                     Variable::new("f", Position::fake()),
     //                     vec![Number::new(
@@ -1472,7 +1472,7 @@ mod tests {
     //             );
 
     //             assert_eq!(
-    //                 expression().parse(stream("f(1,)", "")).unwrap().0,
+    //                 expression().parse(input("f(1,)", "")).unwrap().0,
     //                 Call::new(
     //                     Variable::new("f", Position::fake()),
     //                     vec![Number::new(
@@ -1486,7 +1486,7 @@ mod tests {
     //             );
 
     //             assert_eq!(
-    //                 expression().parse(stream("f(1, 2)", "")).unwrap().0,
+    //                 expression().parse(input("f(1, 2)", "")).unwrap().0,
     //                 Call::new(
     //                     Variable::new("f", Position::fake()),
     //                     vec![
@@ -1507,7 +1507,7 @@ mod tests {
     //             );
 
     //             assert_eq!(
-    //                 expression().parse(stream("f(1, 2,)", "")).unwrap().0,
+    //                 expression().parse(input("f(1, 2,)", "")).unwrap().0,
     //                 Call::new(
     //                     Variable::new("f", Position::fake()),
     //                     vec![
@@ -1533,7 +1533,7 @@ mod tests {
     //             let source = "f(1+)";
 
     //             insta::assert_debug_snapshot!(expression()
-    //                 .parse(stream(source, ""))
+    //                 .parse(input(source, ""))
     //                 .map_err(|error| ParseError::new(source, "", error))
     //                 .err());
     //         }
@@ -1542,7 +1542,7 @@ mod tests {
     //     #[test]
     //     fn parse_try_operation() {
     //         assert_eq!(
-    //             expression().parse(stream("x?", "")).unwrap().0,
+    //             expression().parse(input("x?", "")).unwrap().0,
     //             UnaryOperation::new(
     //                 UnaryOperator::Try,
     //                 Variable::new("x", Position::fake()),
@@ -1554,7 +1554,7 @@ mod tests {
 
     //     #[test]
     //     fn parse_unary_operation() {
-    //         assert!(prefix_operation().parse(stream("", "")).is_err());
+    //         assert!(prefix_operation().parse(input("", "")).is_err());
 
     //         for (source, expected) in &[
     //             (
@@ -1624,7 +1624,7 @@ mod tests {
     //             ),
     //         ] {
     //             assert_eq!(
-    //                 prefix_operation().parse(stream(source, "")).unwrap().0,
+    //                 prefix_operation().parse(input(source, "")).unwrap().0,
     //                 *expected
     //             );
     //         }
@@ -1632,10 +1632,10 @@ mod tests {
 
     //     #[test]
     //     fn parse_prefix_operator() {
-    //         assert!(prefix_operator().parse(stream("", "")).is_err());
+    //         assert!(prefix_operator().parse(input("", "")).is_err());
 
     //         assert_eq!(
-    //             prefix_operator().parse(stream("!", "")).unwrap().0,
+    //             prefix_operator().parse(input("!", "")).unwrap().0,
     //             UnaryOperator::Not
     //         );
     //     }
@@ -1890,14 +1890,14 @@ mod tests {
     //                 .into(),
     //             ),
     //         ] {
-    //             assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+    //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
     //         }
     //     }
 
     //     #[test]
     //     fn parse_binary_operator() {
-    //         assert!(binary_operator().parse(stream("", "")).is_err());
-    //         assert!(binary_operator().parse(stream("++", "")).is_err());
+    //         assert!(binary_operator().parse(input("", "")).is_err());
+    //         assert!(binary_operator().parse(input("++", "")).is_err());
 
     //         for (source, expected) in &[
     //             ("+", BinaryOperator::Add),
@@ -1914,7 +1914,7 @@ mod tests {
     //             ("|", BinaryOperator::Or),
     //         ] {
     //             assert_eq!(
-    //                 binary_operator().parse(stream(source, "")).unwrap().0,
+    //                 binary_operator().parse(input(source, "")).unwrap().0,
     //                 *expected
     //             );
     //         }
@@ -1922,15 +1922,15 @@ mod tests {
 
     //     #[test]
     //     fn parse_record() {
-    //         assert!(record().parse(stream("Foo", "")).is_err());
+    //         assert!(record().parse(input("Foo", "")).is_err());
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{}", "")).unwrap().0,
+    //             record().parse(input("Foo{}", "")).unwrap().0,
     //             Record::new("Foo", None, vec![], Position::fake())
     //         );
 
     //         assert_eq!(
-    //             expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
+    //             expression().parse(input("Foo{foo:42}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 None,
@@ -1948,7 +1948,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{foo:42}", "")).unwrap().0,
+    //             record().parse(input("Foo{foo:42}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 None,
@@ -1965,7 +1965,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
+    //             record().parse(input("Foo{foo:42,bar:42}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 None,
@@ -1991,11 +1991,11 @@ mod tests {
     //             )
     //         );
 
-    //         assert!(record().parse(stream("Foo{foo:42,foo:42}", "")).is_err());
+    //         assert!(record().parse(input("Foo{foo:42,foo:42}", "")).is_err());
 
     //         assert_eq!(
     //             expression()
-    //                 .parse(stream("foo(Foo{foo:42})", ""))
+    //                 .parse(input("foo(Foo{foo:42})", ""))
     //                 .unwrap()
     //                 .0,
     //             Call::new(
@@ -2020,7 +2020,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
+    //             record().parse(input("Foo{foo:bar(42)}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 None,
@@ -2041,10 +2041,10 @@ mod tests {
     //             )
     //         );
 
-    //         assert!(record().parse(stream("Foo{...foo,}", "")).is_err());
+    //         assert!(record().parse(input("Foo{...foo,}", "")).is_err());
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
+    //             record().parse(input("Foo{...foo,bar:42}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 Some(Variable::new("foo", Position::fake()).into()),
@@ -2061,7 +2061,7 @@ mod tests {
     //         );
 
     //         assert_eq!(
-    //             record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
+    //             record().parse(input("Foo{...foo,bar:42,}", "")).unwrap().0,
     //             Record::new(
     //                 "Foo",
     //                 Some(Variable::new("foo", Position::fake()).into()),
@@ -2079,7 +2079,7 @@ mod tests {
 
     //         assert_eq!(
     //             expression()
-    //                 .parse(stream("Foo{...foo,bar:42}", ""))
+    //                 .parse(input("Foo{...foo,bar:42}", ""))
     //                 .unwrap()
     //                 .0,
     //             Record::new(
@@ -2098,39 +2098,39 @@ mod tests {
     //             .into(),
     //         );
 
-    //         assert!(record().parse(stream("Foo{...foo}", "")).is_err());
+    //         assert!(record().parse(input("Foo{...foo}", "")).is_err());
     //         assert!(record()
-    //             .parse(stream("Foo{...foo,bar:42,bar:42}", ""))
+    //             .parse(input("Foo{...foo,bar:42,bar:42}", ""))
     //             .is_err());
-    //         assert!(record().parse(stream("Foo{...(foo),bar:42}", "")).is_ok());
+    //         assert!(record().parse(input("Foo{...(foo),bar:42}", "")).is_ok());
     //         assert!(record()
-    //             .parse(stream("Foo{...foo(bar),bar:42}", ""))
+    //             .parse(input("Foo{...foo(bar),bar:42}", ""))
     //             .is_ok());
     //         assert!(record()
-    //             .parse(stream("Foo{...if true { none } else { none },bar:42}", ""))
+    //             .parse(input("Foo{...if true { none } else { none },bar:42}", ""))
     //             .is_ok());
     //     }
 
     //     #[test]
     //     fn parse_variable() {
-    //         assert!(variable().parse(stream("", "")).is_err());
+    //         assert!(variable().parse(input("", "")).is_err());
 
     //         assert_eq!(
-    //             variable().parse(stream("x", "")).unwrap().0,
+    //             variable().parse(input("x", "")).unwrap().0,
     //             Variable::new("x", Position::fake()),
     //         );
 
     //         assert_eq!(
-    //             variable().parse(stream("Foo.x", "")).unwrap().0,
+    //             variable().parse(input("Foo.x", "")).unwrap().0,
     //             Variable::new("Foo", Position::fake()),
     //         );
     //     }
 
     //     #[test]
     //     fn parse_number_literal() {
-    //         assert!(number_literal().parse(stream("", "")).is_err());
-    //         assert!(number_literal().parse(stream("foo", "")).is_err());
-    //         assert!(number_literal().parse(stream("01", "")).is_err());
+    //         assert!(number_literal().parse(input("", "")).is_err());
+    //         assert!(number_literal().parse(input("foo", "")).is_err());
+    //         assert!(number_literal().parse(input("01", "")).is_err());
 
     //         for (source, value) in [
     //             ("0", NumberRepresentation::FloatingPoint("0".into())),
@@ -2149,7 +2149,7 @@ mod tests {
     //             ("0xfa", NumberRepresentation::Hexadecimal("fa".into())),
     //         ] {
     //             assert_eq!(
-    //                 number_literal().parse(stream(source, "")).unwrap().0,
+    //                 number_literal().parse(input(source, "")).unwrap().0,
     //                 Number::new(value, Position::fake())
     //             );
     //         }
@@ -2157,8 +2157,8 @@ mod tests {
 
     //     #[test]
     //     fn parse_string_literal() {
-    //         assert!(string_literal().parse(stream("", "")).is_err());
-    //         assert!(string_literal().parse(stream("foo", "")).is_err());
+    //         assert!(string_literal().parse(input("", "")).is_err());
+    //         assert!(string_literal().parse(input("foo", "")).is_err());
 
     //         for (source, value) in &[
     //             (r#""""#, ""),
@@ -2173,7 +2173,7 @@ mod tests {
     //             (r#""\n\n""#, "\\n\\n"),
     //         ] {
     //             assert_eq!(
-    //                 string_literal().parse(stream(source, "")).unwrap().0,
+    //                 string_literal().parse(input(source, "")).unwrap().0,
     //                 ByteString::new(*value, Position::fake())
     //             );
     //         }
@@ -2298,7 +2298,7 @@ mod tests {
     //             ),
     //         ] {
     //             assert_eq!(
-    //                 expression().parse(stream(source, "")).unwrap().0,
+    //                 expression().parse(input(source, "")).unwrap().0,
     //                 target.into()
     //             );
     //         }
@@ -2337,7 +2337,7 @@ mod tests {
     //             ),
     //         ] {
     //             assert_eq!(
-    //                 list_comprehension().parse(stream(source, "")).unwrap().0,
+    //                 list_comprehension().parse(input(source, "")).unwrap().0,
     //                 target.into()
     //             );
     //         }
@@ -2425,7 +2425,7 @@ mod tests {
     //                 .into(),
     //             ),
     //         ] {
-    //             assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+    //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
     //         }
     //     }
 
@@ -2433,7 +2433,7 @@ mod tests {
     //     fn parse_map_iteration_comprehension() {
     //         assert_eq!(
     //             list_comprehension()
-    //                 .parse(stream("[none v for k, v in xs]", ""))
+    //                 .parse(input("[none v for k, v in xs]", ""))
     //                 .unwrap()
     //                 .0,
     //             MapIterationComprehension::new(
@@ -2451,43 +2451,43 @@ mod tests {
 
     // #[test]
     // fn parse_identifier() {
-    //     assert!(identifier().parse(stream("if", "")).is_err());
-    //     assert!(identifier().parse(stream("1foo", "")).is_err());
+    //     assert!(identifier().parse(input("if", "")).is_err());
+    //     assert!(identifier().parse(input("1foo", "")).is_err());
     //     assert_eq!(
-    //         identifier().parse(stream("foo", "")).unwrap().0,
+    //         identifier().parse(input("foo", "")).unwrap().0,
     //         "foo".to_string()
     //     );
     //     assert_eq!(
-    //         identifier().parse(stream("foo42", "")).unwrap().0,
+    //         identifier().parse(input("foo42", "")).unwrap().0,
     //         "foo42".to_string()
     //     );
     // }
 
     // #[test]
     // fn parse_keyword() {
-    //     assert!(keyword("type").parse(stream("bar", "")).is_err());
+    //     assert!(keyword("type").parse(input("bar", "")).is_err());
     //     // spell-checker: disable-next-line
-    //     assert!(keyword("type").parse(stream("typer", "")).is_err());
-    //     assert!(keyword("type").parse(stream("type_", "")).is_err());
-    //     assert!(keyword("type").parse(stream("type", "")).is_ok());
+    //     assert!(keyword("type").parse(input("typer", "")).is_err());
+    //     assert!(keyword("type").parse(input("type_", "")).is_err());
+    //     assert!(keyword("type").parse(input("type", "")).is_ok());
     // }
 
     // #[test]
     // fn parse_sign() {
-    //     assert!(sign("+").parse(stream("", "")).is_err());
-    //     assert!(sign("+").parse(stream("-", "")).is_err());
-    //     assert!(sign("+").parse(stream("+", "")).is_ok());
-    //     assert!(sign("++").parse(stream("++", "")).is_ok());
-    //     assert!(sign("+").parse(stream("++", "")).is_err());
+    //     assert!(sign("+").parse(input("", "")).is_err());
+    //     assert!(sign("+").parse(input("-", "")).is_err());
+    //     assert!(sign("+").parse(input("+", "")).is_ok());
+    //     assert!(sign("++").parse(input("++", "")).is_ok());
+    //     assert!(sign("+").parse(input("++", "")).is_err());
     // }
 
     // #[test]
     // fn parse_blank() {
-    //     assert!(blank().with(eof()).parse(stream(" ", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(stream("\n", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(stream(" \n", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(stream("\t", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(stream("# foo", "")).is_ok());
+    //     assert!(blank().with(eof()).parse(input(" ", "")).is_ok());
+    //     assert!(blank().with(eof()).parse(input("\n", "")).is_ok());
+    //     assert!(blank().with(eof()).parse(input(" \n", "")).is_ok());
+    //     assert!(blank().with(eof()).parse(input("\t", "")).is_ok());
+    //     assert!(blank().with(eof()).parse(input("# foo", "")).is_ok());
     // }
 
     #[test]
