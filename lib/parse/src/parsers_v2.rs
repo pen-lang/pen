@@ -25,6 +25,7 @@ const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
 ];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
+const OPERATOR_MODIFIERS: &str = "=";
 
 type Input<'a> = LocatedSpan<&'a str, &'a str>;
 
@@ -53,7 +54,7 @@ pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
 }
 
 fn type_(input: Input) -> IResult<Input, Type> {
-    alt((map(function_type, From::from), union_type))(input)
+    alt((into(function_type), union_type))(input)
 }
 
 fn function_type(input: Input) -> IResult<Input, types::Function> {
@@ -100,9 +101,9 @@ fn map_type(input: Input) -> IResult<Input, types::Map> {
 
 fn atomic_type(input: Input) -> IResult<Input, Type> {
     alt((
-        map(reference_type, From::from),
-        map(list_type, From::from),
-        map(map_type, From::from),
+        into(reference_type),
+        into(list_type),
+        into(map_type),
         delimited(sign("("), type_, sign(")")),
     ))(input)
 }
@@ -165,26 +166,22 @@ fn binary_operator(input: Input) -> IResult<Input, BinaryOperator> {
         value(BinaryOperator::Divide, sign("/")),
         value(BinaryOperator::Equal, sign("==")),
         value(BinaryOperator::NotEqual, sign("!=")),
-        value(BinaryOperator::LessThan, sign("<")),
         value(BinaryOperator::LessThanOrEqual, sign("<=")),
-        value(BinaryOperator::GreaterThan, sign(">")),
+        value(BinaryOperator::LessThan, sign("<")),
         value(BinaryOperator::GreaterThanOrEqual, sign(">=")),
+        value(BinaryOperator::GreaterThan, sign(">")),
         value(BinaryOperator::And, sign("&")),
         value(BinaryOperator::Or, sign("|")),
     ))(input)
 }
 
 fn prefix_operation_like(input: Input) -> IResult<Input, Expression> {
-    alt((
-        map(prefix_operation, From::from),
-        map(suffix_operation_like, From::from),
-    ))(input)
+    alt((into(prefix_operation), into(suffix_operation_like)))(input)
 }
 
 fn prefix_operation(input: Input) -> IResult<Input, UnaryOperation> {
-    let position = position(input);
-
-    let (input, (operator, expression)) = tuple((prefix_operator, prefix_operation_like))(input)?;
+    let (input, (position, operator, expression)) =
+        tuple((position_parser, prefix_operator, prefix_operation_like))(input)?;
 
     Ok((input, UnaryOperation::new(operator, expression, position)))
 }
@@ -541,7 +538,7 @@ fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> + Clone {
             .chars()
             .any(|character| OPERATOR_CHARACTERS.contains(character))
         {
-            value((), tuple((parser, peek(not(one_of(OPERATOR_CHARACTERS))))))(input)
+            value((), tuple((parser, peek(not(one_of(OPERATOR_MODIFIERS))))))(input)
         } else {
             value((), parser)(input)
         }
@@ -2038,93 +2035,90 @@ mod tests {
             );
         }
 
-        //     #[test]
-        //     fn parse_unary_operation() {
-        //         assert!(prefix_operation().parse(input("", "")).is_err());
+        #[test]
+        fn parse_prefix_operation() {
+            assert!(prefix_operation(input("", "")).is_err());
 
-        //         for (source, expected) in &[
-        //             (
-        //                 "!42",
-        //                 UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "!f(42)",
-        //                 UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     Call::new(
-        //                         Variable::new("f", Position::fake()),
-        //                         vec![Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake(),
-        //                         )
-        //                         .into()],
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "!if true {true}else{true}",
-        //                 UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     If::new(
-        //                         vec![IfBranch::new(
-        //                             Variable::new("true", Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 Variable::new("true", Position::fake()),
-        //                                 Position::fake(),
-        //                             ),
-        //                         )],
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("true", Position::fake()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //             (
-        //                 "!!42",
-        //                 UnaryOperation::new(
-        //                     UnaryOperator::Not,
-        //                     UnaryOperation::new(
-        //                         UnaryOperator::Not,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 ),
-        //             ),
-        //         ] {
-        //             assert_eq!(
-        //                 prefix_operation().parse(input(source, "")).unwrap().0,
-        //                 *expected
-        //             );
-        //         }
-        //     }
+            for (source, expected) in &[
+                (
+                    "!42",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "!f(42)",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            )
+                            .into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "!if true {true}else{true}",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        If::new(
+                            vec![IfBranch::new(
+                                Variable::new("true", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("true", Position::fake()),
+                                    Position::fake(),
+                                ),
+                            )],
+                            Block::new(
+                                vec![],
+                                Variable::new("true", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "!!42",
+                    UnaryOperation::new(
+                        UnaryOperator::Not,
+                        UnaryOperation::new(
+                            UnaryOperator::Not,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                ),
+            ] {
+                assert_eq!(prefix_operation(input(source, "")).unwrap().1, *expected);
+            }
+        }
 
-        //     #[test]
-        //     fn parse_prefix_operator() {
-        //         assert!(prefix_operator().parse(input("", "")).is_err());
+        #[test]
+        fn parse_prefix_operator() {
+            assert!(prefix_operator(input("", "")).is_err());
 
-        //         assert_eq!(
-        //             prefix_operator().parse(input("!", "")).unwrap().0,
-        //             UnaryOperator::Not
-        //         );
-        //     }
+            assert_eq!(
+                prefix_operator(input("!", "")).unwrap().1,
+                UnaryOperator::Not
+            );
+        }
 
         //     #[test]
         //     fn parse_binary_operation() {
@@ -2943,7 +2937,8 @@ mod tests {
         assert!(sign("+")(input("-", "")).is_err());
         assert!(sign("+")(input("+", "")).is_ok());
         assert!(sign("++")(input("++", "")).is_ok());
-        assert!(sign("+")(input("++", "")).is_err());
+        assert!(sign("+")(input("++", "")).is_ok());
+        assert!(sign("+")(input("+=", "")).is_err());
         assert!(sign("\\")(input("\\", "")).is_ok());
     }
 
