@@ -2120,285 +2120,282 @@ mod tests {
             );
         }
 
-        //     #[test]
-        //     fn parse_binary_operation() {
-        //         for (source, target) in vec![
-        //             (
-        //                 "1+1",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1+1+1",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Add,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1+(1+1)",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Add,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1*2-3",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Subtract,
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Multiply,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("3".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1+2*3",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Multiply,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("3".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1*2-3/4",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Subtract,
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Multiply,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Divide,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("3".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("4".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "1==1",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Equal,
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "true&true",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::And,
-        //                     Variable::new("true", Position::fake()),
-        //                     Variable::new("true", Position::fake()),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "true|true",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Or,
-        //                     Variable::new("true", Position::fake()),
-        //                     Variable::new("true", Position::fake()),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "true&1<2",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::And,
-        //                     Variable::new("true", Position::fake()),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::LessThan,
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "true|true&true",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Or,
-        //                     Variable::new("true", Position::fake()),
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::And,
-        //                         Variable::new("true", Position::fake()),
-        //                         Variable::new("true", Position::fake()),
-        //                         Position::fake(),
-        //                     ),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "true|true&true|true",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Or,
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Or,
-        //                         Variable::new("true", Position::fake()),
-        //                         BinaryOperation::new(
-        //                             BinaryOperator::And,
-        //                             Variable::new("true", Position::fake()),
-        //                             Variable::new("true", Position::fake()),
-        //                             Position::fake(),
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Variable::new("true", Position::fake()),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //             (
-        //                 "x+x",
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Variable::new("x", Position::fake()),
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake(),
-        //                 )
-        //                 .into(),
-        //             ),
-        //         ] {
-        //             assert_eq!(expression().parse(input(source, "")).unwrap().0, target);
-        //         }
-        //     }
+        #[test]
+        fn parse_binary_operation() {
+            for (source, target) in vec![
+                (
+                    "1+1",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1+1+1",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1+(1+1)",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1*2-3",
+                    BinaryOperation::new(
+                        BinaryOperator::Subtract,
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("3".into()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1+2*3",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("3".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1*2-3/4",
+                    BinaryOperation::new(
+                        BinaryOperator::Subtract,
+                        BinaryOperation::new(
+                            BinaryOperator::Multiply,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        BinaryOperation::new(
+                            BinaryOperator::Divide,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("3".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("4".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "1==1",
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "true&true",
+                    BinaryOperation::new(
+                        BinaryOperator::And,
+                        Variable::new("true", Position::fake()),
+                        Variable::new("true", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "true|true",
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
+                        Variable::new("true", Position::fake()),
+                        Variable::new("true", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "true&1<2",
+                    BinaryOperation::new(
+                        BinaryOperator::And,
+                        Variable::new("true", Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::LessThan,
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake(),
+                            ),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "true|true&true",
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
+                        Variable::new("true", Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::And,
+                            Variable::new("true", Position::fake()),
+                            Variable::new("true", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "true|true&true|true",
+                    BinaryOperation::new(
+                        BinaryOperator::Or,
+                        BinaryOperation::new(
+                            BinaryOperator::Or,
+                            Variable::new("true", Position::fake()),
+                            BinaryOperation::new(
+                                BinaryOperator::And,
+                                Variable::new("true", Position::fake()),
+                                Variable::new("true", Position::fake()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        Variable::new("true", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+                (
+                    "x+x",
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into(),
+                ),
+            ] {
+                assert_eq!(expression(input(source, "")).unwrap().1, target);
+            }
+        }
 
-        //     #[test]
-        //     fn parse_binary_operator() {
-        //         assert!(binary_operator().parse(input("", "")).is_err());
-        //         assert!(binary_operator().parse(input("++", "")).is_err());
+        #[test]
+        fn parse_binary_operator() {
+            assert!(binary_operator(input("", "")).is_err());
+            assert!(binary_operator(input("+=", "")).is_err());
 
-        //         for (source, expected) in &[
-        //             ("+", BinaryOperator::Add),
-        //             ("-", BinaryOperator::Subtract),
-        //             ("*", BinaryOperator::Multiply),
-        //             ("/", BinaryOperator::Divide),
-        //             ("==", BinaryOperator::Equal),
-        //             ("!=", BinaryOperator::NotEqual),
-        //             ("<", BinaryOperator::LessThan),
-        //             ("<=", BinaryOperator::LessThanOrEqual),
-        //             (">", BinaryOperator::GreaterThan),
-        //             (">=", BinaryOperator::GreaterThanOrEqual),
-        //             ("&", BinaryOperator::And),
-        //             ("|", BinaryOperator::Or),
-        //         ] {
-        //             assert_eq!(
-        //                 binary_operator().parse(input(source, "")).unwrap().0,
-        //                 *expected
-        //             );
-        //         }
-        //     }
+            for (source, expected) in &[
+                ("+", BinaryOperator::Add),
+                ("-", BinaryOperator::Subtract),
+                ("*", BinaryOperator::Multiply),
+                ("/", BinaryOperator::Divide),
+                ("==", BinaryOperator::Equal),
+                ("!=", BinaryOperator::NotEqual),
+                ("<", BinaryOperator::LessThan),
+                ("<=", BinaryOperator::LessThanOrEqual),
+                (">", BinaryOperator::GreaterThan),
+                (">=", BinaryOperator::GreaterThanOrEqual),
+                ("&", BinaryOperator::And),
+                ("|", BinaryOperator::Or),
+            ] {
+                assert_eq!(binary_operator(input(source, "")).unwrap().1, *expected);
+            }
+        }
 
         #[test]
         fn parse_record() {
