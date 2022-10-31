@@ -219,8 +219,9 @@ fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
 fn call_operator(input: Input) -> IResult<Input, SuffixOperator> {
     let position = position(input);
 
+    // Do not allow any space before parentheses.
     let (input, arguments) = delimited(
-        sign("("),
+        tag("("),
         separated_or_terminated_list0(sign(","), expression),
         sign(")"),
     )(input)?;
@@ -1374,96 +1375,96 @@ mod tests {
         use super::*;
         use pretty_assertions::assert_eq;
 
-        //     #[test]
-        //     fn parse_expression() {
-        //         assert!(expression().parse(input("", "")).is_err());
-        //         assert_eq!(
-        //             expression().parse(input("1", "")).unwrap().0,
-        //             Number::new(
-        //                 NumberRepresentation::FloatingPoint("1".into()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //         assert_eq!(
-        //             expression().parse(input("x", "")).unwrap().0,
-        //             Variable::new("x", Position::fake()).into()
-        //         );
-        //         assert_eq!(
-        //             expression().parse(input("x + 1", "")).unwrap().0,
-        //             BinaryOperation::new(
-        //                 BinaryOperator::Add,
-        //                 Variable::new("x", Position::fake()),
-        //                 Number::new(
-        //                     NumberRepresentation::FloatingPoint("1".into()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //         assert_eq!(
-        //             expression().parse(input("x + y(z)", "")).unwrap().0,
-        //             BinaryOperation::new(
-        //                 BinaryOperator::Add,
-        //                 Variable::new("x", Position::fake()),
-        //                 Call::new(
-        //                     Variable::new("y", Position::fake()),
-        //                     vec![Variable::new("z", Position::fake()).into()],
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //         assert_eq!(
-        //             expression().parse(input("(x + y)(z)", "")).unwrap().0,
-        //             Call::new(
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Add,
-        //                     Variable::new("x", Position::fake()),
-        //                     Variable::new("y", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 vec![Variable::new("z", Position::fake()).into()],
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //     }
+        #[test]
+        fn parse_expression() {
+            assert!(expression(input("", "")).is_err());
+            assert_eq!(
+                expression(input("1", "")).unwrap().1,
+                Number::new(
+                    NumberRepresentation::FloatingPoint("1".into()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                expression(input("x", "")).unwrap().1,
+                Variable::new("x", Position::fake()).into()
+            );
+            assert_eq!(
+                expression(input("x + 1", "")).unwrap().1,
+                BinaryOperation::new(
+                    BinaryOperator::Add,
+                    Variable::new("x", Position::fake()),
+                    Number::new(
+                        NumberRepresentation::FloatingPoint("1".into()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                expression(input("x + y(z)", "")).unwrap().1,
+                BinaryOperation::new(
+                    BinaryOperator::Add,
+                    Variable::new("x", Position::fake()),
+                    Call::new(
+                        Variable::new("y", Position::fake()),
+                        vec![Variable::new("z", Position::fake()).into()],
+                        Position::fake()
+                    ),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                expression(input("(x + y)(z)", "")).unwrap().1,
+                Call::new(
+                    BinaryOperation::new(
+                        BinaryOperator::Add,
+                        Variable::new("x", Position::fake()),
+                        Variable::new("y", Position::fake()),
+                        Position::fake()
+                    ),
+                    vec![Variable::new("z", Position::fake()).into()],
+                    Position::fake()
+                )
+                .into()
+            );
+        }
 
-        //     #[test]
-        //     fn parse_deeply_nested_expression() {
-        //         assert_eq!(
-        //             expression().parse(input("(((((42)))))", "")).unwrap().0,
-        //             Number::new(
-        //                 NumberRepresentation::FloatingPoint("42".into()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         )
-        //     }
+        #[test]
+        fn parse_deeply_nested_expression() {
+            assert_eq!(
+                expression(input("(((((42)))))", "")).unwrap().1,
+                Number::new(
+                    NumberRepresentation::FloatingPoint("42".into()),
+                    Position::fake()
+                )
+                .into()
+            )
+        }
 
-        //     #[test]
-        //     fn parse_atomic_expression() {
-        //         assert!(atomic_expression().parse(input("", "")).is_err());
-        //         assert_eq!(
-        //             atomic_expression().parse(input("1", "")).unwrap().0,
-        //             Number::new(
-        //                 NumberRepresentation::FloatingPoint("1".into()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //         assert_eq!(
-        //             atomic_expression().parse(input("x", "")).unwrap().0,
-        //             Variable::new("x", Position::fake()).into()
-        //         );
-        //         assert_eq!(
-        //             atomic_expression().parse(input("(x)", "")).unwrap().0,
-        //             Variable::new("x", Position::fake()).into()
-        //         );
-        //     }
+        #[test]
+        fn parse_atomic_expression() {
+            assert!(atomic_expression(input("", "")).is_err());
+            assert_eq!(
+                atomic_expression(input("1", "")).unwrap().1,
+                Number::new(
+                    NumberRepresentation::FloatingPoint("1".into()),
+                    Position::fake()
+                )
+                .into()
+            );
+            assert_eq!(
+                atomic_expression(input("x", "")).unwrap().1,
+                Variable::new("x", Position::fake()).into()
+            );
+            assert_eq!(
+                atomic_expression(input("(x)", "")).unwrap().1,
+                Variable::new("x", Position::fake()).into()
+            );
+        }
 
         //     #[test]
         //     fn parse_lambda() {
@@ -1917,6 +1918,11 @@ mod tests {
 
             #[test]
             fn parse_call() {
+                assert_eq!(
+                    expression(input("f ()", "")).unwrap().1,
+                    Variable::new("f", Position::fake()).into()
+                );
+
                 assert_eq!(
                     expression(input("f()", "")).unwrap().1,
                     Call::new(
