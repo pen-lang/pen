@@ -114,6 +114,33 @@ fn reference_type(input: Input) -> IResult<Input, types::Reference> {
     Ok((input, types::Reference::new(identifier, position)))
 }
 
+fn block(input: Input) -> IResult<Input, Block> {
+    let (input, (position, statements)) = tuple((
+        position_parser,
+        delimited(sign("{"), many1(statement), sign("}")),
+    ))(input)?;
+
+    // TODO Validate the last expressions.
+    Ok((
+        input,
+        Block::new(
+            statements[..statements.len() - 1].to_vec(),
+            statements.last().unwrap().expression().clone(),
+            position,
+        ),
+    ))
+}
+
+fn statement(input: Input) -> IResult<Input, Statement> {
+    let (input, (position, name, expression)) = tuple((
+        position_parser,
+        opt(terminated(identifier, sign("="))),
+        expression,
+    ))(input)?;
+
+    Ok((input, Statement::new(name, expression, position)))
+}
+
 fn expression(input: Input) -> IResult<Input, Expression> {
     binary_operation_like(input)
 }
@@ -225,7 +252,7 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         // if_list().map(Expression::from),
         // if_map().map(Expression::from),
         // if_type().map(Expression::from),
-        // if_().map(Expression::from),
+        into(if_),
         // lambda().map(Expression::from),
         into(record),
         into(list_comprehension),
@@ -236,6 +263,32 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         into(variable),
         delimited(sign("("), expression, sign(")")),
     ))(input)
+}
+
+fn if_(input: Input) -> IResult<Input, If> {
+    let (input, (position, _, first_branch, branches, _, else_block)) = tuple((
+        position_parser,
+        keyword("if"),
+        if_branch,
+        many0(preceded(tuple((keyword("else"), keyword("if"))), if_branch)),
+        keyword("else"),
+        block,
+    ))(input)?;
+
+    Ok((
+        input,
+        If::new(
+            [first_branch].into_iter().chain(branches).collect(),
+            else_block,
+            position,
+        ),
+    ))
+}
+
+fn if_branch(input: Input) -> IResult<Input, IfBranch> {
+    let (input, (expression, block)) = tuple((expression, block))(input)?;
+
+    Ok((input, IfBranch::new(expression, block)))
 }
 
 fn record(input: Input) -> IResult<Input, Record> {
@@ -1484,238 +1537,230 @@ mod tests {
         //         );
         //     }
 
-        //     #[test]
-        //     fn parse_block() {
-        //         assert_eq!(
-        //             block().parse(input("{none}", "")).unwrap().0,
-        //             Block::new(
-        //                 vec![],
-        //                 Variable::new("none", Position::fake()),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //         assert_eq!(
-        //             block().parse(input("{none none}", "")).unwrap().0,
-        //             Block::new(
-        //                 vec![Statement::new(
-        //                     None,
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 )],
-        //                 Variable::new("none", Position::fake()),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //         assert_eq!(
-        //             block().parse(input("{none none none}", "")).unwrap().0,
-        //             Block::new(
-        //                 vec![
-        //                     Statement::new(
-        //                         None,
-        //                         Variable::new("none", Position::fake()),
-        //                         Position::fake()
-        //                     ),
-        //                     Statement::new(
-        //                         None,
-        //                         Variable::new("none", Position::fake()),
-        //                         Position::fake()
-        //                     )
-        //                 ],
-        //                 Variable::new("none", Position::fake()),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //         assert_eq!(
-        //             block().parse(input("{x=none none}", "")).unwrap().0,
-        //             Block::new(
-        //                 vec![Statement::new(
-        //                     Some("x".into()),
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 )],
-        //                 Variable::new("none", Position::fake()),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //         assert_eq!(
-        //             block().parse(input("{x==x}", "")).unwrap().0,
-        //             Block::new(
-        //                 vec![],
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Equal,
-        //                     Variable::new("x", Position::fake()),
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //     }
+        #[test]
+        fn parse_block() {
+            assert_eq!(
+                block(input("{none}", "")).unwrap().1,
+                Block::new(
+                    vec![],
+                    Variable::new("none", Position::fake()),
+                    Position::fake()
+                ),
+            );
+            assert_eq!(
+                block(input("{none none}", "")).unwrap().1,
+                Block::new(
+                    vec![Statement::new(
+                        None,
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    )],
+                    Variable::new("none", Position::fake()),
+                    Position::fake()
+                ),
+            );
+            assert_eq!(
+                block(input("{none none none}", "")).unwrap().1,
+                Block::new(
+                    vec![
+                        Statement::new(
+                            None,
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
+                        Statement::new(
+                            None,
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        )
+                    ],
+                    Variable::new("none", Position::fake()),
+                    Position::fake()
+                ),
+            );
+            assert_eq!(
+                block(input("{x=none none}", "")).unwrap().1,
+                Block::new(
+                    vec![Statement::new(
+                        Some("x".into()),
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    )],
+                    Variable::new("none", Position::fake()),
+                    Position::fake()
+                ),
+            );
+            assert_eq!(
+                block(input("{x==x}", "")).unwrap().1,
+                Block::new(
+                    vec![],
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+            );
+        }
 
-        //     #[test]
-        //     fn parse_statement() {
-        //         assert_eq!(
-        //             statement().parse(input("x==x", "")).unwrap().0,
-        //             Statement::new(
-        //                 None,
-        //                 BinaryOperation::new(
-        //                     BinaryOperator::Equal,
-        //                     Variable::new("x", Position::fake()),
-        //                     Variable::new("x", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //     }
+        #[test]
+        fn parse_statement() {
+            assert_eq!(
+                statement(input("x==x", "")).unwrap().1,
+                Statement::new(
+                    None,
+                    BinaryOperation::new(
+                        BinaryOperator::Equal,
+                        Variable::new("x", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+            );
+        }
 
-        //     #[test]
-        //     fn parse_if() {
-        //         assert_eq!(
-        //             if_()
-        //                 .parse(input("if true { 42 } else { 13 }", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             If::new(
-        //                 vec![IfBranch::new(
-        //                     Variable::new("true", Position::fake()),
-        //                     Block::new(
-        //                         vec![],
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     ),
-        //                 )],
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("13".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //         );
-        //         assert_eq!(
-        //             if_()
-        //                 .parse(input("if if true {true}else{true}{42}else{13}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             If::new(
-        //                 vec![IfBranch::new(
-        //                     If::new(
-        //                         vec![IfBranch::new(
-        //                             Variable::new("true", Position::fake()),
-        //                             Block::new(
-        //                                 vec![],
-        //                                 Variable::new("true", Position::fake()),
-        //                                 Position::fake()
-        //                             ),
-        //                         )],
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("true", Position::fake()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake(),
-        //                     ),
-        //                     Block::new(
-        //                         vec![],
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     ),
-        //                 )],
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("13".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //         );
-        //         assert_eq!(
-        //             if_()
-        //                 .parse(input("if true {1}else if true {2}else{3}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             If::new(
-        //                 vec![
-        //                     IfBranch::new(
-        //                         Variable::new("true", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("1".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         ),
-        //                     ),
-        //                     IfBranch::new(
-        //                         Variable::new("true", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Number::new(
-        //                                 NumberRepresentation::FloatingPoint("2".into()),
-        //                                 Position::fake()
-        //                             ),
-        //                             Position::fake()
-        //                         ),
-        //                     )
-        //                 ],
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("3".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //         );
-        //     }
+        #[test]
+        fn parse_if() {
+            assert_eq!(
+                if_(input("if true { 42 } else { 13 }", "")).unwrap().1,
+                If::new(
+                    vec![IfBranch::new(
+                        Variable::new("true", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                    )],
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("13".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            );
+            assert_eq!(
+                if_(input("if if true {true}else{true}{42}else{13}", ""))
+                    .unwrap()
+                    .1,
+                If::new(
+                    vec![IfBranch::new(
+                        If::new(
+                            vec![IfBranch::new(
+                                Variable::new("true", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Variable::new("true", Position::fake()),
+                                    Position::fake()
+                                ),
+                            )],
+                            Block::new(
+                                vec![],
+                                Variable::new("true", Position::fake()),
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                    )],
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("13".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            );
+            assert_eq!(
+                if_(input("if true {1}else if true {2}else{3}", ""))
+                    .unwrap()
+                    .1,
+                If::new(
+                    vec![
+                        IfBranch::new(
+                            Variable::new("true", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                        ),
+                        IfBranch::new(
+                            Variable::new("true", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("2".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                        )
+                    ],
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("3".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            );
+        }
 
-        //     #[test]
-        //     fn parse_if_with_equal_operator() {
-        //         assert_eq!(
-        //             expression()
-        //                 .parse(input("if x==y {none}else{none}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             If::new(
-        //                 vec![IfBranch::new(
-        //                     BinaryOperation::new(
-        //                         BinaryOperator::Equal,
-        //                         Variable::new("x", Position::fake()),
-        //                         Variable::new("y", Position::fake()),
-        //                         Position::fake()
-        //                     ),
-        //                     Block::new(
-        //                         vec![],
-        //                         Variable::new("none", Position::fake()),
-        //                         Position::fake()
-        //                     ),
-        //                 )],
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //             .into()
-        //         );
-        //     }
+        #[test]
+        fn parse_if_with_equal_operator() {
+            assert_eq!(
+                expression(input("if x==y {none}else{none}", "")).unwrap().1,
+                If::new(
+                    vec![IfBranch::new(
+                        BinaryOperation::new(
+                            BinaryOperator::Equal,
+                            Variable::new("x", Position::fake()),
+                            Variable::new("y", Position::fake()),
+                            Position::fake()
+                        ),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
+                    )],
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+                .into()
+            );
+        }
 
         //     #[test]
         //     fn parse_if_type() {
