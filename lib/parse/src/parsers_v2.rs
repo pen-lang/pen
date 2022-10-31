@@ -2,16 +2,19 @@ use ast::*;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{char, hex_digit1, line_ending, multispace0, none_of},
-    combinator::{complete, eof, map, recognize},
+    character::complete::{char, hex_digit1, multispace0, multispace1, none_of, one_of},
+    combinator::{all_consuming, map, not, peek, recognize, value},
     multi::many0,
-    number::complete::hex_u32,
     sequence::tuple,
     IResult,
 };
 use nom_locate::LocatedSpan;
-use once_cell::sync::Lazy;
 use position::Position;
+
+const KEYWORDS: &[&str] = &[
+    "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
+];
+const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 
 type Input<'a> = LocatedSpan<&'a str, &'a str>;
 
@@ -20,7 +23,7 @@ fn input<'a>(source: &'a str, path: &'a str) -> Input<'a> {
 }
 
 pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
-    let (input, comments) = complete(many0(tuple((
+    let (input, comments) = all_consuming(many0(tuple((
         multispace0,
         alt((
             map(comment, Some),
@@ -39,6 +42,10 @@ pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
     ))
 }
 
+fn string_literal(input: Input) -> IResult<Input, ByteString> {
+    token(raw_string_literal)(input)
+}
+
 fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
     let position = position(input);
 
@@ -51,6 +58,7 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
             tag("\\n"),
             tag("\\r"),
             tag("\\t"),
+            // TODO Limit a number of digits.
             recognize(tuple((tag("\\x"), hex_digit1))),
         ))),
         char('"'),
@@ -67,6 +75,34 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
             position,
         ),
     ))
+}
+
+fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> {
+    if !sign
+        .chars()
+        .any(|character| OPERATOR_CHARACTERS.contains(character))
+    {
+        unreachable!();
+    }
+
+    move |input| {
+        value(
+            (),
+            tuple((tag(sign), peek(not(one_of(OPERATOR_CHARACTERS))))),
+        )(input)
+    }
+}
+
+fn token<O>(parser: impl Fn(Input) -> IResult<Input, O>) -> impl Fn(Input) -> IResult<Input, O> {
+    move |input| {
+        let (input, _) = blank(input)?;
+
+        parser(input)
+    }
+}
+
+fn blank(input: Input) -> IResult<Input, ()> {
+    value((), many0(alt((value((), multispace1), value((), comment)))))(input)
 }
 
 fn comment(input: Input) -> IResult<Input, Comment> {
@@ -2154,29 +2190,30 @@ mod tests {
     //         }
     //     }
 
-    //     #[test]
-    //     fn parse_string_literal() {
-    //         assert!(string_literal().parse(input("", "")).is_err());
-    //         assert!(string_literal().parse(input("foo", "")).is_err());
+    #[test]
+    fn parse_string_literal() {
+        assert!(string_literal(input("", "")).is_err());
+        assert!(string_literal(input("foo", "")).is_err());
+        assert!(string_literal(input("\\a", "")).is_err());
 
-    //         for (source, value) in &[
-    //             (r#""""#, ""),
-    //             (r#""foo""#, "foo"),
-    //             (r#""foo bar""#, "foo bar"),
-    //             (r#""\"""#, "\\\""),
-    //             (r#""\n""#, "\\n"),
-    //             (r#""\r""#, "\\r"),
-    //             (r#""\t""#, "\\t"),
-    //             (r#""\\""#, "\\\\"),
-    //             (r#""\x42""#, "\\x42"),
-    //             (r#""\n\n""#, "\\n\\n"),
-    //         ] {
-    //             assert_eq!(
-    //                 string_literal().parse(input(source, "")).unwrap().0,
-    //                 ByteString::new(*value, Position::fake())
-    //             );
-    //         }
-    //     }
+        for (source, value) in &[
+            (r#""""#, ""),
+            (r#""foo""#, "foo"),
+            (r#""foo bar""#, "foo bar"),
+            (r#""\"""#, "\\\""),
+            (r#""\n""#, "\\n"),
+            (r#""\r""#, "\\r"),
+            (r#""\t""#, "\\t"),
+            (r#""\\""#, "\\\\"),
+            (r#""\x42""#, "\\x42"),
+            (r#""\n\n""#, "\\n\\n"),
+        ] {
+            assert_eq!(
+                string_literal(input(source, "")).unwrap().1,
+                ByteString::new(*value, Position::fake())
+            );
+        }
+    }
 
     //     #[test]
     //     fn parse_list() {
@@ -2471,23 +2508,23 @@ mod tests {
     //     assert!(keyword("type").parse(input("type", "")).is_ok());
     // }
 
-    // #[test]
-    // fn parse_sign() {
-    //     assert!(sign("+").parse(input("", "")).is_err());
-    //     assert!(sign("+").parse(input("-", "")).is_err());
-    //     assert!(sign("+").parse(input("+", "")).is_ok());
-    //     assert!(sign("++").parse(input("++", "")).is_ok());
-    //     assert!(sign("+").parse(input("++", "")).is_err());
-    // }
+    #[test]
+    fn parse_sign() {
+        assert!(sign("+")(input("", "")).is_err());
+        assert!(sign("+")(input("-", "")).is_err());
+        assert!(sign("+")(input("+", "")).is_ok());
+        assert!(sign("++")(input("++", "")).is_ok());
+        assert!(sign("+")(input("++", "")).is_err());
+    }
 
-    // #[test]
-    // fn parse_blank() {
-    //     assert!(blank().with(eof()).parse(input(" ", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(input("\n", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(input(" \n", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(input("\t", "")).is_ok());
-    //     assert!(blank().with(eof()).parse(input("# foo", "")).is_ok());
-    // }
+    #[test]
+    fn parse_blank() {
+        assert!(all_consuming(blank)(input(" ", "")).is_ok());
+        assert!(all_consuming(blank)(input("\n", "")).is_ok());
+        assert!(all_consuming(blank)(input(" \n", "")).is_ok());
+        assert!(all_consuming(blank)(input("\t", "")).is_ok());
+        assert!(all_consuming(blank)(input("# foo", "")).is_ok());
+    }
 
     #[test]
     fn parse_comment() {
