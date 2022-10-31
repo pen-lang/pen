@@ -10,7 +10,6 @@ use nom::{
     IResult,
 };
 use nom_locate::LocatedSpan;
-use nom_regex::str::re_find;
 use once_cell::sync::Lazy;
 use position::Position;
 
