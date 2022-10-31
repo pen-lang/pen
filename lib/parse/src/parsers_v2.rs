@@ -1914,130 +1914,129 @@ mod tests {
         //         );
         //     }
 
-        //     mod call {
-        //         use super::*;
-        //         use pretty_assertions::assert_eq;
+        mod call {
+            use super::*;
+            use pretty_assertions::assert_eq;
 
-        //         #[test]
-        //         fn parse_call() {
-        //             assert_eq!(
-        //                 expression().parse(input("f()", "")).unwrap().0,
-        //                 Call::new(
-        //                     Variable::new("f", Position::fake()),
-        //                     vec![],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
+            #[test]
+            fn parse_call() {
+                assert_eq!(
+                    expression(input("f()", "")).unwrap().1,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-        //             assert_eq!(
-        //                 expression().parse(input("f()()", "")).unwrap().0,
-        //                 Call::new(
-        //                     Call::new(
-        //                         Variable::new("f", Position::fake()),
-        //                         vec![],
-        //                         Position::fake()
-        //                     ),
-        //                     vec![],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
+                assert_eq!(
+                    expression(input("f()()", "")).unwrap().1,
+                    Call::new(
+                        Call::new(
+                            Variable::new("f", Position::fake()),
+                            vec![],
+                            Position::fake()
+                        ),
+                        vec![],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-        //             assert_eq!(
-        //                 expression().parse(input("f(1)", "")).unwrap().0,
-        //                 Call::new(
-        //                     Variable::new("f", Position::fake()),
-        //                     vec![Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake()
-        //                     )
-        //                     .into()],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
+                assert_eq!(
+                    expression(input("f(1)", "")).unwrap().1,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake()
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-        //             assert_eq!(
-        //                 expression().parse(input("f(1,)", "")).unwrap().0,
-        //                 Call::new(
-        //                     Variable::new("f", Position::fake()),
-        //                     vec![Number::new(
-        //                         NumberRepresentation::FloatingPoint("1".into()),
-        //                         Position::fake()
-        //                     )
-        //                     .into()],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
+                assert_eq!(
+                    expression(input("f(1,)", "")).unwrap().1,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![Number::new(
+                            NumberRepresentation::FloatingPoint("1".into()),
+                            Position::fake()
+                        )
+                        .into()],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-        //             assert_eq!(
-        //                 expression().parse(input("f(1, 2)", "")).unwrap().0,
-        //                 Call::new(
-        //                     Variable::new("f", Position::fake()),
-        //                     vec![
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake()
-        //                         )
-        //                         .into(),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake()
-        //                         )
-        //                         .into()
-        //                     ],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
+                assert_eq!(
+                    expression(input("f(1, 2)", "")).unwrap().1,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into(),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            )
+                            .into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
 
-        //             assert_eq!(
-        //                 expression().parse(input("f(1, 2,)", "")).unwrap().0,
-        //                 Call::new(
-        //                     Variable::new("f", Position::fake()),
-        //                     vec![
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("1".into()),
-        //                             Position::fake()
-        //                         )
-        //                         .into(),
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("2".into()),
-        //                             Position::fake()
-        //                         )
-        //                         .into()
-        //                     ],
-        //                     Position::fake()
-        //                 )
-        //                 .into()
-        //             );
-        //         }
+                assert_eq!(
+                    expression(input("f(1, 2,)", "")).unwrap().1,
+                    Call::new(
+                        Variable::new("f", Position::fake()),
+                        vec![
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into(),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("2".into()),
+                                Position::fake()
+                            )
+                            .into()
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                );
+            }
 
-        //         #[test]
-        //         fn fail_to_parse_call() {
-        //             let source = "f(1+)";
+            #[test]
+            fn fail_to_parse_call() {
+                // TODO Should we rather commit to parse calls?
+                assert_eq!(
+                    expression(input("f(1+)", "")).unwrap().1,
+                    Variable::new("f", Position::fake()).into()
+                );
+            }
+        }
 
-        //             insta::assert_debug_snapshot!(expression()
-        //                 .parse(input(source, ""))
-        //                 .map_err(|error| ParseError::new(source, "", error))
-        //                 .err());
-        //         }
-        //     }
-
-        //     #[test]
-        //     fn parse_try_operation() {
-        //         assert_eq!(
-        //             expression().parse(input("x?", "")).unwrap().0,
-        //             UnaryOperation::new(
-        //                 UnaryOperator::Try,
-        //                 Variable::new("x", Position::fake()),
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
-        //     }
+        #[test]
+        fn parse_try_operation() {
+            assert_eq!(
+                expression(input("x?", "")).unwrap().1,
+                UnaryOperation::new(
+                    UnaryOperator::Try,
+                    Variable::new("x", Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            );
+        }
 
         //     #[test]
         //     fn parse_unary_operation() {
