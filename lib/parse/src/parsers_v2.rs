@@ -2,11 +2,14 @@ use ast::*;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{char, hex_digit1, multispace0, multispace1, none_of, one_of},
-    combinator::{all_consuming, map, not, peek, recognize, value},
+    character::complete::{
+        alpha1, alphanumeric0, alphanumeric1, char, hex_digit1, multispace0, multispace1, none_of,
+        one_of,
+    },
+    combinator::{all_consuming, map, not, opt, peek, recognize, value, verify},
     multi::many0,
     sequence::tuple,
-    IResult,
+    IResult, Parser,
 };
 use nom_locate::LocatedSpan;
 use position::Position;
@@ -77,6 +80,67 @@ fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
     ))
 }
 
+fn variable(input: Input) -> IResult<Input, Variable> {
+    let position = position(input);
+
+    let (input, identifier) = token(qualified_identifier)(input)?;
+
+    Ok((input, Variable::new(identifier, position)))
+}
+
+fn qualified_identifier(input: Input) -> IResult<Input, String> {
+    let (input, (former, latter)) = tuple((
+        raw_identifier,
+        opt(tuple((tag(IDENTIFIER_SEPARATOR), raw_identifier))),
+    ))(input)?;
+
+    Ok((
+        input,
+        if let Some((_, latter)) = latter {
+            [&former, IDENTIFIER_SEPARATOR, &latter].concat()
+        } else {
+            former
+        },
+    ))
+}
+
+fn identifier(input: Input) -> IResult<Input, String> {
+    token(raw_identifier)(input)
+}
+
+fn raw_identifier(input: Input) -> IResult<Input, String> {
+    verify(unchecked_identifier, |identifier: &str| {
+        !KEYWORDS.contains(&identifier)
+    })(input)
+}
+
+fn unchecked_identifier(input: Input) -> IResult<Input, String> {
+    let (input, span) = recognize(tuple((
+        alt((value((), alpha1), value((), char('_')))),
+        many0(alt((value((), alphanumeric1), value((), char('_'))))),
+    )))(input)?;
+
+    Ok((input, String::from_utf8_lossy(span.as_bytes()).to_string()))
+}
+
+fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<Input, ()> {
+    if !KEYWORDS.contains(&name) {
+        unreachable!("undefined keyword");
+    }
+
+    move |input| {
+        let (input, _) = value(
+            (),
+            token(tuple((
+                tag(name),
+                peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
+            ))),
+        )(input)?;
+
+        Ok((input, ()))
+    }
+}
+
 fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> {
     if !sign
         .chars()
@@ -93,11 +157,13 @@ fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<Input, ()> {
     }
 }
 
-fn token<O>(parser: impl Fn(Input) -> IResult<Input, O>) -> impl Fn(Input) -> IResult<Input, O> {
+fn token<'a, O>(
+    mut parser: impl Parser<Input<'a>, O, nom::error::Error<Input<'a>>>,
+) -> impl FnMut(Input<'a>) -> IResult<Input, O, nom::error::Error<Input<'a>>> {
     move |input| {
         let (input, _) = blank(input)?;
 
-        parser(input)
+        parser.parse(input)
     }
 }
 
@@ -2146,20 +2212,20 @@ mod tests {
     //             .is_ok());
     //     }
 
-    //     #[test]
-    //     fn parse_variable() {
-    //         assert!(variable().parse(input("", "")).is_err());
+    #[test]
+    fn parse_variable() {
+        assert!(variable(input("", "")).is_err());
 
-    //         assert_eq!(
-    //             variable().parse(input("x", "")).unwrap().0,
-    //             Variable::new("x", Position::fake()),
-    //         );
+        assert_eq!(
+            variable(input("x", "")).unwrap().1,
+            Variable::new("x", Position::fake()),
+        );
 
-    //         assert_eq!(
-    //             variable().parse(input("Foo.x", "")).unwrap().0,
-    //             Variable::new("Foo", Position::fake()),
-    //         );
-    //     }
+        assert_eq!(
+            variable(input("Foo.x", "")).unwrap().1,
+            Variable::new("Foo", Position::fake()),
+        );
+    }
 
     //     #[test]
     //     fn parse_number_literal() {
@@ -2199,6 +2265,7 @@ mod tests {
         for (source, value) in &[
             (r#""""#, ""),
             (r#""foo""#, "foo"),
+            (r#" "foo""#, "foo"),
             (r#""foo bar""#, "foo bar"),
             (r#""\"""#, "\\\""),
             (r#""\n""#, "\\n"),
@@ -2485,28 +2552,25 @@ mod tests {
     //     }
     // }
 
-    // #[test]
-    // fn parse_identifier() {
-    //     assert!(identifier().parse(input("if", "")).is_err());
-    //     assert!(identifier().parse(input("1foo", "")).is_err());
-    //     assert_eq!(
-    //         identifier().parse(input("foo", "")).unwrap().0,
-    //         "foo".to_string()
-    //     );
-    //     assert_eq!(
-    //         identifier().parse(input("foo42", "")).unwrap().0,
-    //         "foo42".to_string()
-    //     );
-    // }
+    #[test]
+    fn parse_identifier() {
+        assert!(identifier(input("if", "")).is_err());
+        assert!(identifier(input("1foo", "")).is_err());
+        assert_eq!(identifier(input("foo", "")).unwrap().1, "foo".to_string());
+        assert_eq!(
+            identifier(input("foo42", "")).unwrap().1,
+            "foo42".to_string()
+        );
+    }
 
-    // #[test]
-    // fn parse_keyword() {
-    //     assert!(keyword("type").parse(input("bar", "")).is_err());
-    //     // spell-checker: disable-next-line
-    //     assert!(keyword("type").parse(input("typer", "")).is_err());
-    //     assert!(keyword("type").parse(input("type_", "")).is_err());
-    //     assert!(keyword("type").parse(input("type", "")).is_ok());
-    // }
+    #[test]
+    fn parse_keyword() {
+        assert!(keyword("type").parse(input("bar", "")).is_err());
+        // spell-checker: disable-next-line
+        assert!(keyword("type").parse(input("typer", "")).is_err());
+        assert!(keyword("type").parse(input("type_", "")).is_err());
+        assert!(keyword("type").parse(input("type", "")).is_ok());
+    }
 
     #[test]
     fn parse_sign() {
