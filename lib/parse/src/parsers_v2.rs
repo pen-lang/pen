@@ -6,7 +6,7 @@ use nom::{
         alpha1, alphanumeric0, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1,
         none_of, one_of,
     },
-    combinator::{all_consuming, into, map, not, opt, peek, recognize, value, verify},
+    combinator::{all_consuming, into, map, not, opt, peek, recognize, success, value, verify},
     error::ParseError,
     multi::{many0, many1, separated_list0, separated_list1},
     number::complete::recognize_float,
@@ -17,7 +17,7 @@ use nom_locate::LocatedSpan;
 use position::Position;
 
 use crate::{
-    combinator::separated_or_terminated_list0,
+    combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
     operations::{reduce_operations, SuffixOperator},
 };
 
@@ -227,7 +227,7 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         // if_type().map(Expression::from),
         // if_().map(Expression::from),
         // lambda().map(Expression::from),
-        // record().map(Expression::from),
+        into(record),
         into(list_comprehension),
         into(list_literal),
         into(map_literal),
@@ -236,6 +236,35 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         into(variable),
         delimited(sign("("), expression, sign(")")),
     ))(input)
+}
+
+fn record(input: Input) -> IResult<Input, Record> {
+    let (input, (position, name, _, (record, fields), _)) = tuple((
+        position_parser,
+        qualified_identifier,
+        sign("{"),
+        alt((
+            tuple((
+                map(delimited(sign("..."), expression, sign(",")), Some),
+                separated_or_terminated_list1(sign(","), record_field),
+            )),
+            tuple((
+                success(None),
+                separated_or_terminated_list0(sign(","), record_field),
+            )),
+        )),
+        sign("}"),
+    ))(input)?;
+
+    // TODO Validate duplicate fields.
+    Ok((input, Record::new(name, record, fields, position)))
+}
+
+fn record_field(input: Input) -> IResult<Input, RecordField> {
+    let (input, (position, name, _, expression)) =
+        tuple((position_parser, identifier, sign(":"), expression))(input)?;
+
+    Ok((input, RecordField::new(name, expression, position)))
 }
 
 fn number_literal(input: Input) -> IResult<Input, Number> {
@@ -2333,196 +2362,181 @@ mod tests {
         //         }
         //     }
 
-        //     #[test]
-        //     fn parse_record() {
-        //         assert!(record().parse(input("Foo", "")).is_err());
+        #[test]
+        fn parse_record() {
+            assert!(record(input("Foo", "")).is_err());
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{}", "")).unwrap().0,
-        //             Record::new("Foo", None, vec![], Position::fake())
-        //         );
+            assert_eq!(
+                record(input("Foo{}", "")).unwrap().1,
+                Record::new("Foo", None, vec![], Position::fake())
+            );
 
-        //         assert_eq!(
-        //             expression().parse(input("Foo{foo:42}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 None,
-        //                 vec![RecordField::new(
-        //                     "foo",
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
+            assert_eq!(
+                expression(input("Foo{foo:42}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    None,
+                    vec![RecordField::new(
+                        "foo",
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+                .into()
+            );
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{foo:42}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 None,
-        //                 vec![RecordField::new(
-        //                     "foo",
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //         );
+            assert_eq!(
+                record(input("Foo{foo:42}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    None,
+                    vec![RecordField::new(
+                        "foo",
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+            );
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{foo:42,bar:42}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 None,
-        //                 vec![
-        //                     RecordField::new(
-        //                         "foo",
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     ),
-        //                     RecordField::new(
-        //                         "bar",
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     )
-        //                 ],
-        //                 Position::fake()
-        //             )
-        //         );
+            assert_eq!(
+                record(input("Foo{foo:42,bar:42}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    None,
+                    vec![
+                        RecordField::new(
+                            "foo",
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        RecordField::new(
+                            "bar",
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )
+                    ],
+                    Position::fake()
+                )
+            );
 
-        //         assert!(record().parse(input("Foo{foo:42,foo:42}", "")).is_err());
+            assert_eq!(
+                expression(input("foo(Foo{foo:42})", "")).unwrap().1,
+                Call::new(
+                    Variable::new("foo", Position::fake()),
+                    vec![Record::new(
+                        "Foo",
+                        None,
+                        vec![RecordField::new(
+                            "foo",
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        )],
+                        Position::fake()
+                    )
+                    .into()],
+                    Position::fake()
+                )
+                .into()
+            );
 
-        //         assert_eq!(
-        //             expression()
-        //                 .parse(input("foo(Foo{foo:42})", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             Call::new(
-        //                 Variable::new("foo", Position::fake()),
-        //                 vec![Record::new(
-        //                     "Foo",
-        //                     None,
-        //                     vec![RecordField::new(
-        //                         "foo",
-        //                         Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         ),
-        //                         Position::fake()
-        //                     )],
-        //                     Position::fake()
-        //                 )
-        //                 .into()],
-        //                 Position::fake()
-        //             )
-        //             .into()
-        //         );
+            assert_eq!(
+                record(input("Foo{foo:bar(42)}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    None,
+                    vec![RecordField::new(
+                        "foo",
+                        Call::new(
+                            Variable::new("bar", Position::fake()),
+                            vec![Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            )
+                            .into()],
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+            );
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{foo:bar(42)}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 None,
-        //                 vec![RecordField::new(
-        //                     "foo",
-        //                     Call::new(
-        //                         Variable::new("bar", Position::fake()),
-        //                         vec![Number::new(
-        //                             NumberRepresentation::FloatingPoint("42".into()),
-        //                             Position::fake()
-        //                         )
-        //                         .into()],
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //         );
+            assert!(record(input("Foo{...foo,}", "")).is_err());
 
-        //         assert!(record().parse(input("Foo{...foo,}", "")).is_err());
+            assert_eq!(
+                record(input("Foo{...foo,bar:42}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    Some(Variable::new("foo", Position::fake()).into()),
+                    vec![RecordField::new(
+                        "bar",
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+            );
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{...foo,bar:42}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 Some(Variable::new("foo", Position::fake()).into()),
-        //                 vec![RecordField::new(
-        //                     "bar",
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //         );
+            assert_eq!(
+                record(input("Foo{...foo,bar:42,}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    Some(Variable::new("foo", Position::fake()).into()),
+                    vec![RecordField::new(
+                        "bar",
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+            );
 
-        //         assert_eq!(
-        //             record().parse(input("Foo{...foo,bar:42,}", "")).unwrap().0,
-        //             Record::new(
-        //                 "Foo",
-        //                 Some(Variable::new("foo", Position::fake()).into()),
-        //                 vec![RecordField::new(
-        //                     "bar",
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //         );
+            assert_eq!(
+                expression(input("Foo{...foo,bar:42}", "")).unwrap().1,
+                Record::new(
+                    "Foo",
+                    Some(Variable::new("foo", Position::fake()).into()),
+                    vec![RecordField::new(
+                        "bar",
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+                .into(),
+            );
 
-        //         assert_eq!(
-        //             expression()
-        //                 .parse(input("Foo{...foo,bar:42}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             Record::new(
-        //                 "Foo",
-        //                 Some(Variable::new("foo", Position::fake()).into()),
-        //                 vec![RecordField::new(
-        //                     "bar",
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 )],
-        //                 Position::fake()
-        //             )
-        //             .into(),
-        //         );
-
-        //         assert!(record().parse(input("Foo{...foo}", "")).is_err());
-        //         assert!(record()
-        //             .parse(input("Foo{...foo,bar:42,bar:42}", ""))
-        //             .is_err());
-        //         assert!(record().parse(input("Foo{...(foo),bar:42}", "")).is_ok());
-        //         assert!(record()
-        //             .parse(input("Foo{...foo(bar),bar:42}", ""))
-        //             .is_ok());
-        //         assert!(record()
-        //             .parse(input("Foo{...if true { none } else { none },bar:42}", ""))
-        //             .is_ok());
-        //     }
+            assert!(record(input("Foo{...foo}", "")).is_err());
+            assert!(record(input("Foo{...(foo),bar:42}", "")).is_ok());
+            assert!(record(input("Foo{...foo(bar),bar:42}", "")).is_ok());
+            assert!(record(input("Foo{...if true { none } else { none },bar:42}", "")).is_ok());
+        }
 
         #[test]
         fn parse_variable() {
