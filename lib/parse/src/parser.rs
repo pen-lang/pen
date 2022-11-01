@@ -73,21 +73,26 @@ pub fn comments(input: Input) -> IResult<Vec<Comment>> {
 }
 
 fn import(input: Input) -> IResult<Import> {
-    map(
-        tuple((
-            position,
-            keyword("import"),
-            module_path,
-            opt(preceded(keyword("as"), identifier)),
-            opt(delimited(
-                sign("{"),
-                separated_or_terminated_list1(sign(","), unqualified_name),
-                sign("}"),
+    context(
+        "import",
+        map(
+            tuple((
+                position,
+                keyword("import"),
+                module_path,
+                cut(tuple((
+                    opt(preceded(keyword("as"), identifier)),
+                    opt(delimited(
+                        sign("{"),
+                        separated_or_terminated_list1(sign(","), unqualified_name),
+                        sign("}"),
+                    )),
+                ))),
             )),
-        )),
-        |(position, _, path, prefix, names)| {
-            Import::new(path, prefix, names.unwrap_or_default(), position)
-        },
+            |(position, _, path, (prefix, names))| {
+                Import::new(path, prefix, names.unwrap_or_default(), position)
+            },
+        ),
     )(input)
 }
 
@@ -99,23 +104,32 @@ fn unqualified_name(input: Input) -> IResult<UnqualifiedName> {
 }
 
 fn module_path(input: Input) -> IResult<ModulePath> {
-    token(alt((
-        into(internal_module_path),
-        into(external_module_path),
-    )))(input)
+    context(
+        "module path",
+        token(alt((
+            into(external_module_path),
+            into(internal_module_path),
+        ))),
+    )(input)
 }
 
 fn internal_module_path(input: Input) -> IResult<InternalModulePath> {
-    map(module_path_components(identifier), InternalModulePath::new)(input)
+    context(
+        "internal module path",
+        map(module_path_components(identifier), InternalModulePath::new),
+    )(input)
 }
 
 fn external_module_path(input: Input) -> IResult<ExternalModulePath> {
-    map(
-        tuple((
-            identifier,
-            module_path_components(public_module_path_component),
-        )),
-        |(package, components)| ExternalModulePath::new(package, components),
+    context(
+        "external module path",
+        map(
+            tuple((
+                identifier,
+                cut(module_path_components(public_module_path_component)),
+            )),
+            |(package, components)| ExternalModulePath::new(package, components),
+        ),
     )(input)
 }
 
@@ -126,34 +140,41 @@ fn module_path_components<'a>(
 }
 
 fn public_module_path_component(input: Input) -> IResult<String> {
-    verify(identifier, ast::analysis::is_name_public)(input)
+    context(
+        "public module path component",
+        verify(identifier, ast::analysis::is_name_public),
+    )(input)
 }
 
 fn foreign_import(input: Input) -> IResult<ForeignImport> {
-    map(
-        tuple((
-            position,
-            keyword("import"),
-            keyword("foreign"),
-            opt(calling_convention),
-            identifier,
-            type_,
-        )),
-        |(position, _, _, calling_convention, name, type_)| {
-            ForeignImport::new(
-                &name,
-                calling_convention.unwrap_or_default(),
-                type_,
+    context(
+        "foreign import",
+        map(
+            tuple((
                 position,
-            )
-        },
+                keyword("import"),
+                keyword("foreign"),
+                cut(tuple((opt(calling_convention), identifier, type_))),
+            )),
+            |(position, _, _, (calling_convention, name, type_))| {
+                ForeignImport::new(
+                    &name,
+                    calling_convention.unwrap_or_default(),
+                    type_,
+                    position,
+                )
+            },
+        ),
     )(input)
 }
 
 fn calling_convention(input: Input) -> IResult<CallingConvention> {
-    value(
-        CallingConvention::C,
-        verify(string_literal, |string| string.value() == "c"),
+    context(
+        "calling convention",
+        value(
+            CallingConvention::C,
+            verify(string_literal, |string| string.value() == "c"),
+        ),
     )(input)
 }
 
@@ -176,39 +197,47 @@ fn function_definition(input: Input) -> IResult<FunctionDefinition> {
 }
 
 fn foreign_export(input: Input) -> IResult<ForeignExport> {
-    map(
-        preceded(keyword("foreign"), opt(calling_convention)),
-        |calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()),
+    context(
+        "foreign export",
+        map(
+            preceded(keyword("foreign"), opt(calling_convention)),
+            |calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()),
+        ),
     )(input)
 }
 
 fn record_definition(input: Input) -> IResult<RecordDefinition> {
-    map(
-        tuple((
-            position,
-            keyword("type"),
-            identifier,
-            sign("{"),
-            many0(tuple((identifier, type_))),
-            sign("}"),
-        )),
-        |(position, _, name, _, fields, _)| {
-            RecordDefinition::new(
-                name,
-                fields
-                    .into_iter()
-                    .map(|(name, type_)| types::RecordField::new(name, type_))
-                    .collect(),
+    context(
+        "record definition",
+        map(
+            tuple((
                 position,
-            )
-        },
+                keyword("type"),
+                identifier,
+                sign("{"),
+                cut(tuple((many0(tuple((identifier, type_))), sign("}")))),
+            )),
+            |(position, _, name, _, (fields, _))| {
+                RecordDefinition::new(
+                    name,
+                    fields
+                        .into_iter()
+                        .map(|(name, type_)| types::RecordField::new(name, type_))
+                        .collect(),
+                    position,
+                )
+            },
+        ),
     )(input)
 }
 
 fn type_alias(input: Input) -> IResult<TypeAlias> {
-    map(
-        tuple((position, keyword("type"), identifier, sign("="), type_)),
-        |(position, _, name, _, type_)| TypeAlias::new(name, type_, position),
+    context(
+        "type alias",
+        map(
+            tuple((position, keyword("type"), identifier, sign("="), cut(type_))),
+            |(position, _, name, _, type_)| TypeAlias::new(name, type_, position),
+        ),
     )(input)
 }
 
@@ -246,16 +275,26 @@ fn union_type(input: Input) -> IResult<Type> {
 }
 
 fn list_type(input: Input) -> IResult<types::List> {
-    map(
-        tuple((position, sign("["), type_, sign("]"))),
-        |(position, _, element, _)| types::List::new(element, position),
+    context(
+        "list type",
+        map(
+            tuple((position, sign("["), cut(terminated(type_, sign("]"))))),
+            |(position, _, element)| types::List::new(element, position),
+        ),
     )(input)
 }
 
 fn map_type(input: Input) -> IResult<types::Map> {
-    map(
-        tuple((position, sign("{"), type_, sign(":"), type_, sign("}"))),
-        |(position, _, key, _, value, _)| types::Map::new(key, value, position),
+    context(
+        "map type",
+        map(
+            tuple((
+                position,
+                sign("{"),
+                cut(tuple((type_, sign(":"), type_, sign("}")))),
+            )),
+            |(position, _, (key, _, value, _))| types::Map::new(key, value, position),
+        ),
     )(input)
 }
 
@@ -264,70 +303,85 @@ fn atomic_type(input: Input) -> IResult<Type> {
         into(reference_type),
         into(list_type),
         into(map_type),
-        delimited(sign("("), type_, sign(")")),
+        preceded(sign("("), cut(terminated(type_, sign(")")))),
     ))(input)
 }
 
 fn reference_type(input: Input) -> IResult<types::Reference> {
-    map(
-        tuple((position, token(qualified_identifier))),
-        |(position, identifier)| types::Reference::new(identifier, position),
+    context(
+        "reference type",
+        map(
+            tuple((position, token(qualified_identifier))),
+            |(position, identifier)| types::Reference::new(identifier, position),
+        ),
     )(input)
 }
 
 fn block(input: Input) -> IResult<Block> {
-    map(
-        tuple((position, delimited(sign("{"), many1(statement), sign("}")))),
-        |(position, statements)| {
-            // TODO Validate the last expressions.
-            Block::new(
-                statements[..statements.len() - 1].to_vec(),
-                statements.last().unwrap().expression().clone(),
+    context(
+        "block",
+        map(
+            tuple((
                 position,
-            )
-        },
+                sign("{"),
+                cut(terminated(many1(statement), sign("}"))),
+            )),
+            |(position, _, statements)| {
+                // TODO Validate the last expressions.
+                Block::new(
+                    statements[..statements.len() - 1].to_vec(),
+                    statements.last().unwrap().expression().clone(),
+                    position,
+                )
+            },
+        ),
     )(input)
 }
 
 fn statement(input: Input) -> IResult<Statement> {
-    map(
-        tuple((position, opt(terminated(identifier, sign("="))), expression)),
-        |(position, name, expression)| Statement::new(name, expression, position),
+    context(
+        "statement",
+        map(
+            tuple((position, opt(terminated(identifier, sign("="))), expression)),
+            |(position, name, expression)| Statement::new(name, expression, position),
+        ),
     )(input)
 }
 
 fn expression(input: Input) -> IResult<Expression> {
-    binary_operation_like(input)
-}
-
-fn binary_operation_like(input: Input) -> IResult<Expression> {
-    map(
-        tuple((
-            prefix_operation_like,
-            many0(map(
-                tuple((position, binary_operator, prefix_operation_like)),
-                |(position, operator, expression)| (operator, expression, position),
+    context(
+        "expression",
+        map(
+            tuple((
+                prefix_operation_like,
+                many0(map(
+                    tuple((position, binary_operator, cut(prefix_operation_like))),
+                    |(position, operator, expression)| (operator, expression, position),
+                )),
             )),
-        )),
-        |(expression, pairs)| reduce_operations(expression, &pairs),
+            |(expression, pairs)| reduce_operations(expression, &pairs),
+        ),
     )(input)
 }
 
 fn binary_operator(input: Input) -> IResult<BinaryOperator> {
-    alt((
-        value(BinaryOperator::Add, sign("+")),
-        value(BinaryOperator::Subtract, sign("-")),
-        value(BinaryOperator::Multiply, sign("*")),
-        value(BinaryOperator::Divide, sign("/")),
-        value(BinaryOperator::Equal, sign("==")),
-        value(BinaryOperator::NotEqual, sign("!=")),
-        value(BinaryOperator::LessThanOrEqual, sign("<=")),
-        value(BinaryOperator::LessThan, sign("<")),
-        value(BinaryOperator::GreaterThanOrEqual, sign(">=")),
-        value(BinaryOperator::GreaterThan, sign(">")),
-        value(BinaryOperator::And, sign("&")),
-        value(BinaryOperator::Or, sign("|")),
-    ))(input)
+    context(
+        "binary operator",
+        alt((
+            value(BinaryOperator::Add, sign("+")),
+            value(BinaryOperator::Subtract, sign("-")),
+            value(BinaryOperator::Multiply, sign("*")),
+            value(BinaryOperator::Divide, sign("/")),
+            value(BinaryOperator::Equal, sign("==")),
+            value(BinaryOperator::NotEqual, sign("!=")),
+            value(BinaryOperator::LessThanOrEqual, sign("<=")),
+            value(BinaryOperator::LessThan, sign("<")),
+            value(BinaryOperator::GreaterThanOrEqual, sign(">=")),
+            value(BinaryOperator::GreaterThan, sign(">")),
+            value(BinaryOperator::And, sign("&")),
+            value(BinaryOperator::Or, sign("|")),
+        )),
+    )(input)
 }
 
 fn prefix_operation_like(input: Input) -> IResult<Expression> {
@@ -335,14 +389,17 @@ fn prefix_operation_like(input: Input) -> IResult<Expression> {
 }
 
 fn prefix_operation(input: Input) -> IResult<UnaryOperation> {
-    map(
-        tuple((position, prefix_operator, prefix_operation_like)),
-        |(position, operator, expression)| UnaryOperation::new(operator, expression, position),
+    context(
+        "prefix operation",
+        map(
+            tuple((position, prefix_operator, cut(prefix_operation_like))),
+            |(position, operator, expression)| UnaryOperation::new(operator, expression, position),
+        ),
     )(input)
 }
 
 fn prefix_operator(input: Input) -> IResult<UnaryOperator> {
-    value(UnaryOperator::Not, sign("!"))(input)
+    context("prefix operator", value(UnaryOperator::Not, sign("!")))(input)
 }
 
 fn suffix_operation_like(input: Input) -> IResult<Expression> {
@@ -372,28 +429,39 @@ fn suffix_operator(input: Input) -> IResult<SuffixOperator> {
 
 fn call_operator(input: Input) -> IResult<SuffixOperator> {
     // Do not allow any space before parentheses.
-    map(
-        tuple((
-            peek(position),
-            tag("("),
-            separated_or_terminated_list0(sign(","), expression),
-            sign(")"),
-        )),
-        |(position, _, arguments, _)| SuffixOperator::Call(arguments, position),
+    context(
+        "call",
+        map(
+            tuple((
+                peek(position),
+                tag("("),
+                cut(terminated(
+                    separated_or_terminated_list0(sign(","), expression),
+                    sign(")"),
+                )),
+            )),
+            |(position, _, arguments)| SuffixOperator::Call(arguments, position),
+        ),
     )(input)
 }
 
 fn record_field_operator(input: Input) -> IResult<SuffixOperator> {
-    map(
-        tuple((position, sign("."), identifier)),
-        |(position, _, identifier)| SuffixOperator::RecordField(identifier, position),
+    context(
+        "record field",
+        map(
+            tuple((position, sign("."), cut(identifier))),
+            |(position, _, identifier)| SuffixOperator::RecordField(identifier, position),
+        ),
     )(input)
 }
 
 fn try_operator(input: Input) -> IResult<SuffixOperator> {
-    map(tuple((position, sign("?"))), |(position, _)| {
-        SuffixOperator::Try(position)
-    })(input)
+    context(
+        "try operator",
+        map(tuple((position, sign("?"))), |(position, _)| {
+            SuffixOperator::Try(position)
+        }),
+    )(input)
 }
 
 fn atomic_expression(input: Input) -> IResult<Expression> {
@@ -415,44 +483,60 @@ fn atomic_expression(input: Input) -> IResult<Expression> {
 }
 
 fn lambda(input: Input) -> IResult<Lambda> {
-    map(
-        tuple((
-            position,
-            sign("\\("),
-            separated_or_terminated_list0(sign(","), argument),
-            sign(")"),
-            type_,
-            block,
-        )),
-        |(position, _, arguments, _, result_type, body)| {
-            Lambda::new(arguments, result_type, body, position)
-        },
+    context(
+        "function",
+        map(
+            tuple((
+                position,
+                sign("\\("),
+                cut(tuple((
+                    separated_or_terminated_list0(sign(","), argument),
+                    sign(")"),
+                    type_,
+                    block,
+                ))),
+            )),
+            |(position, _, (arguments, _, result_type, body))| {
+                Lambda::new(arguments, result_type, body, position)
+            },
+        ),
     )(input)
 }
 
 fn argument(input: Input) -> IResult<Argument> {
-    map(tuple((identifier, type_)), |(name, type_)| {
-        Argument::new(name, type_)
-    })(input)
+    context(
+        "argument",
+        map(tuple((identifier, cut(type_))), |(name, type_)| {
+            Argument::new(name, type_)
+        }),
+    )(input)
 }
 
 fn if_(input: Input) -> IResult<If> {
-    map(
-        tuple((
-            position,
-            keyword("if"),
-            if_branch,
-            many0(preceded(tuple((keyword("else"), keyword("if"))), if_branch)),
-            keyword("else"),
-            block,
-        )),
-        |(position, _, first_branch, branches, _, else_block)| {
-            If::new(
-                [first_branch].into_iter().chain(branches).collect(),
-                else_block,
+    context(
+        "if",
+        map(
+            tuple((
                 position,
-            )
-        },
+                keyword("if"),
+                cut(tuple((
+                    if_branch,
+                    many0(preceded(
+                        tuple((keyword("else"), keyword("if"))),
+                        cut(if_branch),
+                    )),
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, (first_branch, branches, _, else_block))| {
+                If::new(
+                    [first_branch].into_iter().chain(branches).collect(),
+                    else_block,
+                    position,
+                )
+            },
+        ),
     )(input)
 }
 
@@ -463,74 +547,89 @@ fn if_branch(input: Input) -> IResult<IfBranch> {
 }
 
 fn if_list(input: Input) -> IResult<IfList> {
-    map(
-        tuple((
-            position,
-            keyword("if"),
-            sign("["),
-            identifier,
-            sign(","),
-            sign("..."),
-            identifier,
-            sign("]"),
-            sign("="),
-            expression,
-            block,
-            keyword("else"),
-            block,
-        )),
-        |(position, _, _, first_name, _, _, rest_name, _, _, argument, then, _, else_)| {
-            IfList::new(argument, first_name, rest_name, then, else_, position)
-        },
+    context(
+        "if list",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                sign("["),
+                cut(tuple((
+                    identifier,
+                    sign(","),
+                    sign("..."),
+                    identifier,
+                    sign("]"),
+                    sign("="),
+                    expression,
+                    block,
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, _, (first_name, _, _, rest_name, _, _, argument, then, _, else_))| {
+                IfList::new(argument, first_name, rest_name, then, else_, position)
+            },
+        ),
     )(input)
 }
 
 fn if_map(input: Input) -> IResult<IfMap> {
-    map(
-        tuple((
-            position,
-            keyword("if"),
-            identifier,
-            sign("="),
-            expression,
-            sign("["),
-            expression,
-            sign("]"),
-            block,
-            keyword("else"),
-            block,
-        )),
-        |(position, _, name, _, map, _, key, _, then, _, else_)| {
-            IfMap::new(name, map, key, then, else_, position)
-        },
+    context(
+        "if map",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                identifier,
+                sign("="),
+                expression,
+                sign("["),
+                cut(tuple((
+                    expression,
+                    sign("]"),
+                    block,
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, name, _, map, _, (key, _, then, _, else_))| {
+                IfMap::new(name, map, key, then, else_, position)
+            },
+        ),
     )(input)
 }
 
 fn if_type(input: Input) -> IResult<IfType> {
-    map(
-        tuple((
-            position,
-            keyword("if"),
-            identifier,
-            sign("="),
-            expression,
-            keyword("as"),
-            if_type_branch,
-            many0(preceded(
-                tuple((keyword("else"), keyword("if"))),
-                if_type_branch,
-            )),
-            opt(preceded(keyword("else"), block)),
-        )),
-        |(position, _, identifier, _, argument, _, first_branch, branches, else_)| {
-            IfType::new(
-                identifier,
-                argument,
-                [first_branch].into_iter().chain(branches).collect(),
-                else_,
+    context(
+        "if type",
+        map(
+            tuple((
                 position,
-            )
-        },
+                keyword("if"),
+                identifier,
+                sign("="),
+                expression,
+                keyword("as"),
+                cut(tuple((
+                    if_type_branch,
+                    many0(preceded(
+                        tuple((keyword("else"), keyword("if"))),
+                        cut(if_type_branch),
+                    )),
+                    opt(preceded(keyword("else"), block)),
+                ))),
+            )),
+            |(position, _, identifier, _, argument, _, (first_branch, branches, else_))| {
+                IfType::new(
+                    identifier,
+                    argument,
+                    [first_branch].into_iter().chain(branches).collect(),
+                    else_,
+                    position,
+                )
+            },
+        ),
     )(input)
 }
 
@@ -548,10 +647,13 @@ fn record(input: Input) -> IResult<Record> {
             qualified_identifier,
             sign("{"),
             alt((
-                tuple((
-                    map(delimited(sign("..."), expression, sign(",")), Some),
-                    separated_or_terminated_list1(sign(","), record_field),
-                )),
+                preceded(
+                    sign("..."),
+                    cut(tuple((
+                        map(terminated(expression, sign(",")), Some),
+                        separated_or_terminated_list1(sign(","), record_field),
+                    ))),
+                ),
                 tuple((
                     success(None),
                     separated_or_terminated_list0(sign(","), record_field),
@@ -565,7 +667,7 @@ fn record(input: Input) -> IResult<Record> {
 
 fn record_field(input: Input) -> IResult<RecordField> {
     map(
-        tuple((position, identifier, sign(":"), expression)),
+        tuple((position, identifier, sign(":"), cut(expression))),
         |(position, name, _, expression)| RecordField::new(name, expression, position),
     )(input)
 }
@@ -2212,11 +2314,7 @@ mod tests {
 
             #[test]
             fn fail_to_parse_call() {
-                // TODO Should we rather commit to parse calls?
-                assert_eq!(
-                    expression(input("f(1+)", "")).unwrap().1,
-                    Variable::new("f", Position::fake()).into()
-                );
+                assert!(expression(input("f(1+)", "")).is_err());
             }
         }
 
