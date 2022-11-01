@@ -11,11 +11,11 @@ use nom::{
     sequence::{delimited, preceded, terminated, tuple},
     IResult, Parser,
 };
-use nom_locate::LocatedSpan;
 use position::Position;
 
 use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
+    input::Input,
     operations::{reduce_operations, SuffixOperator},
 };
 
@@ -24,12 +24,6 @@ const KEYWORDS: &[&str] = &[
 ];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 const OPERATOR_MODIFIERS: &str = "=";
-
-type Input<'a> = LocatedSpan<&'a str, &'a str>;
-
-pub fn input<'a>(source: &'a str, path: &'a str) -> Input<'a> {
-    LocatedSpan::new_extra(source, path)
-}
 
 pub fn module(input: Input) -> IResult<Input, Module> {
     map(
@@ -817,6 +811,7 @@ fn position(input: Input) -> IResult<Input, Position> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::input::input;
     use indoc::indoc;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;

@@ -1,11 +1,13 @@
 mod combinator;
 mod error;
+mod input;
 mod operations;
 mod parser;
 
 use ast::Comment;
 pub use error::ParseError;
-use parser::{comments, input, module};
+use input::input;
+use parser::{comments, module};
 
 pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
     module(input(source, path))
