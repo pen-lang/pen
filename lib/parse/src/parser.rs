@@ -477,9 +477,9 @@ fn try_operator(input: Input) -> IResult<SuffixOperator> {
 fn atomic_expression(input: Input) -> IResult<Expression> {
     alt((
         into(lambda),
+        into(if_type),
         into(if_list),
         into(if_map),
-        into(if_type),
         into(if_),
         into(record),
         into(list_comprehension),
