@@ -16,7 +16,7 @@ use position::Position;
 use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
     error::NomError,
-    input::Input,
+    input::{self, Input},
     operations::{reduce_operations, SuffixOperator},
 };
 
@@ -800,15 +800,7 @@ fn comment(input: Input) -> IResult<Comment> {
 fn position(input: Input) -> IResult<Position> {
     let (input, _) = multispace0(input)?;
 
-    Ok((
-        input,
-        Position::new(
-            input.extra,
-            input.location_line() as usize,
-            input.get_column(),
-            String::from_utf8_lossy(input.get_line_beginning()),
-        ),
-    ))
+    Ok((input, input::position(input)))
 }
 
 #[cfg(test)]
