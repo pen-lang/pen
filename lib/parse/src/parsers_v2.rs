@@ -33,6 +33,28 @@ fn input<'a>(source: &'a str, path: &'a str) -> Input<'a> {
     LocatedSpan::new_extra(source, path)
 }
 
+pub fn module(input: Input) -> IResult<Input, Module> {
+    map(
+        all_consuming(tuple((
+            position_parser,
+            many0(import),
+            many0(foreign_import),
+            many0(alt((into(type_alias), into(record_definition)))),
+            many0(definition),
+            blank,
+        ))),
+        |(position, imports, foreign_imports, type_definitions, definitions, _)| {
+            Module::new(
+                imports,
+                foreign_imports,
+                type_definitions,
+                definitions,
+                position,
+            )
+        },
+    )(input)
+}
+
 pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
     let (input, comments) = all_consuming(many0(tuple((
         multispace0,
@@ -51,6 +73,149 @@ pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
             .flat_map(|(_, comment, _)| comment)
             .collect(),
     ))
+}
+
+fn import(input: Input) -> IResult<Input, Import> {
+    map(
+        tuple((
+            position_parser,
+            keyword("import"),
+            module_path,
+            opt(preceded(keyword("as"), identifier)),
+            opt(delimited(
+                sign("{"),
+                separated_or_terminated_list1(sign(","), unqualified_name),
+                sign("}"),
+            )),
+        )),
+        |(position, _, path, prefix, names)| {
+            Import::new(path, prefix, names.unwrap_or_default(), position)
+        },
+    )(input)
+}
+
+fn unqualified_name(input: Input) -> IResult<Input, UnqualifiedName> {
+    map(
+        token(tuple((position_parser, identifier))),
+        |(position, identifier)| UnqualifiedName::new(identifier, position),
+    )(input)
+}
+
+fn module_path(input: Input) -> IResult<Input, ModulePath> {
+    token(alt((
+        into(internal_module_path),
+        into(external_module_path),
+    )))(input)
+}
+
+fn internal_module_path(input: Input) -> IResult<Input, InternalModulePath> {
+    map(module_path_components(identifier), InternalModulePath::new)(input)
+}
+
+fn external_module_path(input: Input) -> IResult<Input, ExternalModulePath> {
+    map(
+        tuple((
+            identifier,
+            module_path_components(public_module_path_component),
+        )),
+        |(package, components)| ExternalModulePath::new(package, components),
+    )(input)
+}
+
+fn module_path_components<'a>(
+    component: impl Parser<Input<'a>, String, nom::error::Error<Input<'a>>>,
+) -> impl FnMut(Input<'a>) -> IResult<Input, Vec<String>, nom::error::Error<Input<'a>>> {
+    many1(preceded(tag(IDENTIFIER_SEPARATOR), component))
+}
+
+fn public_module_path_component(input: Input) -> IResult<Input, String> {
+    verify(identifier, |name| ast::analysis::is_name_public(&name))(input)
+}
+
+fn foreign_import(input: Input) -> IResult<Input, ForeignImport> {
+    let (input, (position, _, _, calling_convention, name, type_)) = tuple((
+        position_parser,
+        keyword("import"),
+        keyword("foreign"),
+        opt(calling_convention),
+        identifier,
+        type_,
+    ))(input)?;
+
+    Ok((
+        input,
+        ForeignImport::new(
+            &name,
+            calling_convention.unwrap_or_default(),
+            type_,
+            position,
+        ),
+    ))
+}
+
+fn calling_convention(input: Input) -> IResult<Input, CallingConvention> {
+    let (input, _) = verify(string_literal, |string| string.value() == "c")(input)?;
+
+    Ok((input, CallingConvention::C))
+}
+
+fn definition(input: Input) -> IResult<Input, FunctionDefinition> {
+    let (input, (foreign_export, position, name, _, lambda)) = tuple((
+        opt(foreign_export),
+        position_parser,
+        identifier,
+        sign("="),
+        lambda,
+    ))(input)?;
+
+    Ok((
+        input,
+        FunctionDefinition::new(name, lambda, foreign_export, position),
+    ))
+}
+
+fn foreign_export(input: Input) -> IResult<Input, ForeignExport> {
+    let (input, calling_convention) = preceded(keyword("foreign"), opt(calling_convention))(input)?;
+
+    Ok((
+        input,
+        ForeignExport::new(calling_convention.unwrap_or_default()),
+    ))
+}
+
+fn record_definition(input: Input) -> IResult<Input, RecordDefinition> {
+    let (input, (position, _, name, _, fields, _)) = tuple((
+        position_parser,
+        keyword("type"),
+        identifier,
+        sign("{"),
+        many0(tuple((identifier, type_))),
+        sign("}"),
+    ))(input)?;
+
+    Ok((
+        input,
+        RecordDefinition::new(
+            name,
+            fields
+                .into_iter()
+                .map(|(name, type_)| types::RecordField::new(name, type_))
+                .collect(),
+            position,
+        ),
+    ))
+}
+
+fn type_alias(input: Input) -> IResult<Input, TypeAlias> {
+    let (input, (position, _, name, _, type_)) = tuple((
+        position_parser,
+        keyword("type"),
+        identifier,
+        sign("="),
+        type_,
+    ))(input)?;
+
+    Ok((input, TypeAlias::new(name, type_, position)))
 }
 
 fn type_(input: Input) -> IResult<Input, Type> {
@@ -698,579 +863,552 @@ mod tests {
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
 
-    // mod module {
-    //     use super::*;
-    //     use pretty_assertions::assert_eq;
+    mod module {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    //     #[test]
-    //     fn parse_module() {
-    //         assert_eq!(
-    //             module().parse(input("", "")).unwrap().0,
-    //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
-    //         );
-    //         assert_eq!(
-    //             module().parse(input(" ", "")).unwrap().0,
-    //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
-    //         );
-    //         assert_eq!(
-    //             module().parse(input("\n", "")).unwrap().0,
-    //             Module::new(vec![], vec![], vec![], vec![], Position::fake())
-    //         );
-    //         assert_eq!(
-    //             module().parse(input("import Foo'Bar", "")).unwrap().0,
-    //             Module::new(
-    //                 vec![Import::new(
-    //                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
-    //                     None,
-    //                     vec![],
-    //                     Position::fake()
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )
-    //         );
-    //         assert_eq!(
-    //             module().parse(input("type foo = number", "")).unwrap().0,
-    //             Module::new(
-    //                 vec![],
-    //                 vec![],
-    //                 vec![TypeAlias::new(
-    //                     "foo",
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Position::fake()
-    //                 )
-    //                 .into()],
-    //                 vec![],
-    //                 Position::fake()
-    //             )
-    //         );
-    //         assert_eq!(
-    //             module()
-    //                 .parse(input("x=\\(x number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Module::new(
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![FunctionDefinition::new(
-    //                     "x",
-    //                     Lambda::new(
-    //                         vec![Argument::new(
-    //                             "x",
-    //                             types::Reference::new("number", Position::fake())
-    //                         )],
-    //                         types::Reference::new("number", Position::fake()),
-    //                         Block::new(
-    //                             vec![],
-    //                             Number::new(
-    //                                 NumberRepresentation::FloatingPoint("42".into()),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     None,
-    //                     Position::fake()
-    //                 )],
-    //                 Position::fake()
-    //             )
-    //         );
-    //         assert_eq!(
-    //             module()
-    //                 .parse(input(
-    //                     "x=\\(x number)number{42}y=\\(y number)number{42}",
-    //                     ""
-    //                 ))
-    //                 .unwrap()
-    //                 .0,
-    //             Module::new(
-    //                 vec![],
-    //                 vec![],
-    //                 vec![],
-    //                 vec![
-    //                     FunctionDefinition::new(
-    //                         "x",
-    //                         Lambda::new(
-    //                             vec![Argument::new(
-    //                                 "x",
-    //                                 types::Reference::new("number", Position::fake())
-    //                             )],
-    //                             types::Reference::new("number", Position::fake()),
-    //                             Block::new(
-    //                                 vec![],
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("42".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     ),
-    //                     FunctionDefinition::new(
-    //                         "y",
-    //                         Lambda::new(
-    //                             vec![Argument::new(
-    //                                 "y",
-    //                                 types::Reference::new("number", Position::fake())
-    //                             )],
-    //                             types::Reference::new("number", Position::fake()),
-    //                             Block::new(
-    //                                 vec![],
-    //                                 Number::new(
-    //                                     NumberRepresentation::FloatingPoint("42".into()),
-    //                                     Position::fake()
-    //                                 ),
-    //                                 Position::fake()
-    //                             ),
-    //                             Position::fake()
-    //                         ),
-    //                         None,
-    //                         Position::fake()
-    //                     )
-    //                 ],
-    //                 Position::fake()
-    //             )
-    //         );
-    //     }
+        #[test]
+        fn parse_module() {
+            assert_eq!(
+                module(input("", "")).unwrap().1,
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+            );
+            assert_eq!(
+                module(input(" ", "")).unwrap().1,
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+            );
+            assert_eq!(
+                module(input("\n", "")).unwrap().1,
+                Module::new(vec![], vec![], vec![], vec![], Position::fake())
+            );
+            assert_eq!(
+                module(input("import Foo'Bar", "")).unwrap().1,
+                Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )
+            );
+            assert_eq!(
+                module(input("type foo = number", "")).unwrap().1,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![TypeAlias::new(
+                        "foo",
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    vec![],
+                    Position::fake()
+                )
+            );
+            assert_eq!(
+                module(input("x=\\(x number)number{42}", "")).unwrap().1,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![FunctionDefinition::new(
+                        "x",
+                        Lambda::new(
+                            vec![Argument::new(
+                                "x",
+                                types::Reference::new("number", Position::fake())
+                            )],
+                            types::Reference::new("number", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        None,
+                        Position::fake()
+                    )],
+                    Position::fake()
+                )
+            );
+            assert_eq!(
+                module(input(
+                    "x=\\(x number)number{42}y=\\(y number)number{42}",
+                    ""
+                ))
+                .unwrap()
+                .1,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![],
+                    vec![
+                        FunctionDefinition::new(
+                            "x",
+                            Lambda::new(
+                                vec![Argument::new(
+                                    "x",
+                                    types::Reference::new("number", Position::fake())
+                                )],
+                                types::Reference::new("number", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("42".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                            None,
+                            Position::fake()
+                        ),
+                        FunctionDefinition::new(
+                            "y",
+                            Lambda::new(
+                                vec![Argument::new(
+                                    "y",
+                                    types::Reference::new("number", Position::fake())
+                                )],
+                                types::Reference::new("number", Position::fake()),
+                                Block::new(
+                                    vec![],
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("42".into()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                ),
+                                Position::fake()
+                            ),
+                            None,
+                            Position::fake()
+                        )
+                    ],
+                    Position::fake()
+                )
+            );
+        }
 
-    //     #[test]
-    //     fn parse_import_foreign_after_import() {
-    //         assert_eq!(
-    //             module()
-    //                 .parse(input("import Foo'Bar import foreign foo \\() number", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Module::new(
-    //                 vec![Import::new(
-    //                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
-    //                     None,
-    //                     vec![],
-    //                     Position::fake()
-    //                 )],
-    //                 vec![ForeignImport::new(
-    //                     "foo",
-    //                     CallingConvention::Native,
-    //                     types::Function::new(
-    //                         vec![],
-    //                         types::Reference::new("number", Position::fake()),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 )],
-    //                 vec![],
-    //                 vec![],
-    //                 Position::fake()
-    //             )
-    //         );
-    //     }
+        #[test]
+        fn parse_import_foreign_after_import() {
+            assert_eq!(
+                module(input("import Foo'Bar import foreign foo \\() number", ""))
+                    .unwrap()
+                    .1,
+                Module::new(
+                    vec![Import::new(
+                        ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                        None,
+                        vec![],
+                        Position::fake()
+                    )],
+                    vec![ForeignImport::new(
+                        "foo",
+                        CallingConvention::Native,
+                        types::Function::new(
+                            vec![],
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    )],
+                    vec![],
+                    vec![],
+                    Position::fake()
+                )
+            );
+        }
 
-    //     #[test]
-    //     fn parse_record_definition_after_type_alias() {
-    //         assert_eq!(
-    //             module()
-    //                 .parse(input("type foo = number type bar {}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Module::new(
-    //                 vec![],
-    //                 vec![],
-    //                 vec![
-    //                     TypeAlias::new(
-    //                         "foo",
-    //                         types::Reference::new("number", Position::fake()),
-    //                         Position::fake()
-    //                     )
-    //                     .into(),
-    //                     RecordDefinition::new("bar", vec![], Position::fake()).into(),
-    //                 ],
-    //                 vec![],
-    //                 Position::fake()
-    //             )
-    //         );
-    //     }
-    // }
+        #[test]
+        fn parse_record_definition_after_type_alias() {
+            assert_eq!(
+                module(input("type foo = number type bar {}", ""))
+                    .unwrap()
+                    .1,
+                Module::new(
+                    vec![],
+                    vec![],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        )
+                        .into(),
+                        RecordDefinition::new("bar", vec![], Position::fake()).into(),
+                    ],
+                    vec![],
+                    Position::fake()
+                )
+            );
+        }
+    }
 
-    // mod import {
-    //     use super::*;
-    //     use pretty_assertions::assert_eq;
+    mod import {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    //     #[test]
-    //     fn parse_import() {
-    //         assert_eq!(
-    //             import().parse(input("import 'Foo", "")).unwrap().0,
-    //             Import::new(
-    //                 InternalModulePath::new(vec!["Foo".into()]),
-    //                 None,
-    //                 vec![],
-    //                 Position::fake()
-    //             ),
-    //         );
-    //         assert_eq!(
-    //             import().parse(input("import Foo'Bar", "")).unwrap().0,
-    //             Import::new(
-    //                 ExternalModulePath::new("Foo", vec!["Bar".into()]),
-    //                 None,
-    //                 vec![],
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_import() {
+            assert_eq!(
+                import(input("import 'Foo", "")).unwrap().1,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec![],
+                    Position::fake()
+                ),
+            );
+            assert_eq!(
+                import(input("import Foo'Bar", "")).unwrap().1,
+                Import::new(
+                    ExternalModulePath::new("Foo", vec!["Bar".into()]),
+                    None,
+                    vec![],
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_import_with_custom_prefix() {
-    //         assert_eq!(
-    //             import().parse(input("import 'Foo as foo", "")).unwrap().0,
-    //             Import::new(
-    //                 InternalModulePath::new(vec!["Foo".into()]),
-    //                 Some("foo".into()),
-    //                 vec![],
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_import_with_custom_prefix() {
+            assert_eq!(
+                import(input("import 'Foo as foo", "")).unwrap().1,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    Some("foo".into()),
+                    vec![],
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_unqualified_import() {
-    //         assert_eq!(
-    //             import().parse(input("import 'Foo { Foo }", "")).unwrap().0,
-    //             Import::new(
-    //                 InternalModulePath::new(vec!["Foo".into()]),
-    //                 None,
-    //                 vec![UnqualifiedName::new("Foo", Position::fake())],
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_unqualified_import() {
+            assert_eq!(
+                import(input("import 'Foo { Foo }", "")).unwrap().1,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec![UnqualifiedName::new("Foo", Position::fake())],
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_unqualified_import_with_multiple_identifiers() {
-    //         assert_eq!(
-    //             import()
-    //                 .parse(input("import 'Foo { Foo, Bar }", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             Import::new(
-    //                 InternalModulePath::new(vec!["Foo".into()]),
-    //                 None,
-    //                 vec![
-    //                     UnqualifiedName::new("Foo", Position::fake()),
-    //                     UnqualifiedName::new("Bar", Position::fake())
-    //                 ],
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_unqualified_import_with_multiple_identifiers() {
+            assert_eq!(
+                import(input("import 'Foo { Foo, Bar }", "")).unwrap().1,
+                Import::new(
+                    InternalModulePath::new(vec!["Foo".into()]),
+                    None,
+                    vec![
+                        UnqualifiedName::new("Foo", Position::fake()),
+                        UnqualifiedName::new("Bar", Position::fake())
+                    ],
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_module_path() {
-    //         assert!(module_path().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             module_path().parse(input("'Foo", "")).unwrap().0,
-    //             InternalModulePath::new(vec!["Foo".into()]).into(),
-    //         );
-    //         assert_eq!(
-    //             module_path().parse(input("Foo'Bar", "")).unwrap().0,
-    //             ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
-    //         );
-    //     }
+        #[test]
+        fn parse_module_path() {
+            assert!(module_path(input("", "")).is_err());
+            assert_eq!(
+                module_path(input("'Foo", "")).unwrap().1,
+                InternalModulePath::new(vec!["Foo".into()]).into(),
+            );
+            assert_eq!(
+                module_path(input("Foo'Bar", "")).unwrap().1,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_internal_module_path() {
-    //         assert!(internal_module_path().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             internal_module_path().parse(input("'Foo", "")).unwrap().0,
-    //             InternalModulePath::new(vec!["Foo".into()]),
-    //         );
-    //         assert_eq!(
-    //             internal_module_path()
-    //                 .parse(input("'Foo'Bar", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
-    //         );
-    //     }
+        #[test]
+        fn parse_internal_module_path() {
+            assert!(internal_module_path(input("", "")).is_err());
+            assert_eq!(
+                internal_module_path(input("'Foo", "")).unwrap().1,
+                InternalModulePath::new(vec!["Foo".into()]),
+            );
+            assert_eq!(
+                internal_module_path(input("'Foo'Bar", "")).unwrap().1,
+                InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_external_module_path() {
-    //         assert!(external_module_path().parse(input("", "")).is_err());
-    //         assert_eq!(
-    //             external_module_path()
-    //                 .parse(input("Foo'Bar", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             ExternalModulePath::new("Foo", vec!["Bar".into()]),
-    //         );
-    //     }
+        #[test]
+        fn parse_external_module_path() {
+            assert!(external_module_path(input("", "")).is_err());
+            assert_eq!(
+                external_module_path(input("Foo'Bar", "")).unwrap().1,
+                ExternalModulePath::new("Foo", vec!["Bar".into()]),
+            );
+        }
 
-    //     #[test]
-    //     fn fail_to_parse_private_external_module_file() {
-    //         let source = "Foo'bar";
+        // TODO
+        // #[test]
+        // fn fail_to_parse_private_external_module_file() {
+        //     let source = "Foo'bar";
 
-    //         insta::assert_debug_snapshot!(external_module_path()
-    //             .parse(input(source, ""))
-    //             .map_err(|error| ParseError::new(source, "", error))
-    //             .err());
-    //     }
+        //     insta::assert_debug_snapshot!(external_module_path(input(source, ""))
+        //         .map_err(|error| ParseError::new(source, "", error))
+        //         .err());
+        // }
 
-    //     #[test]
-    //     fn fail_to_parse_private_external_module_directory() {
-    //         let source = "Foo'bar'Baz";
+        // #[test]
+        // fn fail_to_parse_private_external_module_directory() {
+        //     let source = "Foo'bar'Baz";
 
-    //         insta::assert_debug_snapshot!(external_module_path()
-    //             .parse(input(source, ""))
-    //             .map_err(|error| ParseError::new(source, "", error))
-    //             .err());
-    //     }
-    // }
+        //     insta::assert_debug_snapshot!(external_module_path(input(source, ""))
+        //         .map_err(|error| ParseError::new(source, "", error))
+        //         .err());
+        // }
+    }
 
-    // #[test]
-    // fn parse_foreign_import() {
-    //     assert_eq!(
-    //         foreign_import()
-    //             .parse(input("import foreign foo \\(number) number", ""))
-    //             .unwrap()
-    //             .0,
-    //         ForeignImport::new(
-    //             "foo",
-    //             CallingConvention::Native,
-    //             types::Function::new(
-    //                 vec![types::Reference::new("number", Position::fake()).into()],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //             Position::fake()
-    //         ),
-    //     );
+    #[test]
+    fn parse_foreign_import() {
+        assert_eq!(
+            foreign_import(input("import foreign foo \\(number) number", ""))
+                .unwrap()
+                .1,
+            ForeignImport::new(
+                "foo",
+                CallingConvention::Native,
+                types::Function::new(
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                ),
+                Position::fake()
+            ),
+        );
 
-    //     assert_eq!(
-    //         foreign_import()
-    //             .parse(input("import foreign \"c\" foo \\(number) number", ""))
-    //             .unwrap()
-    //             .0,
-    //         ForeignImport::new(
-    //             "foo",
-    //             CallingConvention::C,
-    //             types::Function::new(
-    //                 vec![types::Reference::new("number", Position::fake()).into()],
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake()
-    //             ),
-    //             Position::fake()
-    //         ),
-    //     );
-    // }
+        assert_eq!(
+            foreign_import(input("import foreign \"c\" foo \\(number) number", ""))
+                .unwrap()
+                .1,
+            ForeignImport::new(
+                "foo",
+                CallingConvention::C,
+                types::Function::new(
+                    vec![types::Reference::new("number", Position::fake()).into()],
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake()
+                ),
+                Position::fake()
+            ),
+        );
+    }
 
-    // mod definition {
-    //     use super::*;
-    //     use pretty_assertions::assert_eq;
+    mod definition {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    //     #[test]
-    //     fn parse() {
-    //         assert_eq!(
-    //             definition()
-    //                 .parse(input("x=\\(x number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             FunctionDefinition::new(
-    //                 "x",
-    //                 Lambda::new(
-    //                     vec![Argument::new(
-    //                         "x",
-    //                         types::Reference::new("number", Position::fake())
-    //                     )],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 None,
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse() {
+            assert_eq!(
+                definition(input("x=\\(x number)number{42}", "")).unwrap().1,
+                FunctionDefinition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    None,
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_foreign_definition() {
-    //         assert_eq!(
-    //             definition()
-    //                 .parse(input("foreign x=\\(x number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             FunctionDefinition::new(
-    //                 "x",
-    //                 Lambda::new(
-    //                     vec![Argument::new(
-    //                         "x",
-    //                         types::Reference::new("number", Position::fake())
-    //                     )],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 ForeignExport::new(CallingConvention::Native).into(),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_foreign_definition() {
+            assert_eq!(
+                definition(input("foreign x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .1,
+                FunctionDefinition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    ForeignExport::new(CallingConvention::Native).into(),
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_foreign_definition_with_c_calling_convention() {
-    //         assert_eq!(
-    //             definition()
-    //                 .parse(input("foreign \"c\" x=\\(x number)number{42}", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             FunctionDefinition::new(
-    //                 "x",
-    //                 Lambda::new(
-    //                     vec![Argument::new(
-    //                         "x",
-    //                         types::Reference::new("number", Position::fake())
-    //                     )],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 ForeignExport::new(CallingConvention::C).into(),
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
+        #[test]
+        fn parse_foreign_definition_with_c_calling_convention() {
+            assert_eq!(
+                definition(input("foreign \"c\" x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .1,
+                FunctionDefinition::new(
+                    "x",
+                    Lambda::new(
+                        vec![Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake())
+                        )],
+                        types::Reference::new("number", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    ForeignExport::new(CallingConvention::C).into(),
+                    Position::fake()
+                ),
+            );
+        }
 
-    //     #[test]
-    //     fn parse_keyword_like_name() {
-    //         assert_eq!(
-    //             definition()
-    //                 .parse(input("importA = \\() number { 42 }", ""))
-    //                 .unwrap()
-    //                 .0,
-    //             FunctionDefinition::new(
-    //                 "importA",
-    //                 Lambda::new(
-    //                     vec![],
-    //                     types::Reference::new("number", Position::fake()),
-    //                     Block::new(
-    //                         vec![],
-    //                         Number::new(
-    //                             NumberRepresentation::FloatingPoint("42".into()),
-    //                             Position::fake()
-    //                         ),
-    //                         Position::fake()
-    //                     ),
-    //                     Position::fake()
-    //                 ),
-    //                 None,
-    //                 Position::fake()
-    //             ),
-    //         );
-    //     }
-    // }
+        #[test]
+        fn parse_keyword_like_name() {
+            assert_eq!(
+                definition(input("importA = \\() number { 42 }", ""))
+                    .unwrap()
+                    .1,
+                FunctionDefinition::new(
+                    "importA",
+                    Lambda::new(
+                        vec![],
+                        types::Reference::new("number", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake()
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    None,
+                    Position::fake()
+                ),
+            );
+        }
+    }
 
-    // #[test]
-    // fn parse_record_definition() {
-    //     for (source, expected) in &[
-    //         (
-    //             "type Foo {}",
-    //             RecordDefinition::new("Foo", vec![], Position::fake()),
-    //         ),
-    //         (
-    //             "type Foo {foo number}",
-    //             RecordDefinition::new(
-    //                 "Foo",
-    //                 vec![types::RecordField::new(
-    //                     "foo",
-    //                     types::Reference::new("number", Position::fake()),
-    //                 )],
-    //                 Position::fake(),
-    //             ),
-    //         ),
-    //         (
-    //             "type Foo {foo number bar number}",
-    //             RecordDefinition::new(
-    //                 "Foo",
-    //                 vec![
-    //                     types::RecordField::new(
-    //                         "foo",
-    //                         types::Reference::new("number", Position::fake()),
-    //                     ),
-    //                     types::RecordField::new(
-    //                         "bar",
-    //                         types::Reference::new("number", Position::fake()),
-    //                     ),
-    //                 ],
-    //                 Position::fake(),
-    //             ),
-    //         ),
-    //     ] {
-    //         assert_eq!(
-    //             &record_definition().parse(input(source, "")).unwrap().0,
-    //             expected
-    //         );
-    //     }
-    // }
+    #[test]
+    fn parse_record_definition() {
+        for (source, expected) in &[
+            (
+                "type Foo {}",
+                RecordDefinition::new("Foo", vec![], Position::fake()),
+            ),
+            (
+                "type Foo {foo number}",
+                RecordDefinition::new(
+                    "Foo",
+                    vec![types::RecordField::new(
+                        "foo",
+                        types::Reference::new("number", Position::fake()),
+                    )],
+                    Position::fake(),
+                ),
+            ),
+            (
+                "type Foo {foo number bar number}",
+                RecordDefinition::new(
+                    "Foo",
+                    vec![
+                        types::RecordField::new(
+                            "foo",
+                            types::Reference::new("number", Position::fake()),
+                        ),
+                        types::RecordField::new(
+                            "bar",
+                            types::Reference::new("number", Position::fake()),
+                        ),
+                    ],
+                    Position::fake(),
+                ),
+            ),
+        ] {
+            assert_eq!(&record_definition(input(source, "")).unwrap().1, expected);
+        }
+    }
 
-    // #[test]
-    // fn parse_type_alias() {
-    //     for (source, expected) in &[
-    //         (
-    //             "type foo=number",
-    //             TypeAlias::new(
-    //                 "foo",
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake(),
-    //             ),
-    //         ),
-    //         (
-    //             "type foo = number",
-    //             TypeAlias::new(
-    //                 "foo",
-    //                 types::Reference::new("number", Position::fake()),
-    //                 Position::fake(),
-    //             ),
-    //         ),
-    //         (
-    //             "type foo=number|none",
-    //             TypeAlias::new(
-    //                 "foo",
-    //                 types::Union::new(
-    //                     types::Reference::new("number", Position::fake()),
-    //                     types::Reference::new("none", Position::fake()),
-    //                     Position::fake(),
-    //                 ),
-    //                 Position::fake(),
-    //             ),
-    //         ),
-    //     ] {
-    //         assert_eq!(&type_alias().parse(input(source, "")).unwrap().0, expected);
-    //     }
-    // }
+    #[test]
+    fn parse_type_alias() {
+        for (source, expected) in &[
+            (
+                "type foo=number",
+                TypeAlias::new(
+                    "foo",
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake(),
+                ),
+            ),
+            (
+                "type foo = number",
+                TypeAlias::new(
+                    "foo",
+                    types::Reference::new("number", Position::fake()),
+                    Position::fake(),
+                ),
+            ),
+            (
+                "type foo=number|none",
+                TypeAlias::new(
+                    "foo",
+                    types::Union::new(
+                        types::Reference::new("number", Position::fake()),
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+            ),
+        ] {
+            assert_eq!(&type_alias(input(source, "")).unwrap().1, expected);
+        }
+    }
 
     mod type_ {
         use super::*;
