@@ -9,13 +9,13 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{
-        alpha1, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1, none_of, one_of,
+        alpha1, alphanumeric1, char, digit1, multispace0, multispace1, none_of, one_of,
     },
     combinator::{
         all_consuming, cut, into, map, not, opt, peek, recognize, success, value, verify,
     },
     error::context,
-    multi::{many0, many1, separated_list1},
+    multi::{many0, many1, many_m_n, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, preceded, terminated, tuple},
     Parser,
@@ -721,12 +721,16 @@ fn hexadecimal_literal(input: Input) -> IResult<NumberRepresentation> {
     context(
         "hexadecimal literal",
         map(
-            preceded(tag("0x"), cut(many1(one_of("0123456789abcdefABCDEF")))),
+            preceded(tag("0x"), cut(many1(hexadecimal_digit))),
             |characters| {
                 NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase())
             },
         ),
     )(input)
+}
+
+fn hexadecimal_digit(input: Input) -> IResult<char> {
+    one_of("0123456789abcdefABCDEF")(input)
 }
 
 fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
@@ -758,12 +762,7 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
                         tag("\\n"),
                         tag("\\r"),
                         tag("\\t"),
-                        recognize(tuple((
-                            tag("\\x"),
-                            verify(hex_digit1, |characters: &Input| {
-                                characters.as_bytes().len() == 2
-                            }),
-                        ))),
+                        recognize(tuple((tag("\\x"), many_m_n(2, 2, hexadecimal_digit)))),
                     ))),
                     char('"'),
                 )),
