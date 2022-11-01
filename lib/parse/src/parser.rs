@@ -3,15 +3,13 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{
-        alpha1, alphanumeric0, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1,
-        none_of, one_of,
+        alpha1, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1, none_of, one_of,
     },
     combinator::{all_consuming, into, map, not, opt, peek, recognize, success, value, verify},
-    error::ParseError,
-    multi::{many0, many1, separated_list0, separated_list1},
+    multi::{many0, many1, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, preceded, terminated, tuple},
-    IResult, InputLength, Parser,
+    IResult, Parser,
 };
 use nom_locate::LocatedSpan;
 use position::Position;
@@ -129,7 +127,7 @@ fn module_path_components<'a>(
 }
 
 fn public_module_path_component(input: Input) -> IResult<Input, String> {
-    verify(identifier, |name| ast::analysis::is_name_public(&name))(input)
+    verify(identifier, ast::analysis::is_name_public)(input)
 }
 
 fn foreign_import(input: Input) -> IResult<Input, ForeignImport> {
@@ -1124,18 +1122,18 @@ mod tests {
         // fn fail_to_parse_private_external_module_file() {
         //     let source = "Foo'bar";
 
-        //     insta::assert_debug_snapshot!(external_module_path(input(source, ""))
-        //         .map_err(|error| ParseError::new(source, "", error))
-        //         .err());
+        //     insta::assert_debug_snapshot!(external_module_path(input(source,
+        // ""))         .map_err(|error| ParseError::new(source, "",
+        // error))         .err());
         // }
 
         // #[test]
         // fn fail_to_parse_private_external_module_directory() {
         //     let source = "Foo'bar'Baz";
 
-        //     insta::assert_debug_snapshot!(external_module_path(input(source, ""))
-        //         .map_err(|error| ParseError::new(source, "", error))
-        //         .err());
+        //     insta::assert_debug_snapshot!(external_module_path(input(source,
+        // ""))         .map_err(|error| ParseError::new(source, "",
+        // error))         .err());
         // }
     }
 

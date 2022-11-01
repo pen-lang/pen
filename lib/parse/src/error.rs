@@ -9,7 +9,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new(source: &str, path: &str, error: impl std::error::Error) -> Self {
+    pub fn new(_source: &str, _path: &str, error: impl std::error::Error) -> Self {
         Self {
             message: format!("{}", error),
             expected: vec![],
