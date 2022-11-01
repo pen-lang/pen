@@ -2,10 +2,6 @@
 
 set -e
 
-. $(dirname $0)/utilities.sh
-
-prepare_unit_test
-
 rustup component add llvm-tools-preview
 
 cargo install cargo-llvm-cov
