@@ -15,6 +15,7 @@ use position::Position;
 
 use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
+    error::NomError,
     input::Input,
     operations::{reduce_operations, SuffixOperator},
 };
@@ -25,7 +26,7 @@ const KEYWORDS: &[&str] = &[
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
 const OPERATOR_MODIFIERS: &str = "=";
 
-type IResult<'a, T> = nom::IResult<Input<'a>, T>;
+type IResult<'a, T> = nom::IResult<Input<'a>, T, NomError<'a>>;
 
 pub fn module(input: Input) -> IResult<Module> {
     map(
@@ -117,7 +118,7 @@ fn external_module_path(input: Input) -> IResult<ExternalModulePath> {
 }
 
 fn module_path_components<'a>(
-    component: impl Parser<Input<'a>, String, nom::error::Error<Input<'a>>>,
+    component: impl Parser<Input<'a>, String, NomError<'a>>,
 ) -> impl FnMut(Input<'a>) -> IResult<'a, Vec<String>> {
     many1(preceded(tag(IDENTIFIER_SEPARATOR), component))
 }
@@ -776,7 +777,7 @@ fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<()> + Clone {
 }
 
 fn token<'a, O>(
-    mut parser: impl Parser<Input<'a>, O, nom::error::Error<Input<'a>>>,
+    mut parser: impl Parser<Input<'a>, O, NomError<'a>>,
 ) -> impl FnMut(Input<'a>) -> IResult<'a, O> {
     move |input| {
         let (input, _) = blank(input)?;

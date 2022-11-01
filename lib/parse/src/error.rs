@@ -1,5 +1,9 @@
+use crate::input::Input;
+use nom::error::VerboseError;
 use position::{test::PositionFake, Position};
 use std::{error::Error, fmt, fmt::Display};
+
+pub type NomError<'a> = VerboseError<Input<'a>>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ParseError {
@@ -9,7 +13,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new(_source: &str, _path: &str, error: impl std::error::Error) -> Self {
+    pub fn new<'a>(_source: &str, _path: &str, error: nom::Err<NomError<'a>>) -> Self {
         Self {
             message: format!("{}", error),
             expected: vec![],
