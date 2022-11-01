@@ -217,7 +217,8 @@ fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
 }
 
 fn call_operator(input: Input) -> IResult<Input, SuffixOperator> {
-    let position = position(input);
+    // Discard input to keep spaces.
+    let (_, position) = position_parser(input)?;
 
     // Do not allow any space before parentheses.
     let (input, arguments) = delimited(
@@ -247,8 +248,8 @@ fn try_operator(input: Input) -> IResult<Input, SuffixOperator> {
 
 fn atomic_expression(input: Input) -> IResult<Input, Expression> {
     alt((
-        // lambda().map(Expression::from),
-        // if_list().map(Expression::from),
+        into(lambda),
+        into(if_list),
         into(if_map),
         into(if_type),
         into(if_),
@@ -261,6 +262,25 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
         into(variable),
         delimited(sign("("), expression, sign(")")),
     ))(input)
+}
+
+fn lambda(input: Input) -> IResult<Input, Lambda> {
+    let (input, (position, _, arguments, _, result_type, body)) = tuple((
+        position_parser,
+        sign("\\("),
+        separated_or_terminated_list0(sign(","), argument),
+        sign(")"),
+        type_,
+        block,
+    ))(input)?;
+
+    Ok((input, Lambda::new(arguments, result_type, body, position)))
+}
+
+fn argument(input: Input) -> IResult<Input, Argument> {
+    let (input, (name, type_)) = tuple((identifier, type_))(input)?;
+
+    Ok((input, Argument::new(name, type_)))
 }
 
 fn if_(input: Input) -> IResult<Input, If> {
@@ -287,6 +307,30 @@ fn if_branch(input: Input) -> IResult<Input, IfBranch> {
     let (input, (expression, block)) = tuple((expression, block))(input)?;
 
     Ok((input, IfBranch::new(expression, block)))
+}
+
+fn if_list(input: Input) -> IResult<Input, IfList> {
+    let (input, (position, _, _, first_name, _, _, rest_name, _, _, argument, then, _, else_)) =
+        tuple((
+            position_parser,
+            keyword("if"),
+            sign("["),
+            identifier,
+            sign(","),
+            sign("..."),
+            identifier,
+            sign("]"),
+            sign("="),
+            expression,
+            block,
+            keyword("else"),
+            block,
+        ))(input)?;
+
+    Ok((
+        input,
+        IfList::new(argument, first_name, rest_name, then, else_, position),
+    ))
 }
 
 fn if_map(input: Input) -> IResult<Input, IfMap> {
@@ -1519,74 +1563,70 @@ mod tests {
             );
         }
 
-        //     #[test]
-        //     fn parse_lambda() {
-        //         assert_eq!(
-        //             lambda()
-        //                 .parse(input("\\(x number)number{42}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             Lambda::new(
-        //                 vec![Argument::new(
-        //                     "x",
-        //                     types::Reference::new("number", Position::fake())
-        //                 )],
-        //                 types::Reference::new("number", Position::fake()),
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             ),
-        //         );
+        #[test]
+        fn parse_lambda() {
+            assert_eq!(
+                lambda(input("\\(x number)number{42}", "")).unwrap().1,
+                Lambda::new(
+                    vec![Argument::new(
+                        "x",
+                        types::Reference::new("number", Position::fake())
+                    )],
+                    types::Reference::new("number", Position::fake()),
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+            );
 
-        //         assert_eq!(
-        //             lambda()
-        //                 .parse(input("\\(x number,y number)number{42}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             Lambda::new(
-        //                 vec![
-        //                     Argument::new("x", types::Reference::new("number", Position::fake())),
-        //                     Argument::new("y", types::Reference::new("number", Position::fake()))
-        //                 ],
-        //                 types::Reference::new("number", Position::fake()),
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //     }
+            assert_eq!(
+                lambda(input("\\(x number,y number)number{42}", ""))
+                    .unwrap()
+                    .1,
+                Lambda::new(
+                    vec![
+                        Argument::new("x", types::Reference::new("number", Position::fake())),
+                        Argument::new("y", types::Reference::new("number", Position::fake()))
+                    ],
+                    types::Reference::new("number", Position::fake()),
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+            );
+        }
 
-        //     #[test]
-        //     fn parse_lambda_with_reference_type() {
-        //         assert_eq!(
-        //             lambda().parse(input("\\() Foo { 42 }", "")).unwrap().0,
-        //             Lambda::new(
-        //                 vec![],
-        //                 types::Reference::new("Foo", Position::fake()),
-        //                 Block::new(
-        //                     vec![],
-        //                     Number::new(
-        //                         NumberRepresentation::FloatingPoint("42".into()),
-        //                         Position::fake()
-        //                     ),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake()
-        //             ),
-        //         );
-        //     }
+        #[test]
+        fn parse_lambda_with_reference_type() {
+            assert_eq!(
+                lambda(input("\\() Foo { 42 }", "")).unwrap().1,
+                Lambda::new(
+                    vec![],
+                    types::Reference::new("Foo", Position::fake()),
+                    Block::new(
+                        vec![],
+                        Number::new(
+                            NumberRepresentation::FloatingPoint("42".into()),
+                            Position::fake()
+                        ),
+                        Position::fake()
+                    ),
+                    Position::fake()
+                ),
+            );
+        }
 
         #[test]
         fn parse_block() {
@@ -1907,31 +1947,30 @@ mod tests {
             );
         }
 
-        //     #[test]
-        //     fn parse_if_list() {
-        //         assert_eq!(
-        //             if_list()
-        //                 .parse(input("if[x,...xs]=xs {none}else{none}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             IfList::new(
-        //                 Variable::new("xs", Position::fake()),
-        //                 "x",
-        //                 "xs",
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //         );
-        //     }
+        #[test]
+        fn parse_if_list() {
+            assert_eq!(
+                if_list(input("if[x,...xs]=xs {none}else{none}", ""))
+                    .unwrap()
+                    .1,
+                IfList::new(
+                    Variable::new("xs", Position::fake()),
+                    "x",
+                    "xs",
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            );
+        }
 
         #[test]
         fn parse_if_map() {
