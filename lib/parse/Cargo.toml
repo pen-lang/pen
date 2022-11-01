@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 ast = { path = "../ast" }
 fnv = "1"
+insta = "1.21.0"
 nom = "7.1.1"
 nom_locate = "4.0.0"
 position = { path = "../position" }

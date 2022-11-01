@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
     error::NomError,
@@ -324,10 +326,17 @@ fn block(input: Input) -> IResult<Block> {
             tuple((
                 position,
                 sign("{"),
-                cut(terminated(many1(statement), sign("}"))),
+                cut(terminated(
+                    verify(many1(statement), |statements: &[_]| {
+                        statements
+                            .last()
+                            .map(|statement| statement.name().is_none())
+                            .unwrap_or_default()
+                    }),
+                    sign("}"),
+                )),
             )),
             |(position, _, statements)| {
-                // TODO Validate the last expressions.
                 Block::new(
                     statements[..statements.len() - 1].to_vec(),
                     statements.last().unwrap().expression().clone(),
@@ -641,7 +650,6 @@ fn if_type_branch(input: Input) -> IResult<IfTypeBranch> {
 
 fn record(input: Input) -> IResult<Record> {
     // TODO Disallow spaces before `{` for disambiguation?
-    // TODO Validate duplicate fields.
     context(
         "record",
         map(
@@ -649,19 +657,26 @@ fn record(input: Input) -> IResult<Record> {
                 position,
                 qualified_identifier,
                 sign("{"),
-                alt((
-                    preceded(
-                        sign("..."),
-                        cut(tuple((
-                            map(terminated(expression, sign(",")), Some),
-                            separated_or_terminated_list1(sign(","), record_field),
-                        ))),
-                    ),
-                    tuple((
-                        success(None),
-                        separated_or_terminated_list0(sign(","), record_field),
+                verify(
+                    alt((
+                        preceded(
+                            sign("..."),
+                            cut(tuple((
+                                map(terminated(expression, sign(",")), Some),
+                                separated_or_terminated_list1(sign(","), record_field),
+                            ))),
+                        ),
+                        tuple((
+                            success(None),
+                            separated_or_terminated_list0(sign(","), record_field),
+                        )),
                     )),
-                )),
+                    |(_, fields)| {
+                        fields.len()
+                            == HashSet::<&str>::from_iter(fields.iter().map(|field| field.name()))
+                                .len()
+                    },
+                ),
                 sign("}"),
             )),
             |(position, name, _, (record, fields), _)| Record::new(name, record, fields, position),
@@ -744,8 +759,12 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
                         tag("\\n"),
                         tag("\\r"),
                         tag("\\t"),
-                        // TODO Limit a number of digits.
-                        recognize(tuple((tag("\\x"), hex_digit1))),
+                        recognize(tuple((
+                            tag("\\x"),
+                            verify(hex_digit1, |characters: &Input| {
+                                characters.as_bytes().len() == 2
+                            }),
+                        ))),
                     ))),
                     char('"'),
                 )),
@@ -1174,6 +1193,8 @@ mod tests {
     }
 
     mod import {
+        use crate::ParseError;
+
         use super::*;
         use pretty_assertions::assert_eq;
 
@@ -1276,24 +1297,23 @@ mod tests {
             );
         }
 
-        // TODO
-        // #[test]
-        // fn fail_to_parse_private_external_module_file() {
-        //     let source = "Foo'bar";
+        #[test]
+        fn fail_to_parse_private_external_module_file() {
+            let source = "Foo'bar";
 
-        //     insta::assert_debug_snapshot!(external_module_path(input(source,
-        // ""))         .map_err(|error| ParseError::new(source, "",
-        // error))         .err());
-        // }
+            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .unwrap_err());
+        }
 
-        // #[test]
-        // fn fail_to_parse_private_external_module_directory() {
-        //     let source = "Foo'bar'Baz";
+        #[test]
+        fn fail_to_parse_private_external_module_directory() {
+            let source = "Foo'bar'Baz";
 
-        //     insta::assert_debug_snapshot!(external_module_path(input(source,
-        // ""))         .map_err(|error| ParseError::new(source, "",
-        // error))         .err());
-        // }
+            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
+                .map_err(|error| ParseError::new(source, "", error))
+                .unwrap_err());
+        }
     }
 
     #[test]

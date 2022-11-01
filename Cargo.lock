@@ -820,6 +820,7 @@ dependencies = [
  "ast",
  "fnv",
  "indoc",
+ "insta",
  "nom",
  "nom_locate",
  "position",
