@@ -641,92 +641,113 @@ fn if_type_branch(input: Input) -> IResult<IfTypeBranch> {
 
 fn record(input: Input) -> IResult<Record> {
     // TODO Validate duplicate fields.
-    map(
-        tuple((
-            position,
-            qualified_identifier,
-            sign("{"),
-            alt((
-                preceded(
-                    sign("..."),
-                    cut(tuple((
-                        map(terminated(expression, sign(",")), Some),
-                        separated_or_terminated_list1(sign(","), record_field),
-                    ))),
-                ),
-                tuple((
-                    success(None),
-                    separated_or_terminated_list0(sign(","), record_field),
+    context(
+        "record",
+        map(
+            tuple((
+                position,
+                qualified_identifier,
+                sign("{"),
+                alt((
+                    preceded(
+                        sign("..."),
+                        cut(tuple((
+                            map(terminated(expression, sign(",")), Some),
+                            separated_or_terminated_list1(sign(","), record_field),
+                        ))),
+                    ),
+                    tuple((
+                        success(None),
+                        separated_or_terminated_list0(sign(","), record_field),
+                    )),
                 )),
+                sign("}"),
             )),
-            sign("}"),
-        )),
-        |(position, name, _, (record, fields), _)| Record::new(name, record, fields, position),
+            |(position, name, _, (record, fields), _)| Record::new(name, record, fields, position),
+        ),
     )(input)
 }
 
 fn record_field(input: Input) -> IResult<RecordField> {
-    map(
-        tuple((position, identifier, sign(":"), cut(expression))),
-        |(position, name, _, expression)| RecordField::new(name, expression, position),
+    context(
+        "record field",
+        map(
+            tuple((position, identifier, sign(":"), cut(expression))),
+            |(position, name, _, expression)| RecordField::new(name, expression, position),
+        ),
     )(input)
 }
 
 fn number_literal(input: Input) -> IResult<Number> {
-    map(
-        token(tuple((
-            position,
-            alt((binary_literal, hexadecimal_literal, decimal_literal)),
-            peek(not(digit1)),
-        ))),
-        |(position, number, _)| Number::new(number, position),
+    context(
+        "number",
+        map(
+            token(tuple((
+                position,
+                alt((binary_literal, hexadecimal_literal, decimal_literal)),
+                peek(not(digit1)),
+            ))),
+            |(position, number, _)| Number::new(number, position),
+        ),
     )(input)
 }
 
 fn binary_literal(input: Input) -> IResult<NumberRepresentation> {
-    map(preceded(tag("0b"), many1(one_of("01"))), |characters| {
-        NumberRepresentation::Binary(String::from_iter(characters))
-    })(input)
+    context(
+        "binary literal",
+        map(
+            preceded(tag("0b"), cut(many1(one_of("01")))),
+            |characters| NumberRepresentation::Binary(String::from_iter(characters)),
+        ),
+    )(input)
 }
 
 fn hexadecimal_literal(input: Input) -> IResult<NumberRepresentation> {
-    map(
-        preceded(tag("0x"), many1(one_of("0123456789abcdefABCDEF"))),
-        |characters| {
-            NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase())
-        },
+    context(
+        "hexadecimal literal",
+        map(
+            preceded(tag("0x"), cut(many1(one_of("0123456789abcdefABCDEF")))),
+            |characters| {
+                NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase())
+            },
+        ),
     )(input)
 }
 
 fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
-    map(recognize_float, |characters: Input| {
-        NumberRepresentation::FloatingPoint(
-            String::from_utf8_lossy(characters.as_bytes()).to_string(),
-        )
-    })(input)
+    context(
+        "decimal literal",
+        map(recognize_float, |characters: Input| {
+            NumberRepresentation::FloatingPoint(
+                String::from_utf8_lossy(characters.as_bytes()).to_string(),
+            )
+        }),
+    )(input)
 }
 
 fn string_literal(input: Input) -> IResult<ByteString> {
-    token(raw_string_literal)(input)
+    context("string literal", token(raw_string_literal))(input)
 }
 
 fn raw_string_literal(input: Input) -> IResult<ByteString> {
     map(
         tuple((
             position,
-            delimited(
+            preceded(
                 char('"'),
-                many0(alt((
-                    recognize(none_of("\\\"")),
-                    tag("\\\\"),
-                    tag("\\\""),
-                    tag("\\n"),
-                    tag("\\r"),
-                    tag("\\t"),
-                    // TODO Limit a number of digits.
-                    recognize(tuple((tag("\\x"), hex_digit1))),
-                ))),
-                char('"'),
+                cut(terminated(
+                    many0(alt((
+                        recognize(none_of("\\\"")),
+                        tag("\\\\"),
+                        tag("\\\""),
+                        tag("\\n"),
+                        tag("\\r"),
+                        tag("\\t"),
+                        // TODO Limit a number of digits.
+                        recognize(tuple((tag("\\x"), hex_digit1))),
+                    ))),
+                    char('"'),
+                )),
             ),
         )),
         |(position, spans)| {
