@@ -1,5 +1,6 @@
 use nom_locate::LocatedSpan;
 use position::Position;
+use std::str;
 
 pub type Input<'a> = LocatedSpan<&'a str, &'a str>;
 
@@ -12,6 +13,6 @@ pub fn position(input: Input) -> Position {
         input.extra,
         input.location_line() as usize,
         input.get_column(),
-        String::from_utf8_lossy(input.get_line_beginning()),
+        str::from_utf8(input.get_line_beginning()).unwrap(),
     )
 }

@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
     error::NomError,
@@ -23,6 +21,7 @@ use nom::{
     Parser,
 };
 use position::Position;
+use std::{collections::HashSet, str};
 
 const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -735,7 +734,7 @@ fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
         "decimal literal",
         map(recognize_float, |characters: Input| {
             NumberRepresentation::FloatingPoint(
-                String::from_utf8_lossy(characters.as_bytes()).to_string(),
+                str::from_utf8(characters.as_bytes()).unwrap().into(),
             )
         }),
     )(input)
