@@ -183,13 +183,13 @@ fn function_definition(input: Input) -> IResult<FunctionDefinition> {
         "function definition",
         map(
             tuple((
-                opt(foreign_export),
                 position,
+                opt(foreign_export),
                 identifier,
                 sign("="),
                 cut(lambda),
             )),
-            |(foreign_export, position, name, _, lambda)| {
+            |(position, foreign_export, name, _, lambda)| {
                 FunctionDefinition::new(name, lambda, foreign_export, position)
             },
         ),
@@ -640,6 +640,7 @@ fn if_type_branch(input: Input) -> IResult<IfTypeBranch> {
 }
 
 fn record(input: Input) -> IResult<Record> {
+    // TODO Disallow spaces before `{` for disambiguation?
     // TODO Validate duplicate fields.
     context(
         "record",
@@ -726,7 +727,7 @@ fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
 }
 
 fn string_literal(input: Input) -> IResult<ByteString> {
-    context("string literal", token(raw_string_literal))(input)
+    context("string", token(raw_string_literal))(input)
 }
 
 fn raw_string_literal(input: Input) -> IResult<ByteString> {
@@ -764,110 +765,125 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
 }
 
 fn list_literal(input: Input) -> IResult<List> {
-    map(
-        tuple((
-            position,
-            sign("["),
-            type_,
-            separated_or_terminated_list0(sign(","), list_element),
-            sign("]"),
-        )),
-        |(position, _, type_, elements, _)| List::new(type_, elements, position),
+    context(
+        "list",
+        map(
+            tuple((
+                position,
+                sign("["),
+                cut(tuple((
+                    type_,
+                    separated_or_terminated_list0(sign(","), list_element),
+                    sign("]"),
+                ))),
+            )),
+            |(position, _, (type_, elements, _))| List::new(type_, elements, position),
+        ),
     )(input)
 }
 
 fn list_element(input: Input) -> IResult<ListElement> {
     alt((
         map(expression, ListElement::Single),
-        map(preceded(sign("..."), expression), ListElement::Multiple),
+        map(
+            preceded(sign("..."), cut(expression)),
+            ListElement::Multiple,
+        ),
     ))(input)
 }
 
 fn list_comprehension(input: Input) -> IResult<Expression> {
-    map(
-        tuple((
-            position,
-            sign("["),
-            type_,
-            expression,
-            keyword("for"),
-            identifier,
-            opt(preceded(sign(","), identifier)),
-            keyword("in"),
-            expression,
-            sign("]"),
-        )),
-        |(position, _, type_, element, _, element_name, value_name, _, iterator, _)| {
-            if let Some(value_name) = value_name {
-                MapIterationComprehension::new(
-                    type_,
-                    element,
-                    element_name,
-                    value_name,
-                    iterator,
-                    position,
-                )
-                .into()
-            } else {
-                ListComprehension::new(type_, element, element_name, iterator, position).into()
-            }
-        },
+    context(
+        "list comprehension",
+        map(
+            tuple((
+                position,
+                sign("["),
+                type_,
+                expression,
+                keyword("for"),
+                cut(tuple((
+                    identifier,
+                    opt(preceded(sign(","), identifier)),
+                    keyword("in"),
+                    expression,
+                    sign("]"),
+                ))),
+            )),
+            |(position, _, type_, element, _, (element_name, value_name, _, iterator, _))| {
+                if let Some(value_name) = value_name {
+                    MapIterationComprehension::new(
+                        type_,
+                        element,
+                        element_name,
+                        value_name,
+                        iterator,
+                        position,
+                    )
+                    .into()
+                } else {
+                    ListComprehension::new(type_, element, element_name, iterator, position).into()
+                }
+            },
+        ),
     )(input)
 }
 
 fn map_literal(input: Input) -> IResult<Map> {
-    map(
-        tuple((
-            position,
-            sign("{"),
-            type_,
-            sign(":"),
-            type_,
-            separated_or_terminated_list0(sign(","), map_element),
-            sign("}"),
-        )),
-        |(position, _, key_type, _, value_type, elements, _)| {
-            Map::new(key_type, value_type, elements, position)
-        },
+    context(
+        "map",
+        map(
+            tuple((
+                position,
+                sign("{"),
+                cut(tuple((
+                    type_,
+                    sign(":"),
+                    type_,
+                    separated_or_terminated_list0(sign(","), map_element),
+                    sign("}"),
+                ))),
+            )),
+            |(position, _, (key_type, _, value_type, elements, _))| {
+                Map::new(key_type, value_type, elements, position)
+            },
+        ),
     )(input)
 }
 
 fn map_element(input: Input) -> IResult<MapElement> {
     alt((
         map(
-            tuple((position, expression, sign(":"), expression)),
+            tuple((position, expression, sign(":"), cut(expression))),
             |(position, key, _, value)| MapEntry::new(key, value, position).into(),
         ),
-        map(preceded(sign("..."), expression), MapElement::Map),
+        map(preceded(sign("..."), cut(expression)), MapElement::Map),
         map(expression, MapElement::Removal),
     ))(input)
 }
 
 fn variable(input: Input) -> IResult<Variable> {
-    map(
-        tuple((position, token(qualified_identifier))),
-        |(position, identifier)| Variable::new(identifier, position),
+    context(
+        "variable",
+        map(
+            tuple((position, token(qualified_identifier))),
+            |(position, identifier)| Variable::new(identifier, position),
+        ),
     )(input)
 }
 
 fn qualified_identifier(input: Input) -> IResult<String> {
     map(
-        tuple((
+        recognize(tuple((
             raw_identifier,
-            opt(tuple((tag(IDENTIFIER_SEPARATOR), raw_identifier))),
-        )),
-        |(former, latter)| {
-            if let Some((_, latter)) = latter {
-                [&former, IDENTIFIER_SEPARATOR, &latter].concat()
-            } else {
-                former
-            }
-        },
+            opt(tuple((tag(IDENTIFIER_SEPARATOR), cut(raw_identifier)))),
+        ))),
+        |span| String::from_utf8_lossy(span.as_bytes()).to_string(),
     )(input)
 }
 
 fn identifier(input: Input) -> IResult<String> {
-    token(raw_identifier)(input)
+    context("identifier", token(raw_identifier))(input)
 }
 
 fn raw_identifier(input: Input) -> IResult<String> {
@@ -892,19 +908,22 @@ fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<()> {
     }
 
     move |input| {
-        value(
-            (),
-            token(tuple((
-                tag(name),
-                peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
-            ))),
+        context(
+            "keyword",
+            value(
+                (),
+                token(tuple((
+                    tag(name),
+                    peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
+                ))),
+            ),
         )(input)
     }
 }
 
 fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<()> + Clone {
     move |input| {
-        let parser = token(tag(sign));
+        let parser = context("sign", token(tag(sign)));
 
         if sign
             .chars()
@@ -932,9 +951,12 @@ fn blank(input: Input) -> IResult<()> {
 }
 
 fn comment(input: Input) -> IResult<Comment> {
-    map(
-        tuple((position, tag("#"), many0(none_of("\n\r")))),
-        |(position, _, characters)| Comment::new(String::from_iter(characters), position),
+    context(
+        "comment",
+        map(
+            tuple((position, tag("#"), many0(none_of("\n\r")))),
+            |(position, _, characters)| Comment::new(String::from_iter(characters), position),
+        ),
     )(input)
 }
 
