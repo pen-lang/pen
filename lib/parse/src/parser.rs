@@ -47,7 +47,7 @@ pub fn module(input: Input) -> IResult<Module> {
                 foreign_imports,
                 type_definitions,
                 definitions,
-                position,
+                position(),
             )
         },
     )(input)
@@ -91,7 +91,7 @@ fn import(input: Input) -> IResult<Import> {
                 ))),
             )),
             |(position, _, path, (prefix, names))| {
-                Import::new(path, prefix, names.unwrap_or_default(), position)
+                Import::new(path, prefix, names.unwrap_or_default(), position())
             },
         ),
     )(input)
@@ -100,7 +100,7 @@ fn import(input: Input) -> IResult<Import> {
 fn unqualified_name(input: Input) -> IResult<UnqualifiedName> {
     map(
         token(tuple((position, identifier))),
-        |(position, identifier)| UnqualifiedName::new(identifier, position),
+        |(position, identifier)| UnqualifiedName::new(identifier, position()),
     )(input)
 }
 
@@ -162,7 +162,7 @@ fn foreign_import(input: Input) -> IResult<ForeignImport> {
                     &name,
                     calling_convention.unwrap_or_default(),
                     type_,
-                    position,
+                    position(),
                 )
             },
         ),
@@ -191,7 +191,7 @@ fn function_definition(input: Input) -> IResult<FunctionDefinition> {
                 cut(lambda),
             )),
             |(position, foreign_export, name, _, lambda)| {
-                FunctionDefinition::new(name, lambda, foreign_export, position)
+                FunctionDefinition::new(name, lambda, foreign_export, position())
             },
         ),
     )(input)
@@ -225,7 +225,7 @@ fn record_definition(input: Input) -> IResult<RecordDefinition> {
                         .into_iter()
                         .map(|(name, type_)| types::RecordField::new(name, type_))
                         .collect(),
-                    position,
+                    position(),
                 )
             },
         ),
@@ -237,7 +237,7 @@ fn type_alias(input: Input) -> IResult<TypeAlias> {
         "type alias",
         map(
             tuple((position, keyword("type"), identifier, sign("="), cut(type_))),
-            |(position, _, name, _, type_)| TypeAlias::new(name, type_, position),
+            |(position, _, name, _, type_)| TypeAlias::new(name, type_, position()),
         ),
     )(input)
 }
@@ -260,7 +260,7 @@ fn function_type(input: Input) -> IResult<types::Function> {
                 ))),
             )),
             |(position, _, (arguments, _, result))| {
-                types::Function::new(arguments, result, position)
+                types::Function::new(arguments, result, position())
             },
         ),
     )(input)
@@ -280,7 +280,7 @@ fn list_type(input: Input) -> IResult<types::List> {
         "list type",
         map(
             tuple((position, sign("["), cut(terminated(type_, sign("]"))))),
-            |(position, _, element)| types::List::new(element, position),
+            |(position, _, element)| types::List::new(element, position()),
         ),
     )(input)
 }
@@ -294,7 +294,7 @@ fn map_type(input: Input) -> IResult<types::Map> {
                 sign("{"),
                 cut(tuple((type_, sign(":"), type_, sign("}")))),
             )),
-            |(position, _, (key, _, value, _))| types::Map::new(key, value, position),
+            |(position, _, (key, _, value, _))| types::Map::new(key, value, position()),
         ),
     )(input)
 }
@@ -313,7 +313,7 @@ fn reference_type(input: Input) -> IResult<types::Reference> {
         "reference type",
         map(
             tuple((position, token(qualified_identifier))),
-            |(position, identifier)| types::Reference::new(identifier, position),
+            |(position, identifier)| types::Reference::new(identifier, position()),
         ),
     )(input)
 }
@@ -339,7 +339,7 @@ fn block(input: Input) -> IResult<Block> {
                 Block::new(
                     statements[..statements.len() - 1].to_vec(),
                     statements.last().unwrap().expression().clone(),
-                    position,
+                    position(),
                 )
             },
         ),
@@ -351,7 +351,7 @@ fn statement(input: Input) -> IResult<Statement> {
         "statement",
         map(
             tuple((position, opt(terminated(identifier, sign("="))), expression)),
-            |(position, name, expression)| Statement::new(name, expression, position),
+            |(position, name, expression)| Statement::new(name, expression, position()),
         ),
     )(input)
 }
@@ -364,7 +364,7 @@ fn expression(input: Input) -> IResult<Expression> {
                 prefix_operation_like,
                 many0(map(
                     tuple((position, binary_operator, cut(prefix_operation_like))),
-                    |(position, operator, expression)| (operator, expression, position),
+                    |(position, operator, expression)| (operator, expression, position()),
                 )),
             )),
             |(expression, pairs)| reduce_operations(expression, &pairs),
@@ -401,7 +401,9 @@ fn prefix_operation(input: Input) -> IResult<UnaryOperation> {
         "prefix operation",
         map(
             tuple((position, prefix_operator, cut(prefix_operation_like))),
-            |(position, operator, expression)| UnaryOperation::new(operator, expression, position),
+            |(position, operator, expression)| {
+                UnaryOperation::new(operator, expression, position())
+            },
         ),
     )(input)
 }
@@ -448,7 +450,7 @@ fn call_operator(input: Input) -> IResult<SuffixOperator> {
                     sign(")"),
                 )),
             )),
-            |(position, _, arguments)| SuffixOperator::Call(arguments, position),
+            |(position, _, arguments)| SuffixOperator::Call(arguments, position()),
         ),
     )(input)
 }
@@ -458,7 +460,7 @@ fn record_field_operator(input: Input) -> IResult<SuffixOperator> {
         "record field",
         map(
             tuple((position, sign("."), cut(identifier))),
-            |(position, _, identifier)| SuffixOperator::RecordField(identifier, position),
+            |(position, _, identifier)| SuffixOperator::RecordField(identifier, position()),
         ),
     )(input)
 }
@@ -467,7 +469,7 @@ fn try_operator(input: Input) -> IResult<SuffixOperator> {
     context(
         "try operator",
         map(tuple((position, sign("?"))), |(position, _)| {
-            SuffixOperator::Try(position)
+            SuffixOperator::Try(position())
         }),
     )(input)
 }
@@ -505,7 +507,7 @@ fn lambda(input: Input) -> IResult<Lambda> {
                 ))),
             )),
             |(position, _, (arguments, _, result_type, body))| {
-                Lambda::new(arguments, result_type, body, position)
+                Lambda::new(arguments, result_type, body, position())
             },
         ),
     )(input)
@@ -541,7 +543,7 @@ fn if_(input: Input) -> IResult<If> {
                 If::new(
                     [first_branch].into_iter().chain(branches).collect(),
                     else_block,
-                    position,
+                    position(),
                 )
             },
         ),
@@ -576,7 +578,7 @@ fn if_list(input: Input) -> IResult<IfList> {
                 ))),
             )),
             |(position, _, _, (first_name, _, _, rest_name, _, _, argument, then, _, else_))| {
-                IfList::new(argument, first_name, rest_name, then, else_, position)
+                IfList::new(argument, first_name, rest_name, then, else_, position())
             },
         ),
     )(input)
@@ -602,7 +604,7 @@ fn if_map(input: Input) -> IResult<IfMap> {
                 ))),
             )),
             |(position, _, name, _, map, _, (key, _, then, _, else_))| {
-                IfMap::new(name, map, key, then, else_, position)
+                IfMap::new(name, map, key, then, else_, position())
             },
         ),
     )(input)
@@ -634,7 +636,7 @@ fn if_type(input: Input) -> IResult<IfType> {
                     argument,
                     [first_branch].into_iter().chain(branches).collect(),
                     else_,
-                    position,
+                    position(),
                 )
             },
         ),
@@ -678,7 +680,9 @@ fn record(input: Input) -> IResult<Record> {
                 ),
                 sign("}"),
             )),
-            |(position, name, _, (record, fields), _)| Record::new(name, record, fields, position),
+            |(position, name, _, (record, fields), _)| {
+                Record::new(name, record, fields, position())
+            },
         ),
     )(input)
 }
@@ -688,7 +692,7 @@ fn record_field(input: Input) -> IResult<RecordField> {
         "record field",
         map(
             tuple((position, identifier, sign(":"), cut(expression))),
-            |(position, name, _, expression)| RecordField::new(name, expression, position),
+            |(position, name, _, expression)| RecordField::new(name, expression, position()),
         ),
     )(input)
 }
@@ -702,7 +706,7 @@ fn number_literal(input: Input) -> IResult<Number> {
                 alt((binary_literal, hexadecimal_literal, decimal_literal)),
                 peek(not(digit1)),
             ))),
-            |(position, number, _)| Number::new(number, position),
+            |(position, number, _)| Number::new(number, position()),
         ),
     )(input)
 }
@@ -775,7 +779,7 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
                     .map(|span| str::from_utf8(span.as_bytes()).unwrap())
                     .collect::<Vec<_>>()
                     .concat(),
-                position,
+                position(),
             )
         },
     )(input)
@@ -794,7 +798,7 @@ fn list_literal(input: Input) -> IResult<List> {
                     sign("]"),
                 ))),
             )),
-            |(position, _, (type_, elements, _))| List::new(type_, elements, position),
+            |(position, _, (type_, elements, _))| List::new(type_, elements, position()),
         ),
     )(input)
 }
@@ -835,11 +839,12 @@ fn list_comprehension(input: Input) -> IResult<Expression> {
                         element_name,
                         value_name,
                         iterator,
-                        position,
+                        position(),
                     )
                     .into()
                 } else {
-                    ListComprehension::new(type_, element, element_name, iterator, position).into()
+                    ListComprehension::new(type_, element, element_name, iterator, position())
+                        .into()
                 }
             },
         ),
@@ -862,7 +867,7 @@ fn map_literal(input: Input) -> IResult<Map> {
                 ))),
             )),
             |(position, _, (key_type, _, value_type, elements, _))| {
-                Map::new(key_type, value_type, elements, position)
+                Map::new(key_type, value_type, elements, position())
             },
         ),
     )(input)
@@ -872,7 +877,7 @@ fn map_element(input: Input) -> IResult<MapElement> {
     alt((
         map(
             tuple((position, expression, sign(":"), cut(expression))),
-            |(position, key, _, value)| MapEntry::new(key, value, position).into(),
+            |(position, key, _, value)| MapEntry::new(key, value, position()).into(),
         ),
         map(preceded(sign("..."), cut(expression)), MapElement::Map),
         map(expression, MapElement::Removal),
@@ -884,7 +889,7 @@ fn variable(input: Input) -> IResult<Variable> {
         "variable",
         map(
             tuple((position, token(qualified_identifier))),
-            |(position, identifier)| Variable::new(identifier, position),
+            |(position, identifier)| Variable::new(identifier, position()),
         ),
     )(input)
 }
@@ -988,10 +993,10 @@ fn comment_position(input: Input) -> IResult<Position> {
     Ok((input, input::position(input)))
 }
 
-fn position(input: Input) -> IResult<Position> {
+fn position<'a>(input: Input<'a>) -> IResult<'a, impl Fn() -> Position + 'a> {
     let (input, _) = blank(input)?;
 
-    Ok((input, input::position(input)))
+    Ok((input, move || input::position(input)))
 }
 
 #[cfg(test)]
