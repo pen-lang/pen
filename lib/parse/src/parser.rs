@@ -954,14 +954,20 @@ fn comment(input: Input) -> IResult<Comment> {
     context(
         "comment",
         map(
-            tuple((position, tag("#"), many0(none_of("\n\r")))),
+            tuple((comment_position, tag("#"), many0(none_of("\n\r")))),
             |(position, _, characters)| Comment::new(String::from_iter(characters), position),
         ),
     )(input)
 }
 
-fn position(input: Input) -> IResult<Position> {
+fn comment_position(input: Input) -> IResult<Position> {
     let (input, _) = multispace0(input)?;
+
+    Ok((input, input::position(input)))
+}
+
+fn position(input: Input) -> IResult<Position> {
+    let (input, _) = blank(input)?;
 
     Ok((input, input::position(input)))
 }
