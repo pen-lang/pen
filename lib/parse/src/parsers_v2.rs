@@ -36,7 +36,7 @@ fn input<'a>(source: &'a str, path: &'a str) -> Input<'a> {
 pub fn module(input: Input) -> IResult<Input, Module> {
     map(
         all_consuming(tuple((
-            position_parser,
+            position,
             many0(import),
             many0(foreign_import),
             many0(alt((into(type_alias), into(record_definition)))),
@@ -56,29 +56,29 @@ pub fn module(input: Input) -> IResult<Input, Module> {
 }
 
 pub fn comments(input: Input) -> IResult<Input, Vec<Comment>> {
-    let (input, comments) = all_consuming(many0(tuple((
-        multispace0,
-        alt((
-            map(comment, Some),
-            map(raw_string_literal, |_| None),
-            map(none_of("\"#"), |_| None),
-        )),
-        multispace0,
-    ))))(input)?;
-
-    Ok((
-        input,
-        comments
-            .into_iter()
-            .flat_map(|(_, comment, _)| comment)
-            .collect(),
-    ))
+    map(
+        all_consuming(many0(tuple((
+            multispace0,
+            alt((
+                map(comment, Some),
+                map(raw_string_literal, |_| None),
+                map(none_of("\"#"), |_| None),
+            )),
+            multispace0,
+        )))),
+        |comments| {
+            comments
+                .into_iter()
+                .flat_map(|(_, comment, _)| comment)
+                .collect()
+        },
+    )(input)
 }
 
 fn import(input: Input) -> IResult<Input, Import> {
     map(
         tuple((
-            position_parser,
+            position,
             keyword("import"),
             module_path,
             opt(preceded(keyword("as"), identifier)),
@@ -96,7 +96,7 @@ fn import(input: Input) -> IResult<Input, Import> {
 
 fn unqualified_name(input: Input) -> IResult<Input, UnqualifiedName> {
     map(
-        token(tuple((position_parser, identifier))),
+        token(tuple((position, identifier))),
         |(position, identifier)| UnqualifiedName::new(identifier, position),
     )(input)
 }
@@ -133,89 +133,77 @@ fn public_module_path_component(input: Input) -> IResult<Input, String> {
 }
 
 fn foreign_import(input: Input) -> IResult<Input, ForeignImport> {
-    let (input, (position, _, _, calling_convention, name, type_)) = tuple((
-        position_parser,
-        keyword("import"),
-        keyword("foreign"),
-        opt(calling_convention),
-        identifier,
-        type_,
-    ))(input)?;
-
-    Ok((
-        input,
-        ForeignImport::new(
-            &name,
-            calling_convention.unwrap_or_default(),
-            type_,
+    map(
+        tuple((
             position,
-        ),
-    ))
+            keyword("import"),
+            keyword("foreign"),
+            opt(calling_convention),
+            identifier,
+            type_,
+        )),
+        |(position, _, _, calling_convention, name, type_)| {
+            ForeignImport::new(
+                &name,
+                calling_convention.unwrap_or_default(),
+                type_,
+                position,
+            )
+        },
+    )(input)
 }
 
 fn calling_convention(input: Input) -> IResult<Input, CallingConvention> {
-    let (input, _) = verify(string_literal, |string| string.value() == "c")(input)?;
-
-    Ok((input, CallingConvention::C))
+    value(
+        CallingConvention::C,
+        verify(string_literal, |string| string.value() == "c"),
+    )(input)
 }
 
 fn definition(input: Input) -> IResult<Input, FunctionDefinition> {
-    let (input, (foreign_export, position, name, _, lambda)) = tuple((
-        opt(foreign_export),
-        position_parser,
-        identifier,
-        sign("="),
-        lambda,
-    ))(input)?;
-
-    Ok((
-        input,
-        FunctionDefinition::new(name, lambda, foreign_export, position),
-    ))
+    map(
+        tuple((opt(foreign_export), position, identifier, sign("="), lambda)),
+        |(foreign_export, position, name, _, lambda)| {
+            FunctionDefinition::new(name, lambda, foreign_export, position)
+        },
+    )(input)
 }
 
 fn foreign_export(input: Input) -> IResult<Input, ForeignExport> {
-    let (input, calling_convention) = preceded(keyword("foreign"), opt(calling_convention))(input)?;
-
-    Ok((
-        input,
-        ForeignExport::new(calling_convention.unwrap_or_default()),
-    ))
+    map(
+        preceded(keyword("foreign"), opt(calling_convention)),
+        |calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()),
+    )(input)
 }
 
 fn record_definition(input: Input) -> IResult<Input, RecordDefinition> {
-    let (input, (position, _, name, _, fields, _)) = tuple((
-        position_parser,
-        keyword("type"),
-        identifier,
-        sign("{"),
-        many0(tuple((identifier, type_))),
-        sign("}"),
-    ))(input)?;
-
-    Ok((
-        input,
-        RecordDefinition::new(
-            name,
-            fields
-                .into_iter()
-                .map(|(name, type_)| types::RecordField::new(name, type_))
-                .collect(),
+    map(
+        tuple((
             position,
-        ),
-    ))
+            keyword("type"),
+            identifier,
+            sign("{"),
+            many0(tuple((identifier, type_))),
+            sign("}"),
+        )),
+        |(position, _, name, _, fields, _)| {
+            RecordDefinition::new(
+                name,
+                fields
+                    .into_iter()
+                    .map(|(name, type_)| types::RecordField::new(name, type_))
+                    .collect(),
+                position,
+            )
+        },
+    )(input)
 }
 
 fn type_alias(input: Input) -> IResult<Input, TypeAlias> {
-    let (input, (position, _, name, _, type_)) = tuple((
-        position_parser,
-        keyword("type"),
-        identifier,
-        sign("="),
-        type_,
-    ))(input)?;
-
-    Ok((input, TypeAlias::new(name, type_, position)))
+    map(
+        tuple((position, keyword("type"), identifier, sign("="), type_)),
+        |(position, _, name, _, type_)| TypeAlias::new(name, type_, position),
+    )(input)
 }
 
 fn type_(input: Input) -> IResult<Input, Type> {
@@ -223,45 +211,39 @@ fn type_(input: Input) -> IResult<Input, Type> {
 }
 
 fn function_type(input: Input) -> IResult<Input, types::Function> {
-    let position = position(input);
-
-    let (input, (_, arguments, _, result)) = tuple((
-        sign("\\("),
-        separated_or_terminated_list0(sign(","), type_),
-        sign(")"),
-        type_,
-    ))(input)?;
-
-    Ok((input, types::Function::new(arguments, result, position)))
+    map(
+        tuple((
+            position,
+            sign("\\("),
+            separated_or_terminated_list0(sign(","), type_),
+            sign(")"),
+            type_,
+        )),
+        |(position, _, arguments, _, result)| types::Function::new(arguments, result, position),
+    )(input)
 }
 
 fn union_type(input: Input) -> IResult<Input, Type> {
-    let (input, types) = separated_list1(sign("|"), atomic_type)(input)?;
-
-    Ok((
-        input,
+    map(separated_list1(sign("|"), atomic_type), |types| {
         types
             .into_iter()
             .reduce(|lhs, rhs| types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into())
-            .unwrap(),
-    ))
+            .unwrap()
+    })(input)
 }
 
 fn list_type(input: Input) -> IResult<Input, types::List> {
-    let position = position(input);
-
-    let (input, element) = delimited(sign("["), type_, sign("]"))(input)?;
-
-    Ok((input, types::List::new(element, position)))
+    map(
+        tuple((position, sign("["), type_, sign("]"))),
+        |(position, _, element, _)| types::List::new(element, position),
+    )(input)
 }
 
 fn map_type(input: Input) -> IResult<Input, types::Map> {
-    let position = position(input);
-
-    let (input, (_, key, _, value, _)) =
-        tuple((sign("{"), type_, sign(":"), type_, sign("}")))(input)?;
-
-    Ok((input, types::Map::new(key, value, position)))
+    map(
+        tuple((position, sign("{"), type_, sign(":"), type_, sign("}"))),
+        |(position, _, key, _, value, _)| types::Map::new(key, value, position),
+    )(input)
 }
 
 fn atomic_type(input: Input) -> IResult<Input, Type> {
@@ -274,37 +256,31 @@ fn atomic_type(input: Input) -> IResult<Input, Type> {
 }
 
 fn reference_type(input: Input) -> IResult<Input, types::Reference> {
-    let position = position(input);
-    let (input, identifier) = token(qualified_identifier)(input)?;
-
-    Ok((input, types::Reference::new(identifier, position)))
+    map(
+        tuple((position, token(qualified_identifier))),
+        |(position, identifier)| types::Reference::new(identifier, position),
+    )(input)
 }
 
 fn block(input: Input) -> IResult<Input, Block> {
-    let (input, (position, statements)) = tuple((
-        position_parser,
-        delimited(sign("{"), many1(statement), sign("}")),
-    ))(input)?;
-
-    // TODO Validate the last expressions.
-    Ok((
-        input,
-        Block::new(
-            statements[..statements.len() - 1].to_vec(),
-            statements.last().unwrap().expression().clone(),
-            position,
-        ),
-    ))
+    map(
+        tuple((position, delimited(sign("{"), many1(statement), sign("}")))),
+        |(position, statements)| {
+            // TODO Validate the last expressions.
+            Block::new(
+                statements[..statements.len() - 1].to_vec(),
+                statements.last().unwrap().expression().clone(),
+                position,
+            )
+        },
+    )(input)
 }
 
 fn statement(input: Input) -> IResult<Input, Statement> {
-    let (input, (position, name, expression)) = tuple((
-        position_parser,
-        opt(terminated(identifier, sign("="))),
-        expression,
-    ))(input)?;
-
-    Ok((input, Statement::new(name, expression, position)))
+    map(
+        tuple((position, opt(terminated(identifier, sign("="))), expression)),
+        |(position, name, expression)| Statement::new(name, expression, position),
+    )(input)
 }
 
 fn expression(input: Input) -> IResult<Input, Expression> {
@@ -315,7 +291,7 @@ fn binary_operation_like(input: Input) -> IResult<Input, Expression> {
     let (input, (expression, pairs)): (_, (_, Vec<_>)) = tuple((
         prefix_operation_like,
         many0(map(
-            tuple((position_parser, binary_operator, prefix_operation_like)),
+            tuple((position, binary_operator, prefix_operation_like)),
             |(position, operator, expression)| (operator, expression, position),
         )),
     ))(input)?;
@@ -345,10 +321,10 @@ fn prefix_operation_like(input: Input) -> IResult<Input, Expression> {
 }
 
 fn prefix_operation(input: Input) -> IResult<Input, UnaryOperation> {
-    let (input, (position, operator, expression)) =
-        tuple((position_parser, prefix_operator, prefix_operation_like))(input)?;
-
-    Ok((input, UnaryOperation::new(operator, expression, position)))
+    map(
+        tuple((position, prefix_operator, prefix_operation_like)),
+        |(position, operator, expression)| UnaryOperation::new(operator, expression, position),
+    )(input)
 }
 
 fn prefix_operator(input: Input) -> IResult<Input, UnaryOperator> {
@@ -356,25 +332,24 @@ fn prefix_operator(input: Input) -> IResult<Input, UnaryOperator> {
 }
 
 fn suffix_operation_like(input: Input) -> IResult<Input, Expression> {
-    let (input, (expression, suffix_operators)) =
-        tuple((atomic_expression, many0(suffix_operator)))(input)?;
-
-    Ok((
-        input,
-        suffix_operators
-            .into_iter()
-            .fold(expression, |expression, operator| match operator {
-                SuffixOperator::Call(arguments, position) => {
-                    Call::new(expression, arguments, position).into()
-                }
-                SuffixOperator::RecordField(name, position) => {
-                    RecordDeconstruction::new(expression, name, position).into()
-                }
-                SuffixOperator::Try(position) => {
-                    UnaryOperation::new(UnaryOperator::Try, expression, position).into()
-                }
-            }),
-    ))
+    map(
+        tuple((atomic_expression, many0(suffix_operator))),
+        |(expression, suffix_operators)| {
+            suffix_operators
+                .into_iter()
+                .fold(expression, |expression, operator| match operator {
+                    SuffixOperator::Call(arguments, position) => {
+                        Call::new(expression, arguments, position).into()
+                    }
+                    SuffixOperator::RecordField(name, position) => {
+                        RecordDeconstruction::new(expression, name, position).into()
+                    }
+                    SuffixOperator::Try(position) => {
+                        UnaryOperation::new(UnaryOperator::Try, expression, position).into()
+                    }
+                })
+        },
+    )(input)
 }
 
 fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
@@ -382,33 +357,29 @@ fn suffix_operator(input: Input) -> IResult<Input, SuffixOperator> {
 }
 
 fn call_operator(input: Input) -> IResult<Input, SuffixOperator> {
-    // Discard input to keep spaces.
-    let (_, position) = position_parser(input)?;
-
     // Do not allow any space before parentheses.
-    let (input, arguments) = delimited(
-        tag("("),
-        separated_or_terminated_list0(sign(","), expression),
-        sign(")"),
-    )(input)?;
-
-    Ok((input, SuffixOperator::Call(arguments, position)))
+    map(
+        tuple((
+            peek(position),
+            tag("("),
+            separated_or_terminated_list0(sign(","), expression),
+            sign(")"),
+        )),
+        |(position, _, arguments, _)| SuffixOperator::Call(arguments, position),
+    )(input)
 }
 
 fn record_field_operator(input: Input) -> IResult<Input, SuffixOperator> {
-    let position = position(input);
-
-    let (input, identifier) = preceded(sign("."), identifier)(input)?;
-
-    Ok((input, SuffixOperator::RecordField(identifier, position)))
+    map(
+        tuple((position, sign("."), identifier)),
+        |(position, _, identifier)| SuffixOperator::RecordField(identifier, position),
+    )(input)
 }
 
 fn try_operator(input: Input) -> IResult<Input, SuffixOperator> {
-    let position = position(input);
-
-    let (input, _) = sign("?")(input)?;
-
-    Ok((input, SuffixOperator::Try(position)))
+    map(tuple((position, sign("?"))), |(position, _)| {
+        SuffixOperator::Try(position)
+    })(input)
 }
 
 fn atomic_expression(input: Input) -> IResult<Input, Expression> {
@@ -431,7 +402,7 @@ fn atomic_expression(input: Input) -> IResult<Input, Expression> {
 
 fn lambda(input: Input) -> IResult<Input, Lambda> {
     let (input, (position, _, arguments, _, result_type, body)) = tuple((
-        position_parser,
+        position,
         sign("\\("),
         separated_or_terminated_list0(sign(","), argument),
         sign(")"),
@@ -450,7 +421,7 @@ fn argument(input: Input) -> IResult<Input, Argument> {
 
 fn if_(input: Input) -> IResult<Input, If> {
     let (input, (position, _, first_branch, branches, _, else_block)) = tuple((
-        position_parser,
+        position,
         keyword("if"),
         if_branch,
         many0(preceded(tuple((keyword("else"), keyword("if"))), if_branch)),
@@ -477,7 +448,7 @@ fn if_branch(input: Input) -> IResult<Input, IfBranch> {
 fn if_list(input: Input) -> IResult<Input, IfList> {
     let (input, (position, _, _, first_name, _, _, rest_name, _, _, argument, then, _, else_)) =
         tuple((
-            position_parser,
+            position,
             keyword("if"),
             sign("["),
             identifier,
@@ -500,7 +471,7 @@ fn if_list(input: Input) -> IResult<Input, IfList> {
 
 fn if_map(input: Input) -> IResult<Input, IfMap> {
     let (input, (position, _, name, _, map, _, key, _, then, _, else_)) = tuple((
-        position_parser,
+        position,
         keyword("if"),
         identifier,
         sign("="),
@@ -519,7 +490,7 @@ fn if_map(input: Input) -> IResult<Input, IfMap> {
 fn if_type(input: Input) -> IResult<Input, IfType> {
     let (input, (position, _, identifier, _, argument, _, first_branch, branches, else_)) =
         tuple((
-            position_parser,
+            position,
             keyword("if"),
             identifier,
             sign("="),
@@ -553,7 +524,7 @@ fn if_type_branch(input: Input) -> IResult<Input, IfTypeBranch> {
 
 fn record(input: Input) -> IResult<Input, Record> {
     let (input, (position, name, _, (record, fields), _)) = tuple((
-        position_parser,
+        position,
         qualified_identifier,
         sign("{"),
         alt((
@@ -574,20 +545,21 @@ fn record(input: Input) -> IResult<Input, Record> {
 }
 
 fn record_field(input: Input) -> IResult<Input, RecordField> {
-    let (input, (position, name, _, expression)) =
-        tuple((position_parser, identifier, sign(":"), expression))(input)?;
-
-    Ok((input, RecordField::new(name, expression, position)))
+    map(
+        tuple((position, identifier, sign(":"), expression)),
+        |(position, name, _, expression)| RecordField::new(name, expression, position),
+    )(input)
 }
 
 fn number_literal(input: Input) -> IResult<Input, Number> {
-    let position = position(input);
-    let (input, number) = token(terminated(
-        alt((binary_literal, hexadecimal_literal, decimal_literal)),
-        peek(not(digit1)),
-    ))(input)?;
-
-    Ok((input, Number::new(number, position)))
+    map(
+        token(tuple((
+            position,
+            alt((binary_literal, hexadecimal_literal, decimal_literal)),
+            peek(not(digit1)),
+        ))),
+        |(position, number, _)| Number::new(number, position),
+    )(input)
 }
 
 fn binary_literal(input: Input) -> IResult<Input, NumberRepresentation> {
@@ -624,46 +596,48 @@ fn string_literal(input: Input) -> IResult<Input, ByteString> {
 }
 
 fn raw_string_literal(input: Input) -> IResult<Input, ByteString> {
-    let position = position(input);
-
-    let (input, strings) = delimited(
-        char('"'),
-        many0(alt((
-            recognize(none_of("\\\"")),
-            tag("\\\\"),
-            tag("\\\""),
-            tag("\\n"),
-            tag("\\r"),
-            tag("\\t"),
-            // TODO Limit a number of digits.
-            recognize(tuple((tag("\\x"), hex_digit1))),
-        ))),
-        char('"'),
-    )(input)?;
-
-    Ok((
-        input,
-        ByteString::new(
-            strings
-                .iter()
-                .map(|span| String::from_utf8_lossy(span.as_bytes()))
-                .collect::<Vec<_>>()
-                .concat(),
+    map(
+        tuple((
             position,
-        ),
-    ))
+            delimited(
+                char('"'),
+                many0(alt((
+                    recognize(none_of("\\\"")),
+                    tag("\\\\"),
+                    tag("\\\""),
+                    tag("\\n"),
+                    tag("\\r"),
+                    tag("\\t"),
+                    // TODO Limit a number of digits.
+                    recognize(tuple((tag("\\x"), hex_digit1))),
+                ))),
+                char('"'),
+            ),
+        )),
+        |(position, spans)| {
+            ByteString::new(
+                spans
+                    .iter()
+                    .map(|span| String::from_utf8_lossy(span.as_bytes()))
+                    .collect::<Vec<_>>()
+                    .concat(),
+                position,
+            )
+        },
+    )(input)
 }
 
 fn list_literal(input: Input) -> IResult<Input, List> {
-    let (input, position) = position_parser(input)?;
-    let (input, (_, type_, elements, _)) = tuple((
-        sign("["),
-        type_,
-        separated_or_terminated_list0(sign(","), list_element),
-        sign("]"),
-    ))(input)?;
-
-    Ok((input, List::new(type_, elements, position)))
+    map(
+        tuple((
+            position,
+            sign("["),
+            type_,
+            separated_or_terminated_list0(sign(","), list_element),
+            sign("]"),
+        )),
+        |(position, _, type_, elements, _)| List::new(type_, elements, position),
+    )(input)
 }
 
 fn list_element(input: Input) -> IResult<Input, ListElement> {
@@ -676,7 +650,7 @@ fn list_element(input: Input) -> IResult<Input, ListElement> {
 fn list_comprehension(input: Input) -> IResult<Input, Expression> {
     let (input, (position, _, type_, element, _, element_name, value_name, _, iterator, _)) =
         tuple((
-            position_parser,
+            position,
             sign("["),
             type_,
             expression,
@@ -707,24 +681,26 @@ fn list_comprehension(input: Input) -> IResult<Input, Expression> {
 }
 
 fn map_literal(input: Input) -> IResult<Input, Map> {
-    let position = position(input);
-
-    let (input, (_, key_type, _, value_type, elements, _)) = tuple((
-        sign("{"),
-        type_,
-        sign(":"),
-        type_,
-        separated_or_terminated_list0(sign(","), map_element),
-        sign("}"),
-    ))(input)?;
-
-    Ok((input, Map::new(key_type, value_type, elements, position)))
+    map(
+        tuple((
+            position,
+            sign("{"),
+            type_,
+            sign(":"),
+            type_,
+            separated_or_terminated_list0(sign(","), map_element),
+            sign("}"),
+        )),
+        |(position, _, key_type, _, value_type, elements, _)| {
+            Map::new(key_type, value_type, elements, position)
+        },
+    )(input)
 }
 
 fn map_element(input: Input) -> IResult<Input, MapElement> {
     alt((
         map(
-            tuple((position_parser, expression, sign(":"), expression)),
+            tuple((position, expression, sign(":"), expression)),
             |(position, key, _, value)| MapEntry::new(key, value, position).into(),
         ),
         map(preceded(sign("..."), expression), MapElement::Map),
@@ -733,27 +709,26 @@ fn map_element(input: Input) -> IResult<Input, MapElement> {
 }
 
 fn variable(input: Input) -> IResult<Input, Variable> {
-    let position = position(input);
-
-    let (input, identifier) = token(qualified_identifier)(input)?;
-
-    Ok((input, Variable::new(identifier, position)))
+    map(
+        tuple((position, token(qualified_identifier))),
+        |(position, identifier)| Variable::new(identifier, position),
+    )(input)
 }
 
 fn qualified_identifier(input: Input) -> IResult<Input, String> {
-    let (input, (former, latter)) = tuple((
-        raw_identifier,
-        opt(tuple((tag(IDENTIFIER_SEPARATOR), raw_identifier))),
-    ))(input)?;
-
-    Ok((
-        input,
-        if let Some((_, latter)) = latter {
-            [&former, IDENTIFIER_SEPARATOR, &latter].concat()
-        } else {
-            former
+    map(
+        tuple((
+            raw_identifier,
+            opt(tuple((tag(IDENTIFIER_SEPARATOR), raw_identifier))),
+        )),
+        |(former, latter)| {
+            if let Some((_, latter)) = latter {
+                [&former, IDENTIFIER_SEPARATOR, &latter].concat()
+            } else {
+                former
+            }
         },
-    ))
+    )(input)
 }
 
 fn identifier(input: Input) -> IResult<Input, String> {
@@ -767,12 +742,13 @@ fn raw_identifier(input: Input) -> IResult<Input, String> {
 }
 
 fn unchecked_identifier(input: Input) -> IResult<Input, String> {
-    let (input, span) = recognize(tuple((
-        alt((value((), alpha1), value((), char('_')))),
-        many0(alt((value((), alphanumeric1), value((), char('_'))))),
-    )))(input)?;
-
-    Ok((input, String::from_utf8_lossy(span.as_bytes()).to_string()))
+    map(
+        recognize(tuple((
+            alt((value((), alpha1::<Input, _>), value((), char('_')))),
+            many0(alt((value((), alphanumeric1), value((), char('_'))))),
+        ))),
+        |span| String::from_utf8_lossy(span.as_bytes()).to_string(),
+    )(input)
 }
 
 fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<Input, ()> {
@@ -781,15 +757,13 @@ fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<Input, ()> {
     }
 
     move |input| {
-        let (input, _) = value(
+        value(
             (),
             token(tuple((
                 tag(name),
                 peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
             ))),
-        )(input)?;
-
-        Ok((input, ()))
+        )(input)
     }
 }
 
@@ -823,25 +797,13 @@ fn blank(input: Input) -> IResult<Input, ()> {
 }
 
 fn comment(input: Input) -> IResult<Input, Comment> {
-    let position = position(input);
-
-    let (input, _) = tag("#")(input)?;
-    let (input, comment) = many0(none_of("\n\r"))(input)?;
-
-    Ok((input, Comment::new(String::from_iter(comment), position)))
+    map(
+        tuple((position, tag("#"), many0(none_of("\n\r")))),
+        |(position, _, characters)| Comment::new(String::from_iter(characters), position),
+    )(input)
 }
 
-// TODO Replace use of this with `position_parser`.
-fn position(input: Input) -> Position {
-    Position::new(
-        input.extra,
-        input.location_line() as usize,
-        input.get_column(),
-        String::from_utf8_lossy(input.get_line_beginning()),
-    )
-}
-
-fn position_parser(input: Input) -> IResult<Input, Position> {
+fn position(input: Input) -> IResult<Input, Position> {
     let (input, _) = multispace0(input)?;
 
     Ok((
@@ -858,7 +820,6 @@ fn position_parser(input: Input) -> IResult<Input, Position> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{error::ParseError, stream::stream};
     use indoc::indoc;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
