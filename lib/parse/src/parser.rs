@@ -773,7 +773,7 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
             ByteString::new(
                 spans
                     .iter()
-                    .map(|span| String::from_utf8_lossy(span.as_bytes()))
+                    .map(|span| str::from_utf8(span.as_bytes()).unwrap())
                     .collect::<Vec<_>>()
                     .concat(),
                 position,
@@ -896,7 +896,7 @@ fn qualified_identifier(input: Input) -> IResult<String> {
             raw_identifier,
             opt(tuple((tag(IDENTIFIER_SEPARATOR), cut(raw_identifier)))),
         ))),
-        |span| String::from_utf8_lossy(span.as_bytes()).to_string(),
+        |span| str::from_utf8(span.as_bytes()).unwrap().into(),
     )(input)
 }
 
@@ -916,7 +916,7 @@ fn unchecked_identifier(input: Input) -> IResult<String> {
             alt((value((), alpha1::<Input, _>), value((), char('_')))),
             many0(alt((value((), alphanumeric1), value((), char('_'))))),
         ))),
-        |span| String::from_utf8_lossy(span.as_bytes()).to_string(),
+        |span| str::from_utf8(span.as_bytes()).unwrap().into(),
     )(input)
 }
 
