@@ -969,7 +969,10 @@ fn token<'a, O>(
 }
 
 fn blank(input: Input) -> IResult<()> {
-    value((), many0(alt((value((), multispace1), skipped_comment))))(input)
+    value(
+        (),
+        many0_count(alt((value((), multispace1), skipped_comment))),
+    )(input)
 }
 
 fn comment(input: Input) -> IResult<Comment> {
