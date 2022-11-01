@@ -1,27 +1,21 @@
 mod combinator;
 mod error;
 mod operations;
-mod parsers;
-mod parsers_v2;
-mod stream;
+mod parser;
 
 use ast::Comment;
-use combine::Parser;
 pub use error::ParseError;
-use parsers::{comments, module};
-use stream::stream;
+use parser::{comments, input, module};
 
 pub fn parse(source: &str, path: &str) -> Result<ast::Module, ParseError> {
-    module()
-        .parse(stream(source, path))
-        .map(|(module, _)| module)
+    module(input(source, path))
+        .map(|(_, module)| module)
         .map_err(|error| ParseError::new(source, path, error))
 }
 
 pub fn parse_comments(source: &str, path: &str) -> Result<Vec<Comment>, ParseError> {
-    comments()
-        .parse(stream(source, path))
-        .map(|(module, _)| module)
+    comments(input(source, path))
+        .map(|(_, comments)| comments)
         .map_err(|error| ParseError::new(source, path, error))
 }
 

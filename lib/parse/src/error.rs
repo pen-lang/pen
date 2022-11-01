@@ -1,5 +1,4 @@
-use combine::{easy, stream::position::SourcePosition};
-use position::Position;
+use position::{test::PositionFake, Position};
 use std::{error::Error, fmt, fmt::Display};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -10,40 +9,40 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new(
-        source: &str,
-        path: &str,
-        errors: combine::easy::Errors<char, &str, SourcePosition>,
-    ) -> Self {
+    pub fn new(source: &str, path: &str, error: impl std::error::Error) -> Self {
         Self {
-            message: errors
-                .errors
-                .iter()
-                .rev()
-                .find_map(|error| match error {
-                    easy::Error::Expected(_) => None,
-                    easy::Error::Message(info) => Some(info.to_string()),
-                    easy::Error::Other(error) => Some(error.to_string()),
-                    easy::Error::Unexpected(info) => Some(format!("unexpected {}", info)),
-                })
-                .unwrap_or_else(|| "failed to parse module".into()),
-            expected: errors
-                .errors
-                .iter()
-                .filter_map(|error| match error {
-                    easy::Error::Expected(info) => Some(info.to_string()),
-                    _ => None,
-                })
-                .collect(),
-            position: Position::new(
-                path,
-                errors.position.line as usize,
-                errors.position.column as usize,
-                source
-                    .split('\n')
-                    .nth(errors.position.line as usize - 1)
-                    .unwrap_or_default(),
-            ),
+            message: format!("{}", error),
+            expected: vec![],
+            position: Position::fake(),
+            // TODO
+            // message: errors
+            //     .errors
+            //     .iter()
+            //     .rev()
+            //     .find_map(|error| match error {
+            //         easy::Error::Expected(_) => None,
+            //         easy::Error::Message(info) => Some(info.to_string()),
+            //         easy::Error::Other(error) => Some(error.to_string()),
+            //         easy::Error::Unexpected(info) => Some(format!("unexpected {}", info)),
+            //     })
+            //     .unwrap_or_else(|| "failed to parse module".into()),
+            // expected: errors
+            //     .errors
+            //     .iter()
+            //     .filter_map(|error| match error {
+            //         easy::Error::Expected(info) => Some(info.to_string()),
+            //         _ => None,
+            //     })
+            //     .collect(),
+            // position: Position::new(
+            //     path,
+            //     errors.position.line as usize,
+            //     errors.position.column as usize,
+            //     source
+            //         .split('\n')
+            //         .nth(errors.position.line as usize - 1)
+            //         .unwrap_or_default(),
+            // ),
         }
     }
 }
