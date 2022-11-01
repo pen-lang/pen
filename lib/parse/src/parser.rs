@@ -17,7 +17,7 @@ use nom::{
     error::context,
     multi::{many0, many1, many_m_n, separated_list1},
     number::complete::recognize_float,
-    sequence::{delimited, preceded, terminated, tuple},
+    sequence::{delimited, pair, preceded, terminated, tuple},
     Parser,
 };
 use position::Position;
@@ -964,7 +964,11 @@ fn token<'a, O>(
 }
 
 fn blank(input: Input) -> IResult<()> {
-    value((), many0(alt((value((), multispace1), value((), comment)))))(input)
+    value((), many0(alt((value((), multispace1), skipped_comment))))(input)
+}
+
+fn skipped_comment(input: Input) -> IResult<()> {
+    value((), pair(tag("#"), many0(value((), none_of("\n\r")))))(input)
 }
 
 fn comment(input: Input) -> IResult<Comment> {
@@ -3316,6 +3320,13 @@ mod tests {
         assert!(comment(input("#", "")).is_ok());
         assert!(comment(input("#\n", "")).is_ok());
         assert!(comment(input("#x\n", "")).is_ok());
+    }
+
+    #[test]
+    fn parse_skipped_comment() {
+        assert!(skipped_comment(input("#", "")).is_ok());
+        assert!(skipped_comment(input("#\n", "")).is_ok());
+        assert!(skipped_comment(input("#x\n", "")).is_ok());
     }
 
     mod comments {
