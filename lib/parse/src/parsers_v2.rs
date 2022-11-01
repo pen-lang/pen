@@ -247,11 +247,11 @@ fn try_operator(input: Input) -> IResult<Input, SuffixOperator> {
 
 fn atomic_expression(input: Input) -> IResult<Input, Expression> {
     alt((
-        // if_list().map(Expression::from),
-        // if_map().map(Expression::from),
-        // if_type().map(Expression::from),
-        into(if_),
         // lambda().map(Expression::from),
+        // if_list().map(Expression::from),
+        into(if_map),
+        into(if_type),
+        into(if_),
         into(record),
         into(list_comprehension),
         into(list_literal),
@@ -287,6 +287,59 @@ fn if_branch(input: Input) -> IResult<Input, IfBranch> {
     let (input, (expression, block)) = tuple((expression, block))(input)?;
 
     Ok((input, IfBranch::new(expression, block)))
+}
+
+fn if_map(input: Input) -> IResult<Input, IfMap> {
+    let (input, (position, _, name, _, map, _, key, _, then, _, else_)) = tuple((
+        position_parser,
+        keyword("if"),
+        identifier,
+        sign("="),
+        expression,
+        sign("["),
+        expression,
+        sign("]"),
+        block,
+        keyword("else"),
+        block,
+    ))(input)?;
+
+    Ok((input, IfMap::new(name, map, key, then, else_, position)))
+}
+
+fn if_type(input: Input) -> IResult<Input, IfType> {
+    let (input, (position, _, identifier, _, argument, _, first_branch, branches, else_)) =
+        tuple((
+            position_parser,
+            keyword("if"),
+            identifier,
+            sign("="),
+            expression,
+            keyword("as"),
+            if_type_branch,
+            many0(preceded(
+                tuple((keyword("else"), keyword("if"))),
+                if_type_branch,
+            )),
+            opt(preceded(keyword("else"), block)),
+        ))(input)?;
+
+    Ok((
+        input,
+        IfType::new(
+            identifier,
+            argument,
+            [first_branch].into_iter().chain(branches).collect(),
+            else_,
+            position,
+        ),
+    ))
+}
+
+fn if_type_branch(input: Input) -> IResult<Input, IfTypeBranch> {
+    let (input, (type_, block)) = tuple((type_, block))(input)?;
+
+    Ok((input, IfTypeBranch::new(type_, block)))
 }
 
 fn record(input: Input) -> IResult<Input, Record> {
@@ -1760,102 +1813,99 @@ mod tests {
             );
         }
 
-        //     #[test]
-        //     fn parse_if_type() {
-        //         assert_eq!(
-        //             if_type()
-        //                 .parse(input("if x=y as boolean {none}else{none}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             IfType::new(
-        //                 "x",
-        //                 Variable::new("y", Position::fake()),
-        //                 vec![IfTypeBranch::new(
-        //                     types::Reference::new("boolean", Position::fake()),
-        //                     Block::new(
-        //                         vec![],
-        //                         Variable::new("none", Position::fake()),
-        //                         Position::fake()
-        //                     ),
-        //                 )],
-        //                 Some(Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 )),
-        //                 Position::fake(),
-        //             )
-        //         );
+        #[test]
+        fn parse_if_type() {
+            assert_eq!(
+                if_type(input("if x=y as boolean {none}else{none}", ""))
+                    .unwrap()
+                    .1,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::fake()),
+                    vec![IfTypeBranch::new(
+                        types::Reference::new("boolean", Position::fake()),
+                        Block::new(
+                            vec![],
+                            Variable::new("none", Position::fake()),
+                            Position::fake()
+                        ),
+                    )],
+                    Some(Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    )),
+                    Position::fake(),
+                )
+            );
 
-        //         assert_eq!(
-        //             if_type()
-        //                 .parse(input(
-        //                     "if x=y as boolean{none}else if none{none}else{none}",
-        //                     ""
-        //                 ))
-        //                 .unwrap()
-        //                 .0,
-        //             IfType::new(
-        //                 "x",
-        //                 Variable::new("y", Position::fake()),
-        //                 vec![
-        //                     IfTypeBranch::new(
-        //                         types::Reference::new("boolean", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("none", Position::fake()),
-        //                             Position::fake()
-        //                         ),
-        //                     ),
-        //                     IfTypeBranch::new(
-        //                         types::Reference::new("none", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("none", Position::fake()),
-        //                             Position::fake()
-        //                         ),
-        //                     )
-        //                 ],
-        //                 Some(Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 )),
-        //                 Position::fake()
-        //             )
-        //         );
+            assert_eq!(
+                if_type(input(
+                    "if x=y as boolean{none}else if none{none}else{none}",
+                    ""
+                ))
+                .unwrap()
+                .1,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::fake()),
+                    vec![
+                        IfTypeBranch::new(
+                            types::Reference::new("boolean", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
+                        ),
+                        IfTypeBranch::new(
+                            types::Reference::new("none", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
+                        )
+                    ],
+                    Some(Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    )),
+                    Position::fake()
+                )
+            );
 
-        //         assert_eq!(
-        //             if_type()
-        //                 .parse(input("if x=y as boolean{none}else if none{none}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             IfType::new(
-        //                 "x",
-        //                 Variable::new("y", Position::fake()),
-        //                 vec![
-        //                     IfTypeBranch::new(
-        //                         types::Reference::new("boolean", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("none", Position::fake()),
-        //                             Position::fake()
-        //                         ),
-        //                     ),
-        //                     IfTypeBranch::new(
-        //                         types::Reference::new("none", Position::fake()),
-        //                         Block::new(
-        //                             vec![],
-        //                             Variable::new("none", Position::fake()),
-        //                             Position::fake()
-        //                         ),
-        //                     )
-        //                 ],
-        //                 None,
-        //                 Position::fake()
-        //             )
-        //         );
-        //     }
+            assert_eq!(
+                if_type(input("if x=y as boolean{none}else if none{none}", ""))
+                    .unwrap()
+                    .1,
+                IfType::new(
+                    "x",
+                    Variable::new("y", Position::fake()),
+                    vec![
+                        IfTypeBranch::new(
+                            types::Reference::new("boolean", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
+                        ),
+                        IfTypeBranch::new(
+                            types::Reference::new("none", Position::fake()),
+                            Block::new(
+                                vec![],
+                                Variable::new("none", Position::fake()),
+                                Position::fake()
+                            ),
+                        )
+                    ],
+                    None,
+                    Position::fake()
+                )
+            );
+        }
 
         //     #[test]
         //     fn parse_if_list() {
@@ -1883,34 +1933,31 @@ mod tests {
         //         );
         //     }
 
-        //     #[test]
-        //     fn parse_if_map() {
-        //         assert_eq!(
-        //             if_map()
-        //                 .parse(input("if x=xs[42]{none}else{none}", ""))
-        //                 .unwrap()
-        //                 .0,
-        //             IfMap::new(
-        //                 "x",
-        //                 Variable::new("xs", Position::fake()),
-        //                 Number::new(
-        //                     NumberRepresentation::FloatingPoint("42".into()),
-        //                     Position::fake()
-        //                 ),
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Block::new(
-        //                     vec![],
-        //                     Variable::new("none", Position::fake()),
-        //                     Position::fake()
-        //                 ),
-        //                 Position::fake(),
-        //             )
-        //         );
-        //     }
+        #[test]
+        fn parse_if_map() {
+            assert_eq!(
+                if_map(input("if x=xs[42]{none}else{none}", "")).unwrap().1,
+                IfMap::new(
+                    "x",
+                    Variable::new("xs", Position::fake()),
+                    Number::new(
+                        NumberRepresentation::FloatingPoint("42".into()),
+                        Position::fake()
+                    ),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Block::new(
+                        vec![],
+                        Variable::new("none", Position::fake()),
+                        Position::fake()
+                    ),
+                    Position::fake(),
+                )
+            );
+        }
 
         mod call {
             use super::*;
