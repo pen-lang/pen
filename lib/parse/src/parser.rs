@@ -15,7 +15,7 @@ use nom::{
         all_consuming, cut, into, map, not, opt, peek, recognize, success, value, verify,
     },
     error::context,
-    multi::{count, many0, many1, separated_list1},
+    multi::{count, many0, many0_count, many1, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, pair, preceded, terminated, tuple},
     Parser,
@@ -984,7 +984,7 @@ fn comment(input: Input) -> IResult<Comment> {
 
 // Optimize comment parsing by skipping contents.
 fn skipped_comment(input: Input) -> IResult<()> {
-    value((), pair(tag("#"), many0(value((), none_of("\n\r")))))(input)
+    value((), pair(tag("#"), many0_count(none_of("\n\r"))))(input)
 }
 
 fn comment_position(input: Input) -> IResult<Position> {
@@ -993,7 +993,8 @@ fn comment_position(input: Input) -> IResult<Position> {
     Ok((input, input::position(input)))
 }
 
-fn position<'a>(input: Input<'a>) -> IResult<'a, impl Fn() -> Position + 'a> {
+// Allocate position objects lazily.
+fn position(input: Input) -> IResult<impl Fn() -> Position + '_> {
     let (input, _) = blank(input)?;
 
     Ok((input, move || input::position(input)))
