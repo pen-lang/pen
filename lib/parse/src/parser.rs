@@ -967,10 +967,6 @@ fn blank(input: Input) -> IResult<()> {
     value((), many0(alt((value((), multispace1), skipped_comment))))(input)
 }
 
-fn skipped_comment(input: Input) -> IResult<()> {
-    value((), pair(tag("#"), many0(value((), none_of("\n\r")))))(input)
-}
-
 fn comment(input: Input) -> IResult<Comment> {
     context(
         "comment",
@@ -979,6 +975,11 @@ fn comment(input: Input) -> IResult<Comment> {
             |(position, _, characters)| Comment::new(String::from_iter(characters), position),
         ),
     )(input)
+}
+
+// Optimize comment parsing by skipping contents.
+fn skipped_comment(input: Input) -> IResult<()> {
+    value((), pair(tag("#"), many0(value((), none_of("\n\r")))))(input)
 }
 
 fn comment_position(input: Input) -> IResult<Position> {
