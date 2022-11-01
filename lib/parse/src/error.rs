@@ -16,18 +16,30 @@ impl ParseError {
         match error {
             nom::Err::Incomplete(_) => Self::unexpected_end(source, path),
             nom::Err::Error(error) | nom::Err::Failure(error) => {
-                if let Some((input, kind)) = error.errors.last() {
+                if let Some(&(input, _)) = error.errors.first() {
                     Self {
-                        message: match kind {
-                            VerboseErrorKind::Context(context) => {
-                                format!("failed to parse {}", context)
+                        message: [error
+                            .errors
+                            .iter()
+                            .find_map(|(_, kind)| {
+                                if let VerboseErrorKind::Char(character) = kind {
+                                    Some(format!("letter '{}' expected", character))
+                                } else {
+                                    None
+                                }
+                            })
+                            .unwrap_or_else(|| "failed to parse".into())]
+                        .into_iter()
+                        .chain(error.errors.iter().flat_map(|(_, kind)| {
+                            if let VerboseErrorKind::Context(context) = kind {
+                                Some(format!("in \"{}\"", context))
+                            } else {
+                                None
                             }
-                            VerboseErrorKind::Char(character) => {
-                                format!("letter '{}' expected", character)
-                            }
-                            VerboseErrorKind::Nom(_) => "failed to parse".into(),
-                        },
-                        position: position(*input),
+                        }))
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                        position: position(input),
                     }
                 } else {
                     Self::unexpected_end(source, path)

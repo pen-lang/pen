@@ -1,3 +1,9 @@
+use crate::{
+    combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
+    error::NomError,
+    input::{self, Input},
+    operations::{reduce_operations, SuffixOperator},
+};
 use ast::{types::Type, *};
 use nom::{
     branch::alt,
@@ -5,20 +11,16 @@ use nom::{
     character::complete::{
         alpha1, alphanumeric1, char, digit1, hex_digit1, multispace0, multispace1, none_of, one_of,
     },
-    combinator::{all_consuming, into, map, not, opt, peek, recognize, success, value, verify},
+    combinator::{
+        all_consuming, cut, into, map, not, opt, peek, recognize, success, value, verify,
+    },
+    error::context,
     multi::{many0, many1, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, preceded, terminated, tuple},
     Parser,
 };
 use position::Position;
-
-use crate::{
-    combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
-    error::NomError,
-    input::{self, Input},
-    operations::{reduce_operations, SuffixOperator},
-};
 
 const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
@@ -35,7 +37,7 @@ pub fn module(input: Input) -> IResult<Module> {
             many0(import),
             many0(foreign_import),
             many0(alt((into(type_alias), into(record_definition)))),
-            many0(definition),
+            many0(function_definition),
             blank,
         ))),
         |(position, imports, foreign_imports, type_definitions, definitions, _)| {
@@ -155,12 +157,21 @@ fn calling_convention(input: Input) -> IResult<CallingConvention> {
     )(input)
 }
 
-fn definition(input: Input) -> IResult<FunctionDefinition> {
-    map(
-        tuple((opt(foreign_export), position, identifier, sign("="), lambda)),
-        |(foreign_export, position, name, _, lambda)| {
-            FunctionDefinition::new(name, lambda, foreign_export, position)
-        },
+fn function_definition(input: Input) -> IResult<FunctionDefinition> {
+    context(
+        "function definition",
+        map(
+            tuple((
+                opt(foreign_export),
+                position,
+                identifier,
+                sign("="),
+                cut(lambda),
+            )),
+            |(foreign_export, position, name, _, lambda)| {
+                FunctionDefinition::new(name, lambda, foreign_export, position)
+            },
+        ),
     )(input)
 }
 
@@ -202,19 +213,26 @@ fn type_alias(input: Input) -> IResult<TypeAlias> {
 }
 
 fn type_(input: Input) -> IResult<Type> {
-    alt((into(function_type), union_type))(input)
+    context("type", alt((into(function_type), union_type)))(input)
 }
 
 fn function_type(input: Input) -> IResult<types::Function> {
-    map(
-        tuple((
-            position,
-            sign("\\("),
-            separated_or_terminated_list0(sign(","), type_),
-            sign(")"),
-            type_,
-        )),
-        |(position, _, arguments, _, result)| types::Function::new(arguments, result, position),
+    context(
+        "function type",
+        map(
+            tuple((
+                position,
+                sign("\\("),
+                cut(tuple((
+                    separated_or_terminated_list0(sign(","), type_),
+                    sign(")"),
+                    type_,
+                ))),
+            )),
+            |(position, _, (arguments, _, result))| {
+                types::Function::new(arguments, result, position)
+            },
+        ),
     )(input)
 }
 
@@ -1169,7 +1187,9 @@ mod tests {
         #[test]
         fn parse() {
             assert_eq!(
-                definition(input("x=\\(x number)number{42}", "")).unwrap().1,
+                function_definition(input("x=\\(x number)number{42}", ""))
+                    .unwrap()
+                    .1,
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
@@ -1197,7 +1217,7 @@ mod tests {
         #[test]
         fn parse_foreign_definition() {
             assert_eq!(
-                definition(input("foreign x=\\(x number)number{42}", ""))
+                function_definition(input("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
                     .1,
                 FunctionDefinition::new(
@@ -1227,7 +1247,7 @@ mod tests {
         #[test]
         fn parse_foreign_definition_with_c_calling_convention() {
             assert_eq!(
-                definition(input("foreign \"c\" x=\\(x number)number{42}", ""))
+                function_definition(input("foreign \"c\" x=\\(x number)number{42}", ""))
                     .unwrap()
                     .1,
                 FunctionDefinition::new(
@@ -1257,7 +1277,7 @@ mod tests {
         #[test]
         fn parse_keyword_like_name() {
             assert_eq!(
-                definition(input("importA = \\() number { 42 }", ""))
+                function_definition(input("importA = \\() number { 42 }", ""))
                     .unwrap()
                     .1,
                 FunctionDefinition::new(
