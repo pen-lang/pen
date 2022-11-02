@@ -20,7 +20,11 @@ mod test_module_compiler;
 mod test_runner;
 
 use compile_configuration::CROSS_COMPILE_TARGETS;
+use mimalloc::MiMalloc;
 use std::ops::Deref;
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 fn main() {
     if let Err(error) = run() {
