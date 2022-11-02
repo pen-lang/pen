@@ -2,8 +2,7 @@ use crate::{
     cps::{AsyncStack, ContinuationFunction, StepFunction},
     Closure,
 };
-use core::future::poll_fn;
-use core::{intrinsics::transmute, task::Poll};
+use core::{future::poll_fn, intrinsics::transmute, task::Poll};
 
 type InitialStepFunction<T, V> = extern "C" fn(
     stack: &mut AsyncStack<T>,
