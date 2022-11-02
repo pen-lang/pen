@@ -1,6 +1,5 @@
 use crate::cps::{AsyncStack, ContinuationFunction, StepFunction};
-use core::task::Poll;
-use futures::future::poll_fn;
+use core::{future::poll_fn, task::Poll};
 
 type InitialStepFunction<T> =
     unsafe extern "C" fn(stack: &mut AsyncStack<T>, continuation: ContinuationFunction<T, T>);
