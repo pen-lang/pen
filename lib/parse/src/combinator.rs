@@ -43,10 +43,8 @@ pub fn separated_or_terminated_list1<I: Clone + InputLength, O, S, E: ParseError
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::error::NomError;
-    use crate::input::input;
-    use nom::bytes::complete::tag;
-    use nom::combinator::all_consuming;
+    use crate::{error::NomError, input::input};
+    use nom::{bytes::complete::tag, combinator::all_consuming};
     use std::str;
 
     mod separated_or_terminated_list0 {

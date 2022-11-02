@@ -805,11 +805,11 @@ fn list_literal(input: Input) -> IResult<List> {
 
 fn list_element(input: Input) -> IResult<ListElement> {
     alt((
-        map(expression, ListElement::Single),
         map(
             preceded(sign("..."), cut(expression)),
             ListElement::Multiple,
         ),
+        map(expression, ListElement::Single),
     ))(input)
 }
 
