@@ -16,29 +16,40 @@ impl ParseError {
         match error {
             nom::Err::Incomplete(_) => Self::unexpected_end(source, path),
             nom::Err::Error(error) | nom::Err::Failure(error) => {
+                let context = error
+                    .errors
+                    .iter()
+                    .find_map(|(_, kind)| {
+                        if let VerboseErrorKind::Context(context) = kind {
+                            Some(context)
+                        } else {
+                            None
+                        }
+                    })
+                    .copied();
+
                 if let Some(&(input, _)) = error.errors.first() {
                     Self {
-                        message: [error
-                            .errors
-                            .iter()
-                            .find_map(|(_, kind)| {
+                        message: if let Some(character) =
+                            error.errors.iter().find_map(|(_, kind)| {
                                 if let VerboseErrorKind::Char(character) = kind {
-                                    Some(format!("letter '{}' expected", character))
+                                    Some(character)
                                 } else {
                                     None
                                 }
-                            })
-                            .unwrap_or_else(|| "failed to parse".into())]
-                        .into_iter()
-                        .chain(error.errors.iter().flat_map(|(_, kind)| {
-                            if let VerboseErrorKind::Context(context) = kind {
-                                Some(format!("in \"{}\"", context))
-                            } else {
-                                None
-                            }
-                        }))
-                        .collect::<Vec<_>>()
-                        .join(" "),
+                            }) {
+                            [format!("'{}' expected", character)]
+                                .into_iter()
+                                .chain(context.map(|context| format!("in {}", context)))
+                                .collect::<Vec<_>>()
+                                .join(" ")
+                        } else {
+                            ["failed to parse"]
+                                .into_iter()
+                                .chain(context)
+                                .collect::<Vec<_>>()
+                                .join(" ")
+                        },
                         position: position(input),
                     }
                 } else {

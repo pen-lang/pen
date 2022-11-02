@@ -3,7 +3,7 @@ source: lib/parse/src/parser.rs
 expression: "external_module_path(input(source,\n                \"\")).map_err(|error|\n            ParseError::new(source, \"\", error)).unwrap_err()"
 ---
 ParseError {
-    message: "failed to parse in \"public module path component\" in \"external module path\"",
+    message: "failed to parse public module path component",
     position: Position(
         PositionInner {
             path: "",
