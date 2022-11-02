@@ -10,7 +10,5 @@ pub use from_function::*;
 pub use to_closure::*;
 
 pub mod __private {
-    pub use futures::future::poll_fn;
-
     pub const INITIAL_STACK_CAPACITY: usize = 64;
 }
