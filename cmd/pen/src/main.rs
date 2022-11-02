@@ -24,7 +24,7 @@ use mimalloc::MiMalloc;
 use std::ops::Deref;
 
 #[global_allocator]
-static GLOBAL: MiMalloc = MiMalloc;
+static GLOBAL_ALLOCATOR: MiMalloc = MiMalloc;
 
 fn main() {
     if let Err(error) = run() {
