@@ -1,421 +1,421 @@
-use super::operations::*;
-use crate::stream::Stream;
-use ast::{
-    types::{self, Type},
-    *,
+use crate::{
+    combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
+    error::NomError,
+    input::{self, Input},
+    operations::{reduce_operations, SuffixOperator},
 };
-use combine::{
-    attempt, choice, look_ahead, many, many1, none_of, one_of, optional,
-    parser::{
-        char::{alpha_num, char as character, digit, letter, newline, space, spaces, string},
-        combinator::{lazy, no_partial, not_followed_by},
-        regex::find,
-        sequence::between,
+use ast::{types::Type, *};
+use nom::{
+    branch::alt,
+    bytes::complete::tag,
+    character::complete::{
+        alpha1, alphanumeric1, char, digit1, multispace0, multispace1, none_of, one_of,
     },
-    sep_end_by, sep_end_by1, unexpected_any, value, Parser, Positioned,
+    combinator::{
+        all_consuming, cut, into, map, not, opt, peek, recognize, success, value, verify,
+    },
+    error::context,
+    multi::{count, many0, many0_count, many1, separated_list1},
+    number::complete::recognize_float,
+    sequence::{delimited, pair, preceded, terminated, tuple},
+    Parser,
 };
-use fnv::FnvHashSet;
-use once_cell::sync::Lazy;
 use position::Position;
+use std::{collections::HashSet, str};
 
-static KEYWORDS: &[&str] = &[
+const KEYWORDS: &[&str] = &[
     "as", "else", "export", "for", "foreign", "if", "in", "import", "type",
 ];
 const OPERATOR_CHARACTERS: &str = "+-*/=<>&|!?";
+const OPERATOR_MODIFIERS: &str = "=";
 
-static BINARY_REGEX: Lazy<regex::Regex> = Lazy::new(|| regex::Regex::new(r"^0b[01]+").unwrap());
-static HEXADECIMAL_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^0x[0-9a-fA-F]+").unwrap());
-static DECIMAL_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^-?([1-9][0-9]*|0)(\.[0-9]+)?").unwrap());
-static STRING_CHARACTER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r#"^[^\\"]"#).unwrap());
-static BYTE_CHARACTER_REGEX: Lazy<regex::Regex> =
-    Lazy::new(|| regex::Regex::new(r"^[0-9a-fA-F]{2}").unwrap());
+type IResult<'a, T> = nom::IResult<Input<'a>, T, NomError<'a>>;
 
-pub fn module<'a>() -> impl Parser<Stream<'a>, Output = Module> {
-    (
-        position(),
-        blank(),
-        many(import()),
-        many(foreign_import()),
-        many(choice((
-            type_alias().map(TypeDefinition::from),
-            record_definition().map(TypeDefinition::from),
+pub fn module(input: Input) -> IResult<Module> {
+    map(
+        all_consuming(tuple((
+            position,
+            many0(import),
+            many0(foreign_import),
+            many0(alt((into(type_alias), into(record_definition)))),
+            many0(function_definition),
+            blank,
         ))),
-        many(definition()),
-    )
-        .skip(eof())
-        .map(
-            |(position, _, imports, foreign_imports, type_definitions, definitions)| {
-                Module::new(
-                    imports,
-                    foreign_imports,
-                    type_definitions,
-                    definitions,
-                    position,
-                )
+        |(position, imports, foreign_imports, type_definitions, definitions, _)| {
+            Module::new(
+                imports,
+                foreign_imports,
+                type_definitions,
+                definitions,
+                position(),
+            )
+        },
+    )(input)
+}
+
+pub fn comments(input: Input) -> IResult<Vec<Comment>> {
+    map(
+        all_consuming(many0(tuple((
+            multispace0,
+            alt((
+                map(comment, Some),
+                map(raw_string_literal, |_| None),
+                map(none_of("\"#"), |_| None),
+            )),
+            multispace0,
+        )))),
+        |comments| {
+            comments
+                .into_iter()
+                .flat_map(|(_, comment, _)| comment)
+                .collect()
+        },
+    )(input)
+}
+
+fn import(input: Input) -> IResult<Import> {
+    context(
+        "import",
+        map(
+            tuple((
+                position,
+                keyword("import"),
+                module_path,
+                cut(tuple((
+                    opt(preceded(keyword("as"), identifier)),
+                    opt(delimited(
+                        sign("{"),
+                        separated_or_terminated_list1(sign(","), unqualified_name),
+                        sign("}"),
+                    )),
+                ))),
+            )),
+            |(position, _, path, (prefix, names))| {
+                Import::new(path, prefix, names.unwrap_or_default(), position())
             },
-        )
+        ),
+    )(input)
 }
 
-pub fn comments<'a>() -> impl Parser<Stream<'a>, Output = Vec<Comment>> {
-    many(between(
-        spaces(),
-        spaces(),
-        choice((
-            comment().map(Some),
-            raw_string_literal().map(|_| None),
-            none_of("\"#".chars()).map(|_| None),
-        )),
-    ))
-    .skip(eof())
-    .map(|comments: Vec<_>| comments.into_iter().flatten().collect())
+fn unqualified_name(input: Input) -> IResult<UnqualifiedName> {
+    map(
+        token(tuple((position, identifier))),
+        |(position, identifier)| UnqualifiedName::new(identifier, position()),
+    )(input)
 }
 
-fn import<'a>() -> impl Parser<Stream<'a>, Output = Import> {
-    (
-        attempt((
-            position(),
-            keyword("import"),
-            not_followed_by(keyword("foreign").with(value("foreign"))),
-        )),
-        module_path(),
-        optional(keyword("as").with(identifier())),
-        optional(between(
-            sign("{"),
-            sign("}"),
-            sep_end_by1(unqualified_name(), sign(",")),
-        )),
-    )
-        .map(|((position, _, _), path, prefix, names)| {
-            Import::new(path, prefix, names.unwrap_or_default(), position)
-        })
-        .expected("import statement")
+fn module_path(input: Input) -> IResult<ModulePath> {
+    context(
+        "module path",
+        token(alt((
+            into(external_module_path),
+            into(internal_module_path),
+        ))),
+    )(input)
 }
 
-fn unqualified_name<'a>() -> impl Parser<Stream<'a>, Output = UnqualifiedName> {
-    token(attempt((position(), identifier())))
-        .map(|(position, identifier)| UnqualifiedName::new(identifier, position))
-        .expected("unqualified name")
+fn internal_module_path(input: Input) -> IResult<InternalModulePath> {
+    context(
+        "internal module path",
+        map(module_path_components(identifier), InternalModulePath::new),
+    )(input)
 }
 
-fn module_path<'a>() -> impl Parser<Stream<'a>, Output = ModulePath> {
-    token(choice((
-        internal_module_path().map(ModulePath::from),
-        external_module_path().map(ModulePath::from),
-    )))
-    .expected("module path")
-}
-
-fn internal_module_path<'a>() -> impl Parser<Stream<'a>, Output = InternalModulePath> {
-    module_path_components(identifier()).map(InternalModulePath::new)
-}
-
-fn external_module_path<'a>() -> impl Parser<Stream<'a>, Output = ExternalModulePath> {
-    (
-        identifier(),
-        module_path_components(public_module_path_component()),
-    )
-        .map(|(package, components)| ExternalModulePath::new(package, components))
+fn external_module_path(input: Input) -> IResult<ExternalModulePath> {
+    context(
+        "external module path",
+        map(
+            tuple((
+                identifier,
+                cut(module_path_components(public_module_path_component)),
+            )),
+            |(package, components)| ExternalModulePath::new(package, components),
+        ),
+    )(input)
 }
 
 fn module_path_components<'a>(
-    component: impl Parser<Stream<'a>, Output = String>,
-) -> impl Parser<Stream<'a>, Output = Vec<String>> {
-    many1(string(IDENTIFIER_SEPARATOR).with(component))
+    component: impl Parser<Input<'a>, String, NomError<'a>>,
+) -> impl FnMut(Input<'a>) -> IResult<'a, Vec<String>> {
+    many1(preceded(tag(IDENTIFIER_SEPARATOR), component))
 }
 
-fn public_module_path_component<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    look_ahead(identifier().expected("public module path"))
-        .then(|name| {
-            if ast::analysis::is_name_public(&name) {
-                value(()).left()
-            } else {
-                unexpected_any("private module path").right()
-            }
-        })
-        .with(identifier())
+fn public_module_path_component(input: Input) -> IResult<String> {
+    context(
+        "public module path component",
+        verify(identifier, ast::analysis::is_name_public),
+    )(input)
 }
 
-fn foreign_import<'a>() -> impl Parser<Stream<'a>, Output = ForeignImport> {
-    (
-        attempt(position().skip((keyword("import"), keyword("foreign")))),
-        optional(calling_convention()),
-        identifier(),
-        type_(),
-    )
-        .map(|(position, calling_convention, name, type_)| {
-            ForeignImport::new(
-                &name,
-                calling_convention.unwrap_or_default(),
-                type_,
+fn foreign_import(input: Input) -> IResult<ForeignImport> {
+    context(
+        "foreign import",
+        map(
+            tuple((
                 position,
-            )
-        })
-        .expected("foreign import statement")
+                keyword("import"),
+                keyword("foreign"),
+                cut(tuple((opt(calling_convention), identifier, type_))),
+            )),
+            |(position, _, _, (calling_convention, name, type_))| {
+                ForeignImport::new(
+                    &name,
+                    calling_convention.unwrap_or_default(),
+                    type_,
+                    position(),
+                )
+            },
+        ),
+    )(input)
 }
 
-fn calling_convention<'a>() -> impl Parser<Stream<'a>, Output = CallingConvention> {
-    string_literal()
-        .expected("calling convention")
-        .then(|string| {
-            if string.value() == "c" {
-                value(CallingConvention::C).left()
-            } else {
-                unexpected_any("unknown calling convention").right()
-            }
-        })
+fn calling_convention(input: Input) -> IResult<CallingConvention> {
+    context(
+        "calling convention",
+        value(
+            CallingConvention::C,
+            verify(string_literal, |string| string.value() == "c"),
+        ),
+    )(input)
 }
 
-fn definition<'a>() -> impl Parser<Stream<'a>, Output = FunctionDefinition> {
-    (
-        optional(foreign_export()),
-        position(),
-        identifier(),
-        sign("="),
-        lambda(),
-    )
-        .map(|(foreign_export, position, name, _, lambda)| {
-            FunctionDefinition::new(name, lambda, foreign_export, position)
-        })
-        .expected("definition")
+fn function_definition(input: Input) -> IResult<FunctionDefinition> {
+    context(
+        "function definition",
+        map(
+            tuple((
+                position,
+                opt(foreign_export),
+                identifier,
+                sign("="),
+                cut(lambda),
+            )),
+            |(position, foreign_export, name, _, lambda)| {
+                FunctionDefinition::new(name, lambda, foreign_export, position())
+            },
+        ),
+    )(input)
 }
 
-fn foreign_export<'a>() -> impl Parser<Stream<'a>, Output = ForeignExport> {
-    keyword("foreign")
-        .with(optional(calling_convention()))
-        .map(|calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()))
+fn foreign_export(input: Input) -> IResult<ForeignExport> {
+    context(
+        "foreign export",
+        map(
+            preceded(keyword("foreign"), opt(calling_convention)),
+            |calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()),
+        ),
+    )(input)
 }
 
-fn record_definition<'a>() -> impl Parser<Stream<'a>, Output = RecordDefinition> {
-    (
-        attempt((position(), keyword("type"))),
-        identifier(),
-        sign("{"),
-        many((identifier(), type_())),
-        sign("}"),
-    )
-        .map(
-            |((position, _), name, _, fields, _): (_, _, _, Vec<_>, _)| {
+fn record_definition(input: Input) -> IResult<RecordDefinition> {
+    context(
+        "record definition",
+        map(
+            tuple((
+                position,
+                keyword("type"),
+                identifier,
+                sign("{"),
+                cut(tuple((many0(tuple((identifier, type_))), sign("}")))),
+            )),
+            |(position, _, name, _, (fields, _))| {
                 RecordDefinition::new(
                     name,
                     fields
                         .into_iter()
                         .map(|(name, type_)| types::RecordField::new(name, type_))
                         .collect(),
-                    position,
+                    position(),
                 )
             },
-        )
-        .expected("record definition")
-}
-
-fn type_alias<'a>() -> impl Parser<Stream<'a>, Output = TypeAlias> {
-    (
-        attempt((position(), keyword("type"), identifier(), sign("="))),
-        type_(),
-    )
-        .map(|((position, _, name, _), type_)| TypeAlias::new(name, type_, position))
-        .expected("type alias")
-}
-
-fn type_<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    lazy(|| no_partial(choice((function_type().map(Type::from), union_type()))))
-        .boxed()
-        .expected("type")
-}
-
-fn function_type<'a>() -> impl Parser<Stream<'a>, Output = types::Function> {
-    (
-        attempt(position().skip(sign("\\("))),
-        sep_end_by(type_(), sign(",")),
-        sign(")"),
-        type_(),
-    )
-        .map(|(position, arguments, _, result)| types::Function::new(arguments, result, position))
-        .expected("function type")
-}
-
-fn union_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    sep_end_by1(atomic_type(), sign("|"))
-        .map(|types: Vec<_>| {
-            types
-                .into_iter()
-                .reduce(|lhs, rhs| {
-                    types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into()
-                })
-                .unwrap()
-        })
-        .expected("union type")
-}
-
-fn list_type<'a>() -> impl Parser<Stream<'a>, Output = types::List> {
-    (attempt(position().skip(sign("["))), type_(), sign("]"))
-        .map(|(position, element, _)| types::List::new(element, position))
-        .expected("list type")
-}
-
-fn map_type<'a>() -> impl Parser<Stream<'a>, Output = types::Map> {
-    (
-        attempt(position().skip(sign("{"))),
-        type_(),
-        sign(":"),
-        type_(),
-        sign("}"),
-    )
-        .map(|(position, key, _, value, _)| types::Map::new(key, value, position))
-        .expected("map type")
-}
-
-fn atomic_type<'a>() -> impl Parser<Stream<'a>, Output = Type> {
-    choice((
-        reference_type().map(Type::from),
-        list_type().map(Type::from),
-        map_type().map(Type::from),
-        between(sign("("), sign(")"), type_()),
-    ))
-}
-
-fn reference_type<'a>() -> impl Parser<Stream<'a>, Output = types::Reference> {
-    token(attempt((position(), qualified_identifier())))
-        .map(|(position, identifier)| types::Reference::new(identifier, position))
-        .expected("reference type")
-}
-
-fn block<'a>() -> impl Parser<Stream<'a>, Output = Block> {
-    (
-        position(),
-        between(sign("{"), sign("}"), many1(statement())),
-    )
-        .then(|(position, statements): (_, Vec<_>)| {
-            if let Some(statement) = statements.last() {
-                if statement.name().is_none() {
-                    value(Block::new(
-                        statements[..statements.len() - 1].to_vec(),
-                        statement.expression().clone(),
-                        position,
-                    ))
-                    .left()
-                } else {
-                    unexpected_any("end of block").right()
-                }
-            } else {
-                unexpected_any("end of block").right()
-            }
-        })
-        .expected("block")
-}
-
-fn statement<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    choice((statement_with_result(), statement_without_result())).expected("statement")
-}
-
-fn statement_with_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (attempt((position(), identifier(), sign("="))), expression())
-        .map(|((position, name, _), expression)| Statement::new(Some(name), expression, position))
-}
-
-fn statement_without_result<'a>() -> impl Parser<Stream<'a>, Output = Statement> {
-    (position(), expression())
-        .map(|(position, expression)| Statement::new(None, expression, position))
-}
-
-fn expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| no_partial(binary_operation_like()))
-        .boxed()
-        .expected("expression")
-}
-
-fn binary_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        prefix_operation_like(),
-        many(
-            (
-                attempt((position(), binary_operator())),
-                prefix_operation_like(),
-            )
-                .map(|((position, operator), expression)| (operator, expression, position)),
         ),
-    )
-        .map(|(expression, pairs): (_, Vec<_>)| reduce_operations(expression, &pairs))
+    )(input)
 }
 
-fn binary_operator<'a>() -> impl Parser<Stream<'a>, Output = BinaryOperator> {
-    choice((
-        concrete_binary_operator("+", BinaryOperator::Add),
-        concrete_binary_operator("-", BinaryOperator::Subtract),
-        concrete_binary_operator("*", BinaryOperator::Multiply),
-        concrete_binary_operator("/", BinaryOperator::Divide),
-        concrete_binary_operator("==", BinaryOperator::Equal),
-        concrete_binary_operator("!=", BinaryOperator::NotEqual),
-        concrete_binary_operator("<", BinaryOperator::LessThan),
-        concrete_binary_operator("<=", BinaryOperator::LessThanOrEqual),
-        concrete_binary_operator(">", BinaryOperator::GreaterThan),
-        concrete_binary_operator(">=", BinaryOperator::GreaterThanOrEqual),
-        concrete_binary_operator("&", BinaryOperator::And),
-        concrete_binary_operator("|", BinaryOperator::Or),
-    ))
-    .expected("binary operator")
+fn type_alias(input: Input) -> IResult<TypeAlias> {
+    context(
+        "type alias",
+        map(
+            tuple((position, keyword("type"), identifier, sign("="), cut(type_))),
+            |(position, _, name, _, type_)| TypeAlias::new(name, type_, position()),
+        ),
+    )(input)
 }
 
-fn concrete_binary_operator<'a>(
-    literal: &'static str,
-    operator: BinaryOperator,
-) -> impl Parser<Stream<'a>, Output = BinaryOperator> {
-    attempt(token(many1(one_of(OPERATOR_CHARACTERS.chars())).then(
-        move |parsed_literal: String| {
-            if parsed_literal == literal {
-                value(operator).left()
-            } else {
-                unexpected_any("unknown binary operator").right()
-            }
-        },
-    )))
+fn type_(input: Input) -> IResult<Type> {
+    context("type", alt((into(function_type), union_type)))(input)
 }
 
-fn prefix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| {
-        no_partial(choice((
-            prefix_operation().map(Expression::from),
-            suffix_operation_like().map(Expression::from),
-        )))
-    })
-    .boxed()
+fn function_type(input: Input) -> IResult<types::Function> {
+    context(
+        "function type",
+        map(
+            tuple((
+                position,
+                sign("\\("),
+                cut(tuple((
+                    separated_or_terminated_list0(sign(","), type_),
+                    sign(")"),
+                    type_,
+                ))),
+            )),
+            |(position, _, (arguments, _, result))| {
+                types::Function::new(arguments, result, position())
+            },
+        ),
+    )(input)
 }
 
-fn prefix_operation<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperation> {
-    (
-        attempt((position(), prefix_operator())),
-        prefix_operation_like(),
-    )
-        .map(|((position, operator), expression)| {
-            UnaryOperation::new(operator, expression, position)
-        })
+fn union_type(input: Input) -> IResult<Type> {
+    map(separated_list1(sign("|"), atomic_type), |types| {
+        types
+            .into_iter()
+            .reduce(|lhs, rhs| types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into())
+            .unwrap()
+    })(input)
 }
 
-fn prefix_operator<'a>() -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    choice((concrete_prefix_operator("!", UnaryOperator::Not),)).expected("unary operator")
+fn list_type(input: Input) -> IResult<types::List> {
+    context(
+        "list type",
+        map(
+            tuple((position, sign("["), cut(terminated(type_, sign("]"))))),
+            |(position, _, element)| types::List::new(element, position()),
+        ),
+    )(input)
 }
 
-fn concrete_prefix_operator<'a>(
-    literal: &'static str,
-    operator: UnaryOperator,
-) -> impl Parser<Stream<'a>, Output = UnaryOperator> {
-    token(
-        one_of(OPERATOR_CHARACTERS.chars()).then(move |parsed_literal: char| {
-            if parsed_literal.to_string() == literal {
-                value(operator).left()
-            } else {
-                unexpected_any("unknown unary operator").right()
-            }
-        }),
-    )
+fn map_type(input: Input) -> IResult<types::Map> {
+    context(
+        "map type",
+        map(
+            tuple((
+                position,
+                sign("{"),
+                cut(tuple((type_, sign(":"), type_, sign("}")))),
+            )),
+            |(position, _, (key, _, value, _))| types::Map::new(key, value, position()),
+        ),
+    )(input)
 }
 
-fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (atomic_expression(), many(suffix_operator())).map(
-        |(expression, suffix_operators): (_, Vec<_>)| {
+fn atomic_type(input: Input) -> IResult<Type> {
+    alt((
+        into(reference_type),
+        into(list_type),
+        into(map_type),
+        preceded(sign("("), cut(terminated(type_, sign(")")))),
+    ))(input)
+}
+
+fn reference_type(input: Input) -> IResult<types::Reference> {
+    context(
+        "reference type",
+        map(
+            tuple((position, token(qualified_identifier))),
+            |(position, identifier)| types::Reference::new(identifier, position()),
+        ),
+    )(input)
+}
+
+fn block(input: Input) -> IResult<Block> {
+    context(
+        "block",
+        map(
+            tuple((
+                position,
+                sign("{"),
+                cut(terminated(
+                    verify(many1(statement), |statements: &[_]| {
+                        statements
+                            .last()
+                            .map(|statement| statement.name().is_none())
+                            .unwrap_or_default()
+                    }),
+                    sign("}"),
+                )),
+            )),
+            |(position, _, statements)| {
+                Block::new(
+                    statements[..statements.len() - 1].to_vec(),
+                    statements.last().unwrap().expression().clone(),
+                    position(),
+                )
+            },
+        ),
+    )(input)
+}
+
+fn statement(input: Input) -> IResult<Statement> {
+    context(
+        "statement",
+        map(
+            tuple((position, opt(terminated(identifier, sign("="))), expression)),
+            |(position, name, expression)| Statement::new(name, expression, position()),
+        ),
+    )(input)
+}
+
+fn expression(input: Input) -> IResult<Expression> {
+    context(
+        "expression",
+        map(
+            tuple((
+                prefix_operation_like,
+                many0(map(
+                    tuple((position, binary_operator, cut(prefix_operation_like))),
+                    |(position, operator, expression)| (operator, expression, position()),
+                )),
+            )),
+            |(expression, pairs)| reduce_operations(expression, &pairs),
+        ),
+    )(input)
+}
+
+fn binary_operator(input: Input) -> IResult<BinaryOperator> {
+    context(
+        "binary operator",
+        alt((
+            value(BinaryOperator::Add, sign("+")),
+            value(BinaryOperator::Subtract, sign("-")),
+            value(BinaryOperator::Multiply, sign("*")),
+            value(BinaryOperator::Divide, sign("/")),
+            value(BinaryOperator::Equal, sign("==")),
+            value(BinaryOperator::NotEqual, sign("!=")),
+            value(BinaryOperator::LessThanOrEqual, sign("<=")),
+            value(BinaryOperator::LessThan, sign("<")),
+            value(BinaryOperator::GreaterThanOrEqual, sign(">=")),
+            value(BinaryOperator::GreaterThan, sign(">")),
+            value(BinaryOperator::And, sign("&")),
+            value(BinaryOperator::Or, sign("|")),
+        )),
+    )(input)
+}
+
+fn prefix_operation_like(input: Input) -> IResult<Expression> {
+    alt((into(prefix_operation), into(suffix_operation_like)))(input)
+}
+
+fn prefix_operation(input: Input) -> IResult<UnaryOperation> {
+    context(
+        "prefix operation",
+        map(
+            tuple((position, prefix_operator, cut(prefix_operation_like))),
+            |(position, operator, expression)| {
+                UnaryOperation::new(operator, expression, position())
+            },
+        ),
+    )(input)
+}
+
+fn prefix_operator(input: Input) -> IResult<UnaryOperator> {
+    context("prefix operator", value(UnaryOperator::Not, sign("!")))(input)
+}
+
+fn suffix_operation_like(input: Input) -> IResult<Expression> {
+    map(
+        tuple((atomic_expression, many0(suffix_operator))),
+        |(expression, suffix_operators)| {
             suffix_operators
                 .into_iter()
                 .fold(expression, |expression, operator| match operator {
@@ -430,298 +430,408 @@ fn suffix_operation_like<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                     }
                 })
         },
-    )
+    )(input)
 }
 
-fn suffix_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    choice((call_operator(), record_field_operator(), try_operator()))
+fn suffix_operator(input: Input) -> IResult<SuffixOperator> {
+    alt((call_operator, record_field_operator, try_operator))(input)
 }
 
-fn call_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    (
-        attempt(position().skip(sign("("))),
-        sep_end_by(expression(), sign(",")).skip(sign(")")),
-    )
-        .map(|(position, arguments)| SuffixOperator::Call(arguments, position))
+fn call_operator(input: Input) -> IResult<SuffixOperator> {
+    // Do not allow any space before parentheses.
+    context(
+        "call",
+        map(
+            tuple((
+                peek(position),
+                tag("("),
+                cut(terminated(
+                    separated_or_terminated_list0(sign(","), expression),
+                    sign(")"),
+                )),
+            )),
+            |(position, _, arguments)| SuffixOperator::Call(arguments, position()),
+        ),
+    )(input)
 }
 
-fn record_field_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    (attempt(position().skip(sign("."))), identifier())
-        .map(|(position, identifier)| SuffixOperator::RecordField(identifier, position))
+fn record_field_operator(input: Input) -> IResult<SuffixOperator> {
+    context(
+        "record field",
+        map(
+            tuple((position, sign("."), cut(identifier))),
+            |(position, _, identifier)| SuffixOperator::RecordField(identifier, position()),
+        ),
+    )(input)
 }
 
-fn try_operator<'a>() -> impl Parser<Stream<'a>, Output = SuffixOperator> {
-    position().skip(sign("?")).map(SuffixOperator::Try)
+fn try_operator(input: Input) -> IResult<SuffixOperator> {
+    context(
+        "try operator",
+        map(tuple((position, sign("?"))), |(position, _)| {
+            SuffixOperator::Try(position())
+        }),
+    )(input)
 }
 
-fn atomic_expression<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    lazy(|| {
-        no_partial(choice((
-            if_list().map(Expression::from),
-            if_map().map(Expression::from),
-            if_type().map(Expression::from),
-            if_().map(Expression::from),
-            lambda().map(Expression::from),
-            record().map(Expression::from),
-            list_comprehension().map(Expression::from),
-            list_literal().map(Expression::from),
-            map_literal().map(Expression::from),
-            number_literal().map(Expression::from),
-            string_literal().map(Expression::from),
-            variable().map(Expression::from),
-            between(sign("("), sign(")"), expression()),
-        )))
-    })
-    .boxed()
+fn atomic_expression(input: Input) -> IResult<Expression> {
+    alt((
+        into(lambda),
+        into(if_type),
+        into(if_list),
+        into(if_map),
+        into(if_),
+        into(record),
+        into(list_comprehension),
+        into(list_literal),
+        into(map_literal),
+        into(number_literal),
+        into(string_literal),
+        into(variable),
+        delimited(sign("("), expression, sign(")")),
+    ))(input)
 }
 
-fn lambda<'a>() -> impl Parser<Stream<'a>, Output = Lambda> {
-    (
-        attempt(position().skip(sign("\\("))),
-        sep_end_by(argument(), sign(",")),
-        sign(")"),
-        type_(),
-        block(),
-    )
-        .map(|(position, arguments, _, result_type, body)| {
-            Lambda::new(arguments, result_type, body, position)
-        })
-        .expected("function expression")
+fn lambda(input: Input) -> IResult<Lambda> {
+    context(
+        "function",
+        map(
+            tuple((
+                position,
+                sign("\\("),
+                cut(tuple((
+                    separated_or_terminated_list0(sign(","), argument),
+                    sign(")"),
+                    type_,
+                    block,
+                ))),
+            )),
+            |(position, _, (arguments, _, result_type, body))| {
+                Lambda::new(arguments, result_type, body, position())
+            },
+        ),
+    )(input)
 }
 
-fn argument<'a>() -> impl Parser<Stream<'a>, Output = Argument> {
-    (identifier(), type_()).map(|(name, type_)| Argument::new(name, type_))
+fn argument(input: Input) -> IResult<Argument> {
+    context(
+        "argument",
+        map(tuple((identifier, cut(type_))), |(name, type_)| {
+            Argument::new(name, type_)
+        }),
+    )(input)
 }
 
-fn if_<'a>() -> impl Parser<Stream<'a>, Output = If> {
-    (
-        attempt(position().skip(keyword("if"))),
-        if_branch(),
-        many(attempt((keyword("else"), keyword("if"))).with(if_branch())),
-        keyword("else"),
-        block(),
-    )
-        .map(
-            |(position, first_branch, branches, _, else_block): (_, _, Vec<_>, _, _)| {
+fn if_(input: Input) -> IResult<If> {
+    context(
+        "if",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                cut(tuple((
+                    if_branch,
+                    many0(preceded(
+                        tuple((keyword("else"), keyword("if"))),
+                        cut(if_branch),
+                    )),
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, (first_branch, branches, _, else_block))| {
                 If::new(
                     [first_branch].into_iter().chain(branches).collect(),
                     else_block,
-                    position,
+                    position(),
                 )
             },
-        )
-        .expected("if expression")
+        ),
+    )(input)
 }
 
-fn if_branch<'a>() -> impl Parser<Stream<'a>, Output = IfBranch> {
-    (expression(), block()).map(|(expression, block)| IfBranch::new(expression, block))
+fn if_branch(input: Input) -> IResult<IfBranch> {
+    map(tuple((expression, block)), |(expression, block)| {
+        IfBranch::new(expression, block)
+    })(input)
 }
 
-fn if_list<'a>() -> impl Parser<Stream<'a>, Output = IfList> {
-    (
-        attempt(position().skip((keyword("if"), sign("[")))),
-        identifier(),
-        sign(","),
-        sign("..."),
-        identifier(),
-        sign("]"),
-        sign("="),
-        expression(),
-        block(),
-        keyword("else"),
-        block(),
-    )
-        .map(
-            |(position, first_name, _, _, rest_name, _, _, argument, then, _, else_)| {
-                IfList::new(argument, first_name, rest_name, then, else_, position)
+fn if_list(input: Input) -> IResult<IfList> {
+    context(
+        "if list",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                sign("["),
+                cut(tuple((
+                    identifier,
+                    sign(","),
+                    sign("..."),
+                    identifier,
+                    sign("]"),
+                    sign("="),
+                    expression,
+                    block,
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, _, (first_name, _, _, rest_name, _, _, argument, then, _, else_))| {
+                IfList::new(argument, first_name, rest_name, then, else_, position())
             },
-        )
-        .expected("if-list expression")
+        ),
+    )(input)
 }
 
-fn if_map<'a>() -> impl Parser<Stream<'a>, Output = IfMap> {
-    (
-        attempt((
-            position(),
-            keyword("if"),
-            identifier(),
-            sign("="),
-            expression(),
-            sign("["),
-        )),
-        expression(),
-        sign("]"),
-        block(),
-        keyword("else"),
-        block(),
-    )
-        .map(|((position, _, name, _, map, _), key, _, then, _, else_)| {
-            IfMap::new(name, map, key, then, else_, position)
-        })
-        .expected("if-map expression")
+fn if_map(input: Input) -> IResult<IfMap> {
+    context(
+        "if map",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                identifier,
+                sign("="),
+                expression,
+                sign("["),
+                cut(tuple((
+                    expression,
+                    sign("]"),
+                    block,
+                    keyword("else"),
+                    block,
+                ))),
+            )),
+            |(position, _, name, _, map, _, (key, _, then, _, else_))| {
+                IfMap::new(name, map, key, then, else_, position())
+            },
+        ),
+    )(input)
 }
 
-fn if_type<'a>() -> impl Parser<Stream<'a>, Output = IfType> {
-    (
-        attempt((position(), keyword("if"), identifier(), sign("="))),
-        expression(),
-        keyword("as"),
-        if_type_branch(),
-        many(attempt((keyword("else"), keyword("if"))).with(if_type_branch())),
-        optional(keyword("else").with(block())),
-    )
-        .map(
-            |((position, _, identifier, _), argument, _, first_branch, branches, else_): (
-                _,
-                _,
-                _,
-                _,
-                Vec<_>,
-                _,
-            )| {
+fn if_type(input: Input) -> IResult<IfType> {
+    context(
+        "if type",
+        map(
+            tuple((
+                position,
+                keyword("if"),
+                identifier,
+                sign("="),
+                expression,
+                keyword("as"),
+                cut(tuple((
+                    if_type_branch,
+                    many0(preceded(
+                        tuple((keyword("else"), keyword("if"))),
+                        cut(if_type_branch),
+                    )),
+                    opt(preceded(keyword("else"), block)),
+                ))),
+            )),
+            |(position, _, identifier, _, argument, _, (first_branch, branches, else_))| {
                 IfType::new(
                     identifier,
                     argument,
                     [first_branch].into_iter().chain(branches).collect(),
                     else_,
-                    position,
+                    position(),
                 )
             },
-        )
-        .expected("if-type expression")
+        ),
+    )(input)
 }
 
-fn if_type_branch<'a>() -> impl Parser<Stream<'a>, Output = IfTypeBranch> {
-    (type_(), block()).map(|(type_, block)| IfTypeBranch::new(type_, block))
+fn if_type_branch(input: Input) -> IResult<IfTypeBranch> {
+    map(tuple((type_, block)), |(type_, block)| {
+        IfTypeBranch::new(type_, block)
+    })(input)
 }
 
-fn record<'a>() -> impl Parser<Stream<'a>, Output = Record> {
-    (
-        attempt((position(), qualified_identifier(), sign("{"))),
-        choice((
-            (
-                between(sign("..."), sign(","), expression()).map(Some),
-                sep_end_by1(record_field(), sign(",")),
+fn record(input: Input) -> IResult<Record> {
+    // TODO Disallow spaces before `{` for disambiguation?
+    context(
+        "record",
+        map(
+            tuple((
+                position,
+                qualified_identifier,
+                sign("{"),
+                verify(
+                    alt((
+                        preceded(
+                            sign("..."),
+                            cut(tuple((
+                                map(terminated(expression, sign(",")), Some),
+                                separated_or_terminated_list1(sign(","), record_field),
+                            ))),
+                        ),
+                        tuple((
+                            success(None),
+                            separated_or_terminated_list0(sign(","), record_field),
+                        )),
+                    )),
+                    |(_, fields)| {
+                        fields.len()
+                            == HashSet::<&str>::from_iter(fields.iter().map(|field| field.name()))
+                                .len()
+                    },
+                ),
+                sign("}"),
+            )),
+            |(position, name, _, (record, fields), _)| {
+                Record::new(name, record, fields, position())
+            },
+        ),
+    )(input)
+}
+
+fn record_field(input: Input) -> IResult<RecordField> {
+    context(
+        "record field",
+        map(
+            tuple((position, identifier, sign(":"), cut(expression))),
+            |(position, name, _, expression)| RecordField::new(name, expression, position()),
+        ),
+    )(input)
+}
+
+fn number_literal(input: Input) -> IResult<Number> {
+    context(
+        "number",
+        map(
+            token(tuple((
+                position,
+                alt((binary_literal, hexadecimal_literal, decimal_literal)),
+                peek(not(digit1)),
+            ))),
+            |(position, number, _)| Number::new(number, position()),
+        ),
+    )(input)
+}
+
+fn binary_literal(input: Input) -> IResult<NumberRepresentation> {
+    context(
+        "binary literal",
+        map(
+            preceded(tag("0b"), cut(many1(one_of("01")))),
+            |characters| NumberRepresentation::Binary(String::from_iter(characters)),
+        ),
+    )(input)
+}
+
+fn hexadecimal_literal(input: Input) -> IResult<NumberRepresentation> {
+    context(
+        "hexadecimal literal",
+        map(
+            preceded(tag("0x"), cut(many1(hexadecimal_digit))),
+            |characters| {
+                NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase())
+            },
+        ),
+    )(input)
+}
+
+fn hexadecimal_digit(input: Input) -> IResult<char> {
+    one_of("0123456789abcdefABCDEF")(input)
+}
+
+fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
+    context(
+        "decimal literal",
+        map(recognize_float, |characters: Input| {
+            NumberRepresentation::FloatingPoint(
+                str::from_utf8(characters.as_bytes()).unwrap().into(),
+            )
+        }),
+    )(input)
+}
+
+fn string_literal(input: Input) -> IResult<ByteString> {
+    context("string", token(raw_string_literal))(input)
+}
+
+fn raw_string_literal(input: Input) -> IResult<ByteString> {
+    map(
+        tuple((
+            position,
+            preceded(
+                char('"'),
+                cut(terminated(
+                    many0(alt((
+                        recognize(none_of("\\\"")),
+                        tag("\\\\"),
+                        tag("\\\""),
+                        tag("\\n"),
+                        tag("\\r"),
+                        tag("\\t"),
+                        recognize(tuple((tag("\\x"), count(hexadecimal_digit, 2)))),
+                    ))),
+                    char('"'),
+                )),
             ),
-            (value(None), sep_end_by(record_field(), sign(","))),
         )),
-        sign("}"),
-    )
-        .then(|((position, name, _), (record, fields), _)| {
-            let fields: Vec<_> = fields;
-
-            if fields
-                .iter()
-                .map(|field| field.name())
-                .collect::<FnvHashSet<_>>()
-                .len()
-                == fields.len()
-            {
-                value(Record::new(name, record, fields, position)).left()
-            } else {
-                unexpected_any("duplicate keys in record literal").right()
-            }
-        })
-        .expected("record literal")
+        |(position, spans)| {
+            ByteString::new(
+                spans
+                    .iter()
+                    .map(|span| str::from_utf8(span.as_bytes()).unwrap())
+                    .collect::<Vec<_>>()
+                    .concat(),
+                position(),
+            )
+        },
+    )(input)
 }
 
-fn record_field<'a>() -> impl Parser<Stream<'a>, Output = RecordField> {
-    (attempt((position(), identifier())), sign(":"), expression())
-        .map(|((position, name), _, expression)| RecordField::new(name, expression, position))
+fn list_literal(input: Input) -> IResult<List> {
+    context(
+        "list",
+        map(
+            tuple((
+                position,
+                sign("["),
+                cut(tuple((
+                    type_,
+                    separated_or_terminated_list0(sign(","), list_element),
+                    sign("]"),
+                ))),
+            )),
+            |(position, _, (type_, elements, _))| List::new(type_, elements, position()),
+        ),
+    )(input)
 }
 
-fn number_literal<'a>() -> impl Parser<Stream<'a>, Output = Number> {
-    token(
-        attempt((
-            position(),
-            choice((binary_literal(), hexadecimal_literal(), decimal_literal())),
-        ))
-        .skip(not_followed_by(digit())),
-    )
-    .map(|(position, number)| Number::new(number, position))
-    .silent()
-    .expected("number literal")
+fn list_element(input: Input) -> IResult<ListElement> {
+    alt((
+        map(
+            preceded(sign("..."), cut(expression)),
+            ListElement::Multiple,
+        ),
+        map(expression, ListElement::Single),
+    ))(input)
 }
 
-fn binary_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
-    let regex: &'static regex::Regex = &BINARY_REGEX;
-
-    find(regex).map(|string: &str| NumberRepresentation::Binary(string[2..].into()))
-}
-
-fn hexadecimal_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
-    let regex: &'static regex::Regex = &HEXADECIMAL_REGEX;
-
-    find(regex).map(|string: &str| NumberRepresentation::Hexadecimal(string[2..].to_lowercase()))
-}
-
-fn decimal_literal<'a>() -> impl Parser<Stream<'a>, Output = NumberRepresentation> {
-    let regex: &'static regex::Regex = &DECIMAL_REGEX;
-
-    find(regex).map(|string: &str| NumberRepresentation::FloatingPoint(string.into()))
-}
-
-fn string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
-    token(raw_string_literal())
-}
-
-fn raw_string_literal<'a>() -> impl Parser<Stream<'a>, Output = ByteString> {
-    let string_regex: &'static regex::Regex = &STRING_CHARACTER_REGEX;
-    let byte_regex: &'static regex::Regex = &BYTE_CHARACTER_REGEX;
-
-    (
-        attempt(position().skip(character('"'))),
-        many(choice((
-            find(string_regex).map(String::from),
-            special_string_character("\\\\"),
-            special_string_character("\\\""),
-            special_string_character("\\n"),
-            special_string_character("\\r"),
-            special_string_character("\\t"),
-            (attempt(string("\\x")), find(byte_regex))
-                .map(|(prefix, byte)| prefix.to_owned() + byte),
-        ))),
-        character('"'),
-    )
-        .map(|(position, strings, _): (_, Vec<String>, _)| {
-            ByteString::new(strings.concat(), position)
-        })
-        .expected("string literal")
-}
-
-fn special_string_character<'a>(escape: &'static str) -> impl Parser<Stream<'a>, Output = String> {
-    attempt(string(escape)).map(String::from)
-}
-
-fn list_literal<'a>() -> impl Parser<Stream<'a>, Output = List> {
-    (
-        attempt(position().skip(sign("["))),
-        type_(),
-        sep_end_by(list_element(), sign(",")),
-        sign("]"),
-    )
-        .map(|(position, type_, elements, _)| List::new(type_, elements, position))
-        .expected("list literal")
-}
-
-fn list_element<'a>() -> impl Parser<Stream<'a>, Output = ListElement> {
-    choice((
-        expression().map(ListElement::Single),
-        sign("...").with(expression()).map(ListElement::Multiple),
-    ))
-}
-
-fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
-    (
-        attempt((position(), sign("["), type_(), expression(), keyword("for"))),
-        identifier(),
-        optional(sign(",").with(identifier())),
-        keyword("in"),
-        expression(),
-        sign("]"),
-    )
-        .map(
-            |((position, _, type_, element, _), element_name, value_name, _, iterator, _)| {
+fn list_comprehension(input: Input) -> IResult<Expression> {
+    context(
+        "list comprehension",
+        map(
+            tuple((
+                position,
+                sign("["),
+                type_,
+                expression,
+                keyword("for"),
+                cut(tuple((
+                    identifier,
+                    opt(preceded(sign(","), identifier)),
+                    keyword("in"),
+                    expression,
+                    sign("]"),
+                ))),
+            )),
+            |(position, _, type_, element, _, (element_name, value_name, _, iterator, _))| {
                 if let Some(value_name) = value_name {
                     MapIterationComprehension::new(
                         type_,
@@ -729,163 +839,174 @@ fn list_comprehension<'a>() -> impl Parser<Stream<'a>, Output = Expression> {
                         element_name,
                         value_name,
                         iterator,
-                        position,
+                        position(),
                     )
                     .into()
                 } else {
-                    ListComprehension::new(type_, element, element_name, iterator, position).into()
+                    ListComprehension::new(type_, element, element_name, iterator, position())
+                        .into()
                 }
             },
-        )
-        .expected("list comprehension")
+        ),
+    )(input)
 }
 
-fn map_literal<'a>() -> impl Parser<Stream<'a>, Output = Map> {
-    (
-        attempt(position().skip(sign("{"))),
-        type_(),
-        sign(":"),
-        type_(),
-        sep_end_by(map_element(), sign(",")),
-        sign("}"),
-    )
-        .map(|(position, key_type, _, value_type, elements, _)| {
-            Map::new(key_type, value_type, elements, position)
-        })
-        .expected("map literal")
+fn map_literal(input: Input) -> IResult<Map> {
+    context(
+        "map",
+        map(
+            tuple((
+                position,
+                sign("{"),
+                cut(tuple((
+                    type_,
+                    sign(":"),
+                    type_,
+                    separated_or_terminated_list0(sign(","), map_element),
+                    sign("}"),
+                ))),
+            )),
+            |(position, _, (key_type, _, value_type, elements, _))| {
+                Map::new(key_type, value_type, elements, position())
+            },
+        ),
+    )(input)
 }
 
-fn map_element<'a>() -> impl Parser<Stream<'a>, Output = MapElement> {
-    choice((
-        (
-            attempt((position(), expression()).skip(sign(":"))),
-            expression(),
-        )
-            .map(|((position, key), value)| MapEntry::new(key, value, position).into()),
-        sign("...").with(expression()).map(MapElement::Map),
-        expression().map(MapElement::Removal),
-    ))
+fn map_element(input: Input) -> IResult<MapElement> {
+    alt((
+        map(
+            tuple((position, expression, sign(":"), cut(expression))),
+            |(position, key, _, value)| MapEntry::new(key, value, position()).into(),
+        ),
+        map(preceded(sign("..."), cut(expression)), MapElement::Map),
+        map(expression, MapElement::Removal),
+    ))(input)
 }
 
-fn variable<'a>() -> impl Parser<Stream<'a>, Output = Variable> {
-    token(attempt((position(), qualified_identifier())))
-        .map(|(position, identifier)| Variable::new(identifier, position))
-        .expected("variable")
+fn variable(input: Input) -> IResult<Variable> {
+    context(
+        "variable",
+        map(
+            tuple((position, token(qualified_identifier))),
+            |(position, identifier)| Variable::new(identifier, position()),
+        ),
+    )(input)
 }
 
-fn qualified_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (
-        raw_identifier(),
-        optional(string(IDENTIFIER_SEPARATOR).with(raw_identifier())),
-    )
-        .map(|(former, latter)| {
-            latter
-                .map(|latter| [&former, IDENTIFIER_SEPARATOR, &latter].concat())
-                .unwrap_or(former)
-        })
+fn qualified_identifier(input: Input) -> IResult<String> {
+    map(
+        recognize(tuple((
+            raw_identifier,
+            opt(tuple((tag(IDENTIFIER_SEPARATOR), cut(raw_identifier)))),
+        ))),
+        |span| str::from_utf8(span.as_bytes()).unwrap().into(),
+    )(input)
 }
 
-fn identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    token(raw_identifier()).expected("identifier")
+fn identifier(input: Input) -> IResult<String> {
+    context("identifier", token(raw_identifier))(input)
 }
 
-fn raw_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    unchecked_identifier()
-        .then(|identifier| {
-            if KEYWORDS.contains(&identifier.as_str()) {
-                // TODO Fix those misuse of `unexpected_any` combinators.
-                // These lead to wrong positions in error messages.
-                // We use the `silent` method  below because its position is wrong anyway.
-                unexpected_any("keyword").left()
-            } else {
-                value(identifier).right()
-            }
-        })
-        .silent()
+fn raw_identifier(input: Input) -> IResult<String> {
+    verify(unchecked_identifier, |identifier: &str| {
+        !KEYWORDS.contains(&identifier)
+    })(input)
 }
 
-fn unchecked_identifier<'a>() -> impl Parser<Stream<'a>, Output = String> {
-    (
-        choice((letter(), combine::parser::char::char('_'))),
-        many(choice((alpha_num(), combine::parser::char::char('_')))),
-    )
-        .map(|(head, tail): (char, String)| [head.into(), tail].concat())
+fn unchecked_identifier(input: Input) -> IResult<String> {
+    map(
+        recognize(tuple((
+            alt((value((), alpha1::<Input, _>), value((), char('_')))),
+            many0_count(alt((value((), alphanumeric1), value((), char('_'))))),
+        ))),
+        |span| str::from_utf8(span.as_bytes()).unwrap().into(),
+    )(input)
 }
 
-fn keyword<'a>(name: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
+fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<()> {
     if !KEYWORDS.contains(&name) {
         unreachable!("undefined keyword");
     }
 
-    token(attempt(string(name)).skip(not_followed_by(choice((
-        alpha_num(),
-        combine::parser::char::char('_'),
-    )))))
-    .with(value(()))
-    .expected(name)
+    move |input| {
+        context(
+            "keyword",
+            value(
+                (),
+                token(tuple((
+                    tag(name),
+                    peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
+                ))),
+            ),
+        )(input)
+    }
 }
 
-fn sign<'a>(sign: &'static str) -> impl Parser<Stream<'a>, Output = ()> {
-    let parser = string(sign);
+fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<()> + Clone {
+    move |input| {
+        let parser = context("sign", token(tag(sign)));
 
-    token(
         if sign
             .chars()
             .any(|character| OPERATOR_CHARACTERS.contains(character))
         {
-            parser
-                .skip(not_followed_by(one_of(OPERATOR_CHARACTERS.chars())))
-                .left()
+            value((), tuple((parser, peek(not(one_of(OPERATOR_MODIFIERS))))))(input)
         } else {
-            parser.right()
-        },
-    )
-    .with(value(()))
-    .expected(sign)
+            value((), parser)(input)
+        }
+    }
 }
 
-fn token<'a, O, P: Parser<Stream<'a>, Output = O>>(p: P) -> impl Parser<Stream<'a>, Output = O> {
-    p.skip(blank())
+fn token<'a, O>(
+    mut parser: impl Parser<Input<'a>, O, NomError<'a>>,
+) -> impl FnMut(Input<'a>) -> IResult<'a, O> {
+    move |input| {
+        let (input, _) = blank(input)?;
+
+        parser.parse(input)
+    }
 }
 
-fn position<'a>() -> impl Parser<Stream<'a>, Output = Position> {
-    value(()).map_input(|_, stream: &mut Stream<'a>| {
-        let position = stream.position();
-
-        Position::new(
-            &stream.0.state.path,
-            position.line as usize,
-            position.column as usize,
-            stream.0.state.lines[position.line as usize - 1],
-        )
-    })
+fn blank(input: Input) -> IResult<()> {
+    value(
+        (),
+        many0_count(alt((value((), multispace1), skipped_comment))),
+    )(input)
 }
 
-fn eof<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    combine::eof().expected("end of file")
+fn comment(input: Input) -> IResult<Comment> {
+    context(
+        "comment",
+        map(
+            tuple((comment_position, tag("#"), many0(none_of("\n\r")))),
+            |(position, _, characters)| Comment::new(String::from_iter(characters), position),
+        ),
+    )(input)
 }
 
-fn blank<'a>() -> impl Parser<Stream<'a>, Output = ()> {
-    many::<Vec<_>, _, _>(choice((space().with(value(())), comment().with(value(())))))
-        .with(value(()))
+// Optimize comment parsing by skipping contents.
+fn skipped_comment(input: Input) -> IResult<()> {
+    value((), pair(tag("#"), many0_count(none_of("\n\r"))))(input)
 }
 
-fn comment<'a>() -> impl Parser<Stream<'a>, Output = Comment> {
-    (
-        attempt((position(), string("#"))),
-        many::<Vec<_>, _, _>(none_of("\n".chars())),
-    )
-        .map(|((position, _), string)| {
-            Comment::new(string.into_iter().collect::<String>().trim_end(), position)
-        })
-        .skip(choice((newline().with(value(())), eof())))
-        .expected("comment")
+fn comment_position(input: Input) -> IResult<Position> {
+    let (input, _) = multispace0(input)?;
+
+    Ok((input, input::position(input)))
+}
+
+// Allocate position objects lazily.
+fn position(input: Input) -> IResult<impl Fn() -> Position + '_> {
+    let (input, _) = blank(input)?;
+
+    Ok((input, move || input::position(input)))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{error::ParseError, stream::stream};
+    use crate::input::input;
     use indoc::indoc;
     use position::test::PositionFake;
     use pretty_assertions::assert_eq;
@@ -897,19 +1018,19 @@ mod tests {
         #[test]
         fn parse_module() {
             assert_eq!(
-                module().parse(stream("", "")).unwrap().0,
+                module(input("", "")).unwrap().1,
                 Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
-                module().parse(stream(" ", "")).unwrap().0,
+                module(input(" ", "")).unwrap().1,
                 Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
-                module().parse(stream("\n", "")).unwrap().0,
+                module(input("\n", "")).unwrap().1,
                 Module::new(vec![], vec![], vec![], vec![], Position::fake())
             );
             assert_eq!(
-                module().parse(stream("import Foo'Bar", "")).unwrap().0,
+                module(input("import Foo'Bar", "")).unwrap().1,
                 Module::new(
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
@@ -924,7 +1045,7 @@ mod tests {
                 )
             );
             assert_eq!(
-                module().parse(stream("type foo = number", "")).unwrap().0,
+                module(input("type foo = number", "")).unwrap().1,
                 Module::new(
                     vec![],
                     vec![],
@@ -939,10 +1060,7 @@ mod tests {
                 )
             );
             assert_eq!(
-                module()
-                    .parse(stream("x=\\(x number)number{42}", ""))
-                    .unwrap()
-                    .0,
+                module(input("x=\\(x number)number{42}", "")).unwrap().1,
                 Module::new(
                     vec![],
                     vec![],
@@ -972,13 +1090,12 @@ mod tests {
                 )
             );
             assert_eq!(
-                module()
-                    .parse(stream(
-                        "x=\\(x number)number{42}y=\\(y number)number{42}",
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
+                module(input(
+                    "x=\\(x number)number{42}y=\\(y number)number{42}",
+                    ""
+                ))
+                .unwrap()
+                .1,
                 Module::new(
                     vec![],
                     vec![],
@@ -1035,10 +1152,9 @@ mod tests {
         #[test]
         fn parse_import_foreign_after_import() {
             assert_eq!(
-                module()
-                    .parse(stream("import Foo'Bar import foreign foo \\() number", ""))
+                module(input("import Foo'Bar import foreign foo \\() number", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 Module::new(
                     vec![Import::new(
                         ExternalModulePath::new("Foo", vec!["Bar".into()]),
@@ -1066,10 +1182,9 @@ mod tests {
         #[test]
         fn parse_record_definition_after_type_alias() {
             assert_eq!(
-                module()
-                    .parse(stream("type foo = number type bar {}", ""))
+                module(input("type foo = number type bar {}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 Module::new(
                     vec![],
                     vec![],
@@ -1090,13 +1205,15 @@ mod tests {
     }
 
     mod import {
+        use crate::ParseError;
+
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
         fn parse_import() {
             assert_eq!(
-                import().parse(stream("import 'Foo", "")).unwrap().0,
+                import(input("import 'Foo", "")).unwrap().1,
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
@@ -1105,7 +1222,7 @@ mod tests {
                 ),
             );
             assert_eq!(
-                import().parse(stream("import Foo'Bar", "")).unwrap().0,
+                import(input("import Foo'Bar", "")).unwrap().1,
                 Import::new(
                     ExternalModulePath::new("Foo", vec!["Bar".into()]),
                     None,
@@ -1118,7 +1235,7 @@ mod tests {
         #[test]
         fn parse_import_with_custom_prefix() {
             assert_eq!(
-                import().parse(stream("import 'Foo as foo", "")).unwrap().0,
+                import(input("import 'Foo as foo", "")).unwrap().1,
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     Some("foo".into()),
@@ -1131,7 +1248,7 @@ mod tests {
         #[test]
         fn parse_unqualified_import() {
             assert_eq!(
-                import().parse(stream("import 'Foo { Foo }", "")).unwrap().0,
+                import(input("import 'Foo { Foo }", "")).unwrap().1,
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
@@ -1144,10 +1261,7 @@ mod tests {
         #[test]
         fn parse_unqualified_import_with_multiple_identifiers() {
             assert_eq!(
-                import()
-                    .parse(stream("import 'Foo { Foo, Bar }", ""))
-                    .unwrap()
-                    .0,
+                import(input("import 'Foo { Foo, Bar }", "")).unwrap().1,
                 Import::new(
                     InternalModulePath::new(vec!["Foo".into()]),
                     None,
@@ -1162,41 +1276,35 @@ mod tests {
 
         #[test]
         fn parse_module_path() {
-            assert!(module_path().parse(stream("", "")).is_err());
+            assert!(module_path(input("", "")).is_err());
             assert_eq!(
-                module_path().parse(stream("'Foo", "")).unwrap().0,
+                module_path(input("'Foo", "")).unwrap().1,
                 InternalModulePath::new(vec!["Foo".into()]).into(),
             );
             assert_eq!(
-                module_path().parse(stream("Foo'Bar", "")).unwrap().0,
+                module_path(input("Foo'Bar", "")).unwrap().1,
                 ExternalModulePath::new("Foo", vec!["Bar".into()]).into(),
             );
         }
 
         #[test]
         fn parse_internal_module_path() {
-            assert!(internal_module_path().parse(stream("", "")).is_err());
+            assert!(internal_module_path(input("", "")).is_err());
             assert_eq!(
-                internal_module_path().parse(stream("'Foo", "")).unwrap().0,
+                internal_module_path(input("'Foo", "")).unwrap().1,
                 InternalModulePath::new(vec!["Foo".into()]),
             );
             assert_eq!(
-                internal_module_path()
-                    .parse(stream("'Foo'Bar", ""))
-                    .unwrap()
-                    .0,
+                internal_module_path(input("'Foo'Bar", "")).unwrap().1,
                 InternalModulePath::new(vec!["Foo".into(), "Bar".into()]),
             );
         }
 
         #[test]
         fn parse_external_module_path() {
-            assert!(external_module_path().parse(stream("", "")).is_err());
+            assert!(external_module_path(input("", "")).is_err());
             assert_eq!(
-                external_module_path()
-                    .parse(stream("Foo'Bar", ""))
-                    .unwrap()
-                    .0,
+                external_module_path(input("Foo'Bar", "")).unwrap().1,
                 ExternalModulePath::new("Foo", vec!["Bar".into()]),
             );
         }
@@ -1205,30 +1313,27 @@ mod tests {
         fn fail_to_parse_private_external_module_file() {
             let source = "Foo'bar";
 
-            insta::assert_debug_snapshot!(external_module_path()
-                .parse(stream(source, ""))
+            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
                 .map_err(|error| ParseError::new(source, "", error))
-                .err());
+                .unwrap_err());
         }
 
         #[test]
         fn fail_to_parse_private_external_module_directory() {
             let source = "Foo'bar'Baz";
 
-            insta::assert_debug_snapshot!(external_module_path()
-                .parse(stream(source, ""))
+            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
                 .map_err(|error| ParseError::new(source, "", error))
-                .err());
+                .unwrap_err());
         }
     }
 
     #[test]
     fn parse_foreign_import() {
         assert_eq!(
-            foreign_import()
-                .parse(stream("import foreign foo \\(number) number", ""))
+            foreign_import(input("import foreign foo \\(number) number", ""))
                 .unwrap()
-                .0,
+                .1,
             ForeignImport::new(
                 "foo",
                 CallingConvention::Native,
@@ -1242,10 +1347,9 @@ mod tests {
         );
 
         assert_eq!(
-            foreign_import()
-                .parse(stream("import foreign \"c\" foo \\(number) number", ""))
+            foreign_import(input("import foreign \"c\" foo \\(number) number", ""))
                 .unwrap()
-                .0,
+                .1,
             ForeignImport::new(
                 "foo",
                 CallingConvention::C,
@@ -1266,10 +1370,9 @@ mod tests {
         #[test]
         fn parse() {
             assert_eq!(
-                definition()
-                    .parse(stream("x=\\(x number)number{42}", ""))
+                function_definition(input("x=\\(x number)number{42}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
@@ -1297,10 +1400,9 @@ mod tests {
         #[test]
         fn parse_foreign_definition() {
             assert_eq!(
-                definition()
-                    .parse(stream("foreign x=\\(x number)number{42}", ""))
+                function_definition(input("foreign x=\\(x number)number{42}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
@@ -1328,10 +1430,9 @@ mod tests {
         #[test]
         fn parse_foreign_definition_with_c_calling_convention() {
             assert_eq!(
-                definition()
-                    .parse(stream("foreign \"c\" x=\\(x number)number{42}", ""))
+                function_definition(input("foreign \"c\" x=\\(x number)number{42}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 FunctionDefinition::new(
                     "x",
                     Lambda::new(
@@ -1359,10 +1460,9 @@ mod tests {
         #[test]
         fn parse_keyword_like_name() {
             assert_eq!(
-                definition()
-                    .parse(stream("importA = \\() number { 42 }", ""))
+                function_definition(input("importA = \\() number { 42 }", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 FunctionDefinition::new(
                     "importA",
                     Lambda::new(
@@ -1421,10 +1521,7 @@ mod tests {
                 ),
             ),
         ] {
-            assert_eq!(
-                &record_definition().parse(stream(source, "")).unwrap().0,
-                expected
-            );
+            assert_eq!(&record_definition(input(source, "")).unwrap().1, expected);
         }
     }
 
@@ -1460,39 +1557,39 @@ mod tests {
                 ),
             ),
         ] {
-            assert_eq!(&type_alias().parse(stream(source, "")).unwrap().0, expected);
+            assert_eq!(&type_alias(input(source, "")).unwrap().1, expected);
         }
     }
 
-    mod types_ {
+    mod type_ {
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
         fn parse_type() {
-            assert!(type_().parse(stream("", "")).is_err());
+            assert!(type_(input("", "")).is_err());
             assert_eq!(
-                type_().parse(stream("boolean", "")).unwrap().0,
+                type_(input("boolean", "")).unwrap().1,
                 types::Reference::new("boolean", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("none", "")).unwrap().0,
+                type_(input("none", "")).unwrap().1,
                 types::Reference::new("none", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("number", "")).unwrap().0,
+                type_(input("number", "")).unwrap().1,
                 types::Reference::new("number", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("Foo", "")).unwrap().0,
+                type_(input("Foo", "")).unwrap().1,
                 types::Reference::new("Foo", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("Foo'Bar", "")).unwrap().0,
+                type_(input("Foo'Bar", "")).unwrap().1,
                 types::Reference::new("Foo'Bar", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("\\(number)number", "")).unwrap().0,
+                type_(input("\\(number)number", "")).unwrap().1,
                 types::Function::new(
                     vec![types::Reference::new("number", Position::fake()).into()],
                     types::Reference::new("number", Position::fake()),
@@ -1501,10 +1598,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_()
-                    .parse(stream("\\(number,number)number", ""))
-                    .unwrap()
-                    .0,
+                type_(input("\\(number,number)number", "")).unwrap().1,
                 types::Function::new(
                     vec![
                         types::Reference::new("number", Position::fake()).into(),
@@ -1516,10 +1610,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_()
-                    .parse(stream("\\(\\(number)number)number", ""))
-                    .unwrap()
-                    .0,
+                type_(input("\\(\\(number)number)number", "")).unwrap().1,
                 types::Function::new(
                     vec![types::Function::new(
                         vec![types::Reference::new("number", Position::fake()).into()],
@@ -1533,7 +1624,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_().parse(stream("number|none", "")).unwrap().0,
+                type_(input("number|none", "")).unwrap().1,
                 types::Union::new(
                     types::Reference::new("number", Position::fake()),
                     types::Reference::new("none", Position::fake()),
@@ -1542,7 +1633,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_().parse(stream("boolean|number|none", "")).unwrap().0,
+                type_(input("boolean|number|none", "")).unwrap().1,
                 types::Union::new(
                     types::Union::new(
                         types::Reference::new("boolean", Position::fake()),
@@ -1555,10 +1646,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_()
-                    .parse(stream("\\(number)number|none", ""))
-                    .unwrap()
-                    .0,
+                type_(input("\\(number)number|none", "")).unwrap().1,
                 types::Function::new(
                     vec![types::Reference::new("number", Position::fake()).into()],
                     types::Union::new(
@@ -1571,10 +1659,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                type_()
-                    .parse(stream("(\\(number)number)|none", ""))
-                    .unwrap()
-                    .0,
+                type_(input("(\\(number)number)|none", "")).unwrap().1,
                 types::Union::new(
                     types::Function::new(
                         vec![types::Reference::new("number", Position::fake()).into()],
@@ -1590,13 +1675,13 @@ mod tests {
 
         #[test]
         fn parse_reference_type() {
-            assert!(type_().parse(stream("", "")).is_err());
+            assert!(type_(input("", "")).is_err());
             assert_eq!(
-                type_().parse(stream("Foo", "")).unwrap().0,
+                type_(input("Foo", "")).unwrap().1,
                 types::Reference::new("Foo", Position::fake()).into()
             );
             assert_eq!(
-                type_().parse(stream("Foo'Bar", "")).unwrap().0,
+                type_(input("Foo'Bar", "")).unwrap().1,
                 types::Reference::new("Foo'Bar", Position::fake()).into()
             );
         }
@@ -1604,7 +1689,7 @@ mod tests {
         #[test]
         fn parse_list_type() {
             assert_eq!(
-                type_().parse(stream("[number]", "")).unwrap().0,
+                type_(input("[number]", "")).unwrap().1,
                 types::List::new(
                     types::Reference::new("number", Position::fake()),
                     Position::fake()
@@ -1613,7 +1698,7 @@ mod tests {
             );
 
             assert_eq!(
-                type_().parse(stream("[[number]]", "")).unwrap().0,
+                type_(input("[[number]]", "")).unwrap().1,
                 types::List::new(
                     types::List::new(
                         types::Reference::new("number", Position::fake()),
@@ -1625,7 +1710,7 @@ mod tests {
             );
 
             assert_eq!(
-                type_().parse(stream("[number]|[none]", "")).unwrap().0,
+                type_(input("[number]|[none]", "")).unwrap().1,
                 types::Union::new(
                     types::List::new(
                         types::Reference::new("number", Position::fake()),
@@ -1641,7 +1726,7 @@ mod tests {
             );
 
             assert_eq!(
-                type_().parse(stream("\\([number])[none]", "")).unwrap().0,
+                type_(input("\\([number])[none]", "")).unwrap().1,
                 types::Function::new(
                     vec![types::List::new(
                         types::Reference::new("number", Position::fake()),
@@ -1661,7 +1746,7 @@ mod tests {
         #[test]
         fn parse_map_type() {
             assert_eq!(
-                type_().parse(stream("{number:none}", "")).unwrap().0,
+                type_(input("{number:none}", "")).unwrap().1,
                 types::Map::new(
                     types::Reference::new("number", Position::fake()),
                     types::Reference::new("none", Position::fake()),
@@ -1672,15 +1757,15 @@ mod tests {
         }
     }
 
-    mod expressions {
+    mod expression {
         use super::*;
         use pretty_assertions::assert_eq;
 
         #[test]
         fn parse_expression() {
-            assert!(expression().parse(stream("", "")).is_err());
+            assert!(expression(input("", "")).is_err());
             assert_eq!(
-                expression().parse(stream("1", "")).unwrap().0,
+                expression(input("1", "")).unwrap().1,
                 Number::new(
                     NumberRepresentation::FloatingPoint("1".into()),
                     Position::fake()
@@ -1688,11 +1773,11 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                expression().parse(stream("x", "")).unwrap().0,
+                expression(input("x", "")).unwrap().1,
                 Variable::new("x", Position::fake()).into()
             );
             assert_eq!(
-                expression().parse(stream("x + 1", "")).unwrap().0,
+                expression(input("x + 1", "")).unwrap().1,
                 BinaryOperation::new(
                     BinaryOperator::Add,
                     Variable::new("x", Position::fake()),
@@ -1705,7 +1790,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                expression().parse(stream("x + y(z)", "")).unwrap().0,
+                expression(input("x + y(z)", "")).unwrap().1,
                 BinaryOperation::new(
                     BinaryOperator::Add,
                     Variable::new("x", Position::fake()),
@@ -1719,7 +1804,7 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                expression().parse(stream("(x + y)(z)", "")).unwrap().0,
+                expression(input("(x + y)(z)", "")).unwrap().1,
                 Call::new(
                     BinaryOperation::new(
                         BinaryOperator::Add,
@@ -1737,7 +1822,7 @@ mod tests {
         #[test]
         fn parse_deeply_nested_expression() {
             assert_eq!(
-                expression().parse(stream("(((((42)))))", "")).unwrap().0,
+                expression(input("(((((42)))))", "")).unwrap().1,
                 Number::new(
                     NumberRepresentation::FloatingPoint("42".into()),
                     Position::fake()
@@ -1748,9 +1833,9 @@ mod tests {
 
         #[test]
         fn parse_atomic_expression() {
-            assert!(atomic_expression().parse(stream("", "")).is_err());
+            assert!(atomic_expression(input("", "")).is_err());
             assert_eq!(
-                atomic_expression().parse(stream("1", "")).unwrap().0,
+                atomic_expression(input("1", "")).unwrap().1,
                 Number::new(
                     NumberRepresentation::FloatingPoint("1".into()),
                     Position::fake()
@@ -1758,11 +1843,11 @@ mod tests {
                 .into()
             );
             assert_eq!(
-                atomic_expression().parse(stream("x", "")).unwrap().0,
+                atomic_expression(input("x", "")).unwrap().1,
                 Variable::new("x", Position::fake()).into()
             );
             assert_eq!(
-                atomic_expression().parse(stream("(x)", "")).unwrap().0,
+                atomic_expression(input("(x)", "")).unwrap().1,
                 Variable::new("x", Position::fake()).into()
             );
         }
@@ -1770,10 +1855,7 @@ mod tests {
         #[test]
         fn parse_lambda() {
             assert_eq!(
-                lambda()
-                    .parse(stream("\\(x number)number{42}", ""))
-                    .unwrap()
-                    .0,
+                lambda(input("\\(x number)number{42}", "")).unwrap().1,
                 Lambda::new(
                     vec![Argument::new(
                         "x",
@@ -1793,10 +1875,9 @@ mod tests {
             );
 
             assert_eq!(
-                lambda()
-                    .parse(stream("\\(x number,y number)number{42}", ""))
+                lambda(input("\\(x number,y number)number{42}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 Lambda::new(
                     vec![
                         Argument::new("x", types::Reference::new("number", Position::fake())),
@@ -1819,7 +1900,7 @@ mod tests {
         #[test]
         fn parse_lambda_with_reference_type() {
             assert_eq!(
-                lambda().parse(stream("\\() Foo { 42 }", "")).unwrap().0,
+                lambda(input("\\() Foo { 42 }", "")).unwrap().1,
                 Lambda::new(
                     vec![],
                     types::Reference::new("Foo", Position::fake()),
@@ -1839,7 +1920,7 @@ mod tests {
         #[test]
         fn parse_block() {
             assert_eq!(
-                block().parse(stream("{none}", "")).unwrap().0,
+                block(input("{none}", "")).unwrap().1,
                 Block::new(
                     vec![],
                     Variable::new("none", Position::fake()),
@@ -1847,7 +1928,7 @@ mod tests {
                 ),
             );
             assert_eq!(
-                block().parse(stream("{none none}", "")).unwrap().0,
+                block(input("{none none}", "")).unwrap().1,
                 Block::new(
                     vec![Statement::new(
                         None,
@@ -1859,7 +1940,7 @@ mod tests {
                 ),
             );
             assert_eq!(
-                block().parse(stream("{none none none}", "")).unwrap().0,
+                block(input("{none none none}", "")).unwrap().1,
                 Block::new(
                     vec![
                         Statement::new(
@@ -1878,7 +1959,7 @@ mod tests {
                 ),
             );
             assert_eq!(
-                block().parse(stream("{x=none none}", "")).unwrap().0,
+                block(input("{x=none none}", "")).unwrap().1,
                 Block::new(
                     vec![Statement::new(
                         Some("x".into()),
@@ -1890,7 +1971,7 @@ mod tests {
                 ),
             );
             assert_eq!(
-                block().parse(stream("{x==x}", "")).unwrap().0,
+                block(input("{x==x}", "")).unwrap().1,
                 Block::new(
                     vec![],
                     BinaryOperation::new(
@@ -1907,7 +1988,7 @@ mod tests {
         #[test]
         fn parse_statement() {
             assert_eq!(
-                statement().parse(stream("x==x", "")).unwrap().0,
+                statement(input("x==x", "")).unwrap().1,
                 Statement::new(
                     None,
                     BinaryOperation::new(
@@ -1924,10 +2005,7 @@ mod tests {
         #[test]
         fn parse_if() {
             assert_eq!(
-                if_()
-                    .parse(stream("if true { 42 } else { 13 }", ""))
-                    .unwrap()
-                    .0,
+                if_(input("if true { 42 } else { 13 }", "")).unwrap().1,
                 If::new(
                     vec![IfBranch::new(
                         Variable::new("true", Position::fake()),
@@ -1952,10 +2030,9 @@ mod tests {
                 )
             );
             assert_eq!(
-                if_()
-                    .parse(stream("if if true {true}else{true}{42}else{13}", ""))
+                if_(input("if if true {true}else{true}{42}else{13}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 If::new(
                     vec![IfBranch::new(
                         If::new(
@@ -1995,10 +2072,9 @@ mod tests {
                 )
             );
             assert_eq!(
-                if_()
-                    .parse(stream("if true {1}else if true {2}else{3}", ""))
+                if_(input("if true {1}else if true {2}else{3}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 If::new(
                     vec![
                         IfBranch::new(
@@ -2040,10 +2116,7 @@ mod tests {
         #[test]
         fn parse_if_with_equal_operator() {
             assert_eq!(
-                expression()
-                    .parse(stream("if x==y {none}else{none}", ""))
-                    .unwrap()
-                    .0,
+                expression(input("if x==y {none}else{none}", "")).unwrap().1,
                 If::new(
                     vec![IfBranch::new(
                         BinaryOperation::new(
@@ -2072,10 +2145,9 @@ mod tests {
         #[test]
         fn parse_if_type() {
             assert_eq!(
-                if_type()
-                    .parse(stream("if x=y as boolean {none}else{none}", ""))
+                if_type(input("if x=y as boolean {none}else{none}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 IfType::new(
                     "x",
                     Variable::new("y", Position::fake()),
@@ -2097,13 +2169,12 @@ mod tests {
             );
 
             assert_eq!(
-                if_type()
-                    .parse(stream(
-                        "if x=y as boolean{none}else if none{none}else{none}",
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
+                if_type(input(
+                    "if x=y as boolean{none}else if none{none}else{none}",
+                    ""
+                ))
+                .unwrap()
+                .1,
                 IfType::new(
                     "x",
                     Variable::new("y", Position::fake()),
@@ -2135,10 +2206,9 @@ mod tests {
             );
 
             assert_eq!(
-                if_type()
-                    .parse(stream("if x=y as boolean{none}else if none{none}", ""))
+                if_type(input("if x=y as boolean{none}else if none{none}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 IfType::new(
                     "x",
                     Variable::new("y", Position::fake()),
@@ -2169,10 +2239,9 @@ mod tests {
         #[test]
         fn parse_if_list() {
             assert_eq!(
-                if_list()
-                    .parse(stream("if[x,...xs]=xs {none}else{none}", ""))
+                if_list(input("if[x,...xs]=xs {none}else{none}", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 IfList::new(
                     Variable::new("xs", Position::fake()),
                     "x",
@@ -2195,10 +2264,7 @@ mod tests {
         #[test]
         fn parse_if_map() {
             assert_eq!(
-                if_map()
-                    .parse(stream("if x=xs[42]{none}else{none}", ""))
-                    .unwrap()
-                    .0,
+                if_map(input("if x=xs[42]{none}else{none}", "")).unwrap().1,
                 IfMap::new(
                     "x",
                     Variable::new("xs", Position::fake()),
@@ -2228,7 +2294,12 @@ mod tests {
             #[test]
             fn parse_call() {
                 assert_eq!(
-                    expression().parse(stream("f()", "")).unwrap().0,
+                    expression(input("f ()", "")).unwrap().1,
+                    Variable::new("f", Position::fake()).into()
+                );
+
+                assert_eq!(
+                    expression(input("f()", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![],
@@ -2238,7 +2309,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    expression().parse(stream("f()()", "")).unwrap().0,
+                    expression(input("f()()", "")).unwrap().1,
                     Call::new(
                         Call::new(
                             Variable::new("f", Position::fake()),
@@ -2252,7 +2323,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    expression().parse(stream("f(1)", "")).unwrap().0,
+                    expression(input("f(1)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![Number::new(
@@ -2266,7 +2337,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    expression().parse(stream("f(1,)", "")).unwrap().0,
+                    expression(input("f(1,)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![Number::new(
@@ -2280,7 +2351,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    expression().parse(stream("f(1, 2)", "")).unwrap().0,
+                    expression(input("f(1, 2)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![
@@ -2301,7 +2372,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    expression().parse(stream("f(1, 2,)", "")).unwrap().0,
+                    expression(input("f(1, 2,)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
                         vec![
@@ -2324,19 +2395,14 @@ mod tests {
 
             #[test]
             fn fail_to_parse_call() {
-                let source = "f(1+)";
-
-                insta::assert_debug_snapshot!(expression()
-                    .parse(stream(source, ""))
-                    .map_err(|error| ParseError::new(source, "", error))
-                    .err());
+                assert!(expression(input("f(1+)", "")).is_err());
             }
         }
 
         #[test]
         fn parse_try_operation() {
             assert_eq!(
-                expression().parse(stream("x?", "")).unwrap().0,
+                expression(input("x?", "")).unwrap().1,
                 UnaryOperation::new(
                     UnaryOperator::Try,
                     Variable::new("x", Position::fake()),
@@ -2347,8 +2413,8 @@ mod tests {
         }
 
         #[test]
-        fn parse_unary_operation() {
-            assert!(prefix_operation().parse(stream("", "")).is_err());
+        fn parse_prefix_operation() {
+            assert!(prefix_operation(input("", "")).is_err());
 
             for (source, expected) in &[
                 (
@@ -2417,19 +2483,16 @@ mod tests {
                     ),
                 ),
             ] {
-                assert_eq!(
-                    prefix_operation().parse(stream(source, "")).unwrap().0,
-                    *expected
-                );
+                assert_eq!(prefix_operation(input(source, "")).unwrap().1, *expected);
             }
         }
 
         #[test]
         fn parse_prefix_operator() {
-            assert!(prefix_operator().parse(stream("", "")).is_err());
+            assert!(prefix_operator(input("", "")).is_err());
 
             assert_eq!(
-                prefix_operator().parse(stream("!", "")).unwrap().0,
+                prefix_operator(input("!", "")).unwrap().1,
                 UnaryOperator::Not
             );
         }
@@ -2684,14 +2747,14 @@ mod tests {
                     .into(),
                 ),
             ] {
-                assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+                assert_eq!(expression(input(source, "")).unwrap().1, target);
             }
         }
 
         #[test]
         fn parse_binary_operator() {
-            assert!(binary_operator().parse(stream("", "")).is_err());
-            assert!(binary_operator().parse(stream("++", "")).is_err());
+            assert!(binary_operator(input("", "")).is_err());
+            assert!(binary_operator(input("+=", "")).is_err());
 
             for (source, expected) in &[
                 ("+", BinaryOperator::Add),
@@ -2707,24 +2770,21 @@ mod tests {
                 ("&", BinaryOperator::And),
                 ("|", BinaryOperator::Or),
             ] {
-                assert_eq!(
-                    binary_operator().parse(stream(source, "")).unwrap().0,
-                    *expected
-                );
+                assert_eq!(binary_operator(input(source, "")).unwrap().1, *expected);
             }
         }
 
         #[test]
         fn parse_record() {
-            assert!(record().parse(stream("Foo", "")).is_err());
+            assert!(record(input("Foo", "")).is_err());
 
             assert_eq!(
-                record().parse(stream("Foo{}", "")).unwrap().0,
+                record(input("Foo{}", "")).unwrap().1,
                 Record::new("Foo", None, vec![], Position::fake())
             );
 
             assert_eq!(
-                expression().parse(stream("Foo{foo:42}", "")).unwrap().0,
+                expression(input("Foo{foo:42}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     None,
@@ -2742,7 +2802,7 @@ mod tests {
             );
 
             assert_eq!(
-                record().parse(stream("Foo{foo:42}", "")).unwrap().0,
+                record(input("Foo{foo:42}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     None,
@@ -2759,7 +2819,7 @@ mod tests {
             );
 
             assert_eq!(
-                record().parse(stream("Foo{foo:42,bar:42}", "")).unwrap().0,
+                record(input("Foo{foo:42,bar:42}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     None,
@@ -2785,13 +2845,8 @@ mod tests {
                 )
             );
 
-            assert!(record().parse(stream("Foo{foo:42,foo:42}", "")).is_err());
-
             assert_eq!(
-                expression()
-                    .parse(stream("foo(Foo{foo:42})", ""))
-                    .unwrap()
-                    .0,
+                expression(input("foo(Foo{foo:42})", "")).unwrap().1,
                 Call::new(
                     Variable::new("foo", Position::fake()),
                     vec![Record::new(
@@ -2814,7 +2869,7 @@ mod tests {
             );
 
             assert_eq!(
-                record().parse(stream("Foo{foo:bar(42)}", "")).unwrap().0,
+                record(input("Foo{foo:bar(42)}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     None,
@@ -2835,10 +2890,10 @@ mod tests {
                 )
             );
 
-            assert!(record().parse(stream("Foo{...foo,}", "")).is_err());
+            assert!(record(input("Foo{...foo,}", "")).is_err());
 
             assert_eq!(
-                record().parse(stream("Foo{...foo,bar:42}", "")).unwrap().0,
+                record(input("Foo{...foo,bar:42}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
@@ -2855,7 +2910,7 @@ mod tests {
             );
 
             assert_eq!(
-                record().parse(stream("Foo{...foo,bar:42,}", "")).unwrap().0,
+                record(input("Foo{...foo,bar:42,}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
@@ -2872,10 +2927,7 @@ mod tests {
             );
 
             assert_eq!(
-                expression()
-                    .parse(stream("Foo{...foo,bar:42}", ""))
-                    .unwrap()
-                    .0,
+                expression(input("Foo{...foo,bar:42}", "")).unwrap().1,
                 Record::new(
                     "Foo",
                     Some(Variable::new("foo", Position::fake()).into()),
@@ -2892,39 +2944,31 @@ mod tests {
                 .into(),
             );
 
-            assert!(record().parse(stream("Foo{...foo}", "")).is_err());
-            assert!(record()
-                .parse(stream("Foo{...foo,bar:42,bar:42}", ""))
-                .is_err());
-            assert!(record().parse(stream("Foo{...(foo),bar:42}", "")).is_ok());
-            assert!(record()
-                .parse(stream("Foo{...foo(bar),bar:42}", ""))
-                .is_ok());
-            assert!(record()
-                .parse(stream("Foo{...if true { none } else { none },bar:42}", ""))
-                .is_ok());
+            assert!(record(input("Foo{...foo}", "")).is_err());
+            assert!(record(input("Foo{...(foo),bar:42}", "")).is_ok());
+            assert!(record(input("Foo{...foo(bar),bar:42}", "")).is_ok());
+            assert!(record(input("Foo{...if true { none } else { none },bar:42}", "")).is_ok());
         }
 
         #[test]
         fn parse_variable() {
-            assert!(variable().parse(stream("", "")).is_err());
+            assert!(variable(input("", "")).is_err());
 
             assert_eq!(
-                variable().parse(stream("x", "")).unwrap().0,
+                variable(input("x", "")).unwrap().1,
                 Variable::new("x", Position::fake()),
             );
 
             assert_eq!(
-                variable().parse(stream("Foo.x", "")).unwrap().0,
+                variable(input("Foo.x", "")).unwrap().1,
                 Variable::new("Foo", Position::fake()),
             );
         }
 
         #[test]
         fn parse_number_literal() {
-            assert!(number_literal().parse(stream("", "")).is_err());
-            assert!(number_literal().parse(stream("foo", "")).is_err());
-            assert!(number_literal().parse(stream("01", "")).is_err());
+            assert!(number_literal(input("", "")).is_err());
+            assert!(number_literal(input("foo", "")).is_err());
 
             for (source, value) in [
                 ("0", NumberRepresentation::FloatingPoint("0".into())),
@@ -2943,7 +2987,7 @@ mod tests {
                 ("0xfa", NumberRepresentation::Hexadecimal("fa".into())),
             ] {
                 assert_eq!(
-                    number_literal().parse(stream(source, "")).unwrap().0,
+                    number_literal(input(source, "")).unwrap().1,
                     Number::new(value, Position::fake())
                 );
             }
@@ -2951,12 +2995,14 @@ mod tests {
 
         #[test]
         fn parse_string_literal() {
-            assert!(string_literal().parse(stream("", "")).is_err());
-            assert!(string_literal().parse(stream("foo", "")).is_err());
+            assert!(string_literal(input("", "")).is_err());
+            assert!(string_literal(input("foo", "")).is_err());
+            assert!(string_literal(input("\\a", "")).is_err());
 
             for (source, value) in &[
                 (r#""""#, ""),
                 (r#""foo""#, "foo"),
+                (r#" "foo""#, "foo"),
                 (r#""foo bar""#, "foo bar"),
                 (r#""\"""#, "\\\""),
                 (r#""\n""#, "\\n"),
@@ -2967,7 +3013,7 @@ mod tests {
                 (r#""\n\n""#, "\\n\\n"),
             ] {
                 assert_eq!(
-                    string_literal().parse(stream(source, "")).unwrap().0,
+                    string_literal(input(source, "")).unwrap().1,
                     ByteString::new(*value, Position::fake())
                 );
             }
@@ -3091,10 +3137,7 @@ mod tests {
                     ),
                 ),
             ] {
-                assert_eq!(
-                    expression().parse(stream(source, "")).unwrap().0,
-                    target.into()
-                );
+                assert_eq!(expression(input(source, "")).unwrap().1, target.into());
             }
         }
 
@@ -3131,7 +3174,7 @@ mod tests {
                 ),
             ] {
                 assert_eq!(
-                    list_comprehension().parse(stream(source, "")).unwrap().0,
+                    list_comprehension(input(source, "")).unwrap().1,
                     target.into()
                 );
             }
@@ -3219,17 +3262,16 @@ mod tests {
                     .into(),
                 ),
             ] {
-                assert_eq!(expression().parse(stream(source, "")).unwrap().0, target);
+                assert_eq!(expression(input(source, "")).unwrap().1, target);
             }
         }
 
         #[test]
         fn parse_map_iteration_comprehension() {
             assert_eq!(
-                list_comprehension()
-                    .parse(stream("[none v for k, v in xs]", ""))
+                list_comprehension(input("[none v for k, v in xs]", ""))
                     .unwrap()
-                    .0,
+                    .1,
                 MapIterationComprehension::new(
                     types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
@@ -3245,55 +3287,56 @@ mod tests {
 
     #[test]
     fn parse_identifier() {
-        assert!(identifier().parse(stream("if", "")).is_err());
-        assert!(identifier().parse(stream("1foo", "")).is_err());
+        assert!(identifier(input("if", "")).is_err());
+        assert!(identifier(input("1foo", "")).is_err());
+        assert_eq!(identifier(input("foo", "")).unwrap().1, "foo".to_string());
         assert_eq!(
-            identifier().parse(stream("foo", "")).unwrap().0,
-            "foo".to_string()
-        );
-        assert_eq!(
-            identifier().parse(stream("foo42", "")).unwrap().0,
+            identifier(input("foo42", "")).unwrap().1,
             "foo42".to_string()
         );
     }
 
     #[test]
     fn parse_keyword() {
-        assert!(keyword("type").parse(stream("bar", "")).is_err());
+        assert!(keyword("type").parse(input("bar", "")).is_err());
         // spell-checker: disable-next-line
-        assert!(keyword("type").parse(stream("typer", "")).is_err());
-        assert!(keyword("type").parse(stream("type_", "")).is_err());
-        assert!(keyword("type").parse(stream("type", "")).is_ok());
+        assert!(keyword("type").parse(input("typer", "")).is_err());
+        assert!(keyword("type").parse(input("type_", "")).is_err());
+        assert!(keyword("type").parse(input("type", "")).is_ok());
     }
 
     #[test]
     fn parse_sign() {
-        assert!(sign("+").parse(stream("", "")).is_err());
-        assert!(sign("+").parse(stream("-", "")).is_err());
-        assert!(sign("+").parse(stream("+", "")).is_ok());
-        assert!(sign("++").parse(stream("++", "")).is_ok());
-        assert!(sign("+").parse(stream("++", "")).is_err());
-    }
-
-    #[test]
-    fn parse_position() {
-        assert!(position().parse(stream("", "")).is_ok());
+        assert!(sign("+")(input("", "")).is_err());
+        assert!(sign("+")(input("-", "")).is_err());
+        assert!(sign("+")(input("+", "")).is_ok());
+        assert!(sign("++")(input("++", "")).is_ok());
+        assert!(sign("+")(input("++", "")).is_ok());
+        assert!(sign("+")(input("+=", "")).is_err());
+        assert!(sign("\\")(input("\\", "")).is_ok());
     }
 
     #[test]
     fn parse_blank() {
-        assert!(blank().with(eof()).parse(stream(" ", "")).is_ok());
-        assert!(blank().with(eof()).parse(stream("\n", "")).is_ok());
-        assert!(blank().with(eof()).parse(stream(" \n", "")).is_ok());
-        assert!(blank().with(eof()).parse(stream("\t", "")).is_ok());
-        assert!(blank().with(eof()).parse(stream("# foo", "")).is_ok());
+        assert!(all_consuming(blank)(input(" ", "")).is_ok());
+        assert!(all_consuming(blank)(input("\n", "")).is_ok());
+        assert!(all_consuming(blank)(input(" \n", "")).is_ok());
+        assert!(all_consuming(blank)(input("\t", "")).is_ok());
+        assert!(all_consuming(blank)(input("# foo", "")).is_ok());
     }
 
     #[test]
     fn parse_comment() {
-        assert!(comment().parse(stream("#", "")).is_ok());
-        assert!(comment().parse(stream("#\n", "")).is_ok());
-        assert!(comment().parse(stream("#x\n", "")).is_ok());
+        assert!(comment(input("#", "")).is_ok());
+        assert!(comment(input("#\n", "")).is_ok());
+        assert!(comment(input("#x\n", "")).is_ok());
+    }
+
+    #[test]
+    fn parse_skipped_comment() {
+        assert!(skipped_comment(input("#", "")).is_ok());
+        assert!(skipped_comment(input("#\n", "")).is_ok());
+        assert!(skipped_comment(input("#x\n", "")).is_ok());
     }
 
     mod comments {
@@ -3303,7 +3346,7 @@ mod tests {
         #[test]
         fn parse_comment() {
             assert_eq!(
-                comments().parse(stream("#foo", "")).unwrap().0,
+                comments(input("#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3311,7 +3354,7 @@ mod tests {
         #[test]
         fn parse_comment_after_space() {
             assert_eq!(
-                comments().parse(stream(" #foo", "")).unwrap().0,
+                comments(input(" #foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3319,7 +3362,7 @@ mod tests {
         #[test]
         fn parse_comment_before_space() {
             assert_eq!(
-                comments().parse(stream("#foo\n #bar", "")).unwrap().0,
+                comments(input("#foo\n #bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -3330,7 +3373,7 @@ mod tests {
         #[test]
         fn parse_comment_before_newlines() {
             assert_eq!(
-                comments().parse(stream("#foo\n\n", "")).unwrap().0,
+                comments(input("#foo\n\n", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3338,18 +3381,17 @@ mod tests {
         #[test]
         fn parse_two_line_comments() {
             assert_eq!(
-                comments()
-                    .parse(stream(
-                        indoc!(
-                            "
+                comments(input(
+                    indoc!(
+                        "
                             #foo
                             #bar
                             "
-                        ),
-                        ""
-                    ))
-                    .unwrap()
-                    .0,
+                    ),
+                    ""
+                ))
+                .unwrap()
+                .1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -3360,7 +3402,7 @@ mod tests {
         #[test]
         fn parse_comment_after_identifier() {
             assert_eq!(
-                comments().parse(stream("foo#foo", "")).unwrap().0,
+                comments(input("foo#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3368,7 +3410,7 @@ mod tests {
         #[test]
         fn parse_comment_before_identifier() {
             assert_eq!(
-                comments().parse(stream("#foo\nfoo#bar", "")).unwrap().0,
+                comments(input("#foo\nfoo#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -3379,7 +3421,7 @@ mod tests {
         #[test]
         fn parse_comment_after_keyword() {
             assert_eq!(
-                comments().parse(stream("if#foo", "")).unwrap().0,
+                comments(input("if#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3387,7 +3429,7 @@ mod tests {
         #[test]
         fn parse_comment_before_keyword() {
             assert_eq!(
-                comments().parse(stream("#foo\nif#bar", "")).unwrap().0,
+                comments(input("#foo\nif#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -3398,7 +3440,7 @@ mod tests {
         #[test]
         fn parse_comment_after_sign() {
             assert_eq!(
-                comments().parse(stream("+#foo", "")).unwrap().0,
+                comments(input("+#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3406,7 +3448,7 @@ mod tests {
         #[test]
         fn parse_comment_before_sign() {
             assert_eq!(
-                comments().parse(stream("#foo\n+#bar", "")).unwrap().0,
+                comments(input("#foo\n+#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
@@ -3417,7 +3459,7 @@ mod tests {
         #[test]
         fn parse_comment_after_string() {
             assert_eq!(
-                comments().parse(stream("\"string\"#foo", "")).unwrap().0,
+                comments(input("\"string\"#foo", "")).unwrap().1,
                 vec![Comment::new("foo", Position::fake())]
             );
         }
@@ -3425,10 +3467,7 @@ mod tests {
         #[test]
         fn parse_comment_before_string() {
             assert_eq!(
-                comments()
-                    .parse(stream("#foo\n\"string\"#bar", ""))
-                    .unwrap()
-                    .0,
+                comments(input("#foo\n\"string\"#bar", "")).unwrap().1,
                 vec![
                     Comment::new("foo", Position::fake()),
                     Comment::new("bar", Position::fake())
