@@ -12,10 +12,6 @@ install_nightly_component() {
   rustup component add --toolchain nightly $1
 }
 
-prepare_unit_test() {
-  export RUST_MIN_STACK=8388608
-}
-
 prepare_integration_test() {
   directory=$1
 

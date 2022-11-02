@@ -3770,7 +3770,7 @@ mod tests {
         }
 
         #[test]
-        fn format_definition() {
+        fn format_function_definition() {
             assert_eq!(
                 format(
                     &Module::new(
