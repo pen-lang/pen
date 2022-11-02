@@ -918,7 +918,7 @@ fn unchecked_identifier(input: Input) -> IResult<String> {
     map(
         recognize(tuple((
             alt((value((), alpha1::<Input, _>), value((), char('_')))),
-            many0(alt((value((), alphanumeric1), value((), char('_'))))),
+            many0_count(alt((value((), alphanumeric1), value((), char('_'))))),
         ))),
         |span| str::from_utf8(span.as_bytes()).unwrap().into(),
     )(input)
