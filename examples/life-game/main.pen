@@ -38,5 +38,7 @@ step = \(ctx Context, rows [[boolean]]) none | error {
   File'Write(ctx, File'StdOut(), "\x1bc")?
   File'Write(ctx, File'StdOut(), lifeGame'Render(rows))?
 
+  Time'Sleep(ctx, 50)
+
   step(ctx, lifeGame'Step(rows)?)
 }
