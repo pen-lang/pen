@@ -29,6 +29,7 @@ Items are ordered by priority.
 - [ ] IDE/editor support
   - [ ] Language server
 - [ ] Serialization / deserialization
+- [ ] Package manager
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] Vector type
