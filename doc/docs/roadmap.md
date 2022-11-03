@@ -33,3 +33,4 @@ Items are ordered by priority.
   - [ ] Thread safety
 - [ ] Vector type
 - [ ] Web browser interface
+  - JavaScript backend (?)
