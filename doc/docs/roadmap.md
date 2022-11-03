@@ -25,9 +25,9 @@ Items are ordered by priority.
 - [x] Code formatter
 - [x] Documentation generator
 - [x] Process management
+- [x] Reflection
 - [ ] IDE/editor support
   - [ ] Language server
-- [ ] Reflection
 - [ ] Serialization / deserialization
 - [ ] Mutable state
   - [ ] Thread safety
