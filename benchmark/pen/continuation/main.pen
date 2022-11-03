@@ -1,0 +1,31 @@
+import Os'File
+
+main = \(ctx context) none {
+  loop(10000000)
+
+  none
+}
+
+loop = \(x number) none {
+  if x == 0 {
+    none
+  } else {
+    add(x, x, x)
+    loop(x - 1)
+  }
+}
+
+add = \(x number, y number, z number) number {
+  v1 = value()
+  v2 = value()
+  v3 = value()
+  w1 = value()
+  w2 = value()
+  w3 = value()
+
+  v1 + v2 + v3 + x + y + z + w1 + w2 + w3
+}
+
+value = \() number {
+  42
+}
