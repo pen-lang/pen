@@ -2,6 +2,14 @@
 
 set -e
 
+export_archives() {
+  for archive in "$@"; do
+    archives="$archives${archives:+:}$archive"
+  done
+
+  export PEN_OS_ARCHIVES=$archives
+}
+
 while getopts o:t: option; do
   case $option in
   o)
@@ -21,11 +29,9 @@ elif [ -n "$target" ]; then
   target_option="--target $target"
 fi
 
-cd $(dirname $0)
+cd $(dirname $0)/ffi/application
 
-shift
-
-cd ffi/application
+export_archives "$@"
 
 cargo build --release --quiet $target_option
 
