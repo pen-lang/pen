@@ -1,7 +1,11 @@
 use std::{env, path::Path, str};
 
 fn main() {
-    for (index, path) in env::var("PEN_OS_ARCHIVES").unwrap().split(":").enumerate() {
+    for (index, path) in env::var("PEN_OS_ARCHIVES")
+        .iter()
+        .flat_map(|paths| paths.split(':'))
+        .enumerate()
+    {
         let path = Path::new(path);
         let name = convert_path_to_name(path);
 
@@ -17,7 +21,7 @@ fn main() {
         );
     }
 
-    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
+    if cfg!(target_os = "macos") {
         println!("cargo:rustc-link-lib=framework=Foundation",);
         println!("cargo:rustc-link-lib=framework=Security",);
     }
