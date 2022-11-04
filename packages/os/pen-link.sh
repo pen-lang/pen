@@ -3,11 +3,11 @@
 set -e
 
 export_archives() {
-  for archive in "$@"; do
-    archives="$archives${archives:+:}$archive"
+  for path in "$@"; do
+    paths="$paths${paths:+:}$path"
   done
 
-  export PEN_OS_ARCHIVES=$archives
+  export PEN_OS_ARCHIVES=$paths
 }
 
 while getopts o:t: option; do
