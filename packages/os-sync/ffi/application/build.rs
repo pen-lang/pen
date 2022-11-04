@@ -1,4 +1,4 @@
-use std::{env, ffi::OsString, path::Path, str};
+use std::{env, path::Path, str};
 
 fn main() {
     for (index, path) in env::var("PEN_OS_ARCHIVES").unwrap().split(":").enumerate() {
@@ -16,7 +16,7 @@ fn main() {
         );
     }
 
-    if env::var_os("CARGO_CFG_TARGET_OS") == Some(OsString::from("macos")) {
+    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
         println!("cargo:rustc-link-lib=framework=Foundation",);
         println!("cargo:rustc-link-lib=framework=Security",);
     }
