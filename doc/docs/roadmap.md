@@ -25,11 +25,13 @@ Items are ordered by priority.
 - [x] Code formatter
 - [x] Documentation generator
 - [x] Process management
+- [x] Reflection
 - [ ] IDE/editor support
   - [ ] Language server
-- [ ] Reflection
 - [ ] Serialization / deserialization
+- [ ] Package manager
 - [ ] Mutable state
   - [ ] Thread safety
 - [ ] Vector type
 - [ ] Web browser interface
+  - JavaScript backend (?)
