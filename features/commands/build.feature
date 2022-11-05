@@ -9,7 +9,6 @@ Feature: Building packages
       }
     }
     """
-    And I successfully run `sh -c "echo $PATH | sed 's/:/\\\\n/g' && false"`
     And a file named "main.pen" with:
     """pen
     import Os'Context { Context }
