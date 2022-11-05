@@ -21,6 +21,7 @@ fn main() {
         );
     }
 
+    // https://github.com/rust-lang/cargo/issues/4932
     if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
         println!("cargo:rustc-link-lib=framework=Foundation",);
         println!("cargo:rustc-link-lib=framework=Security",);
