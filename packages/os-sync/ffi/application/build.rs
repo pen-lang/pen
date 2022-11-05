@@ -21,7 +21,7 @@ fn main() {
         );
     }
 
-    if cfg!(target_os = "macos") {
+    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
         println!("cargo:rustc-link-lib=framework=Foundation",);
         println!("cargo:rustc-link-lib=framework=Security",);
     }
