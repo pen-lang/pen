@@ -1,56 +1,37 @@
-use std::{
-    collections::BTreeSet,
-    env,
-    error::Error,
-    path::{self, Path},
-};
+use std::{env, path::Path, str};
 
 fn main() {
-    run().unwrap();
-}
-
-fn run() -> Result<(), Box<dyn Error>> {
-    let archive_files_string = env::var("PEN_ARCHIVE_FILES")?;
-    let archive_files = archive_files_string
-        .split(':')
-        .filter(|file| !file.is_empty())
-        .collect::<Vec<_>>();
-
-    if archive_files.is_empty() {
-        // Archive files are set empty explicitly for testing.
-        return Ok(());
-    }
-
-    println!(
-        "cargo:rustc-link-lib=static={}",
-        get_library_name(archive_files[0]),
-    );
-
-    for path in &archive_files[1..] {
-        println!("cargo:rustc-link-lib={}", get_library_name(path),);
-    }
-
-    for path in archive_files
+    for (index, path) in env::var("PEN_TEST_ARCHIVES")
         .iter()
-        .map(|path| get_parent_directory(path).to_string())
-        .collect::<BTreeSet<_>>()
+        .flat_map(|paths| paths.split(':'))
+        .enumerate()
     {
-        println!("cargo:rustc-link-search={}", path);
+        let path = Path::new(path);
+        let name = convert_path_to_name(path);
+
+        if index == 0 {
+            println!("cargo:rustc-link-lib=static={}", name);
+        } else {
+            println!("cargo:rustc-link-lib={}", name);
+        }
+
+        println!(
+            "cargo:rustc-link-search={}",
+            path.parent().unwrap().display()
+        );
     }
 
-    Ok(())
+    // https://github.com/rust-lang/cargo/issues/4932
+    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
+        println!("cargo:rustc-link-lib=framework=Foundation",);
+        println!("cargo:rustc-link-lib=framework=Security",);
+    }
 }
 
-fn get_library_name(path: &str) -> String {
-    Path::new(path)
-        .file_stem()
+fn convert_path_to_name(path: &Path) -> &str {
+    path.file_stem()
         .unwrap()
-        .to_string_lossy()
-        .strip_prefix("lib")
+        .to_str()
         .unwrap()
-        .into()
-}
-
-fn get_parent_directory(path: &str) -> path::Display {
-    Path::new(path).parent().unwrap().display()
+        .trim_start_matches("lib")
 }

@@ -8,15 +8,9 @@ fi
 
 cd $(dirname $0)/..
 
-for file in $(git ls-files 'packages/**/Cargo.lock'); do
-  dirname $file
+for file in $(git ls-files '*/**/Cargo.lock'); do
   (
     cd $(dirname $file)
     "$@"
   )
 done
-
-(
-  cd cmd/test
-  PEN_ARCHIVE_FILES= "$@"
-)
