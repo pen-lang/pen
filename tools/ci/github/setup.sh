@@ -14,6 +14,8 @@ echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV
 
 case $(uname) in
 Darwin)
+  rustup install stable
+
   for component in rls; do
     rustup component add $component --toolchain stable-x86_64-apple-darwin
   done
