@@ -6,6 +6,8 @@ set -e
 
 prepare_integration_test $(dirname $PWD/$0)/..
 
+which cargo rustc rustup
+
 for target in \
   i686-unknown-linux-musl \
   x86_64-unknown-linux-musl \

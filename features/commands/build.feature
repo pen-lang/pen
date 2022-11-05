@@ -17,6 +17,7 @@ Feature: Building packages
       none
     }
     """
+    When I successfully run `which cargo rustc rustup foo`
     When I successfully run `pen build`
     Then I successfully run `./app`
 
