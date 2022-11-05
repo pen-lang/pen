@@ -12,8 +12,15 @@ llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 echo LLVM_SYS_${llvm_version}0_PREFIX=$llvm_prefix >>$GITHUB_ENV
 echo PATH=$llvm_prefix/bin:$PATH >>$GITHUB_ENV
 
-if [ $(uname) = Linux ]; then
+case $(uname) in
+Darwin)
+  for component in rls; do
+    rustup component add $component --toolchain stable-x86_64-apple-darwin
+  done
+  ;;
+Linux)
   sudo apt update --fix-missing
   sudo apt install libc6-dbg # for valgrind
   brew install valgrind
-fi
+  ;;
+esac
