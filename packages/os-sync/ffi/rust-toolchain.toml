@@ -1,5 +1,6 @@
 [toolchain]
 channel = "stable"
+profile = "minimal"
 targets = [
   "i686-unknown-linux-musl",
   "x86_64-unknown-linux-musl",
