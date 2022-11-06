@@ -286,3 +286,8 @@ numberSet = \(xs [number]) {number: none} {
     {number: none}
   }
 }
+
+# This didn't compile before due to a duplicate name error in F--.
+emptyMap = \() {string: any} {
+  {string: any}
+}
