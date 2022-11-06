@@ -73,4 +73,4 @@ jobs:
     needs: feature_test
     if: ${{ always() }}
     steps:
-      - run: test ${{ needs.feature_tests.result }} = success
+      - run: test ${{ needs.feature_test.result }} = success
