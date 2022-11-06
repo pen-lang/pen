@@ -384,7 +384,7 @@ Ok(
                                     Lambda {
                                         arguments: [
                                             Argument {
-                                                name: "",
+                                                name: "$value1",
                                                 type_: Any(
                                                     Any {
                                                         position: Position(
@@ -399,7 +399,7 @@ Ok(
                                                 ),
                                             },
                                             Argument {
-                                                name: "",
+                                                name: "$value2",
                                                 type_: Any(
                                                     Any {
                                                         position: Position(
@@ -453,7 +453,7 @@ Ok(
                                     Lambda {
                                         arguments: [
                                             Argument {
-                                                name: "",
+                                                name: "$value",
                                                 type_: Any(
                                                     Any {
                                                         position: Position(

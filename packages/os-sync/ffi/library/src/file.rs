@@ -50,7 +50,7 @@ fn _pen_os_open_file(
     options: OpenFileOptions,
 ) -> Result<File, Box<dyn Error>> {
     Ok(File::new(
-        fs::OpenOptions::from(options).open(&Path::new(&utilities::decode_path(&path)?))?,
+        fs::OpenOptions::from(options).open(Path::new(&utilities::decode_path(&path)?))?,
     ))
 }
 

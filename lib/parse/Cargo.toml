@@ -6,11 +6,9 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
-combine = { version = "4", features = ["regex"] }
-fnv = "1"
-once_cell = "1"
+nom = "7.1.1"
+nom_locate = "4.0.0"
 position = { path = "../position" }
-regex = "1"
 
 [dev-dependencies]
 indoc = "1"

@@ -42,6 +42,7 @@
     "mkdocs",
     "modifiability",
     "mtriple",
+    "multispace",
     "optarg",
     "optind",
     "perceus",

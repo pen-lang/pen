@@ -5,8 +5,8 @@ macro_rules! call_function {
     };
     (fn($($argument_type:ty),* $(,)?) -> $result_type:ty, $function:expr, $($argument:expr),* $(,)?) => {
         async {
-            use core::task::Poll;
-            use $crate::future::__private::{INITIAL_STACK_CAPACITY, poll_fn};
+            use core::{future::poll_fn, task::Poll};
+            use $crate::future::__private::{INITIAL_STACK_CAPACITY};
             use $crate::cps;
 
             type AsyncStack = cps::AsyncStack<$result_type>;
