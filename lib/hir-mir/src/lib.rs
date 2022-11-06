@@ -979,6 +979,34 @@ mod tests {
             ]))
             .unwrap();
         }
+
+        #[test]
+        fn compile_value_type_not_comparable() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Any::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        map_type.clone(),
+                        Map::new(
+                            map_type.key().clone(),
+                            map_type.value().clone(),
+                            vec![],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
     }
 
     mod record {
