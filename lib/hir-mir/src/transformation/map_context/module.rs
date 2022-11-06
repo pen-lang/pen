@@ -118,8 +118,8 @@ fn compile_context_function_type(context_type: &Type, position: &Position) -> ty
 fn compile_fake_equal_function(position: &Position) -> Lambda {
     Lambda::new(
         vec![
-            Argument::new("", types::Any::new(position.clone())),
-            Argument::new("", types::Any::new(position.clone())),
+            Argument::new("$value1", types::Any::new(position.clone())),
+            Argument::new("$value2", types::Any::new(position.clone())),
         ],
         types::Boolean::new(position.clone()),
         Boolean::new(false, position.clone()),
@@ -129,7 +129,7 @@ fn compile_fake_equal_function(position: &Position) -> Lambda {
 
 fn compile_fake_hash_function(position: &Position) -> Lambda {
     Lambda::new(
-        vec![Argument::new("", types::Any::new(position.clone()))],
+        vec![Argument::new("$value", types::Any::new(position.clone()))],
         types::Number::new(position.clone()),
         Number::new(0.0, position.clone()),
         position.clone(),
