@@ -2,7 +2,7 @@
 
 set -e
 
-export_archives() {]
+export_archives() {
   for path in "$@"; do
     paths="$paths${paths:+:}$path"
   done
