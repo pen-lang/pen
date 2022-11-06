@@ -3,6 +3,6 @@
 require 'aruba/cucumber'
 
 Aruba.configure do |config|
-  config.exit_timeout = 600
+  config.exit_timeout = 1200
   config.home_directory = ENV['HOME']
 end

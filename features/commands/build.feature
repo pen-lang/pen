@@ -56,7 +56,7 @@ Feature: Building packages
     }
     """
     And I successfully run `rustup target add <target>`
-    When I run `pen build --target <target>`
+    When I successfully run `pen build --target <target>`
     Then the exit status should be 0
 
     Examples:
@@ -81,7 +81,7 @@ Feature: Building packages
     }
     """
     And I successfully run `rustup target add <target>`
-    When I run `pen build --target <target>`
+    When I successfully run `pen build --target <target>`
     Then the exit status should be 0
 
     Examples:

@@ -45,7 +45,7 @@ jobs:
       - uses: codecov/codecov-action@v3
         with:
           files: lcov.info
-  feature_tests:
+  feature_test:
     needs: build
     strategy:
       fail-fast: false
@@ -58,7 +58,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v1
       - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
@@ -70,7 +69,7 @@ jobs:
       - run: tools/integration_test.sh $(find features -name *.feature | sort | awk 'NR % ${{ matrix.total }} == ${{ matrix.index }}')
   integration_test:
     runs-on: ubuntu-latest
-    needs: feature_tests
+    needs: feature_test
     if: ${{ always() }}
     steps:
-      - run: test ${{ needs.feature_tests.result }} = success
+      - run: test ${{ needs.feature_test.result }} = success
