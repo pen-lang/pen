@@ -2,15 +2,12 @@
 
 set -e
 
-convert_library_path_to_flag() {
-  basename "$1" | sed 's/^lib\(.*\)\.a$/\1/'
-}
-
-print_lib_link_flags() {
-  for path in "$@"; do
-    echo "println!(\"cargo:rustc-link-lib=$(convert_library_path_to_flag "$path")\");"
-    echo "println!(\"cargo:rustc-link-search=$(dirname "$path")\");"
+export_archives() {
+  for file in "$@"; do
+    files="$files${files:+:}$file"
   done
+
+  export PEN_OS_ARCHIVES=$files
 }
 
 while getopts o:t: option; do
@@ -32,22 +29,9 @@ elif [ -n "$target" ]; then
   target_option="--target $target"
 fi
 
-cd $(dirname $0)
+cd $(dirname $0)/ffi/application
 
-main_archive_path=$1
-shift
-
-ffi_directory=ffi/application
-
-cat <<EOF >$ffi_directory/build.rs
-fn main() {
-  println!("cargo:rustc-link-lib=static=$(convert_library_path_to_flag "$main_archive_path")");
-  println!("cargo:rustc-link-search=$(dirname "$main_archive_path")");
-  $(print_lib_link_flags "$@")
-}
-EOF
-
-cd $ffi_directory
+export_archives "$@"
 
 cargo build --release --quiet $target_option
 

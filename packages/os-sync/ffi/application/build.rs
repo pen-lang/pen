@@ -1,7 +1,7 @@
 use std::{env, path::Path, str};
 
 fn main() {
-    for (index, path) in env::var("PEN_TEST_ARCHIVES")
+    for (index, path) in env::var("PEN_OS_ARCHIVES")
         .iter()
         .flat_map(|paths| paths.split(':'))
         .enumerate()

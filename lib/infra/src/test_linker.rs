@@ -140,7 +140,7 @@ impl app::infra::TestLinker for TestLinker {
                 .arg("--release")
                 .current_dir(&main_crate_directory)
                 .envs([(
-                    "PEN_ARCHIVE_FILES",
+                    "PEN_TEST_ARCHIVES",
                     archive_files
                         .iter()
                         .map(|file| {
