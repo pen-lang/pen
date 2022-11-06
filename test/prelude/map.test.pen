@@ -286,3 +286,7 @@ numberSet = \(xs [number]) {number: none} {
     {number: none}
   }
 }
+
+foo = \() {string: any} {
+  {string: any}
+}
