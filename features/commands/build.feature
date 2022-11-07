@@ -115,6 +115,7 @@ Feature: Building packages
     When a file named "main.pen" with:
     """pen
     import Os'Context { Context }
+    import Os'File
 
     main = \(ctx context) none {
       _ = File'Write(ctx.Os, File'StdOut(), "hello")
