@@ -56,7 +56,7 @@ jobs:
         index: [0, 1, 2, 3, 4, 5, 6, 7]
         total: [8]
     runs-on: ${{ matrix.os }}
-    if: startsWith(${{ matrix.os }}, 'ubuntu') || github.ref = 'refs/heads/main'
+    if: startsWith(matrix.os, 'ubuntu') || github.ref = 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
       - uses: raviqqe/enable-homebrew@main
