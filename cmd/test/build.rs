@@ -1,7 +1,11 @@
 use std::{env, path::Path, str};
 
+const ARCHIVE_VARIABLE_NAME: &str = "PEN_TEST_ARCHIVES";
+
 fn main() {
-    for (index, path) in env::var("PEN_TEST_ARCHIVES")
+    println!("cargo:rerun-if-env-changed={}", ARCHIVE_VARIABLE_NAME);
+
+    for (index, path) in env::var(ARCHIVE_VARIABLE_NAME)
         .iter()
         .flat_map(|paths| paths.split(':'))
         .enumerate()
@@ -15,6 +19,7 @@ fn main() {
             println!("cargo:rustc-link-lib={}", name);
         }
 
+        println!("cargo:rerun-if-changed={}", name);
         println!(
             "cargo:rustc-link-search={}",
             path.parent().unwrap().display()
