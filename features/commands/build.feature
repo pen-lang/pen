@@ -90,3 +90,39 @@ Feature: Building packages
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
       | wasm32-wasi                |
+
+  Scenario: Build an application package again
+    Given a file named "pen.json" with:
+    """json
+    {
+      "type": "application",
+      "dependencies": {
+        "Os": "pen:///os"
+      }
+    }
+    """
+    And a file named "main.pen" with:
+    """pen
+    import Os'Context { Context }
+
+    main = \(ctx context) none {
+      none
+    }
+    """
+    And I successfully run `pen build`
+    And I successfully run `./app`
+    And the stdout from "./app" should contain exactly ""
+    When a file named "main.pen" with:
+    """pen
+    import Os'Context { Context }
+    import Os'File
+
+    main = \(ctx context) none {
+      _ = File'Write(ctx.Os, File'StdOut(), "hello")
+
+      none
+    }
+    """
+    And I successfully run `pen build`
+    Then I successfully run `./app`
+    And the stdout from "./app" should contain exactly "hello"
