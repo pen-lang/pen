@@ -56,7 +56,6 @@ jobs:
         index: [0, 1, 2, 3, 4, 5, 6, 7]
         total: [8]
     runs-on: ${{ matrix.os }}
-    if: startsWith(matrix.os, 'ubuntu') || github.ref = 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
       - uses: raviqqe/enable-homebrew@main
@@ -68,6 +67,7 @@ jobs:
           path: target/release
       - run: chmod +x target/release/pen
       - run: tools/integration_test.sh $(find features -name *.feature | sort | awk 'NR % ${{ matrix.total }} == ${{ matrix.index }}')
+        if: startsWith(matrix.os, 'ubuntu') || github.ref = 'refs/heads/main'
   integration_test:
     runs-on: ubuntu-latest
     needs: feature_test
