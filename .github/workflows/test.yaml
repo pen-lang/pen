@@ -47,6 +47,7 @@ jobs:
           files: lcov.info
   feature_test:
     needs: build
+    if: ${{ github.ref }} = 'refs/heads/main'
     strategy:
       fail-fast: false
       matrix:
