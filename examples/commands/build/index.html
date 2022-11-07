@@ -1504,6 +1504,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#build-an-application-package-again" class="md-nav__link">
+    Build an application package again
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1765,6 +1772,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#build-an-application-package-again" class="md-nav__link">
+    Build an application package again
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1888,6 +1902,35 @@ main = \(ctx context) none {
 </tr>
 </tbody>
 </table>
+<h2 id="build-an-application-package-again">Build an application package again</h2>
+<p><em>Given</em> a file named "pen.json" with:</p>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os"
+  }
+}</code></pre>
+<p><em>And</em> a file named "main.pen" with:</p>
+<pre class="pen"><code>import Os'Context { Context }
+
+main = \(ctx context) none {
+  none
+}</code></pre>
+<p><em>And</em> I successfully run <code>pen build</code></p>
+<p><em>And</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the stdout from "./app" should contain exactly ""</p>
+<p><em>When</em> a file named "main.pen" with:</p>
+<pre class="pen"><code>import Os'Context { Context }
+import Os'File
+
+main = \(ctx context) none {
+  _ = File'Write(ctx.Os, File'StdOut(), "hello")
+
+  none
+}</code></pre>
+<p><em>And</em> I successfully run <code>pen build</code></p>
+<p><em>Then</em> I successfully run <code>./app</code></p>
+<p><em>And</em> the stdout from "./app" should contain exactly "hello".</p>
 
 
 
