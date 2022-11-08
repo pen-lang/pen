@@ -23,12 +23,12 @@ FindFail = \() none | error {
   Assert'Equal(Utf8'Find("🗿😄🐶", "🐱"), none)
 }
 
-HasPrefix = \() none | error {
-  Assert'True(Utf8'HasPrefix("🗿😄🐶", "🗿😄"))
+StartsWith = \() none | error {
+  Assert'True(Utf8'StartsWith("🗿😄🐶", "🗿😄"))
 }
 
-HasSuffix = \() none | error {
-  Assert'True(Utf8'HasSuffix("🗿😄🐶", "😄🐶"))
+EndsWith = \() none | error {
+  Assert'True(Utf8'EndsWith("🗿😄🐶", "😄🐶"))
 }
 
 LengthEmpty = \() none | error {

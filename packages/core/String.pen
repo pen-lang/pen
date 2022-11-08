@@ -1,6 +1,6 @@
 # This module provides common string operations.
 
-import foreign "c" _pen_core_string_has_prefix \(string, string) boolean
+import foreign "c" _pen_core_string_starts_with \(string, string) boolean
 import foreign "c" _pen_core_string_builder_create \() stringBuilder
 import foreign "c" _pen_core_string_builder_append \(stringBuilder, string) stringBuilder
 import foreign "c" _pen_core_string_builder_build \(stringBuilder, string) string
@@ -33,7 +33,7 @@ appendStrings = \(b stringBuilder, ss [string]) stringBuilder {
   }
 }
 
-# Check if a string has a prefix.
-HasPrefix = \(s string, prefix string) boolean {
-  _pen_core_string_has_prefix(s, prefix)
+# Check if a string starts with a pattern.
+StartsWith = \(s string, prefix string) boolean {
+  _pen_core_string_starts_with(s, prefix)
 }

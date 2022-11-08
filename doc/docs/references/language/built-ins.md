@@ -10,7 +10,7 @@ See [Types](types.md).
 
 ### `size`
 
-It calculates a size of a list or a map. It is generic and you can apply it to any list and map types.
+It calculates a size of a list or map. It is generic and you can apply it to any list and map types.
 
 Its time complexity is O(n) for lists and O(1) for maps.
 

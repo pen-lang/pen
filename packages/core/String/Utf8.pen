@@ -4,8 +4,8 @@ import foreign "c" _pen_core_utf8_characters \(string) [string]
 import foreign "c" _pen_core_utf8_contains \(string, string) boolean
 import foreign "c" _pen_core_utf8_find \(string, string) number
 import foreign "c" _pen_core_utf8_length \(string) number
-import foreign "c" _pen_core_utf8_has_prefix \(string, string) boolean
-import foreign "c" _pen_core_utf8_has_suffix \(string, string) boolean
+import foreign "c" _pen_core_utf8_starts_with \(string, string) boolean
+import foreign "c" _pen_core_utf8_ends_with \(string, string) boolean
 import foreign "c" _pen_core_utf8_replace \(string, string, string) string
 import foreign "c" _pen_core_utf8_slice \(string, number, number) string
 import foreign "c" _pen_core_utf8_split \(string, string) [string]
@@ -34,14 +34,14 @@ Find = \(s string, pat string) number | none {
   if i < 0 { none } else { i }
 }
 
-# Checks if a string has a prefix..
-HasPrefix = \(s string, pat string) boolean {
-  _pen_core_utf8_has_prefix(s, pat)
+# Checks if a string starts with a pattern..
+StartsWith = \(s string, pat string) boolean {
+  _pen_core_utf8_starts_with(s, pat)
 }
 
-# Checks if a string has a suffix..
-HasSuffix = \(s string, pat string) boolean {
-  _pen_core_utf8_has_suffix(s, pat)
+# Checks if a string ends with a pattern..
+EndsWith = \(s string, pat string) boolean {
+  _pen_core_utf8_ends_with(s, pat)
 }
 
 # Return a length of a string.

@@ -1,5 +1,5 @@
 #[ffi::bindgen]
-fn _pen_core_view_has_prefix(
+fn _pen_core_view_starts_with(
     string: ffi::ByteString,
     start: ffi::Number,
     end: ffi::Number,
@@ -27,7 +27,7 @@ mod tests {
 
     #[test]
     fn check_prefix() {
-        assert!(bool::from(_pen_core_view_has_prefix(
+        assert!(bool::from(_pen_core_view_starts_with(
             "foo bar baz".into(),
             5.0.into(),
             8.0.into(),
@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn fail_to_check_prefix() {
-        assert!(!bool::from(_pen_core_view_has_prefix(
+        assert!(!bool::from(_pen_core_view_starts_with(
             "foo".into(),
             1.0.into(),
             3.0.into(),

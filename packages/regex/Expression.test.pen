@@ -2,16 +2,16 @@ import Test'Assert
 
 import 'Expression
 
-IsMatch = \() none | error {
+Matches = \() none | error {
   e = Expression'New("foo")?
 
-  Assert'True(Expression'IsMatch(e, "foo"))
+  Assert'True(Expression'Matches(e, "foo"))
 }
 
 IsNotMatch = \() none | error {
   e = Expression'New("foo")?
 
-  Assert'True(!Expression'IsMatch(e, "bar"))
+  Assert'True(!Expression'Matches(e, "bar"))
 }
 
 Match = \() none | error {
