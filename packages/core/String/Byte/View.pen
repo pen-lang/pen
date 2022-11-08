@@ -39,7 +39,7 @@ End = \(v View) number {
 }
 
 # Check if a string has a prefix.
-HasPrefix = \(v View, s string) boolean {
+StartsWith = \(v View, s string) boolean {
   _pen_core_view_has_prefix(v.value, v.start, v.end, s)
 }
 

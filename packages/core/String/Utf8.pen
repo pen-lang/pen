@@ -35,12 +35,12 @@ Find = \(s string, pat string) number | none {
 }
 
 # Checks if a string has a prefix..
-HasPrefix = \(s string, pat string) boolean {
+StartsWith = \(s string, pat string) boolean {
   _pen_core_utf8_has_prefix(s, pat)
 }
 
 # Checks if a string has a suffix..
-HasSuffix = \(s string, pat string) boolean {
+EndsWith = \(s string, pat string) boolean {
   _pen_core_utf8_has_suffix(s, pat)
 }
 

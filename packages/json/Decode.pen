@@ -52,17 +52,17 @@ Decode = \(s string) Value | error {
 value = \(v View) valueResult | error {
   v = blank(v)
 
-  if View'HasPrefix(v, "n") {
+  if View'StartsWith(v, "n") {
     null(v)
-  } else if View'HasPrefix(v, "t") {
+  } else if View'StartsWith(v, "t") {
     booleanTrue(v)
-  } else if View'HasPrefix(v, "f") {
+  } else if View'StartsWith(v, "f") {
     booleanFalse(v)
-  } else if View'HasPrefix(v, "\"") {
+  } else if View'StartsWith(v, "\"") {
     string(v)
-  } else if View'HasPrefix(v, "[") {
+  } else if View'StartsWith(v, "[") {
     array(v)
-  } else if View'HasPrefix(v, "{") {
+  } else if View'StartsWith(v, "{") {
     object(v)
   } else {
     number(v)
@@ -91,7 +91,7 @@ string = \(v View) valueResult | error {
 }
 
 stringCharacters = \(v View) stringsResult | error {
-  if View'HasPrefix(v, "\"") {
+  if View'StartsWith(v, "\"") {
     stringsResult{strings: [string], input: v}
   } else {
     r = stringCharacter(v)?
@@ -162,7 +162,7 @@ digit = \(v View) View | none {
 }
 
 nonZeroDigit = \(v View) View | none {
-  if Boolean'Any([boolean View'HasPrefix(v, Number'String(n())) for n in Number'Range(1, 9)]) {
+  if Boolean'Any([boolean View'StartsWith(v, Number'String(n())) for n in Number'Range(1, 9)]) {
     View'Seek(v, 1)
   } else {
     none
@@ -241,7 +241,7 @@ token = \(v View, s string) View | error {
 }
 
 raw = \(v View, s string) View | error {
-  if View'HasPrefix(v, s) {
+  if View'StartsWith(v, s) {
     View'Seek(v, Byte'Length(s))
   } else {
     error(s + " expected")
@@ -249,7 +249,7 @@ raw = \(v View, s string) View | error {
 }
 
 blank = \(v View) View {
-  if View'HasPrefix(v, " ") | View'HasPrefix(v, "\t") | View'HasPrefix(v, "\n") {
+  if View'StartsWith(v, " ") | View'StartsWith(v, "\t") | View'StartsWith(v, "\n") {
     blank(View'Seek(v, 1))
   } else {
     v

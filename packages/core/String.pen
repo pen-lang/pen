@@ -34,6 +34,6 @@ appendStrings = \(b stringBuilder, ss [string]) stringBuilder {
 }
 
 # Check if a string has a prefix.
-HasPrefix = \(s string, prefix string) boolean {
+StartsWith = \(s string, prefix string) boolean {
   _pen_core_string_has_prefix(s, prefix)
 }

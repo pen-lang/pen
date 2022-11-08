@@ -34,14 +34,14 @@ JoinThreeStringsWithSeparator = \() none | error {
   Assert'Equal(String'Join([string "foo", "bar", "baz"], ","), "foo,bar,baz")
 }
 
-HasPrefix = \() none | error {
-  Assert'True(String'HasPrefix("foobar", "foo"))
+StartsWith = \() none | error {
+  Assert'True(String'StartsWith("foobar", "foo"))
 }
 
 HasNoPrefix = \() none | error {
-  Assert'True(!String'HasPrefix("bar", "foo"))
+  Assert'True(!String'StartsWith("bar", "foo"))
 }
 
 HasNoPrefixWithSubString = \() none | error {
-  Assert'True(!String'HasPrefix("fo", "foo"))
+  Assert'True(!String'StartsWith("fo", "foo"))
 }
