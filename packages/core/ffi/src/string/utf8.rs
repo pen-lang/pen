@@ -51,7 +51,7 @@ fn find(string: ffi::ByteString, pattern: ffi::ByteString) -> Option<usize> {
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_has_prefix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+fn _pen_core_utf8_starts_with(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string.starts_with(pattern)
@@ -65,7 +65,7 @@ fn _pen_core_utf8_has_prefix(string: ffi::ByteString, pattern: ffi::ByteString) 
 }
 
 #[ffi::bindgen]
-fn _pen_core_utf8_has_suffix(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
+fn _pen_core_utf8_ends_with(string: ffi::ByteString, pattern: ffi::ByteString) -> ffi::Boolean {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
         if let Ok(pattern) = str::from_utf8(pattern.as_slice()) {
             string.ends_with(pattern)

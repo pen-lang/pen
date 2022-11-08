@@ -3,7 +3,7 @@ mod byte;
 mod utf8;
 
 #[ffi::bindgen]
-fn _pen_core_string_has_prefix(string: ffi::ByteString, prefix: ffi::ByteString) -> ffi::Boolean {
+fn _pen_core_string_starts_with(string: ffi::ByteString, prefix: ffi::ByteString) -> ffi::Boolean {
     let string = string.as_slice();
     let prefix = prefix.as_slice();
 
