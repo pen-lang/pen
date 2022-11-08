@@ -25,9 +25,9 @@ fn _pen_regex_expression_new(string: ffi::ByteString) -> Result<Expression, Box<
 }
 
 #[ffi::bindgen]
-fn _pen_regex_expression_is_match(expression: Expression, string: ffi::ByteString) -> ffi::Boolean {
+fn _pen_regex_expression_matches(expression: Expression, string: ffi::ByteString) -> ffi::Boolean {
     if let Ok(string) = str::from_utf8(string.as_slice()) {
-        expression.as_regex().is_match(string)
+        expression.as_regex().matches(string)
     } else {
         false
     }
