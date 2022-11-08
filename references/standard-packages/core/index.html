@@ -1401,8 +1401,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
@@ -1529,8 +1529,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix_1" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith_1" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
@@ -1618,15 +1618,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix_2" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith_2" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#hassuffix" class="md-nav__link">
-    HasSuffix
+  <a href="#endswith" class="md-nav__link">
+    EndsWith
   </a>
   
 </li>
@@ -2933,8 +2933,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
@@ -3061,8 +3061,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix_1" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith_1" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
@@ -3150,15 +3150,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#hasprefix_2" class="md-nav__link">
-    HasPrefix
+  <a href="#startswith_2" class="md-nav__link">
+    StartsWith
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#hassuffix" class="md-nav__link">
-    HasSuffix
+  <a href="#endswith" class="md-nav__link">
+    EndsWith
   </a>
   
 </li>
@@ -3438,8 +3438,8 @@ They can be converted from and into integers represented in IEEE-754 of a
 <h4 id="join"><code>Join</code></h4>
 <p>Join strings with a separator.</p>
 <pre class="pen"><code>\(strings [string], separator string) string</code></pre>
-<h4 id="hasprefix"><code>HasPrefix</code></h4>
-<p>Check if a string has a prefix.</p>
+<h4 id="startswith"><code>StartsWith</code></h4>
+<p>Check if a string starts with a pattern.</p>
 <pre class="pen"><code>\(s string, prefix string) boolean</code></pre>
 <h2 id="corestringbyte-module"><code>Core'String'Byte</code> module</h2>
 <p>This module provides operations for strings as byte arrays.</p>
@@ -3474,8 +3474,8 @@ By using those views, you can apply operations to strings without copying them.<
 <h4 id="end"><code>End</code></h4>
 <p>Get an end index of a view.</p>
 <pre class="pen"><code>\(v View) number</code></pre>
-<h4 id="hasprefix_1"><code>HasPrefix</code></h4>
-<p>Check if a string has a prefix.</p>
+<h4 id="startswith_1"><code>StartsWith</code></h4>
+<p>Check if a string starts with a pattern.</p>
 <pre class="pen"><code>\(v View, s string) boolean</code></pre>
 <h4 id="length_1"><code>Length</code></h4>
 <p>Get a length of a view.</p>
@@ -3503,11 +3503,11 @@ By using those views, you can apply operations to strings without copying them.<
 <h4 id="find"><code>Find</code></h4>
 <p>Find an index for a pattern in a string.</p>
 <pre class="pen"><code>\(s string, pat string) number | none</code></pre>
-<h4 id="hasprefix_2"><code>HasPrefix</code></h4>
-<p>Checks if a string has a prefix..</p>
+<h4 id="startswith_2"><code>StartsWith</code></h4>
+<p>Checks if a string starts with a pattern..</p>
 <pre class="pen"><code>\(s string, pat string) boolean</code></pre>
-<h4 id="hassuffix"><code>HasSuffix</code></h4>
-<p>Checks if a string has a suffix..</p>
+<h4 id="endswith"><code>EndsWith</code></h4>
+<p>Checks if a string ends with a pattern..</p>
 <pre class="pen"><code>\(s string, pat string) boolean</code></pre>
 <h4 id="length_2"><code>Length</code></h4>
 <p>Return a length of a string.</p>
