@@ -12,6 +12,7 @@
     "canonicalization",
     "canonicalize",
     "canonicalizer",
+    "cleandead",
     "clippy",
     "codesign",
     "combinator",
