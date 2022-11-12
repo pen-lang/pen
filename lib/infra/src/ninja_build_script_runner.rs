@@ -20,15 +20,16 @@ impl NinjaBuildScriptRunner {
 
 impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
     fn run(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
+        let build_script_file = self
+            .file_path_converter
+            .convert_to_os_path(build_script_file);
+
         command_runner::run_command(
             Command::new("turtle")
                 .arg("-f")
-                .arg(
-                    self.file_path_converter
-                        .convert_to_os_path(build_script_file),
-                )
+                .arg(&build_script_file)
                 .arg("-t")
-                .arg("cleandead") // spell-checker: disable-line
+                .arg("cleandead")
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
@@ -37,10 +38,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
             Command::new("turtle")
                 .arg("--quiet")
                 .arg("-f")
-                .arg(
-                    self.file_path_converter
-                        .convert_to_os_path(build_script_file),
-                )
+                .arg(&build_script_file)
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
