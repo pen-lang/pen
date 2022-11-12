@@ -28,7 +28,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                         .convert_to_os_path(build_script_file),
                 )
                 .arg("-t")
-                .arg("cleandead")
+                .arg("cleandead") // spell-checker: disable-line
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
