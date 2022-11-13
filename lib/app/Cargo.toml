@@ -9,8 +9,8 @@ ast = { path = "../ast" }
 ast_hir = { path = "../ast-hir" }
 bincode = "1"
 doc = { path = "../doc" }
-fmm = { git = "https://github.com/raviqqe/fmm", branch = "feature/optimal-stack-sort" }
-fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "feature/optimal-stack-sort" }
+fmm = { git = "https://github.com/raviqqe/fmm", branch = "chore/weight" }
+fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "chore/weight" }
 fnv = "1"
 format = { path = "../format" }
 hir = { path = "../hir" }
