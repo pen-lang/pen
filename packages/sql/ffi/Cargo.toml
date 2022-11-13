@@ -14,6 +14,7 @@ sqlx = { version = "0.6", features = [
   "any",
   "mysql",
   "postgres",
-  "sqlite",
   "runtime-tokio-rustls",
+  "sqlite",
+  "uuid",
 ] }

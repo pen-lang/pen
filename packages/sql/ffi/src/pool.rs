@@ -89,6 +89,8 @@ async fn _pen_sql_pool_query(
                     ffi::Boolean::from(boolean).into()
                 } else if let Ok(string) = row.try_get::<&str, _>(index) {
                     ffi::Any::from(ffi::ByteString::from(string))
+                } else if let Ok(string) = row.try_get::<sqlx::types::Uuid, _>(index) {
+                    ffi::Any::from(ffi::ByteString::from(string))
                 } else {
                     return Err(SqlError::TypeNotSupported.into());
                 },
@@ -133,7 +135,7 @@ async fn build_query(
             query = query.bind(f64::from(number));
         } else if let Ok(string) = ffi::ByteString::try_from(argument.clone()) {
             query = query.bind(str::from_utf8(string.as_slice())?.to_owned());
-        } else {
+        } else if let Ok(uuid) = Uuid::try_fr {
             return Err(SqlError::TypeNotSupported.into());
         }
     }
