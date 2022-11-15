@@ -176,6 +176,7 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
                 indent(sequence(definition.fields().iter().map(|field| {
                     sequence([
                         line(),
+                        compile_block_comment(context, field.type_().position()),
                         field.name().into(),
                         " ".into(),
                         compile_type(field.type_()),
@@ -3753,7 +3754,7 @@ mod tests {
                             "foo",
                             vec![types::RecordField::new(
                                 "bar",
-                                types::Reference::new("none", line_position(2)),
+                                types::Reference::new("none", line_position(3)),
                             )],
                             line_position(1)
                         )
