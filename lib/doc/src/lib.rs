@@ -859,7 +859,8 @@ mod tests {
                         "Foo",
                         vec![RecordField::new(
                             "Bar",
-                            types::Reference::new("none", Position::fake())
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
                         )],
                         Position::fake()
                     )
@@ -888,7 +889,8 @@ mod tests {
                         "Foo",
                         vec![RecordField::new(
                             "bar",
-                            types::Reference::new("none", Position::fake())
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
                         )],
                         Position::fake()
                     )

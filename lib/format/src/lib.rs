@@ -176,9 +176,9 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
                 indent(sequence(definition.fields().iter().map(|field| {
                     sequence([
                         line(),
-                        field.name().into(),
-                        " ".into(),
-                        compile_type(field.type_()),
+                        compile_line_comment(context, field.position(), |_| {
+                            sequence([field.name().into(), " ".into(), compile_type(field.type_())])
+                        }),
                     ])
                 }))),
                 line(),
@@ -314,10 +314,7 @@ fn compile_signature(
         arguments
             .iter()
             .map(|argument| {
-                // TODO Use Argument::position().
-                let position = argument.type_().position();
-
-                compile_line_comment(context, position, |_| {
+                compile_line_comment(context, argument.position(), |_| {
                     sequence([
                         argument.name().into(),
                         " ".into(),
@@ -345,7 +342,7 @@ fn are_arguments_flat(arguments: &[Argument], position: &Position) -> bool {
         || Some(position.line_number())
             == arguments
                 .get(0)
-                .map(|argument| argument.type_().position().line_number())
+                .map(|argument| argument.position().line_number())
 }
 
 fn compile_block(context: &mut Context, block: &Block) -> Document {
@@ -365,12 +362,15 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
                 let block_comment = compile_block_comment(context, statement.position());
                 // TODO Use end positions of spans when they are available.
                 let line_count = next_position.line_number() as isize
-                    - statement.position().line_number() as isize
-                    - context
-                        .peek_comments_before(next_position.line_number())
-                        .count() as isize;
+                    - statement.position().line_number() as isize;
                 let statement_document = compile_statement(context, statement);
-                let extra_line = if count_lines(&statement_document) as isize >= line_count {
+
+                let extra_line = if (count_lines(&statement_document)
+                    + context
+                        .peek_comments_before(next_position.line_number())
+                        .count()) as isize
+                    >= line_count
+                {
                     empty()
                 } else {
                     line()
@@ -883,6 +883,7 @@ mod tests {
     use super::*;
     use indoc::indoc;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn line_position(line: usize) -> Position {
         Position::new("", line, 1, "")
@@ -908,6 +909,7 @@ mod tests {
 
     mod import {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_internal_module_import() {
@@ -1178,7 +1180,8 @@ mod tests {
                     "foo",
                     vec![types::RecordField::new(
                         "foo",
-                        types::Reference::new("none", Position::fake())
+                        types::Reference::new("none", Position::fake()),
+                        Position::fake()
                     )],
                     Position::fake()
                 )
@@ -1207,11 +1210,13 @@ mod tests {
                     vec![
                         types::RecordField::new(
                             "foo",
-                            types::Reference::new("none", Position::fake())
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
                         ),
                         types::RecordField::new(
                             "bar",
-                            types::Reference::new("none", Position::fake())
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
                         )
                     ],
                     Position::fake()
@@ -1233,6 +1238,7 @@ mod tests {
 
     mod type_alias {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_type_alias() {
@@ -1312,6 +1318,7 @@ mod tests {
 
     mod type_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format_type(type_: &Type) -> String {
             ir::format(&compile_type(type_))
@@ -1373,6 +1380,7 @@ mod tests {
 
     mod definition {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_with_no_argument_and_no_statement() {
@@ -1450,7 +1458,8 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", Position::fake())
+                                types::Reference::new("none", Position::fake()),
+                                Position::fake()
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -1608,6 +1617,7 @@ mod tests {
 
     mod block {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format(block: &Block) -> String {
             ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
@@ -1940,6 +1950,61 @@ mod tests {
         }
 
         #[test]
+        fn format_space_between_two_statements_with_comment_in_first_statement() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![
+                            Statement::new(
+                                Some("x".into()),
+                                If::new(
+                                    vec![IfBranch::new(
+                                        Variable::new("true", Position::fake()),
+                                        Block::new(
+                                            vec![],
+                                            Variable::new("none", line_position(4)),
+                                            Position::fake()
+                                        )
+                                    )],
+                                    Block::new(
+                                        vec![],
+                                        Variable::new("none", Position::fake()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                ),
+                                line_position(2)
+                            ),
+                            Statement::new(
+                                Some("y".into()),
+                                Variable::new("none", Position::fake()),
+                                line_position(9)
+                            )
+                        ],
+                        Variable::new("none", line_position(10)),
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(3))]
+                ),
+                indoc!(
+                    "
+                    {
+                      x = if true {
+                        #foo
+                        none
+                      } else {
+                        none
+                      }
+
+                      y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
         fn format_space_between_two_statement_comments() {
             assert_eq!(
                 format_with_comments(
@@ -1982,6 +2047,7 @@ mod tests {
 
     mod expression {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format(expression: &Expression) -> String {
             ir::format(&compile_expression(&mut Context::new(vec![]), expression))
@@ -2029,6 +2095,7 @@ mod tests {
 
         mod call {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2148,6 +2215,7 @@ mod tests {
 
         mod if_ {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_single_line() {
@@ -2330,6 +2398,7 @@ mod tests {
 
         mod if_type {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_single_line() {
@@ -2460,6 +2529,7 @@ mod tests {
 
         mod lambda {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2547,7 +2617,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(2))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2),
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2578,8 +2649,16 @@ mod tests {
                     format(
                         &Lambda::new(
                             vec![
-                                Argument::new("x", types::Reference::new("none", line_position(2))),
-                                Argument::new("y", types::Reference::new("none", Position::fake()))
+                                Argument::new(
+                                    "x",
+                                    types::Reference::new("none", Position::fake()),
+                                    line_position(2)
+                                ),
+                                Argument::new(
+                                    "y",
+                                    types::Reference::new("none", Position::fake()),
+                                    Position::fake()
+                                )
                             ],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2612,7 +2691,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(2))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2)
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2645,7 +2725,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(3))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(3),
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2675,6 +2756,7 @@ mod tests {
 
         mod number {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_decimal_float() {
@@ -2726,6 +2808,7 @@ mod tests {
 
         mod binary_operation {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2840,6 +2923,7 @@ mod tests {
 
         mod unary_operation {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_not_operation() {
@@ -2909,6 +2993,7 @@ mod tests {
 
         mod list {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3067,6 +3152,7 @@ mod tests {
 
         mod map {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3300,6 +3386,7 @@ mod tests {
 
         mod record {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3574,6 +3661,7 @@ mod tests {
 
     mod comment {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_comment() {
@@ -3721,7 +3809,7 @@ mod tests {
         }
 
         #[test]
-        fn format_type_definition() {
+        fn format_record_definition() {
             assert_eq!(
                 format(
                     &Module::new(
@@ -3737,6 +3825,71 @@ mod tests {
                     "
                     #foo
                     type foo {}
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_suffix_comment_on_record_field() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new(
+                            "foo",
+                            vec![types::RecordField::new(
+                                "bar",
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2),
+                            )],
+                            line_position(1)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("comment", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    type foo {
+                      bar none #comment
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_record_field() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new(
+                            "foo",
+                            vec![types::RecordField::new(
+                                "bar",
+                                types::Reference::new("none", Position::fake()),
+                                line_position(3),
+                            )],
+                            line_position(1)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("comment", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    type foo {
+                      #comment
+                      bar none
+                    }
                     "
                 )
             );
