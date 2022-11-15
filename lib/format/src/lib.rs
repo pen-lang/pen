@@ -176,10 +176,9 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
                 indent(sequence(definition.fields().iter().map(|field| {
                     sequence([
                         line(),
-                        compile_block_comment(context, field.position()),
-                        field.name().into(),
-                        " ".into(),
-                        compile_type(field.type_()),
+                        compile_line_comment(context, field.position(), |_| {
+                            sequence([field.name().into(), " ".into(), compile_type(field.type_())])
+                        }),
                     ])
                 }))),
                 line(),
@@ -3756,7 +3755,39 @@ mod tests {
         }
 
         #[test]
-        fn format_record_field() {
+        fn format_suffix_comment_on_record_field() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new(
+                            "foo",
+                            vec![types::RecordField::new(
+                                "bar",
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2),
+                            )],
+                            line_position(1)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("comment", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    type foo {
+                      bar none #comment
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_block_comment_on_record_field() {
             assert_eq!(
                 format(
                     &Module::new(
