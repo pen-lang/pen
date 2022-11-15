@@ -216,18 +216,19 @@ fn record_definition(input: Input) -> IResult<RecordDefinition> {
                 keyword("type"),
                 identifier,
                 sign("{"),
-                cut(tuple((many0(tuple((identifier, type_))), sign("}")))),
+                cut(tuple((many0(record_field_definition), sign("}")))),
             )),
-            |(position, _, name, _, (fields, _))| {
-                RecordDefinition::new(
-                    name,
-                    fields
-                        .into_iter()
-                        .map(|(name, type_)| types::RecordField::new(name, type_))
-                        .collect(),
-                    position(),
-                )
-            },
+            |(position, _, name, _, (fields, _))| RecordDefinition::new(name, fields, position()),
+        ),
+    )(input)
+}
+
+fn record_field_definition(input: Input) -> IResult<types::RecordField> {
+    context(
+        "record field",
+        map(
+            tuple((position, identifier, type_)),
+            |(position, name, type_)| types::RecordField::new(name, type_, position()),
         ),
     )(input)
 }
@@ -1499,6 +1500,7 @@ mod tests {
                     vec![types::RecordField::new(
                         "foo",
                         types::Reference::new("number", Position::fake()),
+                        Position::fake(),
                     )],
                     Position::fake(),
                 ),
@@ -1511,10 +1513,12 @@ mod tests {
                         types::RecordField::new(
                             "foo",
                             types::Reference::new("number", Position::fake()),
+                            Position::fake(),
                         ),
                         types::RecordField::new(
                             "bar",
                             types::Reference::new("number", Position::fake()),
+                            Position::fake(),
                         ),
                     ],
                     Position::fake(),
