@@ -3757,8 +3757,8 @@ mod tests {
                             "foo",
                             vec![types::RecordField::new(
                                 "bar",
-                                types::Reference::new("none", line_position(3)),
-                                Position::fake(),
+                                types::Reference::new("none", Position::fake()),
+                                line_position(3),
                             )],
                             line_position(1)
                         )
