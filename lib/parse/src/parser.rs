@@ -517,9 +517,10 @@ fn lambda(input: Input) -> IResult<Lambda> {
 fn argument(input: Input) -> IResult<Argument> {
     context(
         "argument",
-        map(tuple((identifier, cut(type_))), |(name, type_)| {
-            Argument::new(name, type_)
-        }),
+        map(
+            tuple((position, identifier, cut(type_))),
+            |(position, name, type_)| Argument::new(name, type_, position()),
+        ),
     )(input)
 }
 
@@ -1071,7 +1072,8 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("number", Position::fake())
+                                types::Reference::new("number", Position::fake()),
+                                Position::fake()
                             )],
                             types::Reference::new("number", Position::fake()),
                             Block::new(
@@ -1107,7 +1109,8 @@ mod tests {
                             Lambda::new(
                                 vec![Argument::new(
                                     "x",
-                                    types::Reference::new("number", Position::fake())
+                                    types::Reference::new("number", Position::fake()),
+                                    Position::fake()
                                 )],
                                 types::Reference::new("number", Position::fake()),
                                 Block::new(
@@ -1128,7 +1131,8 @@ mod tests {
                             Lambda::new(
                                 vec![Argument::new(
                                     "y",
-                                    types::Reference::new("number", Position::fake())
+                                    types::Reference::new("number", Position::fake()),
+                                    Position::fake()
                                 )],
                                 types::Reference::new("number", Position::fake()),
                                 Block::new(
@@ -1379,7 +1383,8 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new(
                             "x",
-                            types::Reference::new("number", Position::fake())
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
                         )],
                         types::Reference::new("number", Position::fake()),
                         Block::new(
@@ -1409,7 +1414,8 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new(
                             "x",
-                            types::Reference::new("number", Position::fake())
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
                         )],
                         types::Reference::new("number", Position::fake()),
                         Block::new(
@@ -1439,7 +1445,8 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new(
                             "x",
-                            types::Reference::new("number", Position::fake())
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
                         )],
                         types::Reference::new("number", Position::fake()),
                         Block::new(
@@ -1863,7 +1870,8 @@ mod tests {
                 Lambda::new(
                     vec![Argument::new(
                         "x",
-                        types::Reference::new("number", Position::fake())
+                        types::Reference::new("number", Position::fake()),
+                        Position::fake()
                     )],
                     types::Reference::new("number", Position::fake()),
                     Block::new(
@@ -1884,8 +1892,16 @@ mod tests {
                     .1,
                 Lambda::new(
                     vec![
-                        Argument::new("x", types::Reference::new("number", Position::fake())),
-                        Argument::new("y", types::Reference::new("number", Position::fake()))
+                        Argument::new(
+                            "x",
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        ),
+                        Argument::new(
+                            "y",
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        )
                     ],
                     types::Reference::new("number", Position::fake()),
                     Block::new(

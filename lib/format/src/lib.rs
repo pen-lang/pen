@@ -315,10 +315,7 @@ fn compile_signature(
         arguments
             .iter()
             .map(|argument| {
-                // TODO Use Argument::position().
-                let position = argument.type_().position();
-
-                compile_line_comment(context, position, |_| {
+                compile_line_comment(context, argument.position(), |_| {
                     sequence([
                         argument.name().into(),
                         " ".into(),
@@ -346,7 +343,7 @@ fn are_arguments_flat(arguments: &[Argument], position: &Position) -> bool {
         || Some(position.line_number())
             == arguments
                 .get(0)
-                .map(|argument| argument.type_().position().line_number())
+                .map(|argument| argument.position().line_number())
 }
 
 fn compile_block(context: &mut Context, block: &Block) -> Document {
@@ -1454,7 +1451,8 @@ mod tests {
                         Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", Position::fake())
+                                types::Reference::new("none", Position::fake()),
+                                Position::fake()
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2551,7 +2549,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(2))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2),
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2582,8 +2581,16 @@ mod tests {
                     format(
                         &Lambda::new(
                             vec![
-                                Argument::new("x", types::Reference::new("none", line_position(2))),
-                                Argument::new("y", types::Reference::new("none", Position::fake()))
+                                Argument::new(
+                                    "x",
+                                    types::Reference::new("none", Position::fake()),
+                                    line_position(2)
+                                ),
+                                Argument::new(
+                                    "y",
+                                    types::Reference::new("none", Position::fake()),
+                                    Position::fake()
+                                )
                             ],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2616,7 +2623,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(2))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2)
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
@@ -2649,7 +2657,8 @@ mod tests {
                         &Lambda::new(
                             vec![Argument::new(
                                 "x",
-                                types::Reference::new("none", line_position(3))
+                                types::Reference::new("none", Position::fake()),
+                                line_position(3),
                             )],
                             types::Reference::new("none", Position::fake()),
                             Block::new(
