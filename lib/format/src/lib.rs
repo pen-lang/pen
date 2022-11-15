@@ -3721,7 +3721,7 @@ mod tests {
         }
 
         #[test]
-        fn format_type_definition() {
+        fn format_record_definition() {
             assert_eq!(
                 format(
                     &Module::new(
@@ -3737,6 +3737,38 @@ mod tests {
                     "
                     #foo
                     type foo {}
+                    "
+                )
+            );
+        }
+
+        #[test]
+        fn format_record_field() {
+            assert_eq!(
+                format(
+                    &Module::new(
+                        vec![],
+                        vec![],
+                        vec![RecordDefinition::new(
+                            "foo",
+                            vec![types::RecordField::new(
+                                "bar",
+                                types::Reference::new("none", line_position(2)),
+                            )],
+                            line_position(1)
+                        )
+                        .into()],
+                        vec![],
+                        Position::fake()
+                    ),
+                    &[Comment::new("comment", line_position(2))]
+                ),
+                indoc!(
+                    "
+                    type foo {
+                      #comment
+                      bar none
+                    }
                     "
                 )
             );
