@@ -362,12 +362,15 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
                 let block_comment = compile_block_comment(context, statement.position());
                 // TODO Use end positions of spans when they are available.
                 let line_count = next_position.line_number() as isize
-                    - statement.position().line_number() as isize
-                    - context
-                        .peek_comments_before(next_position.line_number())
-                        .count() as isize;
+                    - statement.position().line_number() as isize;
                 let statement_document = compile_statement(context, statement);
-                let extra_line = if count_lines(&statement_document) as isize >= line_count {
+
+                let extra_line = if (count_lines(&statement_document)
+                    + context
+                        .peek_comments_before(next_position.line_number())
+                        .count()) as isize
+                    >= line_count
+                {
                     empty()
                 } else {
                     line()
@@ -880,6 +883,7 @@ mod tests {
     use super::*;
     use indoc::indoc;
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn line_position(line: usize) -> Position {
         Position::new("", line, 1, "")
@@ -905,6 +909,7 @@ mod tests {
 
     mod import {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_internal_module_import() {
@@ -1233,6 +1238,7 @@ mod tests {
 
     mod type_alias {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_type_alias() {
@@ -1312,6 +1318,7 @@ mod tests {
 
     mod type_ {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format_type(type_: &Type) -> String {
             ir::format(&compile_type(type_))
@@ -1373,6 +1380,7 @@ mod tests {
 
     mod definition {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_with_no_argument_and_no_statement() {
@@ -1609,6 +1617,7 @@ mod tests {
 
     mod block {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format(block: &Block) -> String {
             ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
@@ -1941,6 +1950,61 @@ mod tests {
         }
 
         #[test]
+        fn format_space_between_two_statements_with_comment_in_first_statement() {
+            assert_eq!(
+                format_with_comments(
+                    &Block::new(
+                        vec![
+                            Statement::new(
+                                Some("x".into()),
+                                If::new(
+                                    vec![IfBranch::new(
+                                        Variable::new("true", Position::fake()),
+                                        Block::new(
+                                            vec![],
+                                            Variable::new("none", line_position(4)),
+                                            Position::fake()
+                                        )
+                                    )],
+                                    Block::new(
+                                        vec![],
+                                        Variable::new("none", Position::fake()),
+                                        Position::fake()
+                                    ),
+                                    Position::fake()
+                                ),
+                                line_position(2)
+                            ),
+                            Statement::new(
+                                Some("y".into()),
+                                Variable::new("none", Position::fake()),
+                                line_position(9)
+                            )
+                        ],
+                        Variable::new("none", line_position(10)),
+                        Position::fake()
+                    ),
+                    &[Comment::new("foo", line_position(3))]
+                ),
+                indoc!(
+                    "
+                    {
+                      x = if true {
+                        #foo
+                        none
+                      } else {
+                        none
+                      }
+
+                      y = none
+                      none
+                    }
+                    "
+                )
+            );
+        }
+
+        #[test]
         fn format_space_between_two_statement_comments() {
             assert_eq!(
                 format_with_comments(
@@ -1983,6 +2047,7 @@ mod tests {
 
     mod expression {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         fn format(expression: &Expression) -> String {
             ir::format(&compile_expression(&mut Context::new(vec![]), expression))
@@ -2030,6 +2095,7 @@ mod tests {
 
         mod call {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2149,6 +2215,7 @@ mod tests {
 
         mod if_ {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_single_line() {
@@ -2331,6 +2398,7 @@ mod tests {
 
         mod if_type {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_single_line() {
@@ -2461,6 +2529,7 @@ mod tests {
 
         mod lambda {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2687,6 +2756,7 @@ mod tests {
 
         mod number {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_decimal_float() {
@@ -2738,6 +2808,7 @@ mod tests {
 
         mod binary_operation {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_() {
@@ -2852,6 +2923,7 @@ mod tests {
 
         mod unary_operation {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_not_operation() {
@@ -2921,6 +2993,7 @@ mod tests {
 
         mod list {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3079,6 +3152,7 @@ mod tests {
 
         mod map {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3312,6 +3386,7 @@ mod tests {
 
         mod record {
             use super::*;
+            use pretty_assertions::assert_eq;
 
             #[test]
             fn format_empty() {
@@ -3586,6 +3661,7 @@ mod tests {
 
     mod comment {
         use super::*;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn format_comment() {

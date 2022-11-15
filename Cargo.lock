@@ -320,6 +320,7 @@ dependencies = [
  "indoc",
  "itertools",
  "position",
+ "pretty_assertions",
 ]
 
 [[package]]
