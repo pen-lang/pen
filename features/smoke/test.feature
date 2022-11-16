@@ -91,8 +91,6 @@ Feature: Testing
     import Os'File
 
     Foo = \() none | error {
-      _ = File'Write
-
       none
     }
     """
