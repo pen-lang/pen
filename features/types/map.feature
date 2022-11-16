@@ -121,3 +121,13 @@ Feature: Map
     """
     When I run `pen build`
     Then the exit status should be 0
+
+  Scenario: Delete an entry of a map
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs {string: number}) {string: number} {
+      delete(xs, "foo")
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
