@@ -972,6 +972,41 @@ mod tests {
         }
 
         #[test]
+        fn compile_delete_function_call_with_union_key() {
+            let map_type = types::Map::new(
+                types::Union::new(
+                    types::ByteString::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", map_type.clone())],
+                        map_type.clone(),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                            vec![
+                                Variable::new("x", Position::fake()).into(),
+                                ByteString::new("", Position::fake()).into(),
+                            ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
         fn compile_map_comprehension() {
             let map_type = types::Map::new(
                 types::ByteString::new(Position::fake()),

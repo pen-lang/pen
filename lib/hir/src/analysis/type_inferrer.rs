@@ -1921,6 +1921,81 @@ mod tests {
         }
 
         #[test]
+        fn infer_delete_key_from_key_argument() {
+            let map_type = types::Map::new(
+                types::Union::new(
+                    types::ByteString::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![Map::new(
+                                    map_type.key().clone(),
+                                    map_type.value().clone(),
+                                    vec![],
+                                    Position::fake()
+                                )
+                                .into(), None::new( Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![
+                                            map_type.clone().into(),
+                                            types::None::new(Position::fake()).into()
+                                        ],
+                                        map_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![
+                                    Map::new(
+                                        map_type.key().clone(),
+                                        map_type.value().clone(),
+                                        vec![],
+                                        Position::fake()
+                                    )
+                                    .into(),
+                                    None::new(Position::fake()).into()
+                                ],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
         fn infer_race() {
             let list_type = types::List::new(
                 types::List::new(types::None::new(Position::fake()), Position::fake()),

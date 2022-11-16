@@ -50,9 +50,6 @@ pub fn compile(
                 type_canonicalizer::canonicalize_map(function_type.result(), context.types())?
                     .ok_or_else(|| AnalysisError::MapExpected(function_type.result().clone()))?;
             let mir_map_type = type_::compile_map(context)?;
-            let [map, key] = &arguments[..] else {
-                return Err(AnalysisError::ArgumentCount(call.position().clone()).into());
-            };
 
             mir::ir::Call::new(
                 mir::types::Function::new(
@@ -69,9 +66,18 @@ pub fn compile(
                         context,
                         &map_context::expression::transform(context, &map_type)?,
                     )?,
-                    map.clone(),
-                    mir::ir::Variant::new(type_::compile(context, map_type.key())?, key.clone())
+                    arguments[0].clone(),
+                    expression::compile(
+                        context,
+                        &TypeCoercion::new(
+                            function_type.arguments()[1].clone(),
+                            types::Any::new(position.clone()),
+                            call.arguments()[1].clone(),
+                            position.clone(),
+                        )
                         .into(),
+                    )?
+                    .into(),
                 ],
             )
             .into()
