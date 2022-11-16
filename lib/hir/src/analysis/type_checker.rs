@@ -464,11 +464,13 @@ fn check_built_in_call(
             };
 
             check_subsumption(map_type, function_type.result(), context.types())?;
-
-            let map_type = type_canonicalizer::canonicalize_map(map_type, context.types())?
-                .ok_or_else(|| AnalysisError::MapExpected(map_type.clone()))?;
-
-            check_subsumption(&key_type, map_type.key(), context.types())?;
+            check_subsumption(
+                &key_type,
+                type_canonicalizer::canonicalize_map(map_type, context.types())?
+                    .ok_or_else(|| AnalysisError::MapExpected(map_type.clone()))?
+                    .key(),
+                context.types(),
+            )?;
         }
         BuiltInFunctionName::Race => {
             let [argument_type] = function_type.arguments()  else {
