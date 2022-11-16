@@ -125,34 +125,6 @@ fn transform_map(
                     position.clone(),
                 )
                 .into(),
-                MapElement::Removal(key) => Call::new(
-                    Some(
-                        types::Function::new(
-                            vec![
-                                map_context_type.clone(),
-                                any_map_type.clone(),
-                                types::Any::new(position.clone()).into(),
-                            ],
-                            any_map_type,
-                            position.clone(),
-                        )
-                        .into(),
-                    ),
-                    Variable::new(&configuration.delete_function_name, position.clone()),
-                    vec![
-                        map_context.clone(),
-                        rest_expression,
-                        TypeCoercion::new(
-                            key_type.clone(),
-                            types::Any::new(position.clone()),
-                            key.clone(),
-                            position.clone(),
-                        )
-                        .into(),
-                    ],
-                    position.clone(),
-                )
-                .into(),
             }
         }
     })

@@ -329,9 +329,6 @@ fn transform_expression(
                             .into(),
                             variables,
                         )?),
-                        MapElement::Removal(key) => MapElement::Removal(
-                            transform_and_coerce_expression(key, map.key_type(), variables)?,
-                        ),
                     })
                 })
                 .collect::<Result<_, _>>()?,
@@ -1819,65 +1816,6 @@ mod tests {
                                         from_map_type,
                                         to_map_type,
                                         Variable::new("x", Position::fake()),
-                                        Position::fake(),
-                                    )
-                                    .into()
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )])
-                )
-            );
-        }
-
-        #[test]
-        fn coerce_key_removal() {
-            let union_type = types::Union::new(
-                types::Number::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-            let map_type = types::Map::new(
-                union_type.clone(),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-
-            assert_eq!(
-                coerce_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            map_type.clone(),
-                            Map::new(
-                                union_type.clone(),
-                                types::None::new(Position::fake()),
-                                vec![MapElement::Removal(None::new(Position::fake()).into())],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )
-                ])),
-                Ok(
-                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            map_type,
-                            Map::new(
-                                union_type.clone(),
-                                types::None::new(Position::fake()),
-                                vec![MapElement::Removal(
-                                    TypeCoercion::new(
-                                        types::None::new(Position::fake()),
-                                        union_type,
-                                        None::new(Position::fake()),
                                         Position::fake(),
                                     )
                                     .into()

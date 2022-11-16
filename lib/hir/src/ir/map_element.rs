@@ -4,7 +4,6 @@ use super::{expression::Expression, map_entry::MapEntry};
 pub enum MapElement {
     Insertion(MapEntry),
     Map(Expression),
-    Removal(Expression),
 }
 
 impl From<MapEntry> for MapElement {
