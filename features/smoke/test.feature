@@ -88,8 +88,6 @@ Feature: Testing
     """
     And a file named "main.test.pen" with:
     """pen
-    import Os'File
-
     Foo = \() none | error {
       none
     }
