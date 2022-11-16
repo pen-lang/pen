@@ -511,7 +511,7 @@ fn infer_built_in_call(
                 ),
                 BuiltInFunctionName::Delete => {
                     let Some(result_type) =
-                         argument_types.first().cloned() else {
+                        argument_types.first().cloned() else {
                             return Err(AnalysisError::ArgumentCount(position.clone()));
                         };
 
