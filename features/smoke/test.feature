@@ -66,3 +66,36 @@ Feature: Testing
     """
     When I successfully run `pen test`
     Then the exit status should be 0
+
+  Scenario: Keep an application file on testing
+    Given a file named "pen.json" with:
+    """json
+    {
+      "type": "application",
+      "dependencies": {
+        "Os": "pen:///os",
+        "Test": "pen:///test"
+      }
+    }
+    """
+    And a file named "main.pen" with:
+    """pen
+    import Os'Context { Context }
+
+    main = \(ctx context) none {
+      none
+    }
+    """
+    And a file named "main.test.pen" with:
+    """pen
+    import Os'File
+
+    Foo = \() none | error {
+      _ = File'Write
+
+      none
+    }
+    """
+    And I successfully run `pen build`
+    When I successfully run `pen test`
+    Then I successfully run `./app`
