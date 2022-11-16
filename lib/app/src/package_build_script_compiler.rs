@@ -372,7 +372,7 @@ fn compile_test(
     Ok(build_script_file)
 }
 
-fn compile_external(
+pub fn compile_external(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
@@ -406,7 +406,7 @@ fn compile_external(
     Ok(())
 }
 
-fn compile_prelude(
+pub fn compile_prelude(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
