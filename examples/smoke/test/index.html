@@ -1640,6 +1640,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#keep-an-application-file-on-testing" class="md-nav__link">
+    Keep an application file on testing
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1712,6 +1719,28 @@ Add = \() none | error {
 }</code></pre>
 <p><em>When</em> I successfully run <code>pen test</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
+<h2 id="keep-an-application-file-on-testing">Keep an application file on testing</h2>
+<p><em>Given</em> a file named "pen.json" with:</p>
+<pre class="json"><code>{
+  "type": "application",
+  "dependencies": {
+    "Os": "pen:///os",
+    "Test": "pen:///test"
+  }
+}</code></pre>
+<p><em>And</em> a file named "main.pen" with:</p>
+<pre class="pen"><code>import Os'Context { Context }
+
+main = \(ctx context) none {
+  none
+}</code></pre>
+<p><em>And</em> a file named "main.test.pen" with:</p>
+<pre class="pen"><code>Foo = \() none | error {
+  none
+}</code></pre>
+<p><em>And</em> I successfully run <code>pen build</code></p>
+<p><em>When</em> I successfully run <code>pen test</code></p>
+<p><em>Then</em> I successfully run <code>./app</code>.</p>
 
 
 
