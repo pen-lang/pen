@@ -3,6 +3,7 @@ use position::Position;
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum BuiltInFunctionName {
     Debug,
+    Delete,
     Error,
     Race,
     ReflectDebug,
