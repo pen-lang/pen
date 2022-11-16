@@ -7,6 +7,7 @@ pub fn transform(module: &Module) -> Module {
 
         match variable.name() {
             "debug" => BuiltInFunction::new(BuiltInFunctionName::Debug, position.clone()).into(),
+            "delete" => BuiltInFunction::new(BuiltInFunctionName::Delete, position.clone()).into(),
             "error" => BuiltInFunction::new(BuiltInFunctionName::Error, position.clone()).into(),
             "false" => Boolean::new(false, position.clone()).into(),
             "go" => BuiltInFunction::new(BuiltInFunctionName::Spawn, position.clone()).into(),
