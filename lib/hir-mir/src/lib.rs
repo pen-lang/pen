@@ -953,7 +953,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", map_type.clone())],
-                        map_type.clone(),
+                        map_type,
                         Call::new(
                             None,
                             BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
@@ -988,7 +988,7 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![Argument::new("x", map_type.clone())],
-                        map_type.clone(),
+                        map_type,
                         Call::new(
                             None,
                             BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),

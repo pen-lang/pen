@@ -5,6 +5,7 @@ use crate::{
         FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
         EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY, TEST_DIRECTORY,
     },
+    ApplicationConfiguration,
 };
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";
@@ -75,6 +76,15 @@ pub fn resolve_package_directory(output_directory: &FilePath, url: &url::Url) ->
     output_directory.join(&FilePath::new(vec![
         EXTERNAL_PACKAGE_DIRECTORY.into(),
         package_id_calculator::calculate(url),
+    ]))
+}
+
+pub fn resolve_application_file(
+    package_directory: &FilePath,
+    application_configuration: &ApplicationConfiguration,
+) -> FilePath {
+    package_directory.join(&FilePath::new([
+        &application_configuration.application_filename
     ]))
 }
 

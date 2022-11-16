@@ -6,12 +6,85 @@ use crate::{
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
     module_target_source_resolver, package_name_formatter, prelude_interface_file_finder,
-    system_package_finder, ApplicationConfiguration,
+    system_package_finder, ApplicationConfiguration, PackageType,
 };
 use std::error::Error;
 
-// Compile a "main" build script that triggers build of a main package.
-pub fn compile_main(
+pub fn compile(
+    infrastructure: &Infrastructure,
+    main_package_directory: &FilePath,
+    output_directory: &FilePath,
+    target_triple: Option<&str>,
+    prelude_package_url: &url::Url,
+    ffi_package_url: &url::Url,
+    application_configuration: &ApplicationConfiguration,
+) -> Result<FilePath, Box<dyn Error>> {
+    let child_files = [
+        compile_modules(
+            infrastructure,
+            main_package_directory,
+            output_directory,
+            application_configuration,
+        )?,
+        compile_test_modules(infrastructure, main_package_directory, output_directory)?,
+        compile_test(
+            infrastructure,
+            main_package_directory,
+            output_directory,
+            prelude_package_url,
+            ffi_package_url,
+        )?,
+    ]
+    .into_iter()
+    .chain(
+        external_package_topological_sorter::sort(
+            &external_package_configuration_reader::read_all(
+                infrastructure,
+                main_package_directory,
+                output_directory,
+            )?,
+        )?
+        .iter()
+        .chain([prelude_package_url, ffi_package_url])
+        .map(|url| {
+            file_path_resolver::resolve_external_package_build_script_file(
+                output_directory,
+                url,
+                &infrastructure.file_path_configuration,
+            )
+        }),
+    )
+    .chain(
+        if infrastructure
+            .package_configuration_reader
+            .read(main_package_directory)?
+            .type_()
+            == PackageType::Application
+        {
+            Some(compile_application(
+                infrastructure,
+                main_package_directory,
+                output_directory,
+                prelude_package_url,
+                ffi_package_url,
+                application_configuration,
+            )?)
+        } else {
+            None
+        },
+    )
+    .collect::<Vec<_>>();
+
+    compile_main(
+        infrastructure,
+        prelude_package_url,
+        output_directory,
+        target_triple,
+        &child_files,
+    )
+}
+
+fn compile_main(
     infrastructure: &Infrastructure,
     prelude_package_url: &url::Url,
     output_directory: &FilePath,
@@ -44,7 +117,7 @@ pub fn compile_main(
     Ok(build_script_file)
 }
 
-pub fn compile_modules(
+fn compile_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -131,7 +204,7 @@ pub fn compile_modules(
     Ok(build_script_file)
 }
 
-pub fn compile_test_modules(
+fn compile_test_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -167,7 +240,7 @@ pub fn compile_test_modules(
     Ok(build_script_file)
 }
 
-pub fn compile_application(
+fn compile_application(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
@@ -223,9 +296,10 @@ pub fn compile_application(
                     ffi_package_url,
                 ))
                 .collect::<Vec<_>>(),
-                &main_package_directory.join(&FilePath::new([
-                    &application_configuration.application_filename
-                ])),
+                &file_path_resolver::resolve_application_file(
+                    main_package_directory,
+                    application_configuration,
+                ),
             )?
             .as_bytes(),
     )?;
@@ -233,7 +307,7 @@ pub fn compile_application(
     Ok(build_script_file)
 }
 
-pub fn compile_test(
+fn compile_test(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
