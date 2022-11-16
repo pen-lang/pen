@@ -22,7 +22,7 @@ pub trait BuildScriptCompiler {
         &self,
         module_targets: &[TestModuleTarget],
         archive_file: &FilePath,
-        package_test_information_file: &FilePath,
+        test_information_file: &FilePath,
     ) -> Result<String, Box<dyn Error>>;
 
     fn compile_application(
