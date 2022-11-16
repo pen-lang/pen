@@ -42,7 +42,7 @@ pub enum AnalysisError {
     UnusedErrorValue(Position),
     VariableNotFound(Variable),
     VariantExpected(Type),
-    WrongArgumentCount(Position),
+    ArgumentCount(Position),
 }
 
 impl AnalysisError {
@@ -245,7 +245,7 @@ impl Display for AnalysisError {
                     Self::format_found_type_message(type_)
                 )
             }
-            Self::WrongArgumentCount(position) => {
+            Self::ArgumentCount(position) => {
                 write!(
                     formatter,
                     "wrong number of arguments in function call\n{}",

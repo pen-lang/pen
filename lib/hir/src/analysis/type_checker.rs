@@ -66,7 +66,7 @@ fn check_expression(
                 .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?;
 
             if call.arguments().len() != function_type.arguments().len() {
-                return Err(AnalysisError::WrongArgumentCount(call.position().clone()));
+                return Err(AnalysisError::ArgumentCount(call.position().clone()));
             }
 
             for (argument, type_) in call.arguments().iter().zip(function_type.arguments()) {
@@ -458,12 +458,22 @@ fn check_built_in_call(
     let position = call.position();
 
     match function.name() {
+        BuiltInFunctionName::Delete => {
+            let [map_type, key_type] = function_type.arguments() else {
+                return Err(AnalysisError::ArgumentCount(position.clone()));
+            };
+
+            check_subsumption(map_type, function_type.result(), context.types())?;
+
+            let map_type = type_canonicalizer::canonicalize_map(map_type, context.types())?
+                .ok_or_else(|| AnalysisError::MapExpected(map_type.clone()))?;
+
+            check_subsumption(&key_type, map_type.key(), context.types())?;
+        }
         BuiltInFunctionName::Race => {
-            let argument_type = if let [argument_type] = function_type.arguments() {
-                Ok(argument_type)
-            } else {
-                Err(AnalysisError::WrongArgumentCount(position.clone()))
-            }?;
+            let [argument_type] = function_type.arguments()  else {
+                return Err(AnalysisError::ArgumentCount(position.clone()));
+            };
             let argument_type =
                 type_canonicalizer::canonicalize_list(argument_type, context.types())?
                     .ok_or_else(|| AnalysisError::ListExpected(argument_type.clone()))?;
@@ -480,7 +490,7 @@ fn check_built_in_call(
                     return Err(AnalysisError::CollectionExpected(argument_type.clone()));
                 }
             } else {
-                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                return Err(AnalysisError::ArgumentCount(position.clone()));
             }
         }
         BuiltInFunctionName::Spawn => {
@@ -493,7 +503,7 @@ fn check_built_in_call(
                     return Err(AnalysisError::SpawnedFunctionArguments(position.clone()));
                 }
             } else {
-                return Err(AnalysisError::WrongArgumentCount(position.clone()));
+                return Err(AnalysisError::ArgumentCount(position.clone()));
             }
         }
         BuiltInFunctionName::Debug
@@ -3226,6 +3236,134 @@ mod tests {
 
     mod built_in_call {
         use super::*;
+
+        mod delete {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", map_type.clone())],
+                            map_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.clone().into(), map_type.key().clone()],
+                                        map_type.clone(),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![
+                                    Variable::new("x", Position::fake()).into(),
+                                    ByteString::new("", Position::fake()).into(),
+                                ],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    ),
+                ]))
+                .unwrap();
+            }
+
+            #[test]
+            fn check_key() {
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                assert!(matches!(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![Argument::new("x", map_type.clone())],
+                                map_type.clone(),
+                                Call::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![
+                                                map_type.clone().into(),
+                                                types::None::new(Position::fake()).into()
+                                            ],
+                                            map_type.clone(),
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                    ),
+                                    BuiltInFunction::new(
+                                        BuiltInFunctionName::Delete,
+                                        Position::fake()
+                                    ),
+                                    vec![
+                                        Variable::new("x", Position::fake()).into(),
+                                        ByteString::new("", Position::fake()).into(),
+                                    ],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        ),]
+                    )),
+                    Err(AnalysisError::TypesNotMatched(_, _))
+                ));
+            }
+
+            #[test]
+            fn check_result() {
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                assert!(matches!(
+                    check_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", map_type.clone())],
+                            types::None::new(Position::fake()),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.clone().into(), map_type.key().clone()],
+                                        types::None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![
+                                    Variable::new("x", Position::fake()).into(),
+                                    ByteString::new("", Position::fake()).into(),
+                                ],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    ),
+                ])),
+                    Err(AnalysisError::TypesNotMatched(_, _))
+                ));
+            }
+        }
 
         mod size {
             use super::*;

@@ -44,6 +44,12 @@ pub fn compile(
             vec![type_information::debug::compile_call(arguments[0].clone())],
         )
         .into(),
+        BuiltInFunctionName::Delete => mir::ir::Call::new(
+            type_::compile_function(context, &function_type)?,
+            mir::ir::Variable::new(&context.configuration()?.map_type.delete_function_name),
+            [].into_iter().chain(arguments).collect(),
+        )
+        .into(),
         BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
