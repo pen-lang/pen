@@ -1344,6 +1344,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-an-entry-of-a-map" class="md-nav__link">
+    Delete an entry of a map
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1827,6 +1834,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-an-entry-of-a-map" class="md-nav__link">
+    Delete an entry of a map
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1932,6 +1946,13 @@
 <p><em>Given</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(xs {string: number}) number {
   size(xs)
+}</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="delete-an-entry-of-a-map">Delete an entry of a map</h2>
+<p><em>Given</em> a file named "Foo.pen" with:</p>
+<pre class="pen"><code>f = \(xs {string: number}) {string: number} {
+  delete(xs, "foo")
 }</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
