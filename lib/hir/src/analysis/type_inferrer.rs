@@ -515,7 +515,7 @@ fn infer_built_in_call(
                             return Err(AnalysisError::ArgumentCount(position.clone()));
                         };
 
-                    types::Function::new(argument_types, result_type.clone(), position.clone())
+                    types::Function::new(argument_types, result_type, position.clone())
                 }
                 BuiltInFunctionName::Error => types::Function::new(
                     vec![types::Any::new(position.clone()).into()],

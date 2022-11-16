@@ -298,7 +298,7 @@ fn compile_application(
                 .collect::<Vec<_>>(),
                 &file_path_resolver::resolve_application_file(
                     main_package_directory,
-                    &application_configuration,
+                    application_configuration,
                 ),
             )?
             .as_bytes(),

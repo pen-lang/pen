@@ -28,7 +28,7 @@ pub fn build(
         .build_script_runner
         .run(
             &build_script_file,
-            &&file_path_resolver::resolve_test_executable_file(output_directory),
+            &file_path_resolver::resolve_test_executable_file(output_directory),
         )
         .map_err(|_| ApplicationError::Build)?;
 

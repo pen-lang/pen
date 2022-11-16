@@ -465,7 +465,7 @@ fn check_built_in_call(
 
             check_subsumption(map_type, function_type.result(), context.types())?;
             check_subsumption(
-                &key_type,
+                key_type,
                 type_canonicalizer::canonicalize_map(map_type, context.types())?
                     .ok_or_else(|| AnalysisError::MapExpected(map_type.clone()))?
                     .key(),
@@ -3302,7 +3302,7 @@ mod tests {
                                                 map_type.clone().into(),
                                                 types::None::new(Position::fake()).into()
                                             ],
-                                            map_type.clone(),
+                                            map_type,
                                             Position::fake(),
                                         )
                                         .into(),

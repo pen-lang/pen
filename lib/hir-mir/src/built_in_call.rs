@@ -76,8 +76,7 @@ pub fn compile(
                             position.clone(),
                         )
                         .into(),
-                    )?
-                    .into(),
+                    )?,
                 ],
             )
             .into()
