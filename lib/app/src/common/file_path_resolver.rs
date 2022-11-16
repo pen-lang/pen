@@ -1,6 +1,5 @@
 use super::package_id_calculator;
 use crate::{
-    application_configuration,
     common::module_id_calculator,
     infra::{
         FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
@@ -84,7 +83,7 @@ pub fn resolve_application_file(
     package_directory: &FilePath,
     application_configuration: &ApplicationConfiguration,
 ) -> FilePath {
-    main_package_directory.join(&FilePath::new([
+    package_directory.join(&FilePath::new([
         &application_configuration.application_filename
     ]))
 }
