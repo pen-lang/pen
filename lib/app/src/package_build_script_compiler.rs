@@ -84,7 +84,7 @@ pub fn compile(
     )
 }
 
-pub fn compile_main(
+fn compile_main(
     infrastructure: &Infrastructure,
     prelude_package_url: &url::Url,
     output_directory: &FilePath,
@@ -117,7 +117,7 @@ pub fn compile_main(
     Ok(build_script_file)
 }
 
-pub fn compile_modules(
+fn compile_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -204,7 +204,7 @@ pub fn compile_modules(
     Ok(build_script_file)
 }
 
-pub fn compile_test_modules(
+fn compile_test_modules(
     infrastructure: &Infrastructure,
     package_directory: &FilePath,
     output_directory: &FilePath,
@@ -240,7 +240,7 @@ pub fn compile_test_modules(
     Ok(build_script_file)
 }
 
-pub fn compile_application(
+fn compile_application(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
@@ -306,7 +306,7 @@ pub fn compile_application(
     Ok(build_script_file)
 }
 
-pub fn compile_test(
+fn compile_test(
     infrastructure: &Infrastructure,
     main_package_directory: &FilePath,
     output_directory: &FilePath,
@@ -372,7 +372,7 @@ pub fn compile_test(
     Ok(build_script_file)
 }
 
-pub fn compile_external(
+fn compile_external(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
@@ -406,7 +406,7 @@ pub fn compile_external(
     Ok(())
 }
 
-pub fn compile_prelude(
+fn compile_prelude(
     infrastructure: &Infrastructure,
     package_url: &url::Url,
     output_directory: &FilePath,
