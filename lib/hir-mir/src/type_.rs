@@ -115,6 +115,12 @@ pub fn compile_map(context: &Context) -> Result<mir::types::Record, CompileError
     ))
 }
 
+pub fn compile_map_context(context: &Context) -> Result<mir::types::Record, CompileError> {
+    Ok(mir::types::Record::new(
+        &context.configuration()?.map_type.context_type_name,
+    ))
+}
+
 pub fn compile_concrete_map(
     map: &types::Map,
     types: &FnvHashMap<String, Type>,

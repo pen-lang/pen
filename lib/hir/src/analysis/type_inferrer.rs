@@ -509,6 +509,14 @@ fn infer_built_in_call(
                     types::None::new(position.clone()),
                     position.clone(),
                 ),
+                BuiltInFunctionName::Delete => {
+                    let Some(result_type) =
+                        argument_types.first().cloned() else {
+                            return Err(AnalysisError::ArgumentCount(position.clone()));
+                        };
+
+                    types::Function::new(argument_types, result_type.clone(), position.clone())
+                }
                 BuiltInFunctionName::Error => types::Function::new(
                     vec![types::Any::new(position.clone()).into()],
                     types::Error::new(position.clone()),
@@ -517,7 +525,7 @@ fn infer_built_in_call(
                 BuiltInFunctionName::Race => {
                     let argument_type = argument_types
                         .first()
-                        .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?;
+                        .ok_or_else(|| AnalysisError::ArgumentCount(position.clone()))?;
                     let argument_type =
                         type_canonicalizer::canonicalize_list(argument_type, context.types())?
                             .ok_or_else(|| AnalysisError::ListExpected(argument_type.clone()))?;
@@ -559,7 +567,7 @@ fn infer_built_in_call(
                     let result_type = argument_types
                         .first()
                         .cloned()
-                        .ok_or_else(|| AnalysisError::WrongArgumentCount(position.clone()))?;
+                        .ok_or_else(|| AnalysisError::ArgumentCount(position.clone()))?;
 
                     types::Function::new(argument_types, result_type, position.clone())
                 }
@@ -1831,6 +1839,152 @@ mod tests {
                                 ),
                                 BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                                 vec![None::new(Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
+        fn infer_delete() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![Map::new(
+                                    map_type.key().clone(),
+                                    map_type.value().clone(),
+                                    vec![],
+                                    Position::fake()
+                                )
+                                .into(), ByteString::new("", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![
+                                            map_type.clone().into(),
+                                            types::ByteString::new(Position::fake()).into()
+                                        ],
+                                        map_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![
+                                    Map::new(
+                                        map_type.key().clone(),
+                                        map_type.value().clone(),
+                                        vec![],
+                                        Position::fake()
+                                    )
+                                    .into(),
+                                    ByteString::new("", Position::fake()).into()
+                                ],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
+        fn infer_delete_key_from_key_argument() {
+            let map_type = types::Map::new(
+                types::Union::new(
+                    types::ByteString::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                ),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![Map::new(
+                                    map_type.key().clone(),
+                                    map_type.value().clone(),
+                                    vec![],
+                                    Position::fake()
+                                )
+                                .into(), None::new( Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            map_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![
+                                            map_type.clone().into(),
+                                            types::None::new(Position::fake()).into()
+                                        ],
+                                        map_type.clone(),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Delete, Position::fake()),
+                                vec![
+                                    Map::new(
+                                        map_type.key().clone(),
+                                        map_type.value().clone(),
+                                        vec![],
+                                        Position::fake()
+                                    )
+                                    .into(),
+                                    None::new(Position::fake()).into()
+                                ],
                                 Position::fake()
                             ),
                             Position::fake(),

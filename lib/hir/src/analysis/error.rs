@@ -12,6 +12,7 @@ use std::{
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AnalysisError {
     AnyTypeBranch(Position),
+    ArgumentCount(Position),
     BuiltInFunctionNotCalled(Position),
     CollectionExpected(Type),
     DuplicateFunctionNames(Position, Position),
@@ -42,7 +43,6 @@ pub enum AnalysisError {
     UnusedErrorValue(Position),
     VariableNotFound(Variable),
     VariantExpected(Type),
-    WrongArgumentCount(Position),
 }
 
 impl AnalysisError {
@@ -72,6 +72,13 @@ impl Display for AnalysisError {
                 write!(
                     formatter,
                     "any type cannot be used for downcast\n{}",
+                    position
+                )
+            }
+            Self::ArgumentCount(position) => {
+                write!(
+                    formatter,
+                    "wrong number of arguments in function call\n{}",
                     position
                 )
             }
@@ -243,13 +250,6 @@ impl Display for AnalysisError {
                     formatter,
                     "union or any type expected\n{}",
                     Self::format_found_type_message(type_)
-                )
-            }
-            Self::WrongArgumentCount(position) => {
-                write!(
-                    formatter,
-                    "wrong number of arguments in function call\n{}",
-                    position
                 )
             }
         }
