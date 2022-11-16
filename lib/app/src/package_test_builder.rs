@@ -1,4 +1,5 @@
 use crate::{
+    common::file_path_resolver,
     error::ApplicationError,
     infra::{FilePath, Infrastructure},
     package_build_script_compiler, ApplicationConfiguration,
@@ -25,7 +26,10 @@ pub fn build(
 
     infrastructure
         .build_script_runner
-        .run(&build_script_file)
+        .run(
+            &build_script_file,
+            &&file_path_resolver::resolve_test_executable_file(output_directory),
+        )
         .map_err(|_| ApplicationError::Build)?;
 
     Ok(())

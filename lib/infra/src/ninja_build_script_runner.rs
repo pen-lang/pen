@@ -19,7 +19,11 @@ impl NinjaBuildScriptRunner {
 }
 
 impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
-    fn run(&self, build_script_file: &app::infra::FilePath) -> Result<(), Box<dyn Error>> {
+    fn run(
+        &self,
+        build_script_file: &app::infra::FilePath,
+        target_file: &app::infra::FilePath,
+    ) -> Result<(), Box<dyn Error>> {
         let build_script_file = self
             .file_path_converter
             .convert_to_os_path(build_script_file);
@@ -39,6 +43,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                 .arg("--quiet")
                 .arg("-f")
                 .arg(&build_script_file)
+                .arg(&self.file_path_converter.convert_to_os_path(target_file))
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;

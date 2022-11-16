@@ -1,8 +1,9 @@
 use super::application_configuration::ApplicationConfiguration;
 use crate::{
+    common::file_path_resolver,
     error::ApplicationError,
     infra::{FilePath, Infrastructure},
-    package_build_script_compiler,
+    package_build_script_compiler, PackageType,
 };
 use std::error::Error;
 
@@ -27,7 +28,25 @@ pub fn build(
 
     infrastructure
         .build_script_runner
-        .run(&build_script_file)
+        .run(
+            &build_script_file,
+            &if infrastructure
+                .package_configuration_reader
+                .read(main_package_directory)?
+                .type_()
+                == PackageType::Application
+            {
+                file_path_resolver::resolve_application_file(
+                    main_package_directory,
+                    application_configuration,
+                )
+            } else {
+                file_path_resolver::resolve_main_package_archive_file(
+                    output_directory,
+                    &infrastructure.file_path_configuration,
+                )
+            },
+        )
         .map_err(|_| ApplicationError::Build)?;
 
     Ok(())
