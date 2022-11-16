@@ -8,7 +8,7 @@ fi
 
 cd $(dirname $0)/..
 
-for file in $(git ls-files '**/Cargo.lock'); do
+for file in $(git ls-files Cargo.lock '**/Cargo.lock'); do
   (
     cd $(dirname $file)
     "$@"
