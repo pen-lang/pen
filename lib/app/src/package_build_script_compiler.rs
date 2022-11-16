@@ -296,9 +296,10 @@ fn compile_application(
                     ffi_package_url,
                 ))
                 .collect::<Vec<_>>(),
-                &main_package_directory.join(&FilePath::new([
-                    &application_configuration.application_filename
-                ])),
+                &file_path_resolver::resolve_application_file(
+                    main_package_directory,
+                    &application_configuration,
+                ),
             )?
             .as_bytes(),
     )?;
