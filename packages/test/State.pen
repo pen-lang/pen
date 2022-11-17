@@ -21,7 +21,7 @@ Get = \(s State) any {
   _pen_test_state_get(s)
 }
 
-# Get a value to a state.
+# Set a value to a state.
 Set = \(s State, x any) none {
   _pen_test_state_set(s, x)
 }
