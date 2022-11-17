@@ -5,6 +5,6 @@ extern crate alloc;
 use core::mem::transmute;
 
 #[ffi::bindgen]
-fn _pen_core_bit_and(x: ffi::Number, y: ffi::Number) -> ffi::Number {
+fn _pen_test_state_new() -> ffi::Number {
     unsafe { transmute(transmute::<_, u64>(x) & transmute::<_, u64>(y)) }
 }
