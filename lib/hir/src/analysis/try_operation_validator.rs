@@ -89,7 +89,6 @@ fn validate_expression(
                         validate(entry.value())?
                     }
                     MapElement::Map(expression) => validate(expression)?,
-                    MapElement::Removal(expression) => validate(expression)?,
                 }
             }
         }

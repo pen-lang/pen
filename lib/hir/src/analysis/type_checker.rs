@@ -294,12 +294,6 @@ fn check_expression(
                         check_subsumption(map_type.key(), map.key_type())?;
                         check_subsumption(map_type.value(), map.value_type())?;
                     }
-                    MapElement::Removal(expression) => {
-                        check_subsumption(
-                            &check_expression(expression, variables)?,
-                            map.key_type(),
-                        )?;
-                    }
                 }
             }
 
@@ -2570,71 +2564,6 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
                                 vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )
-                ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                )),
-            );
-        }
-
-        #[test]
-        fn check_key_removal() {
-            let map_type = types::Map::new(
-                types::None::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-
-            assert_eq!(
-                check_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            map_type,
-                            Map::new(
-                                types::None::new(Position::fake()),
-                                types::None::new(Position::fake()),
-                                vec![MapElement::Removal(None::new(Position::fake()).into())],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )
-                ])),
-                Ok(()),
-            );
-        }
-
-        #[test]
-        fn check_key_removal_with_wrong_key_type() {
-            let map_type = types::Map::new(
-                types::None::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-
-            assert_eq!(
-                check_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "x",
-                        Lambda::new(
-                            vec![],
-                            map_type,
-                            Map::new(
-                                types::None::new(Position::fake()),
-                                types::None::new(Position::fake()),
-                                vec![MapElement::Removal(
-                                    Number::new(42.0, Position::fake()).into()
-                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),
