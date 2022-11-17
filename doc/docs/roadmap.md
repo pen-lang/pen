@@ -26,11 +26,13 @@ Items are ordered by priority.
 - [x] Documentation generator
 - [x] Process management
 - [x] Reflection
+- [x] Mutable state
 - [ ] IDE/editor support
   - [ ] Language server
+- [ ] Metaprogramming
+  - [ ] Code generator
 - [ ] Serialization / deserialization
 - [ ] Package manager
-- [ ] Mutable state
   - [ ] Thread safety
 - [ ] Vector type
 - [ ] Web browser interface
