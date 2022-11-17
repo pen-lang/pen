@@ -1135,6 +1135,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#teststate-module" class="md-nav__link">
+    Test'State module
+  </a>
+  
+    <nav class="md-nav" aria-label="Test'State module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    State
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    Get
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set" class="md-nav__link">
+    Set
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1795,6 +1862,73 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#teststate-module" class="md-nav__link">
+    Test'State module
+  </a>
+  
+    <nav class="md-nav" aria-label="Test'State module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#types_1" class="md-nav__link">
+    Types
+  </a>
+  
+    <nav class="md-nav" aria-label="Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#state" class="md-nav__link">
+    State
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#functions_1" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#run" class="md-nav__link">
+    Run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    Get
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#set" class="md-nav__link">
+    Set
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1844,6 +1978,24 @@
 <p>Fail with an error immediately.
 This function is useful to make unreachable codes fail.</p>
 <pre class="pen"><code>\() error</code></pre>
+<h2 id="teststate-module"><code>Test'State</code> module</h2>
+<p>This module provides mutable states. They are useful to test certain kinds of side effects, such as I/O.</p>
+<h3 id="types_1">Types</h3>
+<h4 id="state"><code>State</code></h4>
+<p>A mutable state</p>
+<pre class="pen"><code>type State {
+  # ...
+}</code></pre>
+<h3 id="functions_1">Functions</h3>
+<h4 id="run"><code>Run</code></h4>
+<p>Run a function with a state.</p>
+<pre class="pen"><code>\(f \(State) none | error) none | error</code></pre>
+<h4 id="get"><code>Get</code></h4>
+<p>Get a value from a state.</p>
+<pre class="pen"><code>\(s State) any</code></pre>
+<h4 id="set"><code>Set</code></h4>
+<p>Set a value to a state.</p>
+<pre class="pen"><code>\(s State, x any) none</code></pre>
 
 
 
