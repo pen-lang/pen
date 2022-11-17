@@ -6,14 +6,14 @@ type State {
   state any
 }
 
-New = \() State {
-  _pen_test_state_new()
+Run = \(f \(State) none | error) none | error {
+  f(_pen_test_state_new())
 }
 
 Get = \(s State) any {
-  _pen_tet_state_get(s)
+  _pen_test_state_get(s)
 }
 
 Set = \(s State, x any) none {
-  _pen_tet_state_set(s, x)
+  _pen_test_state_set(s, x)
 }

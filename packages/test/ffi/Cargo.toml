@@ -8,4 +8,5 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
+crossbeam = "0.8.2"
 ffi = { package = "pen-ffi", version = "*" }
