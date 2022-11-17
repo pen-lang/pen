@@ -1,0 +1,12 @@
+[package]
+name = "test"
+version = "0.1.0"
+publish = false
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+crossbeam = "0.8.2"
+ffi = { package = "pen-ffi", version = "*" }

@@ -1,0 +1,42 @@
+import 'Assert
+import 'State { State }
+
+New = \() none | error {
+  State'Run(
+    \(s State) none | error {
+      none
+    },
+  )
+}
+
+Get = \() none | error {
+  State'Run(
+    \(s State) none | error {
+      Assert'Equal(State'Get(s), none)
+    },
+  )
+}
+
+Set = \() none | error {
+  State'Run(
+    \(s State) none | error {
+      State'Set(s, 42)
+
+      Assert'Equal(State'Get(s), 42)
+    },
+  )
+}
+
+SetTwice = \() none | error {
+  State'Run(
+    \(s State) none | error {
+      State'Set(s, 42)
+
+      Assert'Equal(State'Get(s), 42)?
+
+      State'Set(s, "foo")
+
+      Assert'Equal(State'Get(s), "foo")
+    },
+  )
+}
