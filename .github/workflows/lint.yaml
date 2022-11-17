@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/lint.sh -- -D warnings
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v1
+      - uses: Swatinem/rust-cache@v2
       - uses: raviqqe/enable-homebrew@main
       - run: tools/ci/github/setup.sh
       - run: tools/unused_dependencies.sh
