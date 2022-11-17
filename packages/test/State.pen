@@ -4,8 +4,6 @@ import foreign "c" _pen_test_state_new \() State
 import foreign "c" _pen_test_state_get \(State) any
 import foreign "c" _pen_test_state_set \(State, any) none
 
-import Reflect'Any
-
 # A mutable state
 type State {
   state any
