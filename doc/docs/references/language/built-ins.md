@@ -19,6 +19,14 @@ Its time complexity is O(n) for lists and O(1) for maps.
 \(map {a: b}) number
 ```
 
+### `delete`
+
+It deletes a key from a map.
+
+```pen
+\(map {k: v}, key k) {k: v}
+```
+
 ### `error`
 
 It creates an error with its source information.
