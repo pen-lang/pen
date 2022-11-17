@@ -143,12 +143,6 @@ You can create new maps from existing ones by spreading entries of the old ones 
 {string: number ...map, "foo": 1}
 ```
 
-You can also delete a key from a map omitting its value.
-
-```pen
-{string: number ...map, "foo"}
-```
-
 ## Records
 
 It combines multiple types into a single type. Each field of a record type is composed of its name and type.
