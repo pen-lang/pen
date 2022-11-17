@@ -40,6 +40,7 @@
     "lcov",
     "libc",
     "malloc",
+    "metaprogramming",
     "mkdocs",
     "modifiability",
     "mtriple",
