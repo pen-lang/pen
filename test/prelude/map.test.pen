@@ -153,6 +153,18 @@ DeleteKey = \() none | error {
   )
 }
 
+DeleteUnionKey = \() none | error {
+  Assert'Equal(
+    size(
+      [number | none
+        k
+        for k, _ in delete({number | none: none 1: none}, 1)
+      ],
+    ),
+    0,
+  )
+}
+
 Merge2Maps = \() none | error {
   Assert'Equal(
     Number'Sum(
