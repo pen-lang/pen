@@ -301,9 +301,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                         ast::MapElement::Map(element) => {
                             ir::MapElement::Map(compile_expression(element)?)
                         }
-                        ast::MapElement::Removal(element) => {
-                            ir::MapElement::Removal(compile_expression(element)?)
-                        }
                     })
                 })
                 .collect::<Result<_, _>>()?,

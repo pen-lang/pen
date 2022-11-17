@@ -85,7 +85,6 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
                         visit_expression(entry.value());
                     }
                     MapElement::Map(expression) => visit_expression(expression),
-                    MapElement::Removal(expression) => visit_expression(expression),
                 }
             }
         }

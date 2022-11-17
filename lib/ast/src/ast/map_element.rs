@@ -6,7 +6,6 @@ use position::Position;
 pub enum MapElement {
     Insertion(MapEntry),
     Map(Expression),
-    Removal(Expression),
 }
 
 impl MapElement {
@@ -14,7 +13,6 @@ impl MapElement {
         match self {
             Self::Insertion(entry) => entry.position(),
             Self::Map(expression) => expression.position(),
-            Self::Removal(expression) => expression.position(),
         }
     }
 }
