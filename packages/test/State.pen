@@ -1,19 +1,27 @@
+# This module provides mutable states. They are useful to test certain kinds of side effects, such as I/O.
+
 import foreign "c" _pen_test_state_new \() State
 import foreign "c" _pen_test_state_get \(State) any
 import foreign "c" _pen_test_state_set \(State, any) none
 
+import Reflect'Any
+
+# A mutable state
 type State {
   state any
 }
 
+# Run a function with a state.
 Run = \(f \(State) none | error) none | error {
   f(_pen_test_state_new())
 }
 
+# Get a value from a state.
 Get = \(s State) any {
   _pen_test_state_get(s)
 }
 
+# Get a value to a state.
 Set = \(s State, x any) none {
   _pen_test_state_set(s, x)
 }
