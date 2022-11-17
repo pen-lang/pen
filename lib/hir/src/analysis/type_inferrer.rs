@@ -290,9 +290,6 @@ fn infer_expression(
                             entry.position().clone(),
                         )),
                         MapElement::Map(map) => MapElement::Map(infer_expression(map, variables)?),
-                        MapElement::Removal(key) => {
-                            MapElement::Removal(infer_expression(key, variables)?)
-                        }
                     })
                 })
                 .collect::<Result<_, AnalysisError>>()?,

@@ -723,7 +723,6 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
                             ": ".into(),
                             compile_expression(context, entry.value()),
                         ]),
-                        MapElement::Removal(expression) => compile_expression(context, expression),
                     }),
                 ])
             })
@@ -3226,24 +3225,6 @@ mod tests {
                         .into()
                     ),
                     "{string: number \"foo\": 1, \"bar\": 2}"
-                );
-            }
-
-            #[test]
-            fn format_removal() {
-                assert_eq!(
-                    format(
-                        &Map::new(
-                            types::Reference::new("string", Position::fake()),
-                            types::Reference::new("number", Position::fake()),
-                            vec![MapElement::Removal(
-                                ByteString::new("foo", Position::fake()).into()
-                            )],
-                            Position::fake()
-                        )
-                        .into()
-                    ),
-                    "{string: number \"foo\"}"
                 );
             }
 

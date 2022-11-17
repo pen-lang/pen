@@ -882,7 +882,6 @@ fn map_element(input: Input) -> IResult<MapElement> {
             |(position, key, _, value)| MapEntry::new(key, value, position()).into(),
         ),
         map(preceded(sign("..."), cut(expression)), MapElement::Map),
-        map(expression, MapElement::Removal),
     ))(input)
 }
 
@@ -3263,18 +3262,6 @@ mod tests {
                         types::Reference::new("none", Position::fake()),
                         types::Reference::new("none", Position::fake()),
                         vec![MapElement::Map(
-                            Variable::new("none", Position::fake()).into(),
-                        )],
-                        Position::fake(),
-                    )
-                    .into(),
-                ),
-                (
-                    "{none:none none}",
-                    Map::new(
-                        types::Reference::new("none", Position::fake()),
-                        types::Reference::new("none", Position::fake()),
-                        vec![MapElement::Removal(
                             Variable::new("none", Position::fake()).into(),
                         )],
                         Position::fake(),

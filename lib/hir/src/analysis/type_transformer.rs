@@ -253,7 +253,6 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                         entry.position().clone(),
                     )),
                     MapElement::Map(map) => MapElement::Map(transform_expression(map)),
-                    MapElement::Removal(key) => MapElement::Removal(transform_expression(key)),
                 })
                 .collect(),
             map.position().clone(),

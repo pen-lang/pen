@@ -141,15 +141,24 @@ SetUnionKeys = \() none | error {
   none
 }
 
-RemoveKey = \() none | error {
+DeleteKey = \() none | error {
   Assert'Equal(
     Number'Sum(
       [number
         k
-        for k, _ in {number: none
-          1: none,
-          1,
-        }
+        for k, _ in delete({number: none 1: none}, 1)
+      ],
+    ),
+    0,
+  )
+}
+
+DeleteUnionKey = \() none | error {
+  Assert'Equal(
+    size(
+      [number | none
+        k
+        for k, _ in delete({number | none: none 1: none}, 1)
       ],
     ),
     0,
