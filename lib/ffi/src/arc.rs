@@ -3,7 +3,7 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use core::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
+use core::{alloc::Layout, borrow::Borrow, marker::PhantomData, ops::Deref, ptr::write};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -49,6 +49,18 @@ impl<T> Deref for Arc<T> {
     }
 }
 
+impl<T> AsRef<T> for Arc<T> {
+    fn as_ref(&self) -> &T {
+        self.deref()
+    }
+}
+
+impl<T> Borrow<T> for Arc<T> {
+    fn borrow(&self) -> &T {
+        self.deref()
+    }
+}
+
 impl<T> Clone for Arc<T> {
     fn clone(&self) -> Self {
         Self {
@@ -66,12 +78,6 @@ impl<T> Drop for Arc<T> {
 
 impl<T: Default> Default for Arc<T> {
     fn default() -> Self {
-        Self::new(T::default())
-    }
-}
-
-impl<T: ?Sized> AsRef for Arc<T> {
-    fn as_ref(&self) -> Self {
         Self::new(T::default())
     }
 }
