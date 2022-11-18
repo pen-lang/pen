@@ -31,6 +31,7 @@ Step = \(rs [[boolean]]) [[boolean]] | error {
 }
 
 stepRows = \(rs [[boolean]]) [[boolean]] | error {
+  # TODO Use a generalized if-list expression.
   if [r1, ...rs] = rs {
     if [r2, ...rs] = rs {
       if [r3, ...rs] = rs {
@@ -107,6 +108,7 @@ tail = \(cs [boolean]) [boolean] {
 }
 
 cellTuple = \(cs [boolean]) cellTuple | none {
+  # TODO Use a generalized if-list expression.
   if [c1, ...cs] = cs {
     if [c2, ...cs] = cs {
       if [c3, ...cs] = cs {
