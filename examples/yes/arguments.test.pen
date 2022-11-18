@@ -14,7 +14,7 @@ ParseOneArgument = \() none | error {
   Assert'Equal(args.Message, "foo")
 }
 
-ParseTwoArgument = \() none | error {
+ParseTwoArguments = \() none | error {
   args = arguments'Parse([string "foo", "bar"])
 
   Assert'Equal(args.Message, "foo bar")

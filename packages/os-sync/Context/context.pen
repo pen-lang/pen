@@ -94,6 +94,7 @@ UnsafeNew = \() Context {
       ReadDirectory: \(d string) [string] | error {
         ss = _pen_os_read_directory(d)?
 
+        # TODO Use list comprehension.
         [string if s = s() as string { s } else { "" } for s in ss]
       },
       CreateDirectory: _pen_os_create_directory,

@@ -47,6 +47,7 @@ run = \(ctx context) none | error {
 }
 
 arguments = \(f Flag'Set) arguments | error {
+  # TODO Use a generalized if-list expression.
   if [m, ...ss] = f.Positional {
     if [u, ...ss] = ss {
       arguments{
