@@ -40,27 +40,21 @@ Tick = \(g Game) Game | none {
   if snake'IsCrashed(s, g.field) {
     none
   } else if snake'Head(s) == frog'Position(g.frog) {
-    s = snake'Grow(s)
-    f = newFrog(g.entities, g.field, g.random)
-
-    Game{
-      ...g,
-      snake: s,
-      frog: f,
-      entities: {Position: Entity
-        ...putSnake({Position: Entity}, s, snake'Positions(s)),
-        frog'Position(f): f,
-      },
-    }
+    tickGame(g, snake'Grow(s), newFrog(g.entities, g.field, g.random))
   } else {
-    Game{
-      ...g,
-      snake: s,
-      entities: {Position: Entity
-        ...putSnake({Position: Entity}, s, snake'Positions(s)),
-        frog'Position(g.frog): g.frog,
-      },
-    }
+    tickGame(g, s, g.frog)
+  }
+}
+
+tickGame = \(g Game, s Snake, f Frog) Game {
+  Game{
+    ...g,
+    snake: s,
+    frog: f,
+    entities: {Position: Entity
+      ...putSnake({Position: Entity}, s, snake'Positions(s)),
+      frog'Position(f): f,
+    },
   }
 }
 
