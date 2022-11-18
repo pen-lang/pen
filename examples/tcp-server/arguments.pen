@@ -10,6 +10,6 @@ Parse = \(ss [string]) Arguments | error {
       Arguments{Host: s()}
     }
   } else {
-    error("too few arguments")
+    error("host not defined")
   }
 }
