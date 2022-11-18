@@ -63,3 +63,16 @@ PackDiamond = \() none | error {
 
   Assert'Equal(Number'Sum([number i().Value for i in is]), 42)
 }
+
+PackHeterogeneous = \() none | error {
+  is = knapsack'Pack(
+    Bag{Capacity: 3},
+    [Item
+      Item{Cost: 1, Value: 1},
+      Item{Cost: 1, Value: 2},
+      Item{Cost: 2, Value: 5},
+    ],
+  )
+
+  Assert'Equal(Number'Sum([number i().Value for i in is]), 7)
+}
