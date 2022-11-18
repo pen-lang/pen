@@ -6,13 +6,12 @@ pub use arc_buffer::*;
 use core::{
     alloc::Layout,
     borrow::Borrow,
-    fmt::{self, Display, Formatter},
+    fmt::{self, Debug, Display, Formatter},
     marker::PhantomData,
     ops::Deref,
     ptr::write,
 };
 
-#[derive(Debug)]
 #[repr(C)]
 pub struct Arc<T> {
     block: ArcBlock,
@@ -86,6 +85,12 @@ impl<T> Drop for Arc<T> {
 impl<T: Default> Default for Arc<T> {
     fn default() -> Self {
         Self::new(T::default())
+    }
+}
+
+impl<T: Debug> Debug for Arc<T> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}", self.as_ref())
     }
 }
 
