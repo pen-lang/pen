@@ -16,10 +16,10 @@ nameView = \(v View) boolean {
 
 validCharacters = \() [string] {
   [string
+    "-",
     ...[string
       Character'FromCodePoint(n())
       for n in Number'Range(Character'ToCodePoint("a"), Character'ToCodePoint("z"))
     ],
-    "-",
   ]
 }
