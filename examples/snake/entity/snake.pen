@@ -50,6 +50,7 @@ Positions = \(s Snake) [Position] {
 }
 
 positions = \(ps [Position], l number) [Position] {
+  # TODO Use an indexed list comprehension.
   if l == 0 {
     [Position]
   } else {
