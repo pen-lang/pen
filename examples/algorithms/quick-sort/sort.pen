@@ -12,6 +12,7 @@ Sort = \(ns [number]) [number] {
   }
 }
 
+# TODO Use a list comprehension.
 filter = \(ns [number], include \(number) boolean) [number] {
   if [n, ...ns] = ns {
     if include(n()) {
