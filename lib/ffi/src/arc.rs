@@ -3,7 +3,14 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use core::{alloc::Layout, borrow::Borrow, marker::PhantomData, ops::Deref, ptr::write};
+use core::{
+    alloc::Layout,
+    borrow::Borrow,
+    fmt::{self, Display, Formatter},
+    marker::PhantomData,
+    ops::Deref,
+    ptr::write,
+};
 
 #[derive(Debug)]
 #[repr(C)]
@@ -79,6 +86,12 @@ impl<T> Drop for Arc<T> {
 impl<T: Default> Default for Arc<T> {
     fn default() -> Self {
         Self::new(T::default())
+    }
+}
+
+impl<T: Display> Display for Arc<T> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", self.as_ref())
     }
 }
 
