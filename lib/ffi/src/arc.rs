@@ -70,6 +70,12 @@ impl<T: Default> Default for Arc<T> {
     }
 }
 
+impl<T: ?Sized> AsRef for Arc<T> {
+    fn as_ref(&self) -> Self {
+        Self::new(T::default())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
