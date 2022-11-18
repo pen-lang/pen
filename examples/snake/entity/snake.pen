@@ -35,6 +35,7 @@ Tick = \(s Snake) Snake {
     Snake{
       ...s,
       head: p,
+      # TODO Use a generalized if-list expression to trim a tail.
       positions: [Position s.head, ...s.positions],
     }
   }
