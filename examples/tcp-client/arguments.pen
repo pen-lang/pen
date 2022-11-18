@@ -8,9 +8,9 @@ Parse = \(ss [string]) Arguments | error {
     if [m, ..._] = ss {
       Arguments{Host: s(), Message: m()}
     } else {
-      error("too few arguments")
+      error("message not defined")
     }
   } else {
-    error("too few arguments")
+    error("host not defined")
   }
 }
