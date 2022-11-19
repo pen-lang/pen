@@ -271,6 +271,19 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.equal_function_name,
+                                types::Function::new(
+                                    vec![
+                                        equal_function_type.clone().into(),
+                                        list_type.clone(),
+                                        list_type.clone(),
+                                    ],
+                                    types::Boolean::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.maybe_equal_function_name,
                                 types::Function::new(
                                     vec![
@@ -308,7 +321,7 @@ mod tests {
                                 &COMPILE_CONFIGURATION.list_type.rest_function_name,
                                 types::Function::new(
                                     vec![first_rest_type],
-                                    list_type,
+                                    list_type.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -320,7 +333,7 @@ mod tests {
                                         equal_function_type.clone().into(),
                                         hash_function_type.clone().into(),
                                         equal_function_type.into(),
-                                        hash_function_type.into(),
+                                        hash_function_type.clone().into(),
                                     ],
                                     map_context_type.clone(),
                                     Position::fake(),
@@ -366,6 +379,15 @@ mod tests {
                                         types::Number::new(Position::fake()).into(),
                                         types::Number::new(Position::fake()).into(),
                                     ],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.hash.list_hash_function_name,
+                                types::Function::new(
+                                    vec![hash_function_type.into(), list_type],
                                     types::Number::new(Position::fake()),
                                     Position::fake(),
                                 ),
@@ -1273,6 +1295,35 @@ mod tests {
                             None,
                             BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                             vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_race() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
+                            vec![List::new(
+                                types::List::new(
+                                    types::None::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![],
+                                Position::fake(),
+                            ).into()],
                             Position::fake(),
                         ),
                         Position::fake(),
