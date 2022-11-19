@@ -276,14 +276,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         )
         .into(),
         ast::Expression::ListComprehension(comprehension) => {
-            if let Some(name) = comprehension.secondary_element_name() {
+            if let Some(value_name) = comprehension.secondary_element_name() {
                 ir::MapIterationComprehension::new(
                     None,
                     None,
-                    type_::compile(comprehension.element_type()),
+                    type_::compile(comprehension.type_()),
                     compile_expression(comprehension.element())?,
-                    comprehension.key_name(),
-                    comprehension.value_name(),
+                    comprehension.element_name(),
+                    value_name,
                     compile_expression(comprehension.map())?,
                     comprehension.position().clone(),
                 )
