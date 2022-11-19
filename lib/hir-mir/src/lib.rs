@@ -787,8 +787,9 @@ mod tests {
                         vec![Argument::new("x", list_type.clone())],
                         list_type,
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
+                            None,
                             Call::new(
                                 None,
                                 Variable::new("x", Position::fake()),
@@ -796,6 +797,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),

@@ -257,8 +257,9 @@ fn infer_expression(
                 .ok_or(AnalysisError::ListExpected(type_))?;
 
             ListComprehension::new(
-                Some(list_type.element().clone()),
                 comprehension.output_type().clone(),
+                Some(list_type.element().clone()),
+                None,
                 infer_expression(
                     comprehension.element(),
                     &variables.insert(
@@ -272,6 +273,7 @@ fn infer_expression(
                     ),
                 )?,
                 comprehension.element_name(),
+                comprehension.secondary_name().map(String::from),
                 list,
                 comprehension.position().clone(),
             )
@@ -813,8 +815,9 @@ mod tests {
                         vec![],
                         list_type.clone(),
                         ListComprehension::new(
-                            None,
                             element_type.clone(),
+                            None,
+                            None,
                             Let::new(
                                 Some("y".into()),
                                 None,
@@ -828,6 +831,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             List::new(element_type.clone(), vec![], Position::fake()),
                             Position::fake(),
                         ),
@@ -843,8 +847,9 @@ mod tests {
                         vec![],
                         list_type,
                         ListComprehension::new(
-                            Some(element_type.clone().into()),
                             element_type.clone(),
+                            Some(element_type.clone().into()),
+                            None,
                             Let::new(
                                 Some("y".into()),
                                 Some(element_type.clone().into()),
@@ -865,6 +870,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             List::new(element_type, vec![], Position::fake()),
                             Position::fake(),
                         ),

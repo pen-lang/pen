@@ -2258,8 +2258,9 @@ mod tests {
                             vec![],
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
-                                Some(element_type.clone().into()),
                                 element_type.clone(),
+                                Some(element_type.clone().into()),
+                                None,
                                 Call::new(
                                     Some(
                                         types::Function::new(
@@ -2274,6 +2275,7 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 "x",
+                                None,
                                 List::new(element_type, vec![], Position::fake()),
                                 Position::fake(),
                             ),
@@ -2297,8 +2299,9 @@ mod tests {
                             vec![],
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
-                                Some(element_type.clone().into()),
                                 element_type.clone(),
+                                Some(element_type.clone().into()),
+                                None,
                                 Call::new(
                                     Some(
                                         types::Function::new(
@@ -2313,6 +2316,7 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 "x",
+                                None,
                                 List::new(
                                     element_type,
                                     vec![ListElement::Single(

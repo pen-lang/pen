@@ -167,8 +167,9 @@ fn transform_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
-            comprehension.input_type().cloned(),
             comprehension.output_type().clone(),
+            comprehension.input_type().cloned(),
+            comprehension.secondary_input_type().cloned(),
             transform_expression(comprehension.element(), &|variable| {
                 if comprehension.element_name() == variable.name() {
                     variable.clone().into()
@@ -177,6 +178,7 @@ fn transform_expression(
                 }
             }),
             comprehension.element_name(),
+            comprehension.secondary_name().map(String::from),
             transform_expression(comprehension.list(), transform),
             comprehension.position().clone(),
         )
@@ -466,10 +468,12 @@ mod tests {
                 vec![],
                 types::None::new(Position::fake()),
                 ListComprehension::new(
-                    None,
                     types::None::new(Position::fake()),
+                    None,
+                    None,
                     Variable::new("x", Position::fake()),
                     "x",
+                    None,
                     Variable::new("xs", Position::fake()),
                     Position::fake(),
                 ),

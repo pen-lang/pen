@@ -283,8 +283,9 @@ fn transform_expression(
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             ListComprehension::new(
-                comprehension.input_type().cloned(),
                 comprehension.output_type().clone(),
+                comprehension.input_type().cloned(),
+                comprehension.secondary_input_type().cloned(),
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.output_type(),
@@ -294,6 +295,7 @@ fn transform_expression(
                     ),
                 )?,
                 comprehension.element_name(),
+                comprehension.secondary_name().map(String::from),
                 transform_expression(comprehension.list(), variables)?,
                 position.clone(),
             )
@@ -1446,10 +1448,12 @@ mod tests {
                             vec![],
                             list_type.clone(),
                             ListComprehension::new(
-                                Some(types::None::new(Position::fake()).into()),
                                 union_type.clone(),
+                                Some(types::None::new(Position::fake()).into()),
+                                None,
                                 None::new(Position::fake()),
                                 "x",
+                                None,
                                 empty_list.clone(),
                                 Position::fake(),
                             ),
@@ -1465,8 +1469,9 @@ mod tests {
                             vec![],
                             list_type,
                             ListComprehension::new(
-                                Some(types::None::new(Position::fake()).into()),
                                 union_type.clone(),
+                                Some(types::None::new(Position::fake()).into()),
+                                None,
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),
                                     union_type,
@@ -1474,6 +1479,7 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 "x",
+                                None,
                                 empty_list,
                                 Position::fake(),
                             ),
@@ -1504,8 +1510,9 @@ mod tests {
                             vec![],
                             list_type.clone(),
                             ListComprehension::new(
-                                Some(types::None::new(Position::fake()).into()),
                                 union_type.clone(),
+                                Some(types::None::new(Position::fake()).into()),
+                                None,
                                 Call::new(
                                     Some(
                                         types::Function::new(
@@ -1520,6 +1527,7 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 "x",
+                                None,
                                 empty_list.clone(),
                                 Position::fake(),
                             ),
@@ -1535,8 +1543,9 @@ mod tests {
                             vec![],
                             list_type,
                             ListComprehension::new(
-                                Some(types::None::new(Position::fake()).into()),
                                 union_type.clone(),
+                                Some(types::None::new(Position::fake()).into()),
+                                None,
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),
                                     union_type,
@@ -1556,6 +1565,7 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 "x",
+                                None,
                                 empty_list,
                                 Position::fake(),
                             ),

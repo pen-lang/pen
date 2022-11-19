@@ -370,14 +370,16 @@ mod tests {
                             Position::fake()
                         ),
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
+                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             Variable::new("xs", Position::fake()),
                             Position::fake()
                         ),
@@ -404,10 +406,12 @@ mod tests {
                             Position::fake()
                         ),
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
+                            None,
                             None::new(Position::fake()),
                             "x",
+                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("xs", Position::fake()),

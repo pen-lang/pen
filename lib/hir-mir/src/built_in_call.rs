@@ -96,8 +96,9 @@ pub fn compile(
                 vec![expression::compile(
                     context,
                     &ListComprehension::new(
-                        Some(list_type.clone().into()),
                         any_list_type,
+                        Some(list_type.clone().into()),
+                        None,
                         Call::new(
                             Some(types::Function::new(vec![], list_type, position.clone()).into()),
                             Variable::new(ELEMENT_NAME, position.clone()),
@@ -105,6 +106,7 @@ pub fn compile(
                             position.clone(),
                         ),
                         ELEMENT_NAME,
+                        None,
                         call.arguments()[0].clone(),
                         position.clone(),
                     )
