@@ -834,20 +834,15 @@ fn list_comprehension(input: Input) -> IResult<Expression> {
                 ))),
             )),
             |(position, _, type_, element, _, (element_name, value_name, _, iterator, _))| {
-                if let Some(value_name) = value_name {
-                    MapIterationComprehension::new(
-                        type_,
-                        element,
-                        element_name,
-                        value_name,
-                        iterator,
-                        position(),
-                    )
-                    .into()
-                } else {
-                    ListComprehension::new(type_, element, element_name, iterator, position())
-                        .into()
-                }
+                ListComprehension::new(
+                    type_,
+                    element,
+                    element_name,
+                    value_name,
+                    iterator,
+                    position(),
+                )
+                .into()
             },
         ),
     )(input)
