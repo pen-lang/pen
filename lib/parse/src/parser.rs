@@ -3164,6 +3164,7 @@ mod tests {
                         types::Reference::new("none", Position::fake()),
                         Variable::new("x", Position::fake()),
                         "x",
+                        None,
                         Variable::new("xs", Position::fake()),
                         Position::fake(),
                     ),
@@ -3182,6 +3183,7 @@ mod tests {
                             Position::fake(),
                         ),
                         "x",
+                        None,
                         Variable::new("xs", Position::fake()),
                         Position::fake(),
                     ),
@@ -3274,11 +3276,11 @@ mod tests {
                 list_comprehension(input("[none v for k, v in xs]", ""))
                     .unwrap()
                     .1,
-                MapIterationComprehension::new(
+                ListComprehension::new(
                     types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
                     "k",
-                    "v",
+                    Some("v".into()),
                     Variable::new("xs", Position::fake()),
                     Position::fake(),
                 )
