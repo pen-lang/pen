@@ -829,6 +829,96 @@ mod tests {
             ]))
             .unwrap();
         }
+
+        #[test]
+        fn compile_nested_list_comprehension() {
+            let input_list_type = types::List::new(
+                types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+            let output_list_type = types::List::new(
+                types::List::new(types::None::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(
+                &Module::empty()
+                    .set_function_declarations(vec![FunctionDeclaration::new(
+                        "g",
+                        types::Function::new(vec![], input_list_type.clone(), Position::fake()),
+                        Position::fake(),
+                    )])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            output_list_type.clone(),
+                            ListComprehension::new(
+                                output_list_type.element().clone(),
+                                None,
+                                ListComprehension::new(
+                                    types::None::new(Position::fake()),
+                                    None,
+                                    None::new(Position::fake()),
+                                    "x",
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        vec![],
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                "xs",
+                                None,
+                                Call::new(
+                                    None,
+                                    Variable::new("g", Position::fake()),
+                                    vec![],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_comprehension_with_nested_list_type_with_element_of_any_type() {
+            let input_list_type = types::List::new(
+                types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+            let output_list_type =
+                types::List::new(types::None::new(Position::fake()), Position::fake());
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", input_list_type.clone())],
+                        output_list_type.clone(),
+                        ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None,
+                            None::new(Position::fake()),
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
     }
 
     mod map {
