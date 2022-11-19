@@ -283,7 +283,6 @@ fn transform_expression(
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
             let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
                 .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?;
-            let input_type = list_type.element();
 
             ListComprehension::new(
                 comprehension.type_().clone(),
@@ -293,7 +292,8 @@ fn transform_expression(
                     comprehension.type_(),
                     &variables.insert(
                         comprehension.primary_name().into(),
-                        types::Function::new(vec![], input_type.clone(), position.clone()).into(),
+                        types::Function::new(vec![], list_type.element().clone(), position.clone())
+                            .into(),
                     ),
                 )?,
                 comprehension.primary_name(),
