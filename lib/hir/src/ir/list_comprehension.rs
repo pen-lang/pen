@@ -16,6 +16,7 @@ pub struct ListComprehension {
 }
 
 impl ListComprehension {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         output_type: impl Into<Type>,
         primary_input_type: Option<Type>,
