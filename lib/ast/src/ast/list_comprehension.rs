@@ -17,16 +17,16 @@ impl ListComprehension {
     pub fn new(
         type_: impl Into<Type>,
         element: impl Into<Expression>,
-        primary_element_name: impl Into<String>,
-        secondary_element_name: Option<String>,
+        primary_name: impl Into<String>,
+        secondary_name: Option<String>,
         list: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
             element: element.into().into(),
-            primary_element_name: primary_element_name.into(),
-            secondary_element_name,
+            primary_element_name: primary_name.into(),
+            secondary_element_name: secondary_name,
             list: list.into().into(),
             position,
         }

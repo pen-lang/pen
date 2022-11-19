@@ -257,7 +257,7 @@ fn infer_expression(
                 .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?;
 
             ListComprehension::new(
-                comprehension.output_type().clone(),
+                comprehension.type_().clone(),
                 Some(type_.clone()),
                 infer_expression(
                     comprehension.element(),

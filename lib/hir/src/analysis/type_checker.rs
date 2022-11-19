@@ -253,7 +253,7 @@ fn check_expression(
             let iteratee_type = comprehension
                 .iteratee_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
+            let list_type = type_canonicalizer::canonicalize_list(&iteratee_type, context.types())?
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
@@ -265,15 +265,15 @@ fn check_expression(
                             .into(),
                     ),
                 )?,
-                comprehension.output_type(),
+                comprehension.type_(),
             )?;
 
             check_subsumption(
                 &check_expression(comprehension.iteratee(), variables)?,
-                iteratee_type,
+                &iteratee_type,
             )?;
 
-            types::List::new(comprehension.output_type().clone(), position.clone()).into()
+            types::List::new(comprehension.type_().clone(), position.clone()).into()
         }
         Expression::Map(map) => {
             for element in map.elements() {

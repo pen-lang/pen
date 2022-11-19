@@ -286,11 +286,11 @@ fn transform_expression(
             let input_type = list_type.element();
 
             ListComprehension::new(
-                comprehension.output_type().clone(),
+                comprehension.type_().clone(),
                 comprehension.iteratee_type().cloned(),
                 transform_and_coerce_expression(
                     comprehension.element(),
-                    comprehension.output_type(),
+                    comprehension.type_(),
                     &variables.insert(
                         comprehension.primary_name().into(),
                         types::Function::new(vec![], input_type.clone(), position.clone()).into(),

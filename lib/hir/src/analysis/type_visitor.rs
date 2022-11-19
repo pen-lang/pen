@@ -152,7 +152,7 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
             }
         }
         Expression::ListComprehension(comprehension) => {
-            visit_type(comprehension.output_type(), visit);
+            visit_type(comprehension.type_(), visit);
 
             if let Some(type_) = comprehension.iteratee_type() {
                 visit_type(type_, visit);

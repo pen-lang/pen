@@ -167,7 +167,7 @@ fn transform_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
-            comprehension.output_type().clone(),
+            comprehension.type_().clone(),
             comprehension.iteratee_type().cloned(),
             transform_expression(comprehension.element(), &|variable| {
                 if comprehension.primary_name() == variable.name() {

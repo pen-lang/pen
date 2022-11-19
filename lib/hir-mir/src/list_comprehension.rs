@@ -21,7 +21,7 @@ pub fn compile(
     let input_list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
         .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?;
     let input_element_type = input_list_type.element();
-    let output_element_type = comprehension.output_type();
+    let output_element_type = comprehension.type_();
     let list_type = type_::compile_list(context)?;
 
     Ok(mir::ir::Call::new(
