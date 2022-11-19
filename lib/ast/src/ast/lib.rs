@@ -477,7 +477,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                             .into_iter()
                             .chain(
                                 comprehension
-                                    .secondary_name()
+                                    .secondary_element_name()
                                     .into_iter()
                                     .flat_map(|name| [", ".into(), name.into()]),
                             )

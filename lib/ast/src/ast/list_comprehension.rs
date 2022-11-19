@@ -40,11 +40,11 @@ impl ListComprehension {
         &self.element
     }
 
-    pub fn element_name(&self) -> &str {
+    pub fn primary_name(&self) -> &str {
         &self.primary_element_name
     }
 
-    pub fn secondary_element_name(&self) -> Option<&str> {
+    pub fn secondary_name(&self) -> Option<&str> {
         self.secondary_element_name.as_deref()
     }
 
