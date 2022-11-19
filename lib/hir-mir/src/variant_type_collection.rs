@@ -345,8 +345,8 @@ mod tests {
                 ),
             ])),
             [
-                input_list_type.element().clone().into(),
-                output_list_type.element().clone().into()
+                input_list_type.element().clone(),
+                output_list_type.element().clone()
             ]
             .into_iter()
             .collect()

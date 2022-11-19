@@ -845,7 +845,7 @@ mod tests {
                 &Module::empty()
                     .set_function_declarations(vec![FunctionDeclaration::new(
                         "g",
-                        types::Function::new(vec![], input_list_type.clone(), Position::fake()),
+                        types::Function::new(vec![], input_list_type, Position::fake()),
                         Position::fake(),
                     )])
                     .set_function_definitions(vec![FunctionDefinition::fake(
@@ -901,8 +901,8 @@ mod tests {
                 FunctionDefinition::fake(
                     "f",
                     Lambda::new(
-                        vec![Argument::new("xs", input_list_type.clone())],
-                        output_list_type.clone(),
+                        vec![Argument::new("xs", input_list_type)],
+                        output_list_type,
                         ListComprehension::new(
                             types::None::new(Position::fake()),
                             None,
