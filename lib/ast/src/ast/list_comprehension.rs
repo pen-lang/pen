@@ -48,7 +48,7 @@ impl ListComprehension {
         self.secondary_element_name.as_deref()
     }
 
-    pub fn list(&self) -> &Expression {
+    pub fn iteratee(&self) -> &Expression {
         &self.list
     }
 

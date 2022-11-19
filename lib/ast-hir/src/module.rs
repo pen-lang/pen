@@ -284,7 +284,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                     compile_expression(comprehension.element())?,
                     comprehension.element_name(),
                     value_name,
-                    compile_expression(comprehension.map())?,
+                    compile_expression(comprehension.iteratee())?,
                     comprehension.position().clone(),
                 )
                 .into()
@@ -294,7 +294,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                     type_::compile(comprehension.type_()),
                     compile_expression(comprehension.element())?,
                     comprehension.element_name(),
-                    compile_expression(comprehension.list())?,
+                    compile_expression(comprehension.iteratee())?,
                     comprehension.position().clone(),
                 )
                 .into()

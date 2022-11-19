@@ -483,7 +483,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                             )
                             .chain([
                                 " in ".into(),
-                                compile_expression(context, comprehension.list()),
+                                compile_expression(context, comprehension.iteratee()),
                             ]),
                     )
                 }),
