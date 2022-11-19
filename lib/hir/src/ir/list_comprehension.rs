@@ -6,8 +6,7 @@ use std::rc::Rc;
 #[derive(Clone, Debug, PartialEq)]
 pub struct ListComprehension {
     output_type: Type,
-    primary_input_type: Option<Type>,
-    secondary_input_type: Option<Type>,
+    iteratee_type: Option<Type>,
     element: Rc<Expression>,
     primary_name: String,
     secondary_name: Option<String>,
@@ -18,9 +17,8 @@ pub struct ListComprehension {
 impl ListComprehension {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        output_type: impl Into<Type>,
-        primary_input_type: Option<Type>,
-        secondary_input_type: Option<Type>,
+        element_type: impl Into<Type>,
+        iteratee_type: Option<Type>,
         element: impl Into<Expression>,
         primary_name: impl Into<String>,
         secondary_name: Option<String>,
@@ -28,9 +26,8 @@ impl ListComprehension {
         position: Position,
     ) -> Self {
         Self {
-            output_type: output_type.into(),
-            primary_input_type,
-            secondary_input_type,
+            output_type: element_type.into(),
+            iteratee_type,
             element: element.into().into(),
             primary_name: primary_name.into(),
             secondary_name,
@@ -43,12 +40,8 @@ impl ListComprehension {
         &self.output_type
     }
 
-    pub fn primary_input_type(&self) -> Option<&Type> {
-        self.primary_input_type.as_ref()
-    }
-
-    pub fn secondary_input_type(&self) -> Option<&Type> {
-        self.secondary_input_type.as_ref()
+    pub fn iteratee_type(&self) -> Option<&Type> {
+        self.iteratee_type.as_ref()
     }
 
     pub fn element(&self) -> &Expression {

@@ -292,7 +292,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 ir::ListComprehension::new(
                     type_::compile(comprehension.type_()),
                     None,
-                    None,
                     compile_expression(comprehension.element())?,
                     comprehension.primary_name(),
                     comprehension.secondary_name().map(String::from),

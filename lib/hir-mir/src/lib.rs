@@ -789,7 +789,6 @@ mod tests {
                         ListComprehension::new(
                             types::None::new(Position::fake()),
                             None,
-                            None,
                             Call::new(
                                 None,
                                 Variable::new("x", Position::fake()),

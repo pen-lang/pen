@@ -1,6 +1,6 @@
 use crate::{context::Context, downcast, expression, type_, CompileError};
 use hir::{
-    analysis::AnalysisError,
+    analysis::{type_canonicalizer, AnalysisError},
     ir::*,
     types::{self, Type},
 };
@@ -15,9 +15,12 @@ pub fn compile(
     const LIST_NAME: &str = "$list";
 
     let position = comprehension.position();
-    let input_element_type = comprehension
-        .primary_input_type()
+    let iteratee_type = comprehension
+        .iteratee_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+    let input_list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
+        .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?;
+    let input_element_type = input_list_type.element();
     let output_element_type = comprehension.output_type();
     let list_type = type_::compile_list(context)?;
 

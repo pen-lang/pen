@@ -234,8 +234,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
             transform(comprehension.output_type()),
-            comprehension.primary_input_type().map(transform),
-            comprehension.secondary_input_type().map(transform),
+            comprehension.iteratee_type().map(transform),
             transform_expression(comprehension.element()),
             comprehension.primary_name(),
             comprehension.secondary_name().map(String::from),

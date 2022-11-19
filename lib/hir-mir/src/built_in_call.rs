@@ -98,7 +98,6 @@ pub fn compile(
                     &ListComprehension::new(
                         any_list_type,
                         Some(list_type.clone().into()),
-                        None,
                         Call::new(
                             Some(types::Function::new(vec![], list_type, position.clone()).into()),
                             Variable::new(ELEMENT_NAME, position.clone()),

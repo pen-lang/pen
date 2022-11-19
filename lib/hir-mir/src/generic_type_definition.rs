@@ -405,8 +405,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         ListComprehension::new(
                             types::None::new(Position::fake()),
-                            Some(union_type.clone().into()),
-                            None,
+                            Some(types::List::new(union_type.clone(), Position::fake()).into()),
                             None::new(Position::fake()),
                             "_",
                             None,
@@ -448,8 +447,7 @@ mod tests {
                         types::None::new(Position::fake()),
                         ListComprehension::new(
                             union_type,
-                            Some(types::None::new(Position::fake()).into()),
-                            None,
+                            Some(list_type.clone().into()),
                             None::new(Position::fake()),
                             "_",
                             None,

@@ -61,7 +61,6 @@ pub fn collect_comparable_parameter_types(
             types.insert(list.type_());
         }
         Expression::ListComprehension(comprehension) => {
-            types.extend(comprehension.primary_input_type());
             types.insert(comprehension.output_type());
         }
         Expression::Map(map) => {

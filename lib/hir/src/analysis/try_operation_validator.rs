@@ -372,7 +372,6 @@ mod tests {
                         ListComprehension::new(
                             types::None::new(Position::fake()),
                             None,
-                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("x", Position::fake()),
@@ -407,7 +406,6 @@ mod tests {
                         ),
                         ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None,
                             None,
                             None::new(Position::fake()),
                             "x",

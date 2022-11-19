@@ -251,15 +251,14 @@ fn infer_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => {
-            let list = infer_expression(comprehension.iteratee(), variables)?;
-            let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
+            let iteratee = infer_expression(comprehension.iteratee(), variables)?;
+            let type_ = type_extractor::extract_from_expression(context, &iteratee, variables)?;
             let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or(AnalysisError::ListExpected(type_))?;
+                .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?;
 
             ListComprehension::new(
                 comprehension.output_type().clone(),
-                Some(list_type.element().clone()),
-                None,
+                Some(type_.clone()),
                 infer_expression(
                     comprehension.element(),
                     &variables.insert(
@@ -274,7 +273,7 @@ fn infer_expression(
                 )?,
                 comprehension.primary_name(),
                 comprehension.secondary_name().map(String::from),
-                list,
+                iteratee,
                 comprehension.position().clone(),
             )
             .into()
@@ -817,7 +816,6 @@ mod tests {
                         ListComprehension::new(
                             element_type.clone(),
                             None,
-                            None,
                             Let::new(
                                 Some("y".into()),
                                 None,
@@ -845,11 +843,10 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        list_type,
+                        list_type.clone(),
                         ListComprehension::new(
                             element_type.clone(),
-                            Some(element_type.clone().into()),
-                            None,
+                            Some(list_type.clone().into()),
                             Let::new(
                                 Some("y".into()),
                                 Some(element_type.clone().into()),

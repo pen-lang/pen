@@ -250,8 +250,10 @@ fn check_expression(
         }
         Expression::ListComprehension(comprehension) => {
             let position = comprehension.position();
-            let input_type = comprehension
-                .primary_input_type()
+            let iteratee_type = comprehension
+                .iteratee_type()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+            let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
@@ -259,7 +261,8 @@ fn check_expression(
                     comprehension.element(),
                     &variables.insert(
                         comprehension.primary_name().into(),
-                        types::Function::new(vec![], input_type.clone(), position.clone()).into(),
+                        types::Function::new(vec![], list_type.element().clone(), position.clone())
+                            .into(),
                     ),
                 )?,
                 comprehension.output_type(),
@@ -267,7 +270,7 @@ fn check_expression(
 
             check_subsumption(
                 &check_expression(comprehension.iteratee(), variables)?,
-                &types::List::new(input_type.clone(), position.clone()).into(),
+                iteratee_type,
             )?;
 
             types::List::new(comprehension.output_type().clone(), position.clone()).into()
@@ -2250,6 +2253,7 @@ mod tests {
         #[test]
         fn check_list_comprehension() {
             let element_type = types::None::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
 
             check_module(&Module::empty().set_function_definitions(vec![
                     FunctionDefinition::fake(
@@ -2259,8 +2263,7 @@ mod tests {
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
                                 element_type.clone(),
-                                Some(element_type.clone().into()),
-                                None,
+                                Some(list_type.clone().into()),
                                 Call::new(
                                     Some(
                                         types::Function::new(
@@ -2290,6 +2293,7 @@ mod tests {
         #[test]
         fn fail_to_check_list_in_list_comprehension() {
             let element_type = types::None::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
 
             assert_eq!(
                 check_module(&Module::empty().set_function_definitions(
@@ -2300,8 +2304,7 @@ mod tests {
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
                                 element_type.clone(),
-                                Some(element_type.clone().into()),
-                                None,
+                                Some(list_type.clone().into()),
                                 Call::new(
                                     Some(
                                         types::Function::new(

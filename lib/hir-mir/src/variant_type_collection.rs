@@ -49,7 +49,6 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
             lower_types.insert(list.type_().clone());
         }
         Expression::ListComprehension(comprehension) => {
-            lower_types.insert(comprehension.primary_input_type().unwrap().clone());
             lower_types.insert(comprehension.output_type().clone());
         }
         Expression::Map(map) => {
