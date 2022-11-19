@@ -79,7 +79,7 @@ fn validate_expression(
         }
         Expression::ListComprehension(comprehension) => {
             validate_expression(context, comprehension.element(), None)?;
-            validate_expression(context, comprehension.list(), None)?;
+            validate_expression(context, comprehension.iteratee(), None)?;
         }
         Expression::Map(map) => {
             for element in map.elements() {

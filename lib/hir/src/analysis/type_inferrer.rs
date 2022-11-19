@@ -251,7 +251,7 @@ fn infer_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => {
-            let list = infer_expression(comprehension.list(), variables)?;
+            let list = infer_expression(comprehension.iteratee(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
             let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
                 .ok_or(AnalysisError::ListExpected(type_))?;
@@ -263,7 +263,7 @@ fn infer_expression(
                 infer_expression(
                     comprehension.element(),
                     &variables.insert(
-                        comprehension.element_name().into(),
+                        comprehension.primary_name().into(),
                         types::Function::new(
                             vec![],
                             list_type.element().clone(),
@@ -272,7 +272,7 @@ fn infer_expression(
                         .into(),
                     ),
                 )?,
-                comprehension.element_name(),
+                comprehension.primary_name(),
                 comprehension.secondary_name().map(String::from),
                 list,
                 comprehension.position().clone(),

@@ -234,12 +234,12 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
             transform(comprehension.output_type()),
-            comprehension.input_type().map(transform),
+            comprehension.primary_input_type().map(transform),
             comprehension.secondary_input_type().map(transform),
             transform_expression(comprehension.element()),
-            comprehension.element_name(),
+            comprehension.primary_name(),
             comprehension.secondary_name().map(String::from),
-            transform_expression(comprehension.list()),
+            transform_expression(comprehension.iteratee()),
             comprehension.position().clone(),
         )
         .into(),

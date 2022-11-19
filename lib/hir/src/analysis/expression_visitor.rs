@@ -75,7 +75,7 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
         }
         Expression::ListComprehension(comprehension) => {
             visit_expression(comprehension.element());
-            visit_expression(comprehension.list());
+            visit_expression(comprehension.iteratee());
         }
         Expression::Map(map) => {
             for element in map.elements() {

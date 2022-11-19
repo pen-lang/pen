@@ -38,7 +38,11 @@ impl ListComprehension {
         }
     }
 
-    pub fn input_type(&self) -> Option<&Type> {
+    pub fn output_type(&self) -> &Type {
+        &self.output_type
+    }
+
+    pub fn primary_input_type(&self) -> Option<&Type> {
         self.primary_input_type.as_ref()
     }
 
@@ -46,15 +50,11 @@ impl ListComprehension {
         self.secondary_input_type.as_ref()
     }
 
-    pub fn output_type(&self) -> &Type {
-        &self.output_type
-    }
-
     pub fn element(&self) -> &Expression {
         &self.element
     }
 
-    pub fn element_name(&self) -> &str {
+    pub fn primary_name(&self) -> &str {
         &self.primary_name
     }
 
@@ -62,7 +62,7 @@ impl ListComprehension {
         self.secondary_name.as_deref()
     }
 
-    pub fn list(&self) -> &Expression {
+    pub fn iteratee(&self) -> &Expression {
         &self.iteratee
     }
 

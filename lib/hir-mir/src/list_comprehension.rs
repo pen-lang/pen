@@ -12,7 +12,7 @@ pub fn compile(
 
     let position = comprehension.position();
     let input_element_type = comprehension
-        .input_type()
+        .primary_input_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
     let output_element_type = comprehension.output_type();
     let list_type = type_::compile_list(context)?;
@@ -37,7 +37,7 @@ pub fn compile(
                             &IfList::new(
                                 Some(input_element_type.clone()),
                                 Variable::new(LIST_NAME, position.clone()),
-                                comprehension.element_name(),
+                                comprehension.primary_name(),
                                 LIST_NAME,
                                 List::new(
                                     output_element_type.clone(),
@@ -79,7 +79,7 @@ pub fn compile(
                     mir::ir::Call::new(
                         mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
-                        vec![compile(comprehension.list())?],
+                        vec![compile(comprehension.iteratee())?],
                     ),
                 ),
             ),

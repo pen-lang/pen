@@ -279,24 +279,24 @@ fn transform_expression(
         Expression::ListComprehension(comprehension) => {
             let position = comprehension.position();
             let input_type = comprehension
-                .input_type()
+                .primary_input_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             ListComprehension::new(
                 comprehension.output_type().clone(),
-                comprehension.input_type().cloned(),
+                comprehension.primary_input_type().cloned(),
                 comprehension.secondary_input_type().cloned(),
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.output_type(),
                     &variables.insert(
-                        comprehension.element_name().into(),
+                        comprehension.primary_name().into(),
                         types::Function::new(vec![], input_type.clone(), position.clone()).into(),
                     ),
                 )?,
-                comprehension.element_name(),
+                comprehension.primary_name(),
                 comprehension.secondary_name().map(String::from),
-                transform_expression(comprehension.list(), variables)?,
+                transform_expression(comprehension.iteratee(), variables)?,
                 position.clone(),
             )
             .into()

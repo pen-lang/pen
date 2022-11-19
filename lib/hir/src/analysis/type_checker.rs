@@ -251,14 +251,14 @@ fn check_expression(
         Expression::ListComprehension(comprehension) => {
             let position = comprehension.position();
             let input_type = comprehension
-                .input_type()
+                .primary_input_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
                 &check_expression(
                     comprehension.element(),
                     &variables.insert(
-                        comprehension.element_name().into(),
+                        comprehension.primary_name().into(),
                         types::Function::new(vec![], input_type.clone(), position.clone()).into(),
                     ),
                 )?,
@@ -266,7 +266,7 @@ fn check_expression(
             )?;
 
             check_subsumption(
-                &check_expression(comprehension.list(), variables)?,
+                &check_expression(comprehension.iteratee(), variables)?,
                 &types::List::new(input_type.clone(), position.clone()).into(),
             )?;
 

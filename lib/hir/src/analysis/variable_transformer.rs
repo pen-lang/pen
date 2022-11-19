@@ -168,18 +168,18 @@ fn transform_expression(
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
             comprehension.output_type().clone(),
-            comprehension.input_type().cloned(),
+            comprehension.primary_input_type().cloned(),
             comprehension.secondary_input_type().cloned(),
             transform_expression(comprehension.element(), &|variable| {
-                if comprehension.element_name() == variable.name() {
+                if comprehension.primary_name() == variable.name() {
                     variable.clone().into()
                 } else {
                     transform(variable)
                 }
             }),
-            comprehension.element_name(),
+            comprehension.primary_name(),
             comprehension.secondary_name().map(String::from),
-            transform_expression(comprehension.list(), transform),
+            transform_expression(comprehension.iteratee(), transform),
             comprehension.position().clone(),
         )
         .into(),
