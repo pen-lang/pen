@@ -253,7 +253,7 @@ fn check_expression(
             let iteratee_type = comprehension
                 .iteratee_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let list_type = type_canonicalizer::canonicalize_list(&iteratee_type, context.types())?
+            let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
             check_subsumption(
@@ -270,7 +270,7 @@ fn check_expression(
 
             check_subsumption(
                 &check_expression(comprehension.iteratee(), variables)?,
-                &iteratee_type,
+                iteratee_type,
             )?;
 
             types::List::new(comprehension.type_().clone(), position.clone()).into()
@@ -2263,7 +2263,7 @@ mod tests {
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
                                 element_type.clone(),
-                                Some(list_type.clone().into()),
+                                Some(list_type.into()),
                                 Call::new(
                                     Some(
                                         types::Function::new(
@@ -2304,7 +2304,7 @@ mod tests {
                             types::List::new(element_type.clone(), Position::fake()),
                             ListComprehension::new(
                                 element_type.clone(),
-                                Some(list_type.clone().into()),
+                                Some(list_type.into()),
                                 Call::new(
                                     Some(
                                         types::Function::new(

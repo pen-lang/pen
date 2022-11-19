@@ -1473,7 +1473,7 @@ mod tests {
                             output_list_type,
                             ListComprehension::new(
                                 union_type.clone(),
-                                Some(input_list_type.clone().into()),
+                                Some(input_list_type.into()),
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),
                                     union_type,
@@ -1547,7 +1547,7 @@ mod tests {
                             output_list_type,
                             ListComprehension::new(
                                 union_type.clone(),
-                                Some(input_list_type.clone().into()),
+                                Some(input_list_type.into()),
                                 TypeCoercion::new(
                                     types::None::new(Position::fake()),
                                     union_type,

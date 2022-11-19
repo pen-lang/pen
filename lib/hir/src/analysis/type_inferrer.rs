@@ -258,7 +258,7 @@ fn infer_expression(
 
             ListComprehension::new(
                 comprehension.type_().clone(),
-                Some(type_.clone()),
+                Some(type_),
                 infer_expression(
                     comprehension.element(),
                     &variables.insert(
@@ -846,7 +846,7 @@ mod tests {
                         list_type.clone(),
                         ListComprehension::new(
                             element_type.clone(),
-                            Some(list_type.clone().into()),
+                            Some(list_type.into()),
                             Let::new(
                                 Some("y".into()),
                                 Some(element_type.clone().into()),
