@@ -3,9 +3,15 @@ mod arc_buffer;
 
 use arc_block::*;
 pub use arc_buffer::*;
-use core::{alloc::Layout, marker::PhantomData, ops::Deref, ptr::write};
+use core::{
+    alloc::Layout,
+    borrow::Borrow,
+    fmt::{self, Debug, Display, Formatter},
+    marker::PhantomData,
+    ops::Deref,
+    ptr::write,
+};
 
-#[derive(Debug)]
 #[repr(C)]
 pub struct Arc<T> {
     block: ArcBlock,
@@ -49,6 +55,18 @@ impl<T> Deref for Arc<T> {
     }
 }
 
+impl<T> AsRef<T> for Arc<T> {
+    fn as_ref(&self) -> &T {
+        self.deref()
+    }
+}
+
+impl<T> Borrow<T> for Arc<T> {
+    fn borrow(&self) -> &T {
+        self.deref()
+    }
+}
+
 impl<T> Clone for Arc<T> {
     fn clone(&self) -> Self {
         Self {
@@ -67,6 +85,18 @@ impl<T> Drop for Arc<T> {
 impl<T: Default> Default for Arc<T> {
     fn default() -> Self {
         Self::new(T::default())
+    }
+}
+
+impl<T: Debug> Debug for Arc<T> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{:?}", self.as_ref())
+    }
+}
+
+impl<T: Display> Display for Arc<T> {
+    fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
+        write!(formatter, "{}", self.as_ref())
     }
 }
 
