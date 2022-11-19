@@ -7,6 +7,7 @@ mod error;
 mod error_type;
 mod expression;
 mod generic_type_definition;
+mod list_comprehension;
 mod list_type_configuration;
 mod main_function;
 mod main_module_configuration;
