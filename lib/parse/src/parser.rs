@@ -834,20 +834,15 @@ fn list_comprehension(input: Input) -> IResult<Expression> {
                 ))),
             )),
             |(position, _, type_, element, _, (element_name, value_name, _, iterator, _))| {
-                if let Some(value_name) = value_name {
-                    MapIterationComprehension::new(
-                        type_,
-                        element,
-                        element_name,
-                        value_name,
-                        iterator,
-                        position(),
-                    )
-                    .into()
-                } else {
-                    ListComprehension::new(type_, element, element_name, iterator, position())
-                        .into()
-                }
+                ListComprehension::new(
+                    type_,
+                    element,
+                    element_name,
+                    value_name,
+                    iterator,
+                    position(),
+                )
+                .into()
             },
         ),
     )(input)
@@ -3169,6 +3164,7 @@ mod tests {
                         types::Reference::new("none", Position::fake()),
                         Variable::new("x", Position::fake()),
                         "x",
+                        None,
                         Variable::new("xs", Position::fake()),
                         Position::fake(),
                     ),
@@ -3187,6 +3183,7 @@ mod tests {
                             Position::fake(),
                         ),
                         "x",
+                        None,
                         Variable::new("xs", Position::fake()),
                         Position::fake(),
                     ),
@@ -3279,11 +3276,11 @@ mod tests {
                 list_comprehension(input("[none v for k, v in xs]", ""))
                     .unwrap()
                     .1,
-                MapIterationComprehension::new(
+                ListComprehension::new(
                     types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
                     "k",
-                    "v",
+                    Some("v".into()),
                     Variable::new("xs", Position::fake()),
                     Position::fake(),
                 )

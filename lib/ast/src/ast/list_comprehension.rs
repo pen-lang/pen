@@ -7,7 +7,8 @@ use std::rc::Rc;
 pub struct ListComprehension {
     type_: Type,
     element: Rc<Expression>,
-    element_name: String,
+    primary_element_name: String,
+    secondary_element_name: Option<String>,
     list: Rc<Expression>,
     position: Position,
 }
@@ -16,14 +17,16 @@ impl ListComprehension {
     pub fn new(
         type_: impl Into<Type>,
         element: impl Into<Expression>,
-        element_name: impl Into<String>,
+        primary_name: impl Into<String>,
+        secondary_name: Option<String>,
         list: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
             type_: type_.into(),
             element: element.into().into(),
-            element_name: element_name.into(),
+            primary_element_name: primary_name.into(),
+            secondary_element_name: secondary_name,
             list: list.into().into(),
             position,
         }
@@ -37,11 +40,15 @@ impl ListComprehension {
         &self.element
     }
 
-    pub fn element_name(&self) -> &str {
-        &self.element_name
+    pub fn primary_name(&self) -> &str {
+        &self.primary_element_name
     }
 
-    pub fn list(&self) -> &Expression {
+    pub fn secondary_name(&self) -> Option<&str> {
+        self.secondary_element_name.as_deref()
+    }
+
+    pub fn iteratee(&self) -> &Expression {
         &self.list
     }
 

@@ -6,7 +6,7 @@ use hir::{
     types::{self, Type},
 };
 
-/// Collects types potentially up-casted to variant (union or `any`) types.
+/// Collects types potentially casted from or to variant (union or `any`) types.
 pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, AnalysisError> {
     let mut lower_types = FnvHashSet::default();
 
@@ -49,8 +49,11 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
             lower_types.insert(list.type_().clone());
         }
         Expression::ListComprehension(comprehension) => {
-            lower_types.insert(comprehension.input_type().unwrap().clone());
-            lower_types.insert(comprehension.output_type().clone());
+            if let Some(Type::List(list_type)) = comprehension.iteratee_type() {
+                lower_types.insert(list_type.element().clone());
+            }
+
+            lower_types.insert(comprehension.type_().clone());
         }
         Expression::Map(map) => {
             lower_types.insert(map.key_type().clone());
@@ -94,6 +97,7 @@ mod tests {
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake};
     use position::{test::PositionFake, Position};
+    use pretty_assertions::assert_eq;
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {
         collect(
@@ -309,6 +313,43 @@ mod tests {
                 )])
             ),
             [field_type.into()].into_iter().collect()
+        );
+    }
+
+    #[test]
+    fn collect_from_list_comprehension() {
+        let input_list_type =
+            types::List::new(types::Number::new(Position::fake()), Position::fake());
+        let output_list_type =
+            types::List::new(types::None::new(Position::fake()), Position::fake());
+
+        assert_eq!(
+            collect_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("x", input_list_type.clone())],
+                        output_list_type.clone(),
+                        ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            Some(input_list_type.clone().into()),
+                            None::new(Position::fake(),),
+                            "x",
+                            None,
+                            Variable::new("x", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ])),
+            [
+                input_list_type.element().clone(),
+                output_list_type.element().clone()
+            ]
+            .into_iter()
+            .collect()
         );
     }
 }

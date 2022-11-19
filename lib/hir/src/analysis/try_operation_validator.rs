@@ -79,7 +79,7 @@ fn validate_expression(
         }
         Expression::ListComprehension(comprehension) => {
             validate_expression(context, comprehension.element(), None)?;
-            validate_expression(context, comprehension.list(), None)?;
+            validate_expression(context, comprehension.iteratee(), None)?;
         }
         Expression::Map(map) => {
             for element in map.elements() {
@@ -370,14 +370,15 @@ mod tests {
                             Position::fake()
                         ),
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             Variable::new("xs", Position::fake()),
                             Position::fake()
                         ),
@@ -404,10 +405,11 @@ mod tests {
                             Position::fake()
                         ),
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
                             None::new(Position::fake()),
                             "x",
+                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("xs", Position::fake()),

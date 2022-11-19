@@ -5,51 +5,59 @@ use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ListComprehension {
-    input_type: Option<Type>,
-    output_type: Type,
+    type_: Type,
+    iteratee_type: Option<Type>,
     element: Rc<Expression>,
-    element_name: String,
-    list: Rc<Expression>,
+    primary_name: String,
+    secondary_name: Option<String>,
+    iteratee: Rc<Expression>,
     position: Position,
 }
 
 impl ListComprehension {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
-        input_type: Option<Type>,
-        output_type: impl Into<Type>,
+        type_: impl Into<Type>,
+        iteratee_type: Option<Type>,
         element: impl Into<Expression>,
-        element_name: impl Into<String>,
-        list: impl Into<Expression>,
+        primary_name: impl Into<String>,
+        secondary_name: Option<String>,
+        iteratee: impl Into<Expression>,
         position: Position,
     ) -> Self {
         Self {
-            input_type,
-            output_type: output_type.into(),
+            type_: type_.into(),
+            iteratee_type,
             element: element.into().into(),
-            element_name: element_name.into(),
-            list: list.into().into(),
+            primary_name: primary_name.into(),
+            secondary_name,
+            iteratee: iteratee.into().into(),
             position,
         }
     }
 
-    pub fn input_type(&self) -> Option<&Type> {
-        self.input_type.as_ref()
+    pub fn type_(&self) -> &Type {
+        &self.type_
     }
 
-    pub fn output_type(&self) -> &Type {
-        &self.output_type
+    pub fn iteratee_type(&self) -> Option<&Type> {
+        self.iteratee_type.as_ref()
     }
 
     pub fn element(&self) -> &Expression {
         &self.element
     }
 
-    pub fn element_name(&self) -> &str {
-        &self.element_name
+    pub fn primary_name(&self) -> &str {
+        &self.primary_name
     }
 
-    pub fn list(&self) -> &Expression {
-        &self.list
+    pub fn secondary_name(&self) -> Option<&str> {
+        self.secondary_name.as_deref()
+    }
+
+    pub fn iteratee(&self) -> &Expression {
+        &self.iteratee
     }
 
     pub fn position(&self) -> &Position {

@@ -251,18 +251,18 @@ fn infer_expression(
         )
         .into(),
         Expression::ListComprehension(comprehension) => {
-            let list = infer_expression(comprehension.list(), variables)?;
-            let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
+            let iteratee = infer_expression(comprehension.iteratee(), variables)?;
+            let type_ = type_extractor::extract_from_expression(context, &iteratee, variables)?;
             let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or(AnalysisError::ListExpected(type_))?;
+                .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?;
 
             ListComprehension::new(
-                Some(list_type.element().clone()),
-                comprehension.output_type().clone(),
+                comprehension.type_().clone(),
+                Some(type_),
                 infer_expression(
                     comprehension.element(),
                     &variables.insert(
-                        comprehension.element_name().into(),
+                        comprehension.primary_name().into(),
                         types::Function::new(
                             vec![],
                             list_type.element().clone(),
@@ -271,8 +271,9 @@ fn infer_expression(
                         .into(),
                     ),
                 )?,
-                comprehension.element_name(),
-                list,
+                comprehension.primary_name(),
+                comprehension.secondary_name().map(String::from),
+                iteratee,
                 comprehension.position().clone(),
             )
             .into()
@@ -813,8 +814,8 @@ mod tests {
                         vec![],
                         list_type.clone(),
                         ListComprehension::new(
-                            None,
                             element_type.clone(),
+                            None,
                             Let::new(
                                 Some("y".into()),
                                 None,
@@ -828,6 +829,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             List::new(element_type.clone(), vec![], Position::fake()),
                             Position::fake(),
                         ),
@@ -841,10 +843,10 @@ mod tests {
                     "f",
                     Lambda::new(
                         vec![],
-                        list_type,
+                        list_type.clone(),
                         ListComprehension::new(
-                            Some(element_type.clone().into()),
                             element_type.clone(),
+                            Some(list_type.into()),
                             Let::new(
                                 Some("y".into()),
                                 Some(element_type.clone().into()),
@@ -865,6 +867,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             List::new(element_type, vec![], Position::fake()),
                             Position::fake(),
                         ),

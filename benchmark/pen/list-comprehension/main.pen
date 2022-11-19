@@ -1,0 +1,23 @@
+import Core'Number
+import Os'Context { Context }
+import Os'File
+import Os'Process
+
+main = \(ctx context) none {
+  if x = print(ctx.Os, [number x() * x() for x in Number'Sequence(100000)]) as none {
+    none
+  } else {
+    debug(x)
+    Process'Exit(ctx.Os, 1)
+  }
+}
+
+print = \(ctx Context, xs [number]) none | error {
+  if [x, ...xs] = xs {
+    File'Write(ctx, File'StdOut(), Number'String(x()) + "\n")?
+
+    print(ctx, xs)
+  } else {
+    none
+  }
+}

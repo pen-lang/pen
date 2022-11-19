@@ -7,6 +7,7 @@ mod error;
 mod error_type;
 mod expression;
 mod generic_type_definition;
+mod list_comprehension;
 mod list_type_configuration;
 mod main_function;
 mod main_module_configuration;
@@ -270,6 +271,19 @@ mod tests {
                                 Position::fake(),
                             ),
                             FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.list_type.equal_function_name,
+                                types::Function::new(
+                                    vec![
+                                        equal_function_type.clone().into(),
+                                        list_type.clone(),
+                                        list_type.clone(),
+                                    ],
+                                    types::Boolean::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.maybe_equal_function_name,
                                 types::Function::new(
                                     vec![
@@ -307,7 +321,7 @@ mod tests {
                                 &COMPILE_CONFIGURATION.list_type.rest_function_name,
                                 types::Function::new(
                                     vec![first_rest_type],
-                                    list_type,
+                                    list_type.clone(),
                                     Position::fake(),
                                 ),
                                 Position::fake(),
@@ -319,7 +333,7 @@ mod tests {
                                         equal_function_type.clone().into(),
                                         hash_function_type.clone().into(),
                                         equal_function_type.into(),
-                                        hash_function_type.into(),
+                                        hash_function_type.clone().into(),
                                     ],
                                     map_context_type.clone(),
                                     Position::fake(),
@@ -365,6 +379,15 @@ mod tests {
                                         types::Number::new(Position::fake()).into(),
                                         types::Number::new(Position::fake()).into(),
                                     ],
+                                    types::Number::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            FunctionDeclaration::new(
+                                &COMPILE_CONFIGURATION.map_type.hash.list_hash_function_name,
+                                types::Function::new(
+                                    vec![hash_function_type.into(), list_type],
                                     types::Number::new(Position::fake()),
                                     Position::fake(),
                                 ),
@@ -786,8 +809,8 @@ mod tests {
                         vec![Argument::new("x", list_type.clone())],
                         list_type,
                         ListComprehension::new(
-                            None,
                             types::None::new(Position::fake()),
+                            None,
                             Call::new(
                                 None,
                                 Variable::new("x", Position::fake()),
@@ -795,7 +818,98 @@ mod tests {
                                 Position::fake(),
                             ),
                             "x",
+                            None,
                             Variable::new("x", Position::fake()),
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_nested_list_comprehension() {
+            let input_list_type = types::List::new(
+                types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+            let output_list_type = types::List::new(
+                types::List::new(types::None::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(
+                &Module::empty()
+                    .set_function_declarations(vec![FunctionDeclaration::new(
+                        "g",
+                        types::Function::new(vec![], input_list_type, Position::fake()),
+                        Position::fake(),
+                    )])
+                    .set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            output_list_type.clone(),
+                            ListComprehension::new(
+                                output_list_type.element().clone(),
+                                None,
+                                ListComprehension::new(
+                                    types::None::new(Position::fake()),
+                                    None,
+                                    None::new(Position::fake()),
+                                    "x",
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        vec![],
+                                        Position::fake(),
+                                    ),
+                                    Position::fake(),
+                                ),
+                                "xs",
+                                None,
+                                Call::new(
+                                    None,
+                                    Variable::new("g", Position::fake()),
+                                    vec![],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )]),
+            )
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_list_comprehension_with_nested_list_type_with_element_of_any_type() {
+            let input_list_type = types::List::new(
+                types::List::new(types::Any::new(Position::fake()), Position::fake()),
+                Position::fake(),
+            );
+            let output_list_type =
+                types::List::new(types::None::new(Position::fake()), Position::fake());
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![Argument::new("xs", input_list_type)],
+                        output_list_type,
+                        ListComprehension::new(
+                            types::None::new(Position::fake()),
+                            None,
+                            None::new(Position::fake()),
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -1271,6 +1385,35 @@ mod tests {
                             None,
                             BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
                             vec![Variable::new("x", Position::fake()).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_race() {
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(types::None::new(Position::fake()), Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
+                            vec![List::new(
+                                types::List::new(
+                                    types::None::new(Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![],
+                                Position::fake(),
+                            ).into()],
                             Position::fake(),
                         ),
                         Position::fake(),

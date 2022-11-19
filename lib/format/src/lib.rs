@@ -472,12 +472,20 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 }),
                 line(),
                 compile_line_comment(context, comprehension.element().position(), |context| {
-                    sequence([
-                        "for ".into(),
-                        comprehension.element_name().into(),
-                        " in ".into(),
-                        compile_expression(context, comprehension.list()),
-                    ])
+                    sequence(
+                        ["for ".into(), comprehension.primary_name().into()]
+                            .into_iter()
+                            .chain(
+                                comprehension
+                                    .secondary_name()
+                                    .into_iter()
+                                    .flat_map(|name| [", ".into(), name.into()]),
+                            )
+                            .chain([
+                                " in ".into(),
+                                compile_expression(context, comprehension.iteratee()),
+                            ]),
+                    )
                 }),
             ]);
 
@@ -496,39 +504,6 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
             ])
         }
         Expression::Map(map) => compile_map(context, map),
-        Expression::MapIterationComprehension(comprehension) => {
-            let elements = sequence([
-                line(),
-                compile_line_comment(context, comprehension.element().position(), |context| {
-                    compile_expression(context, comprehension.element())
-                }),
-                line(),
-                compile_line_comment(context, comprehension.element().position(), |context| {
-                    sequence([
-                        "for ".into(),
-                        comprehension.key_name().into(),
-                        ", ".into(),
-                        comprehension.value_name().into(),
-                        " in ".into(),
-                        compile_expression(context, comprehension.map()),
-                    ])
-                }),
-            ]);
-
-            sequence([
-                "[".into(),
-                compile_type(comprehension.element_type()),
-                if comprehension.position().line_number()
-                    == comprehension.element().position().line_number()
-                    && !is_broken(&elements)
-                {
-                    flatten(elements)
-                } else {
-                    break_(sequence([indent(elements), line()]))
-                },
-                "]".into(),
-            ])
-        }
         Expression::Number(number) => match number.value() {
             NumberRepresentation::Binary(string) => "0b".to_owned() + string,
             NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
@@ -3114,6 +3089,7 @@ mod tests {
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", Position::fake()),
                             "x",
+                            None,
                             Variable::new("xs", Position::fake()),
                             Position::fake()
                         )
@@ -3131,6 +3107,7 @@ mod tests {
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", line_position(2)),
                             "x",
+                            None,
                             Variable::new("xs", Position::fake()),
                             line_position(1)
                         )
@@ -3324,11 +3301,11 @@ mod tests {
             fn format_comprehension() {
                 assert_eq!(
                     format(
-                        &MapIterationComprehension::new(
+                        &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", Position::fake()),
                             "k",
-                            "v",
+                            Some("v".into()),
                             Variable::new("xs", Position::fake()),
                             Position::fake()
                         )
@@ -3342,11 +3319,11 @@ mod tests {
             fn format_multi_line_comprehension() {
                 assert_eq!(
                     format(
-                        &MapIterationComprehension::new(
+                        &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", line_position(2)),
                             "k",
-                            "v",
+                            Some("v".into()),
                             Variable::new("xs", Position::fake()),
                             line_position(1)
                         )

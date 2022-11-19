@@ -1,6 +1,6 @@
 use super::{
     BinaryOperation, ByteString, Call, If, IfList, IfMap, IfType, Lambda, List, ListComprehension,
-    Map, MapIterationComprehension, Number, Record, RecordDeconstruction, UnaryOperation, Variable,
+    Map, Number, Record, RecordDeconstruction, UnaryOperation, Variable,
 };
 use position::Position;
 
@@ -16,7 +16,6 @@ pub enum Expression {
     List(List),
     ListComprehension(ListComprehension),
     Map(Map),
-    MapIterationComprehension(MapIterationComprehension),
     Number(Number),
     Record(Record),
     RecordDeconstruction(RecordDeconstruction),
@@ -38,7 +37,6 @@ impl Expression {
             Self::List(list) => list.position(),
             Self::ListComprehension(comprehension) => comprehension.position(),
             Self::Map(map) => map.position(),
-            Self::MapIterationComprehension(comprehension) => comprehension.position(),
             Self::Number(number) => number.position(),
             Self::Record(record) => record.position(),
             Self::RecordDeconstruction(operation) => operation.position(),
@@ -112,12 +110,6 @@ impl From<ListComprehension> for Expression {
 impl From<Map> for Expression {
     fn from(map: Map) -> Self {
         Self::Map(map)
-    }
-}
-
-impl From<MapIterationComprehension> for Expression {
-    fn from(comprehension: MapIterationComprehension) -> Self {
-        Self::MapIterationComprehension(comprehension)
     }
 }
 
