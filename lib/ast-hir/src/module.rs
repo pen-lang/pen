@@ -275,15 +275,31 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             list.position().clone(),
         )
         .into(),
-        ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
-            None,
-            type_::compile(comprehension.type_()),
-            compile_expression(comprehension.element())?,
-            comprehension.element_name(),
-            compile_expression(comprehension.list())?,
-            comprehension.position().clone(),
-        )
-        .into(),
+        ast::Expression::ListComprehension(comprehension) => {
+            if let Some(name) = comprehension.secondary_element_name() {
+                ir::MapIterationComprehension::new(
+                    None,
+                    None,
+                    type_::compile(comprehension.element_type()),
+                    compile_expression(comprehension.element())?,
+                    comprehension.key_name(),
+                    comprehension.value_name(),
+                    compile_expression(comprehension.map())?,
+                    comprehension.position().clone(),
+                )
+                .into()
+            } else {
+                ir::ListComprehension::new(
+                    None,
+                    type_::compile(comprehension.type_()),
+                    compile_expression(comprehension.element())?,
+                    comprehension.element_name(),
+                    compile_expression(comprehension.list())?,
+                    comprehension.position().clone(),
+                )
+                .into()
+            }
+        }
         ast::Expression::Map(map) => ir::Map::new(
             type_::compile(map.key_type()),
             type_::compile(map.value_type()),
@@ -307,19 +323,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             map.position().clone(),
         )
         .into(),
-        ast::Expression::MapIterationComprehension(comprehension) => {
-            ir::MapIterationComprehension::new(
-                None,
-                None,
-                type_::compile(comprehension.element_type()),
-                compile_expression(comprehension.element())?,
-                comprehension.key_name(),
-                comprehension.value_name(),
-                compile_expression(comprehension.map())?,
-                comprehension.position().clone(),
-            )
-            .into()
-        }
         ast::Expression::Number(number) => {
             ir::Number::new(number::compile(number)?, number.position().clone()).into()
         }
