@@ -179,7 +179,7 @@ fn transform_expression(
                     branch.position().clone(),
                 ));
 
-                transform = Box::new(|variable| {
+                transform = Box::new(move |variable| {
                     if branch.primary_name() == variable.name()
                         || branch.secondary_name() == Some(variable.name())
                     {

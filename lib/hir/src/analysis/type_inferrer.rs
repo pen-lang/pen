@@ -252,7 +252,7 @@ fn infer_expression(
         .into(),
         Expression::ListComprehension(comprehension) => {
             let mut variables = variables.clone();
-            let branches = vec![];
+            let mut branches = vec![];
 
             for branch in comprehension.branches() {
                 let iteratee = infer_expression(branch.iteratee(), &variables)?;
@@ -911,18 +911,23 @@ mod tests {
                             vec![
                                 ListComprehensionBranch::new(
                                     None,
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                ListComprehensionBranch::new(
-                                    None,
                                     "xs",
                                     None,
                                     List::new(list_type.clone(), vec![], Position::fake()),
                                     Position::fake(),
-                                )
+                                ),
+                                ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Position::fake(),
+                                ),
                             ],
                             Position::fake(),
                         ),
@@ -960,19 +965,31 @@ mod tests {
                             ),
                             vec![
                                 ListComprehensionBranch::new(
-                                    Some(list_type.clone().into()),
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                ListComprehensionBranch::new(
                                     Some(nested_list_type.clone().into()),
                                     "xs",
                                     None,
                                     List::new(list_type.clone(), vec![], Position::fake()),
                                     Position::fake(),
-                                )
+                                ),
+                                ListComprehensionBranch::new(
+                                    Some(list_type.clone().into()),
+                                    "x",
+                                    None,
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                list_type.clone(),
+                                                Position::fake()
+                                            )
+                                            .into()
+                                        ),
+                                        Variable::new("xs", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Position::fake(),
+                                ),
                             ],
                             Position::fake(),
                         ),
