@@ -253,24 +253,38 @@ fn check_expression(
             let iteratee_type = comprehension
                 .iteratee_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-
-            check_subsumption(
-                &check_expression(
-                    comprehension.element(),
-                    &variables.insert(
-                        comprehension.primary_name().into(),
-                        types::Function::new(vec![], list_type.element().clone(), position.clone())
-                            .into(),
-                    ),
-                )?,
-                comprehension.type_(),
-            )?;
 
             check_subsumption(
                 &check_expression(comprehension.iteratee(), variables)?,
                 iteratee_type,
+            )?;
+
+            check_subsumption(
+                &check_expression(
+                    comprehension.element(),
+                    &match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
+                        Type::List(list_type) => variables.insert(
+                            comprehension.primary_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                position.clone(),
+                            )
+                            .into(),
+                        ),
+                        Type::Map(map_type) => variables.insert_iter(
+                            [(comprehension.primary_name().into(), map_type.key().clone())]
+                                .into_iter()
+                                .chain(
+                                    comprehension
+                                        .secondary_name()
+                                        .map(|name| (name.into(), map_type.value().clone())),
+                                ),
+                        ),
+                        _ => return Err(AnalysisError::TypeNotInferred(position.clone())),
+                    },
+                )?,
+                comprehension.type_(),
             )?;
 
             types::List::new(comprehension.type_().clone(), position.clone()).into()
