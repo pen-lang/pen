@@ -170,7 +170,9 @@ fn transform_expression(
             comprehension.type_().clone(),
             comprehension.iteratee_type().cloned(),
             transform_expression(comprehension.element(), &|variable| {
-                if comprehension.primary_name() == variable.name() {
+                if comprehension.primary_name() == variable.name()
+                    || comprehension.secondary_name() == Some(variable.name())
+                {
                     variable.clone().into()
                 } else {
                     transform(variable)
@@ -460,7 +462,7 @@ mod tests {
     }
 
     #[test]
-    fn do_not_transform_shadowed_variable_in_list_comprehension() {
+    fn do_not_transform_shadowed_primary_name_in_list_comprehension() {
         let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
             "x",
             Lambda::new(
@@ -483,6 +485,37 @@ mod tests {
         assert_eq!(
             transform(&module, &|variable| if variable.name() == "x" {
                 Variable::new("y", variable.position().clone()).into()
+            } else {
+                variable.clone().into()
+            }),
+            module
+        );
+    }
+
+    #[test]
+    fn do_not_transform_shadowed_secondary_name_in_list_comprehension() {
+        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+            "x",
+            Lambda::new(
+                vec![],
+                types::None::new(Position::fake()),
+                ListComprehension::new(
+                    types::Number::new(Position::fake()),
+                    None,
+                    Variable::new("i", Position::fake()),
+                    "x",
+                    Some("i".into()),
+                    Variable::new("xs", Position::fake()),
+                    Position::fake(),
+                ),
+                Position::fake(),
+            ),
+            false,
+        )]);
+
+        assert_eq!(
+            transform(&module, &|variable| if variable.name() == "i" {
+                Variable::new("j", variable.position().clone()).into()
             } else {
                 variable.clone().into()
             }),
