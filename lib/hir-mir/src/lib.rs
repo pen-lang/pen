@@ -1121,7 +1121,7 @@ mod tests {
         }
 
         #[test]
-        fn compile_map_comprehension() {
+        fn compile_list_comprehension_with_map() {
             let map_type = types::Map::new(
                 types::ByteString::new(Position::fake()),
                 types::Number::new(Position::fake()),
@@ -1147,10 +1147,9 @@ mod tests {
                     Lambda::new(
                         vec![Argument::new("x", map_type.clone())],
                         types::List::new(types::None::new(Position::fake()), Position::fake()),
-                        MapIterationComprehension::new(
-                            None,
-                            None,
+                        ListComprehension::new(
                             types::None::new(Position::fake()),
+                            None,
                             Call::new(
                                 None,
                                 Variable::new("f", Position::fake()),
@@ -1161,7 +1160,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "k",
-                            "v",
+                            Some("v".into()),
                             Variable::new("x", Position::fake()),
                             Position::fake(),
                         ),

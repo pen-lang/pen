@@ -175,20 +175,6 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
                 }
             }
         }
-        Expression::MapIterationComprehension(comprehension) => {
-            if let Some(type_) = comprehension.key_type() {
-                visit_type(type_, visit);
-            }
-
-            if let Some(type_) = comprehension.value_type() {
-                visit_type(type_, visit);
-            }
-
-            visit_type(comprehension.element_type(), visit);
-
-            visit_expression(comprehension.element(), visit);
-            visit_expression(comprehension.map(), visit);
-        }
         Expression::Operation(operation) => match operation {
             Operation::Addition(operation) => {
                 if let Some(type_) = operation.type_() {

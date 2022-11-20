@@ -66,11 +66,6 @@ pub fn collect_comparable_parameter_types(
         Expression::Map(map) => {
             types.extend([map.key_type(), map.value_type()]);
         }
-        Expression::MapIterationComprehension(comprehension) => {
-            types.extend(comprehension.key_type());
-            types.extend(comprehension.value_type());
-            types.insert(comprehension.element_type());
-        }
         _ => {}
     });
 

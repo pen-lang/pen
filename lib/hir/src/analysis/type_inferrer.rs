@@ -253,23 +253,33 @@ fn infer_expression(
         Expression::ListComprehension(comprehension) => {
             let iteratee = infer_expression(comprehension.iteratee(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &iteratee, variables)?;
-            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?;
 
             ListComprehension::new(
                 comprehension.type_().clone(),
-                Some(type_),
+                Some(type_.clone()),
                 infer_expression(
                     comprehension.element(),
-                    &variables.insert(
-                        comprehension.primary_name().into(),
-                        types::Function::new(
-                            vec![],
-                            list_type.element().clone(),
-                            comprehension.position().clone(),
-                        )
-                        .into(),
-                    ),
+                    &match type_canonicalizer::canonicalize(&type_, context.types())? {
+                        Type::List(list_type) => variables.insert(
+                            comprehension.primary_name().into(),
+                            types::Function::new(
+                                vec![],
+                                list_type.element().clone(),
+                                comprehension.position().clone(),
+                            )
+                            .into(),
+                        ),
+                        Type::Map(map_type) => variables.insert_iter(
+                            [(comprehension.primary_name().into(), map_type.key().clone())]
+                                .into_iter()
+                                .chain(
+                                    comprehension
+                                        .secondary_name()
+                                        .map(|name| (name.into(), map_type.value().clone())),
+                                ),
+                        ),
+                        _ => return Err(AnalysisError::CollectionExpected(type_.clone())),
+                    },
                 )?,
                 comprehension.primary_name(),
                 comprehension.secondary_name().map(String::from),
@@ -297,30 +307,6 @@ fn infer_expression(
             map.position().clone(),
         )
         .into(),
-        Expression::MapIterationComprehension(comprehension) => {
-            let map = infer_expression(comprehension.map(), variables)?;
-            let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
-            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
-                .ok_or(AnalysisError::MapExpected(type_))?;
-
-            MapIterationComprehension::new(
-                Some(map_type.key().clone()),
-                Some(map_type.value().clone()),
-                comprehension.element_type().clone(),
-                infer_expression(
-                    comprehension.element(),
-                    &variables.insert_iter([
-                        (comprehension.key_name().into(), map_type.key().clone()),
-                        (comprehension.value_name().into(), map_type.value().clone()),
-                    ]),
-                )?,
-                comprehension.key_name(),
-                comprehension.value_name(),
-                map,
-                comprehension.position().clone(),
-            )
-            .into()
-        }
         Expression::Operation(operation) => match operation {
             Operation::Addition(operation) => {
                 let lhs = infer_expression(operation.lhs(), variables)?;
@@ -881,13 +867,16 @@ mod tests {
 
     #[test]
     fn infer_map_comprehension() {
-        let key_type = types::None::new(Position::fake());
-        let value_type = types::None::new(Position::fake());
+        let map_type = types::Map::new(
+            types::None::new(Position::fake()),
+            types::None::new(Position::fake()),
+            Position::fake(),
+        );
         let element_type = types::None::new(Position::fake());
         let list_type = types::List::new(element_type.clone(), Position::fake());
         let empty_map = Map::new(
-            key_type.clone(),
-            value_type.clone(),
+            map_type.key().clone(),
+            map_type.value().clone(),
             vec![],
             Position::fake(),
         );
@@ -899,10 +888,9 @@ mod tests {
                     Lambda::new(
                         vec![],
                         list_type.clone(),
-                        MapIterationComprehension::new(
-                            None,
-                            None,
+                        ListComprehension::new(
                             element_type.clone(),
+                            None,
                             Let::new(
                                 Some("x".into()),
                                 None,
@@ -911,7 +899,7 @@ mod tests {
                                 Position::fake(),
                             ),
                             "k",
-                            "v",
+                            Some("v".into()),
                             empty_map.clone(),
                             Position::fake(),
                         ),
@@ -926,19 +914,18 @@ mod tests {
                     Lambda::new(
                         vec![],
                         list_type,
-                        MapIterationComprehension::new(
-                            Some(key_type.clone().into()),
-                            Some(value_type.into()),
+                        ListComprehension::new(
                             element_type,
+                            Some(map_type.clone().into()),
                             Let::new(
                                 Some("x".into()),
-                                Some(key_type.into()),
+                                Some(map_type.key().clone()),
                                 Variable::new("k", Position::fake()),
                                 Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
                             "k",
-                            "v",
+                            Some("v".into()),
                             empty_map,
                             Position::fake(),
                         ),

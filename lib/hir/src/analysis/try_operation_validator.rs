@@ -92,10 +92,6 @@ fn validate_expression(
                 }
             }
         }
-        Expression::MapIterationComprehension(comprehension) => {
-            validate_expression(context, comprehension.element(), None)?;
-            validate_expression(context, comprehension.map(), None)?;
-        }
         Expression::Operation(operation) => match operation {
             Operation::Addition(operation) => {
                 validate(operation.lhs())?;

@@ -3,8 +3,7 @@ use super::{
     list::List, map::Map, none::None, number::Number, operation::Operation,
     record_construction::RecordConstruction, record_deconstruction::RecordDeconstruction,
     record_update::RecordUpdate, string::ByteString, type_coercion::TypeCoercion,
-    variable::Variable, BuiltInFunction, Lambda, Let, ListComprehension, MapIterationComprehension,
-    Thunk,
+    variable::Variable, BuiltInFunction, Lambda, Let, ListComprehension, Thunk,
 };
 use position::Position;
 
@@ -22,7 +21,6 @@ pub enum Expression {
     List(List),
     ListComprehension(ListComprehension),
     Map(Map),
-    MapIterationComprehension(MapIterationComprehension),
     None(None),
     Number(Number),
     Operation(Operation),
@@ -50,7 +48,6 @@ impl Expression {
             Self::List(list) => list.position(),
             Self::ListComprehension(comprehension) => comprehension.position(),
             Self::Map(map) => map.position(),
-            Self::MapIterationComprehension(comprehension) => comprehension.position(),
             Self::None(none) => none.position(),
             Self::Number(number) => number.position(),
             Self::Operation(operation) => operation.position(),
@@ -158,12 +155,6 @@ impl From<ListComprehension> for Expression {
 impl From<Map> for Expression {
     fn from(map: Map) -> Self {
         Self::Map(map)
-    }
-}
-
-impl From<MapIterationComprehension> for Expression {
-    fn from(comprehension: MapIterationComprehension) -> Self {
-        Self::MapIterationComprehension(comprehension)
     }
 }
 

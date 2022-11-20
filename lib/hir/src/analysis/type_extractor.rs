@@ -144,11 +144,6 @@ pub fn extract_from_expression(
             map.position().clone(),
         )
         .into(),
-        Expression::MapIterationComprehension(comprehension) => types::List::new(
-            comprehension.element_type().clone(),
-            comprehension.position().clone(),
-        )
-        .into(),
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => match operation {

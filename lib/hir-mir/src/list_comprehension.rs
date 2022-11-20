@@ -9,17 +9,29 @@ pub fn compile(
     context: &Context,
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| expression::compile(context, expression);
+    let iteratee_type = comprehension
+        .iteratee_type()
+        .ok_or_else(|| AnalysisError::TypeNotInferred(comprehension.position().clone()))?;
 
+    match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
+        Type::List(list_type) => compile_list(context, comprehension, &list_type),
+        Type::Map(map_type) => compile_map(context, comprehension, &map_type),
+        type_ => Err(AnalysisError::ListExpected(
+            type_.set_position(comprehension.iteratee().position().clone()),
+        )
+        .into()),
+    }
+}
+
+fn compile_list(
+    context: &Context,
+    comprehension: &ListComprehension,
+    input_list_type: &types::List,
+) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
     const LIST_NAME: &str = "$list";
 
     let position = comprehension.position();
-    let iteratee_type = comprehension
-        .iteratee_type()
-        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let input_list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
-        .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?;
     let input_element_type = input_list_type.element();
     let output_element_type = comprehension.type_();
     let list_type = type_::compile_list(context)?;
@@ -40,7 +52,8 @@ pub fn compile(
                         CLOSURE_NAME,
                         vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
                         list_type.clone(),
-                        compile(
+                        expression::compile(
+                            context,
                             &IfList::new(
                                 Some(input_element_type.clone()),
                                 Variable::new(LIST_NAME, position.clone()),
@@ -86,7 +99,7 @@ pub fn compile(
                     mir::ir::Call::new(
                         mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
-                        vec![compile(comprehension.iteratee())?],
+                        vec![expression::compile(context, comprehension.iteratee())?],
                     ),
                 ),
             ),
@@ -97,15 +110,15 @@ pub fn compile(
     .into())
 }
 
-pub fn compile_map(
+fn compile_map(
     context: &Context,
-    comprehension: &MapIterationComprehension,
+    comprehension: &ListComprehension,
+    map_type: &types::Map,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
 
     let list_type = type_::compile_list(context)?;
-    let map_type = type_::compile_map(context)?;
-    let definition = compile_map_iteration_function_definition(context, comprehension)?;
+    let definition = compile_map_iteration_function_definition(context, comprehension, map_type)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -125,7 +138,7 @@ pub fn compile_map(
                         mir::ir::Variable::new(definition.name()),
                         vec![mir::ir::Call::new(
                             mir::types::Function::new(
-                                vec![map_type.into()],
+                                vec![type_::compile_map(context)?.into()],
                                 mir::types::Type::Variant,
                             ),
                             mir::ir::Variable::new(
@@ -135,7 +148,7 @@ pub fn compile_map(
                                     .iteration
                                     .iterate_function_name,
                             ),
-                            vec![expression::compile(context, comprehension.map())?],
+                            vec![expression::compile(context, comprehension.iteratee())?],
                         )
                         .into()],
                     ),
@@ -150,7 +163,8 @@ pub fn compile_map(
 
 fn compile_map_iteration_function_definition(
     context: &Context,
-    comprehension: &MapIterationComprehension,
+    comprehension: &ListComprehension,
+    map_type: &types::Map,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
     const ITERATOR_NAME: &str = "$iterator";
@@ -158,13 +172,7 @@ fn compile_map_iteration_function_definition(
     let iteration_configuration = &context.configuration()?.map_type.iteration;
     let position = comprehension.position();
     let any_type = Type::from(types::Any::new(position.clone()));
-    let key_type = comprehension
-        .key_type()
-        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let value_type = comprehension
-        .value_type()
-        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-    let element_type = comprehension.element_type();
+    let element_type = comprehension.type_();
     let iterator_type = Type::from(types::Reference::new(
         &iteration_configuration.iterator_type_name,
         position.clone(),
@@ -212,18 +220,27 @@ fn compile_map_iteration_function_definition(
                 vec![IfTypeBranch::new(
                     iterator_type.clone(),
                     Let::new(
-                        Some(comprehension.key_name().into()),
-                        Some(key_type.clone()),
+                        Some(comprehension.primary_name().into()),
+                        Some(map_type.key().clone()),
                         compile_key_value_function_call(
                             &iteration_configuration.key_function_name,
-                            key_type,
+                            map_type.key(),
                         )?,
                         Let::new(
-                            Some(comprehension.value_name().into()),
-                            Some(value_type.clone()),
+                            Some(
+                                comprehension
+                                    .secondary_name()
+                                    .ok_or_else(|| {
+                                        AnalysisError::ValueNameNotDefined(
+                                            comprehension.position().clone(),
+                                        )
+                                    })?
+                                    .into(),
+                            ),
+                            Some(map_type.value().clone()),
                             compile_key_value_function_call(
                                 &iteration_configuration.value_function_name,
-                                value_type,
+                                map_type.value(),
                             )?,
                             List::new(
                                 element_type.clone(),

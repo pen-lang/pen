@@ -119,9 +119,6 @@ pub fn compile(
             list_comprehension::compile(context, comprehension)?
         }
         Expression::Map(map) => compile(&map_literal::transform(context, map)?)?,
-        Expression::MapIterationComprehension(comprehension) => {
-            list_comprehension::compile_map(context, comprehension)?
-        }
         Expression::None(_) => mir::ir::Expression::None,
         Expression::Number(number) => mir::ir::Expression::Number(number.value()),
         Expression::Operation(operation) => compile_operation(context, operation)?,
