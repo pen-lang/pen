@@ -41,6 +41,7 @@ pub enum AnalysisError {
     UnknownRecordField(Position),
     UnreachableCode(Position),
     UnusedErrorValue(Position),
+    ValueNameNotDefined(Position),
     VariableNotFound(Variable),
     VariantExpected(Type),
 }
@@ -238,6 +239,9 @@ impl Display for AnalysisError {
             }
             Self::UnusedErrorValue(position) => {
                 write!(formatter, "unused error value\n{}", position)
+            }
+            Self::ValueNameNotDefined(position) => {
+                write!(formatter, "value name not defined\n{}", position)
             }
             Self::VariableNotFound(variable) => write!(
                 formatter,
