@@ -201,24 +201,6 @@ fn transform_expression(
             map.position().clone(),
         )
         .into(),
-        Expression::MapIterationComprehension(comprehension) => MapIterationComprehension::new(
-            comprehension.key_type().cloned(),
-            comprehension.value_type().cloned(),
-            comprehension.element_type().clone(),
-            transform_expression(comprehension.element(), &|variable| {
-                if [comprehension.key_name(), comprehension.value_name()].contains(&variable.name())
-                {
-                    variable.clone().into()
-                } else {
-                    transform(variable)
-                }
-            }),
-            comprehension.key_name(),
-            comprehension.value_name(),
-            transform_expression(comprehension.map(), transform),
-            comprehension.position().clone(),
-        )
-        .into(),
         Expression::Operation(operation) => transform_operation(operation, transform).into(),
         Expression::RecordConstruction(construction) => RecordConstruction::new(
             construction.type_().clone(),

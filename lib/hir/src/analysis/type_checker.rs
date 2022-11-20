@@ -321,33 +321,6 @@ fn check_expression(
             )
             .into()
         }
-        Expression::MapIterationComprehension(comprehension) => {
-            let position = comprehension.position();
-            let key_type = comprehension
-                .key_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let value_type = comprehension
-                .value_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-
-            check_subsumption(
-                &check_expression(
-                    comprehension.element(),
-                    &variables.insert_iter([
-                        (comprehension.key_name().into(), key_type.clone()),
-                        (comprehension.value_name().into(), value_type.clone()),
-                    ]),
-                )?,
-                comprehension.element_type(),
-            )?;
-
-            check_subsumption(
-                &check_expression(comprehension.map(), variables)?,
-                &types::Map::new(key_type.clone(), value_type.clone(), position.clone()).into(),
-            )?;
-
-            types::List::new(comprehension.element_type().clone(), position.clone()).into()
-        }
         Expression::None(none) => types::None::new(none.position().clone()).into(),
         Expression::Number(number) => types::Number::new(number.position().clone()).into(),
         Expression::Operation(operation) => check_operation(context, operation, variables)?,

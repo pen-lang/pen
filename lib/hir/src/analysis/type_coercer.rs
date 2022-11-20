@@ -351,34 +351,6 @@ fn transform_expression(
             map.position().clone(),
         )
         .into(),
-        Expression::MapIterationComprehension(comprehension) => {
-            let position = comprehension.position();
-            let key_type = comprehension
-                .key_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let value_type = comprehension
-                .value_type()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-
-            MapIterationComprehension::new(
-                comprehension.key_type().cloned(),
-                comprehension.value_type().cloned(),
-                comprehension.element_type().clone(),
-                transform_and_coerce_expression(
-                    comprehension.element(),
-                    comprehension.element_type(),
-                    &variables.insert_iter([
-                        (comprehension.key_name().into(), key_type.clone()),
-                        (comprehension.value_name().into(), value_type.clone()),
-                    ]),
-                )?,
-                comprehension.key_name(),
-                comprehension.value_name(),
-                transform_expression(comprehension.map(), variables)?,
-                position.clone(),
-            )
-            .into()
-        }
         Expression::Operation(operation) => match operation {
             Operation::Addition(operation) => AdditionOperation::new(
                 operation.type_().cloned(),

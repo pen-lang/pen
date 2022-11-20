@@ -307,30 +307,6 @@ fn infer_expression(
             map.position().clone(),
         )
         .into(),
-        Expression::MapIterationComprehension(comprehension) => {
-            let map = infer_expression(comprehension.map(), variables)?;
-            let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
-            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
-                .ok_or(AnalysisError::MapExpected(type_))?;
-
-            MapIterationComprehension::new(
-                Some(map_type.key().clone()),
-                Some(map_type.value().clone()),
-                comprehension.element_type().clone(),
-                infer_expression(
-                    comprehension.element(),
-                    &variables.insert_iter([
-                        (comprehension.key_name().into(), map_type.key().clone()),
-                        (comprehension.value_name().into(), map_type.value().clone()),
-                    ]),
-                )?,
-                comprehension.key_name(),
-                comprehension.value_name(),
-                map,
-                comprehension.position().clone(),
-            )
-            .into()
-        }
         Expression::Operation(operation) => match operation {
             Operation::Addition(operation) => {
                 let lhs = infer_expression(operation.lhs(), variables)?;
