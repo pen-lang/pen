@@ -14,8 +14,8 @@ pub fn compile(
         .ok_or_else(|| AnalysisError::TypeNotInferred(comprehension.position().clone()))?;
 
     match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
-        Type::List(list_type) => compile_for_list(context, comprehension, &list_type),
-        Type::Map(map_type) => compile_for_map(context, comprehension, &map_type),
+        Type::List(list_type) => compile_list(context, comprehension, &list_type),
+        Type::Map(map_type) => compile_map(context, comprehension, &map_type),
         type_ => Err(AnalysisError::ListExpected(
             type_.set_position(comprehension.iteratee().position().clone()),
         )
@@ -23,7 +23,7 @@ pub fn compile(
     }
 }
 
-fn compile_for_list(
+fn compile_list(
     context: &Context,
     comprehension: &ListComprehension,
     input_list_type: &types::List,
@@ -110,7 +110,7 @@ fn compile_for_list(
     .into())
 }
 
-fn compile_for_map(
+fn compile_map(
     context: &Context,
     comprehension: &ListComprehension,
     map_type: &types::Map,
@@ -118,8 +118,7 @@ fn compile_for_map(
     const CLOSURE_NAME: &str = "$loop";
 
     let list_type = type_::compile_list(context)?;
-    let definition =
-        compile_for_map_iteration_function_definition(context, comprehension, map_type)?;
+    let definition = compile_map_iteration_function_definition(context, comprehension, map_type)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -162,7 +161,7 @@ fn compile_for_map(
     .into())
 }
 
-fn compile_for_map_iteration_function_definition(
+fn compile_map_iteration_function_definition(
     context: &Context,
     comprehension: &ListComprehension,
     map_type: &types::Map,
