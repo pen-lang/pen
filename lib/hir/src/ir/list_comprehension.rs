@@ -7,6 +7,7 @@ use std::rc::Rc;
 pub struct ListComprehension {
     type_: Type,
     element: Rc<Expression>,
+    // Branches are in a Python-ish order of top to bottom.
     branches: Vec<ListComprehensionBranch>,
     position: Position,
 }
