@@ -9,8 +9,6 @@ pub fn compile(
     context: &Context,
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let compile = |expression| expression::compile(context, expression);
-
     const CLOSURE_NAME: &str = "$loop";
     const LIST_NAME: &str = "$list";
 
@@ -40,7 +38,8 @@ pub fn compile(
                         CLOSURE_NAME,
                         vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
                         list_type.clone(),
-                        compile(
+                        expression::compile(
+                            context,
                             &IfList::new(
                                 Some(input_element_type.clone()),
                                 Variable::new(LIST_NAME, position.clone()),
@@ -86,7 +85,7 @@ pub fn compile(
                     mir::ir::Call::new(
                         mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
-                        vec![compile(comprehension.iteratee())?],
+                        vec![expression::compile(context, comprehension.iteratee())?],
                     ),
                 ),
             ),
