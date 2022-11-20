@@ -281,8 +281,24 @@ fn transform_expression(
             let iteratee_type = comprehension
                 .iteratee_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-            let list_type = type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
-                .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?;
+            let new_variables =
+                match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
+                    Type::List(list_type) => variables.insert(
+                        comprehension.primary_name().into(),
+                        types::Function::new(vec![], list_type.element().clone(), position.clone())
+                            .into(),
+                    ),
+                    Type::Map(map_type) => variables.insert_iter(
+                        [(comprehension.primary_name().into(), map_type.key().clone())]
+                            .into_iter()
+                            .chain(
+                                comprehension
+                                    .secondary_name()
+                                    .map(|name| (name.into(), map_type.value().clone())),
+                            ),
+                    ),
+                    _ => return Err(AnalysisError::CollectionExpected(iteratee_type.clone())),
+                };
 
             ListComprehension::new(
                 comprehension.type_().clone(),
@@ -290,11 +306,7 @@ fn transform_expression(
                 transform_and_coerce_expression(
                     comprehension.element(),
                     comprehension.type_(),
-                    &variables.insert(
-                        comprehension.primary_name().into(),
-                        types::Function::new(vec![], list_type.element().clone(), position.clone())
-                            .into(),
-                    ),
+                    &new_variables,
                 )?,
                 comprehension.primary_name(),
                 comprehension.secondary_name().map(String::from),
@@ -1854,6 +1866,11 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
+                let map_type = types::Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
                 let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
@@ -1868,13 +1885,12 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type.clone(),
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.clone().into()),
                                     None::new(Position::fake()),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map.clone(),
                                     Position::fake(),
                                 ),
@@ -1889,10 +1905,9 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type,
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.into()),
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
@@ -1900,7 +1915,7 @@ mod tests {
                                         Position::fake(),
                                     ),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map,
                                     Position::fake(),
                                 ),
@@ -1920,6 +1935,11 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
+                let map_type = types::Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
                 let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
@@ -1934,13 +1954,12 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type.clone(),
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.clone().into()),
                                     Variable::new("k", Position::fake()),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map.clone(),
                                     Position::fake(),
                                 ),
@@ -1955,10 +1974,9 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type,
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.clone().into()),
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
@@ -1966,7 +1984,7 @@ mod tests {
                                         Position::fake(),
                                     ),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map,
                                     Position::fake(),
                                 ),
@@ -1986,6 +2004,11 @@ mod tests {
                     Position::fake(),
                 );
                 let list_type = types::List::new(union_type.clone(), Position::fake());
+                let map_type = types::Map::new(
+                    types::None::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
                 let empty_map = Map::new(
                     types::None::new(Position::fake()),
                     types::None::new(Position::fake()),
@@ -2000,13 +2023,12 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type.clone(),
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.clone().into()),
                                     Variable::new("v", Position::fake()),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map.clone(),
                                     Position::fake(),
                                 ),
@@ -2021,10 +2043,9 @@ mod tests {
                             Lambda::new(
                                 vec![],
                                 list_type,
-                                MapIterationComprehension::new(
-                                    Some(types::None::new(Position::fake()).into()),
-                                    Some(types::None::new(Position::fake()).into()),
+                                ListComprehension::new(
                                     union_type.clone(),
+                                    Some(map_type.clone().into()),
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
@@ -2032,7 +2053,7 @@ mod tests {
                                         Position::fake(),
                                     ),
                                     "k",
-                                    "v",
+                                    Some("v".into()),
                                     empty_map,
                                     Position::fake(),
                                 ),
