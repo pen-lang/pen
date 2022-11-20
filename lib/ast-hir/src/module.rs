@@ -275,32 +275,16 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
             list.position().clone(),
         )
         .into(),
-        ast::Expression::ListComprehension(comprehension) => {
-            if let Some(value_name) = comprehension.secondary_name() {
-                ir::MapIterationComprehension::new(
-                    None,
-                    None,
-                    type_::compile(comprehension.type_()),
-                    compile_expression(comprehension.element())?,
-                    comprehension.primary_name(),
-                    value_name,
-                    compile_expression(comprehension.iteratee())?,
-                    comprehension.position().clone(),
-                )
-                .into()
-            } else {
-                ir::ListComprehension::new(
-                    type_::compile(comprehension.type_()),
-                    None,
-                    compile_expression(comprehension.element())?,
-                    comprehension.primary_name(),
-                    comprehension.secondary_name().map(String::from),
-                    compile_expression(comprehension.iteratee())?,
-                    comprehension.position().clone(),
-                )
-                .into()
-            }
-        }
+        ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
+            type_::compile(comprehension.type_()),
+            None,
+            compile_expression(comprehension.element())?,
+            comprehension.primary_name(),
+            comprehension.secondary_name().map(String::from),
+            compile_expression(comprehension.iteratee())?,
+            comprehension.position().clone(),
+        )
+        .into(),
         ast::Expression::Map(map) => ir::Map::new(
             type_::compile(map.key_type()),
             type_::compile(map.value_type()),
