@@ -277,11 +277,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         .into(),
         ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
             type_::compile(comprehension.type_()),
-            None,
             compile_expression(comprehension.element())?,
-            comprehension.primary_name(),
-            comprehension.secondary_name().map(String::from),
-            compile_expression(comprehension.iteratee())?,
+            vec![ir::ListComprehensionBranch::new(
+                None,
+                comprehension.primary_name(),
+                comprehension.secondary_name().map(String::from),
+                compile_expression(comprehension.iteratee())?,
+                comprehension.position().clone(),
+            )],
             comprehension.position().clone(),
         )
         .into(),
