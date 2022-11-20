@@ -1976,7 +1976,7 @@ mod tests {
                                 list_type,
                                 ListComprehension::new(
                                     union_type.clone(),
-                                    Some(map_type.clone().into()),
+                                    Some(map_type.into()),
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
@@ -2045,7 +2045,7 @@ mod tests {
                                 list_type,
                                 ListComprehension::new(
                                     union_type.clone(),
-                                    Some(map_type.clone().into()),
+                                    Some(map_type.into()),
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
