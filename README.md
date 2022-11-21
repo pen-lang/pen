@@ -108,8 +108,6 @@ Pen does not adopt any formal effect system of algebraic efffects or monads. Ins
 
 The reason we do not adopt any formal and statically provable effect system is to keep the language and its type system simple and lean for the purpose of improving developer productivity and software development scalability; we want to make Pen accessible and easy to learn for both newbie and expert programmers.
 
-In Pen, any functions with side effects are always passed down from the main functions of applications. So unless we explicitly pass those impure functions to other functions, they are always pure. This structure makes every function other than the main functions theoretically testable.
-
 ### Context switch
 
 Like [Go][go], every function in Pen is suspendable and can be called asynchronously. This is realized by intermediate representation compiled into [Continuation Passing Style (CPS)](https://en.wikipedia.org/wiki/Continuation-passing_style) which also enables proper tail calls. Thus, Pen implements context switch without any platform-dependent codes for slight sacrifice of performance while Go requires logic written in assembly languages.
