@@ -23,6 +23,7 @@
     "datagram",
     "dealloc",
     "deserialization",
+    "determinicity",
     "displayer",
     "dyndep",
     "ffi",
