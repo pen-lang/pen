@@ -868,7 +868,7 @@ mod tests {
                                 Some(list_type.into()),
                                 "x",
                                 None,
-                                List::new(element_type.clone(), vec![], Position::fake()),
+                                List::new(element_type, vec![], Position::fake()),
                                 Position::fake(),
                             )],
                             Position::fake(),
@@ -951,7 +951,7 @@ mod tests {
                                     Some(
                                         types::Function::new(
                                             vec![],
-                                            element_type.clone(),
+                                            element_type,
                                             Position::fake()
                                         )
                                         .into()
@@ -965,7 +965,7 @@ mod tests {
                             ),
                             vec![
                                 ListComprehensionBranch::new(
-                                    Some(nested_list_type.clone().into()),
+                                    Some(nested_list_type.into()),
                                     "xs",
                                     None,
                                     List::new(list_type.clone(), vec![], Position::fake()),
@@ -979,7 +979,7 @@ mod tests {
                                         Some(
                                             types::Function::new(
                                                 vec![],
-                                                list_type.clone(),
+                                                list_type,
                                                 Position::fake()
                                             )
                                             .into()

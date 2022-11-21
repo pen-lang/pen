@@ -108,7 +108,7 @@ pub fn compile(
                         ),
                         vec![ListComprehensionBranch::new(
                             Some(
-                                types::List::new(list_type.clone(), call.position().clone()).into(),
+                                types::List::new(list_type, call.position().clone()).into(),
                             ),
                             ELEMENT_NAME,
                             None,

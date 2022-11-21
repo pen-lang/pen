@@ -310,7 +310,7 @@ fn transform_expression(
                                     .map(|name| (name.into(), map_type.value().clone())),
                             ),
                     ),
-                    type_ => return Err(AnalysisError::CollectionExpected(type_.clone())),
+                    type_ => return Err(AnalysisError::CollectionExpected(type_)),
                 };
             }
 
