@@ -259,14 +259,6 @@ fn infer_expression(
                 let type_ =
                     type_extractor::extract_from_expression(context, &iteratee, &variables)?;
 
-                branches.push(ListComprehensionBranch::new(
-                    Some(type_.clone()),
-                    branch.primary_name(),
-                    branch.secondary_name().map(String::from),
-                    iteratee,
-                    branch.position().clone(),
-                ));
-
                 variables = match type_canonicalizer::canonicalize(&type_, context.types())? {
                     Type::List(list_type) => variables.insert(
                         branch.primary_name().into(),
@@ -288,6 +280,18 @@ fn infer_expression(
                     ),
                     _ => return Err(AnalysisError::CollectionExpected(type_.clone())),
                 };
+
+                branches.push(ListComprehensionBranch::new(
+                    Some(type_.clone()),
+                    branch.primary_name(),
+                    branch.secondary_name().map(String::from),
+                    iteratee,
+                    branch
+                        .condition()
+                        .map(|expression| infer_expression(expression, &variables))
+                        .transpose()?,
+                    branch.position().clone(),
+                ));
             }
 
             ListComprehension::new(
@@ -797,286 +801,389 @@ mod tests {
         );
     }
 
-    #[test]
-    fn infer_list_comprehension() {
-        let element_type = types::None::new(Position::fake());
-        let list_type = types::List::new(element_type.clone(), Position::fake());
+    mod list_comprehension {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-        assert_eq!(
-            infer_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type.clone(),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Let::new(
-                                Some("y".into()),
-                                None,
-                                Call::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    vec![],
-                                    Position::fake()
-                                ),
-                                Variable::new("y", Position::fake()),
-                                Position::fake(),
-                            ),
-                            vec![ListComprehensionBranch::new(
-                                None,
-                                "x",
-                                None,
-                                List::new(element_type.clone(), vec![], Position::fake()),
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )
-            ])),
-            Ok(
-                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type.clone(),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Let::new(
-                                Some("y".into()),
-                                Some(element_type.clone().into()),
-                                Call::new(
-                                    Some(
-                                        types::Function::new(
-                                            vec![],
-                                            element_type.clone(),
-                                            Position::fake()
-                                        )
-                                        .into()
-                                    ),
-                                    Variable::new("x", Position::fake()),
-                                    vec![],
-                                    Position::fake()
-                                ),
-                                Variable::new("y", Position::fake()),
-                                Position::fake(),
-                            ),
-                            vec![ListComprehensionBranch::new(
-                                Some(list_type.into()),
-                                "x",
-                                None,
-                                List::new(element_type, vec![], Position::fake()),
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )],)
-            )
-        );
-    }
+        #[test]
+        fn infer() {
+            let element_type = types::None::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
 
-    #[test]
-    fn infer_list_comprehension_with_two_branches() {
-        let element_type = types::None::new(Position::fake());
-        let list_type = types::List::new(element_type.clone(), Position::fake());
-        let nested_list_type = types::List::new(list_type.clone(), Position::fake());
-
-        assert_eq!(
-            infer_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type.clone(),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Let::new(
-                                Some("y".into()),
-                                None,
-                                Call::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    vec![],
-                                    Position::fake()
-                                ),
-                                Variable::new("y", Position::fake()),
-                                Position::fake(),
-                            ),
-                            vec![
-                                ListComprehensionBranch::new(
-                                    None,
-                                    "xs",
-                                    None,
-                                    List::new(list_type.clone(), vec![], Position::fake()),
-                                    Position::fake(),
-                                ),
-                                ListComprehensionBranch::new(
-                                    None,
-                                    "x",
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
                                     None,
                                     Call::new(
                                         None,
-                                        Variable::new("xs", Position::fake()),
+                                        Variable::new("x", Position::fake()),
                                         vec![],
                                         Position::fake()
                                     ),
+                                    Variable::new("y", Position::fake()),
                                     Position::fake(),
                                 ),
-                            ],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )
-            ])),
-            Ok(
-                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type.clone(),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Let::new(
-                                Some("y".into()),
-                                Some(element_type.clone().into()),
-                                Call::new(
-                                    Some(
-                                        types::Function::new(
-                                            vec![],
-                                            element_type,
-                                            Position::fake()
-                                        )
-                                        .into()
-                                    ),
-                                    Variable::new("x", Position::fake()),
-                                    vec![],
-                                    Position::fake()
-                                ),
-                                Variable::new("y", Position::fake()),
-                                Position::fake(),
-                            ),
-                            vec![
-                                ListComprehensionBranch::new(
-                                    Some(nested_list_type.into()),
-                                    "xs",
+                                vec![ListComprehensionBranch::new(
                                     None,
-                                    List::new(list_type.clone(), vec![], Position::fake()),
-                                    Position::fake(),
-                                ),
-                                ListComprehensionBranch::new(
-                                    Some(list_type.clone().into()),
                                     "x",
                                     None,
+                                    List::new(element_type.clone(), vec![], Position::fake()),
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
+                                    Some(element_type.clone().into()),
                                     Call::new(
                                         Some(
                                             types::Function::new(
                                                 vec![],
-                                                list_type,
+                                                element_type.clone(),
                                                 Position::fake()
                                             )
                                             .into()
                                         ),
-                                        Variable::new("xs", Position::fake()),
+                                        Variable::new("x", Position::fake()),
                                         vec![],
                                         Position::fake()
                                     ),
+                                    Variable::new("y", Position::fake()),
                                     Position::fake(),
                                 ),
-                            ],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )],)
-            )
-        );
-    }
-
-    #[test]
-    fn infer_map_comprehension() {
-        let map_type = types::Map::new(
-            types::None::new(Position::fake()),
-            types::None::new(Position::fake()),
-            Position::fake(),
-        );
-        let element_type = types::None::new(Position::fake());
-        let list_type = types::List::new(element_type.clone(), Position::fake());
-        let empty_map = Map::new(
-            map_type.key().clone(),
-            map_type.value().clone(),
-            vec![],
-            Position::fake(),
-        );
-
-        assert_eq!(
-            infer_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type.clone(),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Let::new(
-                                Some("x".into()),
-                                None,
-                                Variable::new("k", Position::fake()),
-                                Variable::new("x", Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    Some(list_type.into()),
+                                    "x",
+                                    None,
+                                    List::new(element_type, vec![], Position::fake()),
+                                    None,
+                                    Position::fake(),
+                                )],
                                 Position::fake(),
                             ),
-                            vec![ListComprehensionBranch::new(
-                                None,
-                                "k",
-                                Some("v".into()),
-                                empty_map.clone(),
-                                Position::fake()
-                            )],
                             Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    false,
+                        false,
+                    )],)
                 )
-            ])),
-            Ok(
-                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        list_type,
-                        ListComprehension::new(
-                            element_type,
-                            Let::new(
-                                Some("x".into()),
-                                Some(map_type.key().clone()),
-                                Variable::new("k", Position::fake()),
-                                Variable::new("x", Position::fake()),
+            );
+        }
+
+        #[test]
+        fn infer_two_branches() {
+            let element_type = types::None::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
+            let nested_list_type = types::List::new(list_type.clone(), Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Variable::new("y", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![
+                                    ListComprehensionBranch::new(
+                                        None,
+                                        "xs",
+                                        None,
+                                        List::new(list_type.clone(), vec![], Position::fake()),
+                                        None,
+                                        Position::fake(),
+                                    ),
+                                    ListComprehensionBranch::new(
+                                        None,
+                                        "x",
+                                        None,
+                                        Call::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                            vec![],
+                                            Position::fake()
+                                        ),
+                                        None,
+                                        Position::fake(),
+                                    ),
+                                ],
                                 Position::fake(),
                             ),
-                            vec![ListComprehensionBranch::new(
-                                Some(map_type.clone().into()),
-                                "k",
-                                Some("v".into()),
-                                empty_map,
-                                Position::fake(),
-                            )],
                             Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    false,
-                )],)
-            )
-        );
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
+                                    Some(element_type.clone().into()),
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                element_type,
+                                                Position::fake()
+                                            )
+                                            .into()
+                                        ),
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Variable::new("y", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![
+                                    ListComprehensionBranch::new(
+                                        Some(nested_list_type.into()),
+                                        "xs",
+                                        None,
+                                        List::new(list_type.clone(), vec![], Position::fake()),
+                                        None,
+                                        Position::fake(),
+                                    ),
+                                    ListComprehensionBranch::new(
+                                        Some(list_type.clone().into()),
+                                        "x",
+                                        None,
+                                        Call::new(
+                                            Some(
+                                                types::Function::new(
+                                                    vec![],
+                                                    list_type,
+                                                    Position::fake()
+                                                )
+                                                .into()
+                                            ),
+                                            Variable::new("xs", Position::fake()),
+                                            vec![],
+                                            Position::fake()
+                                        ),
+                                        None,
+                                        Position::fake(),
+                                    ),
+                                ],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_condition() {
+            let list_type =
+                types::List::new(types::Boolean::new(Position::fake()), Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    List::new(
+                                        list_type.element().clone(),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Some(Let::new(
+                                        Some("y".into()),
+                                        None,
+                                        Call::new(
+                                            None,
+                                            Variable::new("x", Position::fake()),
+                                            vec![],
+                                            Position::fake()
+                                        ),
+                                        Variable::new("y", Position::fake()),
+                                        Position::fake(),
+                                    ).into()),
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    Some(list_type.clone().into()),
+                                    "x",
+                                    None,
+                                    List::new(
+                                        list_type.element().clone(),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Some(
+                                        Let::new(
+                                            Some("y".into()),
+                                            Some(list_type.element().clone()),
+                                            Call::new(
+                                                None,
+                                                Variable::new("x", Position::fake()),
+                                                vec![],
+                                                Position::fake()
+                                            ),
+                                            Variable::new("y", Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into()
+                                    ),
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
+
+        #[test]
+        fn infer_map_iteratee() {
+            let map_type = types::Map::new(
+                types::None::new(Position::fake()),
+                types::None::new(Position::fake()),
+                Position::fake(),
+            );
+            let element_type = types::None::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
+            let empty_map = Map::new(
+                map_type.key().clone(),
+                map_type.value().clone(),
+                vec![],
+                Position::fake(),
+            );
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("x".into()),
+                                    None,
+                                    Variable::new("k", Position::fake()),
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "k",
+                                    Some("v".into()),
+                                    empty_map.clone(),
+                                    None,
+                                    Position::fake()
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type,
+                            ListComprehension::new(
+                                element_type,
+                                Let::new(
+                                    Some("x".into()),
+                                    Some(map_type.key().clone()),
+                                    Variable::new("k", Position::fake()),
+                                    Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![ListComprehensionBranch::new(
+                                    Some(map_type.clone().into()),
+                                    "k",
+                                    Some("v".into()),
+                                    empty_map,
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
     }
 
     #[test]

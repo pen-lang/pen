@@ -171,13 +171,7 @@ fn transform_expression(
             let mut transform: Box<dyn Fn(&Variable) -> Expression> = Box::new(transform);
 
             for branch in comprehension.branches() {
-                branches.push(ListComprehensionBranch::new(
-                    branch.type_().cloned(),
-                    branch.primary_name(),
-                    branch.secondary_name().map(String::from),
-                    transform_expression(branch.iteratee(), &transform),
-                    branch.position().clone(),
-                ));
+                let iteratee = transform_expression(branch.iteratee(), &transform);
 
                 transform = Box::new(move |variable| {
                     if branch.primary_name() == variable.name()
@@ -188,6 +182,17 @@ fn transform_expression(
                         transform(variable)
                     }
                 });
+
+                branches.push(ListComprehensionBranch::new(
+                    branch.type_().cloned(),
+                    branch.primary_name(),
+                    branch.secondary_name().map(String::from),
+                    iteratee,
+                    branch
+                        .condition()
+                        .map(|expression| transform_expression(expression, &transform)),
+                    branch.position().clone(),
+                ));
             }
 
             ListComprehension::new(
@@ -462,20 +467,95 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         #[test]
-        fn do_not_transform_shadowed_primary_name() {
+        fn transform_shadowed_variable_in_iteratee() {
+            let module = |name| {
+                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        ListComprehension::new(
+                            types::Number::new(Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            vec![ListComprehensionBranch::new(
+                                None,
+                                "x",
+                                None,
+                                Variable::new(name, Position::fake()),
+                                None,
+                                Position::fake(),
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
+            };
+
+            assert_eq!(
+                transform(&module("x"), &|variable| if variable.name() == "x" {
+                    Variable::new("y", variable.position().clone()).into()
+                } else {
+                    variable.clone().into()
+                }),
+                module("y")
+            );
+        }
+
+        #[test]
+        fn transform_variable_in_condition() {
+            let module = |name| {
+                Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    "x",
+                    Lambda::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        ListComprehension::new(
+                            types::Number::new(Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            vec![ListComprehensionBranch::new(
+                                None,
+                                "x",
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                Some(Variable::new(name, Position::fake()).into()),
+                                Position::fake(),
+                            )],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                )])
+            };
+
+            assert_eq!(
+                transform(&module("a"), &|variable| if variable.name() == "a" {
+                    Variable::new("b", variable.position().clone()).into()
+                } else {
+                    variable.clone().into()
+                }),
+                module("b")
+            );
+        }
+
+        #[test]
+        fn transform_shadowed_variable_in_condition() {
             let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
                     vec![],
                     types::None::new(Position::fake()),
                     ListComprehension::new(
-                        types::None::new(Position::fake()),
+                        types::Number::new(Position::fake()),
                         Variable::new("x", Position::fake()),
                         vec![ListComprehensionBranch::new(
                             None,
                             "x",
                             None,
                             Variable::new("xs", Position::fake()),
+                            Some(Variable::new("x", Position::fake()).into()),
                             Position::fake(),
                         )],
                         Position::fake(),
@@ -496,7 +576,42 @@ mod tests {
         }
 
         #[test]
-        fn do_not_transform_shadowed_secondary_name() {
+        fn transform_shadowed_primary_name() {
+            let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                "x",
+                Lambda::new(
+                    vec![],
+                    types::None::new(Position::fake()),
+                    ListComprehension::new(
+                        types::None::new(Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        vec![ListComprehensionBranch::new(
+                            None,
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
+                            None,
+                            Position::fake(),
+                        )],
+                        Position::fake(),
+                    ),
+                    Position::fake(),
+                ),
+                false,
+            )]);
+
+            assert_eq!(
+                transform(&module, &|variable| if variable.name() == "x" {
+                    Variable::new("y", variable.position().clone()).into()
+                } else {
+                    variable.clone().into()
+                }),
+                module
+            );
+        }
+
+        #[test]
+        fn transform_shadowed_secondary_name() {
             let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
@@ -510,6 +625,7 @@ mod tests {
                             "k",
                             Some("v".into()),
                             Variable::new("xs", Position::fake()),
+                            None,
                             Position::fake(),
                         )],
                         Position::fake(),
@@ -530,7 +646,7 @@ mod tests {
         }
 
         #[test]
-        fn do_not_transform_variable_shadowed_by_second_branch() {
+        fn transform_variable_shadowed_by_second_branch() {
             let module = Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                 "x",
                 Lambda::new(
@@ -545,6 +661,7 @@ mod tests {
                                 "x",
                                 None,
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 Position::fake(),
                             ),
                             ListComprehensionBranch::new(
@@ -552,6 +669,7 @@ mod tests {
                                 "y",
                                 None,
                                 Variable::new("x", Position::fake()),
+                                None,
                                 Position::fake(),
                             ),
                         ],
