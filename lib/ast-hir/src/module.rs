@@ -278,13 +278,20 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
         ast::Expression::ListComprehension(comprehension) => ir::ListComprehension::new(
             type_::compile(comprehension.type_()),
             compile_expression(comprehension.element())?,
-            vec![ir::ListComprehensionBranch::new(
-                None,
-                comprehension.primary_name(),
-                comprehension.secondary_name().map(String::from),
-                compile_expression(comprehension.iteratee())?,
-                comprehension.position().clone(),
-            )],
+            comprehension
+                .branches()
+                .iter()
+                .rev()
+                .map(|branch| {
+                    Ok(ir::ListComprehensionBranch::new(
+                        None,
+                        branch.primary_name(),
+                        branch.secondary_name().map(String::from),
+                        compile_expression(branch.iteratee())?,
+                        branch.position().clone(),
+                    ))
+                })
+                .collect::<Result<_, _>>()?,
             comprehension.position().clone(),
         )
         .into(),
@@ -467,6 +474,86 @@ mod tests {
                     true,
                     Position::fake()
                 )]))
+        );
+    }
+
+    #[test]
+    fn compile_list_comprehension_with_two_branches() {
+        assert_eq!(
+            compile(&ast::Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![ast::FunctionDefinition::new(
+                    "f",
+                    ast::Lambda::new(
+                        vec![],
+                        ast::types::Reference::new("none", Position::fake()),
+                        ast::Block::new(
+                            vec![],
+                            ast::ListComprehension::new(
+                                ast::types::Reference::new("number", Position::fake()),
+                                ast::Variable::new("x", Position::fake()),
+                                vec![
+                                    ast::ListComprehensionBranch::new(
+                                        "y",
+                                        None,
+                                        ast::Variable::new("x", Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    ast::ListComprehensionBranch::new(
+                                        "x",
+                                        None,
+                                        ast::Variable::new("xs", Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                ],
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake(),
+                )],
+                Position::fake(),
+            )),
+            Ok(
+                ir::Module::empty().set_function_definitions(vec![ir::FunctionDefinition::new(
+                    "f",
+                    "f",
+                    ir::Lambda::new(
+                        vec![],
+                        types::Reference::new("none", Position::fake()),
+                        ir::ListComprehension::new(
+                            types::Reference::new("number", Position::fake()),
+                            ir::Variable::new("x", Position::fake()),
+                            vec![
+                                ir::ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    ir::Variable::new("xs", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                ir::ListComprehensionBranch::new(
+                                    None,
+                                    "y",
+                                    None,
+                                    ir::Variable::new("x", Position::fake()),
+                                    Position::fake(),
+                                ),
+                            ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    false,
+                    Position::fake()
+                )])
+            )
         );
     }
 }

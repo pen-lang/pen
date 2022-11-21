@@ -824,25 +824,32 @@ fn list_comprehension(input: Input) -> IResult<Expression> {
                 sign("["),
                 type_,
                 expression,
+                many1(list_comprehension_branch),
+                sign("]"),
+            )),
+            |(position, _, type_, element, branches, _)| {
+                ListComprehension::new(type_, element, branches, position()).into()
+            },
+        ),
+    )(input)
+}
+
+fn list_comprehension_branch(input: Input) -> IResult<ListComprehensionBranch> {
+    context(
+        "list comprehension branch",
+        map(
+            tuple((
+                position,
                 keyword("for"),
                 cut(tuple((
                     identifier,
                     opt(preceded(sign(","), identifier)),
                     keyword("in"),
                     expression,
-                    sign("]"),
                 ))),
             )),
-            |(position, _, type_, element, _, (element_name, value_name, _, iterator, _))| {
-                ListComprehension::new(
-                    type_,
-                    element,
-                    element_name,
-                    value_name,
-                    iterator,
-                    position(),
-                )
-                .into()
+            |(position, _, (element_name, value_name, _, iterator))| {
+                ListComprehensionBranch::new(element_name, value_name, iterator, position()).into()
             },
         ),
     )(input)
@@ -3163,9 +3170,12 @@ mod tests {
                     ListComprehension::new(
                         types::Reference::new("none", Position::fake()),
                         Variable::new("x", Position::fake()),
-                        "x",
-                        None,
-                        Variable::new("xs", Position::fake()),
+                        vec![ListComprehensionBranch::new(
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
+                            Position::fake(),
+                        )],
                         Position::fake(),
                     ),
                 ),
@@ -3182,9 +3192,42 @@ mod tests {
                             ),
                             Position::fake(),
                         ),
-                        "x",
-                        None,
-                        Variable::new("xs", Position::fake()),
+                        vec![ListComprehensionBranch::new(
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
+                            Position::fake(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[number x + 42 for y in x for x in xs]",
+                    ListComprehension::new(
+                        types::Reference::new("number", Position::fake()),
+                        BinaryOperation::new(
+                            BinaryOperator::Add,
+                            Variable::new("x", Position::fake()),
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("42".into()),
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        vec![
+                            ListComprehensionBranch::new(
+                                "y",
+                                None,
+                                Variable::new("x", Position::fake()),
+                                Position::fake(),
+                            ),
+                            ListComprehensionBranch::new(
+                                "x",
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                Position::fake(),
+                            ),
+                        ],
                         Position::fake(),
                     ),
                 ),
@@ -3279,9 +3322,12 @@ mod tests {
                 ListComprehension::new(
                     types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
-                    "k",
-                    Some("v".into()),
-                    Variable::new("xs", Position::fake()),
+                    vec![ListComprehensionBranch::new(
+                        "k",
+                        Some("v".into()),
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    )],
                     Position::fake(),
                 )
                 .into()
