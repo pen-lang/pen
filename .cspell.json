@@ -48,6 +48,7 @@
     "optarg",
     "optind",
     "perceus",
+    "permutate",
     "petgraph",
     "println",
     "raviqqe",
