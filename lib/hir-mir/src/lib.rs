@@ -1062,7 +1062,7 @@ mod tests {
                 FunctionDefinition::fake(
                     "f",
                     Lambda::new(
-                        vec![Argument::new("xs", nested_list_type.clone())],
+                        vec![Argument::new("xs", nested_list_type)],
                         list_type,
                         ListComprehension::new(
                             types::Number::new(Position::fake()),
@@ -1119,7 +1119,7 @@ mod tests {
                     Lambda::new(
                         vec![
                             Argument::new("xs", list_type.clone()),
-                            Argument::new("ys", map_type.clone()),
+                            Argument::new("ys", map_type),
                         ],
                         list_type,
                         ListComprehension::new(
