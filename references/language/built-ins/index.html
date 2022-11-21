@@ -1826,13 +1826,13 @@
 <p>It calculates a size of a list or map. It is generic and you can apply it to any list and map types.</p>
 <p>Its time complexity is O(n) for lists and O(1) for maps.</p>
 <pre class="pen"><code>\(list [a]) number
-\(map {a: b}) number</code></pre>
+\(map {k: v}) number</code></pre>
 <h3 id="delete"><code>delete</code></h3>
 <p>It deletes a key from a map.</p>
 <pre class="pen"><code>\(map {k: v}, key k) {k: v}</code></pre>
 <h3 id="error"><code>error</code></h3>
 <p>It creates an error with its source information.</p>
-<pre class="pen"><code>\(s any) error</code></pre>
+<pre class="pen"><code>\(x any) error</code></pre>
 <h3 id="source"><code>source</code></h3>
 <p>It extracts source information from an error.</p>
 <pre class="pen"><code>\(e error) any</code></pre>
