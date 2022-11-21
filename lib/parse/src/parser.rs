@@ -849,7 +849,7 @@ fn list_comprehension_branch(input: Input) -> IResult<ListComprehensionBranch> {
                 ))),
             )),
             |(position, _, (element_name, value_name, _, iterator))| {
-                ListComprehensionBranch::new(element_name, value_name, iterator, position()).into()
+                ListComprehensionBranch::new(element_name, value_name, iterator, position())
             },
         ),
     )(input)
