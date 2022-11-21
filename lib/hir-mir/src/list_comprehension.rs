@@ -9,23 +9,40 @@ pub fn compile(
     context: &Context,
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let iteratee_type = comprehension
-        .iteratee_type()
-        .ok_or_else(|| AnalysisError::TypeNotInferred(comprehension.position().clone()))?;
+    compile_branches(context, comprehension, comprehension.branches())
+}
 
-    match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
-        Type::List(list_type) => compile_list(context, comprehension, &list_type),
-        Type::Map(map_type) => compile_map(context, comprehension, &map_type),
-        type_ => Err(AnalysisError::ListExpected(
-            type_.set_position(comprehension.iteratee().position().clone()),
-        )
-        .into()),
+fn compile_branches(
+    context: &Context,
+    comprehension: &ListComprehension,
+    branches: &[ListComprehensionBranch],
+) -> Result<mir::ir::Expression, CompileError> {
+    match branches {
+        [] => todo!(),
+        [branch, ..] => {
+            // TODO
+            // let branches = &branches[1..];
+
+            let iteratee_type = branch
+                .type_()
+                .ok_or_else(|| AnalysisError::TypeNotInferred(comprehension.position().clone()))?;
+
+            match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
+                Type::List(list_type) => compile_list(context, comprehension, branch, &list_type),
+                Type::Map(map_type) => compile_map(context, comprehension, branch, &map_type),
+                type_ => Err(AnalysisError::CollectionExpected(
+                    type_.set_position(branch.iteratee().position().clone()),
+                )
+                .into()),
+            }
+        }
     }
 }
 
 fn compile_list(
     context: &Context,
     comprehension: &ListComprehension,
+    branch: &ListComprehensionBranch,
     input_list_type: &types::List,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
@@ -57,7 +74,7 @@ fn compile_list(
                             &IfList::new(
                                 Some(input_element_type.clone()),
                                 Variable::new(LIST_NAME, position.clone()),
-                                comprehension.primary_name(),
+                                branch.primary_name(),
                                 LIST_NAME,
                                 List::new(
                                     output_element_type.clone(),
@@ -99,7 +116,7 @@ fn compile_list(
                     mir::ir::Call::new(
                         mir::types::Function::new(vec![list_type.clone().into()], list_type),
                         mir::ir::Variable::new(CLOSURE_NAME),
-                        vec![expression::compile(context, comprehension.iteratee())?],
+                        vec![expression::compile(context, branch.iteratee())?],
                     ),
                 ),
             ),
@@ -113,12 +130,14 @@ fn compile_list(
 fn compile_map(
     context: &Context,
     comprehension: &ListComprehension,
+    branch: &ListComprehensionBranch,
     map_type: &types::Map,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
 
     let list_type = type_::compile_list(context)?;
-    let definition = compile_map_iteration_function_definition(context, comprehension, map_type)?;
+    let definition =
+        compile_map_iteration_function_definition(context, comprehension, branch, map_type)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -148,7 +167,7 @@ fn compile_map(
                                     .iteration
                                     .iterate_function_name,
                             ),
-                            vec![expression::compile(context, comprehension.iteratee())?],
+                            vec![expression::compile(context, branch.iteratee())?],
                         )
                         .into()],
                     ),
@@ -164,6 +183,7 @@ fn compile_map(
 fn compile_map_iteration_function_definition(
     context: &Context,
     comprehension: &ListComprehension,
+    branch: &ListComprehensionBranch,
     map_type: &types::Map,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
@@ -220,7 +240,7 @@ fn compile_map_iteration_function_definition(
                 vec![IfTypeBranch::new(
                     iterator_type.clone(),
                     Let::new(
-                        Some(comprehension.primary_name().into()),
+                        Some(branch.primary_name().into()),
                         Some(map_type.key().clone()),
                         compile_key_value_function_call(
                             &iteration_configuration.key_function_name,
@@ -228,7 +248,7 @@ fn compile_map_iteration_function_definition(
                         )?,
                         Let::new(
                             Some(
-                                comprehension
+                                branch
                                     .secondary_name()
                                     .ok_or_else(|| {
                                         AnalysisError::ValueNameNotDefined(
