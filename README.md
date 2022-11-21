@@ -91,12 +91,13 @@ See [the `examples` directory](examples).
 | Number           | `number` (IEEE 754)                           | `int`, `float64`, ...          |
 | Sequence         | `[number]` (lazy list)                        | `[]int` (array or slice)       |
 | Map              | `{string: number}`                            | `map[string]int`               |
-| Concurrent queue | `[number]`, [built-in functions][concurrency] | `chan int`                     |
 | Optional value   | `none`, union types                           | null pointer (or _zero_ value) |
 | Function         | `\(number, boolean) string`                   | `func(int, bool) string`       |
 | Union            | `number \| string`                            | Interface                      |
 | Top type         | `any`                                         | `any` (`interface{}`)          |
 | Interface        | Records                                       | Interface                      |
+| Futures          | Functions (thunks)                            | None                           |
+| Concurrent queue | `[number]`, [built-in functions][concurrency] | `chan int`                     |
 
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [Haskell](https://haskell.org).
 
