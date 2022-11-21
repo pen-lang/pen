@@ -104,7 +104,7 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ### Dynamic effect system
 
-Pen does not adopt any formal effect system of algebraic efffects or monads. Instead, Pen rather uses a simple rule to manage side effects: all effects are passed down from the `main` functions to child functions. So unless we pass those impure functions to other functions explicitly, they are always pure. As such, Pen is an impure functional programming language although all runtime values are immutable. However, it can provide many of the same benefits purely functional languages do, such as determinisity, testability, etc.
+Pen does not adopt any formal effect system of algebraic efffects or monads. Instead, Pen rather uses a simple rule to manage side effects: all effects are passed down from the `main` functions to child functions. So unless we pass those impure functions to other functions explicitly, they are always pure. As such, Pen is an impure functional programming language although all runtime values are immutable. However, it still provides many of the same benefits purely functional languages do, such as determinisity, testability, etc.
 
 The reason we do not adopt any formal and statically provable effect system is to keep the language and its type system lean and easy to learn for the purpose of improving developer productivity for software development scalability; we want to make Pen accessible and easy to learn for both newbie and expert programmers.
 
