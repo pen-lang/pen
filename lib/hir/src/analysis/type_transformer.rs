@@ -234,11 +234,20 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
         .into(),
         Expression::ListComprehension(comprehension) => ListComprehension::new(
             transform(comprehension.type_()),
-            comprehension.iteratee_type().map(transform),
             transform_expression(comprehension.element()),
-            comprehension.primary_name(),
-            comprehension.secondary_name().map(String::from),
-            transform_expression(comprehension.iteratee()),
+            comprehension
+                .branches()
+                .iter()
+                .map(|branch| {
+                    ListComprehensionBranch::new(
+                        branch.type_().map(transform),
+                        branch.primary_name(),
+                        branch.secondary_name().map(String::from),
+                        transform_expression(branch.iteratee()),
+                        branch.position().clone(),
+                    )
+                })
+                .collect(),
             comprehension.position().clone(),
         )
         .into(),

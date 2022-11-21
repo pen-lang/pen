@@ -78,8 +78,11 @@ fn validate_expression(
             }
         }
         Expression::ListComprehension(comprehension) => {
+            for branch in comprehension.branches() {
+                validate_expression(context, branch.iteratee(), None)?;
+            }
+
             validate_expression(context, comprehension.element(), None)?;
-            validate_expression(context, comprehension.iteratee(), None)?;
         }
         Expression::Map(map) => {
             for element in map.elements() {
@@ -367,16 +370,19 @@ mod tests {
                         ),
                         ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None,
                             TryOperation::new(
                                 None,
                                 Variable::new("x", Position::fake()),
                                 Position::fake(),
                             ),
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
-                            Position::fake()
+                            vec![ListComprehensionBranch::new(
+                                None,
+                                "x",
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                Position::fake(),
+                            )],
+                            Position::fake(),
                         ),
                         Position::fake(),
                     ),
@@ -402,15 +408,18 @@ mod tests {
                         ),
                         ListComprehension::new(
                             types::None::new(Position::fake()),
-                            None,
                             None::new(Position::fake()),
-                            "x",
-                            None,
-                            TryOperation::new(
+                            vec![ListComprehensionBranch::new(
                                 None,
-                                Variable::new("xs", Position::fake()),
-                                Position::fake(),
-                            ),
+                                "x",
+                                None,
+                                TryOperation::new(
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                Position::fake()
+                            )],
                             Position::fake()
                         ),
                         Position::fake(),

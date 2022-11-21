@@ -97,16 +97,22 @@ pub fn compile(
                     context,
                     &ListComprehension::new(
                         any_list_type,
-                        Some(types::List::new(list_type.clone(), call.position().clone()).into()),
                         Call::new(
-                            Some(types::Function::new(vec![], list_type, position.clone()).into()),
+                            Some(
+                                types::Function::new(vec![], list_type.clone(), position.clone())
+                                    .into(),
+                            ),
                             Variable::new(ELEMENT_NAME, position.clone()),
                             vec![],
                             position.clone(),
                         ),
-                        ELEMENT_NAME,
-                        None,
-                        call.arguments()[0].clone(),
+                        vec![ListComprehensionBranch::new(
+                            Some(types::List::new(list_type, call.position().clone()).into()),
+                            ELEMENT_NAME,
+                            None,
+                            call.arguments()[0].clone(),
+                            position.clone(),
+                        )],
                         position.clone(),
                     )
                     .into(),

@@ -471,22 +471,30 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                     compile_expression(context, comprehension.element())
                 }),
                 line(),
-                compile_line_comment(context, comprehension.element().position(), |context| {
-                    sequence(
-                        ["for ".into(), comprehension.primary_name().into()]
-                            .into_iter()
-                            .chain(
-                                comprehension
-                                    .secondary_name()
-                                    .into_iter()
-                                    .flat_map(|name| [", ".into(), name.into()]),
-                            )
-                            .chain([
-                                " in ".into(),
-                                compile_expression(context, comprehension.iteratee()),
-                            ]),
-                    )
-                }),
+                sequence(
+                    comprehension
+                        .branches()
+                        .iter()
+                        .map(|branch| {
+                            compile_line_comment(context, branch.position(), |context| {
+                                sequence(
+                                    ["for ".into(), branch.primary_name().into()]
+                                        .into_iter()
+                                        .chain(
+                                            branch
+                                                .secondary_name()
+                                                .into_iter()
+                                                .flat_map(|name| [", ".into(), name.into()]),
+                                        )
+                                        .chain([
+                                            " in ".into(),
+                                            compile_expression(context, branch.iteratee()),
+                                        ]),
+                                )
+                            })
+                        })
+                        .intersperse(line()),
+                ),
             ]);
 
             sequence([
@@ -3088,10 +3096,13 @@ mod tests {
                         &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", Position::fake()),
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
-                            Position::fake()
+                            vec![ListComprehensionBranch::new(
+                                "x",
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                Position::fake(),
+                            )],
+                            Position::fake(),
                         )
                         .into()
                     ),
@@ -3106,9 +3117,49 @@ mod tests {
                         &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", line_position(2)),
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
+                            vec![ListComprehensionBranch::new(
+                                "x",
+                                None,
+                                Variable::new("xs", Position::fake()),
+                                line_position(2),
+                            )],
+                            line_position(1),
+                        )
+                        .into()
+                    ),
+                    indoc!(
+                        "
+                        [none
+                          none
+                          for x in xs
+                        ]
+                        "
+                    )
+                    .trim()
+                );
+            }
+
+            #[test]
+            fn format_comprehension_with_two_branches() {
+                assert_eq!(
+                    format(
+                        &ListComprehension::new(
+                            types::Reference::new("none", Position::fake()),
+                            Variable::new("none", line_position(2)),
+                            vec![
+                                ListComprehensionBranch::new(
+                                    "y",
+                                    None,
+                                    Variable::new("x", Position::fake()),
+                                    line_position(2)
+                                ),
+                                ListComprehensionBranch::new(
+                                    "x",
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    line_position(2)
+                                )
+                            ],
                             line_position(1)
                         )
                         .into()
@@ -3117,6 +3168,7 @@ mod tests {
                         "
                         [none
                           none
+                          for y in x
                           for x in xs
                         ]
                         "
@@ -3304,10 +3356,13 @@ mod tests {
                         &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", Position::fake()),
-                            "k",
-                            Some("v".into()),
-                            Variable::new("xs", Position::fake()),
-                            Position::fake()
+                            vec![ListComprehensionBranch::new(
+                                "k",
+                                Some("v".into()),
+                                Variable::new("xs", Position::fake()),
+                                Position::fake(),
+                            )],
+                            Position::fake(),
                         )
                         .into()
                     ),
@@ -3322,9 +3377,12 @@ mod tests {
                         &ListComprehension::new(
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", line_position(2)),
-                            "k",
-                            Some("v".into()),
-                            Variable::new("xs", Position::fake()),
+                            vec![ListComprehensionBranch::new(
+                                "k",
+                                Some("v".into()),
+                                Variable::new("xs", Position::fake()),
+                                line_position(2)
+                            )],
                             line_position(1)
                         )
                         .into()
