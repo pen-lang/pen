@@ -16,7 +16,7 @@ Its time complexity is O(n) for lists and O(1) for maps.
 
 ```pen
 \(list [a]) number
-\(map {a: b}) number
+\(map {k: v}) number
 ```
 
 ### `delete`
@@ -32,7 +32,7 @@ It deletes a key from a map.
 It creates an error with its source information.
 
 ```pen
-\(s any) error
+\(x any) error
 ```
 
 ### `source`
