@@ -287,6 +287,10 @@ fn transform_expression(
                     branch.primary_name(),
                     branch.secondary_name().map(String::from),
                     transform_expression(branch.iteratee(), &variables)?,
+                    branch
+                        .condition()
+                        .map(|expression| transform_expression(expression, &variables))
+                        .transpose()?,
                     position.clone(),
                 ));
 
@@ -1426,90 +1430,96 @@ mod tests {
             );
         }
 
-        #[test]
-        fn coerce_list_comprehension() {
-            let union_type = types::Union::new(
-                types::Number::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-            let input_list_type =
-                types::List::new(types::None::new(Position::fake()), Position::fake());
-            let output_list_type = types::List::new(union_type.clone(), Position::fake());
-            let empty_list =
-                List::new(types::None::new(Position::fake()), vec![], Position::fake());
+        mod list_comprehension {
+            use super::*;
+            use pretty_assertions::assert_eq;
 
-            assert_eq!(
-                coerce_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            output_list_type.clone(),
-                            ListComprehension::new(
-                                union_type.clone(),
-                                None::new(Position::fake()),
-                                vec![ListComprehensionBranch::new(
-                                    Some(input_list_type.clone().into()),
-                                    "x",
-                                    None,
-                                    empty_list.clone(),
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )
-                ],)),
-                Ok(
-                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            output_list_type,
-                            ListComprehension::new(
-                                union_type.clone(),
-                                TypeCoercion::new(
-                                    types::None::new(Position::fake()),
-                                    union_type,
+            #[test]
+            fn coerce_output_element() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let input_list_type =
+                    types::List::new(types::None::new(Position::fake()), Position::fake());
+                let output_list_type = types::List::new(union_type.clone(), Position::fake());
+                let empty_list =
+                    List::new(types::None::new(Position::fake()), vec![], Position::fake());
+
+                assert_eq!(
+                    coerce_module(&Module::empty().set_function_definitions(vec![
+                        FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                output_list_type.clone(),
+                                ListComprehension::new(
+                                    union_type.clone(),
                                     None::new(Position::fake()),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(input_list_type.clone().into()),
+                                        "x",
+                                        None,
+                                        empty_list.clone(),
+                                        None,
+                                        Position::fake(),
+                                    )],
                                     Position::fake(),
                                 ),
-                                vec![ListComprehensionBranch::new(
-                                    Some(input_list_type.into()),
-                                    "x",
-                                    None,
-                                    empty_list,
-                                    Position::fake(),
-                                )],
                                 Position::fake(),
                             ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )],)
-                )
-            );
-        }
+                            false,
+                        )
+                    ],)),
+                    Ok(
+                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                output_list_type,
+                                ListComprehension::new(
+                                    union_type.clone(),
+                                    TypeCoercion::new(
+                                        types::None::new(Position::fake()),
+                                        union_type,
+                                        None::new(Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(input_list_type.into()),
+                                        "x",
+                                        None,
+                                        empty_list,
+                                        None,
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )],)
+                    )
+                );
+            }
 
-        #[test]
-        fn coerce_list_comprehension_with_element() {
-            let union_type = types::Union::new(
-                types::Number::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-            let input_list_type =
-                types::List::new(types::None::new(Position::fake()), Position::fake());
-            let output_list_type = types::List::new(union_type.clone(), Position::fake());
-            let empty_list =
-                List::new(types::None::new(Position::fake()), vec![], Position::fake());
+            #[test]
+            fn coerce_input_element() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let input_list_type =
+                    types::List::new(types::None::new(Position::fake()), Position::fake());
+                let output_list_type = types::List::new(union_type.clone(), Position::fake());
+                let empty_list =
+                    List::new(types::None::new(Position::fake()), vec![], Position::fake());
 
-            assert_eq!(
-                coerce_module(&Module::empty().set_function_definitions(
-                    vec![FunctionDefinition::fake(
+                assert_eq!(
+                    coerce_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -1534,6 +1544,7 @@ mod tests {
                                     "x",
                                     None,
                                     empty_list.clone(),
+                                    None,
                                     Position::fake(),
                                 )],
                                 Position::fake(),
@@ -1542,48 +1553,137 @@ mod tests {
                         ),
                         false,
                     )],
-                )),
-                Ok(
-                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            output_list_type,
-                            ListComprehension::new(
-                                union_type.clone(),
-                                TypeCoercion::new(
+                    )),
+                    Ok(
+                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                output_list_type,
+                                ListComprehension::new(
+                                    union_type.clone(),
+                                    TypeCoercion::new(
+                                        types::None::new(Position::fake()),
+                                        union_type,
+                                        Call::new(
+                                            Some(
+                                                types::Function::new(
+                                                    vec![],
+                                                    types::None::new(Position::fake()),
+                                                    Position::fake(),
+                                                )
+                                                .into()
+                                            ),
+                                            Variable::new("x", Position::fake()),
+                                            vec![],
+                                            Position::fake(),
+                                        ),
+                                        Position::fake(),
+                                    ),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(input_list_type.into()),
+                                        "x",
+                                        None,
+                                        empty_list,
+                                        None,
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )],)
+                    )
+                );
+            }
+
+            #[test]
+            fn coerce_condition() {
+                let union_type = types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type =
+                    types::List::new(types::None::new(Position::fake()), Position::fake());
+                let empty_list =
+                    List::new(types::None::new(Position::fake()), vec![], Position::fake());
+
+                assert_eq!(
+                    coerce_module(&Module::empty().set_function_definitions(vec![
+                        FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type.clone(),
+                                ListComprehension::new(
                                     types::None::new(Position::fake()),
-                                    union_type,
-                                    Call::new(
+                                    None::new(Position::fake()),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(list_type.clone().into()),
+                                        "x",
+                                        None,
+                                        empty_list.clone(),
                                         Some(
-                                            types::Function::new(
-                                                vec![],
-                                                types::None::new(Position::fake()),
+                                            Let::new(
+                                                Some("x".into()),
+                                                Some(union_type.clone().into()),
+                                                None::new(Position::fake()),
+                                                Boolean::new(true, Position::fake()),
                                                 Position::fake(),
                                             )
                                             .into()
                                         ),
-                                        Variable::new("x", Position::fake()),
-                                        vec![],
                                         Position::fake(),
-                                    ),
+                                    )],
                                     Position::fake(),
                                 ),
-                                vec![ListComprehensionBranch::new(
-                                    Some(input_list_type.into()),
-                                    "x",
-                                    None,
-                                    empty_list,
-                                    Position::fake(),
-                                )],
                                 Position::fake(),
                             ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )],)
-                )
-            );
+                            false,
+                        )
+                    ],)),
+                    Ok(
+                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                list_type.clone(),
+                                ListComprehension::new(
+                                    types::None::new(Position::fake()),
+                                    None::new(Position::fake()),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(list_type.clone().into()),
+                                        "x",
+                                        None,
+                                        empty_list.clone(),
+                                        Some(
+                                            Let::new(
+                                                Some("x".into()),
+                                                Some(union_type.clone().into()),
+                                                TypeCoercion::new(
+                                                    types::None::new(Position::fake()),
+                                                    union_type,
+                                                    None::new(Position::fake()),
+                                                    Position::fake(),
+                                                ),
+                                                Boolean::new(true, Position::fake()),
+                                                Position::fake(),
+                                            )
+                                            .into()
+                                        ),
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )])
+                    )
+                );
+            }
         }
     }
 
@@ -1888,6 +1988,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map.clone(),
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
@@ -1916,6 +2017,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map,
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
@@ -1963,6 +2065,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map.clone(),
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
@@ -1991,6 +2094,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map,
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
@@ -2038,6 +2142,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map.clone(),
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
@@ -2066,6 +2171,7 @@ mod tests {
                                         "k",
                                         Some("v".into()),
                                         empty_map,
+                                        None,
                                         Position::fake(),
                                     )],
                                     Position::fake(),
