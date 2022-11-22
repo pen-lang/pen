@@ -1656,10 +1656,10 @@ mod tests {
                                     types::None::new(Position::fake()),
                                     None::new(Position::fake()),
                                     vec![ListComprehensionBranch::new(
-                                        Some(list_type.clone().into()),
+                                        Some(list_type.into()),
                                         "x",
                                         None,
-                                        empty_list.clone(),
+                                        empty_list,
                                         Some(
                                             EqualityOperation::new(
                                                 Some(union_type.clone().into()),

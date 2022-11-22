@@ -1228,7 +1228,7 @@ mod tests {
                     FunctionDefinition::fake(
                         "f",
                         Lambda::new(
-                            vec![Argument::new("xs", map_type.clone())],
+                            vec![Argument::new("xs", map_type)],
                             list_type.clone(),
                             ListComprehension::new(
                                 list_type.element().clone(),
