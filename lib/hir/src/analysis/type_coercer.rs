@@ -282,17 +282,7 @@ fn transform_expression(
             let mut variables = variables.clone();
 
             for branch in comprehension.branches() {
-                branches.push(ListComprehensionBranch::new(
-                    branch.type_().cloned(),
-                    branch.primary_name(),
-                    branch.secondary_name().map(String::from),
-                    transform_expression(branch.iteratee(), &variables)?,
-                    branch
-                        .condition()
-                        .map(|expression| transform_expression(expression, &variables))
-                        .transpose()?,
-                    position.clone(),
-                ));
+                let iteratee = transform_expression(branch.iteratee(), &variables)?;
 
                 variables = match type_canonicalizer::canonicalize(
                     branch
@@ -316,6 +306,18 @@ fn transform_expression(
                     ),
                     type_ => return Err(AnalysisError::CollectionExpected(type_)),
                 };
+
+                branches.push(ListComprehensionBranch::new(
+                    branch.type_().cloned(),
+                    branch.primary_name(),
+                    branch.secondary_name().map(String::from),
+                    iteratee,
+                    branch
+                        .condition()
+                        .map(|expression| transform_expression(expression, &variables))
+                        .transpose()?,
+                    position.clone(),
+                ));
             }
 
             ListComprehension::new(
@@ -1615,7 +1617,7 @@ mod tests {
                         FunctionDefinition::fake(
                             "f",
                             Lambda::new(
-                                vec![],
+                                vec![Argument::new("a", union_type.clone())],
                                 list_type.clone(),
                                 ListComprehension::new(
                                     types::None::new(Position::fake()),
@@ -1626,11 +1628,11 @@ mod tests {
                                         None,
                                         empty_list.clone(),
                                         Some(
-                                            Let::new(
-                                                Some("x".into()),
+                                            EqualityOperation::new(
                                                 Some(union_type.clone().into()),
+                                                EqualityOperator::Equal,
+                                                Variable::new("a", Position::fake()),
                                                 None::new(Position::fake()),
-                                                Boolean::new(true, Position::fake()),
                                                 Position::fake(),
                                             )
                                             .into()
@@ -1648,7 +1650,7 @@ mod tests {
                         Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
                             Lambda::new(
-                                vec![],
+                                vec![Argument::new("a", union_type.clone())],
                                 list_type.clone(),
                                 ListComprehension::new(
                                     types::None::new(Position::fake()),
@@ -1659,16 +1661,16 @@ mod tests {
                                         None,
                                         empty_list.clone(),
                                         Some(
-                                            Let::new(
-                                                Some("x".into()),
+                                            EqualityOperation::new(
                                                 Some(union_type.clone().into()),
+                                                EqualityOperator::Equal,
+                                                Variable::new("a", Position::fake()),
                                                 TypeCoercion::new(
                                                     types::None::new(Position::fake()),
                                                     union_type,
                                                     None::new(Position::fake()),
                                                     Position::fake(),
                                                 ),
-                                                Boolean::new(true, Position::fake()),
                                                 Position::fake(),
                                             )
                                             .into()

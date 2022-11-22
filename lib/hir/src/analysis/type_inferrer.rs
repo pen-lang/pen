@@ -1083,7 +1083,14 @@ mod tests {
                                             Some("y".into()),
                                             Some(list_type.element().clone()),
                                             Call::new(
-                                                None,
+                                                Some(
+                                                    types::Function::new(
+                                                        vec![],
+                                                        types::Boolean::new(Position::fake()),
+                                                        Position::fake()
+                                                    )
+                                                    .into()
+                                                ),
                                                 Variable::new("x", Position::fake()),
                                                 vec![],
                                                 Position::fake()
