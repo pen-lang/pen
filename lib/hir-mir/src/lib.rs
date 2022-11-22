@@ -1178,7 +1178,7 @@ mod tests {
             }
 
             #[test]
-            fn compile_with_condition() {
+            fn compile_condition_with_list_iteratee() {
                 let list_type =
                     types::List::new(types::Number::new(Position::fake()), Position::fake());
 
@@ -1200,6 +1200,43 @@ mod tests {
                                     None,
                                     "x",
                                     None,
+                                    Variable::new("xs", Position::fake()),
+                                    Some(Boolean::new(true, Position::fake()).into()),
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    ),
+                ]))
+                .unwrap();
+            }
+
+            #[test]
+            fn compile_condition_with_map_iteratee() {
+                let list_type =
+                    types::List::new(types::Number::new(Position::fake()), Position::fake());
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+
+                compile_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("xs", map_type.clone())],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                list_type.element().clone(),
+                                Variable::new("v", Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "k",
+                                    Some("v".into()),
                                     Variable::new("xs", Position::fake()),
                                     Some(Boolean::new(true, Position::fake()).into()),
                                     Position::fake(),
