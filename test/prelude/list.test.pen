@@ -31,6 +31,17 @@ FilterList = \() none | error {
   )
 }
 
+FlattenList = \() none | error {
+  Assert'Equal(
+    [number
+      y()
+      for y in x()
+      for x in [[number] [number 1, 2], [number 3], [number 4, 5]]
+    ],
+    [number 1, 2, 3, 4, 5],
+  )
+}
+
 PermutateLists = \() none | error {
   Assert'Equal(
     [number
