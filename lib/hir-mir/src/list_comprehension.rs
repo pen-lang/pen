@@ -75,37 +75,44 @@ fn compile_list(
                                 Variable::new(LIST_NAME, position.clone()),
                                 branch.primary_name(),
                                 LIST_NAME,
-                                List::new(
-                                    output_element_type.clone(),
-                                    vec![
-                                        element,
-                                        ListElement::Multiple(
-                                            Call::new(
-                                                Some(
-                                                    types::Function::new(
-                                                        vec![types::List::new(
-                                                            input_element_type.clone(),
-                                                            position.clone(),
-                                                        )
-                                                        .into()],
-                                                        types::List::new(
-                                                            output_element_type.clone(),
-                                                            position.clone(),
-                                                        ),
-                                                        position.clone(),
-                                                    )
-                                                    .into(),
+                                {
+                                    let rest = Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![types::List::new(
+                                                    input_element_type.clone(),
+                                                    position.clone(),
+                                                )
+                                                .into()],
+                                                types::List::new(
+                                                    output_element_type.clone(),
+                                                    position.clone(),
                                                 ),
-                                                Variable::new(CLOSURE_NAME, position.clone()),
-                                                vec![Variable::new(LIST_NAME, position.clone())
-                                                    .into()],
                                                 position.clone(),
                                             )
                                             .into(),
                                         ),
-                                    ],
-                                    position.clone(),
-                                ),
+                                        Variable::new(CLOSURE_NAME, position.clone()),
+                                        vec![Variable::new(LIST_NAME, position.clone()).into()],
+                                        position.clone(),
+                                    );
+                                    let list = List::new(
+                                        output_element_type.clone(),
+                                        vec![element, ListElement::Multiple(rest.clone().into())],
+                                        position.clone(),
+                                    );
+
+                                    if let Some(condition) = branch.condition() {
+                                        Expression::from(If::new(
+                                            condition.clone(),
+                                            list,
+                                            rest,
+                                            branch.position().clone(),
+                                        ))
+                                    } else {
+                                        list.into()
+                                    }
+                                },
                                 List::new(output_element_type.clone(), vec![], position.clone()),
                                 position.clone(),
                             )
@@ -268,48 +275,56 @@ fn compile_map_iteration_function_definition(
                                 &iteration_configuration.value_function_name,
                                 map_type.value(),
                             )?,
-                            List::new(
-                                element_type.clone(),
-                                vec![
-                                    element,
-                                    ListElement::Multiple(
-                                        Call::new(
-                                            Some(
-                                                types::Function::new(
-                                                    vec![iterator_or_none_type.clone().into()],
-                                                    types::List::new(
-                                                        element_type.clone(),
-                                                        position.clone(),
-                                                    ),
-                                                    position.clone(),
-                                                )
-                                                .into(),
-                                            ),
-                                            Variable::new(CLOSURE_NAME, position.clone()),
-                                            vec![Call::new(
-                                                Some(
-                                                    types::Function::new(
-                                                        vec![iterator_type.clone()],
-                                                        iterator_or_none_type,
-                                                        position.clone(),
-                                                    )
-                                                    .into(),
-                                                ),
-                                                Variable::new(
-                                                    &iteration_configuration.rest_function_name,
-                                                    position.clone(),
-                                                ),
-                                                vec![iterator_variable.into()],
+                            {
+                                let rest = Call::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![iterator_or_none_type.clone().into()],
+                                            types::List::new(
+                                                element_type.clone(),
                                                 position.clone(),
-                                            )
-                                            .into()],
+                                            ),
                                             position.clone(),
                                         )
                                         .into(),
                                     ),
-                                ],
-                                position.clone(),
-                            ),
+                                    Variable::new(CLOSURE_NAME, position.clone()),
+                                    vec![Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![iterator_type.clone()],
+                                                iterator_or_none_type,
+                                                position.clone(),
+                                            )
+                                            .into(),
+                                        ),
+                                        Variable::new(
+                                            &iteration_configuration.rest_function_name,
+                                            position.clone(),
+                                        ),
+                                        vec![iterator_variable.into()],
+                                        position.clone(),
+                                    )
+                                    .into()],
+                                    position.clone(),
+                                );
+                                let list = List::new(
+                                    element_type.clone(),
+                                    vec![element, ListElement::Multiple(rest.clone().into())],
+                                    position.clone(),
+                                );
+
+                                if let Some(condition) = branch.condition() {
+                                    Expression::from(If::new(
+                                        condition.clone(),
+                                        list,
+                                        rest,
+                                        branch.position().clone(),
+                                    ))
+                                } else {
+                                    list.into()
+                                }
+                            },
                             position.clone(),
                         ),
                         position.clone(),
