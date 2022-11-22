@@ -2265,10 +2265,17 @@ foo{x: 0} == foo{x: 1}
 }</code></pre>
 <h3 id="loop">Loop</h3>
 <h4 id="list-comprehension">List comprehension</h4>
-<p>It iterates over elements in a given list and generates a new list with elements of a given expression.</p>
-<pre class="pen"><code>[number f(x) for x in xs]</code></pre>
-<p>You can also iterate keys and values in a map.</p>
+<p>It iterates over elements in a given list and creates a new list with elements of a given expression.</p>
+<pre class="pen"><code>[number f(x()) for x in xs]</code></pre>
+<p>You can iterate key-value pairs in a map.</p>
 <pre class="pen"><code>[number f(key, value) for key, value in map]</code></pre>
+<p>You can use multiple <code>for</code> clauses to iterate multiple lists and maps.</p>
+<pre class="pen"><code>[number f(y())
+  for y in x()
+  for x in xs
+]</code></pre>
+<p>You can use <code>if</code> clauses to filter elements.</p>
+<pre class="pen"><code>[number f(x()) for x in xs if g(x())]</code></pre>
 <h2 id="comment">Comment</h2>
 <p>Comments start with <code>#</code> and end with new-line characters.</p>
 <pre class="pen"><code># This is a comment.</code></pre>
