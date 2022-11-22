@@ -244,6 +244,7 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                         branch.primary_name(),
                         branch.secondary_name().map(String::from),
                         transform_expression(branch.iteratee()),
+                        branch.condition().map(transform_expression),
                         branch.position().clone(),
                     )
                 })

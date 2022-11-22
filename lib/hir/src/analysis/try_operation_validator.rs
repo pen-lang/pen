@@ -80,6 +80,10 @@ fn validate_expression(
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
                 validate_expression(context, branch.iteratee(), None)?;
+
+                if let Some(condition) = branch.condition() {
+                    validate_expression(context, condition, None)?;
+                }
             }
 
             validate_expression(context, comprehension.element(), None)?;
@@ -355,79 +359,125 @@ mod tests {
         );
     }
 
-    #[test]
-    fn fail_to_validate_element_of_list_comprehension() {
-        assert_eq!(
-            validate_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake()
-                        ),
-                        ListComprehension::new(
-                            types::None::new(Position::fake()),
-                            TryOperation::new(
-                                None,
-                                Variable::new("x", Position::fake()),
-                                Position::fake(),
-                            ),
-                            vec![ListComprehensionBranch::new(
-                                None,
-                                "x",
-                                None,
-                                Variable::new("xs", Position::fake()),
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                )
-            ])),
-            Err(AnalysisError::TryOperationInList(Position::fake()))
-        );
-    }
+    mod list_comprehension {
+        use super::*;
+        use pretty_assertions::assert_eq;
 
-    #[test]
-    fn fail_to_validate_list_of_list_comprehension() {
-        assert_eq!(
-            validate_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "x",
-                    Lambda::new(
-                        vec![],
-                        types::Function::new(
+        #[test]
+        fn validate_element() {
+            assert_eq!(
+                validate_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
                             vec![],
-                            types::None::new(Position::fake()),
-                            Position::fake()
-                        ),
-                        ListComprehension::new(
-                            types::None::new(Position::fake()),
-                            None::new(Position::fake()),
-                            vec![ListComprehensionBranch::new(
-                                None,
-                                "x",
-                                None,
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
                                 TryOperation::new(
                                     None,
-                                    Variable::new("xs", Position::fake()),
+                                    Variable::new("x", Position::fake()),
                                     Position::fake(),
                                 ),
-                                Position::fake()
-                            )],
-                            Position::fake()
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
                         ),
-                        Position::fake(),
-                    ),
-                    false,
-                )
-            ])),
-            Err(AnalysisError::TryOperationInList(Position::fake()))
-        );
+                        false,
+                    )
+                ])),
+                Err(AnalysisError::TryOperationInList(Position::fake()))
+            );
+        }
+
+        #[test]
+        fn validate_iteratee() {
+            assert_eq!(
+                validate_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    TryOperation::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        Position::fake(),
+                                    ),
+                                    None,
+                                    Position::fake()
+                                )],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Err(AnalysisError::TryOperationInList(Position::fake()))
+            );
+        }
+
+        #[test]
+        fn validate_condition() {
+            assert_eq!(
+                validate_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "x",
+                        Lambda::new(
+                            vec![],
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            ListComprehension::new(
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    None,
+                                    "x",
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    Some(TryOperation::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        Position::fake(),
+                                    ).into()),
+                                    Position::fake()
+                                )],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Err(AnalysisError::TryOperationInList(Position::fake()))
+            );
+        }
     }
 }

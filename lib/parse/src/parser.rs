@@ -846,10 +846,17 @@ fn list_comprehension_branch(input: Input) -> IResult<ListComprehensionBranch> {
                     opt(preceded(sign(","), identifier)),
                     keyword("in"),
                     expression,
+                    opt(preceded(keyword("if"), expression)),
                 ))),
             )),
-            |(position, _, (element_name, value_name, _, iterator))| {
-                ListComprehensionBranch::new(element_name, value_name, iterator, position())
+            |(position, _, (element_name, value_name, _, iterator, condition))| {
+                ListComprehensionBranch::new(
+                    element_name,
+                    value_name,
+                    iterator,
+                    condition,
+                    position(),
+                )
             },
         ),
     )(input)
@@ -3174,6 +3181,7 @@ mod tests {
                             "x",
                             None,
                             Variable::new("xs", Position::fake()),
+                            None,
                             Position::fake(),
                         )],
                         Position::fake(),
@@ -3196,6 +3204,7 @@ mod tests {
                             "x",
                             None,
                             Variable::new("xs", Position::fake()),
+                            None,
                             Position::fake(),
                         )],
                         Position::fake(),
@@ -3219,15 +3228,32 @@ mod tests {
                                 "y",
                                 None,
                                 Variable::new("x", Position::fake()),
+                                None,
                                 Position::fake(),
                             ),
                             ListComprehensionBranch::new(
                                 "x",
                                 None,
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 Position::fake(),
                             ),
                         ],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[number x for x in xs if true]",
+                    ListComprehension::new(
+                        types::Reference::new("number", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        vec![ListComprehensionBranch::new(
+                            "x",
+                            None,
+                            Variable::new("xs", Position::fake()),
+                            Some(Variable::new("true", Position::fake()).into()),
+                            Position::fake(),
+                        )],
                         Position::fake(),
                     ),
                 ),
@@ -3326,6 +3352,7 @@ mod tests {
                         "k",
                         Some("v".into()),
                         Variable::new("xs", Position::fake()),
+                        None,
                         Position::fake(),
                     )],
                     Position::fake(),
