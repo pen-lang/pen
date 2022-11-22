@@ -489,7 +489,13 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                                         .chain([
                                             " in ".into(),
                                             compile_expression(context, branch.iteratee()),
-                                        ]),
+                                        ])
+                                        .chain(branch.condition().map(|condition| {
+                                            sequence([
+                                                " if ".into(),
+                                                compile_expression(context, condition),
+                                            ])
+                                        })),
                                 )
                             })
                         })
@@ -3089,96 +3095,91 @@ mod tests {
                 );
             }
 
-            #[test]
-            fn format_comprehension() {
-                assert_eq!(
-                    format(
-                        &ListComprehension::new(
-                            types::Reference::new("none", Position::fake()),
-                            Variable::new("none", Position::fake()),
-                            vec![ListComprehensionBranch::new(
-                                "x",
-                                None,
-                                Variable::new("xs", Position::fake()),
-                                None,
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        )
-                        .into()
-                    ),
-                    "[none none for x in xs]"
-                );
-            }
+            mod list_comprehension {
+                use super::*;
+                use pretty_assertions::assert_eq;
 
-            #[test]
-            fn format_multi_line_comprehension() {
-                assert_eq!(
-                    format(
-                        &ListComprehension::new(
-                            types::Reference::new("none", Position::fake()),
-                            Variable::new("none", line_position(2)),
-                            vec![ListComprehensionBranch::new(
-                                "x",
-                                None,
-                                Variable::new("xs", Position::fake()),
-                                None,
-                                line_position(2),
-                            )],
-                            line_position(1),
-                        )
-                        .into()
-                    ),
-                    indoc!(
-                        "
-                        [none
-                          none
-                          for x in xs
-                        ]
-                        "
-                    )
-                    .trim()
-                );
-            }
-
-            #[test]
-            fn format_comprehension_with_two_branches() {
-                assert_eq!(
-                    format(
-                        &ListComprehension::new(
-                            types::Reference::new("none", Position::fake()),
-                            Variable::new("none", line_position(2)),
-                            vec![
-                                ListComprehensionBranch::new(
-                                    "y",
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                    None,
-                                    line_position(2)
-                                ),
-                                ListComprehensionBranch::new(
+                #[test]
+                fn format_comprehension() {
+                    assert_eq!(
+                        format(
+                            &ListComprehension::new(
+                                types::Reference::new("none", Position::fake()),
+                                Variable::new("none", Position::fake()),
+                                vec![ListComprehensionBranch::new(
                                     "x",
                                     None,
                                     Variable::new("xs", Position::fake()),
                                     None,
-                                    line_position(2)
-                                )
-                            ],
-                            line_position(1)
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            )
+                            .into()
+                        ),
+                        "[none none for x in xs]"
+                    );
+                }
+
+                #[test]
+                fn format_multi_line_comprehension() {
+                    assert_eq!(
+                        format(
+                            &ListComprehension::new(
+                                types::Reference::new("none", Position::fake()),
+                                Variable::new("none", line_position(2)),
+                                vec![ListComprehensionBranch::new(
+                                    "x",
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    None,
+                                    line_position(2),
+                                )],
+                                line_position(1),
+                            )
+                            .into()
+                        ),
+                        indoc!(
+                            "
+                            [none
+                              none
+                              for x in xs
+                            ]
+                            "
                         )
-                        .into()
-                    ),
-                    indoc!(
-                        "
-                        [none
-                          none
-                          for y in x
-                          for x in xs
-                        ]
-                        "
-                    )
-                    .trim()
-                );
+                        .trim()
+                    );
+                }
+
+                #[test]
+                fn format_comprehension_with_condition() {
+                    assert_eq!(
+                        format(
+                            &ListComprehension::new(
+                                types::Reference::new("none", Position::fake()),
+                                Variable::new("none", line_position(2)),
+                                vec![ListComprehensionBranch::new(
+                                    "x",
+                                    None,
+                                    Variable::new("xs", Position::fake()),
+                                    Some(Variable::new("true", Position::fake()).into()),
+                                    line_position(2)
+                                )],
+                                line_position(1)
+                            )
+                            .into()
+                        ),
+                        indoc!(
+                            "
+                            [none
+                              none
+                              for x in xs if true
+                            ]
+                            "
+                        )
+                        .trim()
+                    );
+                }
             }
         }
 
