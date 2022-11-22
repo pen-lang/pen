@@ -17,11 +17,11 @@ SizeMany = \() none | error {
   Assert'Equal(size(Number'Sequence(42)), 42)
 }
 
-MapList = \() none | error {
+Map = \() none | error {
   Assert'Equal([number x() * x() for x in [number 1, 2, 3]], [number 1, 4, 9])
 }
 
-FilterList = \() none | error {
+Filter = \() none | error {
   Assert'Equal(
     [number
       x()
@@ -31,7 +31,18 @@ FilterList = \() none | error {
   )
 }
 
-FlattenList = \() none | error {
+FilterType = \() none | error {
+  Assert'Equal(
+    [number
+      x()
+      for x in if x = x() as number { [number x] } else { [number] }
+      for x in [number | none 1, none, none, 2, none, 3]
+    ],
+    [number 1, 2, 3],
+  )
+}
+
+Flatten = \() none | error {
   Assert'Equal(
     [number
       y()
@@ -42,7 +53,7 @@ FlattenList = \() none | error {
   )
 }
 
-PermutateLists = \() none | error {
+Permutate = \() none | error {
   Assert'Equal(
     [number
       x() * y()
