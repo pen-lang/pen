@@ -288,8 +288,7 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                         branch.primary_name(),
                         branch.secondary_name().map(String::from),
                         compile_expression(branch.iteratee())?,
-                        // TODO
-                        None,
+                        branch.condition().map(compile_expression).transpose()?,
                         branch.position().clone(),
                     ))
                 })
@@ -501,12 +500,14 @@ mod tests {
                                         "y",
                                         None,
                                         ast::Variable::new("x", Position::fake()),
+                                        None,
                                         Position::fake(),
                                     ),
                                     ast::ListComprehensionBranch::new(
                                         "x",
                                         None,
                                         ast::Variable::new("xs", Position::fake()),
+                                        None,
                                         Position::fake(),
                                     ),
                                 ],
@@ -549,6 +550,71 @@ mod tests {
                                     Position::fake(),
                                 ),
                             ],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    false,
+                    Position::fake()
+                )])
+            )
+        );
+    }
+
+    #[test]
+    fn compile_list_comprehension_with_condition() {
+        assert_eq!(
+            compile(&ast::Module::new(
+                vec![],
+                vec![],
+                vec![],
+                vec![ast::FunctionDefinition::new(
+                    "f",
+                    ast::Lambda::new(
+                        vec![],
+                        ast::types::Reference::new("none", Position::fake()),
+                        ast::Block::new(
+                            vec![],
+                            ast::ListComprehension::new(
+                                ast::types::Reference::new("number", Position::fake()),
+                                ast::Variable::new("x", Position::fake()),
+                                vec![ast::ListComprehensionBranch::new(
+                                    "x",
+                                    None,
+                                    ast::Variable::new("xs", Position::fake()),
+                                    Some(ast::Variable::new("true", Position::fake()).into()),
+                                    Position::fake(),
+                                ),],
+                                Position::fake(),
+                            ),
+                            Position::fake()
+                        ),
+                        Position::fake(),
+                    ),
+                    None,
+                    Position::fake(),
+                )],
+                Position::fake(),
+            )),
+            Ok(
+                ir::Module::empty().set_function_definitions(vec![ir::FunctionDefinition::new(
+                    "f",
+                    "f",
+                    ir::Lambda::new(
+                        vec![],
+                        types::Reference::new("none", Position::fake()),
+                        ir::ListComprehension::new(
+                            types::Reference::new("number", Position::fake()),
+                            ir::Variable::new("x", Position::fake()),
+                            vec![ir::ListComprehensionBranch::new(
+                                None,
+                                "x",
+                                None,
+                                ir::Variable::new("xs", Position::fake()),
+                                Some(ir::Variable::new("true", Position::fake()).into()),
+                                Position::fake(),
+                            )],
                             Position::fake(),
                         ),
                         Position::fake(),

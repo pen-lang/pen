@@ -3100,6 +3100,7 @@ mod tests {
                                 "x",
                                 None,
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 Position::fake(),
                             )],
                             Position::fake(),
@@ -3121,6 +3122,7 @@ mod tests {
                                 "x",
                                 None,
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 line_position(2),
                             )],
                             line_position(1),
@@ -3151,12 +3153,14 @@ mod tests {
                                     "y",
                                     None,
                                     Variable::new("x", Position::fake()),
+                                    None,
                                     line_position(2)
                                 ),
                                 ListComprehensionBranch::new(
                                     "x",
                                     None,
                                     Variable::new("xs", Position::fake()),
+                                    None,
                                     line_position(2)
                                 )
                             ],
@@ -3360,6 +3364,7 @@ mod tests {
                                 "k",
                                 Some("v".into()),
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 Position::fake(),
                             )],
                             Position::fake(),
@@ -3381,6 +3386,7 @@ mod tests {
                                 "k",
                                 Some("v".into()),
                                 Variable::new("xs", Position::fake()),
+                                None,
                                 line_position(2)
                             )],
                             line_position(1)
