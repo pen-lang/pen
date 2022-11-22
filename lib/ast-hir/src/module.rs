@@ -537,6 +537,7 @@ mod tests {
                                     "x",
                                     None,
                                     ir::Variable::new("xs", Position::fake()),
+                                    None,
                                     Position::fake(),
                                 ),
                                 ir::ListComprehensionBranch::new(
@@ -544,6 +545,7 @@ mod tests {
                                     "y",
                                     None,
                                     ir::Variable::new("x", Position::fake()),
+                                    None,
                                     Position::fake(),
                                 ),
                             ],
