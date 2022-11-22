@@ -19,10 +19,7 @@ SizeMany = \() none | error {
 
 Find = \() none | error {
   Assert'Equal(
-    if [x, ..._] = [number
-      x()
-      for x in [number 7, 42, 13] if Number'Remainder(x(), 2) == 0
-    ] {
+    if [x, ..._] = [number x() for x in [number 7, 42, 13] if Number'Remainder(x(), 2) == 0] {
       x()
     } else {
       none
