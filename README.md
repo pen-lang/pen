@@ -8,7 +8,7 @@
 
 Pen is the parallel, concurrent, and functional programming language focused on application programming following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
 
-Its syntax, type system, and module system is fashioned to achieve those goals being simple and easy to grasp for both newcomers and expterts.
+Its syntax, type system, and module system are fashioned to achieve those goals being simple and easy to grasp for both newcomers and expterts.
 
 Pen provides [the two built-in functions of `go` and `race`][concurrency] to represent many concurrent/parallel computation patterns. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always data-race free.
 
