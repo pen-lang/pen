@@ -22,7 +22,6 @@ New = \() Context {
       QueryPool: \(p Pool, q string, vs [any]) [[any]] | error {
         rs = _pen_sql_pool_query(p, q, vs)?
 
-        # TODO Use list comprehension.
         [[any] if r = r() as [any] { r } else { [any] } for r in rs]
       },
       ExecutePool: _pen_sql_pool_execute,
