@@ -3,23 +3,10 @@ Sort = \(ns [number]) [number] {
     f = \(x number) boolean { x < n() }
 
     [number
-      ...Sort(filter(ns, f)),
+      ...Sort([number n() for n in ns if f(n())]),
       n(),
-      ...Sort(filter(ns, \(x number) boolean { !f(x) })),
+      ...Sort([number n() for n in ns if !f(n())]),
     ]
-  } else {
-    [number]
-  }
-}
-
-# TODO Use list comprehension.
-filter = \(ns [number], include \(number) boolean) [number] {
-  if [n, ...ns] = ns {
-    if include(n()) {
-      [number n(), ...filter(ns, include)]
-    } else {
-      filter(ns, include)
-    }
   } else {
     [number]
   }
