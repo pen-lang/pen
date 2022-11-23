@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - uses: raviqqe/enable-homebrew@main
+      - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/build.sh
       - run: git diff --exit-code
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - uses: raviqqe/enable-homebrew@main
+      - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/unit_test.sh
   coverage:
@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - uses: raviqqe/enable-homebrew@main
+      - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v3
@@ -58,7 +58,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - uses: raviqqe/enable-homebrew@main
+      - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
       - uses: actions/download-artifact@v3
