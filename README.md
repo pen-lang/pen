@@ -107,7 +107,7 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ### Polymorphism without generics
 
-Pen intentionally omit generics (or more specifically parametric polymorphism for functions and types) from its language features as well as the original [Go][go]. It is one of the biggest experiments in the language as most of existing functional languages have generics as their primary features.
+Pen explicitly omit generics (or specifically parametric polymorphism for functions and types) from its language features as well as the original [Go][go]. It is one of the biggest experiments in the language as most of existing functional languages have generics as their primary features.
 
 Instead, we explore polymorphism with other language features, such as generic constructs (e.g. list comprehension and pattern matches,) subtyping, top types, reflection, code generation, and so on. A belief behind this decision is that Pen can achieve the same flexibility as other languages reducing complexity of the language itself. For the same reason, we don't adopt macros as we believe they are too powerful for humanity to handle.
 
