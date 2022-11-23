@@ -3,6 +3,7 @@
 import foreign "c" _pen_test_state_new \() State
 import foreign "c" _pen_test_state_get \(State) any
 import foreign "c" _pen_test_state_set \(State, any) none
+import foreign "c" _pen_test_state_freeze \(State) none
 
 # A mutable state
 type State {
@@ -11,7 +12,10 @@ type State {
 
 # Run a function with a state.
 Run = \(f \(State) none | error) none | error {
-  f(_pen_test_state_new())
+  s = _pen_test_state_new()
+  x = f(s)
+  _pen_test_state_freeze(s)
+  x
 }
 
 # Get a value from a state.

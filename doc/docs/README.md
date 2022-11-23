@@ -65,6 +65,7 @@ Pen aims to make large-scale software development efficient where many engineers
 ### Security
 
 - [No runtime exception][error-handling]
+- Memory safe
 - No undefined behavior
 - No data race
 
