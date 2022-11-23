@@ -21,58 +21,58 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: .
+    directory: /
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: cmd/test
+    directory: /cmd/test
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/core/ffi
+    directory: /packages/core/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/html/ffi
+    directory: /packages/html/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/http/ffi
+    directory: /packages/http/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/json/ffi
+    directory: /packages/json/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/os-sync/ffi
+    directory: /packages/os-sync/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/os/ffi/application
+    directory: /packages/os/ffi/application
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/os/ffi/library
+    directory: /packages/os/ffi/library
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/prelude/ffi
+    directory: /packages/prelude/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/random/ffi
+    directory: /packages/random/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/regex/ffi
+    directory: /packages/regex/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/sql/ffi
+    directory: /packages/sql/ffi
     schedule:
       interval: daily
   - package-ecosystem: cargo
-    directory: packages/test/ffi
+    directory: /packages/test/ffi
     schedule:
       interval: daily
