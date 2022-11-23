@@ -103,6 +103,12 @@ The `\` (lambda, λ) notation in function types and literals originates from oth
 
 ## Technical design
 
+### Polymorphism without generics
+
+Pen intentionally omit generics (or more specifically parametric polymorphism for functions and types) from its language features as well as the original [Go][go]. And it's one of the biggest experiments as most of previous functional languages had generics as their primary features.
+
+Instead, we explore polymorphism with other language features such as subtyping, generic constructs (e.g. list comprehension.)
+
 ### Dynamic effect system
 
 Pen does not adopt any formal effect system of algebraic effects or monads. Instead, Pen rather uses a simple rule to manage side effects: all effects are passed down from the `main` functions to child functions. So unless we pass those impure functions to other functions explicitly, they are always pure. As such, Pen is an impure functional programming language although all runtime values are immutable. However, it still provides many of the same benefits purely functional languages do, such as determinicity and testability.
