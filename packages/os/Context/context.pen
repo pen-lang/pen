@@ -98,7 +98,7 @@ UnsafeNew = \() Context {
 
         [string
           s()
-          for s in if s = s() as string { [string s()] } else { [string] }
+          for s in if s = s() as string { [string s] } else { [string] }
           for s in ss
         ]
       },
