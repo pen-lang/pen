@@ -41,3 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: npx markdown-link-check README.md
+  dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: tools/update_dependabot.sh
+      - run: git diff --exit-code
