@@ -8,9 +8,11 @@
 
 Pen is the parallel, concurrent, and functional programming language focused on application programming following [Go][go]'s philosophy. It aims for further simplicity, testability, and portability to empower team (v. individual) and/or long-term (v. short-term) productivity.
 
-Pen provides [the two built-in functions of `go` and `race`][concurrency] to construct concurrent/parallel computation. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always data-race free.
+Its syntax, type system, [effect system](#dynamic-effect-system), and module system are fashioned to achieve those goals being simple and easy to grasp for both newcomers and experts. One of the biggest differences from the other functional languages is [polymorphism without generics](#polymorphism-without-generics).
 
-System libraries and runtime in Pen are detachable from applications. Therefore, Pen can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
+Pen provides [the two built-in functions of `go` and `race`][concurrency] to represent many concurrent/parallel computation patterns. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always memory safe and data-race free.
+
+System libraries and runtime in Pen are detachable from applications. Thanks to this, Pen can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing libraries written in those languages.
 
 ```pen
 import Core'Number
@@ -102,6 +104,12 @@ See [the `examples` directory](examples).
 The `\` (lambda, λ) notation in function types and literals originates from other functional programming languages like [Haskell](https://haskell.org).
 
 ## Technical design
+
+### Polymorphism without generics
+
+Pen explicitly omit generics (or specifically parametric polymorphism for user-defined functions and types) from its language features as well as the original [Go][go]. It is one of the biggest experiments in the language as most of existing functional languages have generics as their primary features.
+
+Instead, we explore polymorphism with other language features, such as generic constructs (e.g. list comprehension and pattern matches,) subtyping, top types, reflection, code generation, and so on. A belief behind this decision is that Pen can achieve the same flexibility as other languages reducing complexity of the language itself. For the same reason, we don't adopt macros as we believe they are too powerful for humanity to handle.
 
 ### Dynamic effect system
 
