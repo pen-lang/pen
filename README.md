@@ -12,7 +12,7 @@ Its syntax, type system, [effect system](#dynamic-effect-system), and module sys
 
 Pen provides [the two built-in functions of `go` and `race`][concurrency] to represent many concurrent/parallel computation patterns. Thanks to its syntax, type system, and [the state-of-the-art reference counting garbage collection][gc], programs are always memory safe and data-race free.
 
-System libraries and runtime in Pen are detachable from applications. Therefore, Pen can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
+System libraries and runtime in Pen are detachable from applications. Thanks to this, Pen can compile the same applications even for [WebAssembly](https://webassembly.org/) and [WASI](https://wasi.dev/). Pen also provides [Rust][rust]/C FFI to reuse existing resources written in those languages.
 
 ```pen
 import Core'Number
