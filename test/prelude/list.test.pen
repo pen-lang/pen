@@ -16,3 +16,61 @@ SizeTwo = \() none | error {
 SizeMany = \() none | error {
   Assert'Equal(size(Number'Sequence(42)), 42)
 }
+
+Find = \() none | error {
+  Assert'Equal(
+    if [x, ..._] = [number x() for x in [number 7, 42, 13] if Number'Remainder(x(), 2) == 0] {
+      x()
+    } else {
+      none
+    },
+    42,
+  )
+}
+
+Map = \() none | error {
+  Assert'Equal([number x() * x() for x in [number 1, 2, 3]], [number 1, 4, 9])
+}
+
+Filter = \() none | error {
+  Assert'Equal(
+    [number
+      x()
+      for x in [number 1, 2, 3, 4, 5] if Number'Remainder(x(), 2) == 1
+    ],
+    [number 1, 3, 5],
+  )
+}
+
+FilterType = \() none | error {
+  Assert'Equal(
+    [number
+      x()
+      for x in if x = x() as number { [number x] } else { [number] }
+      for x in [number | none 1, none, none, 2, none, 3]
+    ],
+    [number 1, 2, 3],
+  )
+}
+
+Flatten = \() none | error {
+  Assert'Equal(
+    [number
+      y()
+      for y in x()
+      for x in [[number] [number 1, 2], [number 3], [number 4, 5]]
+    ],
+    [number 1, 2, 3, 4, 5],
+  )
+}
+
+Permutate = \() none | error {
+  Assert'Equal(
+    [number
+      x() * y()
+      for y in [number 5, 7, 11]
+      for x in [number 1, 2, 3]
+    ],
+    [number 5, 7, 11, 10, 14, 22, 15, 21, 33],
+  )
+}
