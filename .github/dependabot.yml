@@ -4,14 +4,6 @@ updates:
     directory: /
     schedule:
       interval: daily
-  - package-ecosystem: cargo
-    directory: /
-    schedule:
-      interval: daily
-  - package-ecosystem: cargo
-    directory: /cmd/test
-    schedule:
-      interval: daily
   - package-ecosystem: gomod
     directory: /
     schedule:
@@ -26,5 +18,61 @@ updates:
       interval: daily
   - package-ecosystem: pip
     directory: /doc
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /cmd/test
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/core/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/html/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/http/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/json/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/os-sync/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/os/ffi/application
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/os/ffi/library
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/prelude/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/random/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/regex/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/sql/ffi
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directory: /packages/test/ffi
     schedule:
       interval: daily

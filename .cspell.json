@@ -29,6 +29,7 @@
     "ffi",
     "foo",
     "getopts",
+    "gomod",
     "hamt",
     "hamts",
     "hasher",
