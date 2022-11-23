@@ -26,12 +26,16 @@ updates:
     directory: /doc
     schedule:
       interval: daily
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: daily
 EOF
 
-  for file in $(git ls-files Cargo.lock '**/Cargo.lock'); do
+  for file in $(git ls-files '**/Cargo.lock'); do
     cat <<EOF
   - package-ecosystem: cargo
-    directory: $(dirname $file)
+    directory: /$(dirname $file)
     schedule:
       interval: daily
 EOF
