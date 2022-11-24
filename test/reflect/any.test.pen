@@ -86,3 +86,12 @@ EqualString = \() none | error {
   Assert'Equal(Any'Equal("foo", "foo"), true)?
   Assert'Equal(Any'Equal("foo", "bar"), false)
 }
+
+EqualRecord = \() none | error {
+  Assert'Equal(Any'Equal(foo{}, foo{}), true)?
+  Assert'Equal(Any'Equal(bar{x: 0}, bar{x: 0}), true)?
+  Assert'Equal(Any'Equal(bar{x: 0}, bar{x: 1}), false)?
+  Assert'Equal(Any'Equal(baz{x: 0, y: "foo"}, baz{x: 0, y: "foo"}), true)?
+  Assert'Equal(Any'Equal(baz{x: 0, y: "foo"}, baz{x: 1, y: "foo"}), false)?
+  Assert'Equal(Any'Equal(baz{x: 0, y: "foo"}, baz{x: 0, y: "bar"}), false)?
+}

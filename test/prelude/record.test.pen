@@ -1,0 +1,21 @@
+import Test'Assert
+
+type foo {}
+
+type bar {
+  x number
+}
+
+type baz {
+  x number
+  y string
+}
+
+EqualRecord = \() none | error {
+  Assert'True(foo{} == foo{})?
+  Assert'True(bar{x: 0} == bar{x: 0})?
+  Assert'True(bar{x: 0} != bar{x: 1})?
+  Assert'True(baz{x: 0, y: "foo"} == baz{x: 0, y: "foo"})?
+  Assert'True(baz{x: 0, y: "foo"} != baz{x: 1, y: "foo"})?
+  Assert'True(baz{x: 0, y: "foo"} != baz{x: 0, y: "bar"})?
+}

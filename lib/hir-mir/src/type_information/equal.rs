@@ -249,7 +249,7 @@ fn compile_merged_result(
     rhs: impl Into<mir::ir::Expression>,
 ) -> mir::ir::Expression {
     const LHS_NAME: &str = "$lhs_result";
-    const RHS_NAME: &str = "$lhs_result";
+    const RHS_NAME: &str = "$rhs_result";
 
     let default_alternative = Some(mir::ir::DefaultAlternative::new(
         "",
