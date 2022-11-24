@@ -1,5 +1,5 @@
 /*!
-  Highlight.js v11.6.0 (git: bed790f3f3)
+  Highlight.js v11.7.0 (git: 82688fad18)
   (c) 2006-2022 undefined and other contributors
   License: BSD-3-Clause
  */
@@ -904,7 +904,7 @@ const DEFAULT_KEYWORD_SCOPE = "keyword";
  * @param {boolean} caseInsensitive
  */
 function compileKeywords(rawKeywords, caseInsensitive, scopeName = DEFAULT_KEYWORD_SCOPE) {
-  /** @type KeywordDict */
+  /** @type {import("highlight.js/private").KeywordDict} */
   const compiledKeywords = Object.create(null);
 
   // input can be a string of keywords, an array of keywords, or a object with
@@ -1563,7 +1563,7 @@ function expandOrCloneMode(mode) {
   return mode;
 }
 
-var version = "11.6.0";
+var version = "11.7.0";
 
 class HTMLInjectionError extends Error {
   constructor(reason, html) {
@@ -2638,7 +2638,7 @@ function bash(hljs) {
     end: /'/
   };
   const ARITHMETIC = {
-    begin: /\$\(\(/,
+    begin: /\$?\(\(/,
     end: /\)\)/,
     contains: [
       {
@@ -5479,7 +5479,9 @@ function java(hljs) {
     'requires',
     'exports',
     'do',
-    'sealed'
+    'sealed',
+    'yield',
+    'permits'
   ];
 
   const BUILT_INS = [
@@ -5861,7 +5863,8 @@ function javascript(hljs) {
         nextChar === "<" ||
         // the , gives away that this is not HTML
         // `<T, A extends keyof T, V>`
-        nextChar === ",") {
+        nextChar === ","
+        ) {
         response.ignoreMatch();
         return;
       }
@@ -5879,10 +5882,18 @@ function javascript(hljs) {
       // `<blah />` (self-closing)
       // handled by simpleSelfClosing rule
 
-      // `<From extends string>`
-      // technically this could be HTML, but it smells like a type
       let m;
       const afterMatch = match.input.substring(afterMatchIndex);
+
+      // some more template typing stuff
+      //  <T = any>(key?: string) => Modify<
+      if ((m = afterMatch.match(/^\s*=/))) {
+        response.ignoreMatch();
+        return;
+      }
+
+      // `<From extends string>`
+      // technically this could be HTML, but it smells like a type
       // NOTE: This is ugh, but added specifically for https://github.com/highlightjs/highlight.js/issues/3276
       if ((m = afterMatch.match(/^\s+extends\s+/))) {
         if (m.index === 0) {
@@ -6025,6 +6036,8 @@ function javascript(hljs) {
     HTML_TEMPLATE,
     CSS_TEMPLATE,
     TEMPLATE_STRING,
+    // Skip numbers when they are part of a variable name
+    { match: /\$\d+/ },
     NUMBER,
     // This is intentional:
     // See https://github.com/highlightjs/highlight.js/issues/3288
@@ -6174,7 +6187,8 @@ function javascript(hljs) {
       /\b/,
       noneOf([
         ...BUILT_IN_GLOBALS,
-        "super"
+        "super",
+        "import"
       ]),
       IDENT_RE$1, regex.lookahead(/\(/)),
     className: "title.function",
@@ -6257,6 +6271,8 @@ function javascript(hljs) {
       CSS_TEMPLATE,
       TEMPLATE_STRING,
       COMMENT,
+      // Skip numbers when they are part of a variable name
+      { match: /\$\d+/ },
       NUMBER,
       CLASS_REFERENCE,
       {
@@ -7469,11 +7485,11 @@ function markdown(hljs) {
     contains: [], // defined later
     variants: [
       {
-        begin: /_{2}/,
+        begin: /_{2}(?!\s)/,
         end: /_{2}/
       },
       {
-        begin: /\*{2}/,
+        begin: /\*{2}(?!\s)/,
         end: /\*{2}/
       }
     ]
@@ -7483,11 +7499,11 @@ function markdown(hljs) {
     contains: [], // defined later
     variants: [
       {
-        begin: /\*(?!\*)/,
+        begin: /\*(?![*\s])/,
         end: /\*/
       },
       {
-        begin: /_(?!_)/,
+        begin: /_(?![_\s])/,
         end: /_/,
         relevance: 0
       }
@@ -9705,10 +9721,23 @@ function ruby(hljs) {
   )
   ;
   const CLASS_NAME_WITH_NAMESPACE_RE = regex.concat(CLASS_NAME_RE, /(::\w+)*/);
+  // very popular ruby built-ins that one might even assume
+  // are actual keywords (despite that not being the case)
+  const PSEUDO_KWS = [
+    "include",
+    "extend",
+    "prepend",
+    "public",
+    "private",
+    "protected",
+    "raise",
+    "throw"
+  ];
   const RUBY_KEYWORDS = {
     "variable.constant": [
       "__FILE__",
-      "__LINE__"
+      "__LINE__",
+      "__ENCODING__"
     ],
     "variable.language": [
       "self",
@@ -9717,9 +9746,6 @@ function ruby(hljs) {
     keyword: [
       "alias",
       "and",
-      "attr_accessor",
-      "attr_reader",
-      "attr_writer",
       "begin",
       "BEGIN",
       "break",
@@ -9735,7 +9761,6 @@ function ruby(hljs) {
       "for",
       "if",
       "in",
-      "include",
       "module",
       "next",
       "not",
@@ -9752,10 +9777,17 @@ function ruby(hljs) {
       "when",
       "while",
       "yield",
+      ...PSEUDO_KWS
     ],
     built_in: [
       "proc",
-      "lambda"
+      "lambda",
+      "attr_accessor",
+      "attr_reader",
+      "attr_writer",
+      "define_method",
+      "private_constant",
+      "module_function"
     ],
     literal: [
       "true",
@@ -9914,6 +9946,17 @@ function ruby(hljs) {
     ]
   };
 
+  const INCLUDE_EXTEND = {
+    match: [
+      /(include|extend)\s+/,
+      CLASS_NAME_WITH_NAMESPACE_RE
+    ],
+    scope: {
+      2: "title.class"
+    },
+    keywords: RUBY_KEYWORDS
+  };
+
   const CLASS_DEFINITION = {
     variants: [
       {
@@ -9926,7 +9969,7 @@ function ruby(hljs) {
       },
       {
         match: [
-          /class\s+/,
+          /\b(class|module)\s+/,
           CLASS_NAME_WITH_NAMESPACE_RE
         ]
       }
@@ -9962,18 +10005,27 @@ function ruby(hljs) {
     relevance: 0,
     match: [
       CLASS_NAME_WITH_NAMESPACE_RE,
-      /\.new[ (]/
+      /\.new[. (]/
     ],
     scope: {
       1: "title.class"
     }
   };
 
+  // CamelCase
+  const CLASS_REFERENCE = {
+    relevance: 0,
+    match: CLASS_NAME_RE,
+    scope: "title.class"
+  };
+
   const RUBY_DEFAULT_CONTAINS = [
     STRING,
     CLASS_DEFINITION,
+    INCLUDE_EXTEND,
     OBJECT_CREATION,
     UPPER_CASE_CONSTANT,
+    CLASS_REFERENCE,
     METHOD_DEFINITION,
     {
       // swallow namespace qualifiers before symbols
