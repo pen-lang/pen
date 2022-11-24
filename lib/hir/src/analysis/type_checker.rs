@@ -357,7 +357,7 @@ fn check_expression(
 
             for field_type in field_types {
                 if !field_names.contains(field_type.name()) {
-                    return Err(AnalysisError::RecordFieldMissing(
+                    return Err(AnalysisError::RecordFieldNotFound(
                         construction.position().clone(),
                     ));
                 }
@@ -1892,7 +1892,7 @@ mod tests {
                             false
                         )])
                 ),
-                Err(AnalysisError::RecordFieldMissing(_))
+                Err(AnalysisError::RecordFieldNotFound(_))
             ));
         }
 

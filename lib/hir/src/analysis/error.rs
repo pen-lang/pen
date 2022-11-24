@@ -26,7 +26,7 @@ pub enum AnalysisError {
     MapExpected(Type),
     MissingElseBlock(Position),
     RecordExpected(Type),
-    RecordFieldMissing(Position),
+    RecordFieldNotFound(Position),
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
     RecordNotFound(Record),
@@ -162,7 +162,7 @@ impl Display for AnalysisError {
                     Self::format_found_type_message(type_)
                 )
             }
-            Self::RecordFieldMissing(position) => {
+            Self::RecordFieldNotFound(position) => {
                 write!(formatter, "missing record field\n{}", position)
             }
             Self::RecordFieldPrivate(position) => {
