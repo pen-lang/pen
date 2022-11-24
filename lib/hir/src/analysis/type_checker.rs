@@ -2254,53 +2254,8 @@ mod tests {
                 let element_type = types::None::new(Position::fake());
                 let list_type = types::List::new(element_type.clone(), Position::fake());
 
-                check_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![],
-                        types::List::new(element_type.clone(), Position::fake()),
-                        ListComprehension::new(
-                            element_type.clone(),
-                            Call::new(
-                                Some(
-                                    types::Function::new(
-                                        vec![],
-                                        element_type.clone(),
-                                        Position::fake(),
-                                    )
-                                    .into(),
-                                ),
-                                Variable::new("x", Position::fake()),
-                                vec![],
-                                Position::fake(),
-                            ),
-                            vec![ListComprehensionBranch::new(
-                                Some(list_type.into()),
-                                "x",
-                                None,
-                                List::new(element_type, vec![], Position::fake()),
-                                None,
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                ),
-            ]))
-                .unwrap();
-            }
-
-            #[test]
-            fn check_iteratee() {
-                let element_type = types::None::new(Position::fake());
-                let list_type = types::List::new(element_type.clone(), Position::fake());
-
-                assert_eq!(
-                    check_module(&Module::empty().set_function_definitions(
-                        vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -2321,16 +2276,9 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                Some(list_type.into()),
-                                    "x",
-                                    None,
-                                    List::new(
-                                        element_type,
-                                        vec![ListElement::Single(
-                                            Number::new(42.0, Position::fake()).into(),
-                                        )],
-                                        Position::fake(),
-                                    ),
+                                    Some(list_type.into()),
+                                    vec!["x".into()],
+                                    vec![List::new(element_type, vec![], Position::fake()).into()],
                                     None,
                                     Position::fake(),
                                 )],
@@ -2339,7 +2287,58 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]
+                    )],
+                ))
+                .unwrap();
+            }
+
+            #[test]
+            fn check_iteratee() {
+                let element_type = types::None::new(Position::fake());
+                let list_type = types::List::new(element_type.clone(), Position::fake());
+
+                assert_eq!(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                types::List::new(element_type.clone(), Position::fake()),
+                                ListComprehension::new(
+                                    element_type.clone(),
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                element_type.clone(),
+                                                Position::fake(),
+                                            )
+                                            .into(),
+                                        ),
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake(),
+                                    ),
+                                    vec![ListComprehensionBranch::new(
+                                        Some(list_type.into()),
+                                        vec!["x".into()],
+                                        vec![List::new(
+                                            element_type,
+                                            vec![ListElement::Single(
+                                                Number::new(42.0, Position::fake()).into(),
+                                            )],
+                                            Position::fake(),
+                                        )
+                                        .into()],
+                                        None,
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )]
                     )),
                     Err(AnalysisError::TypesNotMatched(
                         types::Number::new(Position::fake()).into(),
@@ -2365,9 +2364,9 @@ mod tests {
                                     None::new(Position::fake()),
                                     vec![ListComprehensionBranch::new(
                                         Some(list_type.into()),
-                                        "x",
-                                        None,
-                                        List::new(element_type, vec![], Position::fake(),),
+                                        vec!["x".into()],
+                                        vec![List::new(element_type, vec![], Position::fake(),)
+                                            .into()],
                                         Some(None::new(Position::fake()).into()),
                                         Position::fake(),
                                     )],
@@ -2652,14 +2651,13 @@ mod tests {
                                 Variable::new("k", Position::fake()),
                                 vec![ListComprehensionBranch::new(
                                     Some(map_type.clone().into()),
-                                    "k",
-                                    Some("v".into()),
-                                    Map::new(
+                                    vec!["k".into(), "v".into()],
+                                    vec![Map::new(
                                         map_type.key().clone(),
                                         map_type.value().clone(),
                                         vec![],
                                         Position::fake(),
-                                    ),
+                                    ).into()],
                                     None,
                                     Position::fake(),
                                 )],
@@ -2692,14 +2690,13 @@ mod tests {
                                 Variable::new("v", Position::fake()),
                                 vec![ListComprehensionBranch::new(
                                     Some(map_type.clone().into()),
-                                    "k",
-                                    Some("v".into()),
-                                    Map::new(
+                                    vec!["k".into(), "v".into()],
+                                    vec![Map::new(
                                         map_type.key().clone(),
                                         map_type.value().clone(),
                                         vec![],
                                         Position::fake(),
-                                    ),
+                                    ).into()],
                                     None,
                                     Position::fake(),
                                 )],
@@ -2732,14 +2729,13 @@ mod tests {
                                 Variable::new("k", Position::fake()),
                                 vec![ListComprehensionBranch::new(
                                     Some(map_type.clone().into()),
-                                    "k",
-                                    Some("v".into()),
-                                    Map::new(
+                                    vec!["k".into(), "v".into()],
+                                    vec![Map::new(
                                         map_type.key().clone(),
                                         map_type.value().clone(),
                                         vec![],
                                         Position::fake(),
-                                    ),
+                                    ).into()],
                                     None,
                                     Position::fake(),
                                 )],

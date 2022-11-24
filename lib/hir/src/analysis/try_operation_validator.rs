@@ -385,9 +385,8 @@ mod tests {
                                 ),
                                 vec![ListComprehensionBranch::new(
                                     None,
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![Variable::new("xs", Position::fake()).into()],
                                     None,
                                     Position::fake(),
                                 )],
@@ -420,13 +419,12 @@ mod tests {
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
                                     None,
-                                    "x",
-                                    None,
-                                    TryOperation::new(
+                                    vec!["x".into()],
+                                    vec![TryOperation::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
                                         Position::fake(),
-                                    ),
+                                    ).into()],
                                     None,
                                     Position::fake()
                                 )],
@@ -444,8 +442,8 @@ mod tests {
         #[test]
         fn validate_condition() {
             assert_eq!(
-                validate_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
+                validate_module(
+                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -459,14 +457,16 @@ mod tests {
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
                                     None,
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
-                                    Some(TryOperation::new(
-                                        None,
-                                        Variable::new("xs", Position::fake()),
-                                        Position::fake(),
-                                    ).into()),
+                                    vec!["x".into()],
+                                    vec![Variable::new("xs", Position::fake()).into()],
+                                    Some(
+                                        TryOperation::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into()
+                                    ),
                                     Position::fake()
                                 )],
                                 Position::fake()
@@ -474,8 +474,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )
-                ])),
+                    )])
+                ),
                 Err(AnalysisError::TryOperationInList(Position::fake()))
             );
         }
