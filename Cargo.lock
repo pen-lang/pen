@@ -276,7 +276,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0fde465273dcbdd77b54cc9a4adc23eab207d757"
+source = "git+https://github.com/raviqqe/fmm?branch=main#90d6a8738f9218505ea01b049740b3a34210fa13"
 dependencies = [
  "fnv",
  "indexmap",
@@ -288,7 +288,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0fde465273dcbdd77b54cc9a4adc23eab207d757"
+source = "git+https://github.com/raviqqe/fmm?branch=main#90d6a8738f9218505ea01b049740b3a34210fa13"
 dependencies = [
  "fmm",
  "fnv",
@@ -298,7 +298,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#0fde465273dcbdd77b54cc9a4adc23eab207d757"
+source = "git+https://github.com/raviqqe/fmm?branch=main#90d6a8738f9218505ea01b049740b3a34210fa13"
 dependencies = [
  "fmm",
  "fnv",
@@ -574,7 +574,7 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.1.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#f6945b70ca735967aa2a01f8a4a02656296aaab5"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#9ee484b36765281443731cb1034d3c5e076794ec"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -587,7 +587,7 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.6.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#f6945b70ca735967aa2a01f8a4a02656296aaab5"
+source = "git+https://github.com/TheDan64/inkwell?branch=master#9ee484b36765281443731cb1034d3c5e076794ec"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -596,9 +596,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.22.0"
+version = "1.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "197f4e300af8b23664d4077bf5c40e0afa9ba66a567bb5a51d3def3c7b287d1c"
+checksum = "e48b08a091dfe5b09a6a9688c468fdd5b4396e92ce09e2eb932f0884b02788a4"
 dependencies = [
  "console",
  "lazy_static",
