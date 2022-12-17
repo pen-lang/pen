@@ -888,7 +888,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.2"
+version = "0.10.3"
 dependencies = [
  "async-stream",
  "futures",
@@ -899,7 +899,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "convert_case",
  "pen-ffi",
