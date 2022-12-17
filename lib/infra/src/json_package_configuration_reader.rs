@@ -28,8 +28,7 @@ impl app::infra::PackageConfigurationReader for JsonPackageConfigurationReader {
         package_directory: &app::infra::FilePath,
     ) -> Result<app::PackageConfiguration, Box<dyn Error>> {
         let package_file_url = url::Url::from_directory_path(
-            &self
-                .file_path_converter
+            self.file_path_converter
                 .convert_to_os_path(package_directory)
                 .canonicalize()?,
         )
