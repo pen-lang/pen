@@ -131,7 +131,7 @@ impl app::infra::TestLinker for TestLinker {
             .create(true)
             .write(true)
             .truncate(true)
-            .open(&main_crate_directory.join("src/main.rs"))?
+            .open(main_crate_directory.join("src/main.rs"))?
             .write_all(self.format_main_rs(package_test_information)?.as_bytes())?;
 
         command_runner::run_command(

@@ -4,7 +4,7 @@ use std::{error::Error, process::Command};
 pub fn find() -> Result<String, Box<dyn Error>> {
     Ok(replace_target(
         command_runner::run_command(
-            Command::new(&llvm_command_finder::find("llvm-config")?).arg("--host-target"),
+            Command::new(llvm_command_finder::find("llvm-config")?).arg("--host-target"),
         )?
         .trim(),
     ))
