@@ -2,7 +2,7 @@
 
 # Pen programming language
 
-[![GitHub Action](https://img.shields.io/github/workflow/status/pen-lang/pen/test?style=flat-square)](https://github.com/pen-lang/pen/actions)
+[![GitHub Action](https://img.shields.io/github/actions/workflow/status/pen-lang/pen/test.yaml?branch=main&style=flat-square)](https://github.com/pen-lang/pen/actions)
 [![License](https://img.shields.io/badge/license-MIT%20%2B%20Apache%202.0-yellow?style=flat-square)](#license)
 [![Twitter](https://img.shields.io/badge/twitter-%40pen__language-blue?style=flat-square)](https://twitter.com/pen_language)
 
