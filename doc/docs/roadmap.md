@@ -27,13 +27,13 @@ Items are ordered by priority.
 - [x] Process management
 - [x] Reflection
 - [x] Mutable state
+  - [x] Thread safety
 - [ ] IDE/editor support
   - [ ] Language server
 - [ ] Metaprogramming
   - [ ] Code generator
 - [ ] Serialization / deserialization
 - [ ] Package manager
-  - [ ] Thread safety
 - [ ] Vector type
 - [ ] Web browser interface
   - JavaScript backend (?)
