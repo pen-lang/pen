@@ -27,7 +27,7 @@ Items are ordered by priority.
 - [x] Process management
 - [x] Reflection
 - [x] Mutable state
-  - [ ] Thread safety
+  - [x] Thread safety
 - [ ] IDE/editor support
   - [ ] Language server
 - [ ] Metaprogramming
