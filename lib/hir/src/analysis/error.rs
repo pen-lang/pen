@@ -22,6 +22,7 @@ pub enum AnalysisError {
     ImpossibleRecord(Position),
     InvalidAdditionOperand(Position),
     InvalidTryOperation(Position),
+    KeyNameNotDefined(Position),
     ListExpected(Type),
     MapExpected(Type),
     MissingElseBlock(Position),
@@ -133,6 +134,9 @@ impl Display for AnalysisError {
                     "try operation cannot be used in function not returning error\n{}",
                     position
                 )
+            }
+            Self::KeyNameNotDefined(position) => {
+                write!(formatter, "key name not defined\n{}", position)
             }
             Self::ListExpected(type_) => {
                 write!(

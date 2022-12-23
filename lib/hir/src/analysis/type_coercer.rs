@@ -282,36 +282,63 @@ fn transform_expression(
             let mut variables = variables.clone();
 
             for branch in comprehension.branches() {
-                let iteratee = transform_expression(branch.iteratee(), &variables)?;
+                let iteratees = branch
+                    .iteratees()
+                    .iter()
+                    .map(|iteratee| {
+                        Ok(ListComprehensionIteratee::new(
+                            iteratee.type_().cloned(),
+                            transform_expression(iteratee.expression(), &variables)?,
+                            iteratee.position().clone(),
+                        ))
+                    })
+                    .collect::<Result<_, _>>()?;
 
-                variables = match type_canonicalizer::canonicalize(
+                variables =
                     branch
-                        .type_()
-                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?,
-                    context.types(),
-                )? {
-                    Type::List(list_type) => variables.insert(
-                        branch.primary_name().into(),
-                        types::Function::new(vec![], list_type.element().clone(), position.clone())
-                            .into(),
-                    ),
-                    Type::Map(map_type) => variables.insert_iter(
-                        [(branch.primary_name().into(), map_type.key().clone())]
-                            .into_iter()
-                            .chain(
-                                branch
-                                    .secondary_name()
-                                    .map(|name| (name.into(), map_type.value().clone())),
-                            ),
-                    ),
-                    type_ => return Err(AnalysisError::CollectionExpected(type_)),
-                };
+                        .iteratees()
+                        .iter()
+                        .enumerate()
+                        .map(|(index, iteratee)| {
+                            Ok(
+                                match type_canonicalizer::canonicalize(
+                                    iteratee.type_().ok_or_else(|| {
+                                        AnalysisError::TypeNotInferred(position.clone())
+                                    })?,
+                                    context.types(),
+                                )? {
+                                    Type::List(list_type) => variables.insert_iter(
+                                        branch.names().get(index).map(|name| {
+                                            (
+                                                name.into(),
+                                                types::Function::new(
+                                                    vec![],
+                                                    list_type.element().clone(),
+                                                    position.clone(),
+                                                )
+                                                .into(),
+                                            )
+                                        }),
+                                    ),
+                                    Type::Map(map_type) => variables.insert_iter(
+                                        branch
+                                            .names()
+                                            .get(0)
+                                            .map(|name| (name.into(), map_type.key().clone()))
+                                            .into_iter()
+                                            .chain(branch.names().get(1).map(|name| {
+                                                (name.into(), map_type.value().clone())
+                                            })),
+                                    ),
+                                    type_ => return Err(AnalysisError::CollectionExpected(type_)),
+                                },
+                            )
+                        })
+                        .collect()?;
 
                 branches.push(ListComprehensionBranch::new(
-                    branch.type_().cloned(),
-                    branch.primary_name(),
-                    branch.secondary_name().map(String::from),
-                    iteratee,
+                    branch.names().to_vec(),
+                    iteratees,
                     branch
                         .condition()
                         .map(|expression| transform_expression(expression, &variables))
