@@ -79,7 +79,9 @@ fn validate_expression(
         }
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
-                validate_expression(context, branch.iteratee(), None)?;
+                for iteratee in branch.iteratees() {
+                    validate_expression(context, iteratee.expression(), None)?;
+                }
 
                 if let Some(condition) = branch.condition() {
                     validate_expression(context, condition, None)?;
@@ -442,8 +444,8 @@ mod tests {
         #[test]
         fn validate_condition() {
             assert_eq!(
-                validate_module(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                validate_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -474,8 +476,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TryOperationInList(Position::fake()))
             );
         }
