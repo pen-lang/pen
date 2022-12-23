@@ -155,11 +155,13 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
             visit_type(comprehension.type_(), visit);
 
             for branch in comprehension.branches() {
-                if let Some(type_) = branch.type_() {
-                    visit_type(type_, visit);
-                }
+                for iteratee in branch.iteratees() {
+                    if let Some(type_) = iteratee.type_() {
+                        visit_type(type_, visit);
+                    }
 
-                visit_expression(branch.iteratee(), visit);
+                    visit_expression(iteratee.expression(), visit);
+                }
             }
 
             visit_expression(comprehension.element(), visit);
