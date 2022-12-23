@@ -240,10 +240,18 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                 .iter()
                 .map(|branch| {
                     ListComprehensionBranch::new(
-                        branch.type_().map(transform),
-                        branch.primary_name(),
-                        branch.secondary_name().map(String::from),
-                        transform_expression(branch.iteratee()),
+                        branch.names().to_vec(),
+                        branch
+                            .iteratees()
+                            .iter()
+                            .map(|iteratee| {
+                                ListComprehensionIteratee::new(
+                                    iteratee.type_().map(transform),
+                                    transform_expression(iteratee.expression()),
+                                    iteratee.position().clone(),
+                                )
+                            })
+                            .collect(),
                         branch.condition().map(transform_expression),
                         branch.position().clone(),
                     )
