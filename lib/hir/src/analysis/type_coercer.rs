@@ -294,7 +294,7 @@ fn transform_expression(
                     })
                     .collect::<Result<_, _>>()?;
 
-                variables =
+                variables = variables.insert_iter(
                     branch
                         .iteratees()
                         .iter()
@@ -307,8 +307,10 @@ fn transform_expression(
                                     })?,
                                     context.types(),
                                 )? {
-                                    Type::List(list_type) => variables.insert_iter(
-                                        branch.names().get(index).map(|name| {
+                                    Type::List(list_type) => branch
+                                        .names()
+                                        .get(index)
+                                        .map(|name| {
                                             (
                                                 name.into(),
                                                 types::Function::new(
@@ -318,9 +320,10 @@ fn transform_expression(
                                                 )
                                                 .into(),
                                             )
-                                        }),
-                                    ),
-                                    Type::Map(map_type) => variables.insert_iter(
+                                        })
+                                        .into_iter()
+                                        .collect::<Vec<_>>(),
+                                    Type::Map(map_type) => {
                                         branch
                                             .names()
                                             .get(0)
@@ -328,13 +331,17 @@ fn transform_expression(
                                             .into_iter()
                                             .chain(branch.names().get(1).map(|name| {
                                                 (name.into(), map_type.value().clone())
-                                            })),
-                                    ),
+                                            }))
+                                            .collect()
+                                    }
                                     type_ => return Err(AnalysisError::CollectionExpected(type_)),
                                 },
                             )
                         })
-                        .collect()?;
+                        .collect::<Result<Vec<_>, _>>()?
+                        .into_iter()
+                        .flatten(),
+                );
 
                 branches.push(ListComprehensionBranch::new(
                     branch.names().to_vec(),

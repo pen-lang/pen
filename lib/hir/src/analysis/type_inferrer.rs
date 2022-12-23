@@ -255,9 +255,23 @@ fn infer_expression(
             let mut branches = vec![];
 
             for branch in comprehension.branches() {
-                let iteratee = infer_expression(branch.iteratee(), &variables)?;
-                let type_ =
-                    type_extractor::extract_from_expression(context, &iteratee, &variables)?;
+                let iteratees = branch
+                    .iteratees()
+                    .iter()
+                    .map(|iteratee| {
+                        let expression = infer_expression(iteratee.expression(), &variables)?;
+
+                        Ok(ListComprehensionIteratee::new(
+                            Some(type_extractor::extract_from_expression(
+                                context,
+                                &expression,
+                                &variables,
+                            )?),
+                            expression,
+                            iteratee.position().clone(),
+                        ))
+                    })
+                    .collect::<Result<_, _>>()?;
 
                 variables = match type_canonicalizer::canonicalize(&type_, context.types())? {
                     Type::List(list_type) => variables.insert(

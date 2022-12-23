@@ -253,33 +253,79 @@ fn check_expression(
             let mut variables = variables.clone();
 
             for branch in comprehension.branches() {
-                let iteratee_type = branch
-                    .type_()
-                    .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
-
-                check_subsumption(
-                    &check_expression(branch.iteratee(), &variables)?,
-                    iteratee_type,
-                )?;
-
-                variables = match type_canonicalizer::canonicalize(iteratee_type, context.types())?
+                // TODO Test this.
+                if branch.iteratees().len() > 1
+                    && branch
+                        .iteratees()
+                        .iter()
+                        .any(|iteratee| matches!(iteratee.type_(), Some(Type::Map(_))))
                 {
-                    Type::List(list_type) => variables.insert(
-                        branch.primary_name().into(),
-                        types::Function::new(vec![], list_type.element().clone(), position.clone())
-                            .into(),
-                    ),
-                    Type::Map(map_type) => variables.insert_iter(
-                        [(branch.primary_name().into(), map_type.key().clone())]
-                            .into_iter()
-                            .chain(
+                    return Err(
+                        AnalysisError::ParallelMapIteration(branch.position().clone()).into(),
+                    );
+                }
+
+                for (index, iteratee) in branch.iteratees().iter().enumerate() {
+                    let iteratee_type = iteratee
+                        .type_()
+                        .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+
+                    check_subsumption(
+                        &check_expression(iteratee.expression(), &variables)?,
+                        iteratee_type,
+                    )?;
+
+                    variables =
+                        match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
+                            Type::List(list_type) => variables.insert(
                                 branch
-                                    .secondary_name()
-                                    .map(|name| (name.into(), map_type.value().clone())),
+                                    .names()
+                                    .get(index)
+                                    .ok_or_else(|| {
+                                        // TODO Test this.
+                                        AnalysisError::ElementNameNotDefined(
+                                            branch.position().clone(),
+                                        )
+                                    })?
+                                    .into(),
+                                types::Function::new(
+                                    vec![],
+                                    list_type.element().clone(),
+                                    position.clone(),
+                                )
+                                .into(),
                             ),
-                    ),
-                    _ => return Err(AnalysisError::TypeNotInferred(position.clone())),
-                };
+                            Type::Map(map_type) => variables.insert_iter([
+                                (
+                                    branch
+                                        .names()
+                                        .get(0)
+                                        .ok_or_else(|| {
+                                            // TODO Test this.
+                                            AnalysisError::KeyNameNotDefined(
+                                                branch.position().clone(),
+                                            )
+                                        })?
+                                        .into(),
+                                    map_type.key().clone(),
+                                ),
+                                (
+                                    branch
+                                        .names()
+                                        .get(1)
+                                        .ok_or_else(|| {
+                                            // TODO Test this.
+                                            AnalysisError::ValueNameNotDefined(
+                                                branch.position().clone(),
+                                            )
+                                        })?
+                                        .into(),
+                                    map_type.value().clone(),
+                                ),
+                            ]),
+                            _ => return Err(AnalysisError::TypeNotInferred(position.clone())),
+                        };
+                }
 
                 if let Some(condition) = branch.condition() {
                     check_subsumption(
