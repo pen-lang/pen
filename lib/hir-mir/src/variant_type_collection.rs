@@ -50,16 +50,18 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
         }
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
-                if let Some(type_) = branch.type_() {
-                    match type_ {
-                        Type::List(list_type) => {
-                            lower_types.insert(list_type.element().clone());
+                for iteratee in branch.iteratees() {
+                    if let Some(type_) = iteratee.type_() {
+                        match type_ {
+                            Type::List(list_type) => {
+                                lower_types.insert(list_type.element().clone());
+                            }
+                            Type::Map(map_type) => {
+                                lower_types.insert(map_type.key().clone());
+                                lower_types.insert(map_type.value().clone());
+                            }
+                            _ => {}
                         }
-                        Type::Map(map_type) => {
-                            lower_types.insert(map_type.key().clone());
-                            lower_types.insert(map_type.value().clone());
-                        }
-                        _ => {}
                     }
                 }
             }
