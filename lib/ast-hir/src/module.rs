@@ -283,11 +283,17 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .iter()
                 .rev()
                 .map(|branch| {
+                    // TODO
                     Ok(ir::ListComprehensionBranch::new(
-                        None,
-                        branch.primary_name(),
-                        branch.secondary_name().map(String::from),
-                        compile_expression(branch.iteratee())?,
+                        [branch.primary_name().into()]
+                            .into_iter()
+                            .chain(branch.secondary_name().map(String::from))
+                            .collect(),
+                        vec![ir::ListComprehensionIteratee::new(
+                            None,
+                            compile_expression(branch.iteratee())?,
+                            branch.iteratee().position().clone(),
+                        )],
                         branch.condition().map(compile_expression).transpose()?,
                         branch.position().clone(),
                     ))
@@ -534,18 +540,22 @@ mod tests {
                             ir::Variable::new("x", Position::fake()),
                             vec![
                                 ir::ListComprehensionBranch::new(
-                                    None,
-                                    "x",
-                                    None,
-                                    ir::Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![ir::ListComprehensionIteratee::new(
+                                        None,
+                                        ir::Variable::new("xs", Position::fake()),
+                                        Position::fake(),
+                                    )],
                                     None,
                                     Position::fake(),
                                 ),
                                 ir::ListComprehensionBranch::new(
-                                    None,
-                                    "y",
-                                    None,
-                                    ir::Variable::new("x", Position::fake()),
+                                    vec!["y".into()],
+                                    vec![ir::ListComprehensionIteratee::new(
+                                        None,
+                                        ir::Variable::new("x", Position::fake()),
+                                        Position::fake(),
+                                    )],
                                     None,
                                     Position::fake(),
                                 ),
@@ -608,10 +618,12 @@ mod tests {
                             types::Reference::new("number", Position::fake()),
                             ir::Variable::new("x", Position::fake()),
                             vec![ir::ListComprehensionBranch::new(
-                                None,
-                                "x",
-                                None,
-                                ir::Variable::new("xs", Position::fake()),
+                                vec!["x".into()],
+                                vec![ir::ListComprehensionIteratee::new(
+                                    None,
+                                    ir::Variable::new("xs", Position::fake()),
+                                    Position::fake(),
+                                )],
                                 Some(ir::Variable::new("true", Position::fake()).into()),
                                 Position::fake(),
                             )],
