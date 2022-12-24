@@ -386,9 +386,12 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["x".into()],
-                                    vec![Variable::new("xs", Position::fake()).into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        Position::fake()
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -420,15 +423,18 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["x".into()],
-                                    vec![TryOperation::new(
+                                    vec![ListComprehensionIteratee::new(
                                         None,
-                                        Variable::new("xs", Position::fake()),
-                                        Position::fake(),
-                                    ).into()],
+                                        TryOperation::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                            Position::fake(),
+                                        ),
+                                        Position::fake()
+                                    )],
                                     None,
-                                    Position::fake()
+                                    Position::fake(),
                                 )],
                                 Position::fake()
                             ),
@@ -458,9 +464,12 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["x".into()],
-                                    vec![Variable::new("xs", Position::fake()).into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                        Position::fake()
+                                    )],
                                     Some(
                                         TryOperation::new(
                                             None,
@@ -469,7 +478,7 @@ mod tests {
                                         )
                                         .into()
                                     ),
-                                    Position::fake()
+                                    Position::fake(),
                                 )],
                                 Position::fake()
                             ),

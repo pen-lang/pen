@@ -271,35 +271,65 @@ fn infer_expression(
                             iteratee.position().clone(),
                         ))
                     })
-                    .collect::<Result<_, _>>()?;
+                    .collect::<Result<Vec<_>, _>>()?;
 
-                variables = match type_canonicalizer::canonicalize(&type_, context.types())? {
-                    Type::List(list_type) => variables.insert(
-                        branch.primary_name().into(),
-                        types::Function::new(
-                            vec![],
-                            list_type.element().clone(),
-                            comprehension.position().clone(),
-                        )
-                        .into(),
-                    ),
-                    Type::Map(map_type) => variables.insert_iter(
-                        [(branch.primary_name().into(), map_type.key().clone())]
-                            .into_iter()
-                            .chain(
-                                branch
-                                    .secondary_name()
-                                    .map(|name| (name.into(), map_type.value().clone())),
-                            ),
-                    ),
-                    _ => return Err(AnalysisError::CollectionExpected(type_.clone())),
-                };
+                variables = variables.insert_iter(
+                    iteratees
+                        .iter()
+                        .enumerate()
+                        .map(|(index, iteratee)| {
+                            let type_ = iteratee.type_().ok_or_else(|| {
+                                AnalysisError::TypeNotInferred(iteratee.position().clone())
+                            })?;
+
+                            Ok(
+                                match type_canonicalizer::canonicalize(&type_, context.types())? {
+                                    Type::List(list_type) => branch
+                                        .names()
+                                        .get(index)
+                                        .map(|name| {
+                                            (
+                                                name.into(),
+                                                types::Function::new(
+                                                    vec![],
+                                                    list_type.element().clone(),
+                                                    comprehension.position().clone(),
+                                                )
+                                                .into(),
+                                            )
+                                        })
+                                        .into_iter()
+                                        .collect::<Vec<_>>(),
+                                    Type::Map(map_type) => [
+                                        branch
+                                            .names()
+                                            .get(0)
+                                            .map(|name| (name.into(), map_type.key().clone())),
+                                        branch
+                                            .names()
+                                            .get(1)
+                                            .map(|name| (name.into(), map_type.value().clone())),
+                                    ]
+                                    .into_iter()
+                                    .flatten()
+                                    .collect(),
+                                    _ => {
+                                        return Err(AnalysisError::CollectionExpected(
+                                            type_.clone(),
+                                        ))
+                                    }
+                                },
+                            )
+                        })
+                        .collect::<Result<Vec<_>, _>>()?
+                        .into_iter()
+                        .flatten()
+                        .collect::<Vec<_>>(),
+                );
 
                 branches.push(ListComprehensionBranch::new(
-                    Some(type_.clone()),
-                    branch.primary_name(),
-                    branch.secondary_name().map(String::from),
-                    iteratee,
+                    branch.names().to_vec(),
+                    iteratees,
                     branch
                         .condition()
                         .map(|expression| infer_expression(expression, &variables))
@@ -846,10 +876,12 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["x".into()],
-                                    vec![List::new(element_type.clone(), vec![], Position::fake())
-                                        .into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        List::new(element_type.clone(), vec![], Position::fake()),
+                                        Position::fake()
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -888,9 +920,12 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    Some(list_type.into()),
                                     vec!["x".into()],
-                                    vec![List::new(element_type, vec![], Position::fake()).into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        Some(list_type.into()),
+                                        List::new(element_type, vec![], Position::fake()),
+                                        Position::fake()
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -933,27 +968,27 @@ mod tests {
                                 ),
                                 vec![
                                     ListComprehensionBranch::new(
-                                        None,
                                         vec!["xs".into()],
-                                        vec![List::new(
-                                            list_type.clone(),
-                                            vec![],
+                                        vec![ListComprehensionIteratee::new(
+                                            None,
+                                            List::new(list_type.clone(), vec![], Position::fake()),
                                             Position::fake()
-                                        )
-                                        .into()],
+                                        )],
                                         None,
                                         Position::fake(),
                                     ),
                                     ListComprehensionBranch::new(
-                                        None,
                                         vec!["x".into()],
-                                        vec![Call::new(
+                                        vec![ListComprehensionIteratee::new(
                                             None,
-                                            Variable::new("xs", Position::fake()),
-                                            vec![],
+                                            Call::new(
+                                                None,
+                                                Variable::new("xs", Position::fake()),
+                                                vec![],
+                                                Position::fake()
+                                            ),
                                             Position::fake()
-                                        )
-                                        .into()],
+                                        )],
                                         None,
                                         Position::fake(),
                                     ),
@@ -994,34 +1029,34 @@ mod tests {
                                 ),
                                 vec![
                                     ListComprehensionBranch::new(
-                                        Some(nested_list_type.into()),
                                         vec!["xs".into()],
-                                        vec![List::new(
-                                            list_type.clone(),
-                                            vec![],
+                                        vec![ListComprehensionIteratee::new(
+                                            Some(nested_list_type.into()),
+                                            List::new(list_type.clone(), vec![], Position::fake()),
                                             Position::fake()
-                                        )
-                                        .into()],
+                                        )],
                                         None,
                                         Position::fake(),
                                     ),
                                     ListComprehensionBranch::new(
-                                        Some(list_type.clone().into()),
                                         vec!["x".into()],
-                                        vec![Call::new(
-                                            Some(
-                                                types::Function::new(
-                                                    vec![],
-                                                    list_type,
-                                                    Position::fake()
-                                                )
-                                                .into()
+                                        vec![ListComprehensionIteratee::new(
+                                            Some(list_type.clone().into()),
+                                            Call::new(
+                                                Some(
+                                                    types::Function::new(
+                                                        vec![],
+                                                        list_type,
+                                                        Position::fake()
+                                                    )
+                                                    .into()
+                                                ),
+                                                Variable::new("xs", Position::fake()),
+                                                vec![],
+                                                Position::fake()
                                             ),
-                                            Variable::new("xs", Position::fake()),
-                                            vec![],
                                             Position::fake()
-                                        )
-                                        .into()],
+                                        )],
                                         None,
                                         Position::fake(),
                                     ),
@@ -1052,14 +1087,17 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["x".into()],
-                                    vec![List::new(
-                                        list_type.element().clone(),
-                                        vec![],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        List::new(
+                                            list_type.element().clone(),
+                                            vec![],
+                                            Position::fake()
+                                        )
+                                        ,
                                         Position::fake()
-                                    )
-                                    .into()],
+                                    )],
                                     Some(
                                         Let::new(
                                             Some("y".into()),
@@ -1094,14 +1132,16 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    Some(list_type.clone().into()),
                                     vec!["x".into()],
-                                    vec![List::new(
-                                        list_type.element().clone(),
-                                        vec![],
+                                    vec![ListComprehensionIteratee::new(
+                                        Some(list_type.clone().into()),
+                                        List::new(
+                                            list_type.element().clone(),
+                                            vec![],
+                                            Position::fake()
+                                        ),
                                         Position::fake()
-                                    )
-                                    .into()],
+                                    )],
                                     Some(
                                         Let::new(
                                             Some("y".into()),
@@ -1169,9 +1209,12 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    None,
                                     vec!["k".into(), "v".into()],
-                                    vec![empty_map.clone().into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        empty_map.clone(),
+                                        Position::fake()
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -1198,9 +1241,12 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    Some(map_type.clone().into()),
                                     vec!["k".into(), "v".into()],
-                                    vec![empty_map.into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        Some(map_type.clone().into()),
+                                        empty_map,
+                                        Position::fake()
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
