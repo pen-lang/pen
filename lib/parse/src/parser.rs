@@ -159,7 +159,7 @@ fn foreign_import(input: Input) -> IResult<ForeignImport> {
             )),
             |(position, _, _, (calling_convention, name, type_))| {
                 ForeignImport::new(
-                    &name,
+                    name,
                     calling_convention.unwrap_or_default(),
                     type_,
                     position(),

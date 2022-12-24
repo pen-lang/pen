@@ -297,7 +297,7 @@ fn compile_locked_thunk_entry(
     let arguments = compile_arguments(context, definition);
 
     context.module_builder().define_function(
-        &context.module_builder().generate_name(),
+        context.module_builder().generate_name(),
         arguments.clone(),
         type_::compile(context, definition.result_type()),
         |builder| {

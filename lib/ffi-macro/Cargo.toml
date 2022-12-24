@@ -1,7 +1,7 @@
 [package]
 name = "pen-ffi-macro"
 description = "FFI macro library for Pen programming language"
-version = "0.4.0"
+version = "0.4.1"
 publish = true
 edition = "2021"
 license = "MIT"
