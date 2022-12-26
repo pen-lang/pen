@@ -1264,6 +1264,52 @@ mod tests {
                 ]))
                 .unwrap();
             }
+
+            #[test]
+            fn compile_perallel() {
+                let list_type =
+                    types::List::new(types::None::new(Position::fake()), Position::fake());
+                let iteratee_list_types = [
+                    types::List::new(types::Number::new(Position::fake()), Position::fake()),
+                    types::List::new(types::ByteString::new(Position::fake()), Position::fake()),
+                ];
+
+                compile_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![
+                                Argument::new("xs", iteratee_list_types[0].clone()),
+                                Argument::new("ys", iteratee_list_types[1].clone()),
+                            ],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                list_type.element().clone(),
+                                None::new(Position::fake()),
+                                vec![ListComprehensionBranch::new(
+                                    vec!["x".into(), "y".into()],
+                                    vec![
+                                        ListComprehensionIteratee::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                        ),
+                                        ListComprehensionIteratee::new(
+                                            None,
+                                            Variable::new("ys", Position::fake()),
+                                        ),
+                                    ],
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    ),
+                ]))
+                .unwrap();
+            }
         }
     }
 
