@@ -263,21 +263,21 @@ fn check_expression(
 
                 for (name, iteratee) in branch.names().iter().zip(branch.iteratees()) {
                     let position = iteratee.position();
-                    let iteratee_type = iteratee
+                    let type_ = iteratee
                         .type_()
                         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
 
                     check_subsumption(
                         &check_expression(iteratee.expression(), &variables)?,
-                        iteratee_type,
+                        type_,
                     )?;
 
                     variables = variables.insert(
                         name.into(),
                         types::Function::new(
                             vec![],
-                            type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
-                                .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?
+                            type_canonicalizer::canonicalize_list(type_, context.types())?
+                                .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
                                 .element()
                                 .clone(),
                             position.clone(),

@@ -295,51 +295,28 @@ fn transform_expression(
 
                 variables = variables.insert_iter(
                     branch
-                        .iteratees()
+                        .names()
                         .iter()
-                        .enumerate()
-                        .map(|(index, iteratee)| {
-                            Ok(
-                                match type_canonicalizer::canonicalize(
-                                    iteratee.type_().ok_or_else(|| {
-                                        AnalysisError::TypeNotInferred(position.clone())
-                                    })?,
-                                    context.types(),
-                                )? {
-                                    Type::List(list_type) => branch
-                                        .names()
-                                        .get(index)
-                                        .map(|name| {
-                                            (
-                                                name.into(),
-                                                types::Function::new(
-                                                    vec![],
-                                                    list_type.element().clone(),
-                                                    position.clone(),
-                                                )
-                                                .into(),
-                                            )
-                                        })
-                                        .into_iter()
-                                        .collect::<Vec<_>>(),
-                                    Type::Map(map_type) => {
-                                        branch
-                                            .names()
-                                            .get(0)
-                                            .map(|name| (name.into(), map_type.key().clone()))
-                                            .into_iter()
-                                            .chain(branch.names().get(1).map(|name| {
-                                                (name.into(), map_type.value().clone())
-                                            }))
-                                            .collect()
-                                    }
-                                    type_ => return Err(AnalysisError::CollectionExpected(type_)),
-                                },
-                            )
+                        .zip(branch.iteratees())
+                        .map(|(name, iteratee)| {
+                            let type_ = iteratee
+                                .type_()
+                                .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
+
+                            Ok((
+                                name.into(),
+                                types::Function::new(
+                                    vec![],
+                                    type_canonicalizer::canonicalize_list(type_, context.types())?
+                                        .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
+                                        .element()
+                                        .clone(),
+                                    position.clone(),
+                                )
+                                .into(),
+                            ))
                         })
-                        .collect::<Result<Vec<_>, _>>()?
-                        .into_iter()
-                        .flatten(),
+                        .collect::<Result<Vec<_>, _>>()?,
                 );
 
                 branches.push(ListComprehensionBranch::new(
@@ -1988,248 +1965,6 @@ mod tests {
                     )])
                 )
             );
-        }
-
-        mod iteration {
-            use super::*;
-            use pretty_assertions::assert_eq;
-
-            #[test]
-            fn coerce_element() {
-                let union_type = types::Union::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let list_type = types::List::new(union_type.clone(), Position::fake());
-                let map_type = types::Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let empty_map = Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    vec![],
-                    Position::fake(),
-                );
-
-                assert_eq!(
-                    coerce_module(&Module::empty().set_function_definitions(vec![
-                        FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type.clone(),
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    None::new(Position::fake()),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.clone().into()),
-                                            empty_map.clone(),
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )
-                    ],)),
-                    Ok(
-                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type,
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    TypeCoercion::new(
-                                        types::None::new(Position::fake()),
-                                        union_type,
-                                        None::new(Position::fake()),
-                                        Position::fake(),
-                                    ),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.into()),
-                                            empty_map,
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )],)
-                    )
-                );
-            }
-
-            #[test]
-            fn coerce_element_with_key() {
-                let union_type = types::Union::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let list_type = types::List::new(union_type.clone(), Position::fake());
-                let map_type = types::Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let empty_map = Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    vec![],
-                    Position::fake(),
-                );
-
-                assert_eq!(
-                    coerce_module(&Module::empty().set_function_definitions(vec![
-                        FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type.clone(),
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    Variable::new("k", Position::fake()),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.clone().into()),
-                                            empty_map.clone(),
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )
-                    ],)),
-                    Ok(
-                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type,
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    TypeCoercion::new(
-                                        types::None::new(Position::fake()),
-                                        union_type,
-                                        Variable::new("k", Position::fake()),
-                                        Position::fake(),
-                                    ),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.into()),
-                                            empty_map,
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )],)
-                    )
-                );
-            }
-
-            #[test]
-            fn coerce_element_with_value() {
-                let union_type = types::Union::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let list_type = types::List::new(union_type.clone(), Position::fake());
-                let map_type = types::Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-                let empty_map = Map::new(
-                    types::None::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    vec![],
-                    Position::fake(),
-                );
-
-                assert_eq!(
-                    coerce_module(&Module::empty().set_function_definitions(vec![
-                        FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type.clone(),
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    Variable::new("v", Position::fake()),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.clone().into()),
-                                            empty_map.clone(),
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )
-                    ],)),
-                    Ok(
-                        Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                            "f",
-                            Lambda::new(
-                                vec![],
-                                list_type,
-                                ListComprehension::new(
-                                    union_type.clone(),
-                                    TypeCoercion::new(
-                                        types::None::new(Position::fake()),
-                                        union_type,
-                                        Variable::new("v", Position::fake()),
-                                        Position::fake(),
-                                    ),
-                                    vec![ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            Some(map_type.into()),
-                                            empty_map,
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    )],
-                                    Position::fake(),
-                                ),
-                                Position::fake(),
-                            ),
-                            false,
-                        )],)
-                    )
-                );
-            }
         }
     }
 }
