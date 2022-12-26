@@ -1331,6 +1331,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zip-lists" class="md-nav__link">
+    Zip lists
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-a-size-of-a-list" class="md-nav__link">
     Get a size of a list
   </a>
@@ -1835,6 +1842,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#zip-lists" class="md-nav__link">
+    Zip lists
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#get-a-size-of-a-list" class="md-nav__link">
     Get a size of a list
   </a>
@@ -1946,6 +1960,13 @@
 <p><em>Given</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(xs [number]) [number] {
   [number x() for x in xs if x() &lt; 42]
+}</code></pre>
+<p><em>When</em> I run <code>pen build</code></p>
+<p><em>Then</em> the exit status should be 0.</p>
+<h2 id="zip-lists">Zip lists</h2>
+<p><em>Given</em> a file named "Foo.pen" with:</p>
+<pre class="pen"><code>f = \(xs [number], ys [number]) [number] {
+  [number x() + y() for x, y in xs, ys]
 }</code></pre>
 <p><em>When</em> I run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
