@@ -253,7 +253,6 @@ fn check_expression(
             let mut variables = variables.clone();
 
             for branch in comprehension.branches() {
-                // TODO Test this.
                 if branch.iteratees().len() > 1
                     && branch
                         .iteratees()
@@ -263,9 +262,18 @@ fn check_expression(
                     return Err(AnalysisError::ParallelMapIteration(
                         branch.position().clone(),
                     ));
+                } else if branch.names().len() != branch.iteratees().len()
+                    && branch
+                        .iteratees()
+                        .iter()
+                        .all(|iteratee| matches!(iteratee.type_(), Some(Type::List(_))))
+                {
+                    return Err(AnalysisError::ListComprehensionIterateeCount(
+                        branch.position().clone(),
+                    ));
                 }
 
-                for (index, iteratee) in branch.iteratees().iter().enumerate() {
+                for (name, iteratee) in branch.names().iter().zip(branch.iteratees()) {
                     let iteratee_type = iteratee
                         .type_()
                         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
@@ -278,16 +286,7 @@ fn check_expression(
                     variables =
                         match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
                             Type::List(list_type) => variables.insert(
-                                branch
-                                    .names()
-                                    .get(index)
-                                    .ok_or_else(|| {
-                                        // TODO Test this.
-                                        AnalysisError::ElementNameNotDefined(
-                                            branch.position().clone(),
-                                        )
-                                    })?
-                                    .into(),
+                                name.into(),
                                 types::Function::new(
                                     vec![],
                                     list_type.element().clone(),
@@ -301,7 +300,6 @@ fn check_expression(
                                         .names()
                                         .get(0)
                                         .ok_or_else(|| {
-                                            // TODO Test this.
                                             AnalysisError::KeyNameNotDefined(
                                                 branch.position().clone(),
                                             )
@@ -314,7 +312,6 @@ fn check_expression(
                                         .names()
                                         .get(1)
                                         .ok_or_else(|| {
-                                            // TODO Test this.
                                             AnalysisError::ValueNameNotDefined(
                                                 branch.position().clone(),
                                             )
@@ -2430,6 +2427,135 @@ mod tests {
                     Err(AnalysisError::TypesNotMatched(
                         types::None::new(Position::fake()).into(),
                         types::Boolean::new(Position::fake()).into(),
+                    ))
+                );
+            }
+
+            #[test]
+            fn check_parallel() {
+                let element_type = types::None::new(Position::fake());
+                let list_type = types::List::new(element_type.clone(), Position::fake());
+
+                assert_eq!(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                types::List::new(element_type.clone(), Position::fake()),
+                                ListComprehension::new(
+                                    element_type.clone(),
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                element_type.clone(),
+                                                Position::fake(),
+                                            )
+                                            .into(),
+                                        ),
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake(),
+                                    ),
+                                    vec![ListComprehensionBranch::new(
+                                        vec!["x".into(), "y".into()],
+                                        vec![
+                                            ListComprehensionIteratee::new(
+                                                Some(list_type.clone().into()),
+                                                List::new(
+                                                    element_type.clone(),
+                                                    vec![],
+                                                    Position::fake(),
+                                                ),
+                                            ),
+                                            ListComprehensionIteratee::new(
+                                                Some(list_type.into()),
+                                                List::new(
+                                                    element_type,
+                                                    vec![ListElement::Single(
+                                                        Number::new(42.0, Position::fake()).into(),
+                                                    )],
+                                                    Position::fake(),
+                                                ),
+                                            ),
+                                        ],
+                                        None,
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )]
+                    )),
+                    Err(AnalysisError::TypesNotMatched(
+                        types::Number::new(Position::fake()).into(),
+                        types::None::new(Position::fake()).into(),
+                    ))
+                );
+            }
+
+            #[test]
+            fn check_iteratee_count() {
+                let element_type = types::None::new(Position::fake());
+                let list_type = types::List::new(element_type.clone(), Position::fake());
+
+                assert_eq!(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
+                            "f",
+                            Lambda::new(
+                                vec![],
+                                types::List::new(element_type.clone(), Position::fake()),
+                                ListComprehension::new(
+                                    element_type.clone(),
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                element_type.clone(),
+                                                Position::fake(),
+                                            )
+                                            .into(),
+                                        ),
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake(),
+                                    ),
+                                    vec![ListComprehensionBranch::new(
+                                        vec!["x".into()],
+                                        vec![
+                                            ListComprehensionIteratee::new(
+                                                Some(list_type.clone().into()),
+                                                List::new(
+                                                    element_type.clone(),
+                                                    vec![],
+                                                    Position::fake(),
+                                                ),
+                                            ),
+                                            ListComprehensionIteratee::new(
+                                                Some(list_type.into()),
+                                                List::new(
+                                                    element_type,
+                                                    vec![],
+                                                    Position::fake(),
+                                                ),
+                                            ),
+                                        ],
+                                        None,
+                                        Position::fake(),
+                                    )],
+                                    Position::fake(),
+                                ),
+                                Position::fake(),
+                            ),
+                            false,
+                        )]
+                    )),
+                    Err(AnalysisError::ListComprehensionIterateeCount(
+                        Position::fake(),
                     ))
                 );
             }

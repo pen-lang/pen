@@ -24,6 +24,7 @@ pub enum AnalysisError {
     InvalidAdditionOperand(Position),
     InvalidTryOperation(Position),
     KeyNameNotDefined(Position),
+    ListComprehensionIterateeCount(Position),
     ListExpected(Type),
     MapExpected(Type),
     MissingElseBlock(Position),
@@ -142,6 +143,13 @@ impl Display for AnalysisError {
             }
             Self::KeyNameNotDefined(position) => {
                 write!(formatter, "key name not defined\n{}", position)
+            }
+            Self::ListComprehensionIterateeCount(position) => {
+                write!(
+                    formatter,
+                    "unmatched iteratee count in list comprehension\n{}",
+                    position
+                )
             }
             Self::ListExpected(type_) => {
                 write!(
