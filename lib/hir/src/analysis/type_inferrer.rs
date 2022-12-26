@@ -282,7 +282,7 @@ fn infer_expression(
                             })?;
 
                             Ok(
-                                match type_canonicalizer::canonicalize(&type_, context.types())? {
+                                match type_canonicalizer::canonicalize(type_, context.types())? {
                                     Type::List(list_type) => branch
                                         .names()
                                         .get(index)

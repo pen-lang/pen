@@ -38,7 +38,7 @@ pub fn compile(
     };
 
     if let [Type::Map(map_type)] = iteratee_types.as_slice() {
-        compile_map(context, comprehension, branch, &map_type, element)
+        compile_map(context, comprehension, branch, map_type, element)
     } else if iteratee_types
         .iter()
         .all(|type_| matches!(type_, Type::List(_)))
@@ -214,7 +214,7 @@ fn compile_list_iteration_function_definition(
     Ok(mir::ir::FunctionDefinition::new(
         CLOSURE_NAME,
         arguments,
-        list_type.clone(),
+        list_type,
         expression::compile(context, &body)?,
     ))
 }

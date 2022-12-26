@@ -25,6 +25,6 @@ impl ListComprehensionIteratee {
     }
 
     pub fn position(&self) -> &Position {
-        &self.expression.position()
+        self.expression.position()
     }
 }

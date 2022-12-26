@@ -261,7 +261,7 @@ fn check_expression(
                         .any(|iteratee| matches!(iteratee.type_(), Some(Type::Map(_))))
                 {
                     return Err(
-                        AnalysisError::ParallelMapIteration(branch.position().clone()).into(),
+                        AnalysisError::ParallelMapIteration(branch.position().clone()),
                     );
                 }
 
