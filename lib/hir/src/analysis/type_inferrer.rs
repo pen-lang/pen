@@ -273,41 +273,29 @@ fn infer_expression(
                     .collect::<Result<Vec<_>, _>>()?;
 
                 variables = variables.insert_iter(
-                    iteratees
+                    branch
+                        .names()
                         .iter()
-                        .enumerate()
-                        .map(|(index, iteratee)| {
+                        .zip(&iteratees)
+                        .map(|(name, iteratee)| {
                             let type_ = iteratee.type_().ok_or_else(|| {
                                 AnalysisError::TypeNotInferred(iteratee.position().clone())
                             })?;
 
-                            branch
-                                .names()
-                                .get(index)
-                                .map(|name| {
-                                    Ok((
-                                        name.into(),
-                                        types::Function::new(
-                                            vec![],
-                                            type_canonicalizer::canonicalize_list(
-                                                type_,
-                                                context.types(),
-                                            )?
-                                            .ok_or_else(|| {
-                                                AnalysisError::ListExpected(type_.clone())
-                                            })?
-                                            .element()
-                                            .clone(),
-                                            comprehension.position().clone(),
-                                        )
-                                        .into(),
-                                    ))
-                                })
-                                .transpose()
+                            Ok((
+                                name.into(),
+                                types::Function::new(
+                                    vec![],
+                                    type_canonicalizer::canonicalize_list(type_, context.types())?
+                                        .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
+                                        .element()
+                                        .clone(),
+                                    comprehension.position().clone(),
+                                )
+                                .into(),
+                            ))
                         })
-                        .collect::<Result<Vec<_>, _>>()?
-                        .into_iter()
-                        .flatten(),
+                        .collect::<Result<Vec<_>, _>>()?,
                 );
 
                 branches.push(ListComprehensionBranch::new(
