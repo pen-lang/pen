@@ -10,9 +10,19 @@ pub fn compile(
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
     let [branch, ..] = comprehension.branches() else { unreachable!() };
-    let iteratee_type = branch
-        .type_()
-        .ok_or_else(|| AnalysisError::TypeNotInferred(comprehension.position().clone()))?;
+    let iteratee_types = branch
+        .iteratees()
+        .iter()
+        .map(|iteratee| {
+            type_canonicalizer::canonicalize(
+                iteratee.type_().ok_or_else(|| {
+                    AnalysisError::TypeNotInferred(comprehension.position().clone())
+                })?,
+                context.types(),
+            )
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+    // TODO Define a compile_element function.
     let element = if comprehension.branches().len() == 1 {
         ListElement::Single(comprehension.element().clone())
     } else {
@@ -27,30 +37,64 @@ pub fn compile(
         )
     };
 
-    match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
-        Type::List(list_type) => compile_list(context, comprehension, branch, &list_type, element),
-        Type::Map(map_type) => compile_map(context, comprehension, branch, &map_type, element),
-        type_ => Err(AnalysisError::CollectionExpected(
-            type_.set_position(branch.iteratee().position().clone()),
+    if let [Type::Map(map_type)] = iteratee_types.as_slice() {
+        compile_map(context, comprehension, branch, &map_type, element)
+    } else if iteratee_types
+        .iter()
+        .all(|type_| matches!(type_, Type::List(_)))
+    {
+        let list_types = iteratee_types
+            .iter()
+            .filter_map(|type_| type_.as_list())
+            .collect::<Vec<_>>();
+
+        compile_lists(context, comprehension, branch, &list_types, element)
+    } else if iteratee_types
+        .iter()
+        .all(|type_| matches!(type_, Type::Map(_)))
+    {
+        Err(CompileError::MultipleMapsInListComprehension(
+            comprehension.position().clone(),
+        ))
+    } else if iteratee_types
+        .iter()
+        .all(|type_| matches!(type_, Type::List(_) | Type::Map(_)))
+    {
+        Err(CompileError::MixedIterateesInListComprehension(
+            comprehension.position().clone(),
+        ))
+    } else {
+        let index = iteratee_types
+            .iter()
+            .position(|type_| !matches!(type_, Type::List(_) | Type::Map(_)))
+            .unwrap();
+
+        Err(AnalysisError::CollectionExpected(
+            iteratee_types[index]
+                .clone()
+                .set_position(branch.iteratees()[index].position().clone()),
         )
-        .into()),
+        .into())
     }
 }
 
-fn compile_list(
+fn compile_lists(
     context: &Context,
     comprehension: &ListComprehension,
     branch: &ListComprehensionBranch,
-    input_list_type: &types::List,
+    iteratee_types: &[&types::List],
     element: ListElement,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
-    const LIST_NAME: &str = "$list";
 
-    let position = comprehension.position();
-    let input_element_type = input_list_type.element();
-    let output_element_type = comprehension.type_();
     let list_type = type_::compile_list(context)?;
+    let definition = compile_list_iteration_function_definition(
+        context,
+        comprehension,
+        branch,
+        iteratee_types,
+        element,
+    )?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -64,65 +108,22 @@ fn compile_list(
                 vec![],
                 list_type.clone(),
                 mir::ir::LetRecursive::new(
-                    mir::ir::FunctionDefinition::new(
-                        CLOSURE_NAME,
-                        vec![mir::ir::Argument::new(LIST_NAME, list_type.clone())],
-                        list_type.clone(),
-                        expression::compile(
-                            context,
-                            &IfList::new(
-                                Some(input_element_type.clone()),
-                                Variable::new(LIST_NAME, position.clone()),
-                                branch.primary_name(),
-                                LIST_NAME,
-                                {
-                                    let rest = Call::new(
-                                        Some(
-                                            types::Function::new(
-                                                vec![types::List::new(
-                                                    input_element_type.clone(),
-                                                    position.clone(),
-                                                )
-                                                .into()],
-                                                types::List::new(
-                                                    output_element_type.clone(),
-                                                    position.clone(),
-                                                ),
-                                                position.clone(),
-                                            )
-                                            .into(),
-                                        ),
-                                        Variable::new(CLOSURE_NAME, position.clone()),
-                                        vec![Variable::new(LIST_NAME, position.clone()).into()],
-                                        position.clone(),
-                                    );
-                                    let list = List::new(
-                                        output_element_type.clone(),
-                                        vec![element, ListElement::Multiple(rest.clone().into())],
-                                        position.clone(),
-                                    );
-
-                                    if let Some(condition) = branch.condition() {
-                                        Expression::from(If::new(
-                                            condition.clone(),
-                                            list,
-                                            rest,
-                                            branch.position().clone(),
-                                        ))
-                                    } else {
-                                        list.into()
-                                    }
-                                },
-                                List::new(output_element_type.clone(), vec![], position.clone()),
-                                position.clone(),
-                            )
-                            .into(),
-                        )?,
-                    ),
+                    definition.clone(),
                     mir::ir::Call::new(
-                        mir::types::Function::new(vec![list_type.clone().into()], list_type),
-                        mir::ir::Variable::new(CLOSURE_NAME),
-                        vec![expression::compile(context, branch.iteratee())?],
+                        mir::types::Function::new(
+                            branch
+                                .iteratees()
+                                .iter()
+                                .map(|_| list_type.clone().into())
+                                .collect(),
+                            list_type,
+                        ),
+                        mir::ir::Variable::new(definition.name()),
+                        branch
+                            .iteratees()
+                            .iter()
+                            .map(|iteratee| expression::compile(context, iteratee.expression()))
+                            .collect::<Result<_, _>>()?,
                     ),
                 ),
             ),
@@ -131,6 +132,91 @@ fn compile_list(
         .into()],
     )
     .into())
+}
+
+fn compile_list_iteration_function_definition(
+    context: &Context,
+    comprehension: &ListComprehension,
+    branch: &ListComprehensionBranch,
+    iteratee_types: &[&types::List],
+    element: ListElement,
+) -> Result<mir::ir::FunctionDefinition, CompileError> {
+    const CLOSURE_NAME: &str = "$loop";
+    const LIST_NAME: &str = "$list";
+
+    let position = comprehension.position();
+    let list_type = type_::compile_list(context)?;
+    let iteratee_names = (0..branch.iteratees().len())
+        .map(|index| format!("{}_{}", LIST_NAME, index))
+        .collect::<Vec<_>>();
+    let arguments = iteratee_names
+        .iter()
+        .map(|name| mir::ir::Argument::new(name, list_type.clone()))
+        .collect();
+
+    let mut body = {
+        let rest = Call::new(
+            Some(
+                types::Function::new(
+                    iteratee_types
+                        .iter()
+                        .map(|&type_| type_.clone().into())
+                        .collect(),
+                    types::List::new(comprehension.type_().clone(), position.clone()),
+                    position.clone(),
+                )
+                .into(),
+            ),
+            Variable::new(CLOSURE_NAME, position.clone()),
+            iteratee_names
+                .iter()
+                .map(|name| Variable::new(name, position.clone()).into())
+                .collect(),
+            position.clone(),
+        );
+        let list = List::new(
+            comprehension.type_().clone(),
+            vec![element, ListElement::Multiple(rest.clone().into())],
+            position.clone(),
+        );
+
+        if let Some(condition) = branch.condition() {
+            Expression::from(If::new(
+                condition.clone(),
+                list,
+                rest,
+                branch.position().clone(),
+            ))
+        } else {
+            list.into()
+        }
+    };
+
+    for ((element_name, iteratee_name), type_) in branch
+        .names()
+        .iter()
+        .zip(iteratee_names)
+        .zip(iteratee_types)
+        .rev()
+    {
+        body = IfList::new(
+            Some(type_.element().clone()),
+            Variable::new(LIST_NAME, position.clone()),
+            element_name,
+            iteratee_name,
+            body,
+            List::new(comprehension.type_().clone(), vec![], position.clone()),
+            position.clone(),
+        )
+        .into()
+    }
+
+    Ok(mir::ir::FunctionDefinition::new(
+        CLOSURE_NAME,
+        arguments,
+        list_type.clone(),
+        expression::compile(context, &body)?,
+    ))
 }
 
 fn compile_map(
@@ -179,7 +265,11 @@ fn compile_map(
                                     .iteration
                                     .iterate_function_name,
                             ),
-                            vec![expression::compile(context, branch.iteratee())?],
+                            branch
+                                .iteratees()
+                                .iter()
+                                .map(|iteratee| expression::compile(context, iteratee.expression()))
+                                .collect::<Result<_, _>>()?,
                         )
                         .into()],
                     ),
@@ -253,7 +343,17 @@ fn compile_map_iteration_function_definition(
                 vec![IfTypeBranch::new(
                     iterator_type.clone(),
                     Let::new(
-                        Some(branch.primary_name().into()),
+                        Some(
+                            branch
+                                .names()
+                                .get(0)
+                                .ok_or_else(|| {
+                                    AnalysisError::KeyNameNotDefined(
+                                        comprehension.position().clone(),
+                                    )
+                                })?
+                                .into(),
+                        ),
                         Some(map_type.key().clone()),
                         compile_key_value_function_call(
                             &iteration_configuration.key_function_name,
@@ -262,7 +362,8 @@ fn compile_map_iteration_function_definition(
                         Let::new(
                             Some(
                                 branch
-                                    .secondary_name()
+                                    .names()
+                                    .get(1)
                                     .ok_or_else(|| {
                                         AnalysisError::ValueNameNotDefined(
                                             comprehension.position().clone(),
