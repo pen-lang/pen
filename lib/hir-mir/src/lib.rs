@@ -1819,6 +1819,72 @@ mod tests {
             ]))
             .unwrap();
         }
+
+        #[test]
+        fn compile_keys() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(map_type.key().clone(), Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
+                            vec![Map::new(
+                                map_type.key().clone(),
+                                map_type.value().clone(),
+                                vec![],
+                                Position::fake(),
+                            ).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
+
+        #[test]
+        fn compile_values() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+
+            compile_module(&Module::empty().set_function_definitions(vec![
+                FunctionDefinition::fake(
+                    "f",
+                    Lambda::new(
+                        vec![],
+                        types::List::new(map_type.value().clone(), Position::fake()),
+                        Call::new(
+                            None,
+                            BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
+                            vec![Map::new(
+                                map_type.key().clone(),
+                                map_type.value().clone(),
+                                vec![],
+                                Position::fake(),
+                            ).into()],
+                            Position::fake(),
+                        ),
+                        Position::fake(),
+                    ),
+                    false,
+                ),
+            ]))
+            .unwrap();
+        }
     }
 
     mod reflect {

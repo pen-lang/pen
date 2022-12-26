@@ -13,6 +13,7 @@ use hir::{
     types,
     types::Type,
 };
+use position::Position;
 
 pub fn compile(
     context: &Context,
@@ -82,7 +83,23 @@ pub fn compile(
             .into()
         }
         BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
-        BuiltInFunctionName::Keys => todo!(),
+        BuiltInFunctionName::Keys => {
+            let argument_type = &function_type.arguments()[0];
+
+            compile_map_iteration(
+                context,
+                &call.arguments()[0],
+                &context
+                    .configuration()?
+                    .map_type
+                    .iteration
+                    .key_function_name,
+                type_canonicalizer::canonicalize_map(argument_type, context.types())?
+                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .key(),
+                position,
+            )?
+        }
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
@@ -217,18 +234,229 @@ pub fn compile(
             )
             .into()
         }
-        BuiltInFunctionName::Values => todo!(),
+        BuiltInFunctionName::Values => {
+            let argument_type = &function_type.arguments()[0];
+
+            compile_map_iteration(
+                context,
+                &call.arguments()[0],
+                &context
+                    .configuration()?
+                    .map_type
+                    .iteration
+                    .value_function_name,
+                type_canonicalizer::canonicalize_map(argument_type, context.types())?
+                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .value(),
+                position,
+            )?
+        }
     })
+}
+
+fn compile_map_iteration(
+    context: &Context,
+    argument: &Expression,
+    element_function_name: &str,
+    element_type: &Type,
+    position: &Position,
+) -> Result<mir::ir::Expression, CompileError> {
+    const CLOSURE_NAME: &str = "$loop";
+
+    let list_type = type_::compile_list(context)?;
+    let definition = compile_map_iteration_function_definition(
+        context,
+        element_function_name,
+        element_type,
+        position,
+    )?;
+
+    Ok(mir::ir::Call::new(
+        mir::types::Function::new(
+            vec![mir::types::Function::new(vec![], list_type.clone()).into()],
+            list_type.clone(),
+        ),
+        mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
+        vec![mir::ir::LetRecursive::new(
+            mir::ir::FunctionDefinition::new(
+                CLOSURE_NAME,
+                vec![],
+                list_type.clone(),
+                mir::ir::LetRecursive::new(
+                    definition.clone(),
+                    mir::ir::Call::new(
+                        mir::types::Function::new(vec![mir::types::Type::Variant], list_type),
+                        mir::ir::Variable::new(definition.name()),
+                        vec![mir::ir::Call::new(
+                            mir::types::Function::new(
+                                vec![type_::compile_map(context)?.into()],
+                                mir::types::Type::Variant,
+                            ),
+                            mir::ir::Variable::new(
+                                &context
+                                    .configuration()?
+                                    .map_type
+                                    .iteration
+                                    .iterate_function_name,
+                            ),
+                            vec![expression::compile(context, argument)?],
+                        )
+                        .into()],
+                    ),
+                ),
+            ),
+            mir::ir::Variable::new(CLOSURE_NAME),
+        )
+        .into()],
+    )
+    .into())
+}
+
+fn compile_map_iteration_function_definition(
+    context: &Context,
+    element_function_name: &str,
+    element_type: &Type,
+    position: &Position,
+) -> Result<mir::ir::FunctionDefinition, CompileError> {
+    const CLOSURE_NAME: &str = "$loop";
+    const ITERATOR_NAME: &str = "$iterator";
+
+    let iteration_configuration = &context.configuration()?.map_type.iteration;
+    let any_type = Type::from(types::Any::new(position.clone()));
+    let iterator_type = Type::from(types::Reference::new(
+        &iteration_configuration.iterator_type_name,
+        position.clone(),
+    ));
+    let iterator_or_none_type = types::Union::new(
+        iterator_type.clone(),
+        types::None::new(position.clone()),
+        position.clone(),
+    );
+    let iterator_variable = Variable::new(ITERATOR_NAME, position.clone());
+
+    Ok(mir::ir::FunctionDefinition::new(
+        CLOSURE_NAME,
+        vec![mir::ir::Argument::new(
+            ITERATOR_NAME,
+            mir::types::Type::Variant,
+        )],
+        type_::compile_list(context)?,
+        expression::compile(
+            context,
+            &IfType::new(
+                ITERATOR_NAME,
+                iterator_variable.clone(),
+                vec![IfTypeBranch::new(
+                    iterator_type.clone(),
+                    List::new(
+                        element_type.clone(),
+                        vec![
+                            ListElement::Single(downcast::compile(
+                                context,
+                                &any_type,
+                                &element_type,
+                                &Call::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![iterator_type.clone()],
+                                            any_type.clone(),
+                                            position.clone(),
+                                        )
+                                        .into(),
+                                    ),
+                                    Variable::new(element_function_name, position.clone()),
+                                    vec![iterator_variable.clone().into()],
+                                    position.clone(),
+                                )
+                                .into(),
+                            )?),
+                            ListElement::Multiple(
+                                Call::new(
+                                    Some(
+                                        types::Function::new(
+                                            vec![iterator_or_none_type.clone().into()],
+                                            types::List::new(
+                                                element_type.clone(),
+                                                position.clone(),
+                                            ),
+                                            position.clone(),
+                                        )
+                                        .into(),
+                                    ),
+                                    Variable::new(CLOSURE_NAME, position.clone()),
+                                    vec![Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![iterator_type.clone()],
+                                                iterator_or_none_type,
+                                                position.clone(),
+                                            )
+                                            .into(),
+                                        ),
+                                        Variable::new(
+                                            &iteration_configuration.rest_function_name,
+                                            position.clone(),
+                                        ),
+                                        vec![iterator_variable.into()],
+                                        position.clone(),
+                                    )
+                                    .into()],
+                                    position.clone(),
+                                )
+                                .into(),
+                            ),
+                        ],
+                        position.clone(),
+                    ),
+                )],
+                Some(ElseBranch::new(
+                    Some(types::None::new(position.clone()).into()),
+                    List::new(element_type.clone(), vec![], position.clone()),
+                    position.clone(),
+                )),
+                position.clone(),
+            )
+            .into(),
+        )?,
+    ))
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
+
     use super::*;
     use position::{test::PositionFake, Position};
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
-            &Context::dummy(Default::default(), Default::default()),
+            &Context::dummy(
+                [
+                    (
+                        COMPILE_CONFIGURATION.list_type.list_type_name.clone(),
+                        types::None::new(Position::fake()).into(),
+                    ),
+                    (
+                        COMPILE_CONFIGURATION.map_type.context_type_name.clone(),
+                        types::None::new(Position::fake()).into(),
+                    ),
+                    (
+                        COMPILE_CONFIGURATION.map_type.map_type_name.clone(),
+                        types::None::new(Position::fake()).into(),
+                    ),
+                    (
+                        COMPILE_CONFIGURATION
+                            .map_type
+                            .iteration
+                            .iterator_type_name
+                            .clone(),
+                        types::None::new(Position::fake()).into(),
+                    ),
+                ]
+                .into_iter()
+                .collect(),
+                Default::default(),
+            ),
             call,
             if let Expression::BuiltInFunction(function) = call.function() {
                 function
@@ -254,6 +482,62 @@ mod tests {
                 types::None::new(Position::fake()),
                 types::Any::new(Position::fake()),
                 None::new(Position::fake()),
+                Position::fake()
+            )
+            .into()],
+            Position::fake(),
+        )));
+    }
+
+    #[test]
+    fn compile_keys() {
+        insta::assert_debug_snapshot!(compile_call(&Call::new(
+            Some(
+                types::Function::new(
+                    vec![types::Map::new(
+                        types::ByteString::new(Position::fake()),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    types::List::new(types::ByteString::new(Position::fake()), Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            ),
+            BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
+            vec![Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                vec![],
+                Position::fake()
+            )
+            .into()],
+            Position::fake(),
+        )));
+    }
+
+    #[test]
+    fn compile_values() {
+        insta::assert_debug_snapshot!(compile_call(&Call::new(
+            Some(
+                types::Function::new(
+                    vec![types::Map::new(
+                        types::ByteString::new(Position::fake()),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()],
+                    types::List::new(types::ByteString::new(Position::fake()), Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            ),
+            BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
+            vec![Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                vec![],
                 Position::fake()
             )
             .into()],
