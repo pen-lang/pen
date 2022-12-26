@@ -28,7 +28,6 @@ pub enum AnalysisError {
     ListExpected(Type),
     MapExpected(Type),
     MissingElseBlock(Position),
-    ParallelMapIteration(Position),
     RecordExpected(Type),
     RecordFieldNotFound(String, Position),
     RecordFieldPrivate(Position),
@@ -171,9 +170,6 @@ impl Display for AnalysisError {
                     "missing else block in if-type expression\n{}",
                     position
                 )
-            }
-            Self::ParallelMapIteration(position) => {
-                write!(formatter, "cannot iterate maps in parallel \n{}", position)
             }
             Self::RecordExpected(type_) => {
                 write!(

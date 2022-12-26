@@ -1128,68 +1128,6 @@ mod tests {
             }
 
             #[test]
-            fn compile_with_two_branches_of_list_and_map() {
-                let list_type =
-                    types::List::new(types::Number::new(Position::fake()), Position::fake());
-                let map_type = types::Map::new(
-                    types::ByteString::new(Position::fake()),
-                    types::Number::new(Position::fake()),
-                    Position::fake(),
-                );
-
-                compile_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![
-                                Argument::new("xs", list_type.clone()),
-                                Argument::new("ys", map_type),
-                            ],
-                            list_type,
-                            ListComprehension::new(
-                                types::Number::new(Position::fake()),
-                                AdditionOperation::new(
-                                    None,
-                                    Call::new(
-                                        None,
-                                        Variable::new("x", Position::fake()),
-                                        vec![],
-                                        Position::fake(),
-                                    ),
-                                    Variable::new("v", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                vec![
-                                    ListComprehensionBranch::new(
-                                        vec!["x".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            None,
-                                            Variable::new("xs", Position::fake()),
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    ),
-                                    ListComprehensionBranch::new(
-                                        vec!["k".into(), "v".into()],
-                                        vec![ListComprehensionIteratee::new(
-                                            None,
-                                            Variable::new("ys", Position::fake()),
-                                        )],
-                                        None,
-                                        Position::fake(),
-                                    ),
-                                ],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ]))
-                .unwrap();
-            }
-
-            #[test]
             fn compile_condition_with_list_iteratee() {
                 let list_type =
                     types::List::new(types::Number::new(Position::fake()), Position::fake());
@@ -1210,44 +1148,6 @@ mod tests {
                                 ),
                                 vec![ListComprehensionBranch::new(
                                     vec!["x".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        None,
-                                        Variable::new("xs", Position::fake()),
-                                    )],
-                                    Some(Boolean::new(true, Position::fake()).into()),
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ]))
-                .unwrap();
-            }
-
-            #[test]
-            fn compile_condition_with_map_iteratee() {
-                let list_type =
-                    types::List::new(types::Number::new(Position::fake()), Position::fake());
-                let map_type = types::Map::new(
-                    types::ByteString::new(Position::fake()),
-                    types::Number::new(Position::fake()),
-                    Position::fake(),
-                );
-
-                compile_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("xs", map_type)],
-                            list_type.clone(),
-                            ListComprehension::new(
-                                list_type.element().clone(),
-                                Variable::new("v", Position::fake()),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
                                     vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
@@ -1502,63 +1402,6 @@ mod tests {
                                 Variable::new("x", Position::fake()).into(),
                                 ByteString::new("", Position::fake()).into(),
                             ],
-                            Position::fake(),
-                        ),
-                        Position::fake(),
-                    ),
-                    false,
-                ),
-            ]))
-            .unwrap();
-        }
-
-        #[test]
-        fn compile_list_comprehension_with_map() {
-            let map_type = types::Map::new(
-                types::ByteString::new(Position::fake()),
-                types::Number::new(Position::fake()),
-                Position::fake(),
-            );
-
-            compile_module(&Module::empty().set_function_definitions(vec![
-                FunctionDefinition::fake(
-                    "f",
-                    Lambda::new(
-                        vec![
-                            Argument::new("k", map_type.key().clone()),
-                            Argument::new("v", map_type.value().clone()),
-                        ],
-                        types::None::new(Position::fake()),
-                        None::new(Position::fake()),
-                        Position::fake(),
-                    ),
-                    false,
-                ),
-                FunctionDefinition::fake(
-                    "g",
-                    Lambda::new(
-                        vec![Argument::new("x", map_type.clone())],
-                        types::List::new(types::None::new(Position::fake()), Position::fake()),
-                        ListComprehension::new(
-                            types::None::new(Position::fake()),
-                            Call::new(
-                                None,
-                                Variable::new("f", Position::fake()),
-                                vec![
-                                    Variable::new("k", Position::fake()).into(),
-                                    Variable::new("v", Position::fake()).into(),
-                                ],
-                                Position::fake(),
-                            ),
-                            vec![ListComprehensionBranch::new(
-                                vec!["k".into(), "v".into()],
-                                vec![ListComprehensionIteratee::new(
-                                    None,
-                                    Variable::new("x", Position::fake()),
-                                )],
-                                None,
-                                Position::fake(),
-                            )],
                             Position::fake(),
                         ),
                         Position::fake(),

@@ -25,10 +25,7 @@ packItems = \(states {number: [Item]}, b Bag, is [Item]) [Item] {
       is,
     )
   } else {
-    best(
-      [[Item] v for _, v in states],
-      [Item],
-    )
+    best(values(states), [Item])
   }
 }
 

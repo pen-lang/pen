@@ -3390,56 +3390,6 @@ mod tests {
                     .trim(),
                 );
             }
-
-            #[test]
-            fn format_comprehension() {
-                assert_eq!(
-                    format(
-                        &ListComprehension::new(
-                            types::Reference::new("none", Position::fake()),
-                            Variable::new("none", Position::fake()),
-                            vec![ListComprehensionBranch::new(
-                                vec!["k".into(), "v".into()],
-                                vec![Variable::new("xs", Position::fake()).into()],
-                                None,
-                                Position::fake(),
-                            )],
-                            Position::fake(),
-                        )
-                        .into()
-                    ),
-                    "[none none for k, v in xs]"
-                );
-            }
-
-            #[test]
-            fn format_multi_line_comprehension() {
-                assert_eq!(
-                    format(
-                        &ListComprehension::new(
-                            types::Reference::new("none", Position::fake()),
-                            Variable::new("none", line_position(2)),
-                            vec![ListComprehensionBranch::new(
-                                vec!["k".into(), "v".into()],
-                                vec![Variable::new("xs", Position::fake()).into()],
-                                None,
-                                line_position(2)
-                            )],
-                            line_position(1)
-                        )
-                        .into()
-                    ),
-                    indoc!(
-                        "
-                        [none
-                          none
-                          for k, v in xs
-                        ]
-                        "
-                    )
-                    .trim()
-                );
-            }
         }
 
         mod record {

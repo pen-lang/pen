@@ -3343,27 +3343,6 @@ mod tests {
                 assert_eq!(expression(input(source, "")).unwrap().1, target);
             }
         }
-
-        #[test]
-        fn parse_map_iteration_comprehension() {
-            assert_eq!(
-                list_comprehension(input("[none v for k, v in xs]", ""))
-                    .unwrap()
-                    .1,
-                ListComprehension::new(
-                    types::Reference::new("none", Position::fake()),
-                    Variable::new("v", Position::fake()),
-                    vec![ListComprehensionBranch::new(
-                        vec!["k".into(), "v".into()],
-                        vec![Variable::new("xs", Position::fake()).into()],
-                        None,
-                        Position::fake(),
-                    )],
-                    Position::fake(),
-                )
-                .into()
-            );
-        }
     }
 
     #[test]

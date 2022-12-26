@@ -273,57 +273,29 @@ fn infer_expression(
                     .collect::<Result<Vec<_>, _>>()?;
 
                 variables = variables.insert_iter(
-                    iteratees
+                    branch
+                        .names()
                         .iter()
-                        .enumerate()
-                        .map(|(index, iteratee)| {
+                        .zip(&iteratees)
+                        .map(|(name, iteratee)| {
                             let type_ = iteratee.type_().ok_or_else(|| {
                                 AnalysisError::TypeNotInferred(iteratee.position().clone())
                             })?;
 
-                            Ok(
-                                match type_canonicalizer::canonicalize(type_, context.types())? {
-                                    Type::List(list_type) => branch
-                                        .names()
-                                        .get(index)
-                                        .map(|name| {
-                                            (
-                                                name.into(),
-                                                types::Function::new(
-                                                    vec![],
-                                                    list_type.element().clone(),
-                                                    comprehension.position().clone(),
-                                                )
-                                                .into(),
-                                            )
-                                        })
-                                        .into_iter()
-                                        .collect::<Vec<_>>(),
-                                    Type::Map(map_type) => [
-                                        branch
-                                            .names()
-                                            .get(0)
-                                            .map(|name| (name.into(), map_type.key().clone())),
-                                        branch
-                                            .names()
-                                            .get(1)
-                                            .map(|name| (name.into(), map_type.value().clone())),
-                                    ]
-                                    .into_iter()
-                                    .flatten()
-                                    .collect(),
-                                    _ => {
-                                        return Err(AnalysisError::CollectionExpected(
-                                            type_.clone(),
-                                        ))
-                                    }
-                                },
-                            )
+                            Ok((
+                                name.into(),
+                                types::Function::new(
+                                    vec![],
+                                    type_canonicalizer::canonicalize_list(type_, context.types())?
+                                        .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
+                                        .element()
+                                        .clone(),
+                                    comprehension.position().clone(),
+                                )
+                                .into(),
+                            ))
                         })
-                        .collect::<Result<Vec<_>, _>>()?
-                        .into_iter()
-                        .flatten()
-                        .collect::<Vec<_>>(),
+                        .collect::<Result<Vec<_>, _>>()?,
                 );
 
                 branches.push(ListComprehensionBranch::new(
@@ -1186,85 +1158,6 @@ mod tests {
                                         )
                                         .into()
                                     ),
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )],)
-                )
-            );
-        }
-
-        #[test]
-        fn infer_map_iteratee() {
-            let map_type = types::Map::new(
-                types::None::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake(),
-            );
-            let element_type = types::None::new(Position::fake());
-            let list_type = types::List::new(element_type.clone(), Position::fake());
-            let empty_map = Map::new(
-                map_type.key().clone(),
-                map_type.value().clone(),
-                vec![],
-                Position::fake(),
-            );
-
-            assert_eq!(
-                infer_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            list_type.clone(),
-                            ListComprehension::new(
-                                element_type.clone(),
-                                Let::new(
-                                    Some("x".into()),
-                                    None,
-                                    Variable::new("k", Position::fake()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(None, empty_map.clone(),)],
-                                    None,
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    )
-                ])),
-                Ok(
-                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            list_type,
-                            ListComprehension::new(
-                                element_type,
-                                Let::new(
-                                    Some("x".into()),
-                                    Some(map_type.key().clone()),
-                                    Variable::new("k", Position::fake()),
-                                    Variable::new("x", Position::fake()),
-                                    Position::fake(),
-                                ),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        Some(map_type.clone().into()),
-                                        empty_map,
-                                    )],
-                                    None,
                                     Position::fake(),
                                 )],
                                 Position::fake(),
