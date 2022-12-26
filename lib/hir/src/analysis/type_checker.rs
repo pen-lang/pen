@@ -253,27 +253,16 @@ fn check_expression(
             let mut variables = variables.clone();
 
             for branch in comprehension.branches() {
-                if branch.iteratees().len() > 1
-                    && branch
-                        .iteratees()
-                        .iter()
-                        .any(|iteratee| matches!(iteratee.type_(), Some(Type::Map(_))))
-                {
-                    return Err(AnalysisError::ParallelMapIteration(
-                        branch.position().clone(),
-                    ));
-                } else if branch.names().len() != branch.iteratees().len()
-                    && branch
-                        .iteratees()
-                        .iter()
-                        .all(|iteratee| matches!(iteratee.type_(), Some(Type::List(_))))
-                {
+                let position = branch.position();
+
+                if branch.names().len() != branch.iteratees().len() {
                     return Err(AnalysisError::ListComprehensionIterateeCount(
-                        branch.position().clone(),
+                        position.clone(),
                     ));
                 }
 
                 for (name, iteratee) in branch.names().iter().zip(branch.iteratees()) {
+                    let position = iteratee.position();
                     let iteratee_type = iteratee
                         .type_()
                         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
@@ -283,51 +272,24 @@ fn check_expression(
                         iteratee_type,
                     )?;
 
-                    variables =
-                        match type_canonicalizer::canonicalize(iteratee_type, context.types())? {
-                            Type::List(list_type) => variables.insert(
-                                name.into(),
-                                types::Function::new(
-                                    vec![],
-                                    list_type.element().clone(),
-                                    position.clone(),
-                                )
-                                .into(),
-                            ),
-                            Type::Map(map_type) => variables.insert_iter([
-                                (
-                                    branch
-                                        .names()
-                                        .get(0)
-                                        .ok_or_else(|| {
-                                            AnalysisError::KeyNameNotDefined(
-                                                branch.position().clone(),
-                                            )
-                                        })?
-                                        .into(),
-                                    map_type.key().clone(),
-                                ),
-                                (
-                                    branch
-                                        .names()
-                                        .get(1)
-                                        .ok_or_else(|| {
-                                            AnalysisError::ValueNameNotDefined(
-                                                branch.position().clone(),
-                                            )
-                                        })?
-                                        .into(),
-                                    map_type.value().clone(),
-                                ),
-                            ]),
-                            _ => return Err(AnalysisError::TypeNotInferred(position.clone())),
-                        };
+                    variables = variables.insert(
+                        name.into(),
+                        types::Function::new(
+                            vec![],
+                            type_canonicalizer::canonicalize_list(iteratee_type, context.types())?
+                                .ok_or_else(|| AnalysisError::ListExpected(iteratee_type.clone()))?
+                                .element()
+                                .clone(),
+                            position.clone(),
+                        )
+                        .into(),
+                    );
                 }
 
                 if let Some(condition) = branch.condition() {
                     check_subsumption(
                         &check_expression(condition, &variables)?,
-                        &types::Boolean::new(branch.position().clone()).into(),
+                        &types::Boolean::new(position.clone()).into(),
                     )?;
                 }
             }
@@ -2805,133 +2767,6 @@ mod tests {
                     types::None::new(Position::fake()).into(),
                 )),
             );
-        }
-
-        mod iteration {
-            use super::*;
-
-            #[test]
-            fn check_map_iteration_comprehension_with_keys() {
-                let map_type = types::Map::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-
-                check_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::List::new(map_type.key().clone(), Position::fake()),
-                            ListComprehension::new(
-                                map_type.key().clone(),
-                                Variable::new("k", Position::fake()),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        Some(map_type.clone().into()),
-                                        Map::new(
-                                            map_type.key().clone(),
-                                            map_type.value().clone(),
-                                            vec![],
-                                            Position::fake(),
-                                        ),
-                                    )],
-                                    None,
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ]))
-                .unwrap();
-            }
-
-            #[test]
-            fn check_map_iteration_comprehension_with_values() {
-                let map_type = types::Map::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-
-                check_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::List::new(map_type.value().clone(), Position::fake()),
-                            ListComprehension::new(
-                                map_type.value().clone(),
-                                Variable::new("v", Position::fake()),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        Some(map_type.clone().into()),
-                                        Map::new(
-                                            map_type.key().clone(),
-                                            map_type.value().clone(),
-                                            vec![],
-                                            Position::fake(),
-                                        ),
-                                    )],
-                                    None,
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ]))
-                .unwrap();
-            }
-
-            #[test]
-            fn check_element() {
-                let map_type = types::Map::new(
-                    types::Number::new(Position::fake()),
-                    types::None::new(Position::fake()),
-                    Position::fake(),
-                );
-
-                check_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![],
-                            types::List::new(map_type.key().clone(), Position::fake()),
-                            ListComprehension::new(
-                                map_type.key().clone(),
-                                Variable::new("k", Position::fake()),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        Some(map_type.clone().into()),
-                                        Map::new(
-                                            map_type.key().clone(),
-                                            map_type.value().clone(),
-                                            vec![],
-                                            Position::fake(),
-                                        ),
-                                    )],
-                                    None,
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ]))
-                .unwrap();
-            }
         }
     }
 
