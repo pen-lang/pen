@@ -257,25 +257,25 @@ if value = xs[key] {
 
 #### List comprehension
 
-It iterates over elements in a given list and creates a new list with elements of a given expression.
+It iterates a list and creates a new list with elements computed by a given expression.
 
 ```pen
 [number f(x()) for x in xs]
 ```
 
-You can iterate key-value pairs in a map.
-
-```pen
-[number f(key, value) for key, value in map]
-```
-
-You can use multiple `for` clauses to iterate multiple lists and maps.
+Multiple `for` clauses iterate multiple lists considering all combinations of their elements.
 
 ```pen
 [number f(y())
   for y in x()
   for x in xs
 ]
+```
+
+Multiple lists in a `for` clause iterate multiple lists at once.
+
+```pen
+[number f(y()) for x, y in xs, ys]
 ```
 
 You can use `if` clauses to filter elements.
