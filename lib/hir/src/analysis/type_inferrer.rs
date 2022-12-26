@@ -563,6 +563,23 @@ fn infer_built_in_call(
                     types::Error::new(position.clone()),
                     position.clone(),
                 ),
+                BuiltInFunctionName::Keys => {
+                    let [argument_type] = &argument_types[..] else {
+                        return Err(AnalysisError::ArgumentCount(position.clone()));
+                    };
+
+                    types::Function::new(
+                        vec![argument_type.clone()],
+                        types::List::new(
+                            type_canonicalizer::canonicalize_map(argument_type, context.types())?
+                                .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                                .key()
+                                .clone(),
+                            position.clone(),
+                        ),
+                        position.clone(),
+                    )
+                }
                 BuiltInFunctionName::Race => {
                     let argument_type = argument_types
                         .first()
@@ -611,6 +628,23 @@ fn infer_built_in_call(
                         .ok_or_else(|| AnalysisError::ArgumentCount(position.clone()))?;
 
                     types::Function::new(argument_types, result_type, position.clone())
+                }
+                BuiltInFunctionName::Values => {
+                    let [argument_type] = &argument_types[..] else {
+                        return Err(AnalysisError::ArgumentCount(position.clone()));
+                    };
+
+                    types::Function::new(
+                        vec![argument_type.clone()],
+                        types::List::new(
+                            type_canonicalizer::canonicalize_map(argument_type, context.types())?
+                                .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                                .value()
+                                .clone(),
+                            position.clone(),
+                        ),
+                        position.clone(),
+                    )
                 }
             }
             .into(),
@@ -1304,7 +1338,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![],
-                            list_type.clone(),
+                            list_type,
                             ListComprehension::new(
                                 element_type.clone(),
                                 Let::new(
@@ -1351,11 +1385,7 @@ mod tests {
                                                 )
                                                 .into()
                                             ),
-                                            List::new(
-                                                element_type.clone(),
-                                                vec![],
-                                                Position::fake()
-                                            ),
+                                            List::new(element_type, vec![], Position::fake()),
                                         )
                                     ],
                                     None,
@@ -2418,6 +2448,60 @@ mod tests {
         }
 
         #[test]
+        fn infer_keys() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+            let list_type = types::List::new(map_type.key().clone(), Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("xs", map_type.clone())],
+                            list_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
+                                vec![Variable::new("xs", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("xs", map_type.clone())],
+                            list_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.into()],
+                                        list_type,
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
+                                vec![Variable::new("xs", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
         fn infer_race() {
             let list_type = types::List::new(
                 types::List::new(types::None::new(Position::fake()), Position::fake()),
@@ -2691,6 +2775,60 @@ mod tests {
                                     Position::fake(),
                                 )
                                 .into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )])
+                )
+            );
+        }
+
+        #[test]
+        fn infer_values() {
+            let map_type = types::Map::new(
+                types::ByteString::new(Position::fake()),
+                types::Number::new(Position::fake()),
+                Position::fake(),
+            );
+            let list_type = types::List::new(map_type.value().clone(), Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("xs", map_type.clone())],
+                            list_type.clone(),
+                            Call::new(
+                                None,
+                                BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
+                                vec![Variable::new("xs", Position::fake()).into()],
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ],)),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("xs", map_type.clone())],
+                            list_type.clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.into()],
+                                        list_type,
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
+                                vec![Variable::new("xs", Position::fake()).into()],
                                 Position::fake()
                             ),
                             Position::fake(),

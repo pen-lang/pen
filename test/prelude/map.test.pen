@@ -8,18 +8,17 @@ type Bar {}
 type Union = Foo | Bar
 
 SetNoKey = \() none | error {
-  Assert'Equal(Number'Sum([number k for k, _ in {number: none}]), 0)
+  Assert'Equal(Number'Sum(keys({number: none})), 0)
 }
 
 SetKey = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           1: none,
-        }
-      ],
+        },
+      ),
     ),
     1,
   )
@@ -28,13 +27,12 @@ SetKey = \() none | error {
 Set2Keys = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           1: none,
           2: none,
-        }
-      ],
+        },
+      ),
     ),
     3,
   )
@@ -43,14 +41,13 @@ Set2Keys = \() none | error {
 Set3Keys = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           1: none,
           2: none,
           3: none,
-        }
-      ],
+        },
+      ),
     ),
     6,
   )
@@ -59,15 +56,14 @@ Set3Keys = \() none | error {
 Set4Keys = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           1: none,
           2: none,
           3: none,
           4: none,
-        }
-      ],
+        },
+      ),
     ),
     10,
   )
@@ -89,14 +85,14 @@ SetVeryManyKeys = \() none | error {
 
 IterateKey = \() none | error {
   Assert'Equal(
-    Number'Sum([number k for k, _ in {number: none 1: none}]),
+    Number'Sum(keys({number: none 1: none})),
     1,
   )
 }
 
 Iterate2Keys = \() none | error {
   Assert'Equal(
-    Number'Sum([number k for k, _ in {number: none 1: none, 2: none}]),
+    Number'Sum(keys({number: none 1: none, 2: none})),
     3,
   )
 }
@@ -105,7 +101,7 @@ IterateManyKeys = \() none | error {
   ks = Number'Sequence(42)
 
   Assert'Equal(
-    Number'Sum([number k for k, _ in numberSet(ks)]),
+    Number'Sum(keys(numberSet(ks))),
     Number'Sum(ks),
   )
 }
@@ -114,7 +110,7 @@ IterateVeryManyKeys = \() none | error {
   ks = Number'Sequence(1024)
 
   Assert'Equal(
-    Number'Sum([number k for k, _ in numberSet(ks)]),
+    Number'Sum(keys(numberSet(ks))),
     Number'Sum(ks),
   )
 }
@@ -122,14 +118,13 @@ IterateVeryManyKeys = \() none | error {
 Set3KeysWith0 = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           0: none,
           1: none,
           2: none,
-        }
-      ],
+        },
+      ),
     ),
     3,
   )
@@ -143,24 +138,14 @@ SetUnionKeys = \() none | error {
 
 DeleteKey = \() none | error {
   Assert'Equal(
-    Number'Sum(
-      [number
-        k
-        for k, _ in delete({number: none 1: none}, 1)
-      ],
-    ),
+    Number'Sum(keys(delete({number: none 1: none}, 1))),
     0,
   )
 }
 
 DeleteUnionKey = \() none | error {
   Assert'Equal(
-    size(
-      [number | none
-        k
-        for k, _ in delete({number | none: none 1: none}, 1)
-      ],
-    ),
+    size(keys(delete({number | none: none 1: none}, 1))),
     0,
   )
 }
@@ -168,13 +153,12 @@ DeleteUnionKey = \() none | error {
 Merge2Maps = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           ...{number: none 1: none},
           ...{number: none 2: none},
-        }
-      ],
+        },
+      ),
     ),
     3,
   )
@@ -183,14 +167,13 @@ Merge2Maps = \() none | error {
 Merge3Maps = \() none | error {
   Assert'Equal(
     Number'Sum(
-      [number
-        k
-        for k, _ in {number: none
+      keys(
+        {number: none
           ...{number: none 1: none},
           ...{number: none 2: none},
           ...{number: none 3: none},
-        }
-      ],
+        },
+      ),
     ),
     6,
   )

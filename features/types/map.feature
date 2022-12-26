@@ -96,7 +96,7 @@ Feature: Map
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs {string: number}) [string] {
-      [string k for k, _ in xs]
+      keys(xs)
     }
     """
     When I successfully run `pen build`
@@ -106,7 +106,7 @@ Feature: Map
     Given a file named "Foo.pen" with:
     """pen
     f = \(xs {string: number}) [number] {
-      [number v for _, v in xs]
+      values(xs)
     }
     """
     When I successfully run `pen build`

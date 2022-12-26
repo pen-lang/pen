@@ -27,6 +27,22 @@ It deletes a key from a map.
 \(map {k: v}, key k) {k: v}
 ```
 
+### `keys`
+
+It gets keys in a map.
+
+```pen
+\(map {k: v}) [k]
+```
+
+### `values`
+
+It gets values in a map.
+
+```pen
+\(map {k: v}) [v]
+```
+
 ### `error`
 
 It creates an error with its source information.

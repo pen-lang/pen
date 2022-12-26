@@ -11,11 +11,13 @@ pub fn transform(module: &Module) -> Module {
             "error" => BuiltInFunction::new(BuiltInFunctionName::Error, position.clone()).into(),
             "false" => Boolean::new(false, position.clone()).into(),
             "go" => BuiltInFunction::new(BuiltInFunctionName::Spawn, position.clone()).into(),
+            "keys" => BuiltInFunction::new(BuiltInFunctionName::Keys, position.clone()).into(),
             "none" => None::new(position.clone()).into(),
             "race" => BuiltInFunction::new(BuiltInFunctionName::Race, position.clone()).into(),
             "size" => BuiltInFunction::new(BuiltInFunctionName::Size, position.clone()).into(),
             "source" => BuiltInFunction::new(BuiltInFunctionName::Source, position.clone()).into(),
             "true" => Boolean::new(true, position.clone()).into(),
+            "values" => BuiltInFunction::new(BuiltInFunctionName::Values, position.clone()).into(),
             "_reflect_debug" => {
                 BuiltInFunction::new(BuiltInFunctionName::ReflectDebug, position.clone()).into()
             }

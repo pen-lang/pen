@@ -1,0 +1,455 @@
+---
+source: lib/hir-mir/src/built_in_call.rs
+expression: "compile_call(&Call::new(Some(types::Function::new(vec![types :: Map ::\n                            new(types :: ByteString :: new(Position :: fake()), types ::\n                            Number :: new(Position :: fake()), Position ::\n                            fake()).into()],\n                        types::List::new(types::ByteString::new(Position::fake()),\n                            Position::fake()), Position::fake()).into()),\n            BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),\n            vec![Map ::\n                new(types :: ByteString :: new(Position :: fake()), types ::\n                Number :: new(Position :: fake()), vec! [], Position ::\n                fake()).into()], Position::fake()))"
+---
+Ok(
+    Call(
+        Call(
+            CallInner {
+                type_: Function(
+                    FunctionInner {
+                        arguments: [
+                            Function(
+                                Function(
+                                    FunctionInner {
+                                        arguments: [],
+                                        result: Record(
+                                            Record {
+                                                name: "anyList",
+                                            },
+                                        ),
+                                    },
+                                ),
+                            ),
+                        ],
+                        result: Record(
+                            Record {
+                                name: "anyList",
+                            },
+                        ),
+                    },
+                ),
+                function: Variable(
+                    Variable {
+                        name: "lazy",
+                    },
+                ),
+                arguments: [
+                    LetRecursive(
+                        LetRecursive(
+                            LetRecursiveInner {
+                                definition: FunctionDefinition {
+                                    name: "$loop",
+                                    environment: [],
+                                    arguments: [],
+                                    result_type: Record(
+                                        Record {
+                                            name: "anyList",
+                                        },
+                                    ),
+                                    body: LetRecursive(
+                                        LetRecursive(
+                                            LetRecursiveInner {
+                                                definition: FunctionDefinition {
+                                                    name: "$loop",
+                                                    environment: [],
+                                                    arguments: [
+                                                        Argument {
+                                                            name: "$iterator",
+                                                            type_: Variant,
+                                                        },
+                                                    ],
+                                                    result_type: Record(
+                                                        Record {
+                                                            name: "anyList",
+                                                        },
+                                                    ),
+                                                    body: Case(
+                                                        Case(
+                                                            CaseInner {
+                                                                argument: Variable(
+                                                                    Variable {
+                                                                        name: "$iterator",
+                                                                    },
+                                                                ),
+                                                                alternatives: [
+                                                                    Alternative {
+                                                                        types: [
+                                                                            None,
+                                                                        ],
+                                                                        name: "$iterator",
+                                                                        expression: Call(
+                                                                            Call(
+                                                                                CallInner {
+                                                                                    type_: Function(
+                                                                                        FunctionInner {
+                                                                                            arguments: [
+                                                                                                Function(
+                                                                                                    Function(
+                                                                                                        FunctionInner {
+                                                                                                            arguments: [],
+                                                                                                            result: Variant,
+                                                                                                        },
+                                                                                                    ),
+                                                                                                ),
+                                                                                                None,
+                                                                                            ],
+                                                                                            result: None,
+                                                                                        },
+                                                                                    ),
+                                                                                    function: Variable(
+                                                                                        Variable {
+                                                                                            name: "prependToLists",
+                                                                                        },
+                                                                                    ),
+                                                                                    arguments: [
+                                                                                        LetRecursive(
+                                                                                            LetRecursive(
+                                                                                                LetRecursiveInner {
+                                                                                                    definition: FunctionDefinition {
+                                                                                                        name: "$thunk",
+                                                                                                        environment: [],
+                                                                                                        arguments: [],
+                                                                                                        result_type: Variant,
+                                                                                                        body: Variant(
+                                                                                                            Variant(
+                                                                                                                VariantInner {
+                                                                                                                    type_: ByteString,
+                                                                                                                    payload: Case(
+                                                                                                                        Case(
+                                                                                                                            CaseInner {
+                                                                                                                                argument: Call(
+                                                                                                                                    Call(
+                                                                                                                                        CallInner {
+                                                                                                                                            type_: Function(
+                                                                                                                                                FunctionInner {
+                                                                                                                                                    arguments: [
+                                                                                                                                                        None,
+                                                                                                                                                    ],
+                                                                                                                                                    result: Variant,
+                                                                                                                                                },
+                                                                                                                                            ),
+                                                                                                                                            function: Variable(
+                                                                                                                                                Variable {
+                                                                                                                                                    name: "mapIteratorKey",
+                                                                                                                                                },
+                                                                                                                                            ),
+                                                                                                                                            arguments: [
+                                                                                                                                                Variable(
+                                                                                                                                                    Variable {
+                                                                                                                                                        name: "$iterator",
+                                                                                                                                                    },
+                                                                                                                                                ),
+                                                                                                                                            ],
+                                                                                                                                        },
+                                                                                                                                    ),
+                                                                                                                                ),
+                                                                                                                                alternatives: [
+                                                                                                                                    Alternative {
+                                                                                                                                        types: [
+                                                                                                                                            ByteString,
+                                                                                                                                        ],
+                                                                                                                                        name: "$value",
+                                                                                                                                        expression: Variable(
+                                                                                                                                            Variable {
+                                                                                                                                                name: "$value",
+                                                                                                                                            },
+                                                                                                                                        ),
+                                                                                                                                    },
+                                                                                                                                ],
+                                                                                                                                default_alternative: None,
+                                                                                                                            },
+                                                                                                                        ),
+                                                                                                                    ),
+                                                                                                                },
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                        type_: Function(
+                                                                                                            FunctionInner {
+                                                                                                                arguments: [],
+                                                                                                                result: Variant,
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        thunk: true,
+                                                                                                    },
+                                                                                                    expression: Variable(
+                                                                                                        Variable {
+                                                                                                            name: "$thunk",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                },
+                                                                                            ),
+                                                                                        ),
+                                                                                        Call(
+                                                                                            Call(
+                                                                                                CallInner {
+                                                                                                    type_: Function(
+                                                                                                        FunctionInner {
+                                                                                                            arguments: [
+                                                                                                                Function(
+                                                                                                                    Function(
+                                                                                                                        FunctionInner {
+                                                                                                                            arguments: [],
+                                                                                                                            result: None,
+                                                                                                                        },
+                                                                                                                    ),
+                                                                                                                ),
+                                                                                                            ],
+                                                                                                            result: None,
+                                                                                                        },
+                                                                                                    ),
+                                                                                                    function: Variable(
+                                                                                                        Variable {
+                                                                                                            name: "lazy",
+                                                                                                        },
+                                                                                                    ),
+                                                                                                    arguments: [
+                                                                                                        LetRecursive(
+                                                                                                            LetRecursive(
+                                                                                                                LetRecursiveInner {
+                                                                                                                    definition: FunctionDefinition {
+                                                                                                                        name: "$thunk",
+                                                                                                                        environment: [],
+                                                                                                                        arguments: [],
+                                                                                                                        result_type: None,
+                                                                                                                        body: Call(
+                                                                                                                            Call(
+                                                                                                                                CallInner {
+                                                                                                                                    type_: Function(
+                                                                                                                                        FunctionInner {
+                                                                                                                                            arguments: [
+                                                                                                                                                None,
+                                                                                                                                            ],
+                                                                                                                                            result: Record(
+                                                                                                                                                Record {
+                                                                                                                                                    name: "anyList",
+                                                                                                                                                },
+                                                                                                                                            ),
+                                                                                                                                        },
+                                                                                                                                    ),
+                                                                                                                                    function: Variable(
+                                                                                                                                        Variable {
+                                                                                                                                            name: "$loop",
+                                                                                                                                        },
+                                                                                                                                    ),
+                                                                                                                                    arguments: [
+                                                                                                                                        Call(
+                                                                                                                                            Call(
+                                                                                                                                                CallInner {
+                                                                                                                                                    type_: Function(
+                                                                                                                                                        FunctionInner {
+                                                                                                                                                            arguments: [
+                                                                                                                                                                None,
+                                                                                                                                                            ],
+                                                                                                                                                            result: None,
+                                                                                                                                                        },
+                                                                                                                                                    ),
+                                                                                                                                                    function: Variable(
+                                                                                                                                                        Variable {
+                                                                                                                                                            name: "mapIteratorRest",
+                                                                                                                                                        },
+                                                                                                                                                    ),
+                                                                                                                                                    arguments: [
+                                                                                                                                                        Variable(
+                                                                                                                                                            Variable {
+                                                                                                                                                                name: "$iterator",
+                                                                                                                                                            },
+                                                                                                                                                        ),
+                                                                                                                                                    ],
+                                                                                                                                                },
+                                                                                                                                            ),
+                                                                                                                                        ),
+                                                                                                                                    ],
+                                                                                                                                },
+                                                                                                                            ),
+                                                                                                                        ),
+                                                                                                                        type_: Function(
+                                                                                                                            FunctionInner {
+                                                                                                                                arguments: [],
+                                                                                                                                result: None,
+                                                                                                                            },
+                                                                                                                        ),
+                                                                                                                        thunk: true,
+                                                                                                                    },
+                                                                                                                    expression: Variable(
+                                                                                                                        Variable {
+                                                                                                                            name: "$thunk",
+                                                                                                                        },
+                                                                                                                    ),
+                                                                                                                },
+                                                                                                            ),
+                                                                                                        ),
+                                                                                                    ],
+                                                                                                },
+                                                                                            ),
+                                                                                        ),
+                                                                                    ],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                    Alternative {
+                                                                        types: [
+                                                                            None,
+                                                                        ],
+                                                                        name: "$iterator",
+                                                                        expression: Call(
+                                                                            Call(
+                                                                                CallInner {
+                                                                                    type_: Function(
+                                                                                        FunctionInner {
+                                                                                            arguments: [],
+                                                                                            result: None,
+                                                                                        },
+                                                                                    ),
+                                                                                    function: Variable(
+                                                                                        Variable {
+                                                                                            name: "emptyList",
+                                                                                        },
+                                                                                    ),
+                                                                                    arguments: [],
+                                                                                },
+                                                                            ),
+                                                                        ),
+                                                                    },
+                                                                ],
+                                                                default_alternative: None,
+                                                            },
+                                                        ),
+                                                    ),
+                                                    type_: Function(
+                                                        FunctionInner {
+                                                            arguments: [
+                                                                Variant,
+                                                            ],
+                                                            result: Record(
+                                                                Record {
+                                                                    name: "anyList",
+                                                                },
+                                                            ),
+                                                        },
+                                                    ),
+                                                    thunk: false,
+                                                },
+                                                expression: Call(
+                                                    Call(
+                                                        CallInner {
+                                                            type_: Function(
+                                                                FunctionInner {
+                                                                    arguments: [
+                                                                        Variant,
+                                                                    ],
+                                                                    result: Record(
+                                                                        Record {
+                                                                            name: "anyList",
+                                                                        },
+                                                                    ),
+                                                                },
+                                                            ),
+                                                            function: Variable(
+                                                                Variable {
+                                                                    name: "$loop",
+                                                                },
+                                                            ),
+                                                            arguments: [
+                                                                Call(
+                                                                    Call(
+                                                                        CallInner {
+                                                                            type_: Function(
+                                                                                FunctionInner {
+                                                                                    arguments: [
+                                                                                        Record(
+                                                                                            Record {
+                                                                                                name: "genericMap",
+                                                                                            },
+                                                                                        ),
+                                                                                    ],
+                                                                                    result: Variant,
+                                                                                },
+                                                                            ),
+                                                                            function: Variable(
+                                                                                Variable {
+                                                                                    name: "iterateMap",
+                                                                                },
+                                                                            ),
+                                                                            arguments: [
+                                                                                Let(
+                                                                                    Let(
+                                                                                        LetInner {
+                                                                                            name: "$ctx",
+                                                                                            type_: None,
+                                                                                            bound_expression: Call(
+                                                                                                Call(
+                                                                                                    CallInner {
+                                                                                                        type_: Function(
+                                                                                                            FunctionInner {
+                                                                                                                arguments: [],
+                                                                                                                result: None,
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        function: Variable(
+                                                                                                            Variable {
+                                                                                                                name: "hir:map:context:9d7a635aafe1bc04",
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        arguments: [],
+                                                                                                    },
+                                                                                                ),
+                                                                                            ),
+                                                                                            expression: Call(
+                                                                                                Call(
+                                                                                                    CallInner {
+                                                                                                        type_: Function(
+                                                                                                            FunctionInner {
+                                                                                                                arguments: [],
+                                                                                                                result: None,
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        function: Variable(
+                                                                                                            Variable {
+                                                                                                                name: "emptyMap",
+                                                                                                            },
+                                                                                                        ),
+                                                                                                        arguments: [],
+                                                                                                    },
+                                                                                                ),
+                                                                                            ),
+                                                                                        },
+                                                                                    ),
+                                                                                ),
+                                                                            ],
+                                                                        },
+                                                                    ),
+                                                                ),
+                                                            ],
+                                                        },
+                                                    ),
+                                                ),
+                                            },
+                                        ),
+                                    ),
+                                    type_: Function(
+                                        FunctionInner {
+                                            arguments: [],
+                                            result: Record(
+                                                Record {
+                                                    name: "anyList",
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    thunk: false,
+                                },
+                                expression: Variable(
+                                    Variable {
+                                        name: "$loop",
+                                    },
+                                ),
+                            },
+                        ),
+                    ),
+                ],
+            },
+        ),
+    ),
+)

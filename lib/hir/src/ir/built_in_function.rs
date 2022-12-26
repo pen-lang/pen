@@ -5,12 +5,14 @@ pub enum BuiltInFunctionName {
     Debug,
     Delete,
     Error,
+    Keys,
     Race,
     ReflectDebug,
     ReflectEqual,
     Size,
     Source,
     Spawn,
+    Values,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
