@@ -257,7 +257,7 @@ if value = xs[key] {
 
 #### List comprehension
 
-It iterates a list and creates a new list with elements computed by a given expression.
+It iterates a list and creates another list with elements computed by a given expression.
 
 ```pen
 [number f(x()) for x in xs]
