@@ -3434,7 +3434,7 @@ mod tests {
         }
     }
 
-    mod built_in_call {
+    mod built_in {
         use super::*;
 
         mod delete {
@@ -3562,6 +3562,46 @@ mod tests {
                 ])),
                     Err(AnalysisError::TypesNotMatched(_, _))
                 ));
+            }
+        }
+
+        mod keys {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type = types::List::new(map_type.key().clone(), Position::fake());
+
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", map_type.clone())],
+                            list_type.element().clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.clone().into()],
+                                        list_type.element().clone(),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],
+                ))
+                .unwrap();
             }
         }
 
@@ -3790,6 +3830,46 @@ mod tests {
                                     .into(),
                                 ),
                                 BuiltInFunction::new(BuiltInFunctionName::Race, Position::fake()),
+                                vec![Variable::new("x", Position::fake()).into()],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],
+                ))
+                .unwrap();
+            }
+        }
+
+        mod values {
+            use super::*;
+
+            #[test]
+            fn check() {
+                let map_type = types::Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    Position::fake(),
+                );
+                let list_type = types::List::new(map_type.value().clone(), Position::fake());
+
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![Argument::new("x", map_type.clone())],
+                            list_type.element().clone(),
+                            Call::new(
+                                Some(
+                                    types::Function::new(
+                                        vec![map_type.clone().into()],
+                                        list_type.element().clone(),
+                                        Position::fake(),
+                                    )
+                                    .into(),
+                                ),
+                                BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
                                 vec![Variable::new("x", Position::fake()).into()],
                                 Position::fake(),
                             ),
