@@ -569,7 +569,7 @@ fn infer_built_in_call(
                     };
 
                     types::Function::new(
-                        vec![argument_type.clone().into()],
+                        vec![argument_type.clone()],
                         types::List::new(
                             type_canonicalizer::canonicalize_map(argument_type, context.types())?
                                 .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
@@ -637,7 +637,7 @@ fn infer_built_in_call(
                     types::Function::new(
                         vec![argument_type.clone()],
                         types::List::new(
-                            type_canonicalizer::canonicalize_map(&argument_type, context.types())?
+                            type_canonicalizer::canonicalize_map(argument_type, context.types())?
                                 .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
                                 .value()
                                 .clone(),
@@ -1338,7 +1338,7 @@ mod tests {
                         "f",
                         Lambda::new(
                             vec![],
-                            list_type.clone(),
+                            list_type,
                             ListComprehension::new(
                                 element_type.clone(),
                                 Let::new(
@@ -1386,7 +1386,7 @@ mod tests {
                                                 .into()
                                             ),
                                             List::new(
-                                                element_type.clone(),
+                                                element_type,
                                                 vec![],
                                                 Position::fake()
                                             ),
@@ -2487,7 +2487,7 @@ mod tests {
                             Call::new(
                                 Some(
                                     types::Function::new(
-                                        vec![map_type.clone().into()],
+                                        vec![map_type.into()],
                                         list_type,
                                         Position::fake()
                                     )
@@ -2825,7 +2825,7 @@ mod tests {
                             Call::new(
                                 Some(
                                     types::Function::new(
-                                        vec![map_type.clone().into()],
+                                        vec![map_type.into()],
                                         list_type,
                                         Position::fake()
                                     )

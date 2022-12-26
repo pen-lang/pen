@@ -3586,7 +3586,7 @@ mod tests {
                             Call::new(
                                 Some(
                                     types::Function::new(
-                                        vec![map_type.clone().into()],
+                                        vec![map_type.into()],
                                         list_type.element().clone(),
                                         Position::fake(),
                                     )
@@ -3863,7 +3863,7 @@ mod tests {
                             Call::new(
                                 Some(
                                     types::Function::new(
-                                        vec![map_type.clone().into()],
+                                        vec![map_type.into()],
                                         list_type.element().clone(),
                                         Position::fake(),
                                     )

@@ -354,7 +354,7 @@ fn compile_map_iteration_function_definition(
                             ListElement::Single(downcast::compile(
                                 context,
                                 &any_type,
-                                &element_type,
+                                element_type,
                                 &Call::new(
                                     Some(
                                         types::Function::new(
@@ -387,7 +387,7 @@ fn compile_map_iteration_function_definition(
                                     vec![Call::new(
                                         Some(
                                             types::Function::new(
-                                                vec![iterator_type.clone()],
+                                                vec![iterator_type],
                                                 iterator_or_none_type,
                                                 position.clone(),
                                             )
