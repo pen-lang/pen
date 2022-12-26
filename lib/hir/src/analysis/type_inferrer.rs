@@ -1242,6 +1242,134 @@ mod tests {
                 )
             );
         }
+
+        #[test]
+        fn infer_parallel() {
+            let element_type = types::Number::new(Position::fake());
+            let list_type = types::List::new(element_type.clone(), Position::fake());
+
+            assert_eq!(
+                infer_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
+                                    None,
+                                    Call::new(
+                                        None,
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Variable::new("y", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![ListComprehensionBranch::new(
+                                    vec!["_".into(), "x".into()],
+                                    vec![
+                                        ListComprehensionIteratee::new(
+                                            None,
+                                            List::new(
+                                                types::None::new(Position::fake()),
+                                                vec![],
+                                                Position::fake()
+                                            ),
+                                        ),
+                                        ListComprehensionIteratee::new(
+                                            None,
+                                            List::new(
+                                                element_type.clone(),
+                                                vec![],
+                                                Position::fake()
+                                            ),
+                                        )
+                                    ],
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )
+                ])),
+                Ok(
+                    Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                        "f",
+                        Lambda::new(
+                            vec![],
+                            list_type.clone(),
+                            ListComprehension::new(
+                                element_type.clone(),
+                                Let::new(
+                                    Some("y".into()),
+                                    Some(element_type.clone().into()),
+                                    Call::new(
+                                        Some(
+                                            types::Function::new(
+                                                vec![],
+                                                element_type.clone(),
+                                                Position::fake()
+                                            )
+                                            .into()
+                                        ),
+                                        Variable::new("x", Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                    Variable::new("y", Position::fake()),
+                                    Position::fake(),
+                                ),
+                                vec![ListComprehensionBranch::new(
+                                    vec!["_".into(), "x".into()],
+                                    vec![
+                                        ListComprehensionIteratee::new(
+                                            Some(
+                                                types::List::new(
+                                                    types::None::new(Position::fake()),
+                                                    Position::fake()
+                                                )
+                                                .into()
+                                            ),
+                                            List::new(
+                                                types::None::new(Position::fake()),
+                                                vec![],
+                                                Position::fake()
+                                            ),
+                                        ),
+                                        ListComprehensionIteratee::new(
+                                            Some(
+                                                types::List::new(
+                                                    element_type.clone(),
+                                                    Position::fake()
+                                                )
+                                                .into()
+                                            ),
+                                            List::new(
+                                                element_type.clone(),
+                                                vec![],
+                                                Position::fake()
+                                            ),
+                                        )
+                                    ],
+                                    None,
+                                    Position::fake(),
+                                )],
+                                Position::fake(),
+                            ),
+                            Position::fake(),
+                        ),
+                        false,
+                    )],)
+                )
+            );
+        }
     }
 
     #[test]
