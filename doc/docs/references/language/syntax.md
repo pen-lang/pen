@@ -275,7 +275,7 @@ Multiple `for` clauses iterate multiple lists considering all combinations of th
 Multiple lists in a `for` clause iterate them at once.
 
 ```pen
-[number f(y()) for x, y in xs, ys]
+[number f(x(), y()) for x, y in xs, ys]
 ```
 
 You can use `if` clauses to filter elements.
