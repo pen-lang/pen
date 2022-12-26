@@ -1385,11 +1385,7 @@ mod tests {
                                                 )
                                                 .into()
                                             ),
-                                            List::new(
-                                                element_type,
-                                                vec![],
-                                                Position::fake()
-                                            ),
+                                            List::new(element_type, vec![], Position::fake()),
                                         )
                                     ],
                                     None,
