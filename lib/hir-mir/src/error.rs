@@ -16,8 +16,6 @@ pub enum CompileError {
     InvalidVariantType(Type),
     MainFunctionNotFound(Position),
     MirTypeCheck(mir::analysis::type_check::TypeCheckError),
-    MixedIterateesInListComprehension(Position),
-    MultipleMapsInListComprehension(Position),
     NewContextFunctionNotFound(Position),
 }
 
@@ -48,20 +46,6 @@ impl Display for CompileError {
             }
             Self::MirTypeCheck(error) => {
                 write!(formatter, "failed to check types in MIR: {}", error)
-            }
-            Self::MixedIterateesInListComprehension(position) => {
-                write!(
-                    formatter,
-                    "mixed iteratee types in list comprehension\n{}",
-                    position
-                )
-            }
-            Self::MultipleMapsInListComprehension(position) => {
-                write!(
-                    formatter,
-                    "multiple maps in list comprehension\n{}",
-                    position
-                )
             }
             Self::NewContextFunctionNotFound(position) => {
                 write!(formatter, "new context function not found\n{}", position)

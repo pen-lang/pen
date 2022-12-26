@@ -9,85 +9,38 @@ pub fn compile(
     context: &Context,
     comprehension: &ListComprehension,
 ) -> Result<mir::ir::Expression, CompileError> {
-    let [branch, ..] = comprehension.branches() else { unreachable!() };
-    let iteratee_types = branch
-        .iteratees()
-        .iter()
-        .map(|iteratee| {
-            type_canonicalizer::canonicalize(
-                iteratee.type_().ok_or_else(|| {
-                    AnalysisError::TypeNotInferred(comprehension.position().clone())
-                })?,
-                context.types(),
+    let branch = &comprehension.branches()[0];
+
+    compile_lists(
+        context,
+        comprehension.type_(),
+        if comprehension.branches().len() == 1 {
+            ListElement::Single(comprehension.element().clone())
+        } else {
+            ListElement::Multiple(
+                ListComprehension::new(
+                    comprehension.type_().clone(),
+                    comprehension.element().clone(),
+                    comprehension.branches()[1..].to_vec(),
+                    comprehension.position().clone(),
+                )
+                .into(),
             )
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-    // TODO Define a compile_element function.
-    let element = if comprehension.branches().len() == 1 {
-        ListElement::Single(comprehension.element().clone())
-    } else {
-        ListElement::Multiple(
-            ListComprehension::new(
-                comprehension.type_().clone(),
-                comprehension.element().clone(),
-                comprehension.branches()[1..].to_vec(),
-                comprehension.position().clone(),
-            )
-            .into(),
-        )
-    };
-
-    if iteratee_types
-        .iter()
-        .all(|type_| matches!(type_, Type::List(_)))
-    {
-        let list_types = iteratee_types
-            .iter()
-            .filter_map(|type_| type_.as_list())
-            .collect::<Vec<_>>();
-
-        compile_lists(context, comprehension, branch, &list_types, element)
-    } else if iteratee_types
-        .iter()
-        .all(|type_| matches!(type_, Type::Map(_)))
-    {
-        Err(CompileError::MultipleMapsInListComprehension(
-            comprehension.position().clone(),
-        ))
-    } else if iteratee_types
-        .iter()
-        .all(|type_| matches!(type_, Type::List(_) | Type::Map(_)))
-    {
-        Err(CompileError::MixedIterateesInListComprehension(
-            comprehension.position().clone(),
-        ))
-    } else {
-        let index = iteratee_types
-            .iter()
-            .position(|type_| !matches!(type_, Type::List(_) | Type::Map(_)))
-            .unwrap();
-
-        Err(AnalysisError::CollectionExpected(
-            iteratee_types[index]
-                .clone()
-                .set_position(branch.iteratees()[index].position().clone()),
-        )
-        .into())
-    }
+        },
+        branch,
+    )
 }
 
 fn compile_lists(
     context: &Context,
-    comprehension: &ListComprehension,
-    branch: &ListComprehensionBranch,
-    iteratee_types: &[&types::List],
+    element_type: &Type,
     element: ListElement,
+    branch: &ListComprehensionBranch,
 ) -> Result<mir::ir::Expression, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
 
     let list_type = type_::compile_list(context)?;
-    let definition =
-        compile_function_definition(context, comprehension, branch, iteratee_types, element)?;
+    let definition = compile_function_definition(context, element_type, element, branch)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -129,23 +82,33 @@ fn compile_lists(
 
 fn compile_function_definition(
     context: &Context,
-    comprehension: &ListComprehension,
-    branch: &ListComprehensionBranch,
-    iteratee_types: &[&types::List],
+    element_type: &Type,
     element: ListElement,
+    branch: &ListComprehensionBranch,
 ) -> Result<mir::ir::FunctionDefinition, CompileError> {
     const CLOSURE_NAME: &str = "$loop";
     const LIST_NAME: &str = "$list";
 
-    let position = comprehension.position();
+    let position = branch.position();
     let list_type = type_::compile_list(context)?;
     let iteratee_names = (0..branch.iteratees().len())
         .map(|index| format!("{}_{}", LIST_NAME, index))
         .collect::<Vec<_>>();
-    let arguments = iteratee_names
+    let iteratee_types = branch
+        .iteratees()
         .iter()
-        .map(|name| mir::ir::Argument::new(name, list_type.clone()))
-        .collect();
+        .map(|iteratee| {
+            type_canonicalizer::canonicalize_list(
+                iteratee
+                    .type_()
+                    .ok_or_else(|| AnalysisError::TypeNotInferred(iteratee.position().clone()))?,
+                context.types(),
+            )
+        })
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
 
     let mut body = {
         let rest = Call::new(
@@ -153,9 +116,9 @@ fn compile_function_definition(
                 types::Function::new(
                     iteratee_types
                         .iter()
-                        .map(|&type_| type_.clone().into())
+                        .map(|type_| type_.clone().into())
                         .collect(),
-                    types::List::new(comprehension.type_().clone(), position.clone()),
+                    types::List::new(element_type.clone(), position.clone()),
                     position.clone(),
                 )
                 .into(),
@@ -168,7 +131,7 @@ fn compile_function_definition(
             position.clone(),
         );
         let list = List::new(
-            comprehension.type_().clone(),
+            element_type.clone(),
             vec![element, ListElement::Multiple(rest.clone().into())],
             position.clone(),
         );
@@ -188,17 +151,17 @@ fn compile_function_definition(
     for ((element_name, iteratee_name), type_) in branch
         .names()
         .iter()
-        .zip(iteratee_names)
+        .zip(&iteratee_names)
         .zip(iteratee_types)
         .rev()
     {
         body = IfList::new(
             Some(type_.element().clone()),
-            Variable::new(&iteratee_name, position.clone()),
+            Variable::new(iteratee_name, position.clone()),
             element_name,
             iteratee_name,
             body,
-            List::new(comprehension.type_().clone(), vec![], position.clone()),
+            List::new(element_type.clone(), vec![], position.clone()),
             position.clone(),
         )
         .into()
@@ -206,7 +169,10 @@ fn compile_function_definition(
 
     Ok(mir::ir::FunctionDefinition::new(
         CLOSURE_NAME,
-        arguments,
+        iteratee_names
+            .iter()
+            .map(|name| mir::ir::Argument::new(name, list_type.clone()))
+            .collect(),
         list_type,
         expression::compile(context, &body)?,
     ))
