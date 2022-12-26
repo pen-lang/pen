@@ -2300,8 +2300,8 @@ mod tests {
                 let element_type = types::None::new(Position::fake());
                 let list_type = types::List::new(element_type.clone(), Position::fake());
 
-                check_module(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                check_module(&Module::empty().set_function_definitions(
+                    vec![FunctionDefinition::fake(
                         "f",
                         Lambda::new(
                             vec![],
@@ -2335,8 +2335,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )]),
-                )
+                    )],
+                ))
                 .unwrap();
             }
 
@@ -2346,8 +2346,8 @@ mod tests {
                 let list_type = types::List::new(element_type.clone(), Position::fake());
 
                 assert_eq!(
-                    check_module(
-                        &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    check_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
                             "f",
                             Lambda::new(
                                 vec![],
@@ -2387,8 +2387,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )])
-                    ),
+                        )]
+                    )),
                     Err(AnalysisError::TypesNotMatched(
                         types::Number::new(Position::fake()).into(),
                         types::None::new(Position::fake()).into(),

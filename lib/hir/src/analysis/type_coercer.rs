@@ -1555,8 +1555,8 @@ mod tests {
                     List::new(types::None::new(Position::fake()), vec![], Position::fake());
 
                 assert_eq!(
-                    coerce_module(
-                        &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    coerce_module(&Module::empty().set_function_definitions(
+                        vec![FunctionDefinition::fake(
                             "f",
                             Lambda::new(
                                 vec![],
@@ -1590,8 +1590,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )],)
-                    ),
+                        )],
+                    )),
                     Ok(
                         Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
@@ -1650,8 +1650,8 @@ mod tests {
                     List::new(types::None::new(Position::fake()), vec![], Position::fake());
 
                 assert_eq!(
-                    coerce_module(
-                        &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                    coerce_module(&Module::empty().set_function_definitions(vec![
+                        FunctionDefinition::fake(
                             "f",
                             Lambda::new(
                                 vec![Argument::new("a", union_type.clone())],
@@ -1682,8 +1682,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )],)
-                    ),
+                        )
+                    ],)),
                     Ok(
                         Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",

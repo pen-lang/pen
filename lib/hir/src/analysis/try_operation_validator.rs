@@ -448,8 +448,8 @@ mod tests {
         #[test]
         fn validate_condition() {
             assert_eq!(
-                validate_module(
-                    &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
+                validate_module(&Module::empty().set_function_definitions(vec![
+                    FunctionDefinition::fake(
                         "x",
                         Lambda::new(
                             vec![],
@@ -482,8 +482,8 @@ mod tests {
                             Position::fake(),
                         ),
                         false,
-                    )])
-                ),
+                    )
+                ])),
                 Err(AnalysisError::TryOperationInList(Position::fake()))
             );
         }
