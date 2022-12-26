@@ -86,13 +86,8 @@ fn compile_lists(
     const CLOSURE_NAME: &str = "$loop";
 
     let list_type = type_::compile_list(context)?;
-    let definition = compile_list_iteration_function_definition(
-        context,
-        comprehension,
-        branch,
-        iteratee_types,
-        element,
-    )?;
+    let definition =
+        compile_function_definition(context, comprehension, branch, iteratee_types, element)?;
 
     Ok(mir::ir::Call::new(
         mir::types::Function::new(
@@ -132,7 +127,7 @@ fn compile_lists(
     .into())
 }
 
-fn compile_list_iteration_function_definition(
+fn compile_function_definition(
     context: &Context,
     comprehension: &ListComprehension,
     branch: &ListComprehensionBranch,
