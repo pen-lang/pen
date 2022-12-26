@@ -82,6 +82,7 @@ pub fn compile(
             .into()
         }
         BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
+        BuiltInFunctionName::Keys => todo!(),
         BuiltInFunctionName::Race => {
             const ELEMENT_NAME: &str = "$element";
 
@@ -216,6 +217,7 @@ pub fn compile(
             )
             .into()
         }
+        BuiltInFunctionName::Values => todo!(),
     })
 }
 

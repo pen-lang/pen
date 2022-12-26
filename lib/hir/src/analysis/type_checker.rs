@@ -545,9 +545,11 @@ fn check_built_in_call(
         }
         BuiltInFunctionName::Debug
         | BuiltInFunctionName::Error
+        | BuiltInFunctionName::Keys
         | BuiltInFunctionName::ReflectDebug
         | BuiltInFunctionName::ReflectEqual
-        | BuiltInFunctionName::Source => {}
+        | BuiltInFunctionName::Source
+        | BuiltInFunctionName::Values => {}
     }
 
     Ok(())
