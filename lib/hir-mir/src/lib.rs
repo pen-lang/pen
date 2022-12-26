@@ -1266,7 +1266,7 @@ mod tests {
             }
 
             #[test]
-            fn compile_perallel() {
+            fn compile_parallel() {
                 let list_type =
                     types::List::new(types::None::new(Position::fake()), Position::fake());
                 let iteratee_list_types = [
