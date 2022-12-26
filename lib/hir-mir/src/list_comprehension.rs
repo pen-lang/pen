@@ -201,7 +201,7 @@ fn compile_list_iteration_function_definition(
     {
         body = IfList::new(
             Some(type_.element().clone()),
-            Variable::new(LIST_NAME, position.clone()),
+            Variable::new(&iteratee_name, position.clone()),
             element_name,
             iteratee_name,
             body,
