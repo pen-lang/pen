@@ -842,21 +842,14 @@ fn list_comprehension_branch(input: Input) -> IResult<ListComprehensionBranch> {
                 position,
                 keyword("for"),
                 cut(tuple((
-                    identifier,
-                    opt(preceded(sign(","), identifier)),
+                    separated_or_terminated_list1(sign(","), identifier),
                     keyword("in"),
-                    expression,
+                    separated_or_terminated_list1(sign(","), expression),
                     opt(preceded(keyword("if"), expression)),
                 ))),
             )),
-            |(position, _, (element_name, value_name, _, iterator, condition))| {
-                ListComprehensionBranch::new(
-                    element_name,
-                    value_name,
-                    iterator,
-                    condition,
-                    position(),
-                )
+            |(position, _, (element_names, _, iteratees, condition))| {
+                ListComprehensionBranch::new(element_names, iteratees, condition, position())
             },
         ),
     )(input)
@@ -3178,9 +3171,8 @@ mod tests {
                         types::Reference::new("none", Position::fake()),
                         Variable::new("x", Position::fake()),
                         vec![ListComprehensionBranch::new(
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
+                            vec!["x".into()],
+                            vec![Variable::new("xs", Position::fake()).into()],
                             None,
                             Position::fake(),
                         )],
@@ -3201,9 +3193,8 @@ mod tests {
                             Position::fake(),
                         ),
                         vec![ListComprehensionBranch::new(
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
+                            vec!["x".into()],
+                            vec![Variable::new("xs", Position::fake()).into()],
                             None,
                             Position::fake(),
                         )],
@@ -3225,16 +3216,14 @@ mod tests {
                         ),
                         vec![
                             ListComprehensionBranch::new(
-                                "y",
-                                None,
-                                Variable::new("x", Position::fake()),
+                                vec!["y".into()],
+                                vec![Variable::new("x", Position::fake()).into()],
                                 None,
                                 Position::fake(),
                             ),
                             ListComprehensionBranch::new(
-                                "x",
-                                None,
-                                Variable::new("xs", Position::fake()),
+                                vec!["x".into()],
+                                vec![Variable::new("xs", Position::fake()).into()],
                                 None,
                                 Position::fake(),
                             ),
@@ -3248,10 +3237,26 @@ mod tests {
                         types::Reference::new("number", Position::fake()),
                         Variable::new("x", Position::fake()),
                         vec![ListComprehensionBranch::new(
-                            "x",
-                            None,
-                            Variable::new("xs", Position::fake()),
+                            vec!["x".into()],
+                            vec![Variable::new("xs", Position::fake()).into()],
                             Some(Variable::new("true", Position::fake()).into()),
+                            Position::fake(),
+                        )],
+                        Position::fake(),
+                    ),
+                ),
+                (
+                    "[number x for x, y in xs, ys]",
+                    ListComprehension::new(
+                        types::Reference::new("number", Position::fake()),
+                        Variable::new("x", Position::fake()),
+                        vec![ListComprehensionBranch::new(
+                            vec!["x".into(), "y".into()],
+                            vec![
+                                Variable::new("xs", Position::fake()).into(),
+                                Variable::new("ys", Position::fake()).into(),
+                            ],
+                            None,
                             Position::fake(),
                         )],
                         Position::fake(),
@@ -3349,9 +3354,8 @@ mod tests {
                     types::Reference::new("none", Position::fake()),
                     Variable::new("v", Position::fake()),
                     vec![ListComprehensionBranch::new(
-                        "k",
-                        Some("v".into()),
-                        Variable::new("xs", Position::fake()),
+                        vec!["k".into(), "v".into()],
+                        vec![Variable::new("xs", Position::fake()).into()],
                         None,
                         Position::fake(),
                     )],

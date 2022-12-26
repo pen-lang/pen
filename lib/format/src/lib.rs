@@ -478,18 +478,26 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                         .map(|branch| {
                             compile_line_comment(context, branch.position(), |context| {
                                 sequence(
-                                    ["for ".into(), branch.primary_name().into()]
+                                    ["for ".into()]
                                         .into_iter()
                                         .chain(
                                             branch
-                                                .secondary_name()
-                                                .into_iter()
-                                                .flat_map(|name| [", ".into(), name.into()]),
+                                                .names()
+                                                .iter()
+                                                .map(|string| string.as_str().into())
+                                                .intersperse(", ".into()),
                                         )
-                                        .chain([
-                                            " in ".into(),
-                                            compile_expression(context, branch.iteratee()),
-                                        ])
+                                        .chain([" in ".into()])
+                                        .chain(
+                                            branch
+                                                .iteratees()
+                                                .iter()
+                                                .map(|iteratee| {
+                                                    compile_expression(context, iteratee)
+                                                })
+                                                .intersperse(", ".into())
+                                                .collect::<Vec<_>>(),
+                                        )
                                         .chain(branch.condition().map(|condition| {
                                             sequence([
                                                 " if ".into(),
@@ -3107,9 +3115,8 @@ mod tests {
                                 types::Reference::new("none", Position::fake()),
                                 Variable::new("none", Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![Variable::new("xs", Position::fake()).into()],
                                     None,
                                     Position::fake(),
                                 )],
@@ -3129,9 +3136,8 @@ mod tests {
                                 types::Reference::new("none", Position::fake()),
                                 Variable::new("none", line_position(2)),
                                 vec![ListComprehensionBranch::new(
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![Variable::new("xs", Position::fake()).into()],
                                     None,
                                     line_position(2),
                                 )],
@@ -3159,9 +3165,8 @@ mod tests {
                                 types::Reference::new("none", Position::fake()),
                                 Variable::new("none", line_position(2)),
                                 vec![ListComprehensionBranch::new(
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![Variable::new("xs", Position::fake()).into()],
                                     Some(Variable::new("true", Position::fake()).into()),
                                     line_position(2)
                                 )],
@@ -3174,6 +3179,38 @@ mod tests {
                             [none
                               none
                               for x in xs if true
+                            ]
+                            "
+                        )
+                        .trim()
+                    );
+                }
+
+                #[test]
+                fn format_parallel() {
+                    assert_eq!(
+                        format(
+                            &ListComprehension::new(
+                                types::Reference::new("none", Position::fake()),
+                                Variable::new("none", line_position(2)),
+                                vec![ListComprehensionBranch::new(
+                                    vec!["x".into(), "y".into()],
+                                    vec![
+                                        Variable::new("xs", Position::fake()).into(),
+                                        Variable::new("ys", Position::fake()).into()
+                                    ],
+                                    None,
+                                    line_position(2)
+                                )],
+                                line_position(1)
+                            )
+                            .into()
+                        ),
+                        indoc!(
+                            "
+                            [none
+                              none
+                              for x, y in xs, ys
                             ]
                             "
                         )
@@ -3362,9 +3399,8 @@ mod tests {
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", Position::fake()),
                             vec![ListComprehensionBranch::new(
-                                "k",
-                                Some("v".into()),
-                                Variable::new("xs", Position::fake()),
+                                vec!["k".into(), "v".into()],
+                                vec![Variable::new("xs", Position::fake()).into()],
                                 None,
                                 Position::fake(),
                             )],
@@ -3384,9 +3420,8 @@ mod tests {
                             types::Reference::new("none", Position::fake()),
                             Variable::new("none", line_position(2)),
                             vec![ListComprehensionBranch::new(
-                                "k",
-                                Some("v".into()),
-                                Variable::new("xs", Position::fake()),
+                                vec!["k".into(), "v".into()],
+                                vec![Variable::new("xs", Position::fake()).into()],
                                 None,
                                 line_position(2)
                             )],
