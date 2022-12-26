@@ -423,9 +423,8 @@ fn compile_map_iteration_function_definition(
 
 #[cfg(test)]
 mod tests {
-    use crate::compile_configuration::COMPILE_CONFIGURATION;
-
     use super::*;
+    use crate::compile_configuration::COMPILE_CONFIGURATION;
     use position::{test::PositionFake, Position};
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
