@@ -56,7 +56,7 @@ arrayElements = \(vs [Value]) [string] {
 
 object = \(vs {string: Value}) [string] {
   if [_, ...ss] = objectEntries(
-    [objectEntry objectEntry{key: k, value: v} for k, v in keys(vs), values(vs)],
+    [objectEntry objectEntry{key: k(), value: v()} for k, v in keys(vs), values(vs)],
   ) {
     [string "{", ...ss, "}"]
   } else {
