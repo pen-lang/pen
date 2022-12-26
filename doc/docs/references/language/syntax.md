@@ -272,7 +272,7 @@ Multiple `for` clauses iterate multiple lists considering all combinations of th
 ]
 ```
 
-Multiple lists in a `for` clause iterate multiple lists at once.
+Multiple lists in a `for` clause iterate them at once.
 
 ```pen
 [number f(y()) for x, y in xs, ys]
