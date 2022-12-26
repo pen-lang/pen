@@ -51,17 +51,8 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
                 for iteratee in branch.iteratees() {
-                    if let Some(type_) = iteratee.type_() {
-                        match type_ {
-                            Type::List(list_type) => {
-                                lower_types.insert(list_type.element().clone());
-                            }
-                            Type::Map(map_type) => {
-                                lower_types.insert(map_type.key().clone());
-                                lower_types.insert(map_type.value().clone());
-                            }
-                            _ => {}
-                        }
+                    if let Some(Type::List(list_type)) = iteratee.type_() {
+                        lower_types.insert(list_type.element().clone());
                     }
                 }
             }
@@ -368,52 +359,6 @@ mod tests {
                 ])),
                 [
                     input_list_type.element().clone(),
-                    output_list_type.element().clone()
-                ]
-                .into_iter()
-                .collect()
-            );
-        }
-
-        #[test]
-        fn collect_from_map() {
-            let input_map_type = types::Map::new(
-                types::ByteString::new(Position::fake()),
-                types::Number::new(Position::fake()),
-                Position::fake(),
-            );
-            let output_list_type =
-                types::List::new(types::None::new(Position::fake()), Position::fake());
-
-            assert_eq!(
-                collect_module(&Module::empty().set_function_definitions(vec![
-                    FunctionDefinition::fake(
-                        "f",
-                        Lambda::new(
-                            vec![Argument::new("x", input_map_type.clone())],
-                            output_list_type.clone(),
-                            ListComprehension::new(
-                                types::None::new(Position::fake()),
-                                None::new(Position::fake(),),
-                                vec![ListComprehensionBranch::new(
-                                    vec!["k".into(), "v".into()],
-                                    vec![ListComprehensionIteratee::new(
-                                        Some(input_map_type.clone().into()),
-                                        Variable::new("x", Position::fake()),
-                                    )],
-                                    None,
-                                    Position::fake(),
-                                )],
-                                Position::fake(),
-                            ),
-                            Position::fake(),
-                        ),
-                        false,
-                    ),
-                ])),
-                [
-                    input_map_type.key().clone(),
-                    input_map_type.value().clone(),
                     output_list_type.element().clone()
                 ]
                 .into_iter()
