@@ -6,15 +6,13 @@ use position::Position;
 pub struct ListComprehensionIteratee {
     type_: Option<Type>,
     expression: Expression,
-    position: Position,
 }
 
 impl ListComprehensionIteratee {
-    pub fn new(type_: Option<Type>, expression: impl Into<Expression>, position: Position) -> Self {
+    pub fn new(type_: Option<Type>, expression: impl Into<Expression>) -> Self {
         Self {
             type_,
             expression: expression.into(),
-            position,
         }
     }
 
@@ -27,6 +25,6 @@ impl ListComprehensionIteratee {
     }
 
     pub fn position(&self) -> &Position {
-        &self.position
+        &self.expression.position()
     }
 }

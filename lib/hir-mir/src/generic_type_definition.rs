@@ -414,7 +414,6 @@ mod tests {
                                             .into()
                                     ),
                                     List::new(union_type, vec![], Position::fake()),
-                                    Position::fake()
                                 )],
                                 None,
                                 Position::fake(),
@@ -466,7 +465,6 @@ mod tests {
                                         vec![],
                                         Position::fake()
                                     ),
-                                    Position::fake()
                                 )],
                                 None,
                                 Position::fake(),

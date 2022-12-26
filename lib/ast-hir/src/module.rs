@@ -292,7 +292,6 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                         vec![ir::ListComprehensionIteratee::new(
                             None,
                             compile_expression(branch.iteratee())?,
-                            branch.iteratee().position().clone(),
                         )],
                         branch.condition().map(compile_expression).transpose()?,
                         branch.position().clone(),
@@ -544,7 +543,6 @@ mod tests {
                                     vec![ir::ListComprehensionIteratee::new(
                                         None,
                                         ir::Variable::new("xs", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     None,
                                     Position::fake(),
@@ -554,7 +552,6 @@ mod tests {
                                     vec![ir::ListComprehensionIteratee::new(
                                         None,
                                         ir::Variable::new("x", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     None,
                                     Position::fake(),
@@ -622,7 +619,6 @@ mod tests {
                                 vec![ir::ListComprehensionIteratee::new(
                                     None,
                                     ir::Variable::new("xs", Position::fake()),
-                                    Position::fake(),
                                 )],
                                 Some(ir::Variable::new("true", Position::fake()).into()),
                                 Position::fake(),

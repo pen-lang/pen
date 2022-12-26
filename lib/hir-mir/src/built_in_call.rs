@@ -111,7 +111,6 @@ pub fn compile(
                             vec![ListComprehensionIteratee::new(
                                 Some(types::List::new(list_type, call.position().clone()).into()),
                                 call.arguments()[0].clone(),
-                                call.arguments()[0].position().clone(),
                             )],
                             None,
                             position.clone(),

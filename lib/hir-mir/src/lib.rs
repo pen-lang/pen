@@ -842,7 +842,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("x", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     None,
                                     Position::fake(),
@@ -895,7 +894,6 @@ mod tests {
                                                     vec![],
                                                     Position::fake(),
                                                 ),
-                                                Position::fake(),
                                             )],
                                             None,
                                             Position::fake(),
@@ -912,7 +910,6 @@ mod tests {
                                                 vec![],
                                                 Position::fake(),
                                             ),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -950,7 +947,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     None,
                                     Position::fake(),
@@ -990,7 +986,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("xs", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1000,7 +995,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("xs", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1054,7 +1048,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("xs", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1064,7 +1057,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("ys", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1106,7 +1098,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("xs", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1121,7 +1112,6 @@ mod tests {
                                                 vec![],
                                                 Position::fake(),
                                             ),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1175,7 +1165,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("xs", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1185,7 +1174,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             None,
                                             Variable::new("ys", Position::fake()),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1225,7 +1213,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     Some(Boolean::new(true, Position::fake()).into()),
                                     Position::fake(),
@@ -1264,7 +1251,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
-                                        Position::fake(),
                                     )],
                                     Some(Boolean::new(true, Position::fake()).into()),
                                     Position::fake(),
@@ -1523,7 +1509,6 @@ mod tests {
                                 vec![ListComprehensionIteratee::new(
                                     None,
                                     Variable::new("x", Position::fake()),
-                                    Position::fake(),
                                 )],
                                 None,
                                 Position::fake(),

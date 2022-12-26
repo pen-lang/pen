@@ -289,7 +289,6 @@ fn transform_expression(
                         Ok(ListComprehensionIteratee::new(
                             iteratee.type_().cloned(),
                             transform_expression(iteratee.expression(), &variables)?,
-                            iteratee.position().clone(),
                         ))
                     })
                     .collect::<Result<_, _>>()?;
@@ -1498,7 +1497,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(input_list_type.clone().into()),
                                             empty_list.clone(),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1529,7 +1527,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(input_list_type.into()),
                                             empty_list,
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -1558,8 +1555,8 @@ mod tests {
                     List::new(types::None::new(Position::fake()), vec![], Position::fake());
 
                 assert_eq!(
-                    coerce_module(&Module::empty().set_function_definitions(
-                        vec![FunctionDefinition::fake(
+                    coerce_module(
+                        &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
                             Lambda::new(
                                 vec![],
@@ -1584,7 +1581,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(input_list_type.clone().into()),
                                             empty_list.clone(),
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),
@@ -1594,8 +1590,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )],
-                    )),
+                        )],)
+                    ),
                     Ok(
                         Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
@@ -1627,7 +1623,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(input_list_type.into()),
                                             empty_list,
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),
@@ -1655,8 +1650,8 @@ mod tests {
                     List::new(types::None::new(Position::fake()), vec![], Position::fake());
 
                 assert_eq!(
-                    coerce_module(&Module::empty().set_function_definitions(vec![
-                        FunctionDefinition::fake(
+                    coerce_module(
+                        &Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
                             Lambda::new(
                                 vec![Argument::new("a", union_type.clone())],
@@ -1669,7 +1664,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(list_type.clone().into()),
                                             empty_list.clone(),
-                                            Position::fake()
                                         )],
                                         Some(
                                             EqualityOperation::new(
@@ -1688,8 +1682,8 @@ mod tests {
                                 Position::fake(),
                             ),
                             false,
-                        )
-                    ],)),
+                        )],)
+                    ),
                     Ok(
                         Module::empty().set_function_definitions(vec![FunctionDefinition::fake(
                             "f",
@@ -1704,7 +1698,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(list_type.into()),
                                             empty_list,
-                                            Position::fake()
                                         )],
                                         Some(
                                             EqualityOperation::new(
@@ -2036,7 +2029,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.clone().into()),
                                             empty_map.clone(),
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -2067,7 +2059,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.into()),
                                             empty_map,
-                                            Position::fake(),
                                         )],
                                         None,
                                         Position::fake(),
@@ -2117,7 +2108,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.clone().into()),
                                             empty_map.clone(),
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),
@@ -2148,7 +2138,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.into()),
                                             empty_map,
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),
@@ -2198,7 +2187,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.clone().into()),
                                             empty_map.clone(),
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),
@@ -2229,7 +2217,6 @@ mod tests {
                                         vec![ListComprehensionIteratee::new(
                                             Some(map_type.into()),
                                             empty_map,
-                                            Position::fake()
                                         )],
                                         None,
                                         Position::fake(),

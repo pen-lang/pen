@@ -355,7 +355,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         Some(input_list_type.clone().into()),
                                         Variable::new("x", Position::fake()),
-                                        Position::fake()
                                     )],
                                     None,
                                     Position::fake(),
@@ -401,7 +400,6 @@ mod tests {
                                     vec![ListComprehensionIteratee::new(
                                         Some(input_map_type.clone().into()),
                                         Variable::new("x", Position::fake()),
-                                        Position::fake()
                                     )],
                                     None,
                                     Position::fake(),

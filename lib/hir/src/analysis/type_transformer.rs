@@ -248,7 +248,6 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
                                 ListComprehensionIteratee::new(
                                     iteratee.type_().map(transform),
                                     transform_expression(iteratee.expression()),
-                                    iteratee.position().clone(),
                                 )
                             })
                             .collect(),
