@@ -1931,14 +1931,14 @@
 <h2 id="iterate-map-keys">Iterate map keys</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(xs {string: number}) [string] {
-  [string k for k, _ in xs]
+  keys(xs)
 }</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
 <h2 id="iterate-map-values">Iterate map values</h2>
 <p><em>Given</em> a file named "Foo.pen" with:</p>
 <pre class="pen"><code>f = \(xs {string: number}) [number] {
-  [number v for _, v in xs]
+  values(xs)
 }</code></pre>
 <p><em>When</em> I successfully run <code>pen build</code></p>
 <p><em>Then</em> the exit status should be 0.</p>
