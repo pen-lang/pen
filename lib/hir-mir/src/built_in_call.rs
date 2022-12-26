@@ -107,10 +107,11 @@ pub fn compile(
                             position.clone(),
                         ),
                         vec![ListComprehensionBranch::new(
-                            Some(types::List::new(list_type, call.position().clone()).into()),
-                            ELEMENT_NAME,
-                            None,
-                            call.arguments()[0].clone(),
+                            vec![ELEMENT_NAME.into()],
+                            vec![ListComprehensionIteratee::new(
+                                Some(types::List::new(list_type, call.position().clone()).into()),
+                                call.arguments()[0].clone(),
+                            )],
                             None,
                             position.clone(),
                         )],

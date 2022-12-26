@@ -74,3 +74,13 @@ Permutate = \() none | error {
     [number 5, 7, 11, 10, 14, 22, 15, 21, 33],
   )
 }
+
+Zip = \() none | error {
+  Assert'Equal(
+    [number
+      x() * y()
+      for x, y in [number 1, 2, 3], [number 4, 5, 6, 7]
+    ],
+    [number 4, 10, 18],
+  )
+}

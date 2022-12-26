@@ -37,6 +37,7 @@
     "indoc",
     "insta",
     "intrinsics",
+    "iteratees",
     "itertools",
     "koka",
     "lcov",

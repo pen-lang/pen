@@ -122,6 +122,16 @@ Feature: List
     When I run `pen build`
     Then the exit status should be 0
 
+  Scenario: Zip lists
+    Given a file named "Foo.pen" with:
+    """pen
+    f = \(xs [number], ys [number]) [number] {
+      [number x() + y() for x, y in xs, ys]
+    }
+    """
+    When I run `pen build`
+    Then the exit status should be 0
+
   Scenario: Get a size of a list
     Given a file named "Foo.pen" with:
     """pen

@@ -75,7 +75,9 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
         }
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
-                visit_expression(branch.iteratee());
+                for iteratee in branch.iteratees() {
+                    visit_expression(iteratee.expression());
+                }
             }
 
             visit_expression(comprehension.element());

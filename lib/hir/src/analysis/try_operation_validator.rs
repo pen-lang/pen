@@ -79,7 +79,9 @@ fn validate_expression(
         }
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
-                validate_expression(context, branch.iteratee(), None)?;
+                for iteratee in branch.iteratees() {
+                    validate_expression(context, iteratee.expression(), None)?;
+                }
 
                 if let Some(condition) = branch.condition() {
                     validate_expression(context, condition, None)?;
@@ -384,10 +386,11 @@ mod tests {
                                     Position::fake(),
                                 ),
                                 vec![ListComprehensionBranch::new(
-                                    None,
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        None,
+                                        Variable::new("xs", Position::fake()),
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -419,16 +422,17 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    None,
-                                    "x",
-                                    None,
-                                    TryOperation::new(
+                                    vec!["x".into()],
+                                    vec![ListComprehensionIteratee::new(
                                         None,
-                                        Variable::new("xs", Position::fake()),
-                                        Position::fake(),
-                                    ),
+                                        TryOperation::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                            Position::fake(),
+                                        ),
+                                    )],
                                     None,
-                                    Position::fake()
+                                    Position::fake(),
                                 )],
                                 Position::fake()
                             ),
@@ -458,16 +462,20 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake()),
                                 vec![ListComprehensionBranch::new(
-                                    None,
-                                    "x",
-                                    None,
-                                    Variable::new("xs", Position::fake()),
-                                    Some(TryOperation::new(
+                                    vec!["x".into()],
+                                    vec![ListComprehensionIteratee::new(
                                         None,
                                         Variable::new("xs", Position::fake()),
-                                        Position::fake(),
-                                    ).into()),
-                                    Position::fake()
+                                    )],
+                                    Some(
+                                        TryOperation::new(
+                                            None,
+                                            Variable::new("xs", Position::fake()),
+                                            Position::fake(),
+                                        )
+                                        .into()
+                                    ),
+                                    Position::fake(),
                                 )],
                                 Position::fake()
                             ),

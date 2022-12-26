@@ -407,10 +407,14 @@ mod tests {
                             types::None::new(Position::fake()),
                             None::new(Position::fake()),
                             vec![ListComprehensionBranch::new(
-                                Some(types::List::new(union_type.clone(), Position::fake()).into()),
-                                "_",
-                                None,
-                                List::new(union_type, vec![], Position::fake()),
+                                vec!["_".into()],
+                                vec![ListComprehensionIteratee::new(
+                                    Some(
+                                        types::List::new(union_type.clone(), Position::fake())
+                                            .into()
+                                    ),
+                                    List::new(union_type, vec![], Position::fake()),
+                                )],
                                 None,
                                 Position::fake(),
                             )],
@@ -453,14 +457,15 @@ mod tests {
                             union_type,
                             None::new(Position::fake()),
                             vec![ListComprehensionBranch::new(
-                                Some(list_type.clone().into()),
-                                "_",
-                                None,
-                                List::new(
-                                    types::None::new(Position::fake()),
-                                    vec![],
-                                    Position::fake()
-                                ),
+                                vec!["_".into()],
+                                vec![ListComprehensionIteratee::new(
+                                    Some(list_type.clone().into()),
+                                    List::new(
+                                        types::None::new(Position::fake()),
+                                        vec![],
+                                        Position::fake()
+                                    ),
+                                )],
                                 None,
                                 Position::fake(),
                             )],

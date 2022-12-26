@@ -50,16 +50,18 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
         }
         Expression::ListComprehension(comprehension) => {
             for branch in comprehension.branches() {
-                if let Some(type_) = branch.type_() {
-                    match type_ {
-                        Type::List(list_type) => {
-                            lower_types.insert(list_type.element().clone());
+                for iteratee in branch.iteratees() {
+                    if let Some(type_) = iteratee.type_() {
+                        match type_ {
+                            Type::List(list_type) => {
+                                lower_types.insert(list_type.element().clone());
+                            }
+                            Type::Map(map_type) => {
+                                lower_types.insert(map_type.key().clone());
+                                lower_types.insert(map_type.value().clone());
+                            }
+                            _ => {}
                         }
-                        Type::Map(map_type) => {
-                            lower_types.insert(map_type.key().clone());
-                            lower_types.insert(map_type.value().clone());
-                        }
-                        _ => {}
                     }
                 }
             }
@@ -349,10 +351,11 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake(),),
                                 vec![ListComprehensionBranch::new(
-                                    Some(input_list_type.clone().into()),
-                                    "x",
-                                    None,
-                                    Variable::new("x", Position::fake()),
+                                    vec!["x".into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        Some(input_list_type.clone().into()),
+                                        Variable::new("x", Position::fake()),
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],
@@ -393,10 +396,11 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 None::new(Position::fake(),),
                                 vec![ListComprehensionBranch::new(
-                                    Some(input_map_type.clone().into()),
-                                    "k",
-                                    Some("v".into()),
-                                    Variable::new("x", Position::fake()),
+                                    vec!["k".into(), "v".into()],
+                                    vec![ListComprehensionIteratee::new(
+                                        Some(input_map_type.clone().into()),
+                                        Variable::new("x", Position::fake()),
+                                    )],
                                     None,
                                     Position::fake(),
                                 )],

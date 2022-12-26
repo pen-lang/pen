@@ -112,6 +112,14 @@ impl Type {
     pub fn is_variant(&self) -> bool {
         self.is_any() || self.is_union()
     }
+
+    pub fn as_list(&self) -> Option<&List> {
+        if let Self::List(type_) = self {
+            Some(type_)
+        } else {
+            None
+        }
+    }
 }
 
 impl From<Any> for Type {
