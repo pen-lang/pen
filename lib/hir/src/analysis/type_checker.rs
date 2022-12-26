@@ -260,9 +260,9 @@ fn check_expression(
                         .iter()
                         .any(|iteratee| matches!(iteratee.type_(), Some(Type::Map(_))))
                 {
-                    return Err(
-                        AnalysisError::ParallelMapIteration(branch.position().clone()),
-                    );
+                    return Err(AnalysisError::ParallelMapIteration(
+                        branch.position().clone(),
+                    ));
                 }
 
                 for (index, iteratee) in branch.iteratees().iter().enumerate() {
