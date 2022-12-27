@@ -232,19 +232,19 @@ impl Display for AnalysisError {
                 write!(formatter, "type not inferred\n{}", position)
             }
             Self::TypesNotMatched {
-                lhs: (lower, position),
-                rhs: (upper, position),
+                lhs: (lower_position, lower_type),
+                rhs: (upper_position, upper_type),
             } => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                Self::format_found_type_message(lower),
-                Self::format_expected_type_message(upper),
+                Self::format_found_type_message(lower_position, lower_type),
+                Self::format_expected_type_message(upper_position, upper_type),
             ),
-            Self::UnionExpected(type_) => {
+            Self::UnionExpected(position, type_) => {
                 write!(
                     formatter,
                     "union type expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::UnknownRecordField(position) => {
