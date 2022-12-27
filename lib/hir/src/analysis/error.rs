@@ -49,7 +49,7 @@ pub enum AnalysisError {
     UnusedErrorValue(Position),
     ValueNameNotDefined(Position),
     VariableNotFound(Variable),
-    VariantExpected(Type),
+    VariantExpected(Position, Type),
 }
 
 impl AnalysisError {
@@ -109,11 +109,11 @@ impl Display for AnalysisError {
             Self::ErrorTypeUndefined => {
                 write!(formatter, "error type undefined")
             }
-            Self::FunctionExpected(type_) => {
+            Self::FunctionExpected(position, type_) => {
                 write!(
                     formatter,
                     "function expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::ImpossibleRecord(position) => {
@@ -147,18 +147,18 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::ListExpected(type_) => {
+            Self::ListExpected(position, type_) => {
                 write!(
                     formatter,
                     "list expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
-            Self::MapExpected(type_) => {
+            Self::MapExpected(position, type_) => {
                 write!(
                     formatter,
                     "map expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::MissingElseBlock(position) => {
@@ -265,11 +265,11 @@ impl Display for AnalysisError {
                 variable.name(),
                 variable.position()
             ),
-            Self::VariantExpected(type_) => {
+            Self::VariantExpected(position, type_) => {
                 write!(
                     formatter,
                     "union or any type expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
         }
