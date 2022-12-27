@@ -168,11 +168,11 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::RecordExpected(type_) => {
+            Self::RecordExpected(position, type_) => {
                 write!(
                     formatter,
                     "record expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::RecordFieldNotFound(name, position) => {
@@ -207,17 +207,17 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::TypeNotComparable(type_) => {
+            Self::TypeNotComparable(position, type_) => {
                 write!(
                     formatter,
                     "type not comparable\n{}",
                     position::format_message(
-                        type_.position(),
+                        position,
                         &format!(
                             "{} might include function, {}, or {} types",
                             Self::format_type(type_),
-                            Self::format_type(&types::Error::new(type_.position().clone()).into()),
-                            Self::format_type(&types::Any::new(type_.position().clone()).into()),
+                            Self::format_type(&types::Error::new(position.clone()).into()),
+                            Self::format_type(&types::Any::new(position.clone()).into()),
                         ),
                     )
                 )
