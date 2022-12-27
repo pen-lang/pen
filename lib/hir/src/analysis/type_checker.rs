@@ -493,9 +493,14 @@ fn check_built_in_call(
             }
         }
         BuiltInFunctionName::Spawn => {
-            if let [argument_type] = function_type.arguments() {
+            if let ([argument], [argument_type]) = (call.arguments(), function_type.arguments()) {
                 if !type_canonicalizer::canonicalize_function(argument_type, context.types())?
-                    .ok_or_else(|| AnalysisError::FunctionExpected(argument_type.clone()))?
+                    .ok_or_else(|| {
+                        AnalysisError::FunctionExpected(
+                            argument.position().clone(),
+                            argument_type.clone(),
+                        )
+                    })?
                     .arguments()
                     .is_empty()
                 {

@@ -26,7 +26,12 @@ pub fn extract_from_expression(
                 .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
 
             type_canonicalizer::canonicalize_function(type_, context.types())?
-                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?
+                .ok_or_else(|| {
+                    AnalysisError::FunctionExpected(
+                        call.function().position().clone(),
+                        type_.clone(),
+                    )
+                })?
                 .result()
                 .clone()
         }
@@ -38,8 +43,9 @@ pub fn extract_from_expression(
         .into(),
         Expression::IfList(if_) => {
             let type_ = extract_from_expression(if_.list(), variables)?;
-            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or(AnalysisError::ListExpected(type_))?;
+            let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?.ok_or(
+                AnalysisError::ListExpected(if_.list().position().clone(), type_),
+            )?;
 
             types::Union::new(
                 extract_from_expression(
@@ -64,8 +70,9 @@ pub fn extract_from_expression(
         }
         Expression::IfMap(if_) => {
             let type_ = extract_from_expression(if_.map(), variables)?;
-            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
-                .ok_or(AnalysisError::MapExpected(type_))?;
+            let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?.ok_or(
+                AnalysisError::MapExpected(if_.map().position().clone(), type_),
+            )?;
 
             types::Union::new(
                 extract_from_expression(
