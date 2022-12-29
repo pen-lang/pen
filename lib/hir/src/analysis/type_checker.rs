@@ -598,7 +598,7 @@ fn check_built_in_call(
                 key_type,
                 map_type.key(),
                 key_argument.position(),
-                map_type.position(),
+                map_type.key().position(),
                 context.types(),
             )?;
         }
