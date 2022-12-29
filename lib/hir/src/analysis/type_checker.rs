@@ -588,18 +588,17 @@ fn check_built_in_call(
                 position,
                 context.types(),
             )?;
+
+            let map_type = type_canonicalizer::canonicalize_map(map_type, context.types())?
+                .ok_or_else(|| {
+                    AnalysisError::MapExpected(map_argument.position().clone(), map_type.clone())
+                })?;
+
             check_subsumption(
                 key_type,
-                type_canonicalizer::canonicalize_map(map_type, context.types())?
-                    .ok_or_else(|| {
-                        AnalysisError::MapExpected(
-                            map_argument.position().clone(),
-                            map_type.clone(),
-                        )
-                    })?
-                    .key(),
+                map_type.key(),
                 key_argument.position(),
-                position,
+                map_type.position(),
                 context.types(),
             )?;
         }
