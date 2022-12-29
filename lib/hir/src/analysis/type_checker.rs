@@ -330,7 +330,7 @@ fn check_expression(
                         &check_expression(iteratee.expression(), &variables)?,
                         type_,
                         iteratee.expression().position(),
-                        iteratee.expression().position(),
+                        type_.position(),
                     )?;
 
                     variables = variables.insert(
