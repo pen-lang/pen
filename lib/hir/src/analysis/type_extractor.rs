@@ -182,6 +182,7 @@ pub fn extract_from_expression(
             )?
             .iter()
             .find(|field| field.name() == deconstruction.field_name())
+            // TODO Use a field position.
             .ok_or_else(|| AnalysisError::UnknownRecordField(deconstruction.position().clone()))?
             .type_()
             .clone()
