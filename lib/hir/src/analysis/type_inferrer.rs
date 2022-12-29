@@ -1850,6 +1850,7 @@ mod tests {
                     )
                 ],)),
                 Err(AnalysisError::UnionExpected(
+                    Position::fake(),
                     types::Error::new(Position::fake()).into()
                 ))
             );

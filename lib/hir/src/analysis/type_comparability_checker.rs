@@ -74,6 +74,7 @@ mod tests {
     fn check_record_type() {
         assert!(check(
             &types::Record::fake("foo").into(),
+            &Position::fake(),
             &Default::default(),
             &[(
                 "foo".into(),
@@ -92,6 +93,7 @@ mod tests {
     fn check_record_type_with_function_field() {
         assert!(!check(
             &types::Record::fake("foo").into(),
+            &Position::fake(),
             &Default::default(),
             &[(
                 "foo".into(),
@@ -114,6 +116,7 @@ mod tests {
     fn check_comparability_of_record_type_with_any_field() {
         assert!(!check(
             &types::Record::fake("foo").into(),
+            &Position::fake(),
             &Default::default(),
             &[(
                 "foo".into(),
@@ -137,6 +140,7 @@ mod tests {
                 Position::fake()
             )
             .into(),
+            &Position::fake(),
             &Default::default(),
             &Default::default(),
         )
@@ -152,6 +156,7 @@ mod tests {
                 Position::fake()
             )
             .into(),
+            &Position::fake(),
             &Default::default(),
             &Default::default(),
         )

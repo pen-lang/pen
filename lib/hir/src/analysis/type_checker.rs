@@ -953,10 +953,13 @@ mod tests {
                             function_type,
                         )])
                 ),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                })
             );
         }
 
@@ -1063,10 +1066,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::None::new(Position::fake()).into(),
-                    types::Number::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), types::None::new(Position::fake()).into()),
+                    expected: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into(),
+                    )
+                })
             );
         }
     }
@@ -1119,10 +1125,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::None::new(Position::fake()).into(),
-                    types::Boolean::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), types::None::new(Position::fake()).into()),
+                    expected: (
+                        Position::fake(),
+                        types::Boolean::new(Position::fake()).into(),
+                    )
+                })
             );
         }
     }
@@ -1199,10 +1208,13 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::None::new(Position::fake()).into(),
-                    types::Boolean::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), types::None::new(Position::fake()).into()),
+                    expected: (
+                        Position::fake(),
+                        types::Boolean::new(Position::fake()).into(),
+                    )
+                })
             );
         }
 
@@ -1226,10 +1238,13 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::None::new(Position::fake()).into(),
-                    types::Boolean::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), types::None::new(Position::fake()).into()),
+                    expected: (
+                        Position::fake(),
+                        types::Boolean::new(Position::fake()).into(),
+                    )
+                })
             );
         }
     }
@@ -1791,10 +1806,16 @@ mod tests {
                         false,
                     )
                 ],)),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::Boolean::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (
+                        Position::fake(),
+                        types::Boolean::new(Position::fake()).into(),
+                    )
+                })
             );
         }
 
@@ -1879,10 +1900,13 @@ mod tests {
                         false,
                     )]
                 )),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into()
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into())
+                })
             );
         }
 
@@ -2032,10 +2056,13 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    union_type.into()
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), union_type.into())
+                })
             );
         }
 
@@ -2062,10 +2089,10 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Error::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), types::Error::new(Position::fake()).into()),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                })
             );
         }
     }
@@ -2316,10 +2343,16 @@ mod tests {
                             false,
                         )])
                 ),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Reference::new("r1", Position::fake()).into(),
-                    types::Reference::new("r2", Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Reference::new("r1", Position::fake()).into()
+                    ),
+                    expected: (
+                        Position::fake(),
+                        types::Reference::new("r2", Position::fake()).into(),
+                    )
+                })
             );
         }
     }
@@ -2395,10 +2428,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                })
             );
         }
 
@@ -2429,10 +2465,13 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                })
             );
         }
 
@@ -2593,10 +2632,13 @@ mod tests {
                             false,
                         )]
                     )),
-                    Err(AnalysisError::TypesNotMatched(
-                        types::Number::new(Position::fake()).into(),
-                        types::None::new(Position::fake()).into(),
-                    ))
+                    Err(AnalysisError::TypesNotMatched {
+                        found: (
+                            Position::fake(),
+                            types::Number::new(Position::fake()).into()
+                        ),
+                        expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                    })
                 );
             }
 
@@ -2631,10 +2673,13 @@ mod tests {
                             false,
                         )
                     ])),
-                    Err(AnalysisError::TypesNotMatched(
-                        types::None::new(Position::fake()).into(),
-                        types::Boolean::new(Position::fake()).into(),
-                    ))
+                    Err(AnalysisError::TypesNotMatched {
+                        found: (Position::fake(), types::None::new(Position::fake()).into()),
+                        expected: (
+                            Position::fake(),
+                            types::Boolean::new(Position::fake()).into(),
+                        )
+                    })
                 );
             }
 
@@ -2697,10 +2742,13 @@ mod tests {
                             false,
                         )]
                     )),
-                    Err(AnalysisError::TypesNotMatched(
-                        types::Number::new(Position::fake()).into(),
-                        types::None::new(Position::fake()).into(),
-                    ))
+                    Err(AnalysisError::TypesNotMatched {
+                        found: (
+                            Position::fake(),
+                            types::Number::new(Position::fake()).into()
+                        ),
+                        expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                    })
                 );
             }
 
@@ -2863,10 +2911,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                )),
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into(),)
+                }),
             );
         }
 
@@ -2887,11 +2938,11 @@ mod tests {
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
                                 vec![MapEntry::new(
-                                    None::new(Position::fake()),
-                                    Number::new(42.0, Position::fake()),
-                                    Position::fake(),
-                                )
-                                .into()],
+                                          None::new(Position::fake()),
+                                          Number::new(42.0, Position::fake()),
+                                          Position::fake(),
+                                      )
+                                      .into()],
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -2899,10 +2950,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                )),
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into()),
+                }),
             );
         }
 
@@ -2967,10 +3021,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                )),
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into()),
+                }),
             );
         }
 
@@ -3005,10 +3062,13 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::None::new(Position::fake()).into(),
-                )),
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into()),
+                }),
             );
         }
     }
@@ -3149,10 +3209,18 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::List::new(types::Number::new(Position::fake()), Position::fake()).into(),
-                    types::List::new(types::None::new(Position::fake()), Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::List::new(types::Number::new(Position::fake()), Position::fake())
+                            .into()
+                    ),
+                    expected: (
+                        Position::fake(),
+                        types::List::new(types::None::new(Position::fake()), Position::fake())
+                            .into()
+                    ),
+                })
             );
         }
 
@@ -3181,19 +3249,22 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Union::new(
-                        types::Function::new(
-                            vec![],
-                            types::None::new(Position::fake()),
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Union::new(
+                            types::Function::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                Position::fake()
+                            ),
+                            types::Number::new(Position::fake()),
                             Position::fake()
-                        ),
-                        types::Number::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                        )
+                        .into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into()),
+                })
             );
         }
     }
@@ -3305,10 +3376,10 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    wrong_map_type.into(),
-                    map_type.into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (Position::fake(), wrong_map_type.into()),
+                    expected: (Position::fake(), map_type.into()),
+                })
             );
         }
 
@@ -3342,10 +3413,16 @@ mod tests {
                         false,
                     )
                 ]),),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Number::new(Position::fake()).into(),
-                    types::Boolean::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Number::new(Position::fake()).into()
+                    ),
+                    expected: (
+                        Position::fake(),
+                        types::Boolean::new(Position::fake()).into()
+                    ),
+                })
             );
         }
 
@@ -3379,15 +3456,18 @@ mod tests {
                         false,
                     )
                 ])),
-                Err(AnalysisError::TypesNotMatched(
-                    types::Union::new(
-                        types::Number::new(Position::fake()),
-                        types::None::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into(),
-                    types::None::new(Position::fake()).into(),
-                ))
+                Err(AnalysisError::TypesNotMatched {
+                    found: (
+                        Position::fake(),
+                        types::Union::new(
+                            types::Number::new(Position::fake()),
+                            types::None::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ),
+                    expected: (Position::fake(), types::None::new(Position::fake()).into()),
+                })
             );
         }
     }
@@ -3598,7 +3678,7 @@ mod tests {
                             false,
                         ),]
                     )),
-                    Err(AnalysisError::TypesNotMatched(_, _))
+                    Err(AnalysisError::TypesNotMatched { .. })
                 ));
             }
 
@@ -3638,7 +3718,7 @@ mod tests {
                         false,
                     ),
                 ])),
-                    Err(AnalysisError::TypesNotMatched(_, _))
+                    Err(AnalysisError::TypesNotMatched { .. })
                 ));
             }
         }
@@ -3783,7 +3863,7 @@ mod tests {
                             false,
                         )]
                     )),
-                    Err(AnalysisError::CollectionExpected(_)),
+                    Err(AnalysisError::CollectionExpected(_, _)),
                 ));
             }
         }
