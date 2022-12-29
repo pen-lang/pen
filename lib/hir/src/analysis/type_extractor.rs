@@ -169,18 +169,23 @@ pub fn extract_from_expression(
                 .clone(),
         },
         Expression::RecordConstruction(construction) => construction.type_().clone(),
-        Expression::RecordDeconstruction(deconstruction) => record_field_resolver::resolve(
-            deconstruction
+        Expression::RecordDeconstruction(deconstruction) => {
+            let type_ = deconstruction
                 .type_()
-                .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?,
-            context.types(),
-            context.records(),
-        )?
-        .iter()
-        .find(|field| field.name() == deconstruction.field_name())
-        .ok_or_else(|| AnalysisError::UnknownRecordField(deconstruction.position().clone()))?
-        .type_()
-        .clone(),
+                .ok_or_else(|| AnalysisError::TypeNotInferred(deconstruction.position().clone()))?;
+
+            record_field_resolver::resolve(
+                type_,
+                deconstruction.position(),
+                context.types(),
+                context.records(),
+            )?
+            .iter()
+            .find(|field| field.name() == deconstruction.field_name())
+            .ok_or_else(|| AnalysisError::UnknownRecordField(deconstruction.position().clone()))?
+            .type_()
+            .clone()
+        }
         Expression::RecordUpdate(update) => update.type_().clone(),
         Expression::String(string) => types::ByteString::new(string.position().clone()).into(),
         Expression::Thunk(thunk) => types::Function::new(

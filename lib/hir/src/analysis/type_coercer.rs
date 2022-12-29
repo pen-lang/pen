@@ -502,8 +502,12 @@ fn transform_record_fields(
     variables: &plist::FlailMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
-    let field_types =
-        record_field_resolver::resolve(record_type, context.types(), context.records())?;
+    let field_types = record_field_resolver::resolve(
+        record_type,
+        record_type.position(),
+        context.types(),
+        context.records(),
+    )?;
 
     fields
         .iter()

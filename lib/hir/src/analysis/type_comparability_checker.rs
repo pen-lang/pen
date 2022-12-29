@@ -1,23 +1,27 @@
 use super::{record_field_resolver, type_resolver, AnalysisError};
 use crate::types::{RecordField, Type};
 use fnv::{FnvHashMap, FnvHashSet};
+use position::Position;
 
 pub fn check(
     type_: &Type,
+    position: &Position,
     types: &FnvHashMap<String, Type>,
     record_types: &FnvHashMap<String, Vec<RecordField>>,
 ) -> Result<bool, AnalysisError> {
-    check_with_cache(type_, &Default::default(), types, record_types)
+    check_with_cache(type_, position, &Default::default(), types, record_types)
 }
 
 fn check_with_cache(
     type_: &Type,
+    position: &Position,
+    // TODO Use a persistent data structure.
     record_names: &FnvHashSet<String>,
     types: &FnvHashMap<String, Type>,
     record_types: &FnvHashMap<String, Vec<RecordField>>,
 ) -> Result<bool, AnalysisError> {
     let check_with_cache =
-        |type_, record_names| check_with_cache(type_, record_names, types, record_types);
+        |type_, record_names| check_with_cache(type_, position, record_names, types, record_types);
 
     Ok(match type_ {
         Type::Any(_) => false,
@@ -41,7 +45,7 @@ fn check_with_cache(
                     .chain([record.name().into()])
                     .collect();
 
-                record_field_resolver::resolve(type_, types, record_types)?
+                record_field_resolver::resolve(type_, position, types, record_types)?
                     .iter()
                     .map(|field| check_with_cache(field.type_(), &record_names))
                     .collect::<Result<Vec<_>, _>>()?
