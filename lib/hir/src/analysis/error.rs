@@ -40,8 +40,8 @@ pub enum AnalysisError {
     TypeNotInferred(Position),
     TypeNotComparable(Position, Type),
     TypesNotMatched {
-        lhs: (Position, Type),
-        rhs: (Position, Type),
+        found: (Position, Type),
+        expected: (Position, Type),
     },
     UnionExpected(Position, Type),
     UnknownRecordField(Position),
@@ -232,13 +232,13 @@ impl Display for AnalysisError {
                 write!(formatter, "type not inferred\n{}", position)
             }
             Self::TypesNotMatched {
-                lhs: (lower_position, lower_type),
-                rhs: (upper_position, upper_type),
+                found: (found_position, found_type),
+                expected: (expected_position, expected_type),
             } => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                Self::format_found_type_message(lower_position, lower_type),
-                Self::format_expected_type_message(upper_position, upper_type),
+                Self::format_found_type_message(found_position, found_type),
+                Self::format_expected_type_message(expected_position, expected_type),
             ),
             Self::UnionExpected(position, type_) => {
                 write!(

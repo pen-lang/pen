@@ -792,8 +792,8 @@ fn check_operation(
                 && !type_subsumption_checker::check(&rhs_type, &lhs_type, context.types())?
             {
                 return Err(AnalysisError::TypesNotMatched {
-                    lhs: (operation.lhs().position().clone(), lhs_type),
-                    rhs: (operation.rhs().position().clone(), rhs_type),
+                    found: (operation.lhs().position().clone(), lhs_type),
+                    expected: (operation.rhs().position().clone(), rhs_type),
                 });
             }
 
@@ -873,8 +873,8 @@ fn check_subsumption(
         Ok(())
     } else {
         Err(AnalysisError::TypesNotMatched {
-            lhs: (lower_position.clone(), lower_type.clone()),
-            rhs: (upper_position.clone(), upper_type.clone()),
+            found: (lower_position.clone(), lower_type.clone()),
+            expected: (upper_position.clone(), upper_type.clone()),
         })
     }
 }
