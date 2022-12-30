@@ -284,10 +284,12 @@ fn check_expression(
 
                         check_subsumption(
                             type_canonicalizer::canonicalize_list(&type_, context.types())?
-                                .ok_or(AnalysisError::ListExpected(
-                                    expression.position().clone(),
-                                    type_,
-                                ))?
+                                .ok_or_else(|| {
+                                    AnalysisError::ListExpected(
+                                        expression.position().clone(),
+                                        type_,
+                                    )
+                                })?
                                 .element(),
                             list.type_(),
                             expression.position(),
@@ -391,9 +393,10 @@ fn check_expression(
                     MapElement::Map(expression) => {
                         let type_ = check_expression(expression, variables)?;
                         let map_type =
-                            type_canonicalizer::canonicalize_map(&type_, context.types())?.ok_or(
-                                AnalysisError::MapExpected(expression.position().clone(), type_),
-                            )?;
+                            type_canonicalizer::canonicalize_map(&type_, context.types())?
+                                .ok_or_else(|| {
+                                    AnalysisError::MapExpected(expression.position().clone(), type_)
+                                })?;
 
                         check_subsumption(
                             map_type.key(),

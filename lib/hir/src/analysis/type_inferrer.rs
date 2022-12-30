@@ -106,7 +106,7 @@ fn infer_expression(
             let list = infer_expression(if_.list(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
             let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or(AnalysisError::ListExpected(list.position().clone(), type_))?;
+                .ok_or_else(|| AnalysisError::ListExpected(list.position().clone(), type_))?;
 
             let then = infer_expression(
                 if_.then(),
@@ -141,7 +141,7 @@ fn infer_expression(
             let key = infer_expression(if_.key(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
             let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
-                .ok_or(AnalysisError::MapExpected(map.position().clone(), type_))?;
+                .ok_or_else(|| AnalysisError::MapExpected(map.position().clone(), type_))?;
 
             let then = infer_expression(
                 if_.then(),
