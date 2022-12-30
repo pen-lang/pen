@@ -14,7 +14,10 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
                 let record_type =
                     type_canonicalizer::canonicalize_record(construction.type_(), context.types())?
                         .ok_or_else(|| {
-                            AnalysisError::RecordExpected(construction.type_().clone())
+                            AnalysisError::RecordExpected(
+                                construction.type_().position().clone(),
+                                construction.type_().clone(),
+                            )
                         })?;
 
                 if !open_records.contains(record_type.name()) {
@@ -30,7 +33,12 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
                     AnalysisError::TypeNotInferred(deconstruction.position().clone())
                 })?;
                 let record_type = type_canonicalizer::canonicalize_record(type_, context.types())?
-                    .ok_or_else(|| AnalysisError::RecordExpected(type_.clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::RecordExpected(
+                            deconstruction.record().position().clone(),
+                            type_.clone(),
+                        )
+                    })?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(AnalysisError::RecordFieldPrivate(
@@ -41,7 +49,12 @@ pub fn validate(context: &AnalysisContext, module: &Module) -> Result<(), Analys
             Expression::RecordUpdate(update) => {
                 let record_type =
                     type_canonicalizer::canonicalize_record(update.type_(), context.types())?
-                        .ok_or_else(|| AnalysisError::RecordExpected(update.type_().clone()))?;
+                        .ok_or_else(|| {
+                            AnalysisError::RecordExpected(
+                                update.type_().position().clone(),
+                                update.type_().clone(),
+                            )
+                        })?;
 
                 if !open_records.contains(record_type.name()) {
                     return Err(AnalysisError::RecordFieldPrivate(

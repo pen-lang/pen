@@ -12,6 +12,7 @@ pub fn check(
 
 fn check_with_cache(
     type_: &Type,
+    // TODO Use a persistent data structure.
     record_names: &FnvHashSet<String>,
     types: &FnvHashMap<String, Type>,
     record_types: &FnvHashMap<String, Vec<RecordField>>,
@@ -41,7 +42,7 @@ fn check_with_cache(
                     .chain([record.name().into()])
                     .collect();
 
-                record_field_resolver::resolve(type_, types, record_types)?
+                record_field_resolver::resolve_record(record, record_types)?
                     .iter()
                     .map(|field| check_with_cache(field.type_(), &record_names))
                     .collect::<Result<Vec<_>, _>>()?

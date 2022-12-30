@@ -19,9 +19,13 @@ pub fn compile(
     let from = type_canonicalizer::canonicalize(from, context.types())?;
 
     if !from.is_variant() {
-        return Err(AnalysisError::VariantExpected(from).into());
+        return Err(AnalysisError::VariantExpected(position.clone(), from).into());
     } else if !type_subsumption_checker::check(to, &from, context.types())? {
-        return Err(AnalysisError::TypesNotMatched(to.clone(), from).into());
+        return Err(AnalysisError::TypesNotMatched {
+            found: (expression.position().clone(), to.clone()),
+            expected: (from.position().clone(), from),
+        }
+        .into());
     }
 
     Ok(
@@ -137,15 +141,18 @@ mod tests {
                 &types::Any::new(Position::fake()).into(),
                 &Variable::new("x", Position::fake()).into(),
             ),
-            Err(AnalysisError::TypesNotMatched(
-                types::Any::new(Position::fake()).into(),
-                types::Union::new(
-                    types::None::new(Position::fake()),
-                    types::Number::new(Position::fake()),
-                    Position::fake()
-                )
-                .into(),
-            )
+            Err(AnalysisError::TypesNotMatched {
+                found: (Position::fake(), types::Any::new(Position::fake()).into()),
+                expected: (
+                    Position::fake(),
+                    types::Union::new(
+                        types::None::new(Position::fake()),
+                        types::Number::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ),
+            }
             .into())
         );
     }
@@ -158,7 +165,11 @@ mod tests {
                 &types::None::new(Position::fake()).into(),
                 &None::new(Position::fake()).into(),
             ),
-            Err(AnalysisError::VariantExpected(types::None::new(Position::fake()).into()).into())
+            Err(AnalysisError::VariantExpected(
+                Position::fake(),
+                types::None::new(Position::fake()).into()
+            )
+            .into())
         );
     }
 }

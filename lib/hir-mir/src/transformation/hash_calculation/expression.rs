@@ -137,7 +137,7 @@ pub fn transform(
             position,
         )?,
         Type::Any(_) | Type::Error(_) | Type::Function(_) => {
-            return Err(AnalysisError::TypeNotComparable(type_.clone()).into())
+            return Err(AnalysisError::TypeNotComparable(position.clone(), type_.clone()).into())
         }
     })
 }
@@ -287,7 +287,7 @@ mod tests {
                 &any_type.clone().into(),
                 &Position::fake(),
             ),
-            Err(AnalysisError::TypeNotComparable(any_type.into()).into())
+            Err(AnalysisError::TypeNotComparable(Position::fake(), any_type.into()).into())
         );
     }
 
@@ -303,7 +303,7 @@ mod tests {
                 &function_type.clone().into(),
                 &Position::fake(),
             ),
-            Err(AnalysisError::TypeNotComparable(function_type.into()).into())
+            Err(AnalysisError::TypeNotComparable(Position::fake(), function_type.into()).into())
         );
     }
 }
