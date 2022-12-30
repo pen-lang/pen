@@ -25,7 +25,12 @@ pub fn compile(
         .function_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
     let function_type = type_canonicalizer::canonicalize_function(function_type, context.types())?
-        .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+        .ok_or_else(|| {
+            AnalysisError::FunctionExpected(
+                call.function().position().clone(),
+                function_type.clone(),
+            )
+        })?;
     let arguments = call
         .arguments()
         .iter()
@@ -49,7 +54,12 @@ pub fn compile(
         BuiltInFunctionName::Delete => {
             let map_type =
                 type_canonicalizer::canonicalize_map(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(function_type.result().clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            call.position().clone(),
+                            function_type.result().clone(),
+                        )
+                    })?;
             let mir_map_type = type_::compile_map(context)?;
 
             mir::ir::Call::new(
