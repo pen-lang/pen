@@ -189,7 +189,12 @@ pub fn compile(
             let function_type = &function_type.arguments()[0];
             let function_type =
                 type_canonicalizer::canonicalize_function(function_type, context.types())?
-                    .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::FunctionExpected(
+                            call.arguments()[0].position().clone(),
+                            function_type.clone(),
+                        )
+                    })?;
             let result_type = function_type.result();
             let any_type = Type::from(types::Any::new(position.clone()));
             let thunk_type =
@@ -257,17 +262,23 @@ pub fn compile(
         }
         BuiltInFunctionName::Values => {
             let argument_type = &function_type.arguments()[0];
+            let argument = &call.arguments()[0];
 
             compile_map_iteration(
                 context,
-                &call.arguments()[0],
+                argument,
                 &context
                     .configuration()?
                     .map_type
                     .iteration
                     .value_function_name,
                 type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            argument.position().clone(),
+                            argument_type.clone(),
+                        )
+                    })?
                     .value(),
                 position,
             )?
