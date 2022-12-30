@@ -95,17 +95,23 @@ pub fn compile(
         BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Keys => {
             let argument_type = &function_type.arguments()[0];
+            let argument = &call.arguments()[0];
 
             compile_map_iteration(
                 context,
-                &call.arguments()[0],
+                argument,
                 &context
                     .configuration()?
                     .map_type
                     .iteration
                     .key_function_name,
                 type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            argument.position().clone(),
+                            argument_type.clone(),
+                        )
+                    })?
                     .key(),
                 position,
             )?
@@ -115,7 +121,12 @@ pub fn compile(
 
             let list_type =
                 type_canonicalizer::canonicalize_list(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::ListExpected(function_type.result().clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::ListExpected(
+                            call.position().clone(),
+                            function_type.result().clone(),
+                        )
+                    })?;
             let any_list_type =
                 types::List::new(types::Any::new(position.clone()), position.clone());
 
