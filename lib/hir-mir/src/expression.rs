@@ -40,7 +40,12 @@ pub fn compile(
                 mir::ir::Call::new(
                     type_::compile(context, type_)?
                         .into_function()
-                        .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?,
+                        .ok_or_else(|| {
+                            AnalysisError::FunctionExpected(
+                                call.function().position().clone(),
+                                type_.clone(),
+                            )
+                        })?,
                     compile(call.function())?,
                     call.arguments()
                         .iter()
@@ -125,6 +130,7 @@ pub fn compile(
         Expression::RecordConstruction(construction) => {
             let field_types = record_field_resolver::resolve(
                 construction.type_(),
+                construction.type_().position(),
                 context.types(),
                 context.records(),
             )?;
@@ -148,10 +154,15 @@ pub fn compile(
 
             mir::ir::RecordField::new(
                 type_::compile(context, type_)?.into_record().unwrap(),
-                record_field_resolver::resolve(type_, context.types(), context.records())?
-                    .iter()
-                    .position(|field_type| field_type.name() == deconstruction.field_name())
-                    .unwrap(),
+                record_field_resolver::resolve(
+                    type_,
+                    deconstruction.record().position(),
+                    context.types(),
+                    context.records(),
+                )?
+                .iter()
+                .position(|field_type| field_type.name() == deconstruction.field_name())
+                .unwrap(),
                 compile(deconstruction.record())?,
             )
             .into()
@@ -168,6 +179,7 @@ pub fn compile(
                     Ok(mir::ir::RecordUpdateField::new(
                         record_field_resolver::resolve(
                             update.type_(),
+                            update.type_().position(),
                             context.types(),
                             context.records(),
                         )?

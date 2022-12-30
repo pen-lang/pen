@@ -106,7 +106,7 @@ fn infer_expression(
             let list = infer_expression(if_.list(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &list, variables)?;
             let list_type = type_canonicalizer::canonicalize_list(&type_, context.types())?
-                .ok_or(AnalysisError::ListExpected(type_))?;
+                .ok_or_else(|| AnalysisError::ListExpected(list.position().clone(), type_))?;
 
             let then = infer_expression(
                 if_.then(),
@@ -141,7 +141,7 @@ fn infer_expression(
             let key = infer_expression(if_.key(), variables)?;
             let type_ = type_extractor::extract_from_expression(context, &map, variables)?;
             let map_type = type_canonicalizer::canonicalize_map(&type_, context.types())?
-                .ok_or(AnalysisError::MapExpected(type_))?;
+                .ok_or_else(|| AnalysisError::MapExpected(map.position().clone(), type_))?;
 
             let then = infer_expression(
                 if_.then(),
@@ -287,7 +287,12 @@ fn infer_expression(
                                 types::Function::new(
                                     vec![],
                                     type_canonicalizer::canonicalize_list(type_, context.types())?
-                                        .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
+                                        .ok_or_else(|| {
+                                            AnalysisError::ListExpected(
+                                                iteratee.expression().position().clone(),
+                                                type_.clone(),
+                                            )
+                                        })?
                                         .element()
                                         .clone(),
                                     comprehension.position().clone(),
@@ -404,21 +409,25 @@ fn infer_expression(
                     type_extractor::extract_from_expression(context, &expression, variables)?;
 
                 TryOperation::new(
-                    Some(
-                        if let Some(type_) = type_difference_calculator::calculate(
-                            &type_,
-                            &types::Error::new(position.clone()).into(),
-                            context.types(),
-                        )? {
-                            if type_.is_any() {
-                                return Err(AnalysisError::UnionExpected(type_));
-                            } else {
-                                type_
-                            }
+                    Some(if let Some(type_) = type_difference_calculator::calculate(
+                        &type_,
+                        &types::Error::new(position.clone()).into(),
+                        context.types(),
+                    )? {
+                        if type_.is_any() {
+                            Err(AnalysisError::UnionExpected(
+                                operation.expression().position().clone(),
+                                type_,
+                            ))
                         } else {
-                            return Err(AnalysisError::UnionExpected(type_));
-                        },
-                    ),
+                            Ok(type_)
+                        }
+                    } else {
+                        Err(AnalysisError::UnionExpected(
+                            operation.expression().position().clone(),
+                            type_,
+                        ))
+                    }?),
                     expression,
                     position.clone(),
                 )
@@ -536,7 +545,7 @@ fn infer_built_in_call(
                     position.clone(),
                 ),
                 BuiltInFunctionName::Keys => {
-                    let [argument_type] = &argument_types[..] else {
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
                         return Err(AnalysisError::ArgumentCount(position.clone()));
                     };
 
@@ -544,7 +553,12 @@ fn infer_built_in_call(
                         vec![argument_type.clone()],
                         types::List::new(
                             type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                                .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                                .ok_or_else(|| {
+                                    AnalysisError::MapExpected(
+                                        argument.position().clone(),
+                                        argument_type.clone(),
+                                    )
+                                })?
                                 .key()
                                 .clone(),
                             position.clone(),
@@ -553,12 +567,17 @@ fn infer_built_in_call(
                     )
                 }
                 BuiltInFunctionName::Race => {
-                    let argument_type = argument_types
-                        .first()
-                        .ok_or_else(|| AnalysisError::ArgumentCount(position.clone()))?;
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
+                        return Err(AnalysisError::ArgumentCount(position.clone()));
+                    };
                     let argument_type =
                         type_canonicalizer::canonicalize_list(argument_type, context.types())?
-                            .ok_or_else(|| AnalysisError::ListExpected(argument_type.clone()))?;
+                            .ok_or_else(|| {
+                                AnalysisError::ListExpected(
+                                    argument.position().clone(),
+                                    argument_type.clone(),
+                                )
+                            })?;
 
                     types::Function::new(
                         argument_types,
@@ -602,7 +621,7 @@ fn infer_built_in_call(
                     types::Function::new(argument_types, result_type, position.clone())
                 }
                 BuiltInFunctionName::Values => {
-                    let [argument_type] = &argument_types[..] else {
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
                         return Err(AnalysisError::ArgumentCount(position.clone()));
                     };
 
@@ -610,7 +629,12 @@ fn infer_built_in_call(
                         vec![argument_type.clone()],
                         types::List::new(
                             type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                                .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                                .ok_or_else(|| {
+                                    AnalysisError::MapExpected(
+                                        argument.position().clone(),
+                                        argument_type.clone(),
+                                    )
+                                })?
                                 .value()
                                 .clone(),
                             position.clone(),
@@ -1826,6 +1850,7 @@ mod tests {
                     )
                 ],)),
                 Err(AnalysisError::UnionExpected(
+                    Position::fake(),
                     types::Error::new(Position::fake()).into()
                 ))
             );

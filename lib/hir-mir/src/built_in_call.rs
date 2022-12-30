@@ -25,7 +25,12 @@ pub fn compile(
         .function_type()
         .ok_or_else(|| AnalysisError::TypeNotInferred(position.clone()))?;
     let function_type = type_canonicalizer::canonicalize_function(function_type, context.types())?
-        .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+        .ok_or_else(|| {
+            AnalysisError::FunctionExpected(
+                call.function().position().clone(),
+                function_type.clone(),
+            )
+        })?;
     let arguments = call
         .arguments()
         .iter()
@@ -49,7 +54,12 @@ pub fn compile(
         BuiltInFunctionName::Delete => {
             let map_type =
                 type_canonicalizer::canonicalize_map(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(function_type.result().clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            call.position().clone(),
+                            function_type.result().clone(),
+                        )
+                    })?;
             let mir_map_type = type_::compile_map(context)?;
 
             mir::ir::Call::new(
@@ -85,17 +95,23 @@ pub fn compile(
         BuiltInFunctionName::Error => error_type::compile_error(arguments[0].clone()),
         BuiltInFunctionName::Keys => {
             let argument_type = &function_type.arguments()[0];
+            let argument = &call.arguments()[0];
 
             compile_map_iteration(
                 context,
-                &call.arguments()[0],
+                argument,
                 &context
                     .configuration()?
                     .map_type
                     .iteration
                     .key_function_name,
                 type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            argument.position().clone(),
+                            argument_type.clone(),
+                        )
+                    })?
                     .key(),
                 position,
             )?
@@ -105,7 +121,12 @@ pub fn compile(
 
             let list_type =
                 type_canonicalizer::canonicalize_list(function_type.result(), context.types())?
-                    .ok_or_else(|| AnalysisError::ListExpected(function_type.result().clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::ListExpected(
+                            call.position().clone(),
+                            function_type.result().clone(),
+                        )
+                    })?;
             let any_list_type =
                 types::List::new(types::Any::new(position.clone()), position.clone());
 
@@ -168,7 +189,12 @@ pub fn compile(
             let function_type = &function_type.arguments()[0];
             let function_type =
                 type_canonicalizer::canonicalize_function(function_type, context.types())?
-                    .ok_or_else(|| AnalysisError::FunctionExpected(function_type.clone()))?;
+                    .ok_or_else(|| {
+                        AnalysisError::FunctionExpected(
+                            call.arguments()[0].position().clone(),
+                            function_type.clone(),
+                        )
+                    })?;
             let result_type = function_type.result();
             let any_type = Type::from(types::Any::new(position.clone()));
             let thunk_type =
@@ -236,17 +262,23 @@ pub fn compile(
         }
         BuiltInFunctionName::Values => {
             let argument_type = &function_type.arguments()[0];
+            let argument = &call.arguments()[0];
 
             compile_map_iteration(
                 context,
-                &call.arguments()[0],
+                argument,
                 &context
                     .configuration()?
                     .map_type
                     .iteration
                     .value_function_name,
                 type_canonicalizer::canonicalize_map(argument_type, context.types())?
-                    .ok_or_else(|| AnalysisError::MapExpected(argument_type.clone()))?
+                    .ok_or_else(|| {
+                        AnalysisError::MapExpected(
+                            argument.position().clone(),
+                            argument_type.clone(),
+                        )
+                    })?
                     .value(),
                 position,
             )?
