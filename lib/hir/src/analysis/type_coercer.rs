@@ -90,7 +90,12 @@ fn transform_expression(
                 .function_type()
                 .ok_or_else(|| AnalysisError::TypeNotInferred(call.position().clone()))?;
             let function_type = type_canonicalizer::canonicalize_function(type_, context.types())?
-                .ok_or_else(|| AnalysisError::FunctionExpected(type_.clone()))?;
+                .ok_or_else(|| {
+                    AnalysisError::FunctionExpected(
+                        call.function().position().clone(),
+                        type_.clone(),
+                    )
+                })?;
 
             Call::new(
                 call.function_type().cloned(),
@@ -308,7 +313,12 @@ fn transform_expression(
                                 types::Function::new(
                                     vec![],
                                     type_canonicalizer::canonicalize_list(type_, context.types())?
-                                        .ok_or_else(|| AnalysisError::ListExpected(type_.clone()))?
+                                        .ok_or_else(|| {
+                                            AnalysisError::ListExpected(
+                                                iteratee.expression().position().clone(),
+                                                type_.clone(),
+                                            )
+                                        })?
                                         .element()
                                         .clone(),
                                     position.clone(),
@@ -492,8 +502,12 @@ fn transform_record_fields(
     variables: &plist::FlailMap<String, Type>,
     context: &AnalysisContext,
 ) -> Result<Vec<RecordField>, AnalysisError> {
-    let field_types =
-        record_field_resolver::resolve(record_type, context.types(), context.records())?;
+    let field_types = record_field_resolver::resolve(
+        record_type,
+        record_type.position(),
+        context.types(),
+        context.records(),
+    )?;
 
     fields
         .iter()

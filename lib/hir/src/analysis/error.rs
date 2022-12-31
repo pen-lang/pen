@@ -14,21 +14,21 @@ pub enum AnalysisError {
     AnyTypeBranch(Position),
     ArgumentCount(Position),
     BuiltInFunctionNotCalled(Position),
-    CollectionExpected(Type),
+    CollectionExpected(Position, Type),
     DuplicateFunctionNames(Position, Position),
     DuplicateTypeNames(Position, Position),
     ElementNameNotDefined(Position),
     ErrorTypeUndefined,
-    FunctionExpected(Type),
+    FunctionExpected(Position, Type),
     ImpossibleRecord(Position),
     InvalidAdditionOperand(Position),
     InvalidTryOperation(Position),
     KeyNameNotDefined(Position),
     ListComprehensionIterateeCount(Position),
-    ListExpected(Type),
-    MapExpected(Type),
+    ListExpected(Position, Type),
+    MapExpected(Position, Type),
     MissingElseBlock(Position),
-    RecordExpected(Type),
+    RecordExpected(Position, Type),
     RecordFieldNotFound(String, Position),
     RecordFieldPrivate(Position),
     RecordFieldUnknown(Position),
@@ -38,15 +38,18 @@ pub enum AnalysisError {
     TryOperationInList(Position),
     TypeNotFound(Reference),
     TypeNotInferred(Position),
-    TypeNotComparable(Type),
-    TypesNotMatched(Type, Type),
-    UnionExpected(Type),
+    TypeNotComparable(Position, Type),
+    TypesNotMatched {
+        found: (Position, Type),
+        expected: (Position, Type),
+    },
+    UnionExpected(Position, Type),
     UnknownRecordField(Position),
     UnreachableCode(Position),
     UnusedErrorValue(Position),
     ValueNameNotDefined(Position),
     VariableNotFound(Variable),
-    VariantExpected(Type),
+    VariantExpected(Position, Type),
 }
 
 impl AnalysisError {
@@ -54,18 +57,12 @@ impl AnalysisError {
         format!("`{}`", type_formatter::format(type_))
     }
 
-    fn format_found_type_message(type_: &Type) -> String {
-        position::format_message(
-            type_.position(),
-            &format!("found {}", Self::format_type(type_)),
-        )
+    fn format_found_type_message(position: &Position, type_: &Type) -> String {
+        position::format_message(position, &format!("found {}", Self::format_type(type_)))
     }
 
-    fn format_expected_type_message(type_: &Type) -> String {
-        position::format_message(
-            type_.position(),
-            &format!("expected {}", Self::format_type(type_)),
-        )
+    fn format_expected_type_message(position: &Position, type_: &Type) -> String {
+        position::format_message(position, &format!("expected {}", Self::format_type(type_)))
     }
 }
 
@@ -93,11 +90,11 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::CollectionExpected(type_) => {
+            Self::CollectionExpected(position, type_) => {
                 write!(
                     formatter,
                     "list or map expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::DuplicateFunctionNames(one, other) => {
@@ -112,11 +109,11 @@ impl Display for AnalysisError {
             Self::ErrorTypeUndefined => {
                 write!(formatter, "error type undefined")
             }
-            Self::FunctionExpected(type_) => {
+            Self::FunctionExpected(position, type_) => {
                 write!(
                     formatter,
                     "function expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::ImpossibleRecord(position) => {
@@ -150,18 +147,18 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::ListExpected(type_) => {
+            Self::ListExpected(position, type_) => {
                 write!(
                     formatter,
                     "list expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
-            Self::MapExpected(type_) => {
+            Self::MapExpected(position, type_) => {
                 write!(
                     formatter,
                     "map expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::MissingElseBlock(position) => {
@@ -171,11 +168,11 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::RecordExpected(type_) => {
+            Self::RecordExpected(position, type_) => {
                 write!(
                     formatter,
                     "record expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::RecordFieldNotFound(name, position) => {
@@ -210,17 +207,17 @@ impl Display for AnalysisError {
                     position
                 )
             }
-            Self::TypeNotComparable(type_) => {
+            Self::TypeNotComparable(position, type_) => {
                 write!(
                     formatter,
                     "type not comparable\n{}",
                     position::format_message(
-                        type_.position(),
+                        position,
                         &format!(
                             "{} might include function, {}, or {} types",
                             Self::format_type(type_),
-                            Self::format_type(&types::Error::new(type_.position().clone()).into()),
-                            Self::format_type(&types::Any::new(type_.position().clone()).into()),
+                            Self::format_type(&types::Error::new(position.clone()).into()),
+                            Self::format_type(&types::Any::new(position.clone()).into()),
                         ),
                     )
                 )
@@ -234,17 +231,20 @@ impl Display for AnalysisError {
             Self::TypeNotInferred(position) => {
                 write!(formatter, "type not inferred\n{}", position)
             }
-            Self::TypesNotMatched(lower, upper) => write!(
+            Self::TypesNotMatched {
+                found: (found_position, found_type),
+                expected: (expected_position, expected_type),
+            } => write!(
                 formatter,
                 "types not matched\n{}\n{}",
-                Self::format_found_type_message(lower),
-                Self::format_expected_type_message(upper),
+                Self::format_found_type_message(found_position, found_type),
+                Self::format_expected_type_message(expected_position, expected_type),
             ),
-            Self::UnionExpected(type_) => {
+            Self::UnionExpected(position, type_) => {
                 write!(
                     formatter,
                     "union type expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
             Self::UnknownRecordField(position) => {
@@ -265,11 +265,11 @@ impl Display for AnalysisError {
                 variable.name(),
                 variable.position()
             ),
-            Self::VariantExpected(type_) => {
+            Self::VariantExpected(position, type_) => {
                 write!(
                     formatter,
                     "union or any type expected\n{}",
-                    Self::format_found_type_message(type_)
+                    Self::format_found_type_message(position, type_)
                 )
             }
         }
