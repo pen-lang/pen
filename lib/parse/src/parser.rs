@@ -883,7 +883,7 @@ fn map_element(input: Input) -> IResult<MapElement> {
             tuple((position, expression, sign(":"), cut(expression))),
             |(position, key, _, value)| MapEntry::new(key, value, position()).into(),
         ),
-        map(preceded(sign("..."), cut(expression)), MapElement::Map),
+        map(preceded(sign("..."), cut(expression)), MapElement::Multiple),
     ))(input)
 }
 
@@ -3332,7 +3332,7 @@ mod tests {
                     Map::new(
                         types::Reference::new("none", Position::fake()),
                         types::Reference::new("none", Position::fake()),
-                        vec![MapElement::Map(
+                        vec![MapElement::Multiple(
                             Variable::new("none", Position::fake()).into(),
                         )],
                         Position::fake(),

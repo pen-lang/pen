@@ -2,8 +2,8 @@ use super::{expression::Expression, map_entry::MapEntry};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum MapElement {
-    Single(MapEntry),
     Multiple(Expression),
+    Single(MapEntry),
 }
 
 impl From<MapEntry> for MapElement {

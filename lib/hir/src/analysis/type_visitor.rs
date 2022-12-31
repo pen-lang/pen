@@ -176,7 +176,7 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
                         visit_expression(entry.key(), visit);
                         visit_expression(entry.value(), visit);
                     }
-                    MapElement::Map(expression) => visit_expression(expression, visit),
+                    MapElement::Multiple(expression) => visit_expression(expression, visit),
                 }
             }
         }

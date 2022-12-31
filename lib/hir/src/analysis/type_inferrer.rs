@@ -334,7 +334,7 @@ fn infer_expression(
                             infer_expression(entry.value(), variables)?,
                             entry.position().clone(),
                         )),
-                        MapElement::Map(map) => MapElement::Map(infer_expression(map, variables)?),
+                        MapElement::Multiple(map) => MapElement::Multiple(infer_expression(map, variables)?),
                     })
                 })
                 .collect::<Result<_, AnalysisError>>()?,

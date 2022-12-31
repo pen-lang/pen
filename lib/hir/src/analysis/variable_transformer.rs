@@ -219,7 +219,7 @@ fn transform_expression(
                         transform_expression(entry.value(), transform),
                         entry.position().clone(),
                     )),
-                    MapElement::Map(map) => MapElement::Map(transform_expression(map, transform)),
+                    MapElement::Multiple(map) => MapElement::Multiple(transform_expression(map, transform)),
                 })
                 .collect(),
             map.position().clone(),
