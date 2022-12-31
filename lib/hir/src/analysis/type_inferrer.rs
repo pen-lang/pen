@@ -329,7 +329,7 @@ fn infer_expression(
                 .iter()
                 .map(|element| {
                     Ok(match element {
-                        MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                             infer_expression(entry.key(), variables)?,
                             infer_expression(entry.value(), variables)?,
                             entry.position().clone(),

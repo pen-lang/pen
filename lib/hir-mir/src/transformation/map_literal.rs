@@ -58,7 +58,7 @@ fn transform_map(
         .into(),
         // Optimize cases where only a single element of a spread map exists.
         // This is safe because we pass in context functions dynamically in every map operation.
-        [MapElement::Map(expression)] => expression.clone(),
+        [MapElement::Multiple(expression)] => expression.clone(),
         [.., element] => {
             let rest_expression = transform_map(
                 context,
@@ -71,7 +71,7 @@ fn transform_map(
             )?;
 
             match element {
-                MapElement::Insertion(entry) => Call::new(
+                MapElement::Single(entry) => Call::new(
                     Some(
                         types::Function::new(
                             vec![
@@ -107,7 +107,7 @@ fn transform_map(
                     position.clone(),
                 )
                 .into(),
-                MapElement::Map(expression) => Call::new(
+                MapElement::Multiple(expression) => Call::new(
                     Some(
                         types::Function::new(
                             vec![
@@ -212,7 +212,7 @@ mod tests {
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
-                vec![MapElement::Map(None::new(Position::fake()).into())],
+                vec![MapElement::Multiple(None::new(Position::fake()).into())],
                 Position::fake()
             ),
         ));

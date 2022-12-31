@@ -85,11 +85,11 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a E
         Expression::Map(map) => {
             for element in map.elements() {
                 match element {
-                    MapElement::Insertion(entry) => {
+                    MapElement::Single(entry) => {
                         visit_expression(entry.key());
                         visit_expression(entry.value());
                     }
-                    MapElement::Map(expression) => visit_expression(expression),
+                    MapElement::Multiple(expression) => visit_expression(expression),
                 }
             }
         }

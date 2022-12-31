@@ -214,7 +214,7 @@ fn transform_expression(
             map.elements()
                 .iter()
                 .map(|element| match element {
-                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                    MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                         transform_expression(entry.key(), transform),
                         transform_expression(entry.value(), transform),
                         entry.position().clone(),

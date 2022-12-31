@@ -172,7 +172,7 @@ fn visit_expression<'a>(expression: &'a Expression, visit: &mut impl FnMut(&'a T
 
             for element in map.elements() {
                 match element {
-                    MapElement::Insertion(entry) => {
+                    MapElement::Single(entry) => {
                         visit_expression(entry.key(), visit);
                         visit_expression(entry.value(), visit);
                     }

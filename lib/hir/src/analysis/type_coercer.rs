@@ -359,7 +359,7 @@ fn transform_expression(
                 .iter()
                 .map(|element| {
                     Ok(match element {
-                        MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                             transform_and_coerce_expression(
                                 entry.key(),
                                 map.key_type(),
@@ -372,16 +372,18 @@ fn transform_expression(
                             )?,
                             entry.position().clone(),
                         )),
-                        MapElement::Map(other) => MapElement::Map(transform_and_coerce_expression(
-                            other,
-                            &types::Map::new(
-                                map.key_type().clone(),
-                                map.value_type().clone(),
-                                map.position().clone(),
-                            )
-                            .into(),
-                            variables,
-                        )?),
+                        MapElement::Multiple(other) => {
+                            MapElement::Multiple(transform_and_coerce_expression(
+                                other,
+                                &types::Map::new(
+                                    map.key_type().clone(),
+                                    map.value_type().clone(),
+                                    map.position().clone(),
+                                )
+                                .into(),
+                                variables,
+                            )?)
+                        }
                     })
                 })
                 .collect::<Result<_, _>>()?,
@@ -1746,7 +1748,7 @@ mod tests {
                             Map::new(
                                 union_type.clone(),
                                 types::None::new(Position::fake()),
-                                vec![MapElement::Insertion(MapEntry::new(
+                                vec![MapElement::Single(MapEntry::new(
                                     None::new(Position::fake()),
                                     None::new(Position::fake()),
                                     Position::fake(),
@@ -1767,7 +1769,7 @@ mod tests {
                             Map::new(
                                 union_type.clone(),
                                 types::None::new(Position::fake()),
-                                vec![MapElement::Insertion(MapEntry::new(
+                                vec![MapElement::Single(MapEntry::new(
                                     TypeCoercion::new(
                                         types::None::new(Position::fake()),
                                         union_type,
@@ -1881,7 +1883,9 @@ mod tests {
                             Map::new(
                                 to_map_type.key().clone(),
                                 to_map_type.value().clone(),
-                                vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                                vec![MapElement::Multiple(
+                                    Variable::new("x", Position::fake()).into()
+                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -1898,7 +1902,7 @@ mod tests {
                             Map::new(
                                 to_map_type.key().clone(),
                                 to_map_type.value().clone(),
-                                vec![MapElement::Map(
+                                vec![MapElement::Multiple(
                                     TypeCoercion::new(
                                         from_map_type,
                                         to_map_type,
@@ -1945,7 +1949,9 @@ mod tests {
                             Map::new(
                                 to_map_type.key().clone(),
                                 to_map_type.value().clone(),
-                                vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                                vec![MapElement::Multiple(
+                                    Variable::new("x", Position::fake()).into()
+                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -1962,7 +1968,7 @@ mod tests {
                             Map::new(
                                 to_map_type.key().clone(),
                                 to_map_type.value().clone(),
-                                vec![MapElement::Map(
+                                vec![MapElement::Multiple(
                                     TypeCoercion::new(
                                         from_map_type,
                                         to_map_type,

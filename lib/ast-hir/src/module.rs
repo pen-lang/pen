@@ -311,14 +311,14 @@ fn compile_expression(expression: &ast::Expression) -> Result<ir::Expression, Co
                 .map(|element| {
                     Ok(match element {
                         ast::MapElement::Insertion(entry) => {
-                            ir::MapElement::Insertion(ir::MapEntry::new(
+                            ir::MapElement::Single(ir::MapEntry::new(
                                 compile_expression(entry.key())?,
                                 compile_expression(entry.value())?,
                                 entry.position().clone(),
                             ))
                         }
                         ast::MapElement::Map(element) => {
-                            ir::MapElement::Map(compile_expression(element)?)
+                            ir::MapElement::Multiple(compile_expression(element)?)
                         }
                     })
                 })

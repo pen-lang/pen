@@ -2,12 +2,12 @@ use super::{expression::Expression, map_entry::MapEntry};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum MapElement {
-    Insertion(MapEntry),
-    Map(Expression),
+    Single(MapEntry),
+    Multiple(Expression),
 }
 
 impl From<MapEntry> for MapElement {
     fn from(entry: MapEntry) -> Self {
-        Self::Insertion(entry)
+        Self::Single(entry)
     }
 }

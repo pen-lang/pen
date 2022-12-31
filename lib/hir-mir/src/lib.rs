@@ -1335,7 +1335,9 @@ mod tests {
                         Map::new(
                             map_type.key().clone(),
                             map_type.value().clone(),
-                            vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                            vec![MapElement::Multiple(
+                                Variable::new("x", Position::fake()).into(),
+                            )],
                             Position::fake(),
                         ),
                         Position::fake(),
