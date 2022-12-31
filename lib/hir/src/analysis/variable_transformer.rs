@@ -214,12 +214,14 @@ fn transform_expression(
             map.elements()
                 .iter()
                 .map(|element| match element {
-                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                    MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                         transform_expression(entry.key(), transform),
                         transform_expression(entry.value(), transform),
                         entry.position().clone(),
                     )),
-                    MapElement::Map(map) => MapElement::Map(transform_expression(map, transform)),
+                    MapElement::Multiple(map) => {
+                        MapElement::Multiple(transform_expression(map, transform))
+                    }
                 })
                 .collect(),
             map.position().clone(),

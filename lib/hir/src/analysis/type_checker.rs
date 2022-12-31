@@ -376,7 +376,7 @@ fn check_expression(
         Expression::Map(map) => {
             for element in map.elements() {
                 match element {
-                    MapElement::Insertion(entry) => {
+                    MapElement::Single(entry) => {
                         check_subsumption(
                             &check_expression(entry.key(), variables)?,
                             map.key_type(),
@@ -390,7 +390,7 @@ fn check_expression(
                             map.value_type().position(),
                         )?;
                     }
-                    MapElement::Map(expression) => {
+                    MapElement::Multiple(expression) => {
                         let type_ = check_expression(expression, variables)?;
                         let map_type =
                             type_canonicalizer::canonicalize_map(&type_, context.types())?
@@ -2981,7 +2981,9 @@ mod tests {
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
-                                vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                                vec![MapElement::Multiple(
+                                    Variable::new("x", Position::fake()).into()
+                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -3016,7 +3018,9 @@ mod tests {
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
-                                vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                                vec![MapElement::Multiple(
+                                    Variable::new("x", Position::fake()).into()
+                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),
@@ -3057,7 +3061,9 @@ mod tests {
                             Map::new(
                                 types::None::new(Position::fake()),
                                 types::None::new(Position::fake()),
-                                vec![MapElement::Map(Variable::new("x", Position::fake()).into())],
+                                vec![MapElement::Multiple(
+                                    Variable::new("x", Position::fake()).into()
+                                )],
                                 Position::fake(),
                             ),
                             Position::fake(),

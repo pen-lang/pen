@@ -265,12 +265,12 @@ fn transform_expression(expression: &Expression, transform: &impl Fn(&Type) -> T
             map.elements()
                 .iter()
                 .map(|element| match element {
-                    MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                    MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                         transform_expression(entry.key()),
                         transform_expression(entry.value()),
                         entry.position().clone(),
                     )),
-                    MapElement::Map(map) => MapElement::Map(transform_expression(map)),
+                    MapElement::Multiple(map) => MapElement::Multiple(transform_expression(map)),
                 })
                 .collect(),
             map.position().clone(),

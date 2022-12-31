@@ -712,10 +712,10 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
                 sequence([
                     line(),
                     compile_line_comment(context, element.position(), |context| match element {
-                        MapElement::Map(expression) => {
+                        MapElement::Multiple(expression) => {
                             sequence(["...".into(), compile_expression(context, expression)])
                         }
-                        MapElement::Insertion(entry) => sequence([
+                        MapElement::Single(entry) => sequence([
                             compile_expression(context, entry.key()),
                             ": ".into(),
                             compile_expression(context, entry.value()),
@@ -3306,7 +3306,7 @@ mod tests {
                         &Map::new(
                             types::Reference::new("string", Position::fake()),
                             types::Reference::new("number", Position::fake()),
-                            vec![MapElement::Map(
+                            vec![MapElement::Multiple(
                                 Variable::new("xs", Position::fake()).into()
                             )],
                             Position::fake()

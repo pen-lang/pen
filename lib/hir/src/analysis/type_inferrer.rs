@@ -329,12 +329,14 @@ fn infer_expression(
                 .iter()
                 .map(|element| {
                     Ok(match element {
-                        MapElement::Insertion(entry) => MapElement::Insertion(MapEntry::new(
+                        MapElement::Single(entry) => MapElement::Single(MapEntry::new(
                             infer_expression(entry.key(), variables)?,
                             infer_expression(entry.value(), variables)?,
                             entry.position().clone(),
                         )),
-                        MapElement::Map(map) => MapElement::Map(infer_expression(map, variables)?),
+                        MapElement::Multiple(map) => {
+                            MapElement::Multiple(infer_expression(map, variables)?)
+                        }
                     })
                 })
                 .collect::<Result<_, AnalysisError>>()?,

@@ -93,11 +93,11 @@ fn validate_expression(
         Expression::Map(map) => {
             for element in map.elements() {
                 match element {
-                    MapElement::Insertion(entry) => {
+                    MapElement::Single(entry) => {
                         validate(entry.key())?;
                         validate(entry.value())?
                     }
-                    MapElement::Map(expression) => validate(expression)?,
+                    MapElement::Multiple(expression) => validate(expression)?,
                 }
             }
         }
