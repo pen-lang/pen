@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
-nom = "7.1.1"
+nom = "7.1.2"
 nom_locate = "4.0.0"
 position = { path = "../position" }
 
