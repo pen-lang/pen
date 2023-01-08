@@ -193,9 +193,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.4"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2ead0184d769ab08b84acbd22d9b5153b41973f00d5f96d9f34f6551ed8713a"
+checksum = "877a90d19cc1f6efb64075a9791feb8ad585dc4f014f12b9978f935aeb9d4f04"
 dependencies = [
  "async-stream",
  "futures",
