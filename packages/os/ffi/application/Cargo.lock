@@ -280,9 +280,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.4"
+version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2ead0184d769ab08b84acbd22d9b5153b41973f00d5f96d9f34f6551ed8713a"
+checksum = "877a90d19cc1f6efb64075a9791feb8ad585dc4f014f12b9978f935aeb9d4f04"
 dependencies = [
  "async-stream",
  "futures",
@@ -395,9 +395,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.23.0"
+version = "1.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eab6d665857cc6ca78d6e80303a02cea7a7851e85dfbd77cbdc09bd129f1ef46"
+checksum = "1d9f76183f91ecfb55e1d7d5602bd1d979e38a3a522fe900241cf195624d67ae"
 dependencies = [
  "autocfg",
  "bytes",
