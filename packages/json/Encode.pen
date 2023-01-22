@@ -1,3 +1,4 @@
+import Core'Number
 import Core'String
 import Core'String'Utf8
 
@@ -55,10 +56,18 @@ arrayElements = \(vs [Value]) [string] {
 }
 
 object = \(vs {string: Value}) [string] {
-  "{"
-    + String'Join(
-      [string string(k()) + ":" + value(v()) for k, v in keys(vs), values(vs)],
-      ",",
-    )
-    + "}"
+  [string
+    "{",
+    ...[string
+      s()
+      for s in [string
+        if i() == 1 { "" } else { "," },
+        ...string(k()),
+        ":",
+        ...value(v()),
+      ]
+      for k, v, i in keys(vs), values(vs), Number'Sequence(Number'Infinity())
+    ],
+    "}",
+  ]
 }
