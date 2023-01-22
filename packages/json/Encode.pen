@@ -40,19 +40,18 @@ string = \(s string) [string] {
 }
 
 array = \(vs [Value]) [string] {
-  if [_, ...ss] = arrayElements(vs) {
-    [string "[", ...ss, "]"]
-  } else {
-    [string "[]"]
-  }
-}
-
-arrayElements = \(vs [Value]) [string] {
-  if [v, ...vs] = vs {
-    [string ",", ...value(v()), ...arrayElements(vs)]
-  } else {
-    [string]
-  }
+  [string
+    "[",
+    ...[string
+      s()
+      for s in [string
+        if i() == 1 { "" } else { "," },
+        ...value(v()),
+      ]
+      for v, i in vs, Number'Sequence(Number'Infinity())
+    ],
+    "]",
+  ]
 }
 
 object = \(vs {string: Value}) [string] {
