@@ -44,10 +44,7 @@ array = \(vs [Value]) [string] {
     "[",
     ...[string
       s()
-      for s in [string
-        if i() == 1 { "" } else { "," },
-        ...value(v()),
-      ]
+      for s in [string if i() == 1 { "" } else { "," }, ...value(v())]
       for v, i in vs, Number'Sequence(Number'Infinity())
     ],
     "]",
@@ -59,12 +56,7 @@ object = \(vs {string: Value}) [string] {
     "{",
     ...[string
       s()
-      for s in [string
-        if i() == 1 { "" } else { "," },
-        ...string(k()),
-        ":",
-        ...value(v()),
-      ]
+      for s in [string if i() == 1 { "" } else { "," }, ...string(k()), ":", ...value(v())]
       for k, v, i in keys(vs), values(vs), Number'Sequence(Number'Infinity())
     ],
     "}",
