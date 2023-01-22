@@ -1,3 +1,4 @@
+import Core'Number
 import Core'String
 import Core'String'Utf8
 
@@ -39,35 +40,25 @@ string = \(s string) [string] {
 }
 
 array = \(vs [Value]) [string] {
-  if [_, ...ss] = arrayElements(vs) {
-    [string "[", ...ss, "]"]
-  } else {
-    [string "[]"]
-  }
-}
-
-arrayElements = \(vs [Value]) [string] {
-  if [v, ...vs] = vs {
-    [string ",", ...value(v()), ...arrayElements(vs)]
-  } else {
-    [string]
-  }
+  [string
+    "[",
+    ...[string
+      s()
+      for s in [string if i() == 1 { "" } else { "," }, ...value(v())]
+      for v, i in vs, Number'Sequence(Number'Infinity())
+    ],
+    "]",
+  ]
 }
 
 object = \(vs {string: Value}) [string] {
-  if [_, ...ss] = objectEntries(
-    [objectEntry objectEntry{key: k(), value: v()} for k, v in keys(vs), values(vs)],
-  ) {
-    [string "{", ...ss, "}"]
-  } else {
-    [string "{}"]
-  }
-}
-
-objectEntries = \(es [objectEntry]) [string] {
-  if [e, ...es] = es {
-    [string ",", ...string(e().key), ":", ...value(e().value), ...objectEntries(es)]
-  } else {
-    [string]
-  }
+  [string
+    "{",
+    ...[string
+      s()
+      for s in [string if i() == 1 { "" } else { "," }, ...string(k()), ":", ...value(v())]
+      for k, v, i in keys(vs), values(vs), Number'Sequence(Number'Infinity())
+    ],
+    "}",
+  ]
 }
