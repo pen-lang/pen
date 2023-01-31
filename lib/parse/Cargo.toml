@@ -11,6 +11,6 @@ nom_locate = "4.1.0"
 position = { path = "../position" }
 
 [dev-dependencies]
-indoc = "1"
+indoc = "2"
 insta = "1"
 pretty_assertions = "1"
