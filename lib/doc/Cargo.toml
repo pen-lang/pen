@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 ast = { path = "../ast" }
 format = { path = "../format" }
-indoc = "1"
+indoc = "2"
 itertools = "0.10"
 position = { path = "../position" }
 
