@@ -92,7 +92,7 @@ fn compile_function_definition(
     let position = branch.position();
     let list_type = type_::compile_list(context)?;
     let iteratee_names = (0..branch.iteratees().len())
-        .map(|index| format!("{}_{}", LIST_NAME, index))
+        .map(|index| format!("{LIST_NAME}_{index}"))
         .collect::<Vec<_>>();
     let iteratee_types = branch
         .iteratees()

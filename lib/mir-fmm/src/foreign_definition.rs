@@ -12,7 +12,7 @@ pub fn compile(
         .arguments()
         .iter()
         .enumerate()
-        .map(|(index, type_)| fmm::ir::Argument::new(format!("arg_{}", index), type_.clone()))
+        .map(|(index, type_)| fmm::ir::Argument::new(format!("arg_{index}"), type_.clone()))
         .collect::<Vec<_>>();
 
     context.module_builder().define_function(

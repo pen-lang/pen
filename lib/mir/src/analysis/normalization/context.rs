@@ -25,7 +25,7 @@ impl<'a> Context<'a> {
 
         self.name_index.set(index + 1);
 
-        format!("anf:v:{}", index)
+        format!("anf:v:{index}")
     }
 
     pub fn record_fields(&self) -> &FnvHashMap<&'a str, &'a types::RecordBody> {

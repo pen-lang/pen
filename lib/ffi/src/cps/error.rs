@@ -16,7 +16,7 @@ impl Display for CpsError {
                 write!(formatter, "missing context")
             }
             Self::UnexpectedAsyncStackAction(expected) => {
-                write!(formatter, "invalid stack action (expected: {:?})", expected)
+                write!(formatter, "invalid stack action (expected: {expected:?})")
             }
         }
     }

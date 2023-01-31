@@ -11,7 +11,7 @@ pub fn log_error(error: &dyn std::error::Error) -> Result<(), Box<dyn std::error
     writeln!(
         stderr,
         ": {}",
-        format!("{}", error).replace('\n', "\n  ").trim()
+        format!("{error}").replace('\n', "\n  ").trim()
     )?;
 
     if let Some(error) = error.source() {
@@ -28,7 +28,7 @@ pub fn log_info(log: &str) -> Result<(), Box<dyn std::error::Error>> {
     write!(stderr, "info")?;
     stderr.set_color(ColorSpec::new().set_fg(None))?;
 
-    writeln!(stderr, ": {}", log)?;
+    writeln!(stderr, ": {log}")?;
 
     Ok(())
 }

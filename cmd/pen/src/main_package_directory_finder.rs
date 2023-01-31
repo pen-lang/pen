@@ -8,8 +8,7 @@ pub fn find() -> Result<std::path::PathBuf, Box<dyn std::error::Error>> {
             std::io::Error::new(
                 std::io::ErrorKind::NotFound,
                 format!(
-                    "file {} not found in any parent directory",
-                    BUILD_CONFIGURATION_FILENAME,
+                    "file {BUILD_CONFIGURATION_FILENAME} not found in any parent directory",
                 ),
             )
         })?

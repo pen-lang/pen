@@ -42,7 +42,7 @@ fn compile_entry_function(
             .iter()
             .enumerate()
             .map(|(index, type_)| {
-                fmm::ir::Argument::new(format!("arg_{}", index), type_::compile(context, type_))
+                fmm::ir::Argument::new(format!("arg_{index}"), type_::compile(context, type_))
             }),
     )
     .collect::<Vec<_>>();

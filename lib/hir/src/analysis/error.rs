@@ -72,22 +72,19 @@ impl Display for AnalysisError {
             Self::AnyTypeBranch(position) => {
                 write!(
                     formatter,
-                    "any type cannot be used for downcast\n{}",
-                    position
+                    "any type cannot be used for downcast\n{position}"
                 )
             }
             Self::ArgumentCount(position) => {
                 write!(
                     formatter,
-                    "wrong number of arguments in function call\n{}",
-                    position
+                    "wrong number of arguments in function call\n{position}"
                 )
             }
             Self::BuiltInFunctionNotCalled(position) => {
                 write!(
                     formatter,
-                    "built-in function must be called directly\n{}",
-                    position
+                    "built-in function must be called directly\n{position}"
                 )
             }
             Self::CollectionExpected(position, type_) => {
@@ -98,13 +95,13 @@ impl Display for AnalysisError {
                 )
             }
             Self::DuplicateFunctionNames(one, other) => {
-                write!(formatter, "duplicate function names\n{}\n{}", one, other)
+                write!(formatter, "duplicate function names\n{one}\n{other}")
             }
             Self::DuplicateTypeNames(one, other) => {
-                write!(formatter, "duplicate type names\n{}\n{}", one, other)
+                write!(formatter, "duplicate type names\n{one}\n{other}")
             }
             Self::ElementNameNotDefined(position) => {
-                write!(formatter, "element name not defined\n{}", position)
+                write!(formatter, "element name not defined\n{position}")
             }
             Self::ErrorTypeUndefined => {
                 write!(formatter, "error type undefined")
@@ -119,32 +116,28 @@ impl Display for AnalysisError {
             Self::ImpossibleRecord(position) => {
                 write!(
                     formatter,
-                    "record construction dependent on itself\n{}",
-                    position
+                    "record construction dependent on itself\n{position}"
                 )
             }
             Self::InvalidAdditionOperand(position) => {
                 write!(
                     formatter,
-                    "addition operands must be numbers or strings\n{}",
-                    position
+                    "addition operands must be numbers or strings\n{position}"
                 )
             }
             Self::InvalidTryOperation(position) => {
                 write!(
                     formatter,
-                    "try operation cannot be used in function not returning error\n{}",
-                    position
+                    "try operation cannot be used in function not returning error\n{position}"
                 )
             }
             Self::KeyNameNotDefined(position) => {
-                write!(formatter, "key name not defined\n{}", position)
+                write!(formatter, "key name not defined\n{position}")
             }
             Self::ListComprehensionIterateeCount(position) => {
                 write!(
                     formatter,
-                    "unmatched iteratee count in list comprehension\n{}",
-                    position
+                    "unmatched iteratee count in list comprehension\n{position}"
                 )
             }
             Self::ListExpected(position, type_) => {
@@ -164,8 +157,7 @@ impl Display for AnalysisError {
             Self::MissingElseBlock(position) => {
                 write!(
                     formatter,
-                    "missing else block in if-type expression\n{}",
-                    position
+                    "missing else block in if-type expression\n{position}"
                 )
             }
             Self::RecordExpected(position, type_) => {
@@ -176,13 +168,13 @@ impl Display for AnalysisError {
                 )
             }
             Self::RecordFieldNotFound(name, position) => {
-                write!(formatter, "missing record field: {}\n{}", name, position)
+                write!(formatter, "missing record field: {name}\n{position}")
             }
             Self::RecordFieldPrivate(position) => {
-                write!(formatter, "private record field\n{}", position)
+                write!(formatter, "private record field\n{position}")
             }
             Self::RecordFieldUnknown(position) => {
-                write!(formatter, "unknown record field\n{}", position)
+                write!(formatter, "unknown record field\n{position}")
             }
             Self::RecordNotFound(record) => write!(
                 formatter,
@@ -191,20 +183,18 @@ impl Display for AnalysisError {
                 record.position()
             ),
             Self::RecursiveTypeAlias(position) => {
-                write!(formatter, "recursive type alias\n{}", position)
+                write!(formatter, "recursive type alias\n{position}")
             }
             Self::SpawnedFunctionArguments(position) => {
                 write!(
                     formatter,
-                    "function passed to go built-in function cannot have any argument\n{}",
-                    position
+                    "function passed to go built-in function cannot have any argument\n{position}"
                 )
             }
             Self::TryOperationInList(position) => {
                 write!(
                     formatter,
-                    "try operation not allowed in list literal\n{}",
-                    position
+                    "try operation not allowed in list literal\n{position}"
                 )
             }
             Self::TypeNotComparable(position, type_) => {
@@ -229,7 +219,7 @@ impl Display for AnalysisError {
                 reference.position()
             ),
             Self::TypeNotInferred(position) => {
-                write!(formatter, "type not inferred\n{}", position)
+                write!(formatter, "type not inferred\n{position}")
             }
             Self::TypesNotMatched {
                 found: (found_position, found_type),
@@ -248,16 +238,16 @@ impl Display for AnalysisError {
                 )
             }
             Self::UnknownRecordField(position) => {
-                write!(formatter, "unknown record field\n{}", position)
+                write!(formatter, "unknown record field\n{position}")
             }
             Self::UnreachableCode(position) => {
-                write!(formatter, "unreachable code\n{}", position)
+                write!(formatter, "unreachable code\n{position}")
             }
             Self::UnusedErrorValue(position) => {
-                write!(formatter, "unused error value\n{}", position)
+                write!(formatter, "unused error value\n{position}")
             }
             Self::ValueNameNotDefined(position) => {
-                write!(formatter, "value name not defined\n{}", position)
+                write!(formatter, "value name not defined\n{position}")
             }
             Self::VariableNotFound(variable) => write!(
                 formatter,

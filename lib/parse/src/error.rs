@@ -38,9 +38,9 @@ impl ParseError {
                                     None
                                 }
                             }) {
-                            [format!("'{}' expected", character)]
+                            [format!("'{character}' expected")]
                                 .into_iter()
-                                .chain(context.map(|context| format!("in {}", context)))
+                                .chain(context.map(|context| format!("in {context}")))
                                 .collect::<Vec<_>>()
                                 .join(" ")
                         } else {

@@ -51,7 +51,7 @@ impl FilePath {
                             if extension.is_empty() {
                                 "".into()
                             } else {
-                                format!(".{}", extension)
+                                format!(".{extension}")
                             }
                             .as_str(),
                         )

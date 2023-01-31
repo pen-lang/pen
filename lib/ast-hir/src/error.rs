@@ -24,22 +24,21 @@ impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
             Self::ModuleNotFound(path) => {
-                write!(formatter, "module \"{}\" not found", path)
+                write!(formatter, "module \"{path}\" not found")
             }
             Self::NameNotFound(name, position) => {
-                write!(formatter, "name \"{}\" not found\n{}", name, position)
+                write!(formatter, "name \"{name}\" not found\n{position}")
             }
             Self::ParseFloat { error, position } => {
-                write!(formatter, "{}\n{}", error, position)
+                write!(formatter, "{error}\n{position}")
             }
             Self::ParseInteger { error, position } => {
-                write!(formatter, "{}\n{}", error, position)
+                write!(formatter, "{error}\n{position}")
             }
             Self::TooFewBranchesInIf(position) => {
                 write!(
                     formatter,
-                    "too small number of branches in if\n{}",
-                    position
+                    "too small number of branches in if\n{position}"
                 )
             }
         }

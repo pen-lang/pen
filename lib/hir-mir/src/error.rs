@@ -22,15 +22,14 @@ pub enum CompileError {
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::Analysis(error) => write!(formatter, "{}", error),
+            Self::Analysis(error) => write!(formatter, "{error}"),
             Self::CompileConfigurationNotProvided => {
                 write!(formatter, "compile configuration not provided")
             }
             Self::InvalidRecordEqualOperation(position) => {
                 write!(
                     formatter,
-                    "equal operator cannot be used with record type containing any or function types\n{}",
-                    position
+                    "equal operator cannot be used with record type containing any or function types\n{position}"
                 )
             }
             Self::InvalidVariantType(type_) => {
@@ -42,13 +41,13 @@ impl Display for CompileError {
                 )
             }
             Self::MainFunctionNotFound(position) => {
-                write!(formatter, "main function not found\n{}", position)
+                write!(formatter, "main function not found\n{position}")
             }
             Self::MirTypeCheck(error) => {
-                write!(formatter, "failed to check types in MIR: {}", error)
+                write!(formatter, "failed to check types in MIR: {error}")
             }
             Self::NewContextFunctionNotFound(position) => {
-                write!(formatter, "new context function not found\n{}", position)
+                write!(formatter, "new context function not found\n{position}")
             }
         }
     }

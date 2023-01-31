@@ -337,7 +337,7 @@ impl NinjaBuildScriptCompiler {
             format!("  object_file = {}", bit_code_file.display()),
             format!("  module_name = {}", target_source.module_name()),
             self.format_in_package_name_variable(target_source.package_name()),
-            format!("  srcdep = {}", original_source_file),
+            format!("  srcdep = {original_source_file}"),
         ]
     }
 
@@ -513,7 +513,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
-        .chain([format!("build {}: phony", FFI_PHONY_TARGET)])
+        .chain([format!("build {FFI_PHONY_TARGET}: phony")])
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",

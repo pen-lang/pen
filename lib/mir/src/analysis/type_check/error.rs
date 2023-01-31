@@ -23,7 +23,7 @@ pub enum TypeCheckError {
 
 impl Display for TypeCheckError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(formatter, "{:#?}", self)
+        write!(formatter, "{self:#?}")
     }
 }
 

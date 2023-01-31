@@ -15,7 +15,7 @@ pub enum CompileError {
 
 impl Display for CompileError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
-        write!(formatter, "{:?}", self)
+        write!(formatter, "{self:?}")
     }
 }
 

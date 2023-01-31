@@ -26,7 +26,7 @@ impl<'a> Context<'a> {
         if count == 0 {
             name.into()
         } else {
-            format!("{}:{}", name, count)
+            format!("{name}:{count}")
         }
     }
 }
