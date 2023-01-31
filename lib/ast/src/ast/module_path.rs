@@ -23,8 +23,8 @@ impl From<InternalModulePath> for ModulePath {
 impl Display for ModulePath {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::External(path) => write!(formatter, "{}", path),
-            Self::Internal(path) => write!(formatter, "{}", path),
+            Self::External(path) => write!(formatter, "{path}"),
+            Self::Internal(path) => write!(formatter, "{path}"),
         }
     }
 }

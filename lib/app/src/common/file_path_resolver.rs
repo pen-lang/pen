@@ -128,7 +128,7 @@ fn resolve_package_archive_file(
     file_path_configuration: &FilePathConfiguration,
 ) -> FilePath {
     resolve_archive_directory(output_directory)
-        .join(&FilePath::new([format!("lib{}", basename)]))
+        .join(&FilePath::new([format!("lib{basename}")]))
         .with_extension(file_path_configuration.archive_file_extension)
 }
 

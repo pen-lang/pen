@@ -22,8 +22,7 @@ impl Display for ApplicationError {
             Self::ArchitectureWordSize(target_triple) => {
                 write!(
                     formatter,
-                    "cannot infer word size from target triple: {}",
-                    target_triple
+                    "cannot infer word size from target triple: {target_triple}"
                 )
             }
             Self::Build => write!(formatter, "build failed"),
@@ -38,7 +37,7 @@ impl Display for ApplicationError {
                 )
             }
             Self::ModuleNotFound(module) => {
-                write!(formatter, "module {} not found", module)
+                write!(formatter, "module {module} not found")
             }
             Self::NewContextFunctionNotFound => {
                 write!(formatter, "new context function not found")
@@ -47,7 +46,7 @@ impl Display for ApplicationError {
                 write!(formatter, "package dependency cycle detected")
             }
             Self::PackageNotFound(package) => {
-                write!(formatter, "package {} not found", package)
+                write!(formatter, "package {package} not found")
             }
             Self::SystemPackageNotFound => {
                 write!(formatter, "system package not found")

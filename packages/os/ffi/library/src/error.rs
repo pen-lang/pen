@@ -18,9 +18,9 @@ pub enum OsError {
 impl Display for OsError {
     fn fmt(&self, formatter: &mut Formatter) -> fmt::Result {
         match self {
-            Self::EnvironmentVariable(error) => write!(formatter, "{}", error),
-            Self::Io(error) => write!(formatter, "{}", error),
-            Self::Utf8(error) => write!(formatter, "{}", error),
+            Self::EnvironmentVariable(error) => write!(formatter, "{error}"),
+            Self::Io(error) => write!(formatter, "{error}"),
+            Self::Utf8(error) => write!(formatter, "{error}"),
             Self::Other(message) => write!(formatter, "{}", &message),
         }
     }

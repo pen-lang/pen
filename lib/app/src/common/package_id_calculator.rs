@@ -7,6 +7,6 @@ static REPLACEMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[.:/]+").unwra
 
 pub fn calculate(url: &url::Url) -> String {
     REPLACEMENT_REGEX
-        .replace_all(&format!("{}", url), REPLACEMENT_STRING)
+        .replace_all(&format!("{url}"), REPLACEMENT_STRING)
         .into()
 }

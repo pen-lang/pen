@@ -1,19 +1,19 @@
 use crate::{context::Context, type_};
 
 pub fn get_clone_function_name(name: &str) -> String {
-    format!("mir:clone:{}", name)
+    format!("mir:clone:{name}")
 }
 
 pub fn get_clone_unboxed_function_name(name: &str) -> String {
-    format!("mir:clone:unboxed:{}", name)
+    format!("mir:clone:unboxed:{name}")
 }
 
 pub fn get_drop_function_name(name: &str) -> String {
-    format!("mir:drop:{}", name)
+    format!("mir:drop:{name}")
 }
 
 pub fn get_synchronize_function_name(name: &str) -> String {
-    format!("mir:synchronize:{}", name)
+    format!("mir:synchronize:{name}")
 }
 
 pub fn compile_clone_function_type(

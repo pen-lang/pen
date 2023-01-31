@@ -12,7 +12,7 @@ pub enum ReferenceCountError {
 
 impl Display for ReferenceCountError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(formatter, "{:#?}", self)
+        write!(formatter, "{self:#?}")
     }
 }
 

@@ -67,7 +67,7 @@ impl TestLinker {
             .modules()
             .iter()
             .map(|(name, module)| {
-                format!(r#"println!("{}");"#, name)
+                format!(r#"println!("{name}");"#)
                     + &module
                         .functions()
                         .iter()
@@ -97,8 +97,6 @@ impl TestLinker {
                 error += 1;
             }}
             "#,
-            name = name,
-            foreign_name = foreign_name,
         )
     }
 }

@@ -38,12 +38,12 @@ impl Display for InfrastructureError {
         match self {
             Self::CommandExit { status_code } => match status_code {
                 Some(status_code) => {
-                    write!(formatter, "command exited with status code {}", status_code)
+                    write!(formatter, "command exited with status code {status_code}")
                 }
                 None => write!(formatter, "command exited without status code"),
             },
             Self::CommandNotFound(command) => {
-                write!(formatter, "command \"{}\" not found", command)
+                write!(formatter, "command \"{command}\" not found")
             }
             Self::CreateDirectory { path, source: _ } => write!(
                 formatter,
@@ -51,13 +51,13 @@ impl Display for InfrastructureError {
                 path.to_string_lossy()
             ),
             Self::EnvironmentVariableNotFound(name) => {
-                write!(formatter, "environment variable \"{}\" not found", name)
+                write!(formatter, "environment variable \"{name}\" not found")
             }
             Self::LinkScriptNotFound => {
                 write!(formatter, "link script not found in any system packages")
             }
             Self::PackageUrlSchemeNotSupported(url) => {
-                write!(formatter, "package URL scheme not supported {}", url)
+                write!(formatter, "package URL scheme not supported {url}")
             }
             Self::ReadDirectory { path, source: _ } => write!(
                 formatter,

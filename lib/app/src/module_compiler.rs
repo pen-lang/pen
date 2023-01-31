@@ -146,7 +146,7 @@ fn compile_to_hir(
 
     Ok(ast_hir::compile(
         &ast_module,
-        &format!("{}:", source_file),
+        &format!("{source_file}:"),
         &ast_module
             .imports()
             .iter()
