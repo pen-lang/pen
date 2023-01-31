@@ -12,7 +12,7 @@ pub struct ParseError {
 }
 
 impl ParseError {
-    pub fn new<'a>(source: &str, path: &str, error: nom::Err<NomError<'a>>) -> Self {
+    pub fn new(source: &str, path: &str, error: nom::Err<NomError<'_>>) -> Self {
         match error {
             nom::Err::Incomplete(_) => Self::unexpected_end(source, path),
             nom::Err::Error(error) | nom::Err::Failure(error) => {
