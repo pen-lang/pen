@@ -36,10 +36,7 @@ impl Display for CompileError {
                 write!(formatter, "{error}\n{position}")
             }
             Self::TooFewBranchesInIf(position) => {
-                write!(
-                    formatter,
-                    "too small number of branches in if\n{position}"
-                )
+                write!(formatter, "too small number of branches in if\n{position}")
             }
         }
     }
