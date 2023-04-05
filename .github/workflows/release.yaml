@@ -80,7 +80,7 @@ jobs:
           sed -i "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" $file
           sed -i "s/^  sha256 .*/  sha256 \"$hash\"/" $file
           sed -i /revision/d $file
-      - uses: peter-evans/create-pull-request@v4
+      - uses: peter-evans/create-pull-request@v5
         with:
           title: Bump version
           branch: chore/version
