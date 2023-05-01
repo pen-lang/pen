@@ -1,12 +1,15 @@
-use crate::utilities::{generate_type_size_test, parse_crate_path, parse_string_attribute};
+use crate::{
+    attribute_list::AttributeList,
+    utilities::{generate_type_size_test, parse_crate_path, parse_string_attribute},
+};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{AttributeArgs, Ident, ItemStruct};
+use syn::{Ident, ItemStruct};
 
 pub fn generate(
-    attributes: &AttributeArgs,
+    attributes: &AttributeList,
     type_: &ItemStruct,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
@@ -39,6 +42,7 @@ pub fn generate(
     .into())
 }
 
-fn parse_fn(attributes: &AttributeArgs) -> Result<Ident, Box<dyn Error>> {
-    parse_string_attribute(attributes, "fn")?.ok_or_else(|| "missing or invalid fn".into())
+fn parse_fn(attributes: &AttributeList) -> Result<Ident, Box<dyn Error>> {
+    parse_string_attribute(attributes, "into_fn")?
+        .ok_or_else(|| "missing or invalid into_fn".into())
 }
