@@ -1,4 +1,4 @@
-#[pen_ffi_macro::into_any(crate = "crate", name = "pen_ffi_number_to_any")]
+#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_number_to_any")]
 #[repr(transparent)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Number {
