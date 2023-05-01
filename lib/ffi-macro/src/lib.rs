@@ -4,10 +4,10 @@ mod bindgen;
 mod into_any;
 mod utilities;
 
+use self::attribute_list::AttributeList;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, ItemFn, ItemStruct};
-use self::attribute_list::AttributeList;
 
 #[proc_macro_attribute]
 pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
