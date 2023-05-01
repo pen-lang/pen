@@ -1,6 +1,6 @@
 use quote::quote;
 use std::error::Error;
-use syn::{parse::Parse, parse_str, Attribute, Ident, Lit, Meta, Path};
+use syn::{parse::Parse, parse_str, Attribute, Expr, ExprLit, Ident, Lit, Meta, Path};
 
 const DEFAULT_CRATE_NAME: &str = "ffi";
 
@@ -14,10 +14,14 @@ pub fn parse_string_attribute<T: Parse>(
 ) -> Result<Option<T>, Box<dyn Error>> {
     Ok(attributes
         .iter()
-        .find_map(|attribute| match attribute {
-            NestedMeta::Meta(Meta::NameValue(name_value)) => {
+        .find_map(|attribute| match &attribute.meta {
+            Meta::NameValue(name_value) => {
                 if name_value.path.is_ident(key) {
-                    if let Lit::Str(string) = &name_value.lit {
+                    if let Expr::Lit(ExprLit {
+                        lit: Lit::Str(string),
+                        ..
+                    }) = &name_value.value
+                    {
                         Some(string.value())
                     } else {
                         None
