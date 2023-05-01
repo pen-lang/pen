@@ -4,9 +4,7 @@ set -e
 
 . $(dirname $0)/utilities.sh
 
-version=nightly-2022-11-01
+rustup install nightly
+rustup run nightly cargo install cargo-udeps
 
-rustup install $version
-rustup run $version cargo install cargo-udeps
-
-$(dirname $0)/run_all_crates.sh rustup run $version cargo udeps
+$(dirname $0)/run_all_crates.sh rustup run nightly cargo udeps
