@@ -1,6 +1,6 @@
 use crate::{Any, Arc};
 
-#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_error_to_any")]
+#[pen_ffi_macro::into_any(crate = "crate", name = "pen_ffi_error_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 pub struct Error(Arc<ErrorInner>);
