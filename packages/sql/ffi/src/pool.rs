@@ -15,7 +15,7 @@ struct PoolOptions {
     connect_timeout: ffi::Number,
 }
 
-#[ffi::into_any(fn = "_pen_sql_pool_to_any")]
+#[ffi::into_any(into_fn = "_pen_sql_pool_to_any")]
 #[repr(C)]
 struct Pool(ffi::Arc<ffi::Any>);
 

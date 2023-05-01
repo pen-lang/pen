@@ -7,7 +7,7 @@ use std::{
 
 const MAX_UDP_PAYLOAD_SIZE: usize = 512;
 
-#[ffi::into_any(fn = "_pen_os_udp_socket_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_udp_socket_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct UdpSocket(ffi::Arc<ffi::Any>);
@@ -31,7 +31,7 @@ impl UdpSocket {
     }
 }
 
-#[ffi::into_any(fn = "_pen_os_udp_datagram_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_udp_datagram_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct UdpDatagram(ffi::Arc<UdpDatagramInner>);
