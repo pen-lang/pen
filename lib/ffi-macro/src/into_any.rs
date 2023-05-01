@@ -43,5 +43,6 @@ pub fn generate(
 }
 
 fn parse_fn(attributes: &AttributeList) -> Result<Ident, Box<dyn Error>> {
-    parse_string_attribute(attributes, "name")?.ok_or_else(|| "missing or invalid name".into())
+    parse_string_attribute(attributes, "into_fn")?
+        .ok_or_else(|| "missing or invalid into_fn".into())
 }
