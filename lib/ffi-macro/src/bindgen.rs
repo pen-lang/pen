@@ -3,12 +3,12 @@ use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
 use syn::{
-    parse_quote, AttributeArgs, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment,
+    parse_quote, Attribute, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment,
     ReturnType, Type,
 };
 
 pub fn generate(
-    attributes: &AttributeArgs,
+    attributes: &[Attribute],
     function: &ItemFn,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;

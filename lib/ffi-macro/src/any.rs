@@ -3,10 +3,10 @@ use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{AttributeArgs, Ident, ItemStruct};
+use syn::{Attribute, Ident, ItemStruct};
 
 pub fn generate(
-    attributes: &AttributeArgs,
+    attributes: &[Attribute],
     type_: &ItemStruct,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;

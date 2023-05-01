@@ -3,10 +3,10 @@ use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{AttributeArgs, Ident, ItemStruct};
+use syn::{Attribute, Ident, ItemStruct};
 
 pub fn generate(
-    attributes: &AttributeArgs,
+    attributes: &[Attribute],
     type_: &ItemStruct,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
@@ -39,6 +39,6 @@ pub fn generate(
     .into())
 }
 
-fn parse_fn(attributes: &AttributeArgs) -> Result<Ident, Box<dyn Error>> {
+fn parse_fn(attributes: &[Attribute]) -> Result<Ident, Box<dyn Error>> {
     parse_string_attribute(attributes, "fn")?.ok_or_else(|| "missing or invalid fn".into())
 }
