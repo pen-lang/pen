@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::{error::Error, str, sync::Arc};
 
-#[ffi::into_any(fn = "_pen_regex_expression_to_any")]
+#[ffi::into_any(into_fn = "_pen_regex_expression_to_any")]
 #[repr(C)]
 struct Expression(ffi::Arc<ffi::Any>);
 

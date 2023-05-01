@@ -6,7 +6,7 @@ use std::{
     sync::{Arc, RwLock, RwLockWriteGuard},
 };
 
-#[ffi::into_any(fn = "_pen_os_tcp_listener_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_tcp_listener_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct TcpListener(ffi::Arc<ffi::Any>);
@@ -30,7 +30,7 @@ impl TcpListener {
     }
 }
 
-#[ffi::into_any(fn = "_pen_os_tcp_stream_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_tcp_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct TcpStream(ffi::Arc<ffi::Any>);
@@ -54,7 +54,7 @@ impl TcpStream {
     }
 }
 
-#[ffi::into_any(fn = "_pen_os_tcp_accepted_stream_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_tcp_accepted_stream_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct TcpAcceptedStream(ffi::Arc<TcpAcceptedStreamInner>);

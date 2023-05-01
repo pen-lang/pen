@@ -6,7 +6,7 @@ use tokio::{
     sync::{RwLock, RwLockWriteGuard},
 };
 
-#[ffi::into_any(fn = "_pen_os_file_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_file_to_any")]
 #[repr(C)]
 #[derive(Clone)]
 struct File(ffi::Arc<ffi::Any>);
@@ -29,7 +29,7 @@ impl File {
     }
 }
 
-#[ffi::into_any(fn = "_pen_os_file_metadata_to_any")]
+#[ffi::into_any(into_fn = "_pen_os_file_metadata_to_any")]
 #[repr(C)]
 struct FileMetadata(ffi::Arc<FileMetadataInner>);
 

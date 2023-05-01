@@ -1,6 +1,6 @@
 use crate::header_map::HeaderMap;
 
-#[ffi::into_any(fn = "_pen_http_response_to_any")]
+#[ffi::into_any(into_fn = "_pen_http_response_to_any")]
 #[repr(C)]
 pub struct Response(ffi::Arc<ResponseInner>);
 
