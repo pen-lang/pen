@@ -1,4 +1,4 @@
-#[pen_ffi_macro::into_any(crate = "crate", fn = "pen_ffi_boolean_to_any")]
+#[pen_ffi_macro::into_any(crate = "crate", into_fn = "pen_ffi_boolean_to_any")]
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct Boolean {
