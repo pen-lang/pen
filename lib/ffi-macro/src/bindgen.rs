@@ -1,14 +1,13 @@
-use crate::utilities::parse_crate_path;
+use crate::{attribute_list::AttributeList, utilities::parse_crate_path};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
 use syn::{
-    parse_quote, Attribute, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment,
-    ReturnType, Type,
+    parse_quote, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment, ReturnType, Type,
 };
 
 pub fn generate(
-    attributes: &[Attribute],
+    attributes: &AttributeList,
     function: &ItemFn,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;

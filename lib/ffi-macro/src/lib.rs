@@ -1,15 +1,17 @@
 mod any;
+mod attribute_list;
 mod bindgen;
 mod into_any;
 mod utilities;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse::Parser, parse_macro_input, Attribute, ItemFn, ItemStruct};
+use syn::{parse_macro_input, ItemFn, ItemStruct};
+use self::attribute_list::AttributeList;
 
 #[proc_macro_attribute]
 pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = Attribute::parse_outer.parse(attributes).unwrap();
+    let attributes = parse_macro_input!(attributes as AttributeList);
     let function = parse_macro_input!(item as ItemFn);
 
     convert_result(bindgen::generate(&attributes, &function))
@@ -17,7 +19,7 @@ pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn any(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = Attribute::parse_outer.parse(attributes).unwrap();
+    let attributes = parse_macro_input!(attributes as AttributeList);
     let type_ = parse_macro_input!(item as ItemStruct);
 
     convert_result(any::generate(&attributes, &type_))
@@ -25,7 +27,7 @@ pub fn any(attributes: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn into_any(attributes: TokenStream, item: TokenStream) -> TokenStream {
-    let attributes = Attribute::parse_outer.parse(attributes).unwrap();
+    let attributes = parse_macro_input!(attributes as AttributeList);
     let type_ = parse_macro_input!(item as ItemStruct);
 
     convert_result(into_any::generate(&attributes, &type_))

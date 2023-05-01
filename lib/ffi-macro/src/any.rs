@@ -1,12 +1,15 @@
-use crate::utilities::{generate_type_size_test, parse_crate_path};
+use crate::{
+    attribute_list::AttributeList,
+    utilities::{generate_type_size_test, parse_crate_path},
+};
 use convert_case::{Case, Casing};
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{Attribute, Ident, ItemStruct};
+use syn::{Ident, ItemStruct};
 
 pub fn generate(
-    attributes: &[Attribute],
+    attributes: &AttributeList,
     type_: &ItemStruct,
 ) -> Result<TokenStream, Box<dyn Error>> {
     let crate_path = parse_crate_path(attributes)?;
