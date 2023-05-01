@@ -7,6 +7,7 @@ mod utilities;
 use self::attribute_list::AttributeList;
 use proc_macro::TokenStream;
 use quote::quote;
+use std::error::Error;
 use syn::{parse_macro_input, ItemFn, ItemStruct};
 
 #[proc_macro_attribute]
@@ -33,9 +34,7 @@ pub fn into_any(attributes: TokenStream, item: TokenStream) -> TokenStream {
     convert_result(into_any::generate(&attributes, &type_))
 }
 
-fn convert_result(
-    result: core::result::Result<TokenStream, Box<dyn std::error::Error>>,
-) -> TokenStream {
+fn convert_result(result: Result<TokenStream, Box<dyn Error>>) -> TokenStream {
     result.unwrap_or_else(|error| {
         let message = error.to_string();
 
