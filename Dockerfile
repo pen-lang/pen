@@ -15,7 +15,7 @@ run apt update --fix-missing && apt install -y \
 	software-properties-common \
 	sudo \
 	wget
-run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 15
+run curl -fsSL https://apt.llvm.org/llvm.sh | bash /dev/stdin 16
 
 run useradd -mG sudo penguin
 run echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
@@ -31,5 +31,5 @@ run brew install hello
 run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
 run cargo install mdbook sccache turtle-build
 
-env LLVM_SYS_150_PREFIX=/usr/lib/llvm-15
-env PATH="/usr/lib/llvm-15/bin:$PATH"
+env LLVM_SYS_160_PREFIX=/usr/lib/llvm-16
+env PATH="/usr/lib/llvm-16/bin:$PATH"

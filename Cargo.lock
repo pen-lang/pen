@@ -337,7 +337,7 @@ checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
 [[package]]
 name = "fmm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6389477cfca846f19f1aa0a99520a639a47d2d71"
+source = "git+https://github.com/raviqqe/fmm?branch=main#affb0bb7681ad14dd39dc04f0704eafffb256a36"
 dependencies = [
  "fnv",
  "indexmap",
@@ -349,7 +349,7 @@ dependencies = [
 [[package]]
 name = "fmm-c"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6389477cfca846f19f1aa0a99520a639a47d2d71"
+source = "git+https://github.com/raviqqe/fmm?branch=main#affb0bb7681ad14dd39dc04f0704eafffb256a36"
 dependencies = [
  "fmm",
  "fnv",
@@ -359,7 +359,7 @@ dependencies = [
 [[package]]
 name = "fmm-llvm"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/fmm?branch=main#6389477cfca846f19f1aa0a99520a639a47d2d71"
+source = "git+https://github.com/raviqqe/fmm?branch=main#affb0bb7681ad14dd39dc04f0704eafffb256a36"
 dependencies = [
  "fmm",
  "fnv",
@@ -632,7 +632,8 @@ dependencies = [
 [[package]]
 name = "inkwell"
 version = "0.2.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#74f0f96d438e734e5818401fe954441c3d7e1190"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f4fcb4a4fa0b8f7b4178e24e6317d6f8b95ab500d8e6e1bd4283b6860e369c1"
 dependencies = [
  "either",
  "inkwell_internals",
@@ -645,7 +646,8 @@ dependencies = [
 [[package]]
 name = "inkwell_internals"
 version = "0.8.0"
-source = "git+https://github.com/TheDan64/inkwell?branch=master#74f0f96d438e734e5818401fe954441c3d7e1190"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b185e7d068d6820411502efa14d8fbf010750485399402156b72dd2a548ef8e9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -747,9 +749,9 @@ checksum = "ece97ea872ece730aed82664c424eb4c8291e1ff2480247ccf7409044bc6479f"
 
 [[package]]
 name = "llvm-sys"
-version = "150.0.5"
+version = "160.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64be8a29d08e3165e4ed989b80cbc6b52104c543f16e272b83e2dedb749e81e6"
+checksum = "a8f28688b1e9d6fa3a00b6dbec62aae91e7dae15abf1f171391691bae4a767dd"
 dependencies = [
  "cc",
  "lazy_static",
