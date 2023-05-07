@@ -2,7 +2,7 @@
 
 set -e
 
-llvm_version=15
+llvm_version=16
 
 brew update
 brew install jq llvm@$llvm_version ninja sccache

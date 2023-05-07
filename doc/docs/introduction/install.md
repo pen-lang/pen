@@ -24,7 +24,7 @@ You can also build Pen from source on your local machine.
 1. Install the following software using a package manager of your choice (e.g. `apt` for Ubuntu and [Homebrew][homebrew] for macOS.)
 
    - [Rust](https://www.rust-lang.org/)
-   - [LLVM 15](https://llvm.org/)
+   - [LLVM 16](https://llvm.org/)
    - [Git](https://git-scm.com/)
    - [Ninja](https://ninja-build.org/)
 
