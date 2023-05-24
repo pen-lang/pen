@@ -26,7 +26,14 @@ You can also build Pen from source on your local machine.
    - [Rust](https://www.rust-lang.org/)
    - [LLVM 16](https://llvm.org/)
    - [Git](https://git-scm.com/)
-   - [Ninja](https://ninja-build.org/)
+
+1. Install [Turtle](https://github.com/raviqqe/turtle-build).
+
+   ```sh
+   cargo install turtle-build
+   # Or, via Homebrew,
+   brew install pen-lang/pen/turtle
+   ```
 
 1. Clone the Git repository.
 
