@@ -27,7 +27,7 @@ You can also build Pen from source on your local machine.
    - [LLVM 16](https://llvm.org/)
    - [Git](https://git-scm.com/)
 
-1. Install the Turtle build system.
+1. Install [the Turtle build system](https://github.com/raviqqe/turtle-build).
 
    ```sh
    cargo install turtle-build
