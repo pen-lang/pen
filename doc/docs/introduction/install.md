@@ -31,7 +31,7 @@ You can also build Pen from source on your local machine.
 
    ```sh
    cargo install turtle-build
-   # Or via Homebrew,
+   # Or, via Homebrew,
    brew install pen-lang/pen/turtle
    ```
 
