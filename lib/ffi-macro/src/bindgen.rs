@@ -33,6 +33,8 @@ pub fn generate(
     let wrapper_arguments = if is_default_return_type(function) {
         function.sig.inputs.iter().cloned().collect()
     } else {
+        // TODO Remove this annotation when Clippy is fixed.
+        #[allow(clippy::redundant_clone)]
         moved_arguments.clone()
     };
     let argument_names = generate_argument_names(function)?;
