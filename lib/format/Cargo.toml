@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
-itertools = "0.10"
+itertools = "0.11"
 position = { path = "../position" }
 
 [dev-dependencies]
