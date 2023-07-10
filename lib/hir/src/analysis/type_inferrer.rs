@@ -534,10 +534,9 @@ fn infer_built_in_call(
                     position.clone(),
                 ),
                 BuiltInFunctionName::Delete => {
-                    let Some(result_type) =
-                        argument_types.first().cloned() else {
-                            return Err(AnalysisError::ArgumentCount(position.clone()));
-                        };
+                    let Some(result_type) = argument_types.first().cloned() else {
+                        return Err(AnalysisError::ArgumentCount(position.clone()));
+                    };
 
                     types::Function::new(argument_types, result_type, position.clone())
                 }
@@ -547,7 +546,8 @@ fn infer_built_in_call(
                     position.clone(),
                 ),
                 BuiltInFunctionName::Keys => {
-                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..])
+                    else {
                         return Err(AnalysisError::ArgumentCount(position.clone()));
                     };
 
@@ -569,7 +569,8 @@ fn infer_built_in_call(
                     )
                 }
                 BuiltInFunctionName::Race => {
-                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..])
+                    else {
                         return Err(AnalysisError::ArgumentCount(position.clone()));
                     };
                     let argument_type =
@@ -623,7 +624,8 @@ fn infer_built_in_call(
                     types::Function::new(argument_types, result_type, position.clone())
                 }
                 BuiltInFunctionName::Values => {
-                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..]) else {
+                    let ([argument], [argument_type]) = (&arguments[..], &argument_types[..])
+                    else {
                         return Err(AnalysisError::ArgumentCount(position.clone()));
                     };
 
