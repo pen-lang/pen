@@ -606,7 +606,8 @@ fn check_built_in_call(
             )?;
         }
         BuiltInFunctionName::Race => {
-            let ([argument], [argument_type]) = (call.arguments(), function_type.arguments()) else {
+            let ([argument], [argument_type]) = (call.arguments(), function_type.arguments())
+            else {
                 return Err(AnalysisError::ArgumentCount(position.clone()));
             };
             let argument_type = type_canonicalizer::canonicalize_list(
