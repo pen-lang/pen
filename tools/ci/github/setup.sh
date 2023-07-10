@@ -5,7 +5,11 @@ set -e
 llvm_version=16
 
 brew update
-brew install --overwrite python@3.11
+
+if [ -n "$CI" ]; then
+  brew install --overwrite python@3.11
+fi
+
 brew install jq llvm@$llvm_version ninja sccache
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
