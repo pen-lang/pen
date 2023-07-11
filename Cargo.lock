@@ -415,6 +415,7 @@ dependencies = [
  "ast",
  "indoc",
  "itertools",
+ "mfmt",
  "position",
  "pretty_assertions",
 ]
@@ -802,6 +803,12 @@ name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+
+[[package]]
+name = "mfmt"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "635441c1c0b57884db1a50f8a2654417815b3f35dc3ad7644fe9b3a884c40e07"
 
 [[package]]
 name = "minimal-lexical"
