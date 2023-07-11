@@ -1,12 +1,14 @@
 #![allow(unstable_name_collisions)]
 
 mod context;
-mod ir;
 
 use ast::{analysis::operator_priority, types::Type, *};
 use context::Context;
-use ir::{build::*, count_lines, is_broken, Document};
 use itertools::Itertools;
+use mfmt::{
+    count_lines, empty, flatten, flatten_if, indent, is_broken, line, line_suffix, r#break,
+    sequence, Document,
+};
 use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
@@ -18,7 +20,7 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
         .iter()
         .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
 
-    ir::format(
+    mfmt::format(
         &[
             compile_imports(context, &external_imports),
             compile_imports(context, &internal_imports),
@@ -58,14 +60,14 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
 }
 
 pub fn format_type_definition(definition: &TypeDefinition) -> String {
-    ir::format(&compile_type_definition(
+    mfmt::format(&compile_type_definition(
         &mut Context::new(vec![]),
         definition,
     ))
 }
 
 pub fn format_function_signature(lambda: &Lambda) -> String {
-    ir::format(&compile_signature(
+    mfmt::format(&compile_signature(
         &mut Context::new(vec![]),
         lambda.arguments(),
         lambda.result_type(),
@@ -277,7 +279,7 @@ fn compile_type(type_: &Type) -> Document {
             {
                 flatten(union)
             } else {
-                break_(union)
+                r#break(union)
             }
         }
     }
@@ -330,7 +332,7 @@ fn compile_signature(
         if flat {
             flatten(arguments)
         } else {
-            break_(sequence([indent(sequence([line(), arguments])), separator]))
+            r#break(sequence([indent(sequence([line(), arguments])), separator]))
         },
         ") ".into(),
         compile_type(result_type),
@@ -403,7 +405,7 @@ fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
         },
         compile_expression(context, statement.expression()),
         compile_suffix_comment(context, statement.position()),
-        break_(line()),
+        r#break(line()),
     ])
 }
 
@@ -437,7 +439,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(arguments)
                 } else {
-                    break_(sequence([indent(sequence([line(), arguments])), separator]))
+                    r#break(sequence([indent(sequence([line(), arguments])), separator]))
                 },
                 ")".into(),
             ])
@@ -520,7 +522,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    break_(sequence([indent(elements), line()]))
+                    r#break(sequence([indent(elements), line()]))
                 },
                 "]".into(),
             ])
@@ -570,7 +572,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 {
                     flatten(elements)
                 } else {
-                    break_(sequence([indent(sequence([line(), elements])), separator]))
+                    r#break(sequence([indent(sequence([line(), elements])), separator]))
                 },
                 "}".into(),
             ])
@@ -692,7 +694,7 @@ fn compile_list(context: &mut Context, list: &List) -> Document {
         {
             flatten(elements)
         } else {
-            break_(sequence([indent(elements), separator, line()]))
+            r#break(sequence([indent(elements), separator, line()]))
         },
         "]".into(),
     ])
@@ -739,7 +741,7 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
         {
             flatten(elements)
         } else {
-            break_(sequence([indent(elements), separator, line()]))
+            r#break(sequence([indent(elements), separator, line()]))
         },
         "}".into(),
     ])
@@ -853,7 +855,7 @@ fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -
                 sequence([
                     "#".into(),
                     comment.line().trim_end().into(),
-                    break_(line()),
+                    r#break(line()),
                     if comment.position().line_number() + 1 < next_line_number {
                         line()
                     } else {
@@ -1317,7 +1319,7 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format_type(type_: &Type) -> String {
-            ir::format(&compile_type(type_))
+            mfmt::format(&compile_type(type_))
         }
 
         #[test]
@@ -1616,11 +1618,11 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(block: &Block) -> String {
-            ir::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
+            mfmt::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
         }
 
         fn format_with_comments(block: &Block, comments: &[Comment]) -> String {
-            ir::format(&compile_block(&mut Context::new(comments.to_vec()), block)) + "\n"
+            mfmt::format(&compile_block(&mut Context::new(comments.to_vec()), block)) + "\n"
         }
 
         #[test]
@@ -2046,11 +2048,11 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(expression: &Expression) -> String {
-            ir::format(&compile_expression(&mut Context::new(vec![]), expression))
+            mfmt::format(&compile_expression(&mut Context::new(vec![]), expression))
         }
 
         fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
-            ir::format(&compile_expression(
+            mfmt::format(&compile_expression(
                 &mut Context::new(comments.to_vec()),
                 expression,
             ))
