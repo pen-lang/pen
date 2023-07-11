@@ -15,4 +15,4 @@ position = { path = "../position" }
 regex = "1"
 
 [dev-dependencies]
-pretty_assertions = "1.3"
+pretty_assertions = "1.4"
