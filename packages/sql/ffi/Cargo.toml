@@ -12,11 +12,9 @@ ffi = { package = "pen-ffi", version = "*", features = ["runtime", "std"] }
 futures = "0.3"
 sqlx = { version = "0.7", features = [
   "any",
-  "json",
   "mysql",
   "postgres",
   "runtime-tokio",
   "sqlite",
   "tls-rustls",
-  "uuid",
 ] }
