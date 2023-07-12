@@ -814,14 +814,15 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.14"
+version = "0.10.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c70dbe1ca61b03bd21aa9f84e329e8f148bd6109ef572344d5fc5fa044e1e743"
+checksum = "7eff0f5a3c99cfa1c89faea5c3572ef12a7925296294ecd98bba90ed44795569"
 dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
  "tokio",
+ "tokio-macros",
  "tokio-stream",
  "tokio-util",
 ]
