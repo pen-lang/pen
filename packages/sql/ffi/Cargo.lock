@@ -829,14 +829,15 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.13"
+version = "0.10.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4aa420b3cb7177f1407a791fcb5353a9e7449ccf6352bdbfc763c20061deb286"
+checksum = "c70dbe1ca61b03bd21aa9f84e329e8f148bd6109ef572344d5fc5fa044e1e743"
 dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
  "tokio",
+ "tokio-stream",
  "tokio-util",
 ]
 
@@ -1130,9 +1131,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.100"
+version = "1.0.102"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f1e14e89be7aa4c4b78bdbdc9eb5bf8517829a600ae8eaa39a6e1d960b5185c"
+checksum = "b5062a995d481b2308b6064e9af76011f2921c35f97b0468811ed9f6cd91dfed"
 dependencies = [
  "itoa",
  "ryu",
@@ -1566,6 +1567,7 @@ dependencies = [
  "futures-core",
  "pin-project-lite",
  "tokio",
+ "tokio-util",
 ]
 
 [[package]]
