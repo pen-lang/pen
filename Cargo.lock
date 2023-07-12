@@ -982,6 +982,7 @@ dependencies = [
  "futures",
  "pen-ffi-macro",
  "tokio",
+ "tokio-macros",
  "tokio-stream",
  "tokio-util",
 ]
