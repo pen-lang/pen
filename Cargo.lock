@@ -976,12 +976,13 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.14"
+version = "0.10.15"
 dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
  "tokio",
+ "tokio-macros",
  "tokio-stream",
  "tokio-util",
 ]
