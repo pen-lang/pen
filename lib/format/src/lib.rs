@@ -6,8 +6,9 @@ use ast::{analysis::operator_priority, types::Type, *};
 use context::Context;
 use itertools::Itertools;
 use mfmt::{
-    count_lines, empty, flatten, flatten_if, indent, is_broken, line, line_suffix, r#break,
-    sequence, Document,
+    empty, flatten, flatten_if, indent, line, line_suffix, r#break, sequence,
+    utility::{count_lines, is_broken},
+    Document,
 };
 use position::Position;
 
