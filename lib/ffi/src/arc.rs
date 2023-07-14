@@ -26,7 +26,7 @@ impl<T> Arc<T> {
 
         Self {
             block,
-            phantom: PhantomData::default(),
+            phantom: PhantomData,
         }
     }
 
@@ -71,7 +71,7 @@ impl<T> Clone for Arc<T> {
     fn clone(&self) -> Self {
         Self {
             block: self.block.clone(),
-            phantom: PhantomData::default(),
+            phantom: PhantomData,
         }
     }
 }
