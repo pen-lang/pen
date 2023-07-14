@@ -22,6 +22,7 @@
     "ctypes",
     "datagram",
     "dealloc",
+    "deque",
     "deserialization",
     "determinicity",
     "displayer",
