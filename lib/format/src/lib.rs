@@ -838,7 +838,7 @@ fn compile_remaining_block_comment(context: &mut Context) -> Document {
     )
 }
 
-fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
+fn compile_all_comments(comments: &[&Comment], last_line_number: Option<usize>) -> Document {
     sequence(
         comments
             .iter()

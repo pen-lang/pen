@@ -6,7 +6,7 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn new(mut comments: &[Comment]) -> Self {
+    pub fn new(comments: &'a [Comment]) -> Self {
         Self {
             comments: comments.iter().collect(),
         }
@@ -32,7 +32,10 @@ impl<'a> Context<'a> {
         self.drain_comments_before(line_number + 1)
     }
 
-    pub fn peek_comments_before(&self, line_number: usize) -> impl Iterator<Item = &'a Comment> {
+    pub fn peek_comments_before(
+        &self,
+        line_number: usize,
+    ) -> impl Iterator<Item = &'a Comment> + '_ {
         self.comments
             .range(
                 ..self
