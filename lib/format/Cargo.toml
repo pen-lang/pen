@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 ast = { path = "../ast" }
 itertools = "0.11"
-mfmt = "0.1.3"
+mfmt = { git = "https://github.com/raviqqe/mfmt", branch = "chore/box" }
 position = { path = "../position" }
 
 [dev-dependencies]
