@@ -13,7 +13,7 @@ use mfmt::{
 use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let mut context = Context::new(comments.to_vec());
+    let mut context = Context::new(comments);
     let context = &mut context;
 
     let (external_imports, internal_imports) = module
@@ -61,15 +61,12 @@ pub fn format(module: &Module, comments: &[Comment]) -> String {
 }
 
 pub fn format_type_definition(definition: &TypeDefinition) -> String {
-    mfmt::format(&compile_type_definition(
-        &mut Context::new(vec![]),
-        definition,
-    ))
+    mfmt::format(&compile_type_definition(&mut Context::new(&[]), definition))
 }
 
 pub fn format_function_signature(lambda: &Lambda) -> String {
     mfmt::format(&compile_signature(
-        &mut Context::new(vec![]),
+        &mut Context::new(&[]),
         lambda.arguments(),
         lambda.result_type(),
         lambda.position(),
@@ -841,7 +838,7 @@ fn compile_remaining_block_comment(context: &mut Context) -> Document {
     )
 }
 
-fn compile_all_comments(comments: &[Comment], last_line_number: Option<usize>) -> Document {
+fn compile_all_comments(comments: &[&Comment], last_line_number: Option<usize>) -> Document {
     sequence(
         comments
             .iter()
@@ -1619,11 +1616,11 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(block: &Block) -> String {
-            mfmt::format(&compile_block(&mut Context::new(vec![]), block)) + "\n"
+            mfmt::format(&compile_block(&mut Context::new(&[]), block)) + "\n"
         }
 
         fn format_with_comments(block: &Block, comments: &[Comment]) -> String {
-            mfmt::format(&compile_block(&mut Context::new(comments.to_vec()), block)) + "\n"
+            mfmt::format(&compile_block(&mut Context::new(comments), block)) + "\n"
         }
 
         #[test]
@@ -2049,14 +2046,11 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(expression: &Expression) -> String {
-            mfmt::format(&compile_expression(&mut Context::new(vec![]), expression))
+            mfmt::format(&compile_expression(&mut Context::new(&[]), expression))
         }
 
         fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
-            mfmt::format(&compile_expression(
-                &mut Context::new(comments.to_vec()),
-                expression,
-            ))
+            mfmt::format(&compile_expression(&mut Context::new(comments), expression))
         }
 
         #[test]
