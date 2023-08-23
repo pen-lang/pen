@@ -10,4 +10,4 @@ crate-type = ["staticlib"]
 
 [dependencies]
 ffi = { package = "pen-ffi", "version" = "*" }
-siphasher = "0.3"
+siphasher = "1.0"
