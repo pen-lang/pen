@@ -1,6 +1,6 @@
 use super::{compile_configuration::COMPILE_CONFIGURATION, main_package_directory_finder};
 use crate::{application_configuration::APPLICATION_CONFIGURATION, infrastructure};
-use std::{collections::BTreeMap, error::Error, sync::Arc};
+use std::{collections::BTreeMap, error::Error, rc::Rc};
 
 pub fn compile(
     source_file: &str,
@@ -10,7 +10,7 @@ pub fn compile(
     target_triple: Option<&str>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
-    let file_path_converter = Arc::new(infra::FilePathConverter::new(&main_package_directory));
+    let file_path_converter = Rc::new(infra::FilePathConverter::new(&main_package_directory));
 
     app::module_compiler::compile_main(
         &infrastructure::create(file_path_converter.clone(), &main_package_directory)?,

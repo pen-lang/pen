@@ -6,12 +6,12 @@ use app::package_documentation_generator::DocumentationPackage;
 use std::{
     error::Error,
     io::{stdout, Write},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub fn generate(name: &str, url: &str, description: &str) -> Result<(), Box<dyn Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
-    let file_path_converter = Arc::new(infra::FilePathConverter::new(
+    let file_path_converter = Rc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
     ));
 

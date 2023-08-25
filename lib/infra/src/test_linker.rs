@@ -5,17 +5,17 @@ use std::{
     io::Write,
     path::Path,
     process::Command,
-    sync::Arc,
+    rc::Rc,
 };
 
 pub struct TestLinker {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
     language_root_environment_variable: &'static str,
 }
 
 impl TestLinker {
     pub fn new(
-        file_path_converter: Arc<FilePathConverter>,
+        file_path_converter: Rc<FilePathConverter>,
         language_root_environment_variable: &'static str,
     ) -> Self {
         Self {

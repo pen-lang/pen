@@ -1,12 +1,12 @@
 use super::{error::InfrastructureError, file_path_converter::FilePathConverter};
-use std::{io::Error, sync::Arc};
+use std::{io::Error, rc::Rc};
 
 pub struct FileSystem {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
 }
 
 impl FileSystem {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(file_path_converter: Rc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
         }

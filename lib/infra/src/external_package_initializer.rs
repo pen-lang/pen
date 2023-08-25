@@ -1,10 +1,10 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
 use crate::{environment_variable_reader, InfrastructureError};
-use std::{error::Error, path::PathBuf, process::Command, sync::Arc};
+use std::{error::Error, path::PathBuf, process::Command, rc::Rc};
 
 pub struct ExternalPackageInitializer {
-    file_system: Arc<dyn app::infra::FileSystem>,
-    file_path_converter: Arc<FilePathConverter>,
+    file_system: Rc<dyn app::infra::FileSystem>,
+    file_path_converter: Rc<FilePathConverter>,
     language_root_scheme: &'static str,
     language_root_environment_variable: &'static str,
     packages_directory: &'static str,
@@ -12,8 +12,8 @@ pub struct ExternalPackageInitializer {
 
 impl ExternalPackageInitializer {
     pub fn new(
-        file_system: Arc<dyn app::infra::FileSystem>,
-        file_path_converter: Arc<FilePathConverter>,
+        file_system: Rc<dyn app::infra::FileSystem>,
+        file_path_converter: Rc<FilePathConverter>,
         language_root_scheme: &'static str,
         language_root_environment_variable: &'static str,
         packages_directory: &'static str,

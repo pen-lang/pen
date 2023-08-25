@@ -3,10 +3,10 @@ use crate::{
     file_path_configuration::{DEFAULT_SYSTEM_PACKAGE_NAME, DEFAULT_SYSTEM_PACKAGE_URL},
     infrastructure,
 };
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, rc::Rc};
 
 pub fn create(package_directory: &str, library: bool) -> Result<(), Box<dyn std::error::Error>> {
-    let file_path_converter = Arc::new(infra::FilePathConverter::new(
+    let file_path_converter = Rc::new(infra::FilePathConverter::new(
         PathBuf::from(package_directory).parent().ok_or_else(|| {
             std::io::Error::new(std::io::ErrorKind::NotFound, "parent directory not found")
         })?,

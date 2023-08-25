@@ -3,15 +3,15 @@ use crate::command_runner;
 use std::{
     error::Error,
     process::{Command, Stdio},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub struct NinjaBuildScriptRunner {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
 }
 
 impl NinjaBuildScriptRunner {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(file_path_converter: Rc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
         }

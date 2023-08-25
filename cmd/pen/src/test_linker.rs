@@ -2,7 +2,7 @@ use crate::{
     file_path_configuration::{DEFAULT_TARGET_DIRECTORY, OUTPUT_DIRECTORY},
     infrastructure, main_package_directory_finder,
 };
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub fn link(
     archive_files: &[&str],
@@ -10,7 +10,7 @@ pub fn link(
     test_file: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
-    let file_path_converter = Arc::new(infra::FilePathConverter::new(&main_package_directory));
+    let file_path_converter = Rc::new(infra::FilePathConverter::new(&main_package_directory));
 
     app::test_linker::link(
         &infrastructure::create(file_path_converter.clone(), &main_package_directory)?,

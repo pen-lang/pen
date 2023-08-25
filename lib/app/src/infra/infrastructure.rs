@@ -3,7 +3,7 @@ use super::{
     ExternalPackageInitializer, FilePathConfiguration, FilePathDisplayer, FileSystem,
     PackageConfigurationReader, PackageConfigurationWriter, TestLinker,
 };
-use std::sync::Arc;
+use std::rc::Rc;
 
 // Infrastructure is agnostic about the following concepts and their information
 // should be passed through function arguments instead.
@@ -11,15 +11,15 @@ use std::sync::Arc;
 // - Output directory
 // - Main package directory
 pub struct Infrastructure {
-    pub build_script_dependency_compiler: Arc<dyn BuildScriptDependencyCompiler>,
-    pub external_package_initializer: Arc<dyn ExternalPackageInitializer>,
-    pub file_path_configuration: Arc<FilePathConfiguration>,
-    pub file_path_displayer: Arc<dyn FilePathDisplayer>,
-    pub file_system: Arc<dyn FileSystem>,
-    pub build_script_compiler: Arc<dyn BuildScriptCompiler>,
-    pub build_script_runner: Arc<dyn BuildScriptRunner>,
-    pub package_configuration_reader: Arc<dyn PackageConfigurationReader>,
-    pub package_configuration_writer: Arc<dyn PackageConfigurationWriter>,
-    pub command_runner: Arc<dyn CommandRunner>,
-    pub test_linker: Arc<dyn TestLinker>,
+    pub build_script_dependency_compiler: Rc<dyn BuildScriptDependencyCompiler>,
+    pub external_package_initializer: Rc<dyn ExternalPackageInitializer>,
+    pub file_path_configuration: Rc<FilePathConfiguration>,
+    pub file_path_displayer: Rc<dyn FilePathDisplayer>,
+    pub file_system: Rc<dyn FileSystem>,
+    pub build_script_compiler: Rc<dyn BuildScriptCompiler>,
+    pub build_script_runner: Rc<dyn BuildScriptRunner>,
+    pub package_configuration_reader: Rc<dyn PackageConfigurationReader>,
+    pub package_configuration_writer: Rc<dyn PackageConfigurationWriter>,
+    pub command_runner: Rc<dyn CommandRunner>,
+    pub test_linker: Rc<dyn TestLinker>,
 }

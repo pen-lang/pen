@@ -4,15 +4,15 @@ use std::{
     error::Error,
     io::{stderr, stdout, Write},
     process::{Command, Stdio},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub struct CommandRunner {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
 }
 
 impl CommandRunner {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(file_path_converter: Rc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
         }

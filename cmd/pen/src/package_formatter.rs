@@ -1,9 +1,9 @@
 use crate::{infrastructure, main_package_directory_finder};
-use std::{error::Error, sync::Arc};
+use std::{error::Error, rc::Rc};
 
 pub fn format(check: bool) -> Result<(), Box<dyn Error>> {
     let main_package_directory = main_package_directory_finder::find()?;
-    let file_path_converter = Arc::new(infra::FilePathConverter::new(
+    let file_path_converter = Rc::new(infra::FilePathConverter::new(
         main_package_directory.clone(),
     ));
     let infrastructure =
