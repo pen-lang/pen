@@ -43,8 +43,9 @@ impl FilePath {
     pub fn with_extension(&self, extension: &str) -> Self {
         if let Some(last) = self.components.last() {
             Self::new(
-                self.components().take(self.components.len() - 1).chain(
-                    [regex::Regex::new(r"(\..*)?$")
+                self.components()
+                    .take(self.components.len() - 1)
+                    .chain([regex::Regex::new(r"(\..*)?$")
                         .unwrap()
                         .replace(
                             last,
@@ -55,8 +56,7 @@ impl FilePath {
                             }
                             .as_str(),
                         )
-                        .deref()],
-                ),
+                        .deref()]),
             )
         } else {
             self.clone()
