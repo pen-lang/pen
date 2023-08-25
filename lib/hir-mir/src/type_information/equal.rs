@@ -147,13 +147,13 @@ pub(super) fn compile_function_definition(
                 record_field_resolver::resolve_record(record_type, context.records())?
                     .iter()
                     .enumerate()
-                    .fold(
-                        Ok(mir::ir::Variant::new(
+                    .try_fold(
+                        mir::ir::Variant::new(
                             mir::types::Type::Boolean,
                             mir::ir::Expression::Boolean(true),
                         )
-                        .into()),
-                        |result, (index, field)| -> Result<_, CompileError> {
+                        .into(),
+                        |expression, (index, field)| -> Result<_, CompileError> {
                             let compile_field = |record| {
                                 utility::compile_any(
                                     context,
@@ -163,7 +163,7 @@ pub(super) fn compile_function_definition(
                             };
 
                             Ok(compile_merged_result(
-                                result?,
+                                expression,
                                 compile_call(
                                     compile_field(lhs.clone())?,
                                     compile_field(rhs.clone())?,
