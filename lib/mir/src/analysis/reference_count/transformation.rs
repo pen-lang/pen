@@ -245,10 +245,9 @@ fn transform_expression(
             )
         }
         Expression::Call(call) => {
-            let (arguments, moved_variables) = call.arguments().iter().rev().fold(
-                Ok((vec![], moved_variables.clone())),
-                |result, argument| {
-                    let (arguments, moved_variables) = result?;
+            let (arguments, moved_variables) = call.arguments().iter().rev().try_fold(
+                (vec![], moved_variables.clone()),
+                |(arguments, moved_variables), argument| {
                     let (argument, moved_variables) =
                         transform_expression(argument, owned_variables, &moved_variables)?;
 
@@ -431,10 +430,9 @@ fn transform_expression(
             )
         }
         Expression::Record(record) => {
-            let (fields, moved_variables) = record.fields().iter().rev().fold(
-                Ok((vec![], moved_variables.clone())),
-                |result, field| {
-                    let (fields, moved_variables) = result?;
+            let (fields, moved_variables) = record.fields().iter().rev().try_fold(
+                (vec![], moved_variables.clone()),
+                |(fields, moved_variables), field| {
                     let (field, moved_variables) =
                         transform_expression(field, owned_variables, &moved_variables)?;
 
