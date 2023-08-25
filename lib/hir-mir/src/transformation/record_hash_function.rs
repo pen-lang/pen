@@ -115,8 +115,8 @@ fn compile_function_definition(
         Lambda::new(
             vec![Argument::new(RECORD_NAME, record_type.clone())],
             hash_type.clone(),
-            type_definition.fields().iter().rev().fold(
-                Ok(Expression::from(compile_identity_hash(type_definition))),
+            type_definition.fields().iter().rev().try_fold(
+                Expression::from(compile_identity_hash(type_definition)),
                 |expression, field| -> Result<_, CompileError> {
                     Ok(Call::new(
                         Some(
@@ -129,7 +129,7 @@ fn compile_function_definition(
                         ),
                         Variable::new(&configuration.combine_function_name, position.clone()),
                         vec![
-                            expression?,
+                            expression,
                             hash_calculation::expression::transform(
                                 context,
                                 &RecordDeconstruction::new(
