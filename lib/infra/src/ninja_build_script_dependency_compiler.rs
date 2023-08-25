@@ -19,7 +19,7 @@ impl app::infra::BuildScriptDependencyCompiler for NinjaBuildScriptDependencyCom
         object_file: &app::infra::FilePath,
         dependency_files: &[app::infra::FilePath],
     ) -> String {
-        vec![
+        [
             "ninja_dyndep_version = 1".into(),
             format!(
                 "build {}: dyndep | {}",

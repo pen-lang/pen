@@ -625,7 +625,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(application_file);
 
-        Ok(vec![
+        Ok([
             "rule link".into(),
             format!(
                 "  command = {} -t $target -o $out $in",
@@ -665,7 +665,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     ) -> Result<String, Box<dyn Error>> {
         let test_file = self.file_path_converter.convert_to_os_path(test_file);
 
-        Ok(vec![
+        Ok([
             "rule link".into(),
             "  command = pen link-test -o $out -i $in".into(),
             "  description = linking tests".into(),
