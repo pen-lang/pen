@@ -8,7 +8,7 @@ use hir::{
     types::{self, Type},
 };
 
-pub(self) fn context_function_name(
+fn context_function_name(
     type_: &types::Map,
     types: &FnvHashMap<String, Type>,
 ) -> Result<String, CompileError> {

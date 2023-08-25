@@ -1,14 +1,14 @@
 use super::json_package_configuration::JsonPackageConfiguration;
-use std::{error::Error, sync::Arc};
+use std::{error::Error, rc::Rc};
 
 pub struct JsonPackageConfigurationWriter {
-    file_system: Arc<dyn app::infra::FileSystem>,
+    file_system: Rc<dyn app::infra::FileSystem>,
     build_configuration_filename: &'static str,
 }
 
 impl JsonPackageConfigurationWriter {
     pub fn new(
-        file_system: Arc<dyn app::infra::FileSystem>,
+        file_system: Rc<dyn app::infra::FileSystem>,
         build_configuration_filename: &'static str,
     ) -> Self {
         Self {

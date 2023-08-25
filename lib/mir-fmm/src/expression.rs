@@ -373,15 +373,13 @@ fn compile_alternatives(
             })
             .transpose()?,
         [alternative, ..] => Some(builder.if_(
-            alternative.types().iter().fold(
-                Ok(fmm::build::TypedExpression::from(
-                    fmm::ir::Primitive::Boolean(false),
-                )),
-                |result, type_| -> Result<_, CompileError> {
+            alternative.types().iter().try_fold(
+                fmm::build::TypedExpression::from(fmm::ir::Primitive::Boolean(false)),
+                |expression, r#type| -> Result<_, CompileError> {
                     Ok(fmm::build::bitwise_operation(
                         fmm::ir::BitwiseOperator::Or,
-                        result?,
-                        variant::compile_tag_comparison(builder, &argument, type_)?,
+                        expression,
+                        variant::compile_tag_comparison(builder, &argument, r#type)?,
                     )?
                     .into())
                 },

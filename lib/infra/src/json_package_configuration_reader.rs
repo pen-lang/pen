@@ -1,17 +1,17 @@
 use super::json_package_configuration::JsonPackageConfiguration;
 use crate::FilePathConverter;
-use std::{error::Error, sync::Arc};
+use std::{error::Error, rc::Rc};
 
 pub struct JsonPackageConfigurationReader {
-    file_system: Arc<dyn app::infra::FileSystem>,
-    file_path_converter: Arc<FilePathConverter>,
+    file_system: Rc<dyn app::infra::FileSystem>,
+    file_path_converter: Rc<FilePathConverter>,
     build_configuration_filename: &'static str,
 }
 
 impl JsonPackageConfigurationReader {
     pub fn new(
-        file_system: Arc<dyn app::infra::FileSystem>,
-        file_path_converter: Arc<FilePathConverter>,
+        file_system: Rc<dyn app::infra::FileSystem>,
+        file_path_converter: Rc<FilePathConverter>,
         build_configuration_filename: &'static str,
     ) -> Self {
         Self {

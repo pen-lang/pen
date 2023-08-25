@@ -1,17 +1,17 @@
 use super::file_path_converter::FilePathConverter;
 use std::{
     path::{Path, PathBuf},
-    sync::Arc,
+    rc::Rc,
 };
 
 pub struct FilePathDisplayer {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
     package_directory: PathBuf,
 }
 
 impl FilePathDisplayer {
     pub fn new(
-        file_path_converter: Arc<FilePathConverter>,
+        file_path_converter: Rc<FilePathConverter>,
         package_directory: impl AsRef<Path>,
     ) -> Self {
         Self {

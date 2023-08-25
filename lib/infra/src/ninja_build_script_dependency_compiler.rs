@@ -1,12 +1,12 @@
 use super::file_path_converter::FilePathConverter;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub struct NinjaBuildScriptDependencyCompiler {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
 }
 
 impl NinjaBuildScriptDependencyCompiler {
-    pub fn new(file_path_converter: Arc<FilePathConverter>) -> Self {
+    pub fn new(file_path_converter: Rc<FilePathConverter>) -> Self {
         Self {
             file_path_converter,
         }
@@ -19,7 +19,7 @@ impl app::infra::BuildScriptDependencyCompiler for NinjaBuildScriptDependencyCom
         object_file: &app::infra::FilePath,
         dependency_files: &[app::infra::FilePath],
     ) -> String {
-        vec![
+        [
             "ninja_dyndep_version = 1".into(),
             format!(
                 "build {}: dyndep | {}",

@@ -7,7 +7,7 @@ use std::{
     collections::BTreeMap,
     error::Error,
     path::{Path, PathBuf},
-    sync::Arc,
+    rc::Rc,
 };
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
@@ -15,7 +15,7 @@ const FFI_PHONY_TARGET: &str = "ffi";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
-    file_path_converter: Arc<FilePathConverter>,
+    file_path_converter: Rc<FilePathConverter>,
     bit_code_file_extension: &'static str,
     dependency_file_extension: &'static str,
     ninja_dynamic_dependency_file_extension: &'static str,
@@ -25,7 +25,7 @@ pub struct NinjaBuildScriptCompiler {
 
 impl NinjaBuildScriptCompiler {
     pub fn new(
-        file_path_converter: Arc<FilePathConverter>,
+        file_path_converter: Rc<FilePathConverter>,
         bit_code_file_extension: &'static str,
         dependency_file_extension: &'static str,
         ninja_dynamic_dependency_file_extension: &'static str,
@@ -625,7 +625,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .file_path_converter
             .convert_to_os_path(application_file);
 
-        Ok(vec![
+        Ok([
             "rule link".into(),
             format!(
                 "  command = {} -t $target -o $out $in",
@@ -665,7 +665,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     ) -> Result<String, Box<dyn Error>> {
         let test_file = self.file_path_converter.convert_to_os_path(test_file);
 
-        Ok(vec![
+        Ok([
             "rule link".into(),
             "  command = pen link-test -o $out -i $in".into(),
             "  description = linking tests".into(),
