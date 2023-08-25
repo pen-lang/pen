@@ -4,8 +4,7 @@ use std::alloc::{alloc, dealloc, realloc, Layout};
 #[no_mangle]
 extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
     let pointer =
-        (unsafe { alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap()) })
-            as *mut u8;
+        unsafe { alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap()) };
 
     if is_os_debug() {
         eprintln!("malloc: {} -> {:x}", size, pointer as usize);
@@ -17,13 +16,13 @@ extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
 #[no_mangle]
 extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
     // Layouts are expected to be ignored by the global allocator.
-    let new_pointer = (unsafe {
+    let new_pointer = unsafe {
         realloc(
-            old_pointer as *mut u8,
+            old_pointer,
             Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
             size,
         )
-    }) as *mut u8;
+    };
 
     if is_os_debug() {
         eprintln!(
