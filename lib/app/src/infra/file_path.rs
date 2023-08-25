@@ -55,8 +55,7 @@ impl FilePath {
                             }
                             .as_str(),
                         )
-                        .deref()]
-                    .into_iter(),
+                        .deref()],
                 ),
             )
         } else {
