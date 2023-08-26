@@ -1,9 +1,10 @@
+use std::sync::RwLock;
 use tokio::runtime::Handle;
 
-static mut HANDLE: Option<tokio::runtime::Handle> = None;
+static HANDLE: RwLock<Option<tokio::runtime::Handle>> = RwLock::new(None);
 
 pub fn set_handle(handle: Handle) {
-    HANDLE = Some(handle)
+    HANDLE.write().unwrap().replace(handle);
 }
 
 pub fn handle() -> Handle {
