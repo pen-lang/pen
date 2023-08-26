@@ -47,7 +47,7 @@ impl<V> AsyncStack<V> {
 
     pub fn run_with_context<T>(
         &mut self,
-        context: &mut Context<'_>,
+        context: &mut Context,
         callback: impl FnOnce(&mut Self) -> T,
     ) -> T {
         self.context = Some(unsafe { transmute(context) });
