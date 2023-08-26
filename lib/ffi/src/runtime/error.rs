@@ -1,7 +1,5 @@
-use std::{
-    error::Error,
-    fmt::{self, Display, Formatter},
-};
+use core::fmt::{self, Display, Formatter};
+use std::error::Error;
 
 #[derive(Debug, Clone)]
 pub enum RuntimeError {
