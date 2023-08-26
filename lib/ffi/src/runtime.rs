@@ -11,6 +11,6 @@ pub fn set_handle(handle: Handle) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn handle() -> Handle {
-    Handle::current()
+pub fn handle() -> Result<Handle, Error> {
+    Ok(HANDLE.read()?)
 }
