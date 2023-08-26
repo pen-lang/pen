@@ -27,5 +27,5 @@ tokio = { "version" = "1", "features" = ["full"] }
 # For example, we might have multiple global variables of async contexts named
 # with different symbols in TLS, which fails asynchronous function calls due to
 # uninitialized contexts.
-runtime = ["tokio", "tokio-macros", "tokio-stream", "tokio-util"]
+runtime = ["std", "tokio", "tokio-macros", "tokio-stream", "tokio-util"]
 std = []
