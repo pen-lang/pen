@@ -1,7 +1,7 @@
 #![no_std]
 
 extern crate alloc;
-#[cfg(any(test, feature = "std"))]
+#[cfg(any(test, feature = "runtime", feature = "std"))]
 extern crate std;
 
 mod any;
