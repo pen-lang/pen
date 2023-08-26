@@ -960,7 +960,7 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.18"
+version = "0.10.19"
 dependencies = [
  "async-stream",
  "futures",
