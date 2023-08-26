@@ -20,8 +20,9 @@ pub fn set_handle(handle: Handle) -> Result<(), Error> {
 pub fn handle() -> Result<Handle, Error> {
     let guard = _PEN_FFI_RUNTIME_HANDLE.read()?;
 
-    Ok(guard
-        .as_ref()
-        .ok_or_else(|| RuntimeError::HandleNotInitialized)?
-        .clone())
+    if let Some(handle) = guard.as_ref() {
+        Ok(handle.clone())
+    } else {
+        Err(RuntimeError::HandleNotInitialized.into())
+    }
 }
