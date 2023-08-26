@@ -42,12 +42,12 @@ impl<V> AsyncStack<V> {
 
     pub fn context(&mut self) -> Option<&mut Context<'_>> {
         self.context
-            .map(|context| unsafe { &mut *transmute::<_, *mut Context<'_>>(context) })
+            .map(|context| unsafe { &mut *transmute::<_, *mut _>(context) })
     }
 
     pub fn run_with_context<T>(
         &mut self,
-        context: &mut Context<'_>,
+        context: &mut Context,
         callback: impl FnOnce(&mut Self) -> T,
     ) -> T {
         self.context = Some(unsafe { transmute(context) });

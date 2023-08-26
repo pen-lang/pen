@@ -26,6 +26,6 @@ impl<T: std::error::Error> From<T> for Error {
     fn from(error: T) -> Self {
         use alloc::string::ToString;
 
-        Error::new(crate::ByteString::from(error.to_string()))
+        Self::new(crate::ByteString::from(error.to_string()))
     }
 }
