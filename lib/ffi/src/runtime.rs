@@ -2,7 +2,8 @@ use crate::Error;
 use std::sync::RwLock;
 use tokio::runtime::Handle;
 
-static HANDLE: RwLock<Option<tokio::runtime::Handle>> = RwLock::new(None);
+#[no_mangle]
+static _PEN_FFI_RUNTIME_HANDLE: RwLock<Option<tokio::runtime::Handle>> = RwLock::new(None);
 
 pub fn set_handle(handle: Handle) -> Result<(), Error> {
     HANDLE.write()?.replace(handle);
