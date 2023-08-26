@@ -7,4 +7,4 @@ set -e
 # spell-checker: disable-next-line
 install_nightly_component rustfmt
 
-$(dirname $0)/run_all_crates.sh rustup run nightly cargo fmt "$@"
+$(dirname $0)/run_all_crates.sh rustup run nightly cargo fmt --all-features "$@"
