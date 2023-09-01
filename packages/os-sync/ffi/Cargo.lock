@@ -224,9 +224,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.20"
+version = "0.10.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc72b4a944f3b930bc5080c37dc0b1c003b8dcfafbb958db8284de538ec0d71b"
+checksum = "7687a9093121736522e3865a73077bb2c766b62f5edd64e98858f56132b5b00c"
 dependencies = [
  "async-stream",
  "futures",
@@ -286,9 +286,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.10"
+version = "0.38.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed6248e1caa625eb708e266e06159f135e8c26f2bb7ceb72dc4b2766d0340964"
+checksum = "c0c3dde1fc030af041adc40e79c0e7fbcf431dd24870053d187d7c66e4b87453"
 dependencies = [
  "bitflags 2.4.0",
  "errno",
