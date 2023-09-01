@@ -17,7 +17,7 @@ pub fn set_handle(handle: Handle) -> Result<(), Error> {
 }
 
 pub fn handle() -> Result<Handle, Error> {
-    let guard = _PEN_FFI_RUNTIME_HANDLE.read()?;
+    let guard = RUNTIME_HANDLE.read()?;
 
     if let Some(handle) = guard.as_ref() {
         Ok(handle.clone())
