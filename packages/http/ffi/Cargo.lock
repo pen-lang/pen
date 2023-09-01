@@ -345,9 +345,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.5.0"
+version = "2.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+checksum = "5486aed0026218e61b8a01d5fbd5a0a134649abb71a0e53b7bc088529dced86e"
 
 [[package]]
 name = "miniz_oxide"
@@ -419,9 +419,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.17"
+version = "0.10.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba6fe5047daeb8413fbce2f5e5d91653c036e9a15f18deb69f3f0e94a99a3ec1"
+checksum = "7687a9093121736522e3865a73077bb2c766b62f5edd64e98858f56132b5b00c"
 dependencies = [
  "async-stream",
  "futures",

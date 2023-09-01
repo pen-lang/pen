@@ -68,9 +68,9 @@ dependencies = [
 
 [[package]]
 name = "errno"
-version = "0.3.2"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b30f669a7961ef1631673d2766cc92f52d64f7ef354d4fe0ddfd30ed52f0f4f"
+checksum = "136526188508e25c6fef639d7927dfb3e0e3084488bf202267829cf7fc23dbdd"
 dependencies = [
  "errno-dragonfly",
  "libc",
@@ -196,9 +196,9 @@ checksum = "57bcfdad1b858c2db7c38303a6d2ad4dfaf5eb53dfeb0910128b2c26d6158503"
 
 [[package]]
 name = "memchr"
-version = "2.5.0"
+version = "2.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+checksum = "5486aed0026218e61b8a01d5fbd5a0a134649abb71a0e53b7bc088529dced86e"
 
 [[package]]
 name = "once_cell"
@@ -224,9 +224,9 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.17"
+version = "0.10.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba6fe5047daeb8413fbce2f5e5d91653c036e9a15f18deb69f3f0e94a99a3ec1"
+checksum = "7687a9093121736522e3865a73077bb2c766b62f5edd64e98858f56132b5b00c"
 dependencies = [
  "async-stream",
  "futures",
@@ -286,9 +286,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.9"
+version = "0.38.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bfe0f2582b4931a45d1fa608f8a8722e8b3c7ac54dd6d5f3b3212791fedef49"
+checksum = "c0c3dde1fc030af041adc40e79c0e7fbcf431dd24870053d187d7c66e4b87453"
 dependencies = [
  "bitflags 2.4.0",
  "errno",
