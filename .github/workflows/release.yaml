@@ -15,7 +15,7 @@ jobs:
       version: ${{ env.version }}
       should_release: ${{ env.should_release }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - run: |
           git fetch --prune --unshallow --tags
@@ -32,7 +32,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
@@ -49,7 +49,7 @@ jobs:
       contents: write
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
@@ -70,7 +70,7 @@ jobs:
     if: needs.tag_check.outputs.should_release == 'true'
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: pen-lang/homebrew-pen
       - run: |
