@@ -37,7 +37,7 @@ Feature: Building packages
     When I run `pen build`
     Then the exit status should be 0
 
-  Scenario: Cross-build an application package
+  Scenario Outline: Cross-build an application package
     Given a file named "pen.json" with:
     """json
     {
