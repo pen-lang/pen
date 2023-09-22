@@ -2,357 +2,357 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://pen-lang.org/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/roadmap/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/the-zen/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/advanced-features/cross-compile/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/advanced-features/ffi/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/advanced-features/writing-system-packages/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/ffi/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/module/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/package/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/commands/build/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/commands/create/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/commands/document/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/commands/format/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/commands/test/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/built-ins/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/examples/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/module/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/os/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/standard-packages/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/syntax/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/test-packages/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/test/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/memory-leak/concurrency/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/memory-leak/language/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/types/list/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/smoke/types/string/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/standard-packages/core/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/standard-packages/os-sync/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/standard-packages/os/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/standard-packages/random/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/standard-packages/test/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/syntax/block/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/syntax/concurrency/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/any/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/boolean/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/error/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/function/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/list/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/map/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/none/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/number/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/polymorphism/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/record/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/stream/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/string/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/examples/types/union/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/building-an-executable/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/coding-style/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/concurrency-and-parallelism/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/creating-a-library/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/testing/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/guides/using-a-library/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/introduction/building-the-first-program/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/introduction/install/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/command-line-tools/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/language/built-ins/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/language/modules/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/language/packages/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/language/syntax/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/language/types/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/core/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/flag/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/html/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/http/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/json/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/os/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/random/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/reflect/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/regex/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/sql/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://pen-lang.org/references/standard-packages/test/</loc>
-         <lastmod>2023-09-21</lastmod>
+         <lastmod>2023-09-22</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
