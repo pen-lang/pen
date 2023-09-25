@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 im = "15"
-ordered-float = "3"
+ordered-float = "4"
