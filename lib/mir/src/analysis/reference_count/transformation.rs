@@ -146,22 +146,22 @@ fn transform_expression(
 
             let alternative_moved_variables = default_alternative_moved_variables
                 .iter()
-                .cloned()
-                .filter(|variable| {
+                .filter(|&variable| {
                     if let Some(alternative) = case.default_alternative() {
                         variable != alternative.name()
                     } else {
                         true
                     }
                 })
+                .cloned()
                 .chain(
                     alternative_tuples
                         .iter()
                         .flat_map(|(alternative, moved_variables)| {
                             moved_variables
                                 .iter()
+                                .filter(|&variable| variable != alternative.name())
                                 .cloned()
-                                .filter(|variable| variable != alternative.name())
                                 .collect::<FnvHashSet<_>>()
                         }),
                 )
@@ -316,8 +316,8 @@ fn transform_expression(
                 &let_owned_variables,
                 &moved_variables
                     .iter()
+                    .filter(|&variable| variable != let_.name())
                     .cloned()
-                    .filter(|variable| variable != let_.name())
                     .collect(),
             )?;
             let (bound_expression, moved_variables) = transform_expression(
@@ -329,8 +329,8 @@ fn transform_expression(
                     .chain(
                         expression_moved_variables
                             .iter()
-                            .cloned()
-                            .filter(|variable| variable != let_.name()),
+                            .filter(|&variable| variable != let_.name())
+                            .cloned(),
                     )
                     .collect(),
             )?;
@@ -368,8 +368,8 @@ fn transform_expression(
                 &let_owned_variables,
                 &moved_variables
                     .iter()
+                    .filter(|&variable| variable != let_.definition().name())
                     .cloned()
-                    .filter(|variable| variable != let_.definition().name())
                     .collect(),
             )?;
             let moved_variables = moved_variables
@@ -378,8 +378,8 @@ fn transform_expression(
                 .chain(
                     expression_moved_variables
                         .iter()
-                        .cloned()
-                        .filter(|variable| variable != let_.definition().name()),
+                        .filter(|&variable| variable != let_.definition().name())
+                        .cloned(),
                 )
                 .collect();
             let cloned_variables = let_
