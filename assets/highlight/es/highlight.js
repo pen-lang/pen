@@ -1,5 +1,5 @@
 /*!
-  Highlight.js v11.8.0 (git: 65687a907b)
+  Highlight.js v11.9.0 (git: f47103d4f1)
   (c) 2006-2023 undefined and other contributors
   License: BSD-3-Clause
  */
@@ -203,8 +203,8 @@ class HTMLRenderer {
   }
 }
 
-/** @typedef {{scope?: string, language?: string, sublanguage?: boolean, children: Node[]} | string} Node */
-/** @typedef {{scope?: string, language?: string, sublanguage?: boolean, children: Node[]} } DataNode */
+/** @typedef {{scope?: string, language?: string, children: Node[]} | string} Node */
+/** @typedef {{scope?: string, language?: string, children: Node[]} } DataNode */
 /** @typedef {import('highlight.js').Emitter} Emitter */
 /**  */
 
@@ -671,28 +671,18 @@ const BINARY_NUMBER_MODE = {
   relevance: 0
 };
 const REGEXP_MODE = {
-  // this outer rule makes sure we actually have a WHOLE regex and not simply
-  // an expression such as:
-  //
-  //     3 / something
-  //
-  // (which will then blow up when regex's `illegal` sees the newline)
-  begin: /(?=\/[^/\n]*\/)/,
-  contains: [{
-    scope: 'regexp',
-    begin: /\//,
-    end: /\/[gimuy]*/,
-    illegal: /\n/,
-    contains: [
-      BACKSLASH_ESCAPE,
-      {
-        begin: /\[/,
-        end: /\]/,
-        relevance: 0,
-        contains: [BACKSLASH_ESCAPE]
-      }
-    ]
-  }]
+  scope: "regexp",
+  begin: /\/(?=[^/\n]*\/)/,
+  end: /\/[gimuy]*/,
+  contains: [
+    BACKSLASH_ESCAPE,
+    {
+      begin: /\[/,
+      end: /\]/,
+      relevance: 0,
+      contains: [BACKSLASH_ESCAPE]
+    }
+  ]
 };
 const TITLE_MODE = {
   scope: 'title',
@@ -729,30 +719,30 @@ const END_SAME_AS_BEGIN = function(mode) {
 
 var MODES$1 = /*#__PURE__*/Object.freeze({
   __proto__: null,
-  MATCH_NOTHING_RE: MATCH_NOTHING_RE,
-  IDENT_RE: IDENT_RE$1,
-  UNDERSCORE_IDENT_RE: UNDERSCORE_IDENT_RE,
-  NUMBER_RE: NUMBER_RE,
-  C_NUMBER_RE: C_NUMBER_RE,
+  APOS_STRING_MODE: APOS_STRING_MODE,
+  BACKSLASH_ESCAPE: BACKSLASH_ESCAPE,
+  BINARY_NUMBER_MODE: BINARY_NUMBER_MODE,
   BINARY_NUMBER_RE: BINARY_NUMBER_RE,
+  COMMENT: COMMENT,
+  C_BLOCK_COMMENT_MODE: C_BLOCK_COMMENT_MODE,
+  C_LINE_COMMENT_MODE: C_LINE_COMMENT_MODE,
+  C_NUMBER_MODE: C_NUMBER_MODE,
+  C_NUMBER_RE: C_NUMBER_RE,
+  END_SAME_AS_BEGIN: END_SAME_AS_BEGIN,
+  HASH_COMMENT_MODE: HASH_COMMENT_MODE,
+  IDENT_RE: IDENT_RE$1,
+  MATCH_NOTHING_RE: MATCH_NOTHING_RE,
+  METHOD_GUARD: METHOD_GUARD,
+  NUMBER_MODE: NUMBER_MODE,
+  NUMBER_RE: NUMBER_RE,
+  PHRASAL_WORDS_MODE: PHRASAL_WORDS_MODE,
+  QUOTE_STRING_MODE: QUOTE_STRING_MODE,
+  REGEXP_MODE: REGEXP_MODE,
   RE_STARTERS_RE: RE_STARTERS_RE,
   SHEBANG: SHEBANG,
-  BACKSLASH_ESCAPE: BACKSLASH_ESCAPE,
-  APOS_STRING_MODE: APOS_STRING_MODE,
-  QUOTE_STRING_MODE: QUOTE_STRING_MODE,
-  PHRASAL_WORDS_MODE: PHRASAL_WORDS_MODE,
-  COMMENT: COMMENT,
-  C_LINE_COMMENT_MODE: C_LINE_COMMENT_MODE,
-  C_BLOCK_COMMENT_MODE: C_BLOCK_COMMENT_MODE,
-  HASH_COMMENT_MODE: HASH_COMMENT_MODE,
-  NUMBER_MODE: NUMBER_MODE,
-  C_NUMBER_MODE: C_NUMBER_MODE,
-  BINARY_NUMBER_MODE: BINARY_NUMBER_MODE,
-  REGEXP_MODE: REGEXP_MODE,
   TITLE_MODE: TITLE_MODE,
-  UNDERSCORE_TITLE_MODE: UNDERSCORE_TITLE_MODE,
-  METHOD_GUARD: METHOD_GUARD,
-  END_SAME_AS_BEGIN: END_SAME_AS_BEGIN
+  UNDERSCORE_IDENT_RE: UNDERSCORE_IDENT_RE,
+  UNDERSCORE_TITLE_MODE: UNDERSCORE_TITLE_MODE
 });
 
 /**
@@ -1565,7 +1555,7 @@ function expandOrCloneMode(mode) {
   return mode;
 }
 
-var version = "11.8.0";
+var version = "11.9.0";
 
 class HTMLInjectionError extends Error {
   constructor(reason, html) {
@@ -1579,6 +1569,7 @@ class HTMLInjectionError extends Error {
 Syntax highlighting with language autodetection.
 https://highlightjs.org/
 */
+
 
 
 /**
@@ -2308,6 +2299,11 @@ const HLJS = function(hljs) {
     fire("before:highlightElement",
       { el: element, language });
 
+    if (element.dataset.highlighted) {
+      console.log("Element previously highlighted. To highlight again, first unset `dataset.highlighted`.", element);
+      return;
+    }
+
     // we should be all text, no child nodes (unescaped HTML) - this is possibly
     // an HTML injection attack - it's likely too late if this is already in
     // production (the code has likely already done its damage by the time
@@ -2334,6 +2330,7 @@ const HLJS = function(hljs) {
     const result = language ? highlight(text, { language, ignoreIllegals: true }) : highlightAuto(text);
 
     element.innerHTML = result.value;
+    element.dataset.highlighted = "yes";
     updateClassName(element, language, result.language);
     element.result = {
       language: result.language,
@@ -2665,14 +2662,15 @@ function bash(hljs) {
   };
   SUBST.contains.push(QUOTE_STRING);
   const ESCAPED_QUOTE = {
-    className: '',
-    begin: /\\"/
-
+    match: /\\"/
   };
   const APOS_STRING = {
     className: 'string',
     begin: /'/,
     end: /'/
+  };
+  const ESCAPED_APOS = {
+    match: /\\'/
   };
   const ARITHMETIC = {
     begin: /\$?\(\(/,
@@ -2986,6 +2984,7 @@ function bash(hljs) {
       QUOTE_STRING,
       ESCAPED_QUOTE,
       APOS_STRING,
+      ESCAPED_APOS,
       VAR
     ]
   };
@@ -4314,7 +4313,7 @@ const MODES = (hljs) => {
     },
     CSS_VARIABLE: {
       className: "attr",
-      begin: /--[A-Za-z][A-Za-z0-9_-]*/
+      begin: /--[A-Za-z_][A-Za-z0-9_-]*/
     }
   };
 };
@@ -4883,6 +4882,7 @@ Language: CSS
 Category: common, css, web
 Website: https://developer.mozilla.org/en-US/docs/Web/CSS
 */
+
 
 /** @type LanguageFn */
 function css(hljs) {
@@ -5453,6 +5453,7 @@ Category: common, enterprise
 Website: https://www.java.com/
 */
 
+
 /**
  * Allows recursive regex expressions to a given depth
  *
@@ -5862,6 +5863,7 @@ Description: JavaScript (JS) is a lightweight, interpreted, or just-in-time comp
 Category: common, scripting, web
 Website: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 */
+
 
 /** @type LanguageFn */
 function javascript(hljs) {
@@ -6522,6 +6524,7 @@ function json(hljs) {
  Category: common
  */
 
+
 function kotlin(hljs) {
   const KEYWORDS = {
     keyword:
@@ -6770,6 +6773,7 @@ Author:   Max Mikhailov <seven.phases.max@gmail.com>
 Website: http://lesscss.org
 Category: common, css, web
 */
+
 
 /** @type LanguageFn */
 function less(hljs) {
@@ -10228,7 +10232,7 @@ function rust(hljs) {
     relevance: 0,
     begin: regex.concat(
       /\b/,
-      /(?!let\b)/,
+      /(?!let|for|while|if|else|match\b)/,
       hljs.IDENT_RE,
       regex.lookahead(/\s*\(/))
   };
@@ -10337,6 +10341,7 @@ function rust(hljs) {
     "debug_assert!",
     "debug_assert_eq!",
     "env!",
+    "eprintln!",
     "panic!",
     "file!",
     "format!",
@@ -10522,6 +10527,7 @@ Author: Kurt Emch <kurt@kurtemch.com>
 Website: https://sass-lang.com
 Category: common, css, web
 */
+
 
 /** @type LanguageFn */
 function scss(hljs) {
@@ -11390,12 +11396,16 @@ const keywords = [
   /as\?/, // operator
   /as!/, // operator
   'as', // operator
+  'borrowing', // contextual
   'break',
   'case',
   'catch',
   'class',
+  'consume', // contextual
+  'consuming', // contextual
   'continue',
   'convenience', // contextual
+  'copy', // contextual
   'default',
   'defer',
   'deinit',
@@ -11403,6 +11413,7 @@ const keywords = [
   'distributed',
   'do',
   'dynamic', // contextual
+  'each',
   'else',
   'enum',
   'extension',
@@ -11429,6 +11440,7 @@ const keywords = [
   'nonisolated', // contextual
   'lazy', // contextual
   'let',
+  'macro',
   'mutating', // contextual
   'nonmutating', // contextual
   /open\(set\)/, // contextual
@@ -11513,7 +11525,6 @@ const numberSignKeywords = [
   '#line',
   '#selector',
   '#sourceLocation',
-  '#warn_unqualified_access',
   '#warning'
 ];
 
@@ -11627,13 +11638,16 @@ const typeIdentifier = concat(/[A-Z]/, identifierCharacter, '*');
 
 // Built-in attributes, which are highlighted as keywords.
 // @available is handled separately.
+// https://docs.swift.org/swift-book/documentation/the-swift-programming-language/attributes
 const keywordAttributes = [
+  'attached',
   'autoclosure',
   concat(/convention\(/, either('swift', 'block', 'c'), /\)/),
   'discardableResult',
   'dynamicCallable',
   'dynamicMemberLookup',
   'escaping',
+  'freestanding',
   'frozen',
   'GKInspectable',
   'IBAction',
@@ -11653,10 +11667,13 @@ const keywordAttributes = [
   'propertyWrapper',
   'requires_stored_property_inits',
   'resultBuilder',
+  'Sendable',
   'testable',
   'UIApplicationMain',
+  'unchecked',
   'unknown',
-  'usableFromInline'
+  'usableFromInline',
+  'warn_unqualified_access'
 ];
 
 // Contextual keywords used in @available and #(un)available.
@@ -11682,6 +11699,7 @@ Contributors: Chris Eidhof <chris@eidhof.nl>, Nate Cook <natecook@gmail.com>, Al
 Website: https://swift.org
 Category: common, system
 */
+
 
 /** @type LanguageFn */
 function swift(hljs) {
@@ -11849,6 +11867,50 @@ function swift(hljs) {
     ]
   };
 
+  const REGEXP_CONTENTS = [
+    hljs.BACKSLASH_ESCAPE,
+    {
+      begin: /\[/,
+      end: /\]/,
+      relevance: 0,
+      contains: [ hljs.BACKSLASH_ESCAPE ]
+    }
+  ];
+
+  const BARE_REGEXP_LITERAL = {
+    begin: /\/[^\s](?=[^/\n]*\/)/,
+    end: /\//,
+    contains: REGEXP_CONTENTS
+  };
+
+  const EXTENDED_REGEXP_LITERAL = (rawDelimiter) => {
+    const begin = concat(rawDelimiter, /\//);
+    const end = concat(/\//, rawDelimiter);
+    return {
+      begin,
+      end,
+      contains: [
+        ...REGEXP_CONTENTS,
+        {
+          scope: "comment",
+          begin: `#(?!.*${end})`,
+          end: /$/,
+        },
+      ],
+    };
+  };
+
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/lexicalstructure/#Regular-Expression-Literals
+  const REGEXP = {
+    scope: "regexp",
+    variants: [
+      EXTENDED_REGEXP_LITERAL('###'),
+      EXTENDED_REGEXP_LITERAL('##'),
+      EXTENDED_REGEXP_LITERAL('#'),
+      BARE_REGEXP_LITERAL
+    ]
+  };
+
   // https://docs.swift.org/swift-book/ReferenceManual/LexicalStructure.html#ID412
   const QUOTED_IDENTIFIER = { match: concat(/`/, identifier, /`/) };
   const IMPLICIT_PARAMETER = {
@@ -11868,7 +11930,7 @@ function swift(hljs) {
   // https://docs.swift.org/swift-book/ReferenceManual/Attributes.html
   const AVAILABLE_ATTRIBUTE = {
     match: /(@|#(un)?)available/,
-    className: "keyword",
+    scope: 'keyword',
     starts: { contains: [
       {
         begin: /\(/,
@@ -11883,11 +11945,11 @@ function swift(hljs) {
     ] }
   };
   const KEYWORD_ATTRIBUTE = {
-    className: 'keyword',
+    scope: 'keyword',
     match: concat(/@/, either(...keywordAttributes))
   };
   const USER_DEFINED_ATTRIBUTE = {
-    className: 'meta',
+    scope: 'meta',
     match: concat(/@/, identifier)
   };
   const ATTRIBUTES = [
@@ -11955,6 +12017,7 @@ function swift(hljs) {
       'self',
       TUPLE_ELEMENT_NAME,
       ...COMMENTS,
+      REGEXP,
       ...KEYWORD_MODES,
       ...BUILT_INS,
       ...OPERATORS,
@@ -11969,6 +12032,7 @@ function swift(hljs) {
   const GENERIC_PARAMETERS = {
     begin: /</,
     end: />/,
+    keywords: 'repeat each',
     contains: [
       ...COMMENTS,
       TYPE
@@ -12011,9 +12075,10 @@ function swift(hljs) {
     illegal: /["']/
   };
   // https://docs.swift.org/swift-book/ReferenceManual/Declarations.html#ID362
-  const FUNCTION = {
+  // https://docs.swift.org/swift-book/documentation/the-swift-programming-language/declarations/#Macro-Declaration
+  const FUNCTION_OR_MACRO = {
     match: [
-      /func/,
+      /(func|macro)/,
       /\s+/,
       either(QUOTED_IDENTIFIER.match, identifier, operator)
     ],
@@ -12110,7 +12175,7 @@ function swift(hljs) {
     keywords: KEYWORDS,
     contains: [
       ...COMMENTS,
-      FUNCTION,
+      FUNCTION_OR_MACRO,
       INIT_SUBSCRIPT,
       {
         beginKeywords: 'struct protocol class extension enum actor',
@@ -12133,6 +12198,7 @@ function swift(hljs) {
         contains: [ ...COMMENTS ],
         relevance: 0
       },
+      REGEXP,
       ...KEYWORD_MODES,
       ...BUILT_INS,
       ...OPERATORS,
@@ -12154,6 +12220,7 @@ Description: TypeScript is a strict superset of JavaScript
 Website: https://www.typescriptlang.org
 Category: common, scripting
 */
+
 
 /** @type LanguageFn */
 function typescript(hljs) {
@@ -12764,7 +12831,6 @@ var builtIns = /*#__PURE__*/Object.freeze({
   grmr_less: less,
   grmr_lua: lua,
   grmr_makefile: makefile,
-  grmr_xml: xml,
   grmr_markdown: markdown,
   grmr_objectivec: objectivec,
   grmr_perl: perl,
@@ -12783,6 +12849,7 @@ var builtIns = /*#__PURE__*/Object.freeze({
   grmr_typescript: typescript,
   grmr_vbnet: vbnet,
   grmr_wasm: wasm,
+  grmr_xml: xml,
   grmr_yaml: yaml
 });
 
