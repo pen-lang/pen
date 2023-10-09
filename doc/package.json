@@ -3,6 +3,6 @@
     "build": "rm -rf theme/assets && mkdir -p theme/assets && cp -r node_modules/@highlightjs/cdn-assets theme/assets/highlight"
   },
   "dependencies": {
-    "@highlightjs/cdn-assets": "^11.8.0"
+    "@highlightjs/cdn-assets": "^11.9.0"
   }
 }
