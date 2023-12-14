@@ -62,7 +62,7 @@ jobs:
       - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - uses: ruby/setup-ruby@v1
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build-${{ matrix.os }}
           path: target/release
