@@ -37,7 +37,7 @@ jobs:
       - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
