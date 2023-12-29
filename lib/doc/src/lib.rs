@@ -228,7 +228,7 @@ fn compile_first_block_comment(
     let comments = &context.comments;
 
     if comments
-        .get(0)
+        .first()
         .map(|comment| comment.position().line_number())
         != Some(1)
     {
