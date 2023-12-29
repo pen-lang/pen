@@ -271,7 +271,7 @@ fn compile_type(type_: &Type) -> Document {
             );
 
             if types.len() == 1
-                || types.get(0).map(|type_| type_.position().line_number())
+                || types.first().map(|type_| type_.position().line_number())
                     == types.get(1).map(|type_| type_.position().line_number())
                     && !is_broken(&union)
             {
@@ -341,7 +341,7 @@ fn are_arguments_flat(arguments: &[Argument], position: &Position) -> bool {
     arguments.is_empty()
         || Some(position.line_number())
             == arguments
-                .get(0)
+                .first()
                 .map(|argument| argument.position().line_number())
 }
 
@@ -431,7 +431,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                     || Some(call.function().position().line_number())
                         == call
                             .arguments()
-                            .get(0)
+                            .first()
                             .map(|expression| expression.position().line_number())
                         && !is_broken(&arguments)
                 {
@@ -563,7 +563,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                         == if let Some(record) = record.record() {
                             Some(record.position())
                         } else {
-                            record.fields().get(0).map(|field| field.position())
+                            record.fields().first().map(|field| field.position())
                         }
                         .map(|position| position.line_number())
                         && !is_broken(&elements)
@@ -617,7 +617,7 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
             && Some(if_.position().line_number())
                 == if_
                     .branches()
-                    .get(0)
+                    .first()
                     .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
@@ -654,7 +654,7 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
             && Some(if_.position().line_number())
                 == if_
                     .branches()
-                    .get(0)
+                    .first()
                     .map(|branch| branch.block().expression().position().line_number()),
         document,
     )
@@ -686,7 +686,7 @@ fn compile_list(context: &mut Context, list: &List) -> Document {
             || Some(list.position().line_number())
                 == list
                     .elements()
-                    .get(0)
+                    .first()
                     .map(|element| element.position().line_number())
                 && !is_broken(&elements)
         {
@@ -733,7 +733,7 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
             || Some(map.position().line_number())
                 == map
                     .elements()
-                    .get(0)
+                    .first()
                     .map(|element| element.position().line_number())
                 && !is_broken(&elements)
         {
