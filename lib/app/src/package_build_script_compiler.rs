@@ -152,7 +152,7 @@ fn compile_modules(
             .compile_modules(
                 &module_targets,
                 main_module_targets
-                    .get(0)
+                    .first()
                     .map(|target| -> Result<_, Box<dyn Error>> {
                         Ok(MainModuleTarget::new(
                             target.source_file().clone(),
