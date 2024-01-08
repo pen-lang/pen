@@ -57,7 +57,7 @@ jobs:
         index: [0, 1, 2, 3, 4, 5, 6, 7]
         total: [8]
         exclude:
-          - os: ${{ github.ref == 'refs/heads/main' && '' || 'macos-12' }}
+          - os: ${{ github.ref == 'refs/heads/main' && 'none' || 'macos-12' }}
     runs-on: ${{ matrix.os }}
     steps:
       - run: echo ${{ github.ref }}
