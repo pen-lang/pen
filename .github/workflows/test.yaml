@@ -60,6 +60,7 @@ jobs:
           - os: ${{ github.ref == 'refs/heads/main' && '' || 'macos-12' }}
     runs-on: ${{ matrix.os }}
     steps:
+      - run: echo ${{ github.ref }}
       - uses: actions/checkout@v4
       - uses: Homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
