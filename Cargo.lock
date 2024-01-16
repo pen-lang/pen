@@ -784,9 +784,9 @@ checksum = "f665ee40bc4a3c5590afb1e9677db74a508659dfd71e126420da8274909a0167"
 
 [[package]]
 name = "mfmt"
-version = "0.1.4"
+version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5270879eb6d07512d5bf78b565b0125d9f353d8d4ab98d6def3a7cfab384c683"
+checksum = "461016e473ee1b5fbedf848ae7c6874c80e81977d2604c61510baf52003203d7"
 
 [[package]]
 name = "minimal-lexical"
