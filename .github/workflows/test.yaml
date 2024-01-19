@@ -8,6 +8,8 @@ on:
 concurrency:
   group: test-${{ github.ref }}
   cancel-in-progress: true
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
 jobs:
   build:
     strategy:
