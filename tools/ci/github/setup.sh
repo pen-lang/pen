@@ -2,9 +2,9 @@
 
 set -e
 
-llvm_version=16
+export HOMEBREW_NO_AUTO_UPDATE=1
 
-brew update
+llvm_version=16
 
 if [ -n "$CI" ]; then
   brew install --overwrite python@3.11
