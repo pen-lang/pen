@@ -2,8 +2,6 @@
 
 set -e
 
-export HOMEBREW_NO_AUTO_UPDATE=1
-
 llvm_version=16
 
 if [ -n "$CI" ]; then
