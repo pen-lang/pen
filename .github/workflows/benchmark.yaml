@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   benchmark:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
