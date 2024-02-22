@@ -85,7 +85,7 @@ curl -fsSL https://pen-lang.s3.us-west-1.amazonaws.com/icon.svg >doc/docs/icon.s
   npm install
   npm run build
 
-  pip3 install -r requirements.txt
+  pip3 install --break-system-packages --user -r requirements.txt
 
   mkdocs build
 )
