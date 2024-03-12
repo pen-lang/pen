@@ -10,7 +10,7 @@ crate-type = ["staticlib"]
 [dependencies]
 ffi = { package = "pen-ffi", version = "*", features = ["runtime", "std"] }
 futures = "0.3"
-sqlx = { version = "0.6", features = [
+sqlx = { version = "0.7", features = [
   "any",
   "mysql",
   "postgres",
