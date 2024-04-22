@@ -57,7 +57,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
