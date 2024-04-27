@@ -16,5 +16,5 @@ if [ $(uname) = Linux ]; then
   sudo apt install libc6-dbg # for valgrind
   brew install valgrind
 else
-  brew reinstall zstd
+  echo LIBRARY_PATH=$(brew --prefix)/lib:$LIBRARY_PATH >>$GITHUB_ENV
 fi
