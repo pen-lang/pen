@@ -20,9 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-      - uses: Homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
+      - uses: ./tools/ci/github/setup
       - run: tools/build.sh
       - run: git diff --exit-code
       - uses: actions/upload-artifact@v4
@@ -33,17 +31,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-      - uses: Homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
+      - uses: ./tools/ci/github/setup
       - run: tools/unit_test.sh
   coverage:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-      - uses: Homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
+      - uses: ./tools/ci/github/setup
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v3
         with:
@@ -63,9 +57,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
-      - uses: ruby/setup-ruby@v1
+      - uses: ./tools/ci/github/setup
       - uses: actions/download-artifact@v4
         with:
           name: build-${{ matrix.os }}
