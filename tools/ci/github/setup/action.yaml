@@ -1,0 +1,14 @@
+name: pen/setup
+description: Sets up a build environment
+inputs: {}
+outputs: {}
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@v1
+    - uses: swatinem/rust-cache@v2
+    - uses: homebrew/actions/setup-homebrew@master
+      with:
+        stable: true
+    - run: tools/ci/github/setup.sh
+      shell: bash
