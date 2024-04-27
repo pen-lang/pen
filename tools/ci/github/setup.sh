@@ -15,4 +15,6 @@ if [ $(uname) = Linux ]; then
   sudo apt update --fix-missing
   sudo apt install libc6-dbg # for valgrind
   brew install valgrind
+else
+  echo LIBRARY_PATH=$(brew --prefix)/lib:$LIBRARY_PATH >>$GITHUB_ENV
 fi
