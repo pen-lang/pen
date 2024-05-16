@@ -7,7 +7,7 @@ edition = "2021"
 ast = { path = "../ast" }
 format = { path = "../format" }
 indoc = "2"
-itertools = "0.12"
+itertools = "0.13"
 position = { path = "../position" }
 
 [dev-dependencies]
