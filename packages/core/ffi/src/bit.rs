@@ -2,17 +2,17 @@ use core::mem::transmute;
 
 #[ffi::bindgen]
 fn _pen_core_bit_and(x: ffi::Number, y: ffi::Number) -> ffi::Number {
-    unsafe { transmute(transmute::<ffi::Number, u64>(x) & transmute::<_, u64>(y)) }
+    unsafe { transmute(transmute::<ffi::Number, u64>(x) & transmute::<ffi::Number, u64>(y)) }
 }
 
 #[ffi::bindgen]
 fn _pen_core_bit_or(x: ffi::Number, y: ffi::Number) -> ffi::Number {
-    unsafe { transmute(transmute::<ffi::Number, u64>(x) | transmute::<_, u64>(y)) }
+    unsafe { transmute(transmute::<ffi::Number, u64>(x) | transmute::<ffi::Number, u64>(y)) }
 }
 
 #[ffi::bindgen]
 fn _pen_core_bit_xor(x: ffi::Number, y: ffi::Number) -> ffi::Number {
-    unsafe { transmute(transmute::<ffi::Number, u64>(x) ^ transmute::<_, u64>(y)) }
+    unsafe { transmute(transmute::<ffi::Number, u64>(x) ^ transmute::<ffi::Number, u64>(y)) }
 }
 
 #[ffi::bindgen]
