@@ -85,7 +85,7 @@ mod tests {
                 Closure::new(thunk_entry_function as *const u8, value),
             )
             .await,
-            value.into()
+            value
         );
     }
 
