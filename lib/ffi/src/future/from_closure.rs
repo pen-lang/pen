@@ -23,8 +23,9 @@ pub async fn from_closure<T, V>(closure: Closure<T>) -> V {
                 step(stack, continue_);
             } else {
                 let closure = closure.take().unwrap();
-                let entry_function =
-                    unsafe { transmute::<_, InitialStepFunction<V, T>>(closure.entry_function()) };
+                let entry_function = unsafe {
+                    transmute::<*const u8, InitialStepFunction<V, T>>(closure.entry_function())
+                };
 
                 entry_function(stack, resolve, closure);
             }
