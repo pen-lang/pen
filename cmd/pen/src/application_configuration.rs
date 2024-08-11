@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 pub static APPLICATION_CONFIGURATION: LazyLock<Arc<app::ApplicationConfiguration>> =
     LazyLock::new(|| {

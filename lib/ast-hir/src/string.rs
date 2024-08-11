@@ -1,6 +1,5 @@
 use regex::bytes::{Captures, Regex};
-use std::str;
-use std::sync::LazyLock;
+use std::{str, sync::LazyLock};
 
 static HEX_CHARACTER_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
