@@ -9,5 +9,4 @@ clap = { version = "4", features = ["cargo"] }
 app = { path = "../../lib/app" }
 indoc = "2"
 infra = { path = "../../lib/infra" }
-once_cell = "1"
 url = "2"

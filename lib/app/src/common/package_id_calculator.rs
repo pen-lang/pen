@@ -1,9 +1,9 @@
-use once_cell::sync::Lazy;
 use regex::Regex;
+use std::sync::LazyLock;
 
 const REPLACEMENT_STRING: &str = "_";
 
-static REPLACEMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[.:/]+").unwrap());
+static REPLACEMENT_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[.:/]+").unwrap());
 
 pub fn calculate(url: &url::Url) -> String {
     REPLACEMENT_REGEX

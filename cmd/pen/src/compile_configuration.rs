@@ -1,5 +1,4 @@
-use once_cell::sync::Lazy;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 pub const CROSS_COMPILE_TARGETS: &[&str] = &[
     "i686-unknown-linux-musl",
@@ -8,8 +7,8 @@ pub const CROSS_COMPILE_TARGETS: &[&str] = &[
     "wasm32-wasi",
 ];
 
-pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfiguration>> =
-    Lazy::new(|| {
+pub static COMPILE_CONFIGURATION: LazyLock<Arc<app::module_compiler::CompileConfiguration>> =
+    LazyLock::new(|| {
         app::module_compiler::CompileConfiguration {
             fmm: app::module_compiler::FmmConfiguration {
                 allocate_function_name: "_pen_malloc".into(),

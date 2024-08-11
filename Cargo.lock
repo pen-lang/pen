@@ -109,7 +109,6 @@ dependencies = [
  "interface",
  "mir",
  "mir-fmm",
- "once_cell",
  "parse",
  "petgraph",
  "regex",
@@ -137,7 +136,6 @@ dependencies = [
  "hir",
  "interface",
  "itertools",
- "once_cell",
  "position",
  "pretty_assertions",
  "regex",
@@ -550,7 +548,6 @@ name = "hir"
 version = "0.1.0"
 dependencies = [
  "fnv",
- "once_cell",
  "petgraph",
  "plist",
  "position",
@@ -568,7 +565,6 @@ dependencies = [
  "interface",
  "itertools",
  "mir",
- "once_cell",
  "position",
  "pretty_assertions",
  "test-info",
@@ -816,7 +812,6 @@ version = "0.1.0"
 dependencies = [
  "fnv",
  "hamt",
- "once_cell",
  "plist",
  "pretty_assertions",
 ]
@@ -831,7 +826,6 @@ dependencies = [
  "fnv",
  "insta",
  "mir",
- "once_cell",
  "plist",
  "tempfile",
 ]
@@ -944,7 +938,6 @@ dependencies = [
  "clap",
  "indoc",
  "infra",
- "once_cell",
  "url",
 ]
 

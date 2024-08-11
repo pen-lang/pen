@@ -10,7 +10,6 @@ edition = "2021"
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fnv = "1"
 mir = { path = "../mir" }
-once_cell = "1"
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 
 [dev-dependencies]

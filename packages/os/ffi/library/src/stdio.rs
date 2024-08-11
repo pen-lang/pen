@@ -1,16 +1,15 @@
 use crate::utilities;
 use core::ops::DerefMut;
-use once_cell::sync::Lazy;
-use std::error::Error;
+use std::{error::Error, sync::LazyLock};
 use tokio::{
     io::{stderr, stdin, stdout, AsyncWriteExt, Stderr, Stdin, Stdout},
     sync::Mutex,
 };
 
 // Use single buffers for standard I/O.
-static STDIN: Lazy<Mutex<Stdin>> = Lazy::new(|| Mutex::new(stdin()));
-static STDOUT: Lazy<Mutex<Stdout>> = Lazy::new(|| Mutex::new(stdout()));
-static STDERR: Lazy<Mutex<Stderr>> = Lazy::new(|| Mutex::new(stderr()));
+static STDIN: LazyLock<Mutex<Stdin>> = LazyLock::new(|| Mutex::new(stdin()));
+static STDOUT: LazyLock<Mutex<Stdout>> = LazyLock::new(|| Mutex::new(stdout()));
+static STDERR: LazyLock<Mutex<Stderr>> = LazyLock::new(|| Mutex::new(stderr()));
 
 #[ffi::bindgen]
 async fn _pen_os_read_stdin() -> Result<ffi::ByteString, Box<dyn Error>> {

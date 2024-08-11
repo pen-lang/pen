@@ -3,11 +3,11 @@ use crate::{
     reference_count::{self, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS},
     type_, CompileError,
 };
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 thread_local! {
-    static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
-        Lazy::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
+    static DUMMY_FUNCTION_TYPE: LazyLock<mir::types::Function> =
+        LazyLock::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
 }
 
 pub fn compile(

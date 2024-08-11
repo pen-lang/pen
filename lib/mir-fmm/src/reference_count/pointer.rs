@@ -1,6 +1,6 @@
 use super::{super::error::CompileError, block, count, heap};
 use crate::{context::Context, reference_count::REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS};
-use once_cell::unsync::Lazy;
+use std::cell::LazyCell;
 
 // Reference counts are negative for synchronized memory blocks and otherwise
 // positive. References to static memory blocks are tagged.
@@ -8,7 +8,7 @@ use once_cell::unsync::Lazy;
 const CLONE_FUNCTION_NAME: &str = "mir:clone:pointer";
 
 thread_local! {
-    static CLONE_FUNCTION_VARIABLE: Lazy<fmm::build::TypedExpression> = Lazy::new(|| {
+    static CLONE_FUNCTION_VARIABLE: LazyCell<fmm::build::TypedExpression> = LazyCell::new(|| {
         fmm::build::variable(
             CLONE_FUNCTION_NAME,
             fmm::types::Function::new(

@@ -11,7 +11,7 @@ use super::{
 };
 use crate::number_type_configuration::NumberTypeConfiguration;
 #[cfg(test)]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[derive(Clone, Debug)]
 pub struct CompileConfiguration {
@@ -25,12 +25,13 @@ pub struct CompileConfiguration {
 }
 
 #[cfg(test)]
-pub static COMPILE_CONFIGURATION: Lazy<CompileConfiguration> = Lazy::new(|| CompileConfiguration {
-    list_type: LIST_TYPE_CONFIGURATION.clone(),
-    map_type: MAP_TYPE_CONFIGURATION.clone(),
-    number_type: NUMBER_TYPE_CONFIGURATION.clone(),
-    string_type: STRING_TYPE_CONFIGURATION.clone(),
-    debug_function_name: "debug".into(),
-    race_function_name: "race".into(),
-    spawn_function_name: "spawn".into(),
-});
+pub static COMPILE_CONFIGURATION: LazyLock<CompileConfiguration> =
+    LazyLock::new(|| CompileConfiguration {
+        list_type: LIST_TYPE_CONFIGURATION.clone(),
+        map_type: MAP_TYPE_CONFIGURATION.clone(),
+        number_type: NUMBER_TYPE_CONFIGURATION.clone(),
+        string_type: STRING_TYPE_CONFIGURATION.clone(),
+        debug_function_name: "debug".into(),
+        race_function_name: "race".into(),
+        spawn_function_name: "spawn".into(),
+    });

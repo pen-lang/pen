@@ -9,11 +9,11 @@ pub mod string;
 pub mod variant;
 
 pub use expression::*;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
-pub(super) static REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS: Lazy<
+pub(super) static REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS: LazyLock<
     fmm::ir::FunctionDefinitionOptions,
-> = Lazy::new(|| {
+> = LazyLock::new(|| {
     fmm::ir::FunctionDefinitionOptions::new()
         .set_address_named(false)
         .set_calling_convention(fmm::types::CallingConvention::Target)

@@ -2,12 +2,12 @@ use super::error::CompileError;
 use crate::{
     closure, context::Context, expression, reference_count, type_, yield_::yield_function_type,
 };
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 const CLOSURE_NAME: &str = "_closure";
 
-static ENTRY_FUNCTION_DEFINITION_OPTIONS: Lazy<fmm::ir::FunctionDefinitionOptions> =
-    Lazy::new(|| {
+static ENTRY_FUNCTION_DEFINITION_OPTIONS: LazyLock<fmm::ir::FunctionDefinitionOptions> =
+    LazyLock::new(|| {
         fmm::ir::FunctionDefinitionOptions::new()
             .set_address_named(false)
             .set_calling_convention(fmm::types::CallingConvention::Source)

@@ -1,9 +1,9 @@
 #[cfg(test)]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[cfg(test)]
-pub static LIST_TYPE_CONFIGURATION: Lazy<ListTypeConfiguration> =
-    Lazy::new(|| ListTypeConfiguration {
+pub static LIST_TYPE_CONFIGURATION: LazyLock<ListTypeConfiguration> =
+    LazyLock::new(|| ListTypeConfiguration {
         empty_function_name: "emptyList".into(),
         concatenate_function_name: "concatenateLists".into(),
         equal_function_name: "equalLists".into(),

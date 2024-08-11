@@ -2,7 +2,7 @@ pub mod foreign;
 pub mod variant;
 
 use crate::context::Context;
-use once_cell::unsync::Lazy;
+use std::cell::LazyCell;
 
 pub const FUNCTION_ARGUMENT_OFFSET: usize = 1;
 
@@ -39,7 +39,7 @@ pub fn compile_none() -> fmm::types::Type {
 
 pub fn compile_string() -> fmm::types::Pointer {
     thread_local! {
-        static TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+        static TYPE: LazyCell<fmm::types::Pointer> = LazyCell::new(|| {
             fmm::types::Pointer::new(fmm::types::Record::new(vec![
                 fmm::types::Primitive::PointerInteger.into(),
                 // The first byte of a string
@@ -53,7 +53,7 @@ pub fn compile_string() -> fmm::types::Pointer {
 
 fn compile_variant() -> fmm::types::Record {
     thread_local! {
-        static TYPE: Lazy<fmm::types::Record> = Lazy::new(|| {
+        static TYPE: LazyCell<fmm::types::Record> = LazyCell::new(|| {
             fmm::types::Record::new(vec![
                 compile_variant_tag().into(),
                 compile_variant_payload().into(),
@@ -66,7 +66,7 @@ fn compile_variant() -> fmm::types::Record {
 
 pub fn compile_variant_tag() -> fmm::types::Pointer {
     thread_local! {
-        static TYPE: Lazy<fmm::types::Pointer> = Lazy::new(|| {
+        static TYPE: LazyCell<fmm::types::Pointer> = LazyCell::new(|| {
             let payload = fmm::types::Type::from(compile_variant_payload());
 
             fmm::types::Pointer::new(fmm::types::Record::new(vec![
