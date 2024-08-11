@@ -43,7 +43,7 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                 .arg("--quiet")
                 .arg("-f")
                 .arg(&build_script_file)
-                .arg(&self.file_path_converter.convert_to_os_path(target_file))
+                .arg(self.file_path_converter.convert_to_os_path(target_file))
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit()),
         )?;
