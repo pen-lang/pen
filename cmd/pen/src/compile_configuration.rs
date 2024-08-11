@@ -1,5 +1,5 @@
-use std::sync::LazyLock;
 use std::sync::Arc;
+use std::sync::LazyLock;
 
 pub const CROSS_COMPILE_TARGETS: &[&str] = &[
     "i686-unknown-linux-musl",

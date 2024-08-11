@@ -2,12 +2,13 @@ use super::{drop, sync};
 use crate::{context::Context, CompileError};
 use std::sync::LazyLock;
 
-static VARIABLE_DEFINITION_OPTIONS: LazyLock<fmm::ir::VariableDefinitionOptions> = LazyLock::new(|| {
-    fmm::ir::VariableDefinitionOptions::new()
-        .set_address_named(false)
-        .set_linkage(fmm::ir::Linkage::Internal)
-        .set_mutable(false)
-});
+static VARIABLE_DEFINITION_OPTIONS: LazyLock<fmm::ir::VariableDefinitionOptions> =
+    LazyLock::new(|| {
+        fmm::ir::VariableDefinitionOptions::new()
+            .set_address_named(false)
+            .set_linkage(fmm::ir::Linkage::Internal)
+            .set_mutable(false)
+    });
 
 // We do not need to compile closure metadata for thunks in the middle of
 // evaluation because of the following reasons.
