@@ -2,7 +2,7 @@ use super::{drop, sync};
 use crate::{context::Context, CompileError};
 use std::sync::LazyLock;
 
-static VARIABLE_DEFINITION_OPTIONS: Lazy<fmm::ir::VariableDefinitionOptions> = Lazy::new(|| {
+static VARIABLE_DEFINITION_OPTIONS: Lazy<fmm::ir::VariableDefinitionOptions> = LazyLock::new(|| {
     fmm::ir::VariableDefinitionOptions::new()
         .set_address_named(false)
         .set_linkage(fmm::ir::Linkage::Internal)

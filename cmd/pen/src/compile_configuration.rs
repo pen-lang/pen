@@ -9,7 +9,7 @@ pub const CROSS_COMPILE_TARGETS: &[&str] = &[
 ];
 
 pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfiguration>> =
-    Lazy::new(|| {
+    LazyLock::new(|| {
         app::module_compiler::CompileConfiguration {
             fmm: app::module_compiler::FmmConfiguration {
                 allocate_function_name: "_pen_malloc".into(),

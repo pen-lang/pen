@@ -3,7 +3,7 @@ use regex::bytes::{Captures, Regex};
 use std::str;
 
 static HEX_CHARACTER_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
+    LazyLock::new(|| Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
 
 pub fn compile(string: &str) -> Vec<u8> {
     HEX_CHARACTER_REGEX

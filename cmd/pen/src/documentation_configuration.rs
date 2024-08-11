@@ -3,7 +3,7 @@ use app::package_documentation_generator::DocumentationConfiguration;
 use std::sync::LazyLock;
 
 pub static DOCUMENTATION_CONFIGURATION: Lazy<DocumentationConfiguration> =
-    Lazy::new(|| DocumentationConfiguration {
+    LazyLock::new(|| DocumentationConfiguration {
         language: "pen".into(),
         private_names: [APPLICATION_CONFIGURATION
             .main_module

@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 use std::sync::Arc;
 
-pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> = Lazy::new(|| {
+pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> = LazyLock::new(|| {
     app::ApplicationConfiguration {
         application_filename: "app".into(),
         main_module_basename: "main".into(),

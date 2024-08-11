@@ -2,7 +2,7 @@ use crate::context::Context;
 use once_cell::unsync::Lazy;
 
 thread_local! {
-    static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = Lazy::new(|| {
+    static YIELD_FUNCTION_TYPE: Lazy<fmm::types::Function> = LazyLock::new(|| {
         fmm::types::Function::new(
             vec![],
             fmm::types::void_type(),

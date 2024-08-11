@@ -3,7 +3,7 @@ use regex::Regex;
 
 const REPLACEMENT_STRING: &str = "_";
 
-static REPLACEMENT_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[.:/]+").unwrap());
+static REPLACEMENT_REGEX: Lazy<Regex> = LazyLock::new(|| Regex::new(r"[.:/]+").unwrap());
 
 pub fn calculate(url: &url::Url) -> String {
     REPLACEMENT_REGEX

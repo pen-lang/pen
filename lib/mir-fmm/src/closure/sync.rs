@@ -7,7 +7,7 @@ use std::sync::LazyLock;
 
 thread_local! {
     static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
-        Lazy::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
+        LazyLock::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
 }
 
 pub fn compile(
