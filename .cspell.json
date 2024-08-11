@@ -45,6 +45,7 @@
     "libc",
     "malloc",
     "metaprogramming",
+    "metavars",
     "mfmt",
     "mkdocs",
     "modifiability",
