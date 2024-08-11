@@ -1,8 +1,8 @@
 use crate::context::Context;
-use once_cell::unsync::Lazy;
+use std::cell::LazyCell;
 
 thread_local! {
-    static YIELD_FUNCTION_TYPE: LazyLock<fmm::types::Function> = LazyLock::new(|| {
+    static YIELD_FUNCTION_TYPE: LazyCell<fmm::types::Function> = LazyCell::new(|| {
         fmm::types::Function::new(
             vec![],
             fmm::types::void_type(),
