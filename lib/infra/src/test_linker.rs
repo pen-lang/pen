@@ -120,7 +120,7 @@ impl app::infra::TestLinker for TestLinker {
             command_runner::run_command(
                 Command::new("cp")
                     .arg("-r")
-                    .arg(&Path::new(&language_root_directory).join("cmd/test"))
+                    .arg(Path::new(&language_root_directory).join("cmd/test"))
                     .arg(&main_crate_directory),
             )?;
         }

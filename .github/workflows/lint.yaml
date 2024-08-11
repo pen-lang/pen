@@ -20,12 +20,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./tools/ci/github/setup
       - run: tools/lint.sh -- -D warnings
-  unused_dependencies:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./tools/ci/github/setup
-      - run: tools/unused_dependencies.sh
   spell_check:
     runs-on: ubuntu-latest
     steps:

@@ -1,6 +1,6 @@
 from ubuntu:20.04
 
-env DEBIAN_FRONTEND=noninteractive	
+env DEBIAN_FRONTEND=noninteractive
 
 run apt update --fix-missing && apt install -y \
 	build-essential \
@@ -26,7 +26,7 @@ shell ["bash", "-lc"]
 
 run git clone https://github.com/Homebrew/brew ~/.homebrew
 run ~/.homebrew/bin/brew shellenv >> ~/.profile
-run brew install hello
+run brew info hello
 
 run curl -fsSL https://sh.rustup.rs | sh /dev/stdin -y
 run cargo install mdbook sccache turtle-build
