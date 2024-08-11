@@ -1,6 +1,6 @@
 /*!
-  Highlight.js v11.9.0 (git: f47103d4f1)
-  (c) 2006-2023 undefined and other contributors
+  Highlight.js v11.10.0 (git: 366a8bd012)
+  (c) 2006-2024 Josh Goebel <hello@joshgoebel.com> and other contributors
   License: BSD-3-Clause
  */
 /* eslint-disable no-multi-assign */
@@ -1555,7 +1555,7 @@ function expandOrCloneMode(mode) {
   return mode;
 }
 
-var version = "11.9.0";
+var version = "11.10.0";
 
 class HTMLInjectionError extends Error {
   constructor(reason, html) {
@@ -2597,15 +2597,12 @@ const highlight = HLJS({});
 // check https://github.com/wooorm/lowlight/issues/47
 highlight.newInstance = () => HLJS({});
 
-// export an "instance" of the highlighter
-var HighlightJS = highlight;
-
 /*
 Language: Bash
 Author: vah <vahtenberg@gmail.com>
 Contributrors: Benjamin Pannell <contact@sierrasoftworks.com>
 Website: https://www.gnu.org/software/bash/
-Category: common
+Category: common, scripting
 */
 
 /** @type LanguageFn */
@@ -2640,6 +2637,18 @@ function bash(hljs) {
     end: /\)/,
     contains: [ hljs.BACKSLASH_ESCAPE ]
   };
+  const COMMENT = hljs.inherit(
+    hljs.COMMENT(),
+    {
+      match: [
+        /(^|\s)/,
+        /#.*$/
+      ],
+      scope: {
+        2: 'comment'
+      }
+    }
+  );
   const HERE_DOC = {
     begin: /<<-?\s*(?=\w+)/,
     starts: { contains: [
@@ -2773,6 +2782,7 @@ function bash(hljs) {
     "read",
     "readarray",
     "source",
+    "sudo",
     "type",
     "typeset",
     "ulimit",
@@ -2958,7 +2968,10 @@ function bash(hljs) {
 
   return {
     name: 'Bash',
-    aliases: [ 'sh' ],
+    aliases: [
+      'sh',
+      'zsh'
+    ],
     keywords: {
       $pattern: /\b[a-z][a-z0-9._-]+\b/,
       keyword: KEYWORDS,
@@ -2978,7 +2991,7 @@ function bash(hljs) {
       hljs.SHEBANG(), // to catch unknown shells but still highlight the shebang
       FUNCTION,
       ARITHMETIC,
-      hljs.HASH_COMMENT_MODE,
+      COMMENT,
       HERE_DOC,
       PATH_MODE,
       QUOTE_STRING,
@@ -3062,7 +3075,7 @@ function c(hljs) {
     end: /$/,
     keywords: { keyword:
         'if else elif endif define undef warning error line '
-        + 'pragma _Pragma ifdef ifndef include' },
+        + 'pragma _Pragma ifdef ifndef elifdef elifndef include' },
     contains: [
       {
         begin: /\\\n/,
@@ -3106,6 +3119,8 @@ function c(hljs) {
     "restrict",
     "return",
     "sizeof",
+    "typeof",
+    "typeof_unqual",
     "struct",
     "switch",
     "typedef",
@@ -3140,14 +3155,26 @@ function c(hljs) {
     "char",
     "void",
     "_Bool",
+    "_BitInt",
     "_Complex",
     "_Imaginary",
     "_Decimal32",
     "_Decimal64",
+    "_Decimal96",
     "_Decimal128",
+    "_Decimal64x",
+    "_Decimal128x",
+    "_Float16",
+    "_Float32",
+    "_Float64",
+    "_Float128",
+    "_Float32x",
+    "_Float64x",
+    "_Float128x",
     // modifiers
     "const",
     "static",
+    "constexpr",
     // aliases
     "complex",
     "bool",
@@ -3361,9 +3388,44 @@ function cpp(hljs) {
   const NUMBERS = {
     className: 'number',
     variants: [
-      { begin: '\\b(0b[01\']+)' },
-      { begin: '(-?)\\b([\\d\']+(\\.[\\d\']*)?|\\.[\\d\']+)((ll|LL|l|L)(u|U)?|(u|U)(ll|LL|l|L)?|f|F|b|B)' },
-      { begin: '(-?)(\\b0[xX][a-fA-F0-9\']+|(\\b[\\d\']+(\\.[\\d\']*)?|\\.[\\d\']+)([eE][-+]?[\\d\']+)?)' }
+      // Floating-point literal.
+      { begin:
+        "[+-]?(?:" // Leading sign.
+          // Decimal.
+          + "(?:"
+            +"[0-9](?:'?[0-9])*\\.(?:[0-9](?:'?[0-9])*)?"
+            + "|\\.[0-9](?:'?[0-9])*"
+          + ")(?:[Ee][+-]?[0-9](?:'?[0-9])*)?"
+          + "|[0-9](?:'?[0-9])*[Ee][+-]?[0-9](?:'?[0-9])*"
+          // Hexadecimal.
+          + "|0[Xx](?:"
+            +"[0-9A-Fa-f](?:'?[0-9A-Fa-f])*(?:\\.(?:[0-9A-Fa-f](?:'?[0-9A-Fa-f])*)?)?"
+            + "|\\.[0-9A-Fa-f](?:'?[0-9A-Fa-f])*"
+          + ")[Pp][+-]?[0-9](?:'?[0-9])*"
+        + ")(?:" // Literal suffixes.
+          + "[Ff](?:16|32|64|128)?"
+          + "|(BF|bf)16"
+          + "|[Ll]"
+          + "|" // Literal suffix is optional.
+        + ")"
+      },
+      // Integer literal.
+      { begin:
+        "[+-]?\\b(?:" // Leading sign.
+          + "0[Bb][01](?:'?[01])*" // Binary.
+          + "|0[Xx][0-9A-Fa-f](?:'?[0-9A-Fa-f])*" // Hexadecimal.
+          + "|0(?:'?[0-7])*" // Octal or just a lone zero.
+          + "|[1-9](?:'?[0-9])*" // Decimal.
+        + ")(?:" // Literal suffixes.
+          + "[Uu](?:LL?|ll?)"
+          + "|[Uu][Zz]?"
+          + "|(?:LL?|ll?)[Uu]?"
+          + "|[Zz][Uu]"
+          + "|" // Literal suffix is optional.
+        + ")"
+        // Note: there are user-defined literal suffixes too, but perhaps having the custom suffix not part of the
+        // literal highlight actually makes it stand out more.
+      }
     ],
     relevance: 0
   };
@@ -4040,6 +4102,11 @@ function csharp(hljs) {
     ],
     relevance: 0
   };
+  const RAW_STRING = {
+    className: 'string',
+    begin: /"""("*)(?!")(.|\n)*?"""\1/,
+    relevance: 1
+  };
   const VERBATIM_STRING = {
     className: 'string',
     begin: '@"',
@@ -4105,6 +4172,7 @@ function csharp(hljs) {
     hljs.inherit(hljs.C_BLOCK_COMMENT_MODE, { illegal: /\n/ })
   ];
   const STRING = { variants: [
+    RAW_STRING,
     INTERPOLATED_VERBATIM_STRING,
     INTERPOLATED_STRING,
     VERBATIM_STRING,
@@ -4318,7 +4386,7 @@ const MODES = (hljs) => {
   };
 };
 
-const TAGS = [
+const HTML_TAGS = [
   'a',
   'abbr',
   'address',
@@ -4370,11 +4438,16 @@ const TAGS = [
   'nav',
   'object',
   'ol',
+  'optgroup',
+  'option',
   'p',
+  'picture',
   'q',
   'quote',
   'samp',
   'section',
+  'select',
+  'source',
   'span',
   'strong',
   'summary',
@@ -4392,6 +4465,58 @@ const TAGS = [
   'var',
   'video'
 ];
+
+const SVG_TAGS = [
+  'defs',
+  'g',
+  'marker',
+  'mask',
+  'pattern',
+  'svg',
+  'switch',
+  'symbol',
+  'feBlend',
+  'feColorMatrix',
+  'feComponentTransfer',
+  'feComposite',
+  'feConvolveMatrix',
+  'feDiffuseLighting',
+  'feDisplacementMap',
+  'feFlood',
+  'feGaussianBlur',
+  'feImage',
+  'feMerge',
+  'feMorphology',
+  'feOffset',
+  'feSpecularLighting',
+  'feTile',
+  'feTurbulence',
+  'linearGradient',
+  'radialGradient',
+  'stop',
+  'circle',
+  'ellipse',
+  'image',
+  'line',
+  'path',
+  'polygon',
+  'polyline',
+  'rect',
+  'text',
+  'use',
+  'textPath',
+  'tspan',
+  'foreignObject',
+  'clipPath'
+];
+
+const TAGS = [
+  ...HTML_TAGS,
+  ...SVG_TAGS,
+];
+
+// Sorting, then reversing makes sure longer attributes/elements like
+// `font-weight` are matched fully instead of getting false positives on say `font`
 
 const MEDIA_FEATURES = [
   'any-hover',
@@ -4428,7 +4553,7 @@ const MEDIA_FEATURES = [
   'max-width',
   'min-height',
   'max-height'
-];
+].sort().reverse();
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes
 const PSEUDO_CLASSES = [
@@ -4491,7 +4616,7 @@ const PSEUDO_CLASSES = [
   'valid',
   'visited',
   'where' // where()
-];
+].sort().reverse();
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-elements
 const PSEUDO_ELEMENTS = [
@@ -4509,12 +4634,14 @@ const PSEUDO_ELEMENTS = [
   'selection',
   'slotted',
   'spelling-error'
-];
+].sort().reverse();
 
 const ATTRIBUTES = [
+  'accent-color',
   'align-content',
   'align-items',
   'align-self',
+  'alignment-baseline',
   'all',
   'animation',
   'animation-delay',
@@ -4525,6 +4652,7 @@ const ATTRIBUTES = [
   'animation-name',
   'animation-play-state',
   'animation-timing-function',
+  'appearance',
   'backface-visibility',
   'background',
   'background-attachment',
@@ -4536,6 +4664,7 @@ const ATTRIBUTES = [
   'background-position',
   'background-repeat',
   'background-size',
+  'baseline-shift',
   'block-size',
   'border',
   'border-block',
@@ -4582,10 +4711,14 @@ const ATTRIBUTES = [
   'border-left-width',
   'border-radius',
   'border-right',
+  'border-end-end-radius',
+  'border-end-start-radius',
   'border-right-color',
   'border-right-style',
   'border-right-width',
   'border-spacing',
+  'border-start-end-radius',
+  'border-start-start-radius',
   'border-style',
   'border-top',
   'border-top-color',
@@ -4601,6 +4734,8 @@ const ATTRIBUTES = [
   'break-after',
   'break-before',
   'break-inside',
+  'cx',
+  'cy',
   'caption-side',
   'caret-color',
   'clear',
@@ -4608,6 +4743,11 @@ const ATTRIBUTES = [
   'clip-path',
   'clip-rule',
   'color',
+  'color-interpolation',
+  'color-interpolation-filters',
+  'color-profile',
+  'color-rendering',
+  'color-scheme',
   'column-count',
   'column-fill',
   'column-gap',
@@ -4629,7 +4769,12 @@ const ATTRIBUTES = [
   'cursor',
   'direction',
   'display',
+  'dominant-baseline',
   'empty-cells',
+  'enable-background',
+  'fill',
+  'fill-opacity',
+  'fill-rule',
   'filter',
   'flex',
   'flex-basis',
@@ -4640,6 +4785,8 @@ const ATTRIBUTES = [
   'flex-wrap',
   'float',
   'flow',
+  'flood-color',
+  'flood-opacity',
   'font',
   'font-display',
   'font-family',
@@ -4661,6 +4808,7 @@ const ATTRIBUTES = [
   'font-variation-settings',
   'font-weight',
   'gap',
+  'glyph-orientation-horizontal',
   'glyph-orientation-vertical',
   'grid',
   'grid-area',
@@ -4687,16 +4835,32 @@ const ATTRIBUTES = [
   'image-resolution',
   'ime-mode',
   'inline-size',
+  'inset',
+  'inset-block',
+  'inset-block-end',
+  'inset-block-start',
+  'inset-inline',
+  'inset-inline-end',
+  'inset-inline-start',
   'isolation',
+  'kerning',
   'justify-content',
+  'justify-items',
+  'justify-self',
   'left',
   'letter-spacing',
+  'lighting-color',
   'line-break',
   'line-height',
   'list-style',
   'list-style-image',
   'list-style-position',
   'list-style-type',
+  'marker',
+  'marker-end',
+  'marker-mid',
+  'marker-start',
+  'mask',
   'margin',
   'margin-block',
   'margin-block-end',
@@ -4778,12 +4942,15 @@ const ATTRIBUTES = [
   'pointer-events',
   'position',
   'quotes',
+  'r',
   'resize',
   'rest',
   'rest-after',
   'rest-before',
   'right',
+  'rotate',
   'row-gap',
+  'scale',
   'scroll-margin',
   'scroll-margin-block',
   'scroll-margin-block-end',
@@ -4815,11 +4982,23 @@ const ATTRIBUTES = [
   'shape-image-threshold',
   'shape-margin',
   'shape-outside',
+  'shape-rendering',
+  'stop-color',
+  'stop-opacity',
+  'stroke',
+  'stroke-dasharray',
+  'stroke-dashoffset',
+  'stroke-linecap',
+  'stroke-linejoin',
+  'stroke-miterlimit',
+  'stroke-opacity',
+  'stroke-width',
   'speak',
   'speak-as',
   'src', // @font-face
   'tab-size',
   'table-layout',
+  'text-anchor',
   'text-align',
   'text-align-all',
   'text-align-last',
@@ -4827,7 +5006,9 @@ const ATTRIBUTES = [
   'text-decoration',
   'text-decoration-color',
   'text-decoration-line',
+  'text-decoration-skip-ink',
   'text-decoration-style',
+  'text-decoration-thickness',
   'text-emphasis',
   'text-emphasis-color',
   'text-emphasis-position',
@@ -4839,6 +5020,7 @@ const ATTRIBUTES = [
   'text-rendering',
   'text-shadow',
   'text-transform',
+  'text-underline-offset',
   'text-underline-position',
   'top',
   'transform',
@@ -4850,7 +5032,9 @@ const ATTRIBUTES = [
   'transition-duration',
   'transition-property',
   'transition-timing-function',
+  'translate',
   'unicode-bidi',
+  'vector-effect',
   'vertical-align',
   'visibility',
   'voice-balance',
@@ -4869,13 +5053,13 @@ const ATTRIBUTES = [
   'word-spacing',
   'word-wrap',
   'writing-mode',
+  'x',
+  'y',
   'z-index'
-  // reverse makes sure longer attributes `font-weight` are matched fully
-  // instead of getting false positives on say `font`
-].reverse();
+].sort().reverse();
 
 // some grammars use them all as a single group
-const PSEUDO_SELECTORS = PSEUDO_CLASSES.concat(PSEUDO_ELEMENTS);
+const PSEUDO_SELECTORS = PSEUDO_CLASSES.concat(PSEUDO_ELEMENTS).sort().reverse();
 
 /*
 Language: CSS
@@ -5185,10 +5369,25 @@ function go(hljs) {
         className: 'number',
         variants: [
           {
-            begin: hljs.C_NUMBER_RE + '[i]',
-            relevance: 1
+            match: /-?\b0[xX]\.[a-fA-F0-9](_?[a-fA-F0-9])*[pP][+-]?\d(_?\d)*i?/, // hex without a present digit before . (making a digit afterwards required)
+            relevance: 0
           },
-          hljs.C_NUMBER_MODE
+          {
+            match: /-?\b0[xX](_?[a-fA-F0-9])+((\.([a-fA-F0-9](_?[a-fA-F0-9])*)?)?[pP][+-]?\d(_?\d)*)?i?/, // hex with a present digit before . (making a digit afterwards optional)
+            relevance: 0
+          },
+          {
+            match: /-?\b0[oO](_?[0-7])*i?/, // leading 0o octal
+            relevance: 0
+          },
+          {
+            match: /-?\.\d(_?\d)*([eE][+-]?\d(_?\d)*)?i?/, // decimal without a present digit before . (making a digit afterwards required)
+            relevance: 0
+          },
+          {
+            match: /-?\b\d(_?\d)*(\.(\d(_?\d)*)?)?([eE][+-]?\d(_?\d)*)?i?/, // decimal with a present digit before . (making a digit afterwards optional)
+            relevance: 0
+          }
         ]
       },
       { begin: /:=/ // relevance booster
@@ -5521,7 +5720,8 @@ function java(hljs) {
     'do',
     'sealed',
     'yield',
-    'permits'
+    'permits',
+    'goto'
   ];
 
   const BUILT_INS = [
@@ -5991,7 +6191,7 @@ function javascript(hljs) {
     contains: [] // defined later
   };
   const HTML_TEMPLATE = {
-    begin: 'html`',
+    begin: '\.?html`',
     end: '',
     starts: {
       end: '`',
@@ -6004,7 +6204,7 @@ function javascript(hljs) {
     }
   };
   const CSS_TEMPLATE = {
-    begin: 'css`',
+    begin: '\.?css`',
     end: '',
     starts: {
       end: '`',
@@ -6017,7 +6217,7 @@ function javascript(hljs) {
     }
   };
   const GRAPHQL_TEMPLATE = {
-    begin: 'gql`',
+    begin: '\.?gql`',
     end: '',
     starts: {
       end: '`',
@@ -6114,7 +6314,7 @@ function javascript(hljs) {
   const PARAMS_CONTAINS = SUBST_AND_COMMENTS.concat([
     // eat recursive parens in sub expressions
     {
-      begin: /\(/,
+      begin: /(\s*)\(/,
       end: /\)/,
       keywords: KEYWORDS$1,
       contains: ["self"].concat(SUBST_AND_COMMENTS)
@@ -6122,7 +6322,8 @@ function javascript(hljs) {
   ]);
   const PARAMS = {
     className: 'params',
-    begin: /\(/,
+    // convert this to negative lookbehind in v12
+    begin: /(\s*)\(/, // to match the parms with 
     end: /\)/,
     excludeBegin: true,
     excludeEnd: true,
@@ -6245,8 +6446,8 @@ function javascript(hljs) {
         ...BUILT_IN_GLOBALS,
         "super",
         "import"
-      ]),
-      IDENT_RE$1, regex.lookahead(/\(/)),
+      ].map(x => `${x}\\s*\\(`)),
+      IDENT_RE$1, regex.lookahead(/\s*\(/)),
     className: "title.function",
     relevance: 0
   };
@@ -6367,7 +6568,7 @@ function javascript(hljs) {
                     skip: true
                   },
                   {
-                    begin: /\(/,
+                    begin: /(\s*)\(/,
                     end: /\)/,
                     excludeBegin: true,
                     excludeEnd: true,
@@ -6500,6 +6701,7 @@ function json(hljs) {
 
   return {
     name: 'JSON',
+    aliases: ['jsonc'],
     keywords:{
       literal: LITERALS,
     },
@@ -7004,7 +7206,7 @@ function less(hljs) {
 Language: Lua
 Description: Lua is a powerful, efficient, lightweight, embeddable scripting language.
 Author: Andrew Fedorov <dmmdrs@mail.ru>
-Category: common, scripting
+Category: common, gaming, scripting
 Website: https://www.lua.org
 */
 
@@ -7084,7 +7286,7 @@ Language: Makefile
 Author: Ivan Sagalaev <maniac@softwaremaniacs.org>
 Contributors: Joël Porquet <joel@porquet.org>
 Website: https://www.gnu.org/software/make/manual/html_node/Introduction.html
-Category: common
+Category: common, build-system
 */
 
 function makefile(hljs) {
@@ -7622,6 +7824,12 @@ function markdown(hljs) {
     end: '$'
   };
 
+  const ENTITY = {
+    //https://spec.commonmark.org/0.31.2/#entity-references
+    scope: 'literal',
+    match: /&([a-zA-Z0-9]+|#[0-9]{1,7}|#[Xx][0-9a-fA-F]{1,6});/
+  };
+
   return {
     name: 'Markdown',
     aliases: [
@@ -7639,7 +7847,8 @@ function markdown(hljs) {
       CODE,
       HORIZONTAL_RULE,
       LINK,
-      LINK_REFERENCE
+      LINK_REFERENCE,
+      ENTITY
     ]
   };
 }
@@ -7924,6 +8133,7 @@ function perl(hljs) {
     'chown',
     'chr',
     'chroot',
+    'class',
     'close',
     'closedir',
     'connect',
@@ -7953,6 +8163,7 @@ function perl(hljs) {
     'exit',
     'exp',
     'fcntl',
+    'field',
     'fileno',
     'flock',
     'for',
@@ -8012,6 +8223,7 @@ function perl(hljs) {
     'lt',
     'ma',
     'map',
+    'method',
     'mkdir',
     'msgctl',
     'msgget',
@@ -8156,19 +8368,45 @@ function perl(hljs) {
     end: /\}/
     // contains defined later
   };
-  const VAR = { variants: [
-    { begin: /\$\d/ },
-    { begin: regex.concat(
-      /[$%@](\^\w\b|#\w+(::\w+)*|\{\w+\}|\w+(::\w*)*)/,
-      // negative look-ahead tries to avoid matching patterns that are not
-      // Perl at all like $ident$, @ident@, etc.
-      `(?![A-Za-z])(?![@$%])`
-    ) },
-    {
-      begin: /[$%@][^\s\w{]/,
-      relevance: 0
-    }
-  ] };
+  const ATTR = {
+    scope: 'attr',
+    match: /\s+:\s*\w+(\s*\(.*?\))?/,
+  };
+  const VAR = {
+    scope: 'variable',
+    variants: [
+      { begin: /\$\d/ },
+      { begin: regex.concat(
+        /[$%@](?!")(\^\w\b|#\w+(::\w+)*|\{\w+\}|\w+(::\w*)*)/,
+        // negative look-ahead tries to avoid matching patterns that are not
+        // Perl at all like $ident$, @ident@, etc.
+        `(?![A-Za-z])(?![@$%])`
+        )
+      },
+      {
+        // Only $= is a special Perl variable and one can't declare @= or %=.
+        begin: /[$%@](?!")[^\s\w{=]|\$=/,
+        relevance: 0
+      }
+    ],
+    contains: [ ATTR ],
+  };
+  const NUMBER = {
+    className: 'number',
+    variants: [
+      // decimal numbers:
+      // include the case where a number starts with a dot (eg. .9), and
+      // the leading 0? avoids mixing the first and second match on 0.x cases
+      { match: /0?\.[0-9][0-9_]+\b/ },
+      // include the special versioned number (eg. v5.38)
+      { match: /\bv?(0|[1-9][0-9_]*(\.[0-9_]+)?|[1-9][0-9_]*)\b/ },
+      // non-decimal numbers:
+      { match: /\b0[0-7][0-7_]*\b/ },
+      { match: /\b0x[0-9a-fA-F][0-9a-fA-F_]*\b/ },
+      { match: /\b0b[0-1][0-1_]*\b/ },
+    ],
+    relevance: 0
+  };
   const STRING_CONTAINS = [
     hljs.BACKSLASH_ESCAPE,
     SUBST,
@@ -8283,11 +8521,7 @@ function perl(hljs) {
         }
       ]
     },
-    {
-      className: 'number',
-      begin: '(\\b0[0-7_]+)|(\\b0x[0-9a-fA-F_]+)|(\\b[1-9][0-9_]*(\\.[0-9_]+)?)|[0_]\\b',
-      relevance: 0
-    },
+    NUMBER,
     { // regexp container
       begin: '(\\/\\/|' + hljs.RE_STARTERS_RE + '|\\b(split|return|print|reverse|grep)\\b)\\s*',
       keywords: 'split return print reverse grep',
@@ -8329,11 +8563,19 @@ function perl(hljs) {
     },
     {
       className: 'function',
-      beginKeywords: 'sub',
+      beginKeywords: 'sub method',
       end: '(\\s*\\(.*?\\))?[;{]',
       excludeEnd: true,
       relevance: 5,
-      contains: [ hljs.TITLE_MODE ]
+      contains: [ hljs.TITLE_MODE, ATTR ]
+    },
+    {
+      className: 'class',
+      beginKeywords: 'class',
+      end: '[;{]',
+      excludeEnd: true,
+      relevance: 5,
+      contains: [ hljs.TITLE_MODE, ATTR, NUMBER ]
     },
     {
       begin: '-\\w\\b',
@@ -9424,7 +9666,8 @@ function python(hljs) {
       NUMBER,
       {
         // very common convention
-        begin: /\bself\b/
+        scope: 'variable.language',
+        match: /\bself\b/
       },
       {
         // eat "if" prior to string so that it won't accidentally be
@@ -9432,6 +9675,7 @@ function python(hljs) {
         beginKeywords: "if",
         relevance: 0
       },
+      { match: /\bor\b/, scope: "keyword" },
       STRING,
       COMMENT_TYPE,
       hljs.HASH_COMMENT_MODE,
@@ -9775,7 +10019,7 @@ Description: Ruby is a dynamic, open source programming language with a focus on
 Website: https://www.ruby-lang.org/
 Author: Anton Kovalyov <anton@kovalyov.net>
 Contributors: Peter Leonov <gojpeg@yandex.ru>, Vasily Polovnyov <vast@whiteants.net>, Loren Segal <lsegal@soen.ca>, Pascal Hurni <phi@ruby-reactive.org>, Cedric Sohrauer <sohrauer@googlemail.com>
-Category: common
+Category: common, scripting
 */
 
 function ruby(hljs) {
@@ -10225,15 +10469,22 @@ Category: common, system
 */
 
 /** @type LanguageFn */
+
 function rust(hljs) {
   const regex = hljs.regex;
+  // ============================================
+  // Added to support the r# keyword, which is a raw identifier in Rust.
+  const RAW_IDENTIFIER = /(r#)?/;
+  const UNDERSCORE_IDENT_RE = regex.concat(RAW_IDENTIFIER, hljs.UNDERSCORE_IDENT_RE);
+  const IDENT_RE = regex.concat(RAW_IDENTIFIER, hljs.IDENT_RE);
+  // ============================================
   const FUNCTION_INVOKE = {
     className: "title.function.invoke",
     relevance: 0,
     begin: regex.concat(
       /\b/,
       /(?!let|for|while|if|else|match\b)/,
-      hljs.IDENT_RE,
+      IDENT_RE,
       regex.lookahead(/\s*\(/))
   };
   const NUMBER_SUFFIX = '([ui](8|16|32|64|128|size)|f(32|64))\?';
@@ -10282,6 +10533,7 @@ function rust(hljs) {
     "try",
     "type",
     "typeof",
+    "union",
     "unsafe",
     "unsized",
     "use",
@@ -10434,7 +10686,7 @@ function rust(hljs) {
         begin: [
           /fn/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -10449,7 +10701,10 @@ function rust(hljs) {
           {
             className: 'string',
             begin: /"/,
-            end: /"/
+            end: /"/,
+            contains: [
+              hljs.BACKSLASH_ESCAPE
+            ]
           }
         ]
       },
@@ -10458,7 +10713,7 @@ function rust(hljs) {
           /let/,
           /\s+/,
           /(?:mut\s+)?/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -10471,7 +10726,7 @@ function rust(hljs) {
         begin: [
           /for/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE,
+          UNDERSCORE_IDENT_RE,
           /\s+/,
           /in/
         ],
@@ -10485,7 +10740,7 @@ function rust(hljs) {
         begin: [
           /type/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -10496,7 +10751,7 @@ function rust(hljs) {
         begin: [
           /(?:trait|enum|struct|union|impl|for)/,
           /\s+/,
-          hljs.UNDERSCORE_IDENT_RE
+          UNDERSCORE_IDENT_RE
         ],
         className: {
           1: "keyword",
@@ -11448,6 +11703,7 @@ const keywords = [
   'operator',
   'optional', // contextual
   'override', // contextual
+  'package',
   'postfix', // contextual
   'precedencegroup',
   'prefix', // contextual
@@ -11944,14 +12200,17 @@ function swift(hljs) {
       }
     ] }
   };
+
   const KEYWORD_ATTRIBUTE = {
     scope: 'keyword',
-    match: concat(/@/, either(...keywordAttributes))
+    match: concat(/@/, either(...keywordAttributes), lookahead(either(/\(/, /\s+/))),
   };
+
   const USER_DEFINED_ATTRIBUTE = {
     scope: 'meta',
     match: concat(/@/, identifier)
   };
+
   const ATTRIBUTES = [
     AVAILABLE_ATTRIBUTE,
     KEYWORD_ATTRIBUTE,
@@ -12144,6 +12403,37 @@ function swift(hljs) {
     end: /}/
   };
 
+  const TYPE_DECLARATION = {
+    begin: [
+      /(struct|protocol|class|extension|enum|actor)/,
+      /\s+/,
+      identifier,
+      /\s*/,
+    ],
+    beginScope: {
+      1: "keyword",
+      3: "title.class"
+    },
+    keywords: KEYWORDS,
+    contains: [
+      GENERIC_PARAMETERS,
+      ...KEYWORD_MODES,
+      {
+        begin: /:/,
+        end: /\{/,
+        keywords: KEYWORDS,
+        contains: [
+          {
+            scope: "title.class.inherited",
+            match: typeIdentifier,
+          },
+          ...KEYWORD_MODES,
+        ],
+        relevance: 0,
+      },
+    ]
+  };
+
   // Add supported submodes to string interpolation.
   for (const variant of STRING.variants) {
     const interpolation = variant.contains.find(mode => mode.label === "interpol");
@@ -12177,19 +12467,7 @@ function swift(hljs) {
       ...COMMENTS,
       FUNCTION_OR_MACRO,
       INIT_SUBSCRIPT,
-      {
-        beginKeywords: 'struct protocol class extension enum actor',
-        end: '\\{',
-        excludeEnd: true,
-        keywords: KEYWORDS,
-        contains: [
-          hljs.inherit(hljs.TITLE_MODE, {
-            className: "title.class",
-            begin: /[A-Za-z$_][\u00C0-\u02B80-9A-Za-z$_]*/
-          }),
-          ...KEYWORD_MODES
-        ]
-      },
+      TYPE_DECLARATION,
       OPERATOR_DECLARATION,
       PRECEDENCEGROUP,
       {
@@ -12240,10 +12518,15 @@ function typescript(hljs) {
     "unknown"
   ];
   const NAMESPACE = {
-    beginKeywords: 'namespace',
-    end: /\{/,
-    excludeEnd: true,
-    contains: [ tsLanguage.exports.CLASS_REFERENCE ]
+    begin: [
+      /namespace/,
+      /\s+/,
+      hljs.IDENT_RE
+    ],
+    beginScope: {
+      1: "keyword",
+      3: "title.class"
+    }
   };
   const INTERFACE = {
     beginKeywords: 'interface',
@@ -12262,7 +12545,7 @@ function typescript(hljs) {
   };
   const TS_SPECIFIC_KEYWORDS = [
     "type",
-    "namespace",
+    // "namespace",
     "interface",
     "public",
     "private",
@@ -12272,8 +12555,16 @@ function typescript(hljs) {
     "abstract",
     "readonly",
     "enum",
-    "override"
+    "override",
+    "satisfies"
   ];
+
+  /*
+    namespace is a TS keyword but it's fine to use it as a variable name too.
+    const message = 'foo';
+    const namespace = 'bar';
+  */
+
   const KEYWORDS$1 = {
     $pattern: IDENT_RE,
     keyword: KEYWORDS.concat(TS_SPECIFIC_KEYWORDS),
@@ -12299,6 +12590,13 @@ function typescript(hljs) {
   Object.assign(tsLanguage.keywords, KEYWORDS$1);
 
   tsLanguage.exports.PARAMS_CONTAINS.push(DECORATOR);
+
+  // highlight the function params
+  const ATTRIBUTE_HIGHLIGHT = tsLanguage.contains.find(c => c.className === "attr");
+  tsLanguage.exports.PARAMS_CONTAINS.push([
+    tsLanguage.exports.CLASS_REFERENCE, // class reference for highlighting the params types
+    ATTRIBUTE_HIGHLIGHT, // highlight the params key
+  ]);
   tsLanguage.contains = tsLanguage.contains.concat([
     DECORATOR,
     NAMESPACE,
@@ -12642,11 +12940,12 @@ function yaml(hljs) {
   const KEY = {
     className: 'attr',
     variants: [
-      { begin: '\\w[\\w :\\/.-]*:(?=[ \t]|$)' },
-      { // double quoted keys
-        begin: '"\\w[\\w :\\/.-]*":(?=[ \t]|$)' },
-      { // single quoted keys
-        begin: '\'\\w[\\w :\\/.-]*\':(?=[ \t]|$)' }
+      // added brackets support 
+      { begin: /\w[\w :()\./-]*:(?=[ \t]|$)/ },
+      { // double quoted keys - with brackets
+        begin: /"\w[\w :()\./-]*":(?=[ \t]|$)/ },
+      { // single quoted keys - with brackets
+        begin: /'\w[\w :()\./-]*':(?=[ \t]|$)/ },
     ]
   };
 
@@ -12853,7 +13152,7 @@ var builtIns = /*#__PURE__*/Object.freeze({
   grmr_yaml: yaml
 });
 
-const hljs = HighlightJS;
+const hljs = highlight;
 
 for (const key of Object.keys(builtIns)) {
   // our builtInLanguages Rollup plugin has to use `_` to allow identifiers to be
