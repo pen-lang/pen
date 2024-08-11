@@ -8,7 +8,7 @@ pub const CROSS_COMPILE_TARGETS: &[&str] = &[
     "wasm32-wasi",
 ];
 
-pub static COMPILE_CONFIGURATION: Lazy<Arc<app::module_compiler::CompileConfiguration>> =
+pub static COMPILE_CONFIGURATION: LazyLock<Arc<app::module_compiler::CompileConfiguration>> =
     LazyLock::new(|| {
         app::module_compiler::CompileConfiguration {
             fmm: app::module_compiler::FmmConfiguration {

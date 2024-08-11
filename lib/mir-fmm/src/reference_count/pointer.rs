@@ -8,7 +8,7 @@ use once_cell::unsync::Lazy;
 const CLONE_FUNCTION_NAME: &str = "mir:clone:pointer";
 
 thread_local! {
-    static CLONE_FUNCTION_VARIABLE: Lazy<fmm::build::TypedExpression> = LazyLock::new(|| {
+    static CLONE_FUNCTION_VARIABLE: LazyLock<fmm::build::TypedExpression> = LazyLock::new(|| {
         fmm::build::variable(
             CLONE_FUNCTION_NAME,
             fmm::types::Function::new(

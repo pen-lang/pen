@@ -2,7 +2,7 @@
 use std::sync::LazyLock;
 
 #[cfg(test)]
-pub static NUMBER_TYPE_CONFIGURATION: Lazy<NumberTypeConfiguration> =
+pub static NUMBER_TYPE_CONFIGURATION: LazyLock<NumberTypeConfiguration> =
     LazyLock::new(|| NumberTypeConfiguration {
         debug_function_name: "debugNumber".into(),
     });

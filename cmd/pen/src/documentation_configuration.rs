@@ -2,7 +2,7 @@ use crate::application_configuration::APPLICATION_CONFIGURATION;
 use app::package_documentation_generator::DocumentationConfiguration;
 use std::sync::LazyLock;
 
-pub static DOCUMENTATION_CONFIGURATION: Lazy<DocumentationConfiguration> =
+pub static DOCUMENTATION_CONFIGURATION: LazyLock<DocumentationConfiguration> =
     LazyLock::new(|| DocumentationConfiguration {
         language: "pen".into(),
         private_names: [APPLICATION_CONFIGURATION

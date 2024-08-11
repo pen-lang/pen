@@ -2,7 +2,7 @@
 use std::sync::LazyLock;
 
 #[cfg(test)]
-pub static STRING_TYPE_CONFIGURATION: Lazy<StringTypeConfiguration> =
+pub static STRING_TYPE_CONFIGURATION: LazyLock<StringTypeConfiguration> =
     LazyLock::new(|| StringTypeConfiguration {
         equal_function_name: "_equalStrings".into(),
     });

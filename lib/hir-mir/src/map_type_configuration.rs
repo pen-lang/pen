@@ -2,7 +2,7 @@
 use std::sync::LazyLock;
 
 #[cfg(test)]
-pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
+pub static MAP_TYPE_CONFIGURATION: LazyLock<MapTypeConfiguration> =
     LazyLock::new(|| MapTypeConfiguration {
         context_function_name: "newMapContext".into(),
         context_type_name: "mapContext".into(),
@@ -22,7 +22,7 @@ pub static MAP_TYPE_CONFIGURATION: Lazy<MapTypeConfiguration> =
     });
 
 #[cfg(test)]
-pub static HASH_CONFIGURATION: Lazy<HashConfiguration> = LazyLock::new(|| HashConfiguration {
+pub static HASH_CONFIGURATION: LazyLock<HashConfiguration> = LazyLock::new(|| HashConfiguration {
     combine_function_name: "combineHashes".into(),
     number_hash_function_name: "hashNumber".into(),
     string_hash_function_name: "hashString".into(),
@@ -31,7 +31,7 @@ pub static HASH_CONFIGURATION: Lazy<HashConfiguration> = LazyLock::new(|| HashCo
 });
 
 #[cfg(test)]
-pub static MAP_TYPE_ITERATION_CONFIGURATION: Lazy<MapTypeIterationConfiguration> =
+pub static MAP_TYPE_ITERATION_CONFIGURATION: LazyLock<MapTypeIterationConfiguration> =
     LazyLock::new(|| MapTypeIterationConfiguration {
         iterator_type_name: "mapIterator".into(),
         iterate_function_name: "iterateMap".into(),

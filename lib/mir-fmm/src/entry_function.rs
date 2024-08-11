@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 
 const CLOSURE_NAME: &str = "_closure";
 
-static ENTRY_FUNCTION_DEFINITION_OPTIONS: Lazy<fmm::ir::FunctionDefinitionOptions> =
+static ENTRY_FUNCTION_DEFINITION_OPTIONS: LazyLock<fmm::ir::FunctionDefinitionOptions> =
     LazyLock::new(|| {
         fmm::ir::FunctionDefinitionOptions::new()
             .set_address_named(false)

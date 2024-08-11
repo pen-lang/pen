@@ -6,7 +6,7 @@ use crate::{
 use std::sync::LazyLock;
 
 thread_local! {
-    static DUMMY_FUNCTION_TYPE: Lazy<mir::types::Function> =
+    static DUMMY_FUNCTION_TYPE: LazyLock<mir::types::Function> =
         LazyLock::new(|| mir::types::Function::new(vec![], mir::types::Type::None));
 }
 

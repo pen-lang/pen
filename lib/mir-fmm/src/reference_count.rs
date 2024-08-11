@@ -11,7 +11,7 @@ pub mod variant;
 pub use expression::*;
 use std::sync::LazyLock;
 
-pub(super) static REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS: Lazy<
+pub(super) static REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS: LazyLock<
     fmm::ir::FunctionDefinitionOptions,
 > = LazyLock::new(|| {
     fmm::ir::FunctionDefinitionOptions::new()

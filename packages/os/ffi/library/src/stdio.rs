@@ -8,9 +8,9 @@ use tokio::{
 };
 
 // Use single buffers for standard I/O.
-static STDIN: Lazy<Mutex<Stdin>> = LazyLock::new(|| Mutex::new(stdin()));
-static STDOUT: Lazy<Mutex<Stdout>> = LazyLock::new(|| Mutex::new(stdout()));
-static STDERR: Lazy<Mutex<Stderr>> = LazyLock::new(|| Mutex::new(stderr()));
+static STDIN: LazyLock<Mutex<Stdin>> = LazyLock::new(|| Mutex::new(stdin()));
+static STDOUT: LazyLock<Mutex<Stdout>> = LazyLock::new(|| Mutex::new(stdout()));
+static STDERR: LazyLock<Mutex<Stderr>> = LazyLock::new(|| Mutex::new(stderr()));
 
 #[ffi::bindgen]
 async fn _pen_os_read_stdin() -> Result<ffi::ByteString, Box<dyn Error>> {

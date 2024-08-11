@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 use regex::bytes::{Captures, Regex};
 use std::str;
 
-static HEX_CHARACTER_REGEX: Lazy<Regex> =
+static HEX_CHARACTER_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"\\x([0-9a-fA-F][0-9a-fA-F])").unwrap());
 
 pub fn compile(string: &str) -> Vec<u8> {

@@ -25,7 +25,7 @@ pub struct CompileConfiguration {
 }
 
 #[cfg(test)]
-pub static COMPILE_CONFIGURATION: Lazy<CompileConfiguration> = LazyLock::new(|| CompileConfiguration {
+pub static COMPILE_CONFIGURATION: LazyLock<CompileConfiguration> = LazyLock::new(|| CompileConfiguration {
     list_type: LIST_TYPE_CONFIGURATION.clone(),
     map_type: MAP_TYPE_CONFIGURATION.clone(),
     number_type: NUMBER_TYPE_CONFIGURATION.clone(),
