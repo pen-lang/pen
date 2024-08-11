@@ -137,7 +137,6 @@ dependencies = [
  "hir",
  "interface",
  "itertools",
- "once_cell",
  "position",
  "pretty_assertions",
  "regex",
@@ -568,7 +567,6 @@ dependencies = [
  "interface",
  "itertools",
  "mir",
- "once_cell",
  "position",
  "pretty_assertions",
  "test-info",
@@ -831,7 +829,6 @@ dependencies = [
  "fnv",
  "insta",
  "mir",
- "once_cell",
  "plist",
  "tempfile",
 ]

@@ -10,7 +10,6 @@ fnv = "1"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
 itertools = "0.13"
-once_cell = "1"
 position = { path = "../position" }
 regex = "1"
 
