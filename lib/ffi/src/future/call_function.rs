@@ -20,6 +20,7 @@ macro_rules! call_function {
             let mut initialize = Some(|stack: &mut AsyncStack| {
                 let function = $function;
 
+                #[allow(clippy::macro_metavars_in_unsafe)]
                 unsafe { function(stack, resolve, $($argument),*) };
             });
 
