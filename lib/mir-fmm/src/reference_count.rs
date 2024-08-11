@@ -9,7 +9,7 @@ pub mod string;
 pub mod variant;
 
 pub use expression::*;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 pub(super) static REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS: Lazy<
     fmm::ir::FunctionDefinitionOptions,

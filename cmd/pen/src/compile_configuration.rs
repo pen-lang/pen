@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::sync::Arc;
 
 pub const CROSS_COMPILE_TARGETS: &[&str] = &[

@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use regex::bytes::{Captures, Regex};
 use std::str;
 

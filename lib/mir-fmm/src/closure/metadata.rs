@@ -1,6 +1,6 @@
 use super::{drop, sync};
 use crate::{context::Context, CompileError};
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 static VARIABLE_DEFINITION_OPTIONS: Lazy<fmm::ir::VariableDefinitionOptions> = Lazy::new(|| {
     fmm::ir::VariableDefinitionOptions::new()

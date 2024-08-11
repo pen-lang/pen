@@ -1,5 +1,5 @@
 #[cfg(test)]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[cfg(test)]
 pub static NUMBER_TYPE_CONFIGURATION: Lazy<NumberTypeConfiguration> =

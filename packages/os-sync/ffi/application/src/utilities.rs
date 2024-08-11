@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::env;
 
 static OS_DEBUG: Lazy<bool> = Lazy::new(|| env::var("PEN_OS_DEBUG").is_ok());

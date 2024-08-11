@@ -1,6 +1,6 @@
 use crate::application_configuration::APPLICATION_CONFIGURATION;
 use app::package_documentation_generator::DocumentationConfiguration;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 pub static DOCUMENTATION_CONFIGURATION: Lazy<DocumentationConfiguration> =
     Lazy::new(|| DocumentationConfiguration {

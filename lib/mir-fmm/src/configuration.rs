@@ -1,5 +1,5 @@
 #[cfg(test)]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[cfg(test)]
 pub static CONFIGURATION: Lazy<Configuration> = Lazy::new(|| Configuration {

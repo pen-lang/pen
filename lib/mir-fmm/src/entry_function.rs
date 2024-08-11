@@ -2,7 +2,7 @@ use super::error::CompileError;
 use crate::{
     closure, context::Context, expression, reference_count, type_, yield_::yield_function_type,
 };
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 const CLOSURE_NAME: &str = "_closure";
 

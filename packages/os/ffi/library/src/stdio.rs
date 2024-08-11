@@ -1,6 +1,6 @@
 use crate::utilities;
 use core::ops::DerefMut;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::error::Error;
 use tokio::{
     io::{stderr, stdin, stdout, AsyncWriteExt, Stderr, Stdin, Stdout},

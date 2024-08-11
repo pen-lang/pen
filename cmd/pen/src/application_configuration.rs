@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use std::sync::Arc;
 
 pub static APPLICATION_CONFIGURATION: Lazy<Arc<app::ApplicationConfiguration>> = Lazy::new(|| {

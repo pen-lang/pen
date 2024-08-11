@@ -11,7 +11,7 @@ use super::{
 };
 use crate::number_type_configuration::NumberTypeConfiguration;
 #[cfg(test)]
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 #[derive(Clone, Debug)]
 pub struct CompileConfiguration {
