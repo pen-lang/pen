@@ -13,4 +13,3 @@ plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 
 [dev-dependencies]
 pretty_assertions = "1.4"
-once_cell = "1"

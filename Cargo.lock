@@ -109,7 +109,6 @@ dependencies = [
  "interface",
  "mir",
  "mir-fmm",
- "once_cell",
  "parse",
  "petgraph",
  "regex",
@@ -549,7 +548,6 @@ name = "hir"
 version = "0.1.0"
 dependencies = [
  "fnv",
- "once_cell",
  "petgraph",
  "plist",
  "position",
@@ -814,7 +812,6 @@ version = "0.1.0"
 dependencies = [
  "fnv",
  "hamt",
- "once_cell",
  "plist",
  "pretty_assertions",
 ]
@@ -941,7 +938,6 @@ dependencies = [
  "clap",
  "indoc",
  "infra",
- "once_cell",
  "url",
 ]
 

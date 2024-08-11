@@ -6,4 +6,3 @@ edition = "2021"
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "*" }
-once_cell = "1"

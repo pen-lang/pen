@@ -12,5 +12,4 @@ position = { path = "../position" }
 serde = { version = "1", features = ["derive", "rc"] }
 
 [dev-dependencies]
-once_cell = "1"
 pretty_assertions = "1"
