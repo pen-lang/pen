@@ -11,4 +11,4 @@ position = { path = "../position" }
 
 [dev-dependencies]
 indoc = "2"
-pretty_assertions = "1.4.0"
+pretty_assertions = "1.4.1"
