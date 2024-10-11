@@ -6,6 +6,10 @@ llvm_version=16
 
 brew install jq llvm@$llvm_version ninja sccache
 
+if [ $(uname) = Linux ]; then
+  brew install python
+fi
+
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 
 echo LLVM_SYS_${llvm_version}0_PREFIX=$llvm_prefix >>$GITHUB_ENV
