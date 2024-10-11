@@ -4,7 +4,7 @@ set -e
 
 llvm_version=16
 
-brew install jq llvm@$llvm_version ninja python3 sccache
+brew install jq llvm@$llvm_version ninja python sccache
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 
