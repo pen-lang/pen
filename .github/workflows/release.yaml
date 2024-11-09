@@ -84,7 +84,7 @@ jobs:
           title: Bump version
           branch: chore/version
           token: ${{ secrets.PR_CREATION_TOKEN }}
-  test:
+  release:
     needs:
       - tag_check
       - build_asset
@@ -93,4 +93,4 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success ]; done
+      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success -o $result = skipped ]; done
