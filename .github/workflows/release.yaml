@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   tag_check:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ env.version }}
       should_release: ${{ env.should_release }}
@@ -28,9 +28,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-22.04
-          - macos-14
-          - macos-13
+          - ubuntu-24.04
+          - macos-15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +45,7 @@ jobs:
       - build_asset
     permissions:
       contents: write
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -65,9 +64,9 @@ jobs:
   homebrew:
     needs:
       - tag_check
-      - release
+      - github
     if: needs.tag_check.outputs.should_release == 'true'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -85,3 +84,13 @@ jobs:
           title: Bump version
           branch: chore/version
           token: ${{ secrets.PR_CREATION_TOKEN }}
+  release:
+    needs:
+      - tag_check
+      - build_asset
+      - github
+      - homebrew
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success -o $result = skipped ]; done
