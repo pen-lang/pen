@@ -34,7 +34,7 @@ jobs:
       - uses: homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
-      - uses: raviqqe/markdown-link-check@main
+      - uses: raviqqe/markdown-link-check@v1
   dependabot:
     runs-on: ubuntu-latest
     steps:
