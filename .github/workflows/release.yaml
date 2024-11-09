@@ -65,7 +65,7 @@ jobs:
   homebrew:
     needs:
       - tag_check
-      - release
+      - github
     if: needs.tag_check.outputs.should_release == 'true'
     runs-on: ubuntu-22.04
     steps:
