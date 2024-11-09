@@ -29,8 +29,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - macos-14
-          - macos-13
+          - macos-15
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
