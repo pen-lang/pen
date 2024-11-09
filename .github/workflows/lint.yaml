@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: tools/format.sh -- --check
-  lint:
+  clippy:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -31,10 +31,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: raviqqe/markdown-link-check@main
+      - uses: homebrew/actions/setup-homebrew@master
+      - run: tools/ci/github/setup.sh
+      - run: tools/document/build.sh
+      - uses: raviqqe/markdown-link-check@v1
   dependabot:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: tools/update_dependabot.sh
       - run: git diff --exit-code
+  lint:
+    needs:
+      - format
+      - clippy
+      - spell_check
+      - readme
+      - dependabot
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success ]; done

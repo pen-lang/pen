@@ -1,4 +1,4 @@
-name: documentation
+name: document
 on:
   push:
     branches:
@@ -6,11 +6,11 @@ on:
   pull_request:
   merge_group:
 jobs:
-  build:
-    runs-on: ubuntu-22.04
+  document:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
       - uses: peaceiris/actions-gh-pages@v4

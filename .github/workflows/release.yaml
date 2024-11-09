@@ -40,7 +40,7 @@ jobs:
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
-  release:
+  github:
     needs:
       - tag_check
       - build_asset

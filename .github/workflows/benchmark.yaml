@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   benchmark:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./tools/ci/github/setup

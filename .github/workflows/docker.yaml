@@ -6,7 +6,7 @@ on:
   pull_request:
   merge_group:
 jobs:
-  build_image:
+  docker:
     runs-on: ubuntu-latest
     permissions:
       contents: read
