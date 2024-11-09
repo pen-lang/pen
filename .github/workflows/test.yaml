@@ -64,9 +64,13 @@ jobs:
           path: target/release
       - run: chmod +x target/release/pen
       - run: tools/integration_test.sh $(find features -name *.feature | sort | awk 'NR % ${{ matrix.total }} == ${{ matrix.index }}')
-  integration_test:
-    runs-on: ubuntu-latest
-    needs: feature_test
+  test:
+    needs:
+      - build
+      - unit_test
+      - coverage
+      - feature_test
     if: always()
+    runs-on: ubuntu-latest
     steps:
-      - run: test ${{ needs.feature_test.result }} = success
+      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success ]; done
