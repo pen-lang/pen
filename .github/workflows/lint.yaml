@@ -51,4 +51,4 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success ]; done
+      - run: for result in ${{ needs.*.result }}; do [ $result = success ]; done
