@@ -85,3 +85,13 @@ jobs:
           title: Bump version
           branch: chore/version
           token: ${{ secrets.PR_CREATION_TOKEN }}
+  test:
+    needs:
+      - tag_check
+      - build_asset
+      - github
+      - homebrew
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: for result in ${{ join(needs.*.result, ' ') }}; do [ $result = success ]; done
