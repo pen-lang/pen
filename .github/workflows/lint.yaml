@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: Homebrew/actions/setup-homebrew@master
+      - uses: homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
       - uses: raviqqe/markdown-link-check@main
