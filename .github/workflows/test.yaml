@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./tools/ci/github/setup
       - run: tools/coverage.sh
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           files: lcov.info
   feature_test:
