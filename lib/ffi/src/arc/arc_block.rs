@@ -62,7 +62,11 @@ impl ArcBlock {
     }
 
     fn inner_ptr(&self) -> *const ArcInner {
-        (unsafe { (self.pointer as *const usize).offset(-1) }) as *const ArcInner
+        if self.is_null() {
+            null()
+        } else {
+            (unsafe { (self.pointer as *const usize).offset(-1) }) as _
+        }
     }
 
     fn inner_layout(layout: Layout) -> Layout {
