@@ -19,7 +19,7 @@ interface = { path = "../interface" }
 mir = { path = "../mir" }
 mir-fmm = { path = "../mir-fmm" }
 parse = { path = "../parse" }
-petgraph = "0.6"
+petgraph = "0.7"
 regex = "1"
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"

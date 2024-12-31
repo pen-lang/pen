@@ -6,7 +6,7 @@ edition = "2021"
 
 [dependencies]
 fnv = "1"
-petgraph = "0.6"
+petgraph = "0.7"
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 position = { path = "../position" }
 serde = { version = "1", features = ["derive", "rc"] }
