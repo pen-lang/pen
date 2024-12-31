@@ -8,7 +8,7 @@ edition = "2021"
 fnv = "1"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.13"
+itertools = "0.14"
 mir = { path = "../mir" }
 position = { path = "../position" }
 test-info = { path = "../test-info" }

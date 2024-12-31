@@ -9,7 +9,7 @@ ast = { path = "../ast" }
 fnv = "1"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.13"
+itertools = "0.14"
 position = { path = "../position" }
 regex = "1"
 
