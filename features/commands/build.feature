@@ -64,7 +64,7 @@ Feature: Building packages
       | i686-unknown-linux-musl    |
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
-      | wasm32-wasi                |
+      | wasm32-wasip2              |
 
   Scenario Outline: Cross-build a library package
     Given a file named "pen.json" with:
@@ -89,7 +89,7 @@ Feature: Building packages
       | i686-unknown-linux-musl    |
       | x86_64-unknown-linux-musl  |
       | aarch64-unknown-linux-musl |
-      | wasm32-wasi                |
+      | wasm32-wasip2              |
 
   Scenario: Build an application package again
     Given a file named "pen.json" with:

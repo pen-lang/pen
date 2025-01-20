@@ -5,7 +5,7 @@ The language's compiler supports [cross compile](https://en.wikipedia.org/wiki/c
 For example, run the following command to compile a `wasm32` binary for the WASI platform.
 
 ```sh
-pen build --target wasm32-wasi
+pen build --target wasm32-wasip2
 ```
 
 Note that we currently support those targets via [Rust](https://www.rust-lang.org/)'s cross compiler toolchain. Please install a Rust compiler through [`rustup`](https://rust-lang.github.io/rustup/) to enable installation of toolchains for different targets.

@@ -246,7 +246,7 @@ mod tests {
         #[test]
         fn calculate() {
             for (triple, size) in [
-                ("wasm32-wasi", 4),
+                ("wasm32-wasip2", 4),
                 ("wasm64-wasi", 8),
                 ("i386-unknown-linux-gnu", 4),
                 ("x86_64-unknown-linux-gnu", 8),
