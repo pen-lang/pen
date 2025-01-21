@@ -131,7 +131,7 @@ fn get_utf8_byte_index(string: &str, index: usize) -> usize {
         .char_indices()
         .nth(index)
         .map(|(index, _)| index)
-        .unwrap_or_else(|| string.as_bytes().len())
+        .unwrap_or_else(|| string.len())
 }
 
 #[ffi::bindgen]
