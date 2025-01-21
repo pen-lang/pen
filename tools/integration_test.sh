@@ -10,7 +10,7 @@ for target in \
   i686-unknown-linux-musl \
   x86_64-unknown-linux-musl \
   aarch64-unknown-linux-musl \
-  wasm32-wasi; do
+  wasm32-wasip2; do
   rustup target add $target
 done
 

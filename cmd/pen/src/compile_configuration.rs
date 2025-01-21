@@ -4,7 +4,7 @@ pub const CROSS_COMPILE_TARGETS: &[&str] = &[
     "i686-unknown-linux-musl",
     "x86_64-unknown-linux-musl",
     "aarch64-unknown-linux-musl",
-    "wasm32-wasi",
+    "wasm32-wasip2",
 ];
 
 pub static COMPILE_CONFIGURATION: LazyLock<Arc<app::module_compiler::CompileConfiguration>> =

@@ -21,8 +21,7 @@ fn check_canonical(one: &Type, other: &Type) -> bool {
                     .arguments()
                     .iter()
                     .zip(other.arguments())
-                    .map(|(one, other)| check_canonical(one, other))
-                    .all(|ok| ok)
+                    .all(|(one, other)| check_canonical(one, other))
                 && check_canonical(one.result(), other.result())
         }
         (Type::List(one), Type::List(other)) => check_canonical(one.element(), other.element()),
