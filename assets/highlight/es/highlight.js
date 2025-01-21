@@ -1,5 +1,5 @@
 /*!
-  Highlight.js v11.10.0 (git: 366a8bd012)
+  Highlight.js v11.11.1 (git: 08cb242e7d)
   (c) 2006-2024 Josh Goebel <hello@joshgoebel.com> and other contributors
   License: BSD-3-Clause
  */
@@ -1555,7 +1555,7 @@ function expandOrCloneMode(mode) {
   return mode;
 }
 
-var version = "11.10.0";
+var version = "11.11.1";
 
 class HTMLInjectionError extends Error {
   constructor(reason, html) {
@@ -2082,6 +2082,7 @@ const HLJS = function(hljs) {
       // first handler (when ignoreIllegals is true)
       if (match.type === "illegal" && lexeme === "") {
         // advance so we aren't stuck in an infinite loop
+        modeBuffer += "\n";
         return 1;
       }
 
@@ -2375,24 +2376,23 @@ const HLJS = function(hljs) {
    * auto-highlights all pre>code elements on the page
    */
   function highlightAll() {
+    function boot() {
+      // if a highlight was requested before DOM was loaded, do now
+      highlightAll();
+    }
+
     // if we are called too early in the loading process
     if (document.readyState === "loading") {
+      // make sure the event listener is only added once
+      if (!wantsHighlight) {
+        window.addEventListener('DOMContentLoaded', boot, false);
+      }
       wantsHighlight = true;
       return;
     }
 
     const blocks = document.querySelectorAll(options.cssSelector);
     blocks.forEach(highlightElement);
-  }
-
-  function boot() {
-    // if a highlight was requested before DOM was loaded, do now
-    if (wantsHighlight) highlightAll();
-  }
-
-  // make sure we are in the browser environment
-  if (typeof window !== 'undefined' && window.addEventListener) {
-    window.addEventListener('DOMContentLoaded', boot, false);
   }
 
   /**
@@ -2722,6 +2722,7 @@ function bash(hljs) {
     "else",
     "elif",
     "fi",
+    "time",
     "for",
     "while",
     "until",
@@ -2730,6 +2731,7 @@ function bash(hljs) {
     "done",
     "case",
     "esac",
+    "coproc",
     "function",
     "select"
   ];
@@ -3062,13 +3064,14 @@ function c(hljs) {
   const NUMBERS = {
     className: 'number',
     variants: [
-      { begin: '\\b(0b[01\']+)' },
-      { begin: '(-?)\\b([\\d\']+(\\.[\\d\']*)?|\\.[\\d\']+)((ll|LL|l|L)(u|U)?|(u|U)(ll|LL|l|L)?|f|F|b|B)' },
-      { begin: '(-?)(\\b0[xX][a-fA-F0-9\']+|(\\b[\\d\']+(\\.[\\d\']*)?|\\.[\\d\']+)([eE][-+]?[\\d\']+)?)' }
-    ],
+      { match: /\b(0b[01']+)/ },  
+      { match: /(-?)\b([\d']+(\.[\d']*)?|\.[\d']+)((ll|LL|l|L)(u|U)?|(u|U)(ll|LL|l|L)?|f|F|b|B)/ },  
+      { match: /(-?)\b(0[xX][a-fA-F0-9]+(?:'[a-fA-F0-9]+)*(?:\.[a-fA-F0-9]*(?:'[a-fA-F0-9]*)*)?(?:[pP][-+]?[0-9]+)?(l|L)?(u|U)?)/ },  
+      { match: /(-?)\b\d+(?:'\d+)*(?:\.\d*(?:'\d*)*)?(?:[eE][-+]?\d+)?/ }  
+  ],
     relevance: 0
-  };
-
+  };  
+  
   const PREPROCESSOR = {
     className: 'meta',
     begin: /#\s*[a-z]+\b/,
@@ -3583,6 +3586,8 @@ function cpp(hljs) {
     'counting_semaphore',
     'deque',
     'false_type',
+    'flat_map',
+    'flat_set',
     'future',
     'imaginary',
     'initializer_list',
@@ -3908,7 +3913,7 @@ function cpp(hljs) {
       [
         PREPROCESSOR,
         { // containers: ie, `vector <int> rooms (9);`
-          begin: '\\b(deque|list|queue|priority_queue|pair|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array|tuple|optional|variant|function)\\s*<(?!<)',
+          begin: '\\b(deque|list|queue|priority_queue|pair|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array|tuple|optional|variant|function|flat_map|flat_set)\\s*<(?!<)',
           end: '>',
           keywords: CPP_KEYWORDS,
           contains: [
@@ -4055,11 +4060,14 @@ function csharp(hljs) {
     'alias',
     'and',
     'ascending',
+    'args',
     'async',
     'await',
     'by',
     'descending',
+    'dynamic',
     'equals',
+    'file',
     'from',
     'get',
     'global',
@@ -4075,7 +4083,10 @@ function csharp(hljs) {
     'or',
     'orderby',
     'partial',
+    'record',
     'remove',
+    'required',
+    'scoped',
     'select',
     'set',
     'unmanaged',
@@ -4643,7 +4654,9 @@ const ATTRIBUTES = [
   'align-self',
   'alignment-baseline',
   'all',
+  'anchor-name',
   'animation',
+  'animation-composition',
   'animation-delay',
   'animation-direction',
   'animation-duration',
@@ -4651,8 +4664,14 @@ const ATTRIBUTES = [
   'animation-iteration-count',
   'animation-name',
   'animation-play-state',
+  'animation-range',
+  'animation-range-end',
+  'animation-range-start',
+  'animation-timeline',
   'animation-timing-function',
   'appearance',
+  'aspect-ratio',
+  'backdrop-filter',
   'backface-visibility',
   'background',
   'background-attachment',
@@ -4662,6 +4681,8 @@ const ATTRIBUTES = [
   'background-image',
   'background-origin',
   'background-position',
+  'background-position-x',
+  'background-position-y',
   'background-repeat',
   'background-size',
   'baseline-shift',
@@ -4687,6 +4708,8 @@ const ATTRIBUTES = [
   'border-bottom-width',
   'border-collapse',
   'border-color',
+  'border-end-end-radius',
+  'border-end-start-radius',
   'border-image',
   'border-image-outset',
   'border-image-repeat',
@@ -4711,8 +4734,6 @@ const ATTRIBUTES = [
   'border-left-width',
   'border-radius',
   'border-right',
-  'border-end-end-radius',
-  'border-end-start-radius',
   'border-right-color',
   'border-right-style',
   'border-right-width',
@@ -4728,14 +4749,20 @@ const ATTRIBUTES = [
   'border-top-width',
   'border-width',
   'bottom',
+  'box-align',
   'box-decoration-break',
+  'box-direction',
+  'box-flex',
+  'box-flex-group',
+  'box-lines',
+  'box-ordinal-group',
+  'box-orient',
+  'box-pack',
   'box-shadow',
   'box-sizing',
   'break-after',
   'break-before',
   'break-inside',
-  'cx',
-  'cy',
   'caption-side',
   'caret-color',
   'clear',
@@ -4759,19 +4786,31 @@ const ATTRIBUTES = [
   'column-width',
   'columns',
   'contain',
+  'contain-intrinsic-block-size',
+  'contain-intrinsic-height',
+  'contain-intrinsic-inline-size',
+  'contain-intrinsic-size',
+  'contain-intrinsic-width',
+  'container',
+  'container-name',
+  'container-type',
   'content',
   'content-visibility',
   'counter-increment',
   'counter-reset',
+  'counter-set',
   'cue',
   'cue-after',
   'cue-before',
   'cursor',
+  'cx',
+  'cy',
   'direction',
   'display',
   'dominant-baseline',
   'empty-cells',
   'enable-background',
+  'field-sizing',
   'fill',
   'fill-opacity',
   'fill-rule',
@@ -4784,29 +4823,39 @@ const ATTRIBUTES = [
   'flex-shrink',
   'flex-wrap',
   'float',
-  'flow',
   'flood-color',
   'flood-opacity',
+  'flow',
   'font',
   'font-display',
   'font-family',
   'font-feature-settings',
   'font-kerning',
   'font-language-override',
+  'font-optical-sizing',
+  'font-palette',
   'font-size',
   'font-size-adjust',
+  'font-smooth',
   'font-smoothing',
   'font-stretch',
   'font-style',
   'font-synthesis',
+  'font-synthesis-position',
+  'font-synthesis-small-caps',
+  'font-synthesis-style',
+  'font-synthesis-weight',
   'font-variant',
+  'font-variant-alternates',
   'font-variant-caps',
   'font-variant-east-asian',
+  'font-variant-emoji',
   'font-variant-ligatures',
   'font-variant-numeric',
   'font-variant-position',
   'font-variation-settings',
   'font-weight',
+  'forced-color-adjust',
   'gap',
   'glyph-orientation-horizontal',
   'glyph-orientation-vertical',
@@ -4828,14 +4877,19 @@ const ATTRIBUTES = [
   'grid-template-rows',
   'hanging-punctuation',
   'height',
+  'hyphenate-character',
+  'hyphenate-limit-chars',
   'hyphens',
   'icon',
   'image-orientation',
   'image-rendering',
   'image-resolution',
   'ime-mode',
+  'initial-letter',
+  'initial-letter-align',
   'inline-size',
   'inset',
+  'inset-area',
   'inset-block',
   'inset-block-end',
   'inset-block-start',
@@ -4843,24 +4897,20 @@ const ATTRIBUTES = [
   'inset-inline-end',
   'inset-inline-start',
   'isolation',
-  'kerning',
   'justify-content',
   'justify-items',
   'justify-self',
+  'kerning',
   'left',
   'letter-spacing',
   'lighting-color',
   'line-break',
   'line-height',
+  'line-height-step',
   'list-style',
   'list-style-image',
   'list-style-position',
   'list-style-type',
-  'marker',
-  'marker-end',
-  'marker-mid',
-  'marker-start',
-  'mask',
   'margin',
   'margin-block',
   'margin-block-end',
@@ -4872,6 +4922,11 @@ const ATTRIBUTES = [
   'margin-left',
   'margin-right',
   'margin-top',
+  'margin-trim',
+  'marker',
+  'marker-end',
+  'marker-mid',
+  'marker-start',
   'marks',
   'mask',
   'mask-border',
@@ -4890,6 +4945,10 @@ const ATTRIBUTES = [
   'mask-repeat',
   'mask-size',
   'mask-type',
+  'masonry-auto-flow',
+  'math-depth',
+  'math-shift',
+  'math-style',
   'max-block-size',
   'max-height',
   'max-inline-size',
@@ -4908,6 +4967,12 @@ const ATTRIBUTES = [
   'normal',
   'object-fit',
   'object-position',
+  'offset',
+  'offset-anchor',
+  'offset-distance',
+  'offset-path',
+  'offset-position',
+  'offset-rotate',
   'opacity',
   'order',
   'orphans',
@@ -4917,9 +4982,19 @@ const ATTRIBUTES = [
   'outline-style',
   'outline-width',
   'overflow',
+  'overflow-anchor',
+  'overflow-block',
+  'overflow-clip-margin',
+  'overflow-inline',
   'overflow-wrap',
   'overflow-x',
   'overflow-y',
+  'overlay',
+  'overscroll-behavior',
+  'overscroll-behavior-block',
+  'overscroll-behavior-inline',
+  'overscroll-behavior-x',
+  'overscroll-behavior-y',
   'padding',
   'padding-block',
   'padding-block-end',
@@ -4931,16 +5006,24 @@ const ATTRIBUTES = [
   'padding-left',
   'padding-right',
   'padding-top',
+  'page',
   'page-break-after',
   'page-break-before',
   'page-break-inside',
+  'paint-order',
   'pause',
   'pause-after',
   'pause-before',
   'perspective',
   'perspective-origin',
+  'place-content',
+  'place-items',
+  'place-self',
   'pointer-events',
   'position',
+  'position-anchor',
+  'position-visibility',
+  'print-color-adjust',
   'quotes',
   'r',
   'resize',
@@ -4950,7 +5033,10 @@ const ATTRIBUTES = [
   'right',
   'rotate',
   'row-gap',
+  'ruby-align',
+  'ruby-position',
   'scale',
+  'scroll-behavior',
   'scroll-margin',
   'scroll-margin-block',
   'scroll-margin-block-end',
@@ -4976,6 +5062,9 @@ const ATTRIBUTES = [
   'scroll-snap-align',
   'scroll-snap-stop',
   'scroll-snap-type',
+  'scroll-timeline',
+  'scroll-timeline-axis',
+  'scroll-timeline-name',
   'scrollbar-color',
   'scrollbar-gutter',
   'scrollbar-width',
@@ -4983,6 +5072,9 @@ const ATTRIBUTES = [
   'shape-margin',
   'shape-outside',
   'shape-rendering',
+  'speak',
+  'speak-as',
+  'src', // @font-face
   'stop-color',
   'stop-opacity',
   'stroke',
@@ -4993,19 +5085,17 @@ const ATTRIBUTES = [
   'stroke-miterlimit',
   'stroke-opacity',
   'stroke-width',
-  'speak',
-  'speak-as',
-  'src', // @font-face
   'tab-size',
   'table-layout',
-  'text-anchor',
   'text-align',
   'text-align-all',
   'text-align-last',
+  'text-anchor',
   'text-combine-upright',
   'text-decoration',
   'text-decoration-color',
   'text-decoration-line',
+  'text-decoration-skip',
   'text-decoration-skip-ink',
   'text-decoration-style',
   'text-decoration-thickness',
@@ -5019,23 +5109,37 @@ const ATTRIBUTES = [
   'text-overflow',
   'text-rendering',
   'text-shadow',
+  'text-size-adjust',
   'text-transform',
   'text-underline-offset',
   'text-underline-position',
+  'text-wrap',
+  'text-wrap-mode',
+  'text-wrap-style',
+  'timeline-scope',
   'top',
+  'touch-action',
   'transform',
   'transform-box',
   'transform-origin',
   'transform-style',
   'transition',
+  'transition-behavior',
   'transition-delay',
   'transition-duration',
   'transition-property',
   'transition-timing-function',
   'translate',
   'unicode-bidi',
+  'user-modify',
+  'user-select',
   'vector-effect',
   'vertical-align',
+  'view-timeline',
+  'view-timeline-axis',
+  'view-timeline-inset',
+  'view-timeline-name',
+  'view-transition-name',
   'visibility',
   'voice-balance',
   'voice-duration',
@@ -5046,6 +5150,7 @@ const ATTRIBUTES = [
   'voice-stress',
   'voice-volume',
   'white-space',
+  'white-space-collapse',
   'widows',
   'width',
   'will-change',
@@ -5055,7 +5160,8 @@ const ATTRIBUTES = [
   'writing-mode',
   'x',
   'y',
-  'z-index'
+  'z-index',
+  'zoom'
 ].sort().reverse();
 
 // some grammars use them all as a single group
@@ -5721,7 +5827,8 @@ function java(hljs) {
     'sealed',
     'yield',
     'permits',
-    'goto'
+    'goto',
+    'when'
   ];
 
   const BUILT_INS = [
@@ -5941,7 +6048,9 @@ const KEYWORDS = [
   "import",
   "from",
   "export",
-  "extends"
+  "extends",
+  // It's reached stage 3, which is "recommended for implementation":
+  "using"
 ];
 const LITERALS = [
   "true",
@@ -6323,7 +6432,7 @@ function javascript(hljs) {
   const PARAMS = {
     className: 'params',
     // convert this to negative lookbehind in v12
-    begin: /(\s*)\(/, // to match the parms with 
+    begin: /(\s*)\(/, // to match the parms with
     end: /\)/,
     excludeBegin: true,
     excludeEnd: true,
@@ -6534,8 +6643,8 @@ function javascript(hljs) {
       NUMBER,
       CLASS_REFERENCE,
       {
-        className: 'attr',
-        begin: IDENT_RE$1 + regex.lookahead(':'),
+        scope: 'attr',
+        match: IDENT_RE$1 + regex.lookahead(':'),
         relevance: 0
       },
       FUNCTION_VARIABLE,
@@ -7231,6 +7340,7 @@ function lua(hljs) {
   ];
   return {
     name: 'Lua',
+    aliases: ['pluto'],
     keywords: {
       $pattern: hljs.UNDERSCORE_IDENT_RE,
       literal: "true false nil",
@@ -7321,7 +7431,10 @@ function makefile(hljs) {
         + 'word wordlist firstword lastword dir notdir suffix basename '
         + 'addsuffix addprefix join wildcard realpath abspath error warning '
         + 'shell origin flavor foreach if or and call eval file value' },
-    contains: [ VARIABLE ]
+    contains: [ 
+      VARIABLE,
+      QUOTE_STRING // Added QUOTE_STRING as they can be a part of functions
+    ]
   };
   /* Variable assignment */
   const ASSIGNMENT = { begin: '^' + hljs.UNDERSCORE_IDENT_RE + '\\s*(?=[:+?]?=)' };
@@ -8632,12 +8745,15 @@ function php(hljs) {
   const PASCAL_CASE_CLASS_NAME_RE = regex.concat(
     /(\\?[A-Z][a-z0-9_\x7f-\xff]+|\\?[A-Z]+(?=[A-Z][a-z0-9_\x7f-\xff])){1,}/,
     NOT_PERL_ETC);
+  const UPCASE_NAME_RE = regex.concat(
+    /[A-Z]+/,
+    NOT_PERL_ETC);
   const VARIABLE = {
     scope: 'variable',
     match: '\\$+' + IDENT_RE,
   };
   const PREPROCESSOR = {
-    scope: 'meta',
+    scope: "meta",
     variants: [
       { begin: /<\?php/, relevance: 10 }, // boost for obvious PHP
       { begin: /<\?=/ },
@@ -9051,7 +9167,12 @@ function php(hljs) {
   ];
 
   const ATTRIBUTES = {
-    begin: regex.concat(/#\[\s*/, PASCAL_CASE_CLASS_NAME_RE),
+    begin: regex.concat(/#\[\s*\\?/,
+      regex.either(
+        PASCAL_CASE_CLASS_NAME_RE,
+        UPCASE_NAME_RE
+      )
+    ),
     beginScope: "meta",
     end: /]/,
     endScope: "meta",
@@ -9081,7 +9202,10 @@ function php(hljs) {
       ...ATTRIBUTE_CONTAINS,
       {
         scope: 'meta',
-        match: PASCAL_CASE_CLASS_NAME_RE
+        variants: [
+          { match: PASCAL_CASE_CLASS_NAME_RE },
+          { match: UPCASE_NAME_RE }
+        ]
       }
     ]
   };
@@ -9161,6 +9285,7 @@ function php(hljs) {
             keywords: KEYWORDS,
             contains: [
               'self',
+              ATTRIBUTES,
               VARIABLE,
               LEFT_AND_RIGHT_SIDE_OF_DOUBLE_COLON,
               hljs.C_BLOCK_COMMENT_MODE,
@@ -10365,7 +10490,7 @@ function ruby(hljs) {
     },
     {
       className: 'params',
-      begin: /\|/,
+      begin: /\|(?!=)/,
       end: /\|/,
       excludeBegin: true,
       excludeEnd: true,
@@ -10661,15 +10786,25 @@ function rust(hljs) {
         illegal: null
       }),
       {
-        className: 'string',
-        variants: [
-          { begin: /b?r(#*)"(.|\n)*?"\1(?!#)/ },
-          { begin: /b?'\\?(x\w{2}|u\w{4}|U\w{8}|.)'/ }
-        ]
+        className: 'symbol',
+        // negative lookahead to avoid matching `'`
+        begin: /'[a-zA-Z_][a-zA-Z0-9_]*(?!')/
       },
       {
-        className: 'symbol',
-        begin: /'[a-zA-Z_][a-zA-Z0-9_]*/
+        scope: 'string',
+        variants: [
+          { begin: /b?r(#*)"(.|\n)*?"\1(?!#)/ },
+          {
+            begin: /b?'/,
+            end: /'/,
+            contains: [
+              {
+                scope: "char.escape",
+                match: /\\('|\w|x\w{2}|u\w{4}|U\w{8})/
+              }
+            ]
+          }
+        ]
       },
       {
         className: 'number',
@@ -10959,19 +11094,19 @@ function sql(hljs) {
   const regex = hljs.regex;
   const COMMENT_MODE = hljs.COMMENT('--', '$');
   const STRING = {
-    className: 'string',
+    scope: 'string',
     variants: [
       {
         begin: /'/,
         end: /'/,
-        contains: [ { begin: /''/ } ]
+        contains: [ { match: /''/ } ]
       }
     ]
   };
   const QUOTED_IDENTIFIER = {
     begin: /"/,
     end: /"/,
-    contains: [ { begin: /""/ } ]
+    contains: [ { match: /""/ } ]
   };
 
   const LITERALS = [
@@ -11541,20 +11676,40 @@ function sql(hljs) {
   });
 
   const VARIABLE = {
-    className: "variable",
-    begin: /@[a-z0-9][a-z0-9_]*/,
+    scope: "variable",
+    match: /@[a-z0-9][a-z0-9_]*/,
   };
 
   const OPERATOR = {
-    className: "operator",
-    begin: /[-+*/=%^~]|&&?|\|\|?|!=?|<(?:=>?|<|>)?|>[>=]?/,
+    scope: "operator",
+    match: /[-+*/=%^~]|&&?|\|\|?|!=?|<(?:=>?|<|>)?|>[>=]?/,
     relevance: 0,
   };
 
   const FUNCTION_CALL = {
-    begin: regex.concat(/\b/, regex.either(...FUNCTIONS), /\s*\(/),
+    match: regex.concat(/\b/, regex.either(...FUNCTIONS), /\s*\(/),
     relevance: 0,
     keywords: { built_in: FUNCTIONS }
+  };
+
+  // turns a multi-word keyword combo into a regex that doesn't
+  // care about extra whitespace etc.
+  // input: "START QUERY"
+  // output: /\bSTART\s+QUERY\b/
+  function kws_to_regex(list) {
+    return regex.concat(
+      /\b/,
+      regex.either(...list.map((kw) => {
+        return kw.replace(/\s+/, "\\s+")
+      })),
+      /\b/
+    )
+  }
+
+  const MULTI_WORD_KEYWORDS = {
+    scope: "keyword",
+    match: kws_to_regex(COMBOS),
+    relevance: 0,
   };
 
   // keywords with less than 3 letters are reduced in relevancy
@@ -11589,19 +11744,10 @@ function sql(hljs) {
     },
     contains: [
       {
-        begin: regex.either(...COMBOS),
-        relevance: 0,
-        keywords: {
-          $pattern: /[\w\.]+/,
-          keyword: KEYWORDS.concat(COMBOS),
-          literal: LITERALS,
-          type: TYPES
-        },
+        scope: "type",
+        match: kws_to_regex(MULTI_WORD_TYPES)
       },
-      {
-        className: "type",
-        begin: regex.either(...MULTI_WORD_TYPES)
-      },
+      MULTI_WORD_KEYWORDS,
       FUNCTION_CALL,
       VARIABLE,
       STRING,
@@ -12403,6 +12549,33 @@ function swift(hljs) {
     end: /}/
   };
 
+  const CLASS_FUNC_DECLARATION = {
+    match: [
+      /class\b/,          
+      /\s+/,
+      /func\b/,
+      /\s+/,
+      /\b[A-Za-z_][A-Za-z0-9_]*\b/ 
+    ],
+    scope: {
+      1: "keyword",
+      3: "keyword",
+      5: "title.function"
+    }
+  };
+
+  const CLASS_VAR_DECLARATION = {
+    match: [
+      /class\b/,
+      /\s+/,          
+      /var\b/, 
+    ],
+    scope: {
+      1: "keyword",
+      3: "keyword"
+    }
+  };
+
   const TYPE_DECLARATION = {
     begin: [
       /(struct|protocol|class|extension|enum|actor)/,
@@ -12467,6 +12640,8 @@ function swift(hljs) {
       ...COMMENTS,
       FUNCTION_OR_MACRO,
       INIT_SUBSCRIPT,
+      CLASS_FUNC_DECLARATION,
+      CLASS_VAR_DECLARATION,
       TYPE_DECLARATION,
       OPERATOR_DECLARATION,
       PRECEDENCEGROUP,
@@ -12502,6 +12677,7 @@ Category: common, scripting
 
 /** @type LanguageFn */
 function typescript(hljs) {
+  const regex = hljs.regex;
   const tsLanguage = javascript(hljs);
 
   const IDENT_RE$1 = IDENT_RE;
@@ -12558,13 +12734,11 @@ function typescript(hljs) {
     "override",
     "satisfies"
   ];
-
   /*
     namespace is a TS keyword but it's fine to use it as a variable name too.
     const message = 'foo';
     const namespace = 'bar';
   */
-
   const KEYWORDS$1 = {
     $pattern: IDENT_RE,
     keyword: KEYWORDS.concat(TS_SPECIFIC_KEYWORDS),
@@ -12572,6 +12746,7 @@ function typescript(hljs) {
     built_in: BUILT_INS.concat(TYPES),
     "variable.language": BUILT_IN_VARIABLES
   };
+
   const DECORATOR = {
     className: 'meta',
     begin: '@' + IDENT_RE$1,
@@ -12592,15 +12767,25 @@ function typescript(hljs) {
   tsLanguage.exports.PARAMS_CONTAINS.push(DECORATOR);
 
   // highlight the function params
-  const ATTRIBUTE_HIGHLIGHT = tsLanguage.contains.find(c => c.className === "attr");
+  const ATTRIBUTE_HIGHLIGHT = tsLanguage.contains.find(c => c.scope === "attr");
+
+  // take default attr rule and extend it to support optionals
+  const OPTIONAL_KEY_OR_ARGUMENT = Object.assign({},
+    ATTRIBUTE_HIGHLIGHT,
+    { match: regex.concat(IDENT_RE$1, regex.lookahead(/\s*\?:/)) }
+  );
   tsLanguage.exports.PARAMS_CONTAINS.push([
     tsLanguage.exports.CLASS_REFERENCE, // class reference for highlighting the params types
     ATTRIBUTE_HIGHLIGHT, // highlight the params key
+    OPTIONAL_KEY_OR_ARGUMENT, // Added for optional property assignment highlighting
   ]);
+
+  // Add the optional property assignment highlighting for objects or classes
   tsLanguage.contains = tsLanguage.contains.concat([
     DECORATOR,
     NAMESPACE,
     INTERFACE,
+    OPTIONAL_KEY_OR_ARGUMENT, // Added for optional property assignment highlighting
   ]);
 
   // TS gets a simpler shebang rule than JS
@@ -12940,15 +13125,15 @@ function yaml(hljs) {
   const KEY = {
     className: 'attr',
     variants: [
-      // added brackets support 
-      { begin: /\w[\w :()\./-]*:(?=[ \t]|$)/ },
-      { // double quoted keys - with brackets
-        begin: /"\w[\w :()\./-]*":(?=[ \t]|$)/ },
-      { // single quoted keys - with brackets
-        begin: /'\w[\w :()\./-]*':(?=[ \t]|$)/ },
+      // added brackets support and special char support
+      { begin: /[\w*@][\w*@ :()\./-]*:(?=[ \t]|$)/ },
+      { // double quoted keys - with brackets and special char support
+        begin: /"[\w*@][\w*@ :()\./-]*":(?=[ \t]|$)/ },
+      { // single quoted keys - with brackets and special char support
+        begin: /'[\w*@][\w*@ :()\./-]*':(?=[ \t]|$)/ },
     ]
   };
-
+  
   const TEMPLATE_VARIABLES = {
     className: 'template-variable',
     variants: [
@@ -12962,14 +13147,25 @@ function yaml(hljs) {
       }
     ]
   };
+
+  const SINGLE_QUOTE_STRING = {
+    className: 'string',
+    relevance: 0,
+    begin: /'/,
+    end: /'/,
+    contains: [
+      {
+        match: /''/,
+        scope: 'char.escape',
+        relevance: 0
+      }
+    ]
+  };
+
   const STRING = {
     className: 'string',
     relevance: 0,
     variants: [
-      {
-        begin: /'/,
-        end: /'/
-      },
       {
         begin: /"/,
         end: /"/
@@ -12987,7 +13183,13 @@ function yaml(hljs) {
   const CONTAINER_STRING = hljs.inherit(STRING, { variants: [
     {
       begin: /'/,
-      end: /'/
+      end: /'/,
+      contains: [
+        {
+          begin: /''/,
+          relevance: 0
+        }
+      ]
     },
     {
       begin: /"/,
@@ -13096,6 +13298,7 @@ function yaml(hljs) {
     },
     OBJECT,
     ARRAY,
+    SINGLE_QUOTE_STRING,
     STRING
   ];
 
