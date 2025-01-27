@@ -9,4 +9,4 @@ crate-type = ["staticlib"]
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "*" }
-rand = "0.8"
+rand = "0.9"
