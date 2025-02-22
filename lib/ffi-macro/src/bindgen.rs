@@ -61,7 +61,7 @@ pub fn generate(
     };
 
     Ok(quote! {
-        #[no_mangle]
+        #[unsafe(no_mangle)]
         extern "C" fn #function_name(
             stack: &mut #crate_path::cps::AsyncStack<()>,
             continue_: #crate_path::cps::ContinuationFunction<#output_type, ()>,
@@ -122,7 +122,7 @@ fn generate_sync_function(
     Ok(if is_default_return_type(function) {
         quote! {
             #(#attributes)*
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             extern "C" fn #function_name(#arguments) -> #output_type {
                 #(#statements);*;
 
@@ -135,7 +135,7 @@ fn generate_sync_function(
 
         quote! {
             #(#attributes)*
-            #[no_mangle]
+            #[unsafe(no_mangle)]
             extern "C" fn #function_name(#(#moved_arguments),*) -> #output_type {
                 fn run(#arguments) #original_output_type {
                     #(#statements);*

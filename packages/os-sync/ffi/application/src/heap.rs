@@ -1,7 +1,7 @@
 use crate::utilities::is_os_debug;
 use std::alloc::{alloc, dealloc, realloc, Layout};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
     let pointer =
         unsafe { alloc(Layout::from_size_align(size, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap()) };
@@ -13,7 +13,7 @@ extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
     pointer
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
     // Layouts are expected to be ignored by the global allocator.
     let new_pointer = unsafe {
@@ -34,7 +34,7 @@ extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
     new_pointer
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn _pen_free(pointer: *mut u8) {
     if is_os_debug() {
         eprintln!("free: {:x}", pointer as usize);
