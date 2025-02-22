@@ -109,7 +109,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
         types::{self, Type},
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn compile_module(
         module: &Module,
@@ -276,12 +276,14 @@ mod tests {
                             FunctionDeclaration::new(
                                 &COMPILE_CONFIGURATION.list_type.lazy_function_name,
                                 types::Function::new(
-                                    vec![types::Function::new(
-                                        vec![],
-                                        list_type.clone(),
-                                        Position::fake(),
-                                    )
-                                    .into()],
+                                    vec![
+                                        types::Function::new(
+                                            vec![],
+                                            list_type.clone(),
+                                            Position::fake(),
+                                        )
+                                        .into(),
+                                    ],
                                     list_type.clone(),
                                     Position::fake(),
                                 ),

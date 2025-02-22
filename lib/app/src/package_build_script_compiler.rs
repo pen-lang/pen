@@ -2,11 +2,12 @@ mod module_target_collector;
 mod test_module_target_collector;
 
 use crate::{
+    ApplicationConfiguration, PackageType,
     common::file_path_resolver,
     external_package_configuration_reader, external_package_topological_sorter,
     infra::{FilePath, Infrastructure, MainModuleTarget},
     module_target_source_resolver, package_name_formatter, prelude_interface_file_finder,
-    system_package_finder, ApplicationConfiguration, PackageType,
+    system_package_finder,
 };
 use std::error::Error;
 

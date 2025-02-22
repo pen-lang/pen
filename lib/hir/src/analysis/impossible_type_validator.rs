@@ -1,4 +1,4 @@
-use super::{record_field_resolver, type_resolver, AnalysisContext};
+use super::{AnalysisContext, record_field_resolver, type_resolver};
 use crate::{analysis::AnalysisError, ir::*, types::Type};
 use fnv::FnvHashSet;
 use std::convert::identity;
@@ -93,7 +93,7 @@ mod tests {
         test::{ModuleFake, RecordFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn validate_module(module: &Module) -> Result<(), AnalysisError> {
         validate(

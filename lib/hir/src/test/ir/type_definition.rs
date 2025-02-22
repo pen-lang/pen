@@ -1,5 +1,5 @@
 use crate::{ir::*, types};
-use position::{test::PositionFake, Position};
+use position::{Position, test::PositionFake};
 
 pub trait TypeDefinitionFake {
     fn fake(

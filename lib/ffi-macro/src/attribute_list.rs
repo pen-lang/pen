@@ -1,7 +1,7 @@
 use syn::{
+    Meta, Result, Token,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    Meta, Result, Token,
 };
 
 pub struct AttributeList {

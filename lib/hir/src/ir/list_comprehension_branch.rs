@@ -1,4 +1,4 @@
-use super::{expression::Expression, ListComprehensionIteratee};
+use super::{ListComprehensionIteratee, expression::Expression};
 use position::Position;
 use std::rc::Rc;
 

@@ -1,12 +1,12 @@
 use super::function;
 use crate::{
+    CompileError,
     context::Context,
     transformation::{collection_type, map_context, record_type_information},
-    CompileError,
 };
 use hir::{
     analysis::{
-        type_comparability_checker, type_resolver, union_type_member_calculator, AnalysisError,
+        AnalysisError, type_comparability_checker, type_resolver, union_type_member_calculator,
     },
     ir::*,
     types::{self, Type},
@@ -137,7 +137,7 @@ pub fn transform(
             position,
         )?,
         Type::Any(_) | Type::Error(_) | Type::Function(_) => {
-            return Err(AnalysisError::TypeNotComparable(position.clone(), type_.clone()).into())
+            return Err(AnalysisError::TypeNotComparable(position.clone(), type_.clone()).into());
         }
     })
 }
@@ -177,7 +177,7 @@ mod tests {
     use super::*;
     use crate::map_type_configuration::HASH_CONFIGURATION;
     use hir::test::RecordFake;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn hash_type() -> Type {

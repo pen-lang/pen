@@ -27,7 +27,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn validate_module() {

@@ -2,14 +2,14 @@
 name = "pen-sql"
 version = "0.1.0"
 publish = false
-edition = "2021"
+edition = "2024"
 
 [lib]
 crate-type = ["staticlib"]
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "*", features = ["runtime", "std"] }
-futures = "0.3"
+futures = "0.3.31"
 sqlx = { version = "0.6", features = [
   "any",
   "mysql",

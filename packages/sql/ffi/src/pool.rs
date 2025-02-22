@@ -1,5 +1,5 @@
 use crate::error::SqlError;
-use futures::{pin_mut, StreamExt};
+use futures::{StreamExt, pin_mut};
 use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 

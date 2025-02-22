@@ -2,7 +2,7 @@
 name = "pen"
 version = "0.6.9"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 clap = { version = "4", features = ["cargo"] }

@@ -1,4 +1,4 @@
-use crate::{call, context::Context, foreign_value, type_, CompileError};
+use crate::{CompileError, call, context::Context, foreign_value, type_};
 
 pub fn compile(
     context: &Context,

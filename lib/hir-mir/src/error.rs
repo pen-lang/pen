@@ -1,5 +1,5 @@
 use hir::{
-    analysis::{type_formatter, AnalysisError},
+    analysis::{AnalysisError, type_formatter},
     types::Type,
 };
 use position::Position;

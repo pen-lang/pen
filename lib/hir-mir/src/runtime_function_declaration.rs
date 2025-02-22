@@ -1,4 +1,4 @@
-use crate::{context::Context, type_, CompileError};
+use crate::{CompileError, context::Context, type_};
 
 pub const LOCAL_DEBUG_FUNCTION_NAME: &str = "__debug";
 pub const LOCAL_RACE_FUNCTION_NAME: &str = "__race";
@@ -58,10 +58,12 @@ mod tests {
                 &COMPILE_CONFIGURATION.spawn_function_name,
             ),
         ] {
-            assert!(declarations
-                .iter()
-                .any(|declaration| declaration.name() == local_name
-                    && declaration.foreign_name() == foreign_name));
+            assert!(
+                declarations
+                    .iter()
+                    .any(|declaration| declaration.name() == local_name
+                        && declaration.foreign_name() == foreign_name)
+            );
         }
     }
 }

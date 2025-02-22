@@ -1,4 +1,4 @@
-use crate::{future, import, Any, Arc, Boolean, Closure, List};
+use crate::{Any, Arc, Boolean, Closure, List, future, import};
 use futures::Stream;
 
 import!(pen_ffi_list_first_rest, async fn(list: List) -> Arc<FirstRest>);

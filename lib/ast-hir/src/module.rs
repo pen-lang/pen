@@ -402,7 +402,7 @@ fn compile_if(
 mod tests {
     use super::*;
     use hir::test::ModuleFake;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

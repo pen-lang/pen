@@ -1,4 +1,4 @@
-use super::{expression::Expression, Block};
+use super::{Block, expression::Expression};
 use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]

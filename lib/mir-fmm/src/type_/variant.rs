@@ -1,4 +1,4 @@
-use crate::{context::Context, type_, CompileError};
+use crate::{CompileError, context::Context, type_};
 
 pub fn compile_payload(
     context: &Context,

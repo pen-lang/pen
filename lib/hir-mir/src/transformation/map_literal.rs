@@ -1,5 +1,5 @@
 use super::{collection_type, map_context};
-use crate::{context::Context, CompileError};
+use crate::{CompileError, context::Context};
 use hir::{
     ir::*,
     types::{self, Type},
@@ -168,12 +168,14 @@ mod tests {
             &Map::new(
                 types::None::new(Position::fake()),
                 types::None::new(Position::fake()),
-                vec![MapEntry::new(
-                    None::new(Position::fake()),
-                    None::new(Position::fake()),
-                    Position::fake()
-                )
-                .into()],
+                vec![
+                    MapEntry::new(
+                        None::new(Position::fake()),
+                        None::new(Position::fake()),
+                        Position::fake()
+                    )
+                    .into()
+                ],
                 Position::fake()
             ),
         ));

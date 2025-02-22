@@ -1,4 +1,4 @@
-use crate::{context::Context, transformation::record_type_information, CompileError};
+use crate::{CompileError, context::Context, transformation::record_type_information};
 use hir::{analysis::type_comparability_checker, ir::*, types};
 
 const LHS_NAME: &str = "$lhs";
@@ -140,7 +140,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{ModuleFake, RecordFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {

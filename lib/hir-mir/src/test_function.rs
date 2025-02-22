@@ -66,11 +66,13 @@ pub fn compile(
                                                         BuiltInFunctionName::Source,
                                                         position.clone(),
                                                     ),
-                                                    vec![Variable::new(
-                                                        RESULT_VARIABLE_NAME,
-                                                        position.clone(),
-                                                    )
-                                                    .into()],
+                                                    vec![
+                                                        Variable::new(
+                                                            RESULT_VARIABLE_NAME,
+                                                            position.clone(),
+                                                        )
+                                                        .into(),
+                                                    ],
                                                     position.clone(),
                                                 ),
                                                 vec![IfTypeBranch::new(

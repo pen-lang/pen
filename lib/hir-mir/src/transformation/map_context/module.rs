@@ -1,14 +1,14 @@
 use super::context_function_name;
 use crate::{
+    CompileError,
     context::Context,
     transformation::{collection_type, equal_operation, hash_calculation},
-    CompileError,
 };
 use fnv::FnvHashSet;
 use hir::{
     analysis::{
-        expression_visitor, type_canonicalizer, type_comparability_checker, type_visitor,
-        AnalysisError,
+        AnalysisError, expression_visitor, type_canonicalizer, type_comparability_checker,
+        type_visitor,
     },
     ir::*,
     types,

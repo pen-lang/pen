@@ -1,5 +1,5 @@
-use crate::{error::ApplicationError, PackageConfiguration};
-use petgraph::{algo::toposort, Graph};
+use crate::{PackageConfiguration, error::ApplicationError};
+use petgraph::{Graph, algo::toposort};
 use std::{collections::BTreeMap, error::Error};
 
 pub fn sort(

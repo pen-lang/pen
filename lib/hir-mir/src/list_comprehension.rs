@@ -1,6 +1,6 @@
-use crate::{context::Context, expression, type_, CompileError};
+use crate::{CompileError, context::Context, expression, type_};
 use hir::{
-    analysis::{type_canonicalizer, AnalysisError},
+    analysis::{AnalysisError, type_canonicalizer},
     ir::*,
     types::{self, Type},
 };
@@ -48,34 +48,36 @@ fn compile_lists(
             list_type.clone(),
         ),
         mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
-        vec![mir::ir::LetRecursive::new(
-            mir::ir::FunctionDefinition::new(
-                CLOSURE_NAME,
-                vec![],
-                list_type.clone(),
-                mir::ir::LetRecursive::new(
-                    definition.clone(),
-                    mir::ir::Call::new(
-                        mir::types::Function::new(
+        vec![
+            mir::ir::LetRecursive::new(
+                mir::ir::FunctionDefinition::new(
+                    CLOSURE_NAME,
+                    vec![],
+                    list_type.clone(),
+                    mir::ir::LetRecursive::new(
+                        definition.clone(),
+                        mir::ir::Call::new(
+                            mir::types::Function::new(
+                                branch
+                                    .iteratees()
+                                    .iter()
+                                    .map(|_| list_type.clone().into())
+                                    .collect(),
+                                list_type,
+                            ),
+                            mir::ir::Variable::new(definition.name()),
                             branch
                                 .iteratees()
                                 .iter()
-                                .map(|_| list_type.clone().into())
-                                .collect(),
-                            list_type,
+                                .map(|iteratee| expression::compile(context, iteratee.expression()))
+                                .collect::<Result<_, _>>()?,
                         ),
-                        mir::ir::Variable::new(definition.name()),
-                        branch
-                            .iteratees()
-                            .iter()
-                            .map(|iteratee| expression::compile(context, iteratee.expression()))
-                            .collect::<Result<_, _>>()?,
                     ),
                 ),
-            ),
-            mir::ir::Variable::new(CLOSURE_NAME),
-        )
-        .into()],
+                mir::ir::Variable::new(CLOSURE_NAME),
+            )
+            .into(),
+        ],
     )
     .into())
 }

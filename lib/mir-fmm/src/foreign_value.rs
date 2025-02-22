@@ -1,4 +1,4 @@
-use crate::{box_, context::Context, type_, CompileError};
+use crate::{CompileError, box_, context::Context, type_};
 
 pub fn convert_to_foreign(
     context: &Context,

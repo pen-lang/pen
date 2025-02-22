@@ -1,4 +1,4 @@
-use crate::input::{position, Input};
+use crate::input::{Input, position};
 use nom::error::{VerboseError, VerboseErrorKind};
 use position::Position;
 use std::{error::Error, fmt, fmt::Display};

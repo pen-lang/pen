@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, union_type_creator, union_type_member_calculator, AnalysisError};
+use super::{AnalysisError, type_canonicalizer, union_type_creator, union_type_member_calculator};
 use crate::types::Type;
 use fnv::FnvHashMap;
 
@@ -29,7 +29,7 @@ pub fn calculate(
 mod tests {
     use super::*;
     use crate::types;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

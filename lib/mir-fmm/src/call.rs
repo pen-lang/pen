@@ -1,4 +1,4 @@
-use crate::{closure, type_, CompileError};
+use crate::{CompileError, closure, type_};
 
 pub fn compile(
     instruction_builder: &fmm::build::InstructionBuilder,

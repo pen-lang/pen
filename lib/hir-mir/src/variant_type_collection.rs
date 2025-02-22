@@ -1,7 +1,7 @@
 use crate::context::Context;
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
+    analysis::{AnalysisError, expression_visitor, union_type_member_calculator},
     ir::*,
     types::{self, Type},
 };
@@ -100,7 +100,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {

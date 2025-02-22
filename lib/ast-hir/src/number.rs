@@ -27,7 +27,7 @@ pub fn compile(number: &Number) -> Result<f64, CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn compile_binary() {

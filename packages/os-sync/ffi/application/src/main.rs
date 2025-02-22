@@ -7,7 +7,7 @@ const INITIAL_STACK_CAPACITY: usize = 256;
 
 #[cfg(not(test))]
 #[link(name = "main")]
-extern "C" {
+unsafe extern "C" {
     fn _pen_main(
         stack: *mut ffi::cps::Stack,
         continuation: extern "C" fn(*mut ffi::cps::Stack, ffi::None),

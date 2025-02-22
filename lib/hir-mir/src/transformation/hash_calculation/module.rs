@@ -1,8 +1,8 @@
 use super::expression;
 use crate::{
+    CompileError,
     context::Context,
     transformation::{collection_type, hash_calculation::function},
-    CompileError,
 };
 use hir::{
     ir::*,
@@ -76,7 +76,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{ModuleFake, TypeAliasFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn transform_module(module: &Module) -> Result<Module, CompileError> {
         transform(

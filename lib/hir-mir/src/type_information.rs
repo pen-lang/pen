@@ -2,7 +2,7 @@ pub mod debug;
 pub mod equal;
 mod utility;
 
-use crate::{context::Context, type_, variant_type_collection, CompileError};
+use crate::{CompileError, context::Context, type_, variant_type_collection};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{type_canonicalizer, type_collector, type_id_calculator},
@@ -219,11 +219,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
             .map(|_| types::ByteString::new(position.clone()).into()),
     )
     .chain(variant_type_collection::collect(context, module)?)
-    .chain(
-        type_collector::collect_records(module)
-            .into_values()
-            .map(Type::from),
-    )
+    .chain(type_collector::collect_records(module).into_values())
     .map(|type_| type_canonicalizer::canonicalize(&type_, context.types()))
     .collect::<Result<Vec<_>, _>>()?
     .into_iter()
@@ -237,7 +233,7 @@ mod tests {
     use crate::{compile_configuration::COMPILE_CONFIGURATION, error_type};
     use fnv::FnvHashMap;
     use hir::test::{FunctionDefinitionFake, ModuleFake, RecordFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn create_context(module: &Module) -> Context {
@@ -370,13 +366,15 @@ mod tests {
             types::None::new(Position::fake()).into(),
             types::Number::new(Position::fake()).into(),
         ] {
-            assert!(definitions
-                .iter()
-                .find(|definition| definition.definition().name()
-                    == compile_function_name(&context, type_).unwrap())
-                .unwrap()
-                .definition()
-                .is_thunk());
+            assert!(
+                definitions
+                    .iter()
+                    .find(|definition| definition.definition().name()
+                        == compile_function_name(&context, type_).unwrap())
+                    .unwrap()
+                    .definition()
+                    .is_thunk()
+            );
         }
     }
 

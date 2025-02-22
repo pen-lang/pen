@@ -1,6 +1,6 @@
 use crate::{
-    cps::{AsyncStack, ContinuationFunction, StepFunction},
     Closure,
+    cps::{AsyncStack, ContinuationFunction, StepFunction},
 };
 use core::{future::poll_fn, intrinsics::transmute, task::Poll};
 

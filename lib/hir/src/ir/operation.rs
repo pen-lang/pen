@@ -1,7 +1,7 @@
 use super::{
-    arithmetic_operation::ArithmeticOperation, boolean_operation::BooleanOperation,
-    equality_operation::EqualityOperation, not_operation::NotOperation,
-    order_operation::OrderOperation, try_operation::TryOperation, AdditionOperation,
+    AdditionOperation, arithmetic_operation::ArithmeticOperation,
+    boolean_operation::BooleanOperation, equality_operation::EqualityOperation,
+    not_operation::NotOperation, order_operation::OrderOperation, try_operation::TryOperation,
 };
 use position::Position;
 
