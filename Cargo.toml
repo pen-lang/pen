@@ -25,7 +25,9 @@ members = [
 ]
 exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 resolver = "2"
-edition = "2024"
+
+[workspace.package]
+edition = "2021"
 
 [profile.release]
 lto = true
