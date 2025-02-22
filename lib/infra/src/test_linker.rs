@@ -85,7 +85,7 @@ impl TestLinker {
         format!(
             r#"
             #[link(name = "main_test")]
-            extern "C" {{ fn {foreign_name}() -> ffi::ByteString; }}
+            unsafe extern "C" {{ fn {foreign_name}() -> ffi::ByteString; }}
 
             let message = unsafe {{ {foreign_name}() }};
             println!("\t{{}}\t{name}", if message.as_slice().is_empty() {{ "OK" }} else {{ "FAIL" }});
