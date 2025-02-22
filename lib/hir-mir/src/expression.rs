@@ -27,7 +27,9 @@ pub fn compile(
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
         Expression::BuiltInFunction(function) => {
-            return Err(AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into());
+            return Err(
+                AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into(),
+            );
         }
         Expression::Call(call) => {
             if let Expression::BuiltInFunction(function) = call.function() {
