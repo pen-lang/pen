@@ -4,7 +4,7 @@ description = "Mid-level Intermediate Representation"
 version = "0.1.0"
 license = "MIT"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 fnv = "1"

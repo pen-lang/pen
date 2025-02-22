@@ -1,7 +1,7 @@
 [package]
 name = "std-hash-map-insert"
 version = "0.1.0"
-edition = "2021"
+edition.workspace = true
 
 [dependencies]
 ordered-float = "5"
