@@ -1,8 +1,9 @@
 use crate::{
+    ApplicationConfiguration,
     common::file_path_resolver,
     error::ApplicationError,
     infra::{FilePath, Infrastructure},
-    package_test_builder, ApplicationConfiguration,
+    package_test_builder,
 };
 use std::error::Error;
 

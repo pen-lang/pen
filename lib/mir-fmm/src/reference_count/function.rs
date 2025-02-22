@@ -23,11 +23,13 @@ pub fn compile_drop_function(context: &Context) -> Result<(), CompileError> {
                         builder,
                         builder.load(closure::get_metadata_pointer(closure_pointer.clone())?)?,
                     )?,
-                    vec![fmm::build::bit_cast(
-                        fmm::types::Primitive::PointerInteger,
-                        closure_pointer.clone(),
-                    )
-                    .into()],
+                    vec![
+                        fmm::build::bit_cast(
+                            fmm::types::Primitive::PointerInteger,
+                            closure_pointer.clone(),
+                        )
+                        .into(),
+                    ],
                 )?;
 
                 Ok(())
@@ -61,11 +63,13 @@ pub fn compile_synchronize_function(context: &Context) -> Result<(), CompileErro
                         builder,
                         builder.load(closure::get_metadata_pointer(closure_pointer.clone())?)?,
                     )?,
-                    vec![fmm::build::bit_cast(
-                        fmm::types::Primitive::PointerInteger,
-                        closure_pointer.clone(),
-                    )
-                    .into()],
+                    vec![
+                        fmm::build::bit_cast(
+                            fmm::types::Primitive::PointerInteger,
+                            closure_pointer.clone(),
+                        )
+                        .into(),
+                    ],
                 )?;
 
                 Ok(())

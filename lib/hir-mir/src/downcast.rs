@@ -1,7 +1,7 @@
-use crate::{context::Context, CompileError};
+use crate::{CompileError, context::Context};
 use hir::{
     analysis::{
-        type_canonicalizer, type_equality_checker, type_subsumption_checker, AnalysisError,
+        AnalysisError, type_canonicalizer, type_equality_checker, type_subsumption_checker,
     },
     ir::*,
     types::Type,
@@ -51,7 +51,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use hir::types;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn downcast(

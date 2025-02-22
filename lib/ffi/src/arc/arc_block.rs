@@ -2,7 +2,7 @@ use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
     ptr::{drop_in_place, null},
-    sync::atomic::{fence, AtomicIsize, Ordering},
+    sync::atomic::{AtomicIsize, Ordering, fence},
 };
 
 const UNIQUE_COUNT: isize = 0;

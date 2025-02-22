@@ -32,7 +32,7 @@ pub fn create(module: &Module) -> HashMap<String, Type> {
 mod tests {
     use super::*;
     use crate::{test::ModuleFake, types};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn create_with_foreign_declaration() {

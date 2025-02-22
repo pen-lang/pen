@@ -1,5 +1,5 @@
 use super::collection_type;
-use crate::{context::Context, CompileError};
+use crate::{CompileError, context::Context};
 use hir::{
     ir::*,
     types::{self, Type},
@@ -108,7 +108,7 @@ fn transform_list(
 mod tests {
     use super::*;
     use crate::list_type_configuration::LIST_TYPE_CONFIGURATION;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn get_list_type() -> types::Reference {
@@ -323,12 +323,14 @@ mod tests {
                     &LIST_TYPE_CONFIGURATION.lazy_function_name,
                     Position::fake()
                 ),
-                vec![Thunk::new(
-                    Some(list_type.into()),
-                    Variable::new("xs", Position::fake()),
-                    Position::fake(),
-                )
-                .into()],
+                vec![
+                    Thunk::new(
+                        Some(list_type.into()),
+                        Variable::new("xs", Position::fake()),
+                        Position::fake(),
+                    )
+                    .into()
+                ],
                 Position::fake(),
             )
             .into()),
@@ -370,12 +372,14 @@ mod tests {
                             &LIST_TYPE_CONFIGURATION.lazy_function_name,
                             Position::fake()
                         ),
-                        vec![Thunk::new(
-                            Some(list_type.into()),
-                            Variable::new("ys", Position::fake()),
-                            Position::fake(),
-                        )
-                        .into()],
+                        vec![
+                            Thunk::new(
+                                Some(list_type.into()),
+                                Variable::new("ys", Position::fake()),
+                                Position::fake(),
+                            )
+                            .into()
+                        ],
                         Position::fake(),
                     )
                     .into(),

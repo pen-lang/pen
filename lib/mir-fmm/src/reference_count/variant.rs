@@ -1,5 +1,5 @@
 use super::{
-    super::error::CompileError, expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
+    super::error::CompileError, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS, expression, pointer,
 };
 use crate::{context::Context, type_, type_information, variant};
 

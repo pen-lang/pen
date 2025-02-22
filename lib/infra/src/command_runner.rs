@@ -2,7 +2,7 @@ use super::error::InfrastructureError;
 use crate::FilePathConverter;
 use std::{
     error::Error,
-    io::{stderr, stdout, Write},
+    io::{Write, stderr, stdout},
     process::{Command, Stdio},
     rc::Rc,
 };

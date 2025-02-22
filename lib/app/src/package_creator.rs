@@ -1,8 +1,8 @@
 use crate::{
+    ApplicationConfiguration,
     common::file_path_resolver,
     infra::{FilePath, Infrastructure},
     package_configuration::{PackageConfiguration, PackageType},
-    ApplicationConfiguration,
 };
 use std::{collections::BTreeMap, error::Error};
 

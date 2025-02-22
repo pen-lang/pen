@@ -1,4 +1,4 @@
-use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
+use super::{CpsError, Stack, async_stack_action::AsyncStackAction};
 use alloc::{vec, vec::Vec};
 use core::{
     future::Future,
@@ -178,7 +178,7 @@ unsafe impl<V: Sync> Sync for AsyncStack<V> {}
 mod tests {
     use super::*;
     use core::{
-        future::{ready, Ready},
+        future::{Ready, ready},
         ptr::null,
         task::{RawWaker, RawWakerVTable, Waker},
     };

@@ -1,6 +1,6 @@
 use super::{
-    context::AnalysisContext, module_environment, type_canonicalizer, type_difference_calculator,
-    type_extractor, union_type_creator, AnalysisError,
+    AnalysisError, context::AnalysisContext, module_environment, type_canonicalizer,
+    type_difference_calculator, type_extractor, union_type_creator,
 };
 use crate::{
     ir::*,
@@ -662,7 +662,7 @@ mod tests {
         analysis::type_collector,
         test::{FunctionDefinitionFake, ModuleFake, RecordFake},
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn infer_module(module: &Module) -> Result<Module, AnalysisError> {
@@ -2690,13 +2690,15 @@ mod tests {
                                     .into()
                                 ),
                                 BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
-                                vec![Lambda::new(
-                                    vec![],
-                                    types::None::new(Position::fake()),
-                                    None::new(Position::fake()),
-                                    Position::fake(),
-                                )
-                                .into()],
+                                vec![
+                                    Lambda::new(
+                                        vec![],
+                                        types::None::new(Position::fake()),
+                                        None::new(Position::fake()),
+                                        Position::fake(),
+                                    )
+                                    .into()
+                                ],
                                 Position::fake()
                             ),
                             Position::fake(),

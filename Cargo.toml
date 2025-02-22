@@ -27,7 +27,7 @@ exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
 resolver = "2"
 
 [workspace.package]
-edition = "2021"
+edition = "2024"
 
 [profile.release]
 lto = true

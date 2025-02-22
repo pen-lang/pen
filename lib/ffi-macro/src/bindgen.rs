@@ -3,7 +3,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
 use syn::{
-    parse_quote, FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment, ReturnType, Type,
+    FnArg, Ident, ItemFn, Pat, Path, PathArguments, PathSegment, ReturnType, Type, parse_quote,
 };
 
 pub fn generate(

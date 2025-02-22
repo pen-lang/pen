@@ -1,5 +1,5 @@
 use super::utility;
-use crate::{context::Context, error_type, type_, type_information, CompileError};
+use crate::{CompileError, context::Context, error_type, type_, type_information};
 use hir::{
     analysis::{record_field_resolver, type_formatter, type_id_calculator},
     types::Type,
@@ -183,7 +183,7 @@ pub(super) fn compile_function_definition(
             .into(),
         )?,
         Type::Any(_) | Type::Reference(_) | Type::Union(_) => {
-            return Err(CompileError::InvalidVariantType(type_.clone()))
+            return Err(CompileError::InvalidVariantType(type_.clone()));
         }
     })
 }
@@ -247,7 +247,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{ir::*, test::ModuleFake, types};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

@@ -1,13 +1,13 @@
-use super::{
-    list_type_configuration::ListTypeConfiguration, map_type_configuration::MapTypeConfiguration,
-    string_type_configuration::StringTypeConfiguration,
-};
 #[cfg(test)]
 use super::{
     list_type_configuration::LIST_TYPE_CONFIGURATION,
     map_type_configuration::MAP_TYPE_CONFIGURATION,
     number_type_configuration::NUMBER_TYPE_CONFIGURATION,
     string_type_configuration::STRING_TYPE_CONFIGURATION,
+};
+use super::{
+    list_type_configuration::ListTypeConfiguration, map_type_configuration::MapTypeConfiguration,
+    string_type_configuration::StringTypeConfiguration,
 };
 use crate::number_type_configuration::NumberTypeConfiguration;
 #[cfg(test)]

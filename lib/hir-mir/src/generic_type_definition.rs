@@ -1,4 +1,4 @@
-use super::{context::Context, type_, CompileError};
+use super::{CompileError, context::Context, type_};
 use crate::variant_type_collection;
 use hir::{ir::*, types::Type};
 
@@ -23,22 +23,20 @@ fn compile_type_definition(
         Type::Function(function_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_function_name(function_type, context.types())?,
             mir::types::RecordBody::new(vec![
-                type_::compile_function(context, function_type)?.into()
+                type_::compile_function(context, function_type)?.into(),
             ]),
         )),
         Type::List(list_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_list_name(list_type, context.types())?,
-            mir::types::RecordBody::new(vec![mir::types::Record::new(
-                &context.configuration()?.list_type.list_type_name,
-            )
-            .into()]),
+            mir::types::RecordBody::new(vec![
+                mir::types::Record::new(&context.configuration()?.list_type.list_type_name).into(),
+            ]),
         )),
         Type::Map(map_type) => Some(mir::ir::TypeDefinition::new(
             type_::compile_concrete_map_name(map_type, context.types())?,
-            mir::types::RecordBody::new(vec![mir::types::Record::new(
-                &context.configuration()?.map_type.map_type_name,
-            )
-            .into()]),
+            mir::types::RecordBody::new(vec![
+                mir::types::Record::new(&context.configuration()?.map_type.map_type_name).into(),
+            ]),
         )),
         Type::Any(_)
         | Type::Boolean(_)
@@ -58,7 +56,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn compile_race_function() {
@@ -100,10 +98,12 @@ mod tests {
                     context.types()
                 )
                 .unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -140,12 +140,11 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_function_name(&function_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![type_::compile_function(
-                    &context,
-                    &function_type,
-                )
-                .unwrap()
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    type_::compile_function(&context, &function_type,)
+                        .unwrap()
+                        .into()
+                ]),
             )])
         );
     }
@@ -181,10 +180,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -221,10 +222,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -259,10 +262,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -299,10 +304,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -337,10 +344,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -377,10 +386,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -427,10 +438,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -478,10 +491,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -515,10 +530,12 @@ mod tests {
             ),
             Ok(vec![mir::ir::TypeDefinition::new(
                 type_::compile_concrete_list_name(&list_type, context.types()).unwrap(),
-                mir::types::RecordBody::new(vec![mir::types::Record::new(
-                    &context.configuration().unwrap().list_type.list_type_name
-                )
-                .into()]),
+                mir::types::RecordBody::new(vec![
+                    mir::types::Record::new(
+                        &context.configuration().unwrap().list_type.list_type_name
+                    )
+                    .into()
+                ]),
             )])
         );
     }
@@ -561,17 +578,21 @@ mod tests {
             Ok(vec![
                 mir::ir::TypeDefinition::new(
                     type_::compile_concrete_list_name(&key_type, context.types()).unwrap(),
-                    mir::types::RecordBody::new(vec![mir::types::Record::new(
-                        &context.configuration().unwrap().list_type.list_type_name
-                    )
-                    .into()]),
+                    mir::types::RecordBody::new(vec![
+                        mir::types::Record::new(
+                            &context.configuration().unwrap().list_type.list_type_name
+                        )
+                        .into()
+                    ]),
                 ),
                 mir::ir::TypeDefinition::new(
                     type_::compile_concrete_list_name(&value_type, context.types()).unwrap(),
-                    mir::types::RecordBody::new(vec![mir::types::Record::new(
-                        &context.configuration().unwrap().list_type.list_type_name
-                    )
-                    .into()]),
+                    mir::types::RecordBody::new(vec![
+                        mir::types::Record::new(
+                            &context.configuration().unwrap().list_type.list_type_name
+                        )
+                        .into()
+                    ]),
                 )
             ])
         );
@@ -605,17 +626,21 @@ mod tests {
             Ok(vec![
                 mir::ir::TypeDefinition::new(
                     type_::compile_concrete_list_name(&key_type, context.types()).unwrap(),
-                    mir::types::RecordBody::new(vec![mir::types::Record::new(
-                        &context.configuration().unwrap().list_type.list_type_name
-                    )
-                    .into()]),
+                    mir::types::RecordBody::new(vec![
+                        mir::types::Record::new(
+                            &context.configuration().unwrap().list_type.list_type_name
+                        )
+                        .into()
+                    ]),
                 ),
                 mir::ir::TypeDefinition::new(
                     type_::compile_concrete_list_name(&value_type, context.types()).unwrap(),
-                    mir::types::RecordBody::new(vec![mir::types::Record::new(
-                        &context.configuration().unwrap().list_type.list_type_name
-                    )
-                    .into()]),
+                    mir::types::RecordBody::new(vec![
+                        mir::types::Record::new(
+                            &context.configuration().unwrap().list_type.list_type_name
+                        )
+                        .into()
+                    ]),
                 )
             ])
         );

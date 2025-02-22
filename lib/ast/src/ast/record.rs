@@ -1,4 +1,4 @@
-use super::{expression::Expression, RecordField};
+use super::{RecordField, expression::Expression};
 use position::Position;
 use std::rc::Rc;
 

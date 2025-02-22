@@ -1,18 +1,18 @@
 use super::{
-    built_in_call,
+    CompileError, built_in_call,
     context::Context,
     transformation::{
         boolean_operation, equal_operation, if_list, if_map, list_literal, map_literal,
         not_equal_operation,
     },
-    type_, CompileError,
+    type_,
 };
 use crate::{concrete_type, list_comprehension};
 use fnv::FnvHashMap;
 use hir::{
     analysis::{
-        record_field_resolver, type_canonicalizer, type_equality_checker,
-        union_type_member_calculator, AnalysisError,
+        AnalysisError, record_field_resolver, type_canonicalizer, type_equality_checker,
+        union_type_member_calculator,
     },
     ir::*,
     types::{self, Type},
@@ -27,7 +27,7 @@ pub fn compile(
     Ok(match expression {
         Expression::Boolean(boolean) => mir::ir::Expression::Boolean(boolean.value()),
         Expression::BuiltInFunction(function) => {
-            return Err(AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into())
+            return Err(AnalysisError::BuiltInFunctionNotCalled(function.position().clone()).into());
         }
         Expression::Call(call) => {
             if let Expression::BuiltInFunction(function) = call.function() {
@@ -506,7 +506,7 @@ fn compile_record_fields(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn compile_expression(expression: &Expression) -> Result<mir::ir::Expression, CompileError> {
         compile(

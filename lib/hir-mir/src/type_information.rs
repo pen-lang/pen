@@ -2,7 +2,7 @@ pub mod debug;
 pub mod equal;
 mod utility;
 
-use crate::{context::Context, type_, variant_type_collection, CompileError};
+use crate::{CompileError, context::Context, type_, variant_type_collection};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{type_canonicalizer, type_collector, type_id_calculator},
@@ -237,7 +237,7 @@ mod tests {
     use crate::{compile_configuration::COMPILE_CONFIGURATION, error_type};
     use fnv::FnvHashMap;
     use hir::test::{FunctionDefinitionFake, ModuleFake, RecordFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn create_context(module: &Module) -> Context {
@@ -370,13 +370,15 @@ mod tests {
             types::None::new(Position::fake()).into(),
             types::Number::new(Position::fake()).into(),
         ] {
-            assert!(definitions
-                .iter()
-                .find(|definition| definition.definition().name()
-                    == compile_function_name(&context, type_).unwrap())
-                .unwrap()
-                .definition()
-                .is_thunk());
+            assert!(
+                definitions
+                    .iter()
+                    .find(|definition| definition.definition().name()
+                        == compile_function_name(&context, type_).unwrap())
+                    .unwrap()
+                    .definition()
+                    .is_thunk()
+            );
         }
     }
 
