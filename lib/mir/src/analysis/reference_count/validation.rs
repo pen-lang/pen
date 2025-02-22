@@ -255,7 +255,7 @@ fn validate_conditional_variables(
 fn filter_valid_variables(variables: &FnvHashMap<String, isize>) -> FnvHashMap<String, isize> {
     variables
         .iter()
-        .filter(|(_, &count)| count != 0)
+        .filter(|(_, count)| **count != 0)
         .map(|(name, &count)| (name.clone(), count))
         .collect()
 }
