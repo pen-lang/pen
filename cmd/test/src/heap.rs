@@ -28,10 +28,9 @@ pub extern "C" fn _pen_realloc(old_pointer: *mut u8, size: usize) -> *mut u8 {
 /// Pointers returned from `_pen_malloc` or `_pen_realloc` must be passed.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
-    dealloc(
-        pointer,
-        Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
-    )
+    let layout = Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap();
+
+    unsafe { dealloc(pointer, layout) }
 }
 
 fn check_stack_size(size: usize) {
