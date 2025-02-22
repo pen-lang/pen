@@ -1,5 +1,5 @@
 use crate::utilities::is_os_debug;
-use std::alloc::{alloc, dealloc, realloc, Layout};
+use std::alloc::{Layout, alloc, dealloc, realloc};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _pen_malloc(size: usize) -> *mut u8 {
@@ -43,8 +43,7 @@ pub unsafe extern "C" fn _pen_free(pointer: *mut u8) {
         eprintln!("free: {:x}", pointer as usize);
     }
 
-    dealloc(
-        pointer,
-        Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap(),
-    )
+    let layout = Layout::from_size_align(0, ffi::DEFAULT_MEMORY_ALIGNMENT).unwrap();
+
+    unsafe { dealloc(pointer, layout) }
 }
