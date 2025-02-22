@@ -2,7 +2,7 @@
 name = "prelude"
 version = "0.1.0"
 publish = false
-edition.workspace = true
+edition = "2024"
 
 [lib]
 name = "prelude"
