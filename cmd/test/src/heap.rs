@@ -1,4 +1,4 @@
-use std::alloc::{alloc, dealloc, realloc, Layout};
+use std::alloc::{Layout, alloc, dealloc, realloc};
 
 const MAX_STACK_SIZE: usize = 2 << (2 * 10);
 
