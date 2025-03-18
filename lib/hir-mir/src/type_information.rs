@@ -219,10 +219,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
             .map(|_| types::ByteString::new(position.clone()).into()),
     )
     .chain(variant_type_collection::collect(context, module)?)
-    .chain(
-        type_collector::collect_records(module)
-            .into_values(),
-    )
+    .chain(type_collector::collect_records(module).into_values())
     .map(|type_| type_canonicalizer::canonicalize(&type_, context.types()))
     .collect::<Result<Vec<_>, _>>()?
     .into_iter()
