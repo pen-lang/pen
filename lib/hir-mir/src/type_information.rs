@@ -221,8 +221,7 @@ fn collect_types(context: &Context, module: &Module) -> Result<FnvHashSet<Type>,
     .chain(variant_type_collection::collect(context, module)?)
     .chain(
         type_collector::collect_records(module)
-            .into_values()
-            .map(Type::from),
+            .into_values(),
     )
     .map(|type_| type_canonicalizer::canonicalize(&type_, context.types()))
     .collect::<Result<Vec<_>, _>>()?
