@@ -8,7 +8,7 @@ pub fn serialize(
     prelude_interface_files: &[FilePath],
 ) -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(bincode::serde::encode_to_vec(
-        &(interface_files, prelude_interface_files),
+        (interface_files, prelude_interface_files),
         bincode::config::standard(),
     )?)
 }

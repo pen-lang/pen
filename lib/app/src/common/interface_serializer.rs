@@ -2,7 +2,7 @@ use std::error::Error;
 
 pub fn serialize(module: &interface::Module) -> Result<Vec<u8>, Box<dyn Error>> {
     Ok(bincode::serde::encode_to_vec(
-        &module,
+        module,
         bincode::config::standard(),
     )?)
 }
