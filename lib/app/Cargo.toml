@@ -7,7 +7,7 @@ edition = "2021"
 [dependencies]
 ast = { path = "../ast" }
 ast_hir = { path = "../ast-hir" }
-bincode = "2"
+bincode = { version = "2", features = ["serde"] }
 doc = { path = "../doc" }
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
