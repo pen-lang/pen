@@ -291,7 +291,7 @@ fn compile_last_block_comment(context: &Context, position: &Position) -> Option<
 mod tests {
     use super::*;
     use indoc::indoc;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     const TEST_LANGUAGE: &str = "pen";
 

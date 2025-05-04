@@ -1,11 +1,11 @@
 use super::package_id_calculator;
 use crate::{
+    ApplicationConfiguration,
     common::module_id_calculator,
     infra::{
-        FilePath, FilePathConfiguration, ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY,
-        EXTERNAL_PACKAGE_DIRECTORY, OBJECT_DIRECTORY, TEST_DIRECTORY,
+        ARCHIVE_DIRECTORY, BUILD_SCRIPT_DIRECTORY, EXTERNAL_PACKAGE_DIRECTORY, FilePath,
+        FilePathConfiguration, OBJECT_DIRECTORY, TEST_DIRECTORY,
     },
-    ApplicationConfiguration,
 };
 
 const MAIN_ARCHIVE_BASENAME: &str = "main";

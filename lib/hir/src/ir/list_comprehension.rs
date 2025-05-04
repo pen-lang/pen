@@ -1,4 +1,4 @@
-use super::{expression::Expression, ListComprehensionBranch};
+use super::{ListComprehensionBranch, expression::Expression};
 use crate::types::Type;
 use position::Position;
 use std::rc::Rc;

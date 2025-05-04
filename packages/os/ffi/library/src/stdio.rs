@@ -2,7 +2,7 @@ use crate::utilities;
 use core::ops::DerefMut;
 use std::{error::Error, sync::LazyLock};
 use tokio::{
-    io::{stderr, stdin, stdout, AsyncWriteExt, Stderr, Stdin, Stdout},
+    io::{AsyncWriteExt, Stderr, Stdin, Stdout, stderr, stdin, stdout},
     sync::Mutex,
 };
 

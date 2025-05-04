@@ -1,5 +1,5 @@
 use super::expression::Expression;
-use crate::{types::Type, ListComprehensionBranch};
+use crate::{ListComprehensionBranch, types::Type};
 use position::Position;
 use std::rc::Rc;
 

@@ -6,8 +6,8 @@ use crate::{
 };
 use hir::{
     analysis::{
-        type_canonicalizer, type_comparability_checker, type_equality_checker, type_resolver,
-        union_type_creator, union_type_member_calculator, AnalysisError,
+        AnalysisError, type_canonicalizer, type_comparability_checker, type_equality_checker,
+        type_resolver, union_type_creator, union_type_member_calculator,
     },
     ir::*,
     types::{self, Type},
@@ -216,7 +216,7 @@ fn transform_canonical(
             position,
         )?,
         Type::Any(_) | Type::Error(_) | Type::Function(_) => {
-            return Err(AnalysisError::TypeNotComparable(position.clone(), type_.clone()).into())
+            return Err(AnalysisError::TypeNotComparable(position.clone(), type_.clone()).into());
         }
     })
 }
@@ -237,7 +237,7 @@ mod tests {
     use super::*;
     use crate::transformation::record_type_information;
     use hir::{test::RecordFake, types};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

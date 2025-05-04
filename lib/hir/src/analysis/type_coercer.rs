@@ -1,4 +1,4 @@
-use super::{context::AnalysisContext, AnalysisError};
+use super::{AnalysisError, context::AnalysisContext};
 use crate::{
     analysis::{
         module_environment, record_field_resolver, type_canonicalizer, type_equality_checker,
@@ -562,7 +562,7 @@ mod tests {
         analysis::type_collector,
         test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn coerce_module(module: &Module) -> Result<Module, AnalysisError> {
@@ -1834,17 +1834,19 @@ mod tests {
                             Map::new(
                                 types::None::new(Position::fake()),
                                 union_type.clone(),
-                                vec![MapEntry::new(
-                                    None::new(Position::fake()),
-                                    TypeCoercion::new(
-                                        types::None::new(Position::fake()),
-                                        union_type,
+                                vec![
+                                    MapEntry::new(
                                         None::new(Position::fake()),
+                                        TypeCoercion::new(
+                                            types::None::new(Position::fake()),
+                                            union_type,
+                                            None::new(Position::fake()),
+                                            Position::fake(),
+                                        ),
                                         Position::fake(),
-                                    ),
-                                    Position::fake(),
-                                )
-                                .into()],
+                                    )
+                                    .into()
+                                ],
                                 Position::fake(),
                             ),
                             Position::fake(),

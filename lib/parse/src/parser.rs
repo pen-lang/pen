@@ -2,10 +2,11 @@ use crate::{
     combinator::{separated_or_terminated_list0, separated_or_terminated_list1},
     error::NomError,
     input::{self, Input},
-    operations::{reduce_operations, SuffixOperator},
+    operations::{SuffixOperator, reduce_operations},
 };
 use ast::{types::Type, *};
 use nom::{
+    Parser,
     branch::alt,
     bytes::complete::tag,
     character::complete::{
@@ -18,7 +19,6 @@ use nom::{
     multi::{count, many0, many0_count, many1, separated_list1},
     number::complete::recognize_float,
     sequence::{delimited, pair, preceded, terminated, tuple},
-    Parser,
 };
 use position::Position;
 use std::{collections::HashSet, str};
@@ -1052,12 +1052,14 @@ mod tests {
                 Module::new(
                     vec![],
                     vec![],
-                    vec![TypeAlias::new(
-                        "foo",
-                        types::Reference::new("number", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     vec![],
                     Position::fake()
                 )
@@ -1319,18 +1321,22 @@ mod tests {
         fn fail_to_parse_private_external_module_file() {
             let source = "Foo'bar";
 
-            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
-                .map_err(|error| ParseError::new(source, "", error))
-                .unwrap_err());
+            insta::assert_debug_snapshot!(
+                external_module_path(input(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .unwrap_err()
+            );
         }
 
         #[test]
         fn fail_to_parse_private_external_module_directory() {
             let source = "Foo'bar'Baz";
 
-            insta::assert_debug_snapshot!(external_module_path(input(source, ""))
-                .map_err(|error| ParseError::new(source, "", error))
-                .unwrap_err());
+            insta::assert_debug_snapshot!(
+                external_module_path(input(source, ""))
+                    .map_err(|error| ParseError::new(source, "", error))
+                    .unwrap_err()
+            );
         }
     }
 
@@ -1624,12 +1630,14 @@ mod tests {
             assert_eq!(
                 type_(input("\\(\\(number)number)number", "")).unwrap().1,
                 types::Function::new(
-                    vec![types::Function::new(
-                        vec![types::Reference::new("number", Position::fake()).into()],
-                        types::Reference::new("number", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        types::Function::new(
+                            vec![types::Reference::new("number", Position::fake()).into()],
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     types::Reference::new("number", Position::fake()),
                     Position::fake()
                 )
@@ -1740,11 +1748,13 @@ mod tests {
             assert_eq!(
                 type_(input("\\([number])[none]", "")).unwrap().1,
                 types::Function::new(
-                    vec![types::List::new(
-                        types::Reference::new("number", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        types::List::new(
+                            types::Reference::new("number", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     types::List::new(
                         types::Reference::new("none", Position::fake()),
                         Position::fake()
@@ -2347,11 +2357,13 @@ mod tests {
                     expression(input("f(1)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
-                        vec![Number::new(
-                            NumberRepresentation::FloatingPoint("1".into()),
-                            Position::fake()
-                        )
-                        .into()],
+                        vec![
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into()
+                        ],
                         Position::fake()
                     )
                     .into()
@@ -2361,11 +2373,13 @@ mod tests {
                     expression(input("f(1,)", "")).unwrap().1,
                     Call::new(
                         Variable::new("f", Position::fake()),
-                        vec![Number::new(
-                            NumberRepresentation::FloatingPoint("1".into()),
-                            Position::fake()
-                        )
-                        .into()],
+                        vec![
+                            Number::new(
+                                NumberRepresentation::FloatingPoint("1".into()),
+                                Position::fake()
+                            )
+                            .into()
+                        ],
                         Position::fake()
                     )
                     .into()
@@ -2455,11 +2469,13 @@ mod tests {
                         UnaryOperator::Not,
                         Call::new(
                             Variable::new("f", Position::fake()),
-                            vec![Number::new(
-                                NumberRepresentation::FloatingPoint("42".into()),
-                                Position::fake(),
-                            )
-                            .into()],
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake(),
+                                )
+                                .into(),
+                            ],
                             Position::fake(),
                         ),
                         Position::fake(),
@@ -2870,20 +2886,22 @@ mod tests {
                 expression(input("foo(Foo{foo:42})", "")).unwrap().1,
                 Call::new(
                     Variable::new("foo", Position::fake()),
-                    vec![Record::new(
-                        "Foo",
-                        None,
-                        vec![RecordField::new(
-                            "foo",
-                            Number::new(
-                                NumberRepresentation::FloatingPoint("42".into()),
+                    vec![
+                        Record::new(
+                            "Foo",
+                            None,
+                            vec![RecordField::new(
+                                "foo",
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                ),
                                 Position::fake()
-                            ),
+                            )],
                             Position::fake()
-                        )],
-                        Position::fake()
-                    )
-                    .into()],
+                        )
+                        .into()
+                    ],
                     Position::fake()
                 )
                 .into()
@@ -2898,11 +2916,13 @@ mod tests {
                         "foo",
                         Call::new(
                             Variable::new("bar", Position::fake()),
-                            vec![Number::new(
-                                NumberRepresentation::FloatingPoint("42".into()),
-                                Position::fake()
-                            )
-                            .into()],
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("42".into()),
+                                    Position::fake()
+                                )
+                                .into()
+                            ],
                             Position::fake()
                         ),
                         Position::fake()
@@ -3288,12 +3308,14 @@ mod tests {
                     Map::new(
                         types::Reference::new("none", Position::fake()),
                         types::Reference::new("none", Position::fake()),
-                        vec![MapEntry::new(
-                            Variable::new("none", Position::fake()),
-                            Variable::new("none", Position::fake()),
-                            Position::fake(),
-                        )
-                        .into()],
+                        vec![
+                            MapEntry::new(
+                                Variable::new("none", Position::fake()),
+                                Variable::new("none", Position::fake()),
+                                Position::fake(),
+                            )
+                            .into(),
+                        ],
                         Position::fake(),
                     )
                     .into(),

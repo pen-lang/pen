@@ -11,7 +11,7 @@ pub fn compile(import: &ast::Import) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn calculate_prefix_for_internal_module_import() {

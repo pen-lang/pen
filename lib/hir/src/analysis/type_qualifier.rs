@@ -94,7 +94,7 @@ pub fn qualify(module: &Module, prefix: &str) -> Module {
 mod tests {
     use super::*;
     use crate::test::{ModuleFake, TypeAliasFake, TypeDefinitionFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

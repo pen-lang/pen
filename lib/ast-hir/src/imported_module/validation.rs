@@ -34,7 +34,7 @@ pub fn validate(module: &ImportedModule) -> Result<(), CompileError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn validate_undefined_name() {

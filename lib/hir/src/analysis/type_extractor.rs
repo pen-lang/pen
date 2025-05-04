@@ -18,7 +18,7 @@ pub fn extract_from_expression(
         Expression::BuiltInFunction(function) => {
             return Err(AnalysisError::BuiltInFunctionNotCalled(
                 function.position().clone(),
-            ))
+            ));
         }
         Expression::Call(call) => {
             let type_ = call
@@ -219,7 +219,7 @@ pub fn extract_from_lambda(lambda: &Lambda) -> types::Function {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn empty_context() -> AnalysisContext {
@@ -308,23 +308,23 @@ mod tests {
                     &Call::new(
                         Some(
                             types::Function::new(
-                                vec![types::List::new(
-                                    types::None::new(Position::fake()),
-                                    Position::fake()
-                                )
-                                .into()],
+                                vec![
+                                    types::List::new(
+                                        types::None::new(Position::fake()),
+                                        Position::fake()
+                                    )
+                                    .into()
+                                ],
                                 types::Number::new(Position::fake()),
                                 Position::fake()
                             )
                             .into()
                         ),
                         BuiltInFunction::new(BuiltInFunctionName::Size, Position::fake()),
-                        vec![List::new(
-                            types::None::new(Position::fake()),
-                            vec![],
-                            Position::fake()
-                        )
-                        .into()],
+                        vec![
+                            List::new(types::None::new(Position::fake()), vec![], Position::fake())
+                                .into()
+                        ],
                         Position::fake()
                     )
                     .into(),
@@ -352,13 +352,15 @@ mod tests {
                             .into()
                         ),
                         BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
-                        vec![Lambda::new(
-                            vec![],
-                            types::None::new(Position::fake()),
-                            None::new(Position::fake()),
-                            Position::fake()
-                        )
-                        .into()],
+                        vec![
+                            Lambda::new(
+                                vec![],
+                                types::None::new(Position::fake()),
+                                None::new(Position::fake()),
+                                Position::fake()
+                            )
+                            .into()
+                        ],
                         Position::fake()
                     )
                     .into(),

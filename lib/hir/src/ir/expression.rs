@@ -1,9 +1,9 @@
 use super::{
-    boolean::Boolean, call::Call, if_::If, if_list::IfList, if_map::IfMap, if_type::IfType,
-    list::List, map::Map, none::None, number::Number, operation::Operation,
-    record_construction::RecordConstruction, record_deconstruction::RecordDeconstruction,
-    record_update::RecordUpdate, string::ByteString, type_coercion::TypeCoercion,
-    variable::Variable, BuiltInFunction, Lambda, Let, ListComprehension, Thunk,
+    BuiltInFunction, Lambda, Let, ListComprehension, Thunk, boolean::Boolean, call::Call, if_::If,
+    if_list::IfList, if_map::IfMap, if_type::IfType, list::List, map::Map, none::None,
+    number::Number, operation::Operation, record_construction::RecordConstruction,
+    record_deconstruction::RecordDeconstruction, record_update::RecordUpdate, string::ByteString,
+    type_coercion::TypeCoercion, variable::Variable,
 };
 use position::Position;
 

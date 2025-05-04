@@ -1,4 +1,4 @@
-use super::{lambda::Lambda, ForeignDefinitionConfiguration};
+use super::{ForeignDefinitionConfiguration, lambda::Lambda};
 use position::Position;
 
 #[derive(Clone, Debug, PartialEq)]

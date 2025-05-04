@@ -1,5 +1,5 @@
 use super::{drop, sync};
-use crate::{context::Context, CompileError};
+use crate::{CompileError, context::Context};
 use std::sync::LazyLock;
 
 static VARIABLE_DEFINITION_OPTIONS: LazyLock<fmm::ir::VariableDefinitionOptions> =

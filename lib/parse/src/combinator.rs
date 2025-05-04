@@ -1,8 +1,8 @@
 use nom::{
+    IResult, InputLength, Parser,
     combinator::opt,
     error::ParseError,
     multi::{separated_list0, separated_list1},
-    IResult, InputLength, Parser,
 };
 
 pub fn separated_or_terminated_list0<I: Clone + InputLength, O, S, E: ParseError<I>>(
@@ -76,11 +76,13 @@ mod tests {
         #[test]
         fn fail_to_parse() {
             for source in [",", "a,,"] {
-                assert!(all_consuming(separated_or_terminated_list0(
-                    |input| tag::<_, _, NomError>(",")(input),
-                    tag("a")
-                ))(input(source, ""))
-                .is_err());
+                assert!(
+                    all_consuming(separated_or_terminated_list0(
+                        |input| tag::<_, _, NomError>(",")(input),
+                        tag("a")
+                    ))(input(source, ""))
+                    .is_err()
+                );
             }
         }
     }
@@ -113,11 +115,13 @@ mod tests {
         #[test]
         fn fail_to_parse() {
             for source in ["", ",", "a,,"] {
-                assert!(all_consuming(separated_or_terminated_list1(
-                    |input| tag::<_, _, NomError>(",")(input),
-                    tag("a")
-                ))(input(source, ""))
-                .is_err());
+                assert!(
+                    all_consuming(separated_or_terminated_list1(
+                        |input| tag::<_, _, NomError>(",")(input),
+                        tag("a")
+                    ))(input(source, ""))
+                    .is_err()
+                );
             }
         }
     }

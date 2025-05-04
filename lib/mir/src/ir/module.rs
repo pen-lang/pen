@@ -1,7 +1,7 @@
 use super::{
-    foreign_declaration::ForeignDeclaration, foreign_definition::ForeignDefinition,
-    function_declaration::FunctionDeclaration, type_definition::TypeDefinition,
-    GlobalFunctionDefinition, TypeInformation,
+    GlobalFunctionDefinition, TypeInformation, foreign_declaration::ForeignDeclaration,
+    foreign_definition::ForeignDefinition, function_declaration::FunctionDeclaration,
+    type_definition::TypeDefinition,
 };
 
 #[derive(Clone, Debug, PartialEq)]

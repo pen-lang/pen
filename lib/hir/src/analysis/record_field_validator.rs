@@ -1,6 +1,6 @@
 use super::AnalysisContext;
 use crate::{
-    analysis::{expression_visitor, type_canonicalizer, AnalysisError},
+    analysis::{AnalysisError, expression_visitor, type_canonicalizer},
     ir::*,
 };
 use fnv::FnvHashSet;
@@ -98,7 +98,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake, RecordFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn validate_module(module: &Module) -> Result<(), AnalysisError> {
         validate(

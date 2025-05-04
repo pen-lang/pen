@@ -1,6 +1,6 @@
 use crate::{
-    cps::{AsyncStack, ContinuationFunction},
     Closure,
+    cps::{AsyncStack, ContinuationFunction},
 };
 use alloc::boxed::Box;
 use core::{future::Future, pin::Pin, task::Poll};

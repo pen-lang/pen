@@ -2,7 +2,7 @@ use futures::{future::FutureExt, pin_mut, stream::StreamExt};
 use std::{num::NonZeroUsize, thread::available_parallelism};
 use tokio::{
     spawn,
-    sync::mpsc::{channel, Receiver},
+    sync::mpsc::{Receiver, channel},
     task::yield_now,
 };
 

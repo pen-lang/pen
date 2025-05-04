@@ -80,7 +80,7 @@ mod tests {
         test::{ModuleFake, RecordFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn fail_to_validate_non_existent_reference_type_in_type_alias() {

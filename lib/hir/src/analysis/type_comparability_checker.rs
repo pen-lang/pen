@@ -1,4 +1,4 @@
-use super::{record_field_resolver, type_resolver, AnalysisError};
+use super::{AnalysisError, record_field_resolver, type_resolver};
 use crate::types::{RecordField, Type};
 use fnv::{FnvHashMap, FnvHashSet};
 
@@ -65,93 +65,107 @@ fn check_with_cache(
 mod tests {
     use super::*;
     use crate::{test::RecordFake, types};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn check_record_type() {
-        assert!(check(
-            &types::Record::fake("foo").into(),
-            &Default::default(),
-            &[(
-                "foo".into(),
-                vec![types::RecordField::new(
-                    "foo",
-                    types::None::new(Position::fake())
+        assert!(
+            check(
+                &types::Record::fake("foo").into(),
+                &Default::default(),
+                &[(
+                    "foo".into(),
+                    vec![types::RecordField::new(
+                        "foo",
+                        types::None::new(Position::fake())
+                    )]
                 )]
-            )]
-            .into_iter()
-            .collect()
-        )
-        .unwrap());
+                .into_iter()
+                .collect()
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_record_type_with_function_field() {
-        assert!(!check(
-            &types::Record::fake("foo").into(),
-            &Default::default(),
-            &[(
-                "foo".into(),
-                vec![types::RecordField::new(
-                    "x",
-                    types::Function::new(
-                        vec![],
-                        types::None::new(Position::fake()),
-                        Position::fake(),
-                    )
+        assert!(
+            !check(
+                &types::Record::fake("foo").into(),
+                &Default::default(),
+                &[(
+                    "foo".into(),
+                    vec![types::RecordField::new(
+                        "x",
+                        types::Function::new(
+                            vec![],
+                            types::None::new(Position::fake()),
+                            Position::fake(),
+                        )
+                    )]
                 )]
-            )]
-            .into_iter()
-            .collect()
-        )
-        .unwrap());
+                .into_iter()
+                .collect()
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_comparability_of_record_type_with_any_field() {
-        assert!(!check(
-            &types::Record::fake("foo").into(),
-            &Default::default(),
-            &[(
-                "foo".into(),
-                vec![types::RecordField::new(
-                    "x",
-                    types::Any::new(Position::fake())
+        assert!(
+            !check(
+                &types::Record::fake("foo").into(),
+                &Default::default(),
+                &[(
+                    "foo".into(),
+                    vec![types::RecordField::new(
+                        "x",
+                        types::Any::new(Position::fake())
+                    )]
                 )]
-            )]
-            .into_iter()
-            .collect()
-        )
-        .unwrap());
+                .into_iter()
+                .collect()
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_union_type() {
-        assert!(check(
-            &types::Union::new(
-                types::Number::new(Position::fake()),
-                types::None::new(Position::fake()),
-                Position::fake()
+        assert!(
+            check(
+                &types::Union::new(
+                    types::Number::new(Position::fake()),
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+                &Default::default(),
+                &Default::default(),
             )
-            .into(),
-            &Default::default(),
-            &Default::default(),
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_union_type_with_function() {
-        assert!(!check(
-            &types::Union::new(
-                types::Function::new(vec![], types::None::new(Position::fake()), Position::fake(),),
-                types::None::new(Position::fake()),
-                Position::fake()
+        assert!(
+            !check(
+                &types::Union::new(
+                    types::Function::new(
+                        vec![],
+                        types::None::new(Position::fake()),
+                        Position::fake(),
+                    ),
+                    types::None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+                &Default::default(),
+                &Default::default(),
             )
-            .into(),
-            &Default::default(),
-            &Default::default(),
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 }

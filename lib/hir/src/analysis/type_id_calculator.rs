@@ -61,7 +61,7 @@ fn calculate_string(type_: &Type) -> String {
 mod tests {
     use super::*;
     use crate::types;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn calculate_none_list_type_id() {

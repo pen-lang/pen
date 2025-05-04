@@ -1,5 +1,5 @@
 use super::{command_runner, file_path_converter::FilePathConverter};
-use crate::{environment_variable_reader, InfrastructureError};
+use crate::{InfrastructureError, environment_variable_reader};
 use std::{error::Error, path::PathBuf, process::Command, rc::Rc};
 
 pub struct ExternalPackageInitializer {

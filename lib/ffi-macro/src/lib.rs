@@ -8,7 +8,7 @@ use self::attribute_list::AttributeList;
 use proc_macro::TokenStream;
 use quote::quote;
 use std::error::Error;
-use syn::{parse_macro_input, ItemFn, ItemStruct};
+use syn::{ItemFn, ItemStruct, parse_macro_input};
 
 #[proc_macro_attribute]
 pub fn bindgen(attributes: TokenStream, item: TokenStream) -> TokenStream {

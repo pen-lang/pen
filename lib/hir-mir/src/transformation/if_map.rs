@@ -78,7 +78,7 @@ pub fn transform(context: &Context, if_: &IfMap) -> Result<Expression, CompileEr
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn transform_if_map() {

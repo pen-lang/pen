@@ -30,7 +30,7 @@ pub fn format(type_: &Type) -> String {
 mod tests {
     use super::*;
     use crate::types::{self, *};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn format_function() {

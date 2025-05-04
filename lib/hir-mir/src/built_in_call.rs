@@ -1,14 +1,15 @@
 use crate::{
+    CompileError,
     context::Context,
     downcast, error_type, expression,
     runtime_function_declaration::{
         LOCAL_DEBUG_FUNCTION_NAME, LOCAL_RACE_FUNCTION_NAME, LOCAL_SPAWN_FUNCTION_NAME,
     },
     transformation::map_context,
-    type_, type_information, CompileError,
+    type_, type_information,
 };
 use hir::{
-    analysis::{type_canonicalizer, AnalysisError},
+    analysis::{AnalysisError, type_canonicalizer},
     ir::*,
     types,
     types::Type,
@@ -207,32 +208,34 @@ pub fn compile(
                 mir::ir::Call::new(
                     type_::compile_spawn_function(),
                     mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
-                    vec![mir::ir::LetRecursive::new(
-                        mir::ir::FunctionDefinition::thunk(
-                            ANY_THUNK_NAME,
-                            type_::compile(context, &any_type)?,
-                            expression::compile(
-                                context,
-                                &TypeCoercion::new(
-                                    result_type.clone(),
-                                    any_type.clone(),
-                                    Call::new(
-                                        Some(function_type.clone().into()),
-                                        call.arguments()[0].clone(),
-                                        vec![],
+                    vec![
+                        mir::ir::LetRecursive::new(
+                            mir::ir::FunctionDefinition::thunk(
+                                ANY_THUNK_NAME,
+                                type_::compile(context, &any_type)?,
+                                expression::compile(
+                                    context,
+                                    &TypeCoercion::new(
+                                        result_type.clone(),
+                                        any_type.clone(),
+                                        Call::new(
+                                            Some(function_type.clone().into()),
+                                            call.arguments()[0].clone(),
+                                            vec![],
+                                            position.clone(),
+                                        ),
                                         position.clone(),
-                                    ),
-                                    position.clone(),
-                                )
-                                .into(),
-                            )?,
-                        ),
-                        mir::ir::Synchronize::new(
-                            mir_thunk_type,
-                            mir::ir::Variable::new(ANY_THUNK_NAME),
-                        ),
-                    )
-                    .into()],
+                                    )
+                                    .into(),
+                                )?,
+                            ),
+                            mir::ir::Synchronize::new(
+                                mir_thunk_type,
+                                mir::ir::Variable::new(ANY_THUNK_NAME),
+                            ),
+                        )
+                        .into(),
+                    ],
                 ),
                 mir::ir::LetRecursive::new(
                     mir::ir::FunctionDefinition::new(
@@ -309,37 +312,41 @@ fn compile_map_iteration(
             list_type.clone(),
         ),
         mir::ir::Variable::new(&context.configuration()?.list_type.lazy_function_name),
-        vec![mir::ir::LetRecursive::new(
-            mir::ir::FunctionDefinition::new(
-                CLOSURE_NAME,
-                vec![],
-                list_type.clone(),
-                mir::ir::LetRecursive::new(
-                    definition.clone(),
-                    mir::ir::Call::new(
-                        mir::types::Function::new(vec![mir::types::Type::Variant], list_type),
-                        mir::ir::Variable::new(definition.name()),
-                        vec![mir::ir::Call::new(
-                            mir::types::Function::new(
-                                vec![type_::compile_map(context)?.into()],
-                                mir::types::Type::Variant,
-                            ),
-                            mir::ir::Variable::new(
-                                &context
-                                    .configuration()?
-                                    .map_type
-                                    .iteration
-                                    .iterate_function_name,
-                            ),
-                            vec![expression::compile(context, argument)?],
-                        )
-                        .into()],
+        vec![
+            mir::ir::LetRecursive::new(
+                mir::ir::FunctionDefinition::new(
+                    CLOSURE_NAME,
+                    vec![],
+                    list_type.clone(),
+                    mir::ir::LetRecursive::new(
+                        definition.clone(),
+                        mir::ir::Call::new(
+                            mir::types::Function::new(vec![mir::types::Type::Variant], list_type),
+                            mir::ir::Variable::new(definition.name()),
+                            vec![
+                                mir::ir::Call::new(
+                                    mir::types::Function::new(
+                                        vec![type_::compile_map(context)?.into()],
+                                        mir::types::Type::Variant,
+                                    ),
+                                    mir::ir::Variable::new(
+                                        &context
+                                            .configuration()?
+                                            .map_type
+                                            .iteration
+                                            .iterate_function_name,
+                                    ),
+                                    vec![expression::compile(context, argument)?],
+                                )
+                                .into(),
+                            ],
+                        ),
                     ),
                 ),
-            ),
-            mir::ir::Variable::new(CLOSURE_NAME),
-        )
-        .into()],
+                mir::ir::Variable::new(CLOSURE_NAME),
+            )
+            .into(),
+        ],
     )
     .into())
 }
@@ -416,23 +423,25 @@ fn compile_map_iteration_function_definition(
                                         .into(),
                                     ),
                                     Variable::new(CLOSURE_NAME, position.clone()),
-                                    vec![Call::new(
-                                        Some(
-                                            types::Function::new(
-                                                vec![iterator_type],
-                                                iterator_or_none_type,
+                                    vec![
+                                        Call::new(
+                                            Some(
+                                                types::Function::new(
+                                                    vec![iterator_type],
+                                                    iterator_or_none_type,
+                                                    position.clone(),
+                                                )
+                                                .into(),
+                                            ),
+                                            Variable::new(
+                                                &iteration_configuration.rest_function_name,
                                                 position.clone(),
-                                            )
-                                            .into(),
-                                        ),
-                                        Variable::new(
-                                            &iteration_configuration.rest_function_name,
+                                            ),
+                                            vec![iterator_variable.into()],
                                             position.clone(),
-                                        ),
-                                        vec![iterator_variable.into()],
-                                        position.clone(),
-                                    )
-                                    .into()],
+                                        )
+                                        .into(),
+                                    ],
                                     position.clone(),
                                 )
                                 .into(),
@@ -457,7 +466,7 @@ fn compile_map_iteration_function_definition(
 mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn compile_call(call: &Call) -> Result<mir::ir::Expression, CompileError> {
         compile(
@@ -509,13 +518,15 @@ mod tests {
                 .into()
             ),
             BuiltInFunction::new(BuiltInFunctionName::Debug, Position::fake()),
-            vec![TypeCoercion::new(
-                types::None::new(Position::fake()),
-                types::Any::new(Position::fake()),
-                None::new(Position::fake()),
-                Position::fake()
-            )
-            .into()],
+            vec![
+                TypeCoercion::new(
+                    types::None::new(Position::fake()),
+                    types::Any::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into()
+            ],
             Position::fake(),
         )));
     }
@@ -525,25 +536,29 @@ mod tests {
         insta::assert_debug_snapshot!(compile_call(&Call::new(
             Some(
                 types::Function::new(
-                    vec![types::Map::new(
-                        types::ByteString::new(Position::fake()),
-                        types::Number::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        types::Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     types::List::new(types::ByteString::new(Position::fake()), Position::fake()),
                     Position::fake()
                 )
                 .into()
             ),
             BuiltInFunction::new(BuiltInFunctionName::Keys, Position::fake()),
-            vec![Map::new(
-                types::ByteString::new(Position::fake()),
-                types::Number::new(Position::fake()),
-                vec![],
-                Position::fake()
-            )
-            .into()],
+            vec![
+                Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    vec![],
+                    Position::fake()
+                )
+                .into()
+            ],
             Position::fake(),
         )));
     }
@@ -553,25 +568,29 @@ mod tests {
         insta::assert_debug_snapshot!(compile_call(&Call::new(
             Some(
                 types::Function::new(
-                    vec![types::Map::new(
-                        types::ByteString::new(Position::fake()),
-                        types::Number::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        types::Map::new(
+                            types::ByteString::new(Position::fake()),
+                            types::Number::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     types::List::new(types::ByteString::new(Position::fake()), Position::fake()),
                     Position::fake()
                 )
                 .into()
             ),
             BuiltInFunction::new(BuiltInFunctionName::Values, Position::fake()),
-            vec![Map::new(
-                types::ByteString::new(Position::fake()),
-                types::Number::new(Position::fake()),
-                vec![],
-                Position::fake()
-            )
-            .into()],
+            vec![
+                Map::new(
+                    types::ByteString::new(Position::fake()),
+                    types::Number::new(Position::fake()),
+                    vec![],
+                    Position::fake()
+                )
+                .into()
+            ],
             Position::fake(),
         )));
     }
@@ -600,13 +619,15 @@ mod tests {
                         .into()
                     ),
                     BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
-                    vec![Lambda::new(
-                        vec![],
-                        types::Number::new(Position::fake()),
-                        Number::new(42.0, Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        Lambda::new(
+                            vec![],
+                            types::Number::new(Position::fake()),
+                            Number::new(42.0, Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     Position::fake(),
                 ),),
                 Ok(mir::ir::Let::new(
@@ -615,33 +636,38 @@ mod tests {
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
                         mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
-                        vec![mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::thunk(
-                                "$any_thunk",
-                                mir::types::Type::Variant,
-                                mir::ir::Variant::new(
-                                    mir::types::Type::Number,
-                                    mir::ir::Call::new(
-                                        mir::types::Function::new(vec![], mir::types::Type::Number),
-                                        mir::ir::LetRecursive::new(
-                                            mir::ir::FunctionDefinition::new(
-                                                "$closure",
+                        vec![
+                            mir::ir::LetRecursive::new(
+                                mir::ir::FunctionDefinition::thunk(
+                                    "$any_thunk",
+                                    mir::types::Type::Variant,
+                                    mir::ir::Variant::new(
+                                        mir::types::Type::Number,
+                                        mir::ir::Call::new(
+                                            mir::types::Function::new(
                                                 vec![],
-                                                mir::types::Type::Number,
-                                                mir::ir::Expression::Number(42.0),
+                                                mir::types::Type::Number
                                             ),
-                                            mir::ir::Variable::new("$closure")
+                                            mir::ir::LetRecursive::new(
+                                                mir::ir::FunctionDefinition::new(
+                                                    "$closure",
+                                                    vec![],
+                                                    mir::types::Type::Number,
+                                                    mir::ir::Expression::Number(42.0),
+                                                ),
+                                                mir::ir::Variable::new("$closure")
+                                            ),
+                                            vec![]
                                         ),
-                                        vec![]
                                     ),
                                 ),
-                            ),
-                            mir::ir::Synchronize::new(
-                                thunk_type.clone(),
-                                mir::ir::Variable::new("$any_thunk")
-                            ),
-                        )
-                        .into()]
+                                mir::ir::Synchronize::new(
+                                    thunk_type.clone(),
+                                    mir::ir::Variable::new("$any_thunk")
+                                ),
+                            )
+                            .into()
+                        ]
                     ),
                     mir::ir::LetRecursive::new(
                         mir::ir::FunctionDefinition::new(
@@ -686,13 +712,15 @@ mod tests {
                         .into()
                     ),
                     BuiltInFunction::new(BuiltInFunctionName::Spawn, Position::fake()),
-                    vec![Lambda::new(
-                        vec![],
-                        types::Any::new(Position::fake()),
-                        Variable::new("x", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        Lambda::new(
+                            vec![],
+                            types::Any::new(Position::fake()),
+                            Variable::new("x", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     Position::fake(),
                 ),),
                 Ok(mir::ir::Let::new(
@@ -701,30 +729,32 @@ mod tests {
                     mir::ir::Call::new(
                         type_::compile_spawn_function(),
                         mir::ir::Variable::new(LOCAL_SPAWN_FUNCTION_NAME),
-                        vec![mir::ir::LetRecursive::new(
-                            mir::ir::FunctionDefinition::thunk(
-                                "$any_thunk",
-                                mir::types::Type::Variant,
-                                mir::ir::Call::new(
-                                    thunk_type.clone(),
-                                    mir::ir::LetRecursive::new(
-                                        mir::ir::FunctionDefinition::new(
-                                            "$closure",
-                                            vec![],
-                                            mir::types::Type::Variant,
-                                            mir::ir::Variable::new("x"),
+                        vec![
+                            mir::ir::LetRecursive::new(
+                                mir::ir::FunctionDefinition::thunk(
+                                    "$any_thunk",
+                                    mir::types::Type::Variant,
+                                    mir::ir::Call::new(
+                                        thunk_type.clone(),
+                                        mir::ir::LetRecursive::new(
+                                            mir::ir::FunctionDefinition::new(
+                                                "$closure",
+                                                vec![],
+                                                mir::types::Type::Variant,
+                                                mir::ir::Variable::new("x"),
+                                            ),
+                                            mir::ir::Variable::new("$closure")
                                         ),
-                                        mir::ir::Variable::new("$closure")
+                                        vec![]
                                     ),
-                                    vec![]
                                 ),
-                            ),
-                            mir::ir::Synchronize::new(
-                                thunk_type.clone(),
-                                mir::ir::Variable::new("$any_thunk")
-                            ),
-                        )
-                        .into()]
+                                mir::ir::Synchronize::new(
+                                    thunk_type.clone(),
+                                    mir::ir::Variable::new("$any_thunk")
+                                ),
+                            )
+                            .into()
+                        ]
                     ),
                     mir::ir::LetRecursive::new(
                         mir::ir::FunctionDefinition::new(
