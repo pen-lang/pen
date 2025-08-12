@@ -19,7 +19,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./tools/ci/github/setup
       - run: tools/build.sh
       - run: git diff --exit-code
@@ -30,13 +30,13 @@ jobs:
   unit_test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./tools/ci/github/setup
       - run: tools/unit_test.sh
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./tools/ci/github/setup
       - run: tools/coverage.sh
       - uses: codecov/codecov-action@v5
@@ -56,7 +56,7 @@ jobs:
           - os: ${{ github.ref == 'refs/heads/main' && 'none' || 'macos-latest' }}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./tools/ci/github/setup
       - uses: actions/download-artifact@v4
         with:

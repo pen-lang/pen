@@ -12,7 +12,7 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./tools/ci/github/setup
       - run: tools/build.sh
       - run: tools/benchmark.sh -b

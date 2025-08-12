@@ -9,7 +9,7 @@ jobs:
   document:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
