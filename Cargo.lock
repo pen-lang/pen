@@ -27,6 +27,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "allocator-api2"
+version = "0.2.21"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
+
+[[package]]
 name = "anstream"
 version = "0.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -932,9 +938,12 @@ checksum = "523dc4f511e55ab87b694dc30d0f820d60906ef06413f93d4d7a1385599cc149"
 
 [[package]]
 name = "mfmt"
-version = "0.1.4"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5270879eb6d07512d5bf78b565b0125d9f353d8d4ab98d6def3a7cfab384c683"
+checksum = "9d48181208286332c2f51417d7a53403443dba9a0ea01147a02d6b4f910d32d5"
+dependencies = [
+ "allocator-api2",
+]
 
 [[package]]
 name = "minimal-lexical"
