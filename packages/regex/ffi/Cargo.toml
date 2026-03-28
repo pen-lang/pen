@@ -1,5 +1,5 @@
 [package]
-name = "ffi"
+name = "pen-regex-ffi"
 version = "0.1.0"
 publish = false
 edition = "2021"

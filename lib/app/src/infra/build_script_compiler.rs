@@ -8,6 +8,7 @@ pub trait BuildScriptCompiler {
         output_directory: &FilePath,
         target_triple: Option<&str>,
         child_build_script_files: &[FilePath],
+        ffi_package_directories: &[FilePath],
     ) -> Result<String, Box<dyn Error>>;
 
     fn compile_modules(

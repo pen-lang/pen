@@ -4,6 +4,7 @@ mod default_target_finder;
 mod environment_variable_reader;
 mod error;
 mod external_package_initializer;
+pub mod ffi_crate_finder;
 mod file_path_converter;
 mod file_path_displayer;
 mod file_system;
