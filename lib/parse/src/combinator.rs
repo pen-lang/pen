@@ -2,13 +2,13 @@ use nom::{
     combinator::opt,
     error::ParseError,
     multi::{separated_list0, separated_list1},
-    IResult, InputLength, Parser,
+    IResult, Input, Parser,
 };
 
-pub fn separated_or_terminated_list0<I: Clone + InputLength, O, S, E: ParseError<I>>(
-    separator: impl Parser<I, S, E> + Clone,
-    element: impl Parser<I, O, E>,
-) -> impl FnMut(I) -> IResult<I, Vec<O>, E> {
+pub fn separated_or_terminated_list0<I: Input, O, S, E: ParseError<I>>(
+    separator: impl Parser<I, Output = S, Error = E> + Clone,
+    element: impl Parser<I, Output = O, Error = E>,
+) -> impl Parser<I, Output = Vec<O>, Error = E> {
     let mut list = separated_list0(separator.clone(), element);
     let mut end = opt(separator);
 
@@ -25,10 +25,10 @@ pub fn separated_or_terminated_list0<I: Clone + InputLength, O, S, E: ParseError
     }
 }
 
-pub fn separated_or_terminated_list1<I: Clone + InputLength, O, S, E: ParseError<I>>(
-    separator: impl Parser<I, S, E> + Clone,
-    element: impl Parser<I, O, E>,
-) -> impl FnMut(I) -> IResult<I, Vec<O>, E> {
+pub fn separated_or_terminated_list1<I: Input, O, S, E: ParseError<I>>(
+    separator: impl Parser<I, Output = S, Error = E> + Clone,
+    element: impl Parser<I, Output = O, Error = E>,
+) -> impl Parser<I, Output = Vec<O>, Error = E> {
     let mut list = separated_list1(separator.clone(), element);
     let mut end = opt(separator);
 
