@@ -130,7 +130,7 @@ pub fn clone(
         fmm::build::comparison_operation(
             fmm::ir::ComparisonOperator::Equal,
             fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, tag.clone()),
-            fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
+            fmm::ir::Primitive::PointerInteger(0),
         )?,
         |builder| Ok(builder.branch(expression.clone())),
         |builder| {
