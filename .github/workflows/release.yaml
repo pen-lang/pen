@@ -15,7 +15,7 @@ jobs:
       version: ${{ env.version }}
       should_release: ${{ env.should_release }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - run: echo version=$(tools/version.sh) >> $GITHUB_ENV
       - run: |
           git fetch --prune --unshallow --tags
@@ -32,10 +32,10 @@ jobs:
           - macos-15
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: ./tools/ci/github/setup
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/setup
       - run: echo asset=$(tools/build_asset.sh) >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ env.asset }}
           path: ${{ env.asset }}
@@ -47,14 +47,14 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
       - run: git log --pretty='- %s by %aN' $(git describe --tags --abbrev=0 HEAD^)..HEAD > changes.md
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           path: artifacts
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@26e8ad27a09a225049a7075d7ec1caa2df6ff332 # v2.6.0
         if: needs.tag_check.outputs.should_release == 'true'
         with:
           tag_name: v${{ needs.tag_check.outputs.version }}
@@ -68,7 +68,7 @@ jobs:
     if: needs.tag_check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: pen-lang/homebrew-pen
       - run: |
@@ -79,7 +79,7 @@ jobs:
           sed -i "s/v[[0-9.]*.tar.gz/v$version.tar.gz/" $file
           sed -i "s/^  sha256 .*/  sha256 \"$hash\"/" $file
           sed -i /revision/d $file
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
         with:
           title: Bump version
           branch: chore/version
