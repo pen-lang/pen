@@ -12,35 +12,34 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - run: tools/format.sh -- --check
   clippy:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - uses: ./tools/ci/github/setup
       - run: tools/lint.sh -- -D warnings
   spell_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: streetsidesoftware/cspell-action@main
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: streetsidesoftware/cspell-action@d5d910b521ad408f1e7383c24609079f5a88bdca # v8.2.0
         with:
           files: "**/*.{feature,md,pen,rs,sh}"
   readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/setup
       - run: tools/document/build.sh
-      - uses: raviqqe/markdown-link-check@v1
+      - uses: raviqqe/markdown-link-check@f0dffa8d9e25af28aef34fa60088907525c96597 # v1.0.3
         with:
           paths: "**/README.md"
   dependabot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - run: tools/update_dependabot.sh
       - run: git diff --exit-code
   lint:
