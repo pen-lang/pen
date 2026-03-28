@@ -142,8 +142,8 @@ fn external_module_path(input: Input) -> IResult<ExternalModulePath> {
 }
 
 fn module_path_components<'a>(
-    component: impl Parser<Input<'a>, String, NomError<'a>>,
-) -> impl FnMut(Input<'a>) -> IResult<'a, Vec<String>> {
+    component: impl Parser<Input<'a>, Output = String, Error = NomError<'a>>,
+) -> impl Parser<Input<'a>, Output = Vec<String>, Error = NomError<'a>> {
     many1(preceded(tag(IDENTIFIER_SEPARATOR), component))
 }
 
@@ -1019,7 +1019,7 @@ fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<()> + Clone {
 }
 
 fn token<'a, O>(
-    mut parser: impl Parser<Input<'a>, O, NomError<'a>>,
+    mut parser: impl Parser<Input<'a>, Output = O, Error = NomError<'a>>,
 ) -> impl FnMut(Input<'a>) -> IResult<'a, O> {
     move |input| {
         let (input, _) = blank(input)?;
