@@ -367,7 +367,7 @@ impl NinjaBuildScriptCompiler {
                             .display(),
                         FFI_BUILD_STAMP,
                     ),
-                    format!("  source = $ffi_target_dir/{}", crate_info.library_name),
+                    format!("  source = $ffi_target_dir/{}", crate_info.library_name()),
                     self.format_in_package_name_variable(package_name),
                 ]
                 .into_iter()
@@ -499,19 +499,67 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         output_directory: &FilePath,
         target_triple: Option<&str>,
         child_build_script_files: &[FilePath],
+        ffi_package_directories: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
+        let output_os_path = self
+            .file_path_converter
+            .convert_to_os_path(output_directory);
+
+        let ffi_crates = ffi_package_directories
+            .iter()
+            .filter_map(|directory| {
+                let os_path = self.file_path_converter.convert_to_os_path(directory);
+                ffi_crate_finder::find(&os_path).transpose().map(|result| {
+                    result.map(|info| (os_path, info))
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if !ffi_crates.is_empty() {
+            let workspace_dir = output_os_path.join(FFI_WORKSPACE_DIRECTORY);
+            fs::create_dir_all(&workspace_dir)?;
+
+            let members = ffi_crates
+                .iter()
+                .map(|(_, info)| format!("  \"{}\"", info.directory().display()))
+                .collect::<Vec<_>>();
+
+            fs::write(
+                workspace_dir.join("Cargo.toml"),
+                format!(
+                    "[workspace]\nresolver = \"2\"\nmembers = [\n{},\n]\n",
+                    members.join(",\n")
+                ),
+            )?;
+        }
+
         Ok([
             "ninja_required_version = 1.10".into(),
-            format!(
-                "builddir = {}",
-                self.file_path_converter
-                    .convert_to_os_path(output_directory)
-                    .display()
-            ),
+            format!("builddir = {}", output_os_path.display()),
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
-        .chain([format!("build {FFI_PHONY_TARGET}: phony")])
+        .chain(if ffi_crates.is_empty() {
+            vec![format!("build {FFI_PHONY_TARGET}: phony")]
+        } else {
+            vec![
+                format!(
+                    "ffi_target_dir = {}/target/$target/release",
+                    output_os_path.join(FFI_WORKSPACE_DIRECTORY).display()
+                ),
+                format!(
+                    "build {FFI_BUILD_STAMP}: build_ffi",
+                ),
+                format!(
+                    "  manifest_path = {}",
+                    output_os_path
+                        .join(FFI_WORKSPACE_DIRECTORY)
+                        .join("Cargo.toml")
+                        .display()
+                ),
+                format!("build {FFI_PHONY_TARGET}: phony {FFI_BUILD_STAMP}"),
+            ]
+        })
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
