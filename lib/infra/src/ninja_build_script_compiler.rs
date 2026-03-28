@@ -15,7 +15,7 @@ use std::{
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const FFI_PHONY_TARGET: &str = "ffi";
 const FFI_WORKSPACE_DIRECTORY: &str = "ffi";
-const FFI_BUILD_STAMP: &str = "ffi/.stamp";
+const FFI_BUILD_TARGET: &str = "ffi_build";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
@@ -121,7 +121,7 @@ impl NinjaBuildScriptCompiler {
             &resolve_dependency_command,
             "  description = resolving dependency of module $module_name $in_package_name",
             "rule build_ffi",
-            "  command = cargo build --manifest-path $manifest_path --release --quiet --target $target && touch $out",
+            "  command = cargo build --manifest-path $manifest_path --release --quiet --target $target",
             "  description = building FFI workspace",
             "rule copy_ffi",
             "  command = cp $source $out",
@@ -365,7 +365,7 @@ impl NinjaBuildScriptCompiler {
                         self.file_path_converter
                             .convert_to_os_path(&ffi_archive_file)
                             .display(),
-                        FFI_BUILD_STAMP,
+                        FFI_PHONY_TARGET,
                     ),
                     format!("  source = $ffi_target_dir/{}", crate_info.library_name()),
                     self.format_in_package_name_variable(package_name),
@@ -547,7 +547,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     "ffi_target_dir = {}/target/$target/release",
                     output_os_path.join(FFI_WORKSPACE_DIRECTORY).display()
                 ),
-                format!("build {FFI_BUILD_STAMP}: build_ffi",),
+                format!("build {FFI_BUILD_TARGET}: build_ffi"),
                 format!(
                     "  manifest_path = {}",
                     output_os_path
@@ -555,7 +555,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                         .join("Cargo.toml")
                         .display()
                 ),
-                format!("build {FFI_PHONY_TARGET}: phony {FFI_BUILD_STAMP}"),
+                format!("build {FFI_PHONY_TARGET}: phony {FFI_BUILD_TARGET}"),
             ]
         })
         .chain(child_build_script_files.iter().map(|file| {
