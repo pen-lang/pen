@@ -22,7 +22,7 @@ updates:
     directory: /doc
     schedule:
       interval: daily
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /doc
     schedule:
       interval: daily
