@@ -1,17 +1,18 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{
-    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
-};
+use crate::{default_target_finder, ffi_crate_finder, llvm_command_finder, package_script_finder, InfrastructureError};
 use app::infra::FilePath;
 use std::{
     collections::BTreeMap,
     error::Error,
+    fs,
     path::{Path, PathBuf},
     rc::Rc,
 };
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const FFI_PHONY_TARGET: &str = "ffi";
+const FFI_WORKSPACE_DIRECTORY: &str = "ffi";
+const FFI_BUILD_STAMP: &str = "ffi/.stamp";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
@@ -119,9 +120,12 @@ impl NinjaBuildScriptCompiler {
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of module $module_name $in_package_name",
-            "rule compile_ffi",
-            "  command = $script_file -t $target $out",
-            "  description = compiling FFI module $in_package_name",
+            "rule build_ffi",
+            "  command = cargo build --manifest-path $manifest_path --release --quiet --target $target && touch $out",
+            "  description = building FFI workspace",
+            "rule copy_ffi",
+            "  command = cp $source $out",
+            "  description = copying FFI archive $package_name",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
             AR_DESCRIPTION,
