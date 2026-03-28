@@ -3164,7 +3164,7 @@ mod tests {
 
         #[test]
         fn parse_list_comprehension() {
-            for (source, target) in vec![
+            for (source, target) in [
                 (
                     "[none x for x in xs]",
                     ListComprehension::new(
@@ -3272,7 +3272,7 @@ mod tests {
 
         #[test]
         fn parse_map() {
-            for (source, target) in vec![
+            for (source, target) in [
                 (
                     "{none:none}",
                     Map::new(
