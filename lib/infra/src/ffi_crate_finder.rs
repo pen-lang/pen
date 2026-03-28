@@ -22,10 +22,8 @@ impl FfiCrateInfo {
 pub fn find(package_directory: &Path) -> Result<Option<FfiCrateInfo>, Box<dyn Error>> {
     let ffi_directory = package_directory.join("ffi");
 
-    if ffi_directory.join("Cargo.toml").is_file() {
-        if is_package(&ffi_directory)? {
-            return parse_crate_info(&ffi_directory);
-        }
+    if ffi_directory.join("Cargo.toml").is_file() && is_package(&ffi_directory)? {
+        return parse_crate_info(&ffi_directory);
     }
 
     let library_directory = ffi_directory.join("library");

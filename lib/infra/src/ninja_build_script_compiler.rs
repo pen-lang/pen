@@ -1,5 +1,8 @@
 use super::file_path_converter::FilePathConverter;
-use crate::{default_target_finder, ffi_crate_finder, llvm_command_finder, package_script_finder, InfrastructureError};
+use crate::{
+    default_target_finder, ffi_crate_finder, llvm_command_finder, package_script_finder,
+    InfrastructureError,
+};
 use app::infra::FilePath;
 use std::{
     collections::BTreeMap,
@@ -20,7 +23,6 @@ pub struct NinjaBuildScriptCompiler {
     bit_code_file_extension: &'static str,
     dependency_file_extension: &'static str,
     ninja_dynamic_dependency_file_extension: &'static str,
-    ffi_build_script_basename: &'static str,
     link_script_basename: &'static str,
 }
 
@@ -30,7 +32,6 @@ impl NinjaBuildScriptCompiler {
         bit_code_file_extension: &'static str,
         dependency_file_extension: &'static str,
         ninja_dynamic_dependency_file_extension: &'static str,
-        ffi_build_script_basename: &'static str,
         link_script_basename: &'static str,
     ) -> Self {
         Self {
@@ -38,7 +39,6 @@ impl NinjaBuildScriptCompiler {
             bit_code_file_extension,
             dependency_file_extension,
             ninja_dynamic_dependency_file_extension,
-            ffi_build_script_basename,
             link_script_basename,
         }
     }
@@ -509,9 +509,9 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .iter()
             .filter_map(|directory| {
                 let os_path = self.file_path_converter.convert_to_os_path(directory);
-                ffi_crate_finder::find(&os_path).transpose().map(|result| {
-                    result.map(|info| (os_path, info))
-                })
+                ffi_crate_finder::find(&os_path)
+                    .transpose()
+                    .map(|result| result.map(|info| (os_path, info)))
             })
             .collect::<Result<Vec<_>, _>>()?;
 
@@ -547,9 +547,7 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
                     "ffi_target_dir = {}/target/$target/release",
                     output_os_path.join(FFI_WORKSPACE_DIRECTORY).display()
                 ),
-                format!(
-                    "build {FFI_BUILD_STAMP}: build_ffi",
-                ),
+                format!("build {FFI_BUILD_STAMP}: build_ffi",),
                 format!(
                     "  manifest_path = {}",
                     output_os_path

@@ -83,9 +83,7 @@ pub fn compile(
             external_package_urls
                 .iter()
                 .chain([prelude_package_url, ffi_package_url])
-                .map(|url| {
-                    file_path_resolver::resolve_package_directory(output_directory, url)
-                }),
+                .map(|url| file_path_resolver::resolve_package_directory(output_directory, url)),
         )
         .collect::<Vec<_>>();
 
