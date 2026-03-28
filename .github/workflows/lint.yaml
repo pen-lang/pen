@@ -36,7 +36,7 @@ jobs:
       - run: tools/document/build.sh
       - uses: raviqqe/markdown-link-check@v1
         with:
-          paths: *.md
+          paths: **/README.md
   dependabot:
     runs-on: ubuntu-latest
     steps:
