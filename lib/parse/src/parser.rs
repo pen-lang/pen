@@ -101,10 +101,9 @@ fn import(input: Input) -> IResult<Import> {
 }
 
 fn unqualified_name(input: Input) -> IResult<UnqualifiedName> {
-    map(
-        token((position, identifier)),
-        |(position, identifier)| UnqualifiedName::new(identifier, position()),
-    )
+    map(token((position, identifier)), |(position, identifier)| {
+        UnqualifiedName::new(identifier, position())
+    })
     .parse(input)
 }
 
@@ -239,10 +238,9 @@ fn record_definition(input: Input) -> IResult<RecordDefinition> {
 fn record_field_definition(input: Input) -> IResult<types::RecordField> {
     context(
         "record field",
-        map(
-            (position, identifier, type_),
-            |(position, name, type_)| types::RecordField::new(name, type_, position()),
-        ),
+        map((position, identifier, type_), |(position, name, type_)| {
+            types::RecordField::new(name, type_, position())
+        }),
     )
     .parse(input)
 }
@@ -566,10 +564,7 @@ fn if_(input: Input) -> IResult<If> {
                 keyword("if"),
                 cut((
                     if_branch,
-                    many0(preceded(
-                        (keyword("else"), keyword("if")),
-                        cut(if_branch),
-                    )),
+                    many0(preceded((keyword("else"), keyword("if")), cut(if_branch))),
                     keyword("else"),
                     block,
                 )),
@@ -633,13 +628,7 @@ fn if_map(input: Input) -> IResult<IfMap> {
                 sign("="),
                 expression,
                 sign("["),
-                cut((
-                    expression,
-                    sign("]"),
-                    block,
-                    keyword("else"),
-                    block,
-                )),
+                cut((expression, sign("]"), block, keyword("else"), block)),
             ),
             |(position, _, name, _, map, _, (key, _, then, _, else_))| {
                 IfMap::new(name, map, key, then, else_, position())
