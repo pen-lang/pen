@@ -35,6 +35,8 @@ jobs:
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
       - uses: raviqqe/markdown-link-check@v1
+        with:
+          paths: *.md
   dependabot:
     runs-on: ubuntu-latest
     steps:
