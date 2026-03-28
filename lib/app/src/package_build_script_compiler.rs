@@ -8,8 +8,7 @@ use crate::{
     module_target_source_resolver, package_name_formatter, prelude_interface_file_finder,
     system_package_finder, ApplicationConfiguration, PackageType,
 };
-use core::error::Error;
-use core::slice;
+use core::{error::Error, slice};
 
 pub fn compile(
     infrastructure: &Infrastructure,
