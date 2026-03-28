@@ -1,5 +1,5 @@
 use crate::ir::*;
-use core::iter::{repeat, repeat_n};
+use core::iter::repeat_n;
 
 struct Context {
     outputs: Vec<String>,
