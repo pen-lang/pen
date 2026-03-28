@@ -1,5 +1,5 @@
 use crate::input::{position, Input};
-use nom::error::{VerboseError, VerboseErrorKind};
+use nom_language::error::{VerboseError, VerboseErrorKind};
 use position::Position;
 use std::{error::Error, fmt, fmt::Display};
 
