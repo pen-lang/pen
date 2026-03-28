@@ -1,5 +1,5 @@
 use crate::ir::*;
-use std::iter::repeat;
+use core::iter::{repeat, repeat_n};
 
 struct Context {
     outputs: Vec<String>,
@@ -14,7 +14,7 @@ pub fn generate(section: &Section) -> String {
 }
 
 fn generate_section(context: &mut Context, section: &Section, level: usize) {
-    context.outputs.extend(repeat("#".into()).take(level + 1));
+    context.outputs.extend(repeat_n("#".into(), level + 1));
     context.outputs.push(" ".into());
     generate_text(context, &section.title);
     generate_line(context);

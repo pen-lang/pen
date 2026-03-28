@@ -1000,7 +1000,7 @@ fn comment_position(input: Input) -> IResult<Position> {
 }
 
 // Allocate position objects lazily.
-fn position(input: Input) -> IResult<impl Fn() -> Position + '_> {
+fn position(input: Input<'_>) -> IResult<'_, impl Fn() -> Position + '_> {
     let (input, _) = blank(input)?;
 
     Ok((input, move || input::position(input)))
