@@ -9,11 +9,10 @@ jobs:
   document:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: homebrew/actions/setup-homebrew@master
-      - run: tools/ci/github/setup.sh
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/setup
       - run: tools/document/build.sh
-      - uses: peaceiris/actions-gh-pages@v4
+      - uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

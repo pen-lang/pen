@@ -1,0 +1,14 @@
+name: pen/setup
+description: Sets up a build environment
+inputs: {}
+outputs: {}
+runs:
+  using: composite
+  steps:
+    - uses: ruby/setup-ruby@4dc28cf14d77b0afa6832d9765ac422dbf0dfedd # v1.298.0
+    - uses: raviqqe/cargo-cache@e56278c26e69da71a8d6ffc14271b71db22d77f3 # v1.0.2
+    - uses: raviqqe/enable-homebrew@70f0031499e58d68b205c69e67a8a42db68d81c9 # v1.0.2
+      with:
+        stable: true
+    - run: tools/ci/github/setup.sh
+      shell: bash
