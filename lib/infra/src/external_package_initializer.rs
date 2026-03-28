@@ -37,10 +37,12 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         url: &url::Url,
         package_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        if self.file_system.exists(
-            &package_directory
-                .join(&app::infra::FilePath::new([self.build_configuration_filename])),
-        ) {
+        if self
+            .file_system
+            .exists(&package_directory.join(&app::infra::FilePath::new([
+                self.build_configuration_filename,
+            ])))
+        {
             return Ok(());
         }
 
