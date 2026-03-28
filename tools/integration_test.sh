@@ -18,4 +18,4 @@ bundler install
 
 cd $(dirname $0)/..
 
-cucumber --publish-quiet --strict-undefined "$@"
+bundler exec cucumber --publish-quiet --strict-undefined "$@"
