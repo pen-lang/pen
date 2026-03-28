@@ -81,7 +81,7 @@ go run github.com/raviqqe/gherkin2markdown features doc/docs/examples
   cd doc
 
   pnpm install
-  pnpm run build
+  pnpm build
 
   pip3 install --break-system-packages --user -r requirements.txt
 
