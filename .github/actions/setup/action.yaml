@@ -5,9 +5,9 @@ outputs: {}
 runs:
   using: composite
   steps:
-    - uses: ruby/setup-ruby@4dc28cf14d77b0afa6832d9765ac422dbf0dfedd # v1.298.0
-    - uses: raviqqe/cargo-cache@e56278c26e69da71a8d6ffc14271b71db22d77f3 # v1.0.2
-    - uses: raviqqe/enable-homebrew@70f0031499e58d68b205c69e67a8a42db68d81c9 # v1.0.2
+    - uses: ruby/setup-ruby@3ff19f5e2baf30647122352b96108b1fbe250c64 # v1.299.0
+    - uses: raviqqe/cargo-cache@98cf6adfd93fe558bc3ae1735b97f10998f2067f # v1.0.3
+    - uses: raviqqe/enable-homebrew@a1458a466e3f3218b534472496fa03adb2926204 # v1.0.3
       with:
         stable: true
     - run: tools/ci/github/setup.sh
