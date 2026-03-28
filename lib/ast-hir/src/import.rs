@@ -479,7 +479,7 @@ mod tests {
             assert_eq!(
                 compile_module(
                     &ir::Module::empty(),
-                    &vec![
+                    &[
                         ImportedModule::new(
                             interface::Module::new(
                                 vec![create_type_definition(false)],
@@ -719,7 +719,7 @@ mod tests {
             assert_eq!(
                 compile_module(
                     &ir::Module::empty(),
-                    &vec![
+                    &[
                         ImportedModule::new(
                             interface::Module::new(vec![], vec![create_type_alias(false)], vec![]),
                             "Foo",
