@@ -2,7 +2,7 @@ use nom::{
     combinator::opt,
     error::ParseError,
     multi::{separated_list0, separated_list1},
-    IResult, Input, Parser,
+    Input, Parser,
 };
 
 pub fn separated_or_terminated_list0<I: Input, O, S, E: ParseError<I>>(
