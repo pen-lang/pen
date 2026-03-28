@@ -60,9 +60,9 @@ mod tests {
             ] {
                 assert_eq!(
                     separated_or_terminated_list0(
-                        |input| tag::<_, _, NomError>(",")(input),
+                        |input| tag::<_, _, NomError>(",".parse(input),
                         tag("a")
-                    )(input(source, ""))
+                    .parse(input(source, ""))
                     .unwrap()
                     .1
                     .iter()
@@ -77,9 +77,9 @@ mod tests {
         fn fail_to_parse() {
             for source in [",", "a,,"] {
                 assert!(all_consuming(separated_or_terminated_list0(
-                    |input| tag::<_, _, NomError>(",")(input),
+                    |input| tag::<_, _, NomError>(",".parse(input),
                     tag("a")
-                ))(input(source, ""))
+                ).parse(input(source, ""))
                 .is_err());
             }
         }
@@ -97,9 +97,9 @@ mod tests {
             ] {
                 assert_eq!(
                     separated_or_terminated_list1(
-                        |input| tag::<_, _, NomError>(",")(input),
+                        |input| tag::<_, _, NomError>(",".parse(input),
                         tag("a")
-                    )(input(source, ""))
+                    .parse(input(source, ""))
                     .unwrap()
                     .1
                     .iter()
@@ -114,9 +114,9 @@ mod tests {
         fn fail_to_parse() {
             for source in ["", ",", "a,,"] {
                 assert!(all_consuming(separated_or_terminated_list1(
-                    |input| tag::<_, _, NomError>(",")(input),
+                    |input| tag::<_, _, NomError>(",".parse(input),
                     tag("a")
-                ))(input(source, ""))
+                ).parse(input(source, ""))
                 .is_err());
             }
         }
