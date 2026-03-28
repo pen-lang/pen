@@ -1,11 +1,6 @@
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub enum CallingConvention {
+    #[default]
     Native,
     C,
-}
-
-impl Default for CallingConvention {
-    fn default() -> Self {
-        Self::Native
-    }
 }

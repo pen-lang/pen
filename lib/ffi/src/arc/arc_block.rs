@@ -1,7 +1,7 @@
 use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
-    ptr::{drop_in_place, null},
+    ptr::{drop_in_place, null, NonNull},
     sync::atomic::{fence, AtomicIsize, Ordering},
 };
 
@@ -38,7 +38,11 @@ impl ArcBlock {
     }
 
     pub fn ptr(&self) -> *const u8 {
-        &self.inner().payload as *const () as *const u8
+        if self.is_null() {
+            NonNull::dangling().as_ptr()
+        } else {
+            self.pointer
+        }
     }
 
     pub fn ptr_mut(&mut self) -> *mut u8 {

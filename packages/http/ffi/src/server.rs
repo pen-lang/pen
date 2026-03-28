@@ -31,6 +31,7 @@ async fn _pen_http_server_serve(
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
 
+                            #[expect(deprecated)]
                             let response = ffi::call!(
                                 fn(
                                     ffi::ByteString,

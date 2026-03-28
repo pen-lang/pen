@@ -21,7 +21,7 @@ impl File {
         Self(ffi::Arc::new(FileInner(Arc::new(RwLock::new(file))).into()))
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<fs::File>, OsError> {
+    pub fn lock(&self) -> Result<RwLockWriteGuard<'_, fs::File>, OsError> {
         Ok(TryInto::<&FileInner>::try_into(&*self.0)
             .unwrap()
             .0

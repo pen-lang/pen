@@ -2,7 +2,7 @@
 pub struct Section {
     pub title: Text,
     pub paragraphs: Vec<Paragraph>,
-    pub children: Vec<Section>,
+    pub children: Vec<Self>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -251,7 +251,7 @@ fn is_null(
     Ok(fmm::build::comparison_operation(
         fmm::ir::ComparisonOperator::Equal,
         fmm::build::bit_cast(fmm::types::Primitive::PointerInteger, pointer.clone()),
-        fmm::ir::Undefined::new(fmm::types::Primitive::PointerInteger),
+        fmm::ir::Primitive::PointerInteger(0),
     )?
     .into())
 }

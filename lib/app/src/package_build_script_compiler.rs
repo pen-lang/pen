@@ -8,7 +8,7 @@ use crate::{
     module_target_source_resolver, package_name_formatter, prelude_interface_file_finder,
     system_package_finder, ApplicationConfiguration, PackageType,
 };
-use std::error::Error;
+use core::{error::Error, slice};
 
 pub fn compile(
     infrastructure: &Infrastructure,
@@ -140,7 +140,7 @@ fn compile_modules(
         target.source_file()
             == &file_path_resolver::resolve_source_file(
                 package_directory,
-                &[application_configuration.main_module_basename.clone()],
+                slice::from_ref(&application_configuration.main_module_basename),
                 &infrastructure.file_path_configuration,
             )
     });
@@ -173,9 +173,9 @@ fn compile_modules(
                                                 output_directory,
                                                 &url,
                                             ),
-                                            &[application_configuration
-                                                .context_module_basename
-                                                .clone()],
+                                            slice::from_ref(
+                                                &application_configuration.context_module_basename,
+                                            ),
                                             &infrastructure.file_path_configuration,
                                         ),
                                         &infrastructure.file_path_configuration,
