@@ -22,7 +22,7 @@ impl TcpListener {
         ))
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpListener>, OsError> {
+    pub fn lock(&self) -> Result<RwLockWriteGuard<'_, net::TcpListener>, OsError> {
         Ok(TryInto::<&TcpListenerInner>::try_into(&*self.0)
             .unwrap()
             .0
@@ -46,7 +46,7 @@ impl TcpStream {
         ))
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::TcpStream>, OsError> {
+    pub fn lock(&self) -> Result<RwLockWriteGuard<'_, net::TcpStream>, OsError> {
         Ok(TryInto::<&TcpStreamInner>::try_into(&*self.0)
             .unwrap()
             .0

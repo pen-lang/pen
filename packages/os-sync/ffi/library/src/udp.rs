@@ -23,7 +23,7 @@ impl UdpSocket {
         ))
     }
 
-    pub fn lock(&self) -> Result<RwLockWriteGuard<net::UdpSocket>, OsError> {
+    pub fn lock(&self) -> Result<RwLockWriteGuard<'_, net::UdpSocket>, OsError> {
         Ok(TryInto::<&UdpSocketInner>::try_into(&*self.0)
             .unwrap()
             .0
