@@ -3437,11 +3437,11 @@ mod tests {
 
     #[test]
     fn parse_blank() {
-        assert!(all_consuming(blank)(input(" ", "")).is_ok());
-        assert!(all_consuming(blank)(input("\n", "")).is_ok());
-        assert!(all_consuming(blank)(input(" \n", "")).is_ok());
-        assert!(all_consuming(blank)(input("\t", "")).is_ok());
-        assert!(all_consuming(blank)(input("# foo", "")).is_ok());
+        assert!(all_consuming(blank).parse(input(" ", "")).is_ok());
+        assert!(all_consuming(blank).parse(input("\n", "")).is_ok());
+        assert!(all_consuming(blank).parse(input(" \n", "")).is_ok());
+        assert!(all_consuming(blank).parse(input("\t", "")).is_ok());
+        assert!(all_consuming(blank).parse(input("# foo", "")).is_ok());
     }
 
     #[test]
