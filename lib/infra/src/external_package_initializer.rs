@@ -8,6 +8,7 @@ pub struct ExternalPackageInitializer {
     language_root_scheme: &'static str,
     language_root_environment_variable: &'static str,
     packages_directory: &'static str,
+    build_configuration_filename: &'static str,
 }
 
 impl ExternalPackageInitializer {
@@ -17,6 +18,7 @@ impl ExternalPackageInitializer {
         language_root_scheme: &'static str,
         language_root_environment_variable: &'static str,
         packages_directory: &'static str,
+        build_configuration_filename: &'static str,
     ) -> Self {
         Self {
             file_system,
@@ -24,6 +26,7 @@ impl ExternalPackageInitializer {
             language_root_scheme,
             language_root_environment_variable,
             packages_directory,
+            build_configuration_filename,
         }
     }
 }
@@ -34,7 +37,10 @@ impl app::infra::ExternalPackageInitializer for ExternalPackageInitializer {
         url: &url::Url,
         package_directory: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        if self.file_system.exists(package_directory) {
+        if self.file_system.exists(
+            &package_directory
+                .join(&app::infra::FilePath::new([self.build_configuration_filename])),
+        ) {
             return Ok(());
         }
 
