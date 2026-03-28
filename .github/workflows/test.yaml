@@ -23,7 +23,7 @@ jobs:
       - uses: ./tools/ci/github/setup
       - run: tools/build.sh
       - run: git diff --exit-code
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build-${{ matrix.os }}
           path: target/release/pen
