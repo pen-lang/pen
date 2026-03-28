@@ -2,7 +2,7 @@ use super::{async_stack_action::AsyncStackAction, CpsError, Stack};
 use alloc::{vec, vec::Vec};
 use core::{
     future::Future,
-    intrinsics::transmute,
+    mem::transmute,
     ops::{Deref, DerefMut},
     task::Context,
 };
