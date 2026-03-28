@@ -12,25 +12,25 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: tools/format.sh -- --check
   clippy:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./tools/ci/github/setup
       - run: tools/lint.sh -- -D warnings
   spell_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: streetsidesoftware/cspell-action@main
         with:
           files: "**/*.{feature,md,pen,rs,sh}"
   readme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: homebrew/actions/setup-homebrew@master
       - run: tools/ci/github/setup.sh
       - run: tools/document/build.sh
@@ -40,7 +40,7 @@ jobs:
   dependabot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: tools/update_dependabot.sh
       - run: git diff --exit-code
   lint:
