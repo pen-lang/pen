@@ -75,7 +75,7 @@ build_package_document \
   Test \
   "This package provides test utilities."
 
-go run github.com/raviqqe/gherkin2markdown features doc/docs/examples
+go tool gherkin2markdown features doc/docs/examples
 
 (
   cd doc
