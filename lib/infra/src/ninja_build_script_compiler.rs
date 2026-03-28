@@ -8,7 +8,7 @@ use std::{
     collections::BTreeMap,
     error::Error,
     fs,
-    path::{Path, PathBuf},
+    path::{Component, Path, PathBuf},
     rc::Rc,
 };
 
@@ -492,6 +492,29 @@ impl NinjaBuildScriptCompiler {
     }
 }
 
+fn relative_path(from: &Path, to: &Path) -> PathBuf {
+    let from = from.components().collect::<Vec<_>>();
+    let to = to.components().collect::<Vec<_>>();
+
+    let common = from
+        .iter()
+        .zip(to.iter())
+        .take_while(|(a, b)| a == b)
+        .count();
+
+    let mut result = PathBuf::new();
+
+    for _ in &from[common..] {
+        result.push(Component::ParentDir);
+    }
+
+    for component in &to[common..] {
+        result.push(component);
+    }
+
+    result
+}
+
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_main(
         &self,
@@ -521,7 +544,12 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
 
             let members = ffi_crates
                 .iter()
-                .map(|(_, info)| format!("  \"{}\"", info.directory().display()))
+                .map(|(_, info)| {
+                    format!(
+                        "  \"{}\"",
+                        relative_path(&workspace_dir, info.directory()).display()
+                    )
+                })
                 .collect::<Vec<_>>();
 
             fs::write(
@@ -783,5 +811,34 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compute_relative_path_to_sibling() {
+        assert_eq!(
+            relative_path(Path::new("/a/b/ffi"), Path::new("/a/b/packages/os/ffi")),
+            PathBuf::from("../packages/os/ffi")
+        );
+    }
+
+    #[test]
+    fn compute_relative_path_to_child() {
+        assert_eq!(
+            relative_path(Path::new("/a/b"), Path::new("/a/b/c/d")),
+            PathBuf::from("c/d")
+        );
+    }
+
+    #[test]
+    fn compute_relative_path_to_same() {
+        assert_eq!(
+            relative_path(Path::new("/a/b"), Path::new("/a/b")),
+            PathBuf::from("")
+        );
     }
 }

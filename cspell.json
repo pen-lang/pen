@@ -43,6 +43,7 @@
     "koka",
     "lcov",
     "libc",
+    "libpen",
     "malloc",
     "metaprogramming",
     "metavars",
