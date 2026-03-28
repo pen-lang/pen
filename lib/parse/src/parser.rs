@@ -50,6 +50,7 @@ pub fn module(input: Input) -> IResult<Module> {
                 position(),
             )
         },
+    )
     .parse(input)
 }
 
@@ -70,6 +71,7 @@ pub fn comments(input: Input) -> IResult<Vec<Comment>> {
                 .flat_map(|(_, comment, _)| comment)
                 .collect()
         },
+    )
     .parse(input)
 }
 
@@ -94,6 +96,7 @@ fn import(input: Input) -> IResult<Import> {
                 Import::new(path, prefix, names.unwrap_or_default(), position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -101,6 +104,7 @@ fn unqualified_name(input: Input) -> IResult<UnqualifiedName> {
     map(
         token(tuple((position, identifier))),
         |(position, identifier)| UnqualifiedName::new(identifier, position()),
+    )
     .parse(input)
 }
 
@@ -111,6 +115,7 @@ fn module_path(input: Input) -> IResult<ModulePath> {
             into(external_module_path),
             into(internal_module_path),
         ))),
+    )
     .parse(input)
 }
 
@@ -118,6 +123,7 @@ fn internal_module_path(input: Input) -> IResult<InternalModulePath> {
     context(
         "internal module path",
         map(module_path_components(identifier), InternalModulePath::new),
+    )
     .parse(input)
 }
 
@@ -131,12 +137,13 @@ fn external_module_path(input: Input) -> IResult<ExternalModulePath> {
             )),
             |(package, components)| ExternalModulePath::new(package, components),
         ),
+    )
     .parse(input)
 }
 
 fn module_path_components<'a>(
-    component: impl Parser<Input<'a>, Output = String, Error = NomError<'a>>,
-) -> impl Parser<Input<'a>, Output = Vec<String>, Error = NomError<'a>> {
+    component: impl Parser<Input<'a>, String, NomError<'a>>,
+) -> impl FnMut(Input<'a>) -> IResult<'a, Vec<String>> {
     many1(preceded(tag(IDENTIFIER_SEPARATOR), component))
 }
 
@@ -144,6 +151,7 @@ fn public_module_path_component(input: Input) -> IResult<String> {
     context(
         "public module path component",
         verify(identifier, ast::analysis::is_name_public),
+    )
     .parse(input)
 }
 
@@ -166,6 +174,7 @@ fn foreign_import(input: Input) -> IResult<ForeignImport> {
                 )
             },
         ),
+    )
     .parse(input)
 }
 
@@ -176,6 +185,7 @@ fn calling_convention(input: Input) -> IResult<CallingConvention> {
             CallingConvention::C,
             verify(string_literal, |string| string.value() == "c"),
         ),
+    )
     .parse(input)
 }
 
@@ -194,6 +204,7 @@ fn function_definition(input: Input) -> IResult<FunctionDefinition> {
                 FunctionDefinition::new(name, lambda, foreign_export, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -204,6 +215,7 @@ fn foreign_export(input: Input) -> IResult<ForeignExport> {
             preceded(keyword("foreign"), opt(calling_convention)),
             |calling_convention| ForeignExport::new(calling_convention.unwrap_or_default()),
         ),
+    )
     .parse(input)
 }
 
@@ -220,6 +232,7 @@ fn record_definition(input: Input) -> IResult<RecordDefinition> {
             )),
             |(position, _, name, _, (fields, _))| RecordDefinition::new(name, fields, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -230,6 +243,7 @@ fn record_field_definition(input: Input) -> IResult<types::RecordField> {
             tuple((position, identifier, type_)),
             |(position, name, type_)| types::RecordField::new(name, type_, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -240,11 +254,12 @@ fn type_alias(input: Input) -> IResult<TypeAlias> {
             tuple((position, keyword("type"), identifier, sign("="), cut(type_))),
             |(position, _, name, _, type_)| TypeAlias::new(name, type_, position()),
         ),
+    )
     .parse(input)
 }
 
 fn type_(input: Input) -> IResult<Type> {
-    context("type", alt((into(function_type), union_type)).parse(input)
+    context("type", alt((into(function_type), union_type))).parse(input)
 }
 
 fn function_type(input: Input) -> IResult<types::Function> {
@@ -264,6 +279,7 @@ fn function_type(input: Input) -> IResult<types::Function> {
                 types::Function::new(arguments, result, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -273,7 +289,8 @@ fn union_type(input: Input) -> IResult<Type> {
             .into_iter()
             .reduce(|lhs, rhs| types::Union::new(lhs.clone(), rhs, lhs.position().clone()).into())
             .unwrap()
-    }.parse(input)
+    })
+    .parse(input)
 }
 
 fn list_type(input: Input) -> IResult<types::List> {
@@ -283,6 +300,7 @@ fn list_type(input: Input) -> IResult<types::List> {
             tuple((position, sign("["), cut(terminated(type_, sign("]"))))),
             |(position, _, element)| types::List::new(element, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -297,6 +315,7 @@ fn map_type(input: Input) -> IResult<types::Map> {
             )),
             |(position, _, (key, _, value, _))| types::Map::new(key, value, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -306,7 +325,8 @@ fn atomic_type(input: Input) -> IResult<Type> {
         into(list_type),
         into(map_type),
         preceded(sign("("), cut(terminated(type_, sign(")")))),
-    ).parse(input)
+    ))
+    .parse(input)
 }
 
 fn reference_type(input: Input) -> IResult<types::Reference> {
@@ -316,6 +336,7 @@ fn reference_type(input: Input) -> IResult<types::Reference> {
             tuple((position, token(qualified_identifier))),
             |(position, identifier)| types::Reference::new(identifier, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -344,6 +365,7 @@ fn block(input: Input) -> IResult<Block> {
                 )
             },
         ),
+    )
     .parse(input)
 }
 
@@ -354,6 +376,7 @@ fn statement(input: Input) -> IResult<Statement> {
             tuple((position, opt(terminated(identifier, sign("="))), expression)),
             |(position, name, expression)| Statement::new(name, expression, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -370,6 +393,7 @@ fn expression(input: Input) -> IResult<Expression> {
             )),
             |(expression, pairs)| reduce_operations(expression, &pairs),
         ),
+    )
     .parse(input)
 }
 
@@ -390,11 +414,12 @@ fn binary_operator(input: Input) -> IResult<BinaryOperator> {
             value(BinaryOperator::And, sign("&")),
             value(BinaryOperator::Or, sign("|")),
         )),
+    )
     .parse(input)
 }
 
 fn prefix_operation_like(input: Input) -> IResult<Expression> {
-    alt((into(prefix_operation), into(suffix_operation_like)).parse(input)
+    alt((into(prefix_operation), into(suffix_operation_like))).parse(input)
 }
 
 fn prefix_operation(input: Input) -> IResult<UnaryOperation> {
@@ -406,11 +431,12 @@ fn prefix_operation(input: Input) -> IResult<UnaryOperation> {
                 UnaryOperation::new(operator, expression, position())
             },
         ),
+    )
     .parse(input)
 }
 
 fn prefix_operator(input: Input) -> IResult<UnaryOperator> {
-    context("prefix operator", value(UnaryOperator::Not, sign("!")).parse(input)
+    context("prefix operator", value(UnaryOperator::Not, sign("!"))).parse(input)
 }
 
 fn suffix_operation_like(input: Input) -> IResult<Expression> {
@@ -431,11 +457,12 @@ fn suffix_operation_like(input: Input) -> IResult<Expression> {
                     }
                 })
         },
+    )
     .parse(input)
 }
 
 fn suffix_operator(input: Input) -> IResult<SuffixOperator> {
-    alt((call_operator, record_field_operator, try_operator).parse(input)
+    alt((call_operator, record_field_operator, try_operator)).parse(input)
 }
 
 fn call_operator(input: Input) -> IResult<SuffixOperator> {
@@ -453,6 +480,7 @@ fn call_operator(input: Input) -> IResult<SuffixOperator> {
             )),
             |(position, _, arguments)| SuffixOperator::Call(arguments, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -463,6 +491,7 @@ fn record_field_operator(input: Input) -> IResult<SuffixOperator> {
             tuple((position, sign("."), cut(identifier))),
             |(position, _, identifier)| SuffixOperator::RecordField(identifier, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -472,6 +501,7 @@ fn try_operator(input: Input) -> IResult<SuffixOperator> {
         map(tuple((position, sign("?"))), |(position, _)| {
             SuffixOperator::Try(position())
         }),
+    )
     .parse(input)
 }
 
@@ -490,7 +520,8 @@ fn atomic_expression(input: Input) -> IResult<Expression> {
         into(string_literal),
         into(variable),
         delimited(sign("("), expression, sign(")")),
-    ).parse(input)
+    ))
+    .parse(input)
 }
 
 fn lambda(input: Input) -> IResult<Lambda> {
@@ -511,6 +542,7 @@ fn lambda(input: Input) -> IResult<Lambda> {
                 Lambda::new(arguments, result_type, body, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -521,6 +553,7 @@ fn argument(input: Input) -> IResult<Argument> {
             tuple((position, identifier, cut(type_))),
             |(position, name, type_)| Argument::new(name, type_, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -549,13 +582,15 @@ fn if_(input: Input) -> IResult<If> {
                 )
             },
         ),
+    )
     .parse(input)
 }
 
 fn if_branch(input: Input) -> IResult<IfBranch> {
     map(tuple((expression, block)), |(expression, block)| {
         IfBranch::new(expression, block)
-    }.parse(input)
+    })
+    .parse(input)
 }
 
 fn if_list(input: Input) -> IResult<IfList> {
@@ -583,6 +618,7 @@ fn if_list(input: Input) -> IResult<IfList> {
                 IfList::new(argument, first_name, rest_name, then, else_, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -609,6 +645,7 @@ fn if_map(input: Input) -> IResult<IfMap> {
                 IfMap::new(name, map, key, then, else_, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -642,13 +679,15 @@ fn if_type(input: Input) -> IResult<IfType> {
                 )
             },
         ),
+    )
     .parse(input)
 }
 
 fn if_type_branch(input: Input) -> IResult<IfTypeBranch> {
     map(tuple((type_, block)), |(type_, block)| {
         IfTypeBranch::new(type_, block)
-    }.parse(input)
+    })
+    .parse(input)
 }
 
 fn record(input: Input) -> IResult<Record> {
@@ -686,6 +725,7 @@ fn record(input: Input) -> IResult<Record> {
                 Record::new(name, record, fields, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -696,6 +736,7 @@ fn record_field(input: Input) -> IResult<RecordField> {
             tuple((position, identifier, sign(":"), cut(expression))),
             |(position, name, _, expression)| RecordField::new(name, expression, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -710,6 +751,7 @@ fn number_literal(input: Input) -> IResult<Number> {
             ))),
             |(position, number, _)| Number::new(number, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -720,6 +762,7 @@ fn binary_literal(input: Input) -> IResult<NumberRepresentation> {
             preceded(tag("0b"), cut(many1(one_of("01")))),
             |characters| NumberRepresentation::Binary(String::from_iter(characters)),
         ),
+    )
     .parse(input)
 }
 
@@ -732,11 +775,12 @@ fn hexadecimal_literal(input: Input) -> IResult<NumberRepresentation> {
                 NumberRepresentation::Hexadecimal(String::from_iter(characters).to_lowercase())
             },
         ),
+    )
     .parse(input)
 }
 
 fn hexadecimal_digit(input: Input) -> IResult<char> {
-    one_of("0123456789abcdefABCDEF".parse(input)
+    one_of("0123456789abcdefABCDEF").parse(input)
 }
 
 fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
@@ -747,11 +791,12 @@ fn decimal_literal(input: Input) -> IResult<NumberRepresentation> {
                 str::from_utf8(characters.as_bytes()).unwrap().into(),
             )
         }),
+    )
     .parse(input)
 }
 
 fn string_literal(input: Input) -> IResult<ByteString> {
-    context("string", token(raw_string_literal).parse(input)
+    context("string", token(raw_string_literal)).parse(input)
 }
 
 fn raw_string_literal(input: Input) -> IResult<ByteString> {
@@ -784,6 +829,7 @@ fn raw_string_literal(input: Input) -> IResult<ByteString> {
                 position(),
             )
         },
+    )
     .parse(input)
 }
 
@@ -802,6 +848,7 @@ fn list_literal(input: Input) -> IResult<List> {
             )),
             |(position, _, (type_, elements, _))| List::new(type_, elements, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -812,7 +859,8 @@ fn list_element(input: Input) -> IResult<ListElement> {
             ListElement::Multiple,
         ),
         map(expression, ListElement::Single),
-    ).parse(input)
+    ))
+    .parse(input)
 }
 
 fn list_comprehension(input: Input) -> IResult<Expression> {
@@ -831,6 +879,7 @@ fn list_comprehension(input: Input) -> IResult<Expression> {
                 ListComprehension::new(type_, element, branches, position()).into()
             },
         ),
+    )
     .parse(input)
 }
 
@@ -852,6 +901,7 @@ fn list_comprehension_branch(input: Input) -> IResult<ListComprehensionBranch> {
                 ListComprehensionBranch::new(element_names, iteratees, condition, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -874,6 +924,7 @@ fn map_literal(input: Input) -> IResult<Map> {
                 Map::new(key_type, value_type, elements, position())
             },
         ),
+    )
     .parse(input)
 }
 
@@ -884,7 +935,8 @@ fn map_element(input: Input) -> IResult<MapElement> {
             |(position, key, _, value)| MapEntry::new(key, value, position()).into(),
         ),
         map(preceded(sign("..."), cut(expression)), MapElement::Multiple),
-    ).parse(input)
+    ))
+    .parse(input)
 }
 
 fn variable(input: Input) -> IResult<Variable> {
@@ -894,6 +946,7 @@ fn variable(input: Input) -> IResult<Variable> {
             tuple((position, token(qualified_identifier))),
             |(position, identifier)| Variable::new(identifier, position()),
         ),
+    )
     .parse(input)
 }
 
@@ -904,17 +957,19 @@ fn qualified_identifier(input: Input) -> IResult<String> {
             opt(tuple((tag(IDENTIFIER_SEPARATOR), cut(raw_identifier)))),
         ))),
         |span| str::from_utf8(span.as_bytes()).unwrap().into(),
+    )
     .parse(input)
 }
 
 fn identifier(input: Input) -> IResult<String> {
-    context("identifier", token(raw_identifier).parse(input)
+    context("identifier", token(raw_identifier)).parse(input)
 }
 
 fn raw_identifier(input: Input) -> IResult<String> {
     verify(unchecked_identifier, |identifier: &str| {
         !KEYWORDS.contains(&identifier)
-    }.parse(input)
+    })
+    .parse(input)
 }
 
 fn unchecked_identifier(input: Input) -> IResult<String> {
@@ -924,6 +979,7 @@ fn unchecked_identifier(input: Input) -> IResult<String> {
             many0_count(alt((value((), alphanumeric1), value((), char('_'))))),
         ))),
         |span| str::from_utf8(span.as_bytes()).unwrap().into(),
+    )
     .parse(input)
 }
 
@@ -942,6 +998,7 @@ fn keyword(name: &'static str) -> impl FnMut(Input) -> IResult<()> {
                     peek(not(alt((value((), alphanumeric1), value((), char('_')))))),
                 ))),
             ),
+        )
         .parse(input)
     }
 }
@@ -954,15 +1011,15 @@ fn sign(sign: &'static str) -> impl Fn(Input) -> IResult<()> + Clone {
             .chars()
             .any(|character| OPERATOR_CHARACTERS.contains(character))
         {
-            value((), tuple((parser, peek(not(one_of(OPERATOR_MODIFIERS))))).parse(input)
+            value((), tuple((parser, peek(not(one_of(OPERATOR_MODIFIERS)))))).parse(input)
         } else {
-            value((), parser.parse(input)
+            value((), parser).parse(input)
         }
     }
 }
 
 fn token<'a, O>(
-    mut parser: impl Parser<Input<'a>, Output = O, Error = NomError<'a>>,
+    mut parser: impl Parser<Input<'a>, O, NomError<'a>>,
 ) -> impl FnMut(Input<'a>) -> IResult<'a, O> {
     move |input| {
         let (input, _) = blank(input)?;
@@ -975,6 +1032,7 @@ fn blank(input: Input) -> IResult<()> {
     value(
         (),
         many0_count(alt((value((), multispace1), skipped_comment))),
+    )
     .parse(input)
 }
 
@@ -985,12 +1043,13 @@ fn comment(input: Input) -> IResult<Comment> {
             tuple((comment_position, tag("#"), many0(none_of("\n\r")))),
             |(position, _, characters)| Comment::new(String::from_iter(characters), position),
         ),
+    )
     .parse(input)
 }
 
 // Optimize comment parsing by skipping contents.
 fn skipped_comment(input: Input) -> IResult<()> {
-    value((), pair(tag("#"), many0_count(none_of("\n\r"))).parse(input)
+    value((), pair(tag("#"), many0_count(none_of("\n\r")))).parse(input)
 }
 
 fn comment_position(input: Input) -> IResult<Position> {
@@ -3367,22 +3426,22 @@ mod tests {
 
     #[test]
     fn parse_sign() {
-        assert!(sign("+".parse(input("", "")).is_err());
-        assert!(sign("+".parse(input("-", "")).is_err());
-        assert!(sign("+".parse(input("+", "")).is_ok());
-        assert!(sign("++".parse(input("++", "")).is_ok());
-        assert!(sign("+".parse(input("++", "")).is_ok());
-        assert!(sign("+".parse(input("+=", "")).is_err());
-        assert!(sign("\\".parse(input("\\", "")).is_ok());
+        assert!(sign("+")(input("", "")).is_err());
+        assert!(sign("+")(input("-", "")).is_err());
+        assert!(sign("+")(input("+", "")).is_ok());
+        assert!(sign("++")(input("++", "")).is_ok());
+        assert!(sign("+")(input("++", "")).is_ok());
+        assert!(sign("+")(input("+=", "")).is_err());
+        assert!(sign("\\")(input("\\", "")).is_ok());
     }
 
     #[test]
     fn parse_blank() {
-        assert!(all_consuming(blank.parse(input(" ", "")).is_ok());
-        assert!(all_consuming(blank.parse(input("\n", "")).is_ok());
-        assert!(all_consuming(blank.parse(input(" \n", "")).is_ok());
-        assert!(all_consuming(blank.parse(input("\t", "")).is_ok());
-        assert!(all_consuming(blank.parse(input("# foo", "")).is_ok());
+        assert!(all_consuming(blank)(input(" ", "")).is_ok());
+        assert!(all_consuming(blank)(input("\n", "")).is_ok());
+        assert!(all_consuming(blank)(input(" \n", "")).is_ok());
+        assert!(all_consuming(blank)(input("\t", "")).is_ok());
+        assert!(all_consuming(blank)(input("# foo", "")).is_ok());
     }
 
     #[test]
