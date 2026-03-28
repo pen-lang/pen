@@ -348,13 +348,12 @@ impl NinjaBuildScriptCompiler {
         package_directory: &FilePath,
         package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
+        let os_path = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
         Ok(
-            if let Some(script) = package_script_finder::find(
-                &self
-                    .file_path_converter
-                    .convert_to_os_path(package_directory),
-                self.ffi_build_script_basename,
-            )? {
+            if let Some(crate_info) = ffi_crate_finder::find(&os_path)? {
                 let ffi_archive_file = archive_file
                     .parent()
                     .join(&FilePath::new([FFI_ARCHIVE_DIRECTORY]))
@@ -362,14 +361,13 @@ impl NinjaBuildScriptCompiler {
 
                 [
                     format!(
-                        "build {}: compile_ffi {} {}",
+                        "build {}: copy_ffi {}",
                         self.file_path_converter
                             .convert_to_os_path(&ffi_archive_file)
                             .display(),
-                        script.display(),
-                        FFI_PHONY_TARGET,
+                        FFI_BUILD_STAMP,
                     ),
-                    format!("  script_file = {}", script.display()),
+                    format!("  source = $ffi_target_dir/{}", crate_info.library_name),
                     self.format_in_package_name_variable(package_name),
                 ]
                 .into_iter()
