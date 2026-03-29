@@ -14,7 +14,6 @@ use std::{
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const FFI_PHONY_TARGET: &str = "ffi";
-const FFI_WORKSPACE_DIRECTORY: &str = "ffi";
 const FFI_BUILD_TARGET: &str = "ffi_build";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
@@ -539,21 +538,18 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .collect::<Result<Vec<_>, _>>()?;
 
         if !ffi_crates.is_empty() {
-            let workspace_dir = output_os_path.join(FFI_WORKSPACE_DIRECTORY);
-            fs::create_dir_all(&workspace_dir)?;
-
             let members = ffi_crates
                 .iter()
                 .map(|(_, info)| {
                     format!(
                         "  \"{}\"",
-                        relative_path(&workspace_dir, info.directory()).display()
+                        relative_path(&output_os_path, info.directory()).display()
                     )
                 })
                 .collect::<Vec<_>>();
 
             fs::write(
-                workspace_dir.join("Cargo.toml"),
+                output_os_path.join("Cargo.toml"),
                 format!(
                     "[workspace]\nresolver = \"2\"\nmembers = [\n{},\n]\n",
                     members.join(",\n")
@@ -573,15 +569,12 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             vec![
                 format!(
                     "ffi_target_dir = {}/target/$target/release",
-                    output_os_path.join(FFI_WORKSPACE_DIRECTORY).display()
+                    output_os_path.display()
                 ),
                 format!("build {FFI_BUILD_TARGET}: build_ffi"),
                 format!(
                     "  manifest_path = {}",
-                    output_os_path
-                        .join(FFI_WORKSPACE_DIRECTORY)
-                        .join("Cargo.toml")
-                        .display()
+                    output_os_path.join("Cargo.toml").display()
                 ),
                 format!("build {FFI_PHONY_TARGET}: phony {FFI_BUILD_TARGET}"),
             ]
