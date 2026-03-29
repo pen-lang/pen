@@ -29,7 +29,6 @@ pub fn create(
             LANGUAGE_ROOT_SCHEME,
             LANGUAGE_ROOT_ENVIRONMENT_VARIABLE,
             PACKAGES_DIRECTORY,
-            BUILD_CONFIGURATION_FILENAME,
         )),
         file_system: file_system.clone(),
         file_path_displayer: Rc::new(infra::FilePathDisplayer::new(
