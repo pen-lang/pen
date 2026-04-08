@@ -19,6 +19,14 @@ pub fn compile(
     ffi_package_url: &url::Url,
     application_configuration: &ApplicationConfiguration,
 ) -> Result<FilePath, Box<dyn Error>> {
+    let external_package_urls = external_package_topological_sorter::sort(
+        &external_package_configuration_reader::read_all(
+            infrastructure,
+            main_package_directory,
+            output_directory,
+        )?,
+    )?;
+
     let child_files = [
         compile_modules(
             infrastructure,
@@ -37,22 +45,16 @@ pub fn compile(
     ]
     .into_iter()
     .chain(
-        external_package_topological_sorter::sort(
-            &external_package_configuration_reader::read_all(
-                infrastructure,
-                main_package_directory,
-                output_directory,
-            )?,
-        )?
-        .iter()
-        .chain([prelude_package_url, ffi_package_url])
-        .map(|url| {
-            file_path_resolver::resolve_external_package_build_script_file(
-                output_directory,
-                url,
-                &infrastructure.file_path_configuration,
-            )
-        }),
+        external_package_urls
+            .iter()
+            .chain([prelude_package_url, ffi_package_url])
+            .map(|url| {
+                file_path_resolver::resolve_external_package_build_script_file(
+                    output_directory,
+                    url,
+                    &infrastructure.file_path_configuration,
+                )
+            }),
     )
     .chain(
         if infrastructure
@@ -75,12 +77,23 @@ pub fn compile(
     )
     .collect::<Vec<_>>();
 
+    let ffi_package_directories = [main_package_directory.clone()]
+        .into_iter()
+        .chain(
+            external_package_urls
+                .iter()
+                .chain([prelude_package_url, ffi_package_url])
+                .map(|url| file_path_resolver::resolve_package_directory(output_directory, url)),
+        )
+        .collect::<Vec<_>>();
+
     compile_main(
         infrastructure,
         prelude_package_url,
         output_directory,
         target_triple,
         &child_files,
+        &ffi_package_directories,
     )
 }
 
@@ -90,6 +103,7 @@ fn compile_main(
     output_directory: &FilePath,
     target_triple: Option<&str>,
     child_build_script_files: &[FilePath],
+    ffi_package_directories: &[FilePath],
 ) -> Result<FilePath, Box<dyn Error>> {
     let build_script_file = file_path_resolver::resolve_special_build_script_file(
         output_directory,
@@ -110,6 +124,7 @@ fn compile_main(
                 output_directory,
                 target_triple,
                 child_build_script_files,
+                ffi_package_directories,
             )?
             .as_bytes(),
     )?;

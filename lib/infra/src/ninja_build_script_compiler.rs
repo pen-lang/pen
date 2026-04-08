@@ -1,17 +1,20 @@
 use super::file_path_converter::FilePathConverter;
 use crate::{
-    default_target_finder, llvm_command_finder, package_script_finder, InfrastructureError,
+    default_target_finder, ffi_crate_finder, llvm_command_finder, package_script_finder,
+    InfrastructureError,
 };
 use app::infra::FilePath;
 use std::{
     collections::BTreeMap,
     error::Error,
-    path::{Path, PathBuf},
+    fs,
+    path::{Component, Path, PathBuf},
     rc::Rc,
 };
 
 const FFI_ARCHIVE_DIRECTORY: &str = "ffi";
 const FFI_PHONY_TARGET: &str = "ffi";
+const FFI_BUILD_STAMP: &str = "ffi_build.stamp";
 const AR_DESCRIPTION: &str = "  description = archiving package $package_name";
 
 pub struct NinjaBuildScriptCompiler {
@@ -19,7 +22,6 @@ pub struct NinjaBuildScriptCompiler {
     bit_code_file_extension: &'static str,
     dependency_file_extension: &'static str,
     ninja_dynamic_dependency_file_extension: &'static str,
-    ffi_build_script_basename: &'static str,
     link_script_basename: &'static str,
 }
 
@@ -29,7 +31,6 @@ impl NinjaBuildScriptCompiler {
         bit_code_file_extension: &'static str,
         dependency_file_extension: &'static str,
         ninja_dynamic_dependency_file_extension: &'static str,
-        ffi_build_script_basename: &'static str,
         link_script_basename: &'static str,
     ) -> Self {
         Self {
@@ -37,7 +38,6 @@ impl NinjaBuildScriptCompiler {
             bit_code_file_extension,
             dependency_file_extension,
             ninja_dynamic_dependency_file_extension,
-            ffi_build_script_basename,
             link_script_basename,
         }
     }
@@ -119,9 +119,12 @@ impl NinjaBuildScriptCompiler {
             "rule resolve_dependency",
             &resolve_dependency_command,
             "  description = resolving dependency of module $module_name $in_package_name",
-            "rule compile_ffi",
-            "  command = $script_file -t $target $out",
-            "  description = compiling FFI module $in_package_name",
+            "rule build_ffi",
+            "  command = cargo build --manifest-path $manifest_path --release --quiet --target $target && touch $out",
+            "  description = building FFI workspace",
+            "rule copy_ffi",
+            "  command = cp $source $out",
+            "  description = copying FFI archive $package_name",
             "rule ar",
             &format!("  command = {} crs $out $in", ar.display()),
             AR_DESCRIPTION,
@@ -344,13 +347,12 @@ impl NinjaBuildScriptCompiler {
         package_directory: &FilePath,
         package_name: Option<&str>,
     ) -> Result<Vec<String>, Box<dyn Error>> {
+        let os_path = self
+            .file_path_converter
+            .convert_to_os_path(package_directory);
+
         Ok(
-            if let Some(script) = package_script_finder::find(
-                &self
-                    .file_path_converter
-                    .convert_to_os_path(package_directory),
-                self.ffi_build_script_basename,
-            )? {
+            if let Some(crate_info) = ffi_crate_finder::find(&os_path)? {
                 let ffi_archive_file = archive_file
                     .parent()
                     .join(&FilePath::new([FFI_ARCHIVE_DIRECTORY]))
@@ -358,14 +360,13 @@ impl NinjaBuildScriptCompiler {
 
                 [
                     format!(
-                        "build {}: compile_ffi {} {}",
+                        "build {}: copy_ffi {}",
                         self.file_path_converter
                             .convert_to_os_path(&ffi_archive_file)
                             .display(),
-                        script.display(),
                         FFI_PHONY_TARGET,
                     ),
-                    format!("  script_file = {}", script.display()),
+                    format!("  source = $ffi_target_dir/{}", crate_info.library_name()),
                     self.format_in_package_name_variable(package_name),
                 ]
                 .into_iter()
@@ -490,6 +491,29 @@ impl NinjaBuildScriptCompiler {
     }
 }
 
+fn relative_path(from: &Path, to: &Path) -> PathBuf {
+    let from = from.components().collect::<Vec<_>>();
+    let to = to.components().collect::<Vec<_>>();
+
+    let common = from
+        .iter()
+        .zip(to.iter())
+        .take_while(|(a, b)| a == b)
+        .count();
+
+    let mut result = PathBuf::new();
+
+    for _ in &from[common..] {
+        result.push(Component::ParentDir);
+    }
+
+    for component in &to[common..] {
+        result.push(component);
+    }
+
+    result
+}
+
 impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
     fn compile_main(
         &self,
@@ -497,19 +521,67 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
         output_directory: &FilePath,
         target_triple: Option<&str>,
         child_build_script_files: &[FilePath],
+        ffi_package_directories: &[FilePath],
     ) -> Result<String, Box<dyn Error>> {
+        let output_os_path = self
+            .file_path_converter
+            .convert_to_os_path(output_directory);
+
+        let ffi_crates = ffi_package_directories
+            .iter()
+            .filter_map(|directory| {
+                let os_path = self.file_path_converter.convert_to_os_path(directory);
+                ffi_crate_finder::find(&os_path)
+                    .transpose()
+                    .map(|result| result.map(|info| (os_path, info)))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if !ffi_crates.is_empty() {
+            let members = ffi_crates
+                .iter()
+                .map(|(_, info)| {
+                    format!(
+                        "  \"{}\"",
+                        relative_path(&output_os_path, info.directory()).display()
+                    )
+                })
+                .collect::<Vec<_>>();
+
+            fs::write(
+                output_os_path.join("Cargo.toml"),
+                format!(
+                    "[workspace]\nresolver = \"2\"\nmembers = [\n{},\n]\n",
+                    members.join(",\n")
+                ),
+            )?;
+        }
+
         Ok([
             "ninja_required_version = 1.10".into(),
-            format!(
-                "builddir = {}",
-                self.file_path_converter
-                    .convert_to_os_path(output_directory)
-                    .display()
-            ),
+            format!("builddir = {}", output_os_path.display()),
         ]
         .into_iter()
         .chain(self.compile_rules(prelude_interface_files, target_triple)?)
-        .chain([format!("build {FFI_PHONY_TARGET}: phony")])
+        .chain(if ffi_crates.is_empty() {
+            vec![format!("build {FFI_PHONY_TARGET}: phony")]
+        } else {
+            {
+                let stamp = output_os_path.join(FFI_BUILD_STAMP);
+                vec![
+                    format!(
+                        "ffi_target_dir = {}/target/$target/release",
+                        output_os_path.display()
+                    ),
+                    format!("build {}: build_ffi", stamp.display()),
+                    format!(
+                        "  manifest_path = {}",
+                        output_os_path.join("Cargo.toml").display()
+                    ),
+                    format!("build {FFI_PHONY_TARGET}: phony {}", stamp.display()),
+                ]
+            }
+        })
         .chain(child_build_script_files.iter().map(|file| {
             format!(
                 "subninja {}",
@@ -735,5 +807,34 @@ impl app::infra::BuildScriptCompiler for NinjaBuildScriptCompiler {
             .collect::<Vec<_>>()
             .join("\n")
             + "\n")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn compute_relative_path_to_sibling() {
+        assert_eq!(
+            relative_path(Path::new("/a/b/ffi"), Path::new("/a/b/packages/os/ffi")),
+            PathBuf::from("../packages/os/ffi")
+        );
+    }
+
+    #[test]
+    fn compute_relative_path_to_child() {
+        assert_eq!(
+            relative_path(Path::new("/a/b"), Path::new("/a/b/c/d")),
+            PathBuf::from("c/d")
+        );
+    }
+
+    #[test]
+    fn compute_relative_path_to_same() {
+        assert_eq!(
+            relative_path(Path::new("/a/b"), Path::new("/a/b")),
+            PathBuf::from("")
+        );
     }
 }

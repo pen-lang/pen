@@ -13,7 +13,6 @@ pub const DEFAULT_SYSTEM_PACKAGE_NAME: &str = "Os";
 pub const DEFAULT_SYSTEM_PACKAGE_URL: &str = "pen:///os";
 pub const PRELUDE_PACKAGE_URL: &str = "pen:///prelude";
 pub const FFI_PACKAGE_URL: &str = "pen:///ffi";
-pub const FFI_BUILD_SCRIPT_BASENAME: &str = "pen-ffi";
 pub const LINK_SCRIPT_BASENAME: &str = "pen-link";
 
 pub const FILE_PATH_CONFIGURATION: app::infra::FilePathConfiguration =
