@@ -22,6 +22,10 @@ updates:
     directory: /doc
     schedule:
       interval: daily
+  - package-ecosystem: rust-toolchain
+    directory: /
+    schedule:
+      interval: daily
   - package-ecosystem: uv
     directory: /doc
     schedule:
