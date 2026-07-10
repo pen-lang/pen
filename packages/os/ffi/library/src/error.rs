@@ -21,7 +21,7 @@ impl Display for OsError {
             Self::EnvironmentVariable(error) => write!(formatter, "{error}"),
             Self::Io(error) => write!(formatter, "{error}"),
             Self::Utf8(error) => write!(formatter, "{error}"),
-            Self::Other(message) => write!(formatter, "{}", &message),
+            Self::Other(message) => write!(formatter, "{message}"),
         }
     }
 }
