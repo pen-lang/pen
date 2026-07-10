@@ -1,5 +1,5 @@
 [toolchain]
-channel = "stable"
+channel = "1.96.0"
 components = ["clippy", "rustfmt", "rust-analyzer", "rust-src"]
 targets = [
   "i686-unknown-linux-musl",

@@ -22,6 +22,23 @@ updates:
     directory: /doc
     schedule:
       interval: daily
+  - package-ecosystem: rust-toolchain
+    directories:
+      - /
+EOF
+
+  for file in $(git ls-files '**/rust-toolchain.toml'); do
+    echo "      - /$(dirname $file)"
+  done
+
+  cat <<EOF
+    groups:
+      rust-toolchain:
+        group-by: dependency-name
+        patterns:
+          - "*"
+    schedule:
+      interval: daily
   - package-ecosystem: uv
     directory: /doc
     schedule:

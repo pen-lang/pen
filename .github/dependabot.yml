@@ -16,6 +16,24 @@ updates:
     directory: /doc
     schedule:
       interval: daily
+  - package-ecosystem: rust-toolchain
+    directories:
+      - /
+      - /packages/core/ffi
+      - /packages/http/ffi
+      - /packages/json/ffi
+      - /packages/os-sync/ffi
+      - /packages/os/ffi/application
+      - /packages/os/ffi/library
+      - /packages/prelude/ffi
+      - /packages/sql/ffi
+    groups:
+      rust-toolchain:
+        group-by: dependency-name
+        patterns:
+          - "*"
+    schedule:
+      interval: daily
   - package-ecosystem: uv
     directory: /doc
     schedule:
