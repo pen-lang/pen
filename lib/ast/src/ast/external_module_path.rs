@@ -30,7 +30,7 @@ impl Display for ExternalModulePath {
         write!(
             formatter,
             "{}{}{}",
-            &self.package,
+            self.package,
             IDENTIFIER_SEPARATOR,
             self.components.join(IDENTIFIER_SEPARATOR),
         )
