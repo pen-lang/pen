@@ -76,3 +76,7 @@ updates:
     directory: /packages/test/ffi
     schedule:
       interval: daily
+  - package-ecosystem: rust-toolchain
+    directory: /
+    schedule:
+      interval: daily
