@@ -7,7 +7,7 @@ pub fn format(type_: &Type) -> String {
         Type::Error(_) => "error".into(),
         Type::Function(function) => format!(
             "\\({}) {}",
-            &function
+            function
                 .arguments()
                 .iter()
                 .map(format)

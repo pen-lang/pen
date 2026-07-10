@@ -419,10 +419,10 @@ impl NinjaBuildScriptCompiler {
                     .convert_to_os_path(archive_file)
                     .display(),
                 ffi_archive_file.display(),
-                &object_files,
+                object_files,
             ),
             format!("  ffi_archive_file = {}", ffi_archive_file.display()),
-            format!("  object_files = {}", &object_files),
+            format!("  object_files = {}", object_files),
             format!("  package_name = {}", package_name.unwrap_or_default()),
         ])
     }
