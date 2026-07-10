@@ -34,6 +34,7 @@ EOF
   cat <<EOF
     groups:
       rust-toolchain:
+        group-by: dependency-name
         patterns:
           - "*"
     schedule:

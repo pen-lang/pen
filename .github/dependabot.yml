@@ -29,6 +29,7 @@ updates:
       - /packages/sql/ffi
     groups:
       rust-toolchain:
+        group-by: dependency-name
         patterns:
           - "*"
     schedule:
