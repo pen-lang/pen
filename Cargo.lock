@@ -512,7 +512,7 @@ checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 [[package]]
 name = "hamt"
 version = "0.3.2"
-source = "git+https://github.com/raviqqe/hamt-rs?branch=main#3267578af5770ad50f48157e22ec92a9e97533de"
+source = "git+https://github.com/raviqqe/hamt-rs?branch=main#f43481bea53711c12e104a8e3cea6e951ed15ce6"
 
 [[package]]
 name = "hashbrown"
