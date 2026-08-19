@@ -1110,7 +1110,7 @@ checksum = "8afb450f006bf6385ca15ef45d71d2288452bc3683ce2e2cacc0d18e4be60b58"
 [[package]]
 name = "plist"
 version = "0.1.0"
-source = "git+https://github.com/raviqqe/plist-rs?branch=main#8e05f2dea254b486a6ca6b04ecb44e2863ed25bb"
+source = "git+https://github.com/raviqqe/plist-rs?branch=main#1e81e84db1eac790acb4e8965a6e3b13202f253a"
 
 [[package]]
 name = "position"
