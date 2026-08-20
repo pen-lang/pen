@@ -1,4 +1,4 @@
-from ubuntu:20.04
+from ubuntu:26.04
 
 env DEBIAN_FRONTEND=noninteractive
 
