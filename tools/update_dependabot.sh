@@ -18,6 +18,10 @@ updates:
     directory: /
     schedule:
       interval: daily
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: daily
   - package-ecosystem: npm
     directory: /doc
     schedule:

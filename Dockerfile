@@ -1,4 +1,4 @@
-from ubuntu:26.04
+from ubuntu:26.04@sha256:2260313b31c8c011cd2eebe728008efac1b3982be73eb71348ea2648d2c0e09b
 
 env DEBIAN_FRONTEND=noninteractive
 
