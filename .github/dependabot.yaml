@@ -1,9 +1,3 @@
-#!/bin/sh
-
-set -e
-
-(
-  cat <<EOF
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -25,13 +19,14 @@ updates:
   - package-ecosystem: rust-toolchain
     directories:
       - /
-EOF
-
-  for file in $(git ls-files '**/rust-toolchain.toml'); do
-    echo "      - /$(dirname $file)"
-  done
-
-  cat <<EOF
+      - /packages/core/ffi
+      - /packages/http/ffi
+      - /packages/json/ffi
+      - /packages/os-sync/ffi
+      - /packages/os/ffi/application
+      - /packages/os/ffi/library
+      - /packages/prelude/ffi
+      - /packages/sql/ffi
     groups:
       rust-toolchain:
         group-by: dependency-name
@@ -46,13 +41,19 @@ EOF
   - package-ecosystem: cargo
     directories:
       - /
-EOF
-
-  for file in $(git ls-files '**/Cargo.lock'); do
-    echo "      - /$(dirname $file)"
-  done
-
-  cat <<EOF
+      - /cmd/test
+      - /packages/core/ffi
+      - /packages/html/ffi
+      - /packages/http/ffi
+      - /packages/json/ffi
+      - /packages/os-sync/ffi
+      - /packages/os/ffi/application
+      - /packages/os/ffi/library
+      - /packages/prelude/ffi
+      - /packages/random/ffi
+      - /packages/regex/ffi
+      - /packages/sql/ffi
+      - /packages/test/ffi
     groups:
       cargo:
         group-by: dependency-name
@@ -65,5 +66,3 @@ EOF
           - "*"
     schedule:
       interval: daily
-EOF
-) >$(dirname $0)/../.github/dependabot.yaml
