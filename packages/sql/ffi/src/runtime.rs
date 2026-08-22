@@ -6,9 +6,6 @@ use std::{
 };
 use tokio::runtime::{Builder, Runtime};
 
-// This crate embeds its own copy of tokio whose symbols differ from the
-// application's ones due to feature unification. So sqlx needs a runtime
-// context of this copy.
 static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     Builder::new_multi_thread()
         .worker_threads(1)
