@@ -7,12 +7,12 @@ edition = "2021"
 
 [dependencies]
 ast = { path = "../ast" }
-fnv = "1"
+fnv = "1.0.7"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.15"
+itertools = "0.15.0"
 position = { path = "../position" }
-regex = "1"
+regex = "1.13.1"
 
 [dev-dependencies]
-pretty_assertions = "1.4"
+pretty_assertions = "1.4.1"
