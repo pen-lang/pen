@@ -96,6 +96,8 @@ jobs:
         id: auth
         if: github.ref == 'refs/heads/main'
       - run: tools/publish_crates.sh ${{ github.ref != 'refs/heads/main' && '--dry-run' || '' }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
   release:
     needs:
       - tag_check
