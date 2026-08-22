@@ -6,11 +6,11 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-fnv = "1"
-petgraph = "0.8"
+fnv = "1.0.7"
+petgraph = "0.8.3"
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 position = { path = "../position" }
-serde = { version = "1", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
 
 [dev-dependencies]
-pretty_assertions = "1"
+pretty_assertions = "1.4.1"
