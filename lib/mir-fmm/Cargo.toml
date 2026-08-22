@@ -9,12 +9,12 @@ edition = "2021"
 
 [dependencies]
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
-fnv = "1"
+fnv = "1.0.7"
 mir = { path = "../mir" }
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 
 [dev-dependencies]
-insta = "1"
-tempfile = "3"
+insta = "1.41.1"
+tempfile = "3.27.0"
 fmm-c = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }

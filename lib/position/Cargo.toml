@@ -6,4 +6,4 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }

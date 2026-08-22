@@ -8,9 +8,9 @@ authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-fnv = "1"
+fnv = "1.0.7"
 hamt = { git = "https://github.com/raviqqe/hamt-rs", branch = "main" }
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 
 [dev-dependencies]
-pretty_assertions = "1.4"
+pretty_assertions = "1.4.1"
