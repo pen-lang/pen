@@ -8,5 +8,5 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "*" }
-rand = "0.10"
+ffi = { package = "pen-ffi", version = "0.10.23" }
+rand = "0.10.2"

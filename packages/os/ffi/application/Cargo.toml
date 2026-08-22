@@ -5,7 +5,7 @@ publish = false
 edition = "2021"
 
 [dependencies]
-async-stream = "0.3"
-ffi = { package = "pen-ffi", version = "*", features = ["runtime"] }
-futures = "0.3"
-tokio = { "version" = "1", features = ["full"] }
+async-stream = "0.3.6"
+ffi = { package = "pen-ffi", version = "0.10.23", features = ["runtime"] }
+futures = "0.3.34"
+tokio = { "version" = "1.37.0", features = ["full"] }
