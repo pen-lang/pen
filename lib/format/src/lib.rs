@@ -14,68 +14,22 @@ use mfmt::{
 use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let allocator = Bump::new();
-    let mut context = Context::new(&allocator, comments);
-    let context = &mut context;
-
-    let (external_imports, internal_imports) = module
-        .imports()
-        .iter()
-        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
-
-    format_document(
-        &[
-            compile_imports(context, &external_imports),
-            compile_imports(context, &internal_imports),
-            compile_foreign_imports(context, module.foreign_imports()),
-            context.builder().sequence(
-                module
-                    .type_definitions()
-                    .iter()
-                    .map(|definition| compile_type_definition(context, definition))
-                    .intersperse(line()),
-            ),
-            context.builder().sequence(
-                module
-                    .function_definitions()
-                    .iter()
-                    .map(|definition| compile_function_definition(context, definition))
-                    .intersperse(line()),
-            ),
-            compile_remaining_block_comment(context),
-        ]
-        .into_iter()
-        .fold(empty(), |all, document| {
-            if count_lines(&document) == 0 {
-                all
-            } else {
-                context.builder().sequence([
-                    if count_lines(&all) == 0 {
-                        empty()
-                    } else {
-                        context.builder().sequence([all, line()])
-                    },
-                    document,
-                ])
-            }
-        }),
-    )
+    format_document(&compile_module(
+        &mut Context::new(&Bump::new(), comments),
+        module,
+    ))
 }
 
 pub fn format_type_definition(definition: &TypeDefinition) -> String {
-    let allocator = Bump::new();
-
     format_document(&compile_type_definition(
-        &mut Context::new(&allocator, &[]),
+        &mut Context::new(&Bump::new(), &[]),
         definition,
     ))
 }
 
 pub fn format_function_signature(lambda: &Lambda) -> String {
-    let allocator = Bump::new();
-
     format_document(&compile_signature(
-        &mut Context::new(&allocator, &[]),
+        &mut Context::new(&Bump::new(), &[]),
         lambda.arguments(),
         lambda.result_type(),
         lambda.position(),
@@ -88,6 +42,49 @@ fn format_document(document: &Document) -> String {
     mfmt::format(document, &mut string, FormatOptions::new(2)).expect("infallible string write");
 
     string
+}
+
+fn compile_module<'a>(context: &mut Context<'a>, module: &'a Module) -> Document<'a> {
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
+
+    [
+        compile_imports(context, &external_imports),
+        compile_imports(context, &internal_imports),
+        compile_foreign_imports(context, module.foreign_imports()),
+        context.builder().sequence(
+            module
+                .type_definitions()
+                .iter()
+                .map(|definition| compile_type_definition(context, definition))
+                .intersperse(line()),
+        ),
+        context.builder().sequence(
+            module
+                .function_definitions()
+                .iter()
+                .map(|definition| compile_function_definition(context, definition))
+                .intersperse(line()),
+        ),
+        compile_remaining_block_comment(context),
+    ]
+    .into_iter()
+    .fold(empty(), |all, document| {
+        if count_lines(&document) == 0 {
+            all
+        } else {
+            context.builder().sequence([
+                if count_lines(&all) == 0 {
+                    empty()
+                } else {
+                    context.builder().sequence([all, line()])
+                },
+                document,
+            ])
+        }
+    })
 }
 
 fn compile_imports<'a>(context: &mut Context<'a>, imports: &[&'a Import]) -> Document<'a> {
@@ -1404,9 +1401,7 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format_type(type_: &Type) -> String {
-            let allocator = Bump::new();
-
-            format_document(&compile_type(&Context::new(&allocator, &[]), type_))
+            format_document(&compile_type(&Context::new(&Bump::new(), &[]), type_))
         }
 
         #[test]
@@ -1709,10 +1704,8 @@ mod tests {
         }
 
         fn format_with_comments(block: &Block, comments: &[Comment]) -> String {
-            let allocator = Bump::new();
-
             format_document(&compile_block(
-                &mut Context::new(&allocator, comments),
+                &mut Context::new(&Bump::new(), comments),
                 block,
             )) + "\n"
         }
@@ -2144,10 +2137,8 @@ mod tests {
         }
 
         fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
-            let allocator = Bump::new();
-
             format_document(&compile_expression(
-                &mut Context::new(&allocator, comments),
+                &mut Context::new(&Bump::new(), comments),
                 expression,
             ))
         }
