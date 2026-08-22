@@ -186,6 +186,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bumpalo"
+version = "3.20.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+dependencies = [
+ "allocator-api2",
+]
+
+[[package]]
 name = "bytecount"
 version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -402,6 +411,7 @@ name = "format"
 version = "0.1.0"
 dependencies = [
  "ast",
+ "bumpalo",
  "indoc",
  "itertools",
  "mfmt",
