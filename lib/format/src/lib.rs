@@ -3,101 +3,118 @@
 mod context;
 
 use ast::{analysis::operator_priority, types::Type, *};
+use bumpalo::Bump;
 use context::Context;
 use itertools::Itertools;
 use mfmt::{
-    empty, flatten, flatten_if, indent, line, line_suffix, r#break, sequence,
+    empty, flatten_if, line,
     utility::{count_lines, is_broken},
-    Document,
+    Document, FormatOptions,
 };
 use position::Position;
 
 pub fn format(module: &Module, comments: &[Comment]) -> String {
-    let mut context = Context::new(comments);
-    let context = &mut context;
-
-    let (external_imports, internal_imports) = module
-        .imports()
-        .iter()
-        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
-
-    mfmt::format(
-        &[
-            compile_imports(context, &external_imports),
-            compile_imports(context, &internal_imports),
-            compile_foreign_imports(context, module.foreign_imports()),
-            sequence(
-                module
-                    .type_definitions()
-                    .iter()
-                    .map(|definition| compile_type_definition(context, definition))
-                    .intersperse(line()),
-            ),
-            sequence(
-                module
-                    .function_definitions()
-                    .iter()
-                    .map(|definition| compile_function_definition(context, definition))
-                    .intersperse(line()),
-            ),
-            compile_remaining_block_comment(context),
-        ]
-        .into_iter()
-        .fold(empty(), |all, document| {
-            if count_lines(&document) == 0 {
-                all
-            } else {
-                sequence([
-                    if count_lines(&all) == 0 {
-                        empty()
-                    } else {
-                        sequence([all, line()])
-                    },
-                    document,
-                ])
-            }
-        }),
-    )
+    format_document(&compile_module(
+        &mut Context::new(&Bump::new(), comments),
+        module,
+    ))
 }
 
 pub fn format_type_definition(definition: &TypeDefinition) -> String {
-    mfmt::format(&compile_type_definition(&mut Context::new(&[]), definition))
+    format_document(&compile_type_definition(
+        &mut Context::new(&Bump::new(), &[]),
+        definition,
+    ))
 }
 
 pub fn format_function_signature(lambda: &Lambda) -> String {
-    mfmt::format(&compile_signature(
-        &mut Context::new(&[]),
+    format_document(&compile_signature(
+        &mut Context::new(&Bump::new(), &[]),
         lambda.arguments(),
         lambda.result_type(),
         lambda.position(),
     ))
 }
 
-fn compile_imports(context: &mut Context, imports: &[&Import]) -> Document {
-    sequence(
+fn format_document(document: &Document) -> String {
+    let mut string = String::new();
+
+    mfmt::format(document, &mut string, FormatOptions::new(2)).expect("infallible string write");
+
+    string
+}
+
+fn compile_module<'a>(context: &mut Context<'a>, module: &'a Module) -> Document<'a> {
+    let (external_imports, internal_imports) = module
+        .imports()
+        .iter()
+        .partition::<Vec<_>, _>(|import| matches!(import.module_path(), ModulePath::External(_)));
+
+    [
+        compile_imports(context, &external_imports),
+        compile_imports(context, &internal_imports),
+        compile_foreign_imports(context, module.foreign_imports()),
+        context.builder().sequence(
+            module
+                .type_definitions()
+                .iter()
+                .map(|definition| compile_type_definition(context, definition))
+                .intersperse(line()),
+        ),
+        context.builder().sequence(
+            module
+                .function_definitions()
+                .iter()
+                .map(|definition| compile_function_definition(context, definition))
+                .intersperse(line()),
+        ),
+        compile_remaining_block_comment(context),
+    ]
+    .into_iter()
+    .fold(empty(), |all, document| {
+        if count_lines(&document) == 0 {
+            all
+        } else {
+            context.builder().sequence([
+                if count_lines(&all) == 0 {
+                    empty()
+                } else {
+                    context.builder().sequence([all, line()])
+                },
+                document,
+            ])
+        }
+    })
+}
+
+fn compile_imports<'a>(context: &mut Context<'a>, imports: &[&'a Import]) -> Document<'a> {
+    context.builder().sequence(
         imports
             .iter()
+            .copied()
             .sorted_by_key(|import| import.module_path())
             .map(|import| compile_import(context, import)),
     )
 }
 
-fn compile_import(context: &mut Context, import: &Import) -> Document {
-    sequence([
+fn compile_import<'a>(context: &mut Context<'a>, import: &'a Import) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence([
         compile_block_comment(context, import.position()),
         "import ".into(),
-        compile_module_path(import.module_path()),
+        compile_module_path(context, import.module_path()),
         if let Some(prefix) = import.prefix() {
-            sequence([" as ", prefix])
+            builder.strings([" as ", prefix])
         } else {
             empty()
         },
         if import.unqualified_names().is_empty() {
             empty()
         } else {
-            sequence([
+            builder.sequence([
                 " { ".into(),
-                sequence(
+                builder.strings(
                     import
                         .unqualified_names()
                         .iter()
@@ -112,34 +129,45 @@ fn compile_import(context: &mut Context, import: &Import) -> Document {
     ])
 }
 
-fn compile_module_path(path: &ModulePath) -> Document {
+fn compile_module_path<'a>(context: &Context<'a>, path: &'a ModulePath) -> Document<'a> {
     match path {
-        ModulePath::External(path) => sequence([
+        ModulePath::External(path) => context.builder().sequence([
             path.package().into(),
             "'".into(),
-            compile_module_path_components(path.components()),
+            compile_module_path_components(context, path.components()),
         ]),
-        ModulePath::Internal(path) => sequence([
+        ModulePath::Internal(path) => context.builder().sequence([
             "'".into(),
-            compile_module_path_components(path.components()),
+            compile_module_path_components(context, path.components()),
         ]),
     }
 }
 
-fn compile_module_path_components(components: &[String]) -> Document {
-    components.join("'").into()
+fn compile_module_path_components<'a>(
+    context: &Context<'a>,
+    components: &[String],
+) -> Document<'a> {
+    context
+        .builder()
+        .strings(components.iter().map(String::as_str).intersperse("'"))
 }
 
-fn compile_foreign_imports(context: &mut Context, imports: &[ForeignImport]) -> Document {
-    sequence(
+fn compile_foreign_imports<'a>(
+    context: &mut Context<'a>,
+    imports: &'a [ForeignImport],
+) -> Document<'a> {
+    context.builder().sequence(
         imports
             .iter()
             .map(|import| compile_foreign_import(context, import)),
     )
 }
 
-fn compile_foreign_import(context: &mut Context, import: &ForeignImport) -> Document {
-    sequence([
+fn compile_foreign_import<'a>(
+    context: &mut Context<'a>,
+    import: &'a ForeignImport,
+) -> Document<'a> {
+    context.builder().sequence([
         compile_block_comment(context, import.position()),
         "import foreign".into(),
         match import.calling_convention() {
@@ -149,12 +177,15 @@ fn compile_foreign_import(context: &mut Context, import: &ForeignImport) -> Docu
         " ".into(),
         import.name().into(),
         " ".into(),
-        compile_type(import.type_()),
+        compile_type(context, import.type_()),
         line(),
     ])
 }
 
-fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -> Document {
+fn compile_type_definition<'a>(
+    context: &mut Context<'a>,
+    definition: &'a TypeDefinition,
+) -> Document<'a> {
     match definition {
         TypeDefinition::RecordDefinition(definition) => {
             compile_record_definition(context, definition)
@@ -163,8 +194,13 @@ fn compile_type_definition(context: &mut Context, definition: &TypeDefinition) -
     }
 }
 
-fn compile_record_definition(context: &mut Context, definition: &RecordDefinition) -> Document {
-    sequence([
+fn compile_record_definition<'a>(
+    context: &mut Context<'a>,
+    definition: &'a RecordDefinition,
+) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence([
         compile_block_comment(context, definition.position()),
         "type ".into(),
         definition.name().into(),
@@ -172,12 +208,16 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
         if definition.fields().is_empty() {
             empty()
         } else {
-            sequence([
-                indent(sequence(definition.fields().iter().map(|field| {
-                    sequence([
+            builder.sequence([
+                builder.indent(builder.sequence(definition.fields().iter().map(|field| {
+                    builder.sequence([
                         line(),
-                        compile_line_comment(context, field.position(), |_| {
-                            sequence([field.name().into(), " ".into(), compile_type(field.type_())])
+                        compile_line_comment(context, field.position(), |context| {
+                            builder.sequence([
+                                field.name().into(),
+                                " ".into(),
+                                compile_type(context, field.type_()),
+                            ])
                         }),
                     ])
                 }))),
@@ -189,28 +229,34 @@ fn compile_record_definition(context: &mut Context, definition: &RecordDefinitio
     ])
 }
 
-fn compile_type_alias(context: &mut Context, alias: &TypeAlias) -> Document {
-    let type_ = compile_type(alias.type_());
+fn compile_type_alias<'a>(context: &mut Context<'a>, alias: &'a TypeAlias) -> Document<'a> {
+    let builder = context.builder();
+    let type_ = compile_type(context, alias.type_());
 
-    sequence([
+    builder.sequence([
         compile_block_comment(context, alias.position()),
         "type ".into(),
         alias.name().into(),
         " =".into(),
         if is_broken(&type_) {
-            indent(sequence([line(), type_]))
+            builder.indent(builder.sequence([line(), type_]))
         } else {
-            sequence([" ".into(), type_])
+            builder.sequence([" ".into(), type_])
         },
         line(),
     ])
 }
 
-fn compile_function_definition(context: &mut Context, definition: &FunctionDefinition) -> Document {
-    sequence([
+fn compile_function_definition<'a>(
+    context: &mut Context<'a>,
+    definition: &'a FunctionDefinition,
+) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence([
         compile_block_comment(context, definition.position()),
         if let Some(export) = definition.foreign_export() {
-            sequence([
+            builder.sequence([
                 "foreign ".into(),
                 match export.calling_convention() {
                     CallingConvention::C => "\"c\" ".into(),
@@ -227,26 +273,32 @@ fn compile_function_definition(context: &mut Context, definition: &FunctionDefin
     ])
 }
 
-fn compile_type(type_: &Type) -> Document {
+fn compile_type<'a>(context: &Context<'a>, type_: &'a Type) -> Document<'a> {
+    let builder = context.builder();
+
     match type_ {
-        Type::Function(function) => sequence([
+        Type::Function(function) => builder.sequence([
             "\\(".into(),
-            sequence(
+            builder.sequence(
                 function
                     .arguments()
                     .iter()
-                    .map(compile_type)
+                    .map(|type_| compile_type(context, type_))
                     .intersperse(", ".into()),
             ),
             ") ".into(),
-            compile_type(function.result()),
+            compile_type(context, function.result()),
         ]),
-        Type::List(list) => sequence(["[".into(), compile_type(list.element()), "]".into()]),
-        Type::Map(map) => sequence([
+        Type::List(list) => builder.sequence([
+            "[".into(),
+            compile_type(context, list.element()),
+            "]".into(),
+        ]),
+        Type::Map(map) => builder.sequence([
             "{".into(),
-            compile_type(map.key()),
+            compile_type(context, map.key()),
             ": ".into(),
-            compile_type(map.value()),
+            compile_type(context, map.value()),
             "}".into(),
         ]),
         Type::Record(record) => record.name().into(),
@@ -254,20 +306,20 @@ fn compile_type(type_: &Type) -> Document {
         Type::Union(_) => {
             let types = collect_union_types(type_);
 
-            let union = sequence(
+            let union = builder.sequence(
                 types
                     .iter()
                     .enumerate()
                     .map(|(index, type_)| {
-                        let document = compile_type(type_);
+                        let document = compile_type(context, type_);
 
                         if index != types.len() - 1 && matches!(type_, Type::Function(_)) {
-                            sequence(["(".into(), document, ")".into()])
+                            builder.sequence(["(".into(), document, ")".into()])
                         } else {
                             document
                         }
                     })
-                    .intersperse(sequence([" |".into(), line()])),
+                    .intersperse(builder.sequence([" |".into(), line()])),
             );
 
             if types.len() == 1
@@ -275,16 +327,18 @@ fn compile_type(type_: &Type) -> Document {
                     == types.get(1).map(|type_| type_.position().line_number())
                     && !is_broken(&union)
             {
-                flatten(union)
+                builder.flatten(union)
             } else {
-                r#break(union)
+                builder.r#break(union)
             }
         }
     }
 }
 
-fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
-    sequence([
+fn compile_lambda<'a>(context: &mut Context<'a>, lambda: &'a Lambda) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence([
         compile_signature(
             context,
             lambda.arguments(),
@@ -296,44 +350,48 @@ fn compile_lambda(context: &mut Context, lambda: &Lambda) -> Document {
             are_arguments_flat(lambda.arguments(), lambda.position())
                 && lambda.position().line_number()
                     == lambda.body().expression().position().line_number(),
-            compile_block(context, lambda.body()),
+            builder.allocate(compile_block(context, lambda.body())),
         ),
     ])
 }
 
-fn compile_signature(
-    context: &mut Context,
-    arguments: &[Argument],
-    result_type: &Type,
+fn compile_signature<'a>(
+    context: &mut Context<'a>,
+    arguments: &'a [Argument],
+    result_type: &'a Type,
     position: &Position,
-) -> Document {
+) -> Document<'a> {
+    let builder = context.builder();
     let flat = are_arguments_flat(arguments, position);
-    let separator = sequence([",".into(), line()]);
+    let separator = builder.sequence([",".into(), line()]);
 
-    let arguments = sequence(
+    let arguments = builder.sequence(
         arguments
             .iter()
             .map(|argument| {
-                compile_line_comment(context, argument.position(), |_| {
-                    sequence([
+                compile_line_comment(context, argument.position(), |context| {
+                    builder.sequence([
                         argument.name().into(),
                         " ".into(),
-                        compile_type(argument.type_()),
+                        compile_type(context, argument.type_()),
                     ])
                 })
             })
             .intersperse(separator.clone()),
     );
 
-    sequence([
+    builder.sequence([
         "\\(".into(),
         if flat {
-            flatten(arguments)
+            builder.flatten(arguments)
         } else {
-            r#break(sequence([indent(sequence([line(), arguments])), separator]))
+            builder.r#break(builder.sequence([
+                builder.indent(builder.sequence([line(), arguments])),
+                separator,
+            ]))
         },
         ") ".into(),
-        compile_type(result_type),
+        compile_type(context, result_type),
     ])
 }
 
@@ -345,8 +403,9 @@ fn are_arguments_flat(arguments: &[Argument], position: &Position) -> bool {
                 .map(|argument| argument.position().line_number())
 }
 
-fn compile_block(context: &mut Context, block: &Block) -> Document {
-    let statements = sequence(
+fn compile_block<'a>(context: &mut Context<'a>, block: &'a Block) -> Document<'a> {
+    let builder = context.builder();
+    let statements = builder.sequence(
         block
             .statements()
             .iter()
@@ -376,13 +435,13 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
                     line()
                 };
 
-                sequence([block_comment, statement_document, extra_line])
+                builder.sequence([block_comment, statement_document, extra_line])
             }),
     );
 
-    sequence([
+    builder.sequence([
         "{".into(),
-        indent(sequence([
+        builder.indent(builder.sequence([
             line(),
             statements,
             compile_line_comment(context, block.expression().position(), |context| {
@@ -394,26 +453,30 @@ fn compile_block(context: &mut Context, block: &Block) -> Document {
     ])
 }
 
-fn compile_statement(context: &mut Context, statement: &Statement) -> Document {
-    sequence([
+fn compile_statement<'a>(context: &mut Context<'a>, statement: &'a Statement) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence([
         if let Some(name) = statement.name() {
-            sequence([name, " = "])
+            builder.strings([name, " = "])
         } else {
             empty()
         },
         compile_expression(context, statement.expression()),
         compile_suffix_comment(context, statement.position()),
-        r#break(line()),
+        builder.r#break(line()),
     ])
 }
 
-fn compile_expression(context: &mut Context, expression: &Expression) -> Document {
+fn compile_expression<'a>(context: &mut Context<'a>, expression: &'a Expression) -> Document<'a> {
+    let builder = context.builder();
+
     match expression {
         Expression::BinaryOperation(operation) => compile_binary_operation(context, operation),
         Expression::Call(call) => {
-            let separator = sequence([",".into(), line()]);
+            let separator = builder.sequence([",".into(), line()]);
             let function = compile_expression(context, call.function());
-            let arguments = sequence(
+            let arguments = builder.sequence(
                 call.arguments()
                     .iter()
                     .map(|argument| {
@@ -424,7 +487,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                     .intersperse(separator.clone()),
             );
 
-            sequence([
+            builder.sequence([
                 function,
                 "(".into(),
                 if call.arguments().is_empty()
@@ -435,24 +498,27 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                             .map(|expression| expression.position().line_number())
                         && !is_broken(&arguments)
                 {
-                    flatten(arguments)
+                    builder.flatten(arguments)
                 } else {
-                    r#break(sequence([indent(sequence([line(), arguments])), separator]))
+                    builder.r#break(builder.sequence([
+                        builder.indent(builder.sequence([line(), arguments])),
+                        separator,
+                    ]))
                 },
                 ")".into(),
             ])
         }
         Expression::If(if_) => compile_if(context, if_),
-        Expression::IfList(if_) => sequence([
-            sequence(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
+        Expression::IfList(if_) => builder.sequence([
+            builder.strings(["if [", if_.first_name(), ", ...", if_.rest_name(), "] = "]),
             compile_expression(context, if_.list()),
             " ".into(),
             compile_block(context, if_.then()),
             " else ".into(),
             compile_block(context, if_.else_()),
         ]),
-        Expression::IfMap(if_) => sequence([
-            sequence(["if ", if_.name(), " = "]),
+        Expression::IfMap(if_) => builder.sequence([
+            builder.strings(["if ", if_.name(), " = "]),
             compile_expression(context, if_.map()),
             "[".into(),
             compile_expression(context, if_.key()),
@@ -465,19 +531,19 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
         Expression::Lambda(lambda) => compile_lambda(context, lambda),
         Expression::List(list) => compile_list(context, list),
         Expression::ListComprehension(comprehension) => {
-            let elements = sequence([
+            let elements = builder.sequence([
                 line(),
                 compile_line_comment(context, comprehension.element().position(), |context| {
                     compile_expression(context, comprehension.element())
                 }),
                 line(),
-                sequence(
+                builder.sequence(
                     comprehension
                         .branches()
                         .iter()
                         .map(|branch| {
                             compile_line_comment(context, branch.position(), |context| {
-                                sequence(
+                                builder.sequence(
                                     ["for ".into()]
                                         .into_iter()
                                         .chain(
@@ -499,7 +565,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                                                 .collect::<Vec<_>>(),
                                         )
                                         .chain(branch.condition().map(|condition| {
-                                            sequence([
+                                            builder.sequence([
                                                 " if ".into(),
                                                 compile_expression(context, condition),
                                             ])
@@ -511,41 +577,42 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                 ),
             ]);
 
-            sequence([
+            builder.sequence([
                 "[".into(),
-                compile_type(comprehension.type_()),
+                compile_type(context, comprehension.type_()),
                 if comprehension.position().line_number()
                     == comprehension.element().position().line_number()
                     && !is_broken(&elements)
                 {
-                    flatten(elements)
+                    builder.flatten(elements)
                 } else {
-                    r#break(sequence([indent(elements), line()]))
+                    builder.r#break(builder.sequence([builder.indent(elements), line()]))
                 },
                 "]".into(),
             ])
         }
         Expression::Map(map) => compile_map(context, map),
         Expression::Number(number) => match number.value() {
-            NumberRepresentation::Binary(string) => "0b".to_owned() + string,
-            NumberRepresentation::Hexadecimal(string) => "0x".to_owned() + &string.to_uppercase(),
-            NumberRepresentation::FloatingPoint(string) => string.clone(),
-        }
-        .into(),
+            NumberRepresentation::Binary(string) => builder.strings(["0b", string]),
+            NumberRepresentation::Hexadecimal(string) => {
+                builder.strings(["0x", &string.to_uppercase()])
+            }
+            NumberRepresentation::FloatingPoint(string) => string.as_str().into(),
+        },
         Expression::Record(record) => {
-            let separator = sequence([",".into(), line()]);
-            let elements = sequence(
+            let separator = builder.sequence([",".into(), line()]);
+            let elements = builder.sequence(
                 record
                     .record()
                     .map(|record| {
                         compile_line_comment(context, record.position(), |context| {
-                            sequence(["...".into(), compile_expression(context, record)])
+                            builder.sequence(["...".into(), compile_expression(context, record)])
                         })
                     })
                     .into_iter()
                     .chain(record.fields().iter().map(|field| {
                         compile_line_comment(context, field.position(), |context| {
-                            sequence([
+                            builder.sequence([
                                 field.name().into(),
                                 ": ".into(),
                                 compile_expression(context, field.expression()),
@@ -555,7 +622,7 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                     .intersperse(separator.clone()),
             );
 
-            sequence([
+            builder.sequence([
                 record.type_name().into(),
                 "{".into(),
                 if record.record().is_none() && record.fields().is_empty()
@@ -568,40 +635,44 @@ fn compile_expression(context: &mut Context, expression: &Expression) -> Documen
                         .map(|position| position.line_number())
                         && !is_broken(&elements)
                 {
-                    flatten(elements)
+                    builder.flatten(elements)
                 } else {
-                    r#break(sequence([indent(sequence([line(), elements])), separator]))
+                    builder.r#break(builder.sequence([
+                        builder.indent(builder.sequence([line(), elements])),
+                        separator,
+                    ]))
                 },
                 "}".into(),
             ])
         }
-        Expression::RecordDeconstruction(deconstruction) => sequence([
+        Expression::RecordDeconstruction(deconstruction) => builder.sequence([
             compile_expression(context, deconstruction.expression()),
             ".".into(),
             deconstruction.name().into(),
         ]),
-        Expression::String(string) => sequence(["\"", string.value(), "\""]),
+        Expression::String(string) => builder.strings(["\"", string.value(), "\""]),
         Expression::UnaryOperation(operation) => {
             let operand = compile_expression(context, operation.expression());
             let operand = if matches!(operation.expression(), Expression::BinaryOperation(_)) {
-                sequence(["(".into(), operand, ")".into()])
+                builder.sequence(["(".into(), operand, ")".into()])
             } else {
                 operand
             };
 
             match operation.operator() {
-                UnaryOperator::Not => sequence(["!".into(), operand]),
-                UnaryOperator::Try => sequence([operand, "?".into()]),
+                UnaryOperator::Not => builder.sequence(["!".into(), operand]),
+                UnaryOperator::Try => builder.sequence([operand, "?".into()]),
             }
         }
         Expression::Variable(variable) => variable.name().into(),
     }
 }
 
-fn compile_if(context: &mut Context, if_: &If) -> Document {
-    let document = sequence([
-        sequence(if_.branches().iter().map(|branch| {
-            sequence([
+fn compile_if<'a>(context: &mut Context<'a>, if_: &'a If) -> Document<'a> {
+    let builder = context.builder();
+    let document = builder.sequence([
+        builder.sequence(if_.branches().iter().map(|branch| {
+            builder.sequence([
                 "if ".into(),
                 compile_expression(context, branch.condition()),
                 " ".into(),
@@ -619,23 +690,24 @@ fn compile_if(context: &mut Context, if_: &If) -> Document {
                     .branches()
                     .first()
                     .map(|branch| branch.block().expression().position().line_number()),
-        document,
+        builder.allocate(document),
     )
 }
 
-fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
-    let document = sequence([
+fn compile_if_type<'a>(context: &mut Context<'a>, if_: &'a IfType) -> Document<'a> {
+    let builder = context.builder();
+    let document = builder.sequence([
         "if ".into(),
         if_.name().into(),
         " = ".into(),
         compile_expression(context, if_.argument()),
         " as ".into(),
-        sequence(
+        builder.sequence(
             if_.branches()
                 .iter()
                 .map(|branch| {
-                    sequence([
-                        compile_type(branch.type_()),
+                    builder.sequence([
+                        compile_type(context, branch.type_()),
                         " ".into(),
                         compile_block(context, branch.block()),
                     ])
@@ -643,7 +715,7 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
                 .intersperse(" else if ".into()),
         ),
         if let Some(block) = if_.else_() {
-            sequence([" else ".into(), compile_block(context, block)])
+            builder.sequence([" else ".into(), compile_block(context, block)])
         } else {
             empty()
         },
@@ -656,22 +728,22 @@ fn compile_if_type(context: &mut Context, if_: &IfType) -> Document {
                     .branches()
                     .first()
                     .map(|branch| branch.block().expression().position().line_number()),
-        document,
+        builder.allocate(document),
     )
 }
 
-fn compile_list(context: &mut Context, list: &List) -> Document {
+fn compile_list<'a>(context: &mut Context<'a>, list: &'a List) -> Document<'a> {
+    let builder = context.builder();
     let separator = Document::from(",");
-    let elements = sequence(
+    let elements = builder.sequence(
         list.elements()
             .iter()
             .map(|element| {
-                sequence([
+                builder.sequence([
                     line(),
                     compile_line_comment(context, element.position(), |context| match element {
-                        ListElement::Multiple(expression) => {
-                            sequence(["...".into(), compile_expression(context, expression)])
-                        }
+                        ListElement::Multiple(expression) => builder
+                            .sequence(["...".into(), compile_expression(context, expression)]),
                         ListElement::Single(expression) => compile_expression(context, expression),
                     }),
                 ])
@@ -679,9 +751,9 @@ fn compile_list(context: &mut Context, list: &List) -> Document {
             .intersperse(separator.clone()),
     );
 
-    sequence([
+    builder.sequence([
         "[".into(),
-        compile_type(list.type_()),
+        compile_type(context, list.type_()),
         if list.elements().is_empty()
             || Some(list.position().line_number())
                 == list
@@ -690,32 +762,32 @@ fn compile_list(context: &mut Context, list: &List) -> Document {
                     .map(|element| element.position().line_number())
                 && !is_broken(&elements)
         {
-            flatten(elements)
+            builder.flatten(elements)
         } else {
-            r#break(sequence([indent(elements), separator, line()]))
+            builder.r#break(builder.sequence([builder.indent(elements), separator, line()]))
         },
         "]".into(),
     ])
 }
 
-fn compile_map(context: &mut Context, map: &Map) -> Document {
-    let type_ = sequence([
-        compile_type(map.key_type()),
+fn compile_map<'a>(context: &mut Context<'a>, map: &'a Map) -> Document<'a> {
+    let builder = context.builder();
+    let type_ = builder.sequence([
+        compile_type(context, map.key_type()),
         ": ".into(),
-        compile_type(map.value_type()),
+        compile_type(context, map.value_type()),
     ]);
     let separator = Document::from(",");
-    let elements = sequence(
+    let elements = builder.sequence(
         map.elements()
             .iter()
             .map(|element| {
-                sequence([
+                builder.sequence([
                     line(),
                     compile_line_comment(context, element.position(), |context| match element {
-                        MapElement::Multiple(expression) => {
-                            sequence(["...".into(), compile_expression(context, expression)])
-                        }
-                        MapElement::Single(entry) => sequence([
+                        MapElement::Multiple(expression) => builder
+                            .sequence(["...".into(), compile_expression(context, expression)]),
+                        MapElement::Single(entry) => builder.sequence([
                             compile_expression(context, entry.key()),
                             ": ".into(),
                             compile_expression(context, entry.value()),
@@ -726,7 +798,7 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
             .intersperse(separator.clone()),
     );
 
-    sequence([
+    builder.sequence([
         "{".into(),
         type_,
         if map.elements().is_empty()
@@ -737,18 +809,22 @@ fn compile_map(context: &mut Context, map: &Map) -> Document {
                     .map(|element| element.position().line_number())
                 && !is_broken(&elements)
         {
-            flatten(elements)
+            builder.flatten(elements)
         } else {
-            r#break(sequence([indent(elements), separator, line()]))
+            builder.r#break(builder.sequence([builder.indent(elements), separator, line()]))
         },
         "}".into(),
     ])
 }
 
-fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) -> Document {
-    let document = sequence([
+fn compile_binary_operation<'a>(
+    context: &mut Context<'a>,
+    operation: &'a BinaryOperation,
+) -> Document<'a> {
+    let builder = context.builder();
+    let document = builder.sequence([
         compile_operand(context, operation.lhs(), operation.operator()),
-        indent(sequence([
+        builder.indent(builder.sequence([
             line(),
             compile_binary_operator(operation.operator()),
             " ".into(),
@@ -758,15 +834,15 @@ fn compile_binary_operation(context: &mut Context, operation: &BinaryOperation) 
 
     flatten_if(
         operation.lhs().position().line_number() == operation.rhs().position().line_number(),
-        document,
+        builder.allocate(document),
     )
 }
 
-fn compile_operand(
-    context: &mut Context,
-    operand: &Expression,
+fn compile_operand<'a>(
+    context: &mut Context<'a>,
+    operand: &'a Expression,
     parent_operator: BinaryOperator,
-) -> Document {
+) -> Document<'a> {
     let document = compile_expression(context, operand);
 
     if match operand {
@@ -776,13 +852,15 @@ fn compile_operand(
     .map(|operand| operator_priority(operand.operator()) < operator_priority(parent_operator))
     .unwrap_or_default()
     {
-        sequence(["(".into(), document, ")".into()])
+        context
+            .builder()
+            .sequence(["(".into(), document, ")".into()])
     } else {
         document
     }
 }
 
-fn compile_binary_operator(operator: BinaryOperator) -> Document {
+fn compile_binary_operator(operator: BinaryOperator) -> Document<'static> {
     match operator {
         BinaryOperator::Or => "|",
         BinaryOperator::And => "&",
@@ -800,46 +878,52 @@ fn compile_binary_operator(operator: BinaryOperator) -> Document {
     .into()
 }
 
-fn compile_line_comment(
-    context: &mut Context,
+fn compile_line_comment<'a>(
+    context: &mut Context<'a>,
     position: &Position,
-    document: impl Fn(&mut Context) -> Document,
-) -> Document {
-    sequence([
+    document: impl Fn(&mut Context<'a>) -> Document<'a>,
+) -> Document<'a> {
+    context.builder().sequence([
         compile_block_comment(context, position),
         document(context),
         compile_suffix_comment(context, position),
     ])
 }
 
-fn compile_suffix_comment(context: &mut Context, position: &Position) -> Document {
-    sequence(
+fn compile_suffix_comment<'a>(context: &mut Context<'a>, position: &Position) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence(
         context
             .drain_current_comment(position.line_number())
-            .map(|comment| line_suffix(" #".to_owned() + comment.line().trim_end())),
+            .map(|comment| builder.line_suffixes([" #", comment.line().trim_end()])),
     )
 }
 
-fn compile_block_comment(context: &mut Context, position: &Position) -> Document {
-    compile_all_comments(
-        &context
-            .drain_comments_before(position.line_number())
-            .collect::<Vec<_>>(),
-        Some(position.line_number()),
-    )
+fn compile_block_comment<'a>(context: &mut Context<'a>, position: &Position) -> Document<'a> {
+    let comments = context
+        .drain_comments_before(position.line_number())
+        .collect::<Vec<_>>();
+
+    compile_all_comments(context, &comments, Some(position.line_number()))
 }
 
-fn compile_remaining_block_comment(context: &mut Context) -> Document {
-    compile_all_comments(
-        &context
-            .drain_comments_before(usize::MAX)
-            .collect::<Vec<_>>(),
-        None,
-    )
+fn compile_remaining_block_comment<'a>(context: &mut Context<'a>) -> Document<'a> {
+    let comments = context
+        .drain_comments_before(usize::MAX)
+        .collect::<Vec<_>>();
+
+    compile_all_comments(context, &comments, None)
 }
 
-fn compile_all_comments(comments: &[&Comment], last_line_number: Option<usize>) -> Document {
-    sequence(
+fn compile_all_comments<'a>(
+    context: &Context<'a>,
+    comments: &[&'a Comment],
+    last_line_number: Option<usize>,
+) -> Document<'a> {
+    let builder = context.builder();
+
+    builder.sequence(
         comments
             .iter()
             .zip(
@@ -850,10 +934,10 @@ fn compile_all_comments(comments: &[&Comment], last_line_number: Option<usize>) 
                     .chain([last_line_number.unwrap_or(0)]),
             )
             .map(|(comment, next_line_number)| {
-                sequence([
+                builder.sequence([
                     "#".into(),
                     comment.line().trim_end().into(),
-                    r#break(line()),
+                    builder.r#break(line()),
                     if comment.position().line_number() + 1 < next_line_number {
                         line()
                     } else {
@@ -864,13 +948,13 @@ fn compile_all_comments(comments: &[&Comment], last_line_number: Option<usize>) 
     )
 }
 
-fn collect_union_types(type_: &Type) -> Vec<Type> {
+fn collect_union_types(type_: &Type) -> Vec<&Type> {
     match type_ {
         Type::Union(union) => collect_union_types(union.lhs())
             .into_iter()
             .chain(collect_union_types(union.rhs()))
             .collect(),
-        _ => vec![type_.clone()],
+        _ => vec![type_],
     }
 }
 
@@ -1317,7 +1401,7 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format_type(type_: &Type) -> String {
-            mfmt::format(&compile_type(type_))
+            format_document(&compile_type(&Context::new(&Bump::new(), &[]), type_))
         }
 
         #[test]
@@ -1616,11 +1700,14 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(block: &Block) -> String {
-            mfmt::format(&compile_block(&mut Context::new(&[]), block)) + "\n"
+            format_with_comments(block, &[])
         }
 
         fn format_with_comments(block: &Block, comments: &[Comment]) -> String {
-            mfmt::format(&compile_block(&mut Context::new(comments), block)) + "\n"
+            format_document(&compile_block(
+                &mut Context::new(&Bump::new(), comments),
+                block,
+            )) + "\n"
         }
 
         #[test]
@@ -2046,11 +2133,14 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         fn format(expression: &Expression) -> String {
-            mfmt::format(&compile_expression(&mut Context::new(&[]), expression))
+            format_with_comments(expression, &[])
         }
 
         fn format_with_comments(expression: &Expression, comments: &[Comment]) -> String {
-            mfmt::format(&compile_expression(&mut Context::new(comments), expression))
+            format_document(&compile_expression(
+                &mut Context::new(&Bump::new(), comments),
+                expression,
+            ))
         }
 
         #[test]
