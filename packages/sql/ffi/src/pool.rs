@@ -5,8 +5,7 @@ use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
-type AnyQuery<'a> =
-    sqlx::query::Query<'a, sqlx::Any, <sqlx::Any as sqlx::database::HasArguments<'a>>::Arguments>;
+type AnyQuery<'a> = sqlx::query::Query<'a, sqlx::Any, <sqlx::Any as sqlx::Database>::Arguments<'a>>;
 
 #[repr(C)]
 struct PoolOptions {
@@ -43,6 +42,8 @@ async fn _pen_sql_pool_create(
     uri: ffi::ByteString,
     options: ffi::Arc<PoolOptions>,
 ) -> Result<Pool, Box<dyn Error>> {
+    sqlx::any::install_default_drivers();
+
     Ok(Pool::new(
         sqlx::any::AnyPoolOptions::new()
             .min_connections(f64::from(options.min_connections) as u32)
