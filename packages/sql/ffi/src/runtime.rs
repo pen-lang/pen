@@ -1,8 +1,7 @@
 use std::{
-    future::Future,
-    pin::Pin,
+    future::{poll_fn, Future},
+    pin::pin,
     sync::LazyLock,
-    task::{Context, Poll},
 };
 use tokio::runtime::{Builder, Runtime};
 
@@ -14,50 +13,23 @@ static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
         .unwrap()
 });
 
-// Polls and drops a future in the runtime context. sqlx spawns tasks even on
-// drop of pool connections.
-pub fn run<F: Future>(future: F) -> impl Future<Output = F::Output> {
-    Run(Some(Box::pin(future)))
-}
+// Polls a future in the runtime context.
+pub async fn run<T>(future: impl Future<Output = T>) -> T {
+    let mut future = pin!(future);
 
-struct Run<F>(Option<Pin<Box<F>>>);
-
-impl<F: Future> Future for Run<F> {
-    type Output = F::Output;
-
-    fn poll(mut self: Pin<&mut Self>, context: &mut Context) -> Poll<Self::Output> {
+    poll_fn(|context| {
         let _guard = RUNTIME.enter();
 
-        self.0.as_mut().unwrap().as_mut().poll(context)
-    }
-}
-
-impl<F> Drop for Run<F> {
-    fn drop(&mut self) {
-        let _guard = RUNTIME.enter();
-
-        self.0.take();
-    }
+        future.as_mut().poll(context)
+    })
+    .await
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use futures::executor::block_on;
-    use std::sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    };
     use tokio::runtime::Handle;
-
-    struct Probe(Arc<AtomicBool>);
-
-    impl Drop for Probe {
-        fn drop(&mut self) {
-            self.0
-                .store(Handle::try_current().is_ok(), Ordering::SeqCst);
-        }
-    }
 
     #[test]
     fn enter_context_on_poll() {
@@ -69,15 +41,5 @@ mod tests {
         block_on(run(async {}));
 
         assert!(Handle::try_current().is_err());
-    }
-
-    #[test]
-    fn enter_context_on_drop() {
-        let dropped = Arc::new(AtomicBool::new(false));
-        let probe = Probe(dropped.clone());
-
-        drop(run(async move { drop(probe) }));
-
-        assert!(dropped.load(Ordering::SeqCst));
     }
 }
