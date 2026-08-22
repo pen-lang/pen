@@ -2,6 +2,7 @@
 name = "mir-fmm"
 description = "MIR to F-- compiler"
 version = "0.1.0"
+publish = false
 license = "MIT"
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"

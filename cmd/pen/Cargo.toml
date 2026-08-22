@@ -1,6 +1,7 @@
 [package]
 name = "pen"
 version = "0.6.9"
+publish = false
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2021"
 
