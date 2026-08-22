@@ -7,7 +7,9 @@ set -e
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directories:
+      - /
+      - /.github/actions/*
     schedule:
       interval: daily
   - package-ecosystem: gomod
