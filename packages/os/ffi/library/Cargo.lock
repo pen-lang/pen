@@ -146,12 +146,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hashbrown"
-version = "0.15.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1"
-
-[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -218,24 +212,21 @@ dependencies = [
 
 [[package]]
 name = "pen-ffi"
-version = "0.10.25"
+version = "0.10.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "590ac935a245d7670c435e2f6b239e729d3062964b313922a24b718791bc8fff"
+checksum = "de072d64dacc3ffefb22a1e6cc832cf3ad17bc8892ecb31c5d66942e5dc6f49d"
 dependencies = [
  "async-stream",
  "futures",
  "pen-ffi-macro",
  "tokio",
- "tokio-macros",
- "tokio-stream",
- "tokio-util",
 ]
 
 [[package]]
 name = "pen-ffi-macro"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aeb7d803c1ab813c5687b3d5dfcdf4f9a9806f4749f3247cc3901ca671ce3049"
+checksum = "8a43cb69f7583c33fe308a2fca10e1894cf6050b49baee33d29a1155915adead"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -364,36 +355,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.3",
-]
-
-[[package]]
-name = "tokio-stream"
-version = "0.1.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3d06f0b082ba57c26b79407372e57cf2a1e28124f78e9479fe80322cf53420b"
-dependencies = [
- "futures-core",
- "pin-project-lite",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "tokio-util"
-version = "0.7.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
-dependencies = [
- "bytes",
- "futures-core",
- "futures-io",
- "futures-sink",
- "futures-util",
- "hashbrown",
- "libc",
- "pin-project-lite",
- "slab",
- "tokio",
 ]
 
 [[package]]

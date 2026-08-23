@@ -9,4 +9,4 @@ crate-type = ["staticlib"]
 
 [dependencies]
 crossbeam = "0.8.4"
-ffi = { package = "pen-ffi", version = "0.10.25" }
+ffi = { package = "pen-ffi", version = "0.10.26" }
