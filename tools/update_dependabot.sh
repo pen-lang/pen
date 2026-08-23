@@ -2,8 +2,7 @@
 
 set -e
 
-(
-  cat <<EOF
+cat >$(dirname $0)/../.github/dependabot.yaml <<EOF
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -27,13 +26,8 @@ updates:
   - package-ecosystem: rust-toolchain
     directories:
       - /
-EOF
-
-  for file in $(git ls-files '**/rust-toolchain.toml'); do
-    echo "      - /$(dirname $file)"
-  done
-
-  cat <<EOF
+      - /packages/*/ffi
+      - /packages/os/ffi/*
     groups:
       rust-toolchain:
         patterns:
@@ -47,13 +41,9 @@ EOF
   - package-ecosystem: cargo
     directories:
       - /
-EOF
-
-  for file in $(git ls-files '**/Cargo.lock'); do
-    echo "      - /$(dirname $file)"
-  done
-
-  cat <<EOF
+      - /cmd/test
+      - /packages/*/ffi
+      - /packages/os/ffi/*
     groups:
       cargo:
         patterns:
@@ -65,4 +55,3 @@ EOF
     schedule:
       interval: daily
 EOF
-) >$(dirname $0)/../.github/dependabot.yaml
