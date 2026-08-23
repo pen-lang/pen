@@ -14,7 +14,7 @@ pen-ffi-macro = { path = "../ffi-macro", version = "0.5.2" }
 tokio = { version = "1.53.1", features = ["rt-multi-thread"], optional = true }
 
 [dev-dependencies]
-tokio = { "version" = "1.53.1", "features" = ["full"] }
+tokio = { version = "1.53.1", features = ["macros", "rt"] }
 
 [features]
 runtime = ["std", "tokio"]
