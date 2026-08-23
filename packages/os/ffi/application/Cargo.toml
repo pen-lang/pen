@@ -7,4 +7,4 @@ publish = false
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.10.26" }
 futures = "0.3.34"
-tokio = { "version" = "1.53.1", features = ["full"] }
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "sync", "time"] }
