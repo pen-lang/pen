@@ -42,4 +42,37 @@ mod tests {
 
         assert!(Handle::try_current().is_err());
     }
+
+    mod attribute {
+        use super::*;
+
+        #[pen_ffi_macro::runtime(crate = "crate")]
+        async fn is_in_context() -> bool {
+            Handle::try_current().is_ok()
+        }
+
+        #[pen_ffi_macro::runtime(crate = "crate")]
+        async fn add(x: f64, y: f64) -> Result<f64, ()> {
+            let x = Ok::<_, ()>(x)?;
+
+            Ok(x + y)
+        }
+
+        #[test]
+        fn enter_context() {
+            assert!(block_on(is_in_context()));
+        }
+
+        #[test]
+        fn leave_context() {
+            block_on(is_in_context());
+
+            assert!(Handle::try_current().is_err());
+        }
+
+        #[test]
+        fn pass_arguments() {
+            assert_eq!(block_on(add(40.0, 2.0)), Ok(42.0));
+        }
+    }
 }
