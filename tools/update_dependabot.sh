@@ -36,7 +36,6 @@ EOF
   cat <<EOF
     groups:
       rust-toolchain:
-        group-by: dependency-name
         patterns:
           - "*"
     schedule:
@@ -57,12 +56,10 @@ EOF
   cat <<EOF
     groups:
       cargo:
-        group-by: dependency-name
         patterns:
           - "*"
       cargo-security:
         applies-to: security-updates
-        group-by: dependency-name
         patterns:
           - "*"
     schedule:

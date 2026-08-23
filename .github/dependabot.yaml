@@ -31,7 +31,6 @@ updates:
       - /packages/sql/ffi
     groups:
       rust-toolchain:
-        group-by: dependency-name
         patterns:
           - "*"
     schedule:
@@ -58,12 +57,10 @@ updates:
       - /packages/test/ffi
     groups:
       cargo:
-        group-by: dependency-name
         patterns:
           - "*"
       cargo-security:
         applies-to: security-updates
-        group-by: dependency-name
         patterns:
           - "*"
     schedule:
