@@ -8,7 +8,7 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "0.10.23", features = ["runtime", "std"] }
+ffi = { package = "pen-ffi", version = "0.10.26", features = ["runtime", "std"] }
 futures = "0.3.34"
 sqlx = { version = "0.8.6", features = [
   "any",
@@ -17,4 +17,3 @@ sqlx = { version = "0.8.6", features = [
   "sqlite",
   "runtime-tokio-rustls",
 ] }
-tokio = { version = "1.37.0", features = ["net", "rt-multi-thread", "time"] }

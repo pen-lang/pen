@@ -1,7 +1,7 @@
+use crate::runtime::runtime;
 use futures::{future::FutureExt, pin_mut, stream::StreamExt};
 use std::{num::NonZeroUsize, thread::available_parallelism};
 use tokio::{
-    spawn,
     sync::mpsc::{channel, Receiver},
     task::yield_now,
 };
@@ -11,7 +11,9 @@ const PARALLELISM_MULTIPLIER: usize = 2;
 #[ffi::bindgen]
 async fn _pen_spawn(closure: ffi::Closure) -> ffi::Closure {
     ffi::future::to_closure(
-        spawn(ffi::future::from_closure::<_, ffi::Any>(closure)).map(Result::unwrap),
+        runtime()
+            .spawn(ffi::future::from_closure::<_, ffi::Any>(closure))
+            .map(Result::unwrap),
     )
 }
 
@@ -29,7 +31,7 @@ async fn _pen_race(list: ffi::List) -> ffi::List {
                 .get(),
     );
 
-    spawn(async move {
+    runtime().spawn(async move {
         let list = ffi::future::stream::from_list(list);
 
         pin_mut!(list);
@@ -37,7 +39,7 @@ async fn _pen_race(list: ffi::List) -> ffi::List {
         while let Some(element) = list.next().await {
             let cloned_sender = sender.clone();
 
-            spawn(async move {
+            runtime().spawn(async move {
                 let list = ffi::future::stream::from_list(element.try_into().unwrap());
 
                 pin_mut!(list);

@@ -3,6 +3,7 @@ use std::{error::Error, process::exit, str, time::Duration};
 use tokio::{process::Command, time::sleep};
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_exit(code: ffi::Number) -> ffi::None {
     // HACK Wait for all I/O buffers to be flushed (hopefully.)
     sleep(Duration::from_millis(50)).await;
@@ -12,6 +13,7 @@ async fn _pen_os_exit(code: ffi::Number) -> ffi::None {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_run_command(
     command: ffi::ByteString,
     arguments: ffi::List,

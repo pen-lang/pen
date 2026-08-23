@@ -1,4 +1,4 @@
-use crate::{error::SqlError, runtime};
+use crate::error::SqlError;
 use futures::{pin_mut, StreamExt};
 use sqlx::{Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
@@ -38,6 +38,7 @@ struct PoolInner {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_sql_pool_create(
     uri: ffi::ByteString,
     options: ffi::Arc<PoolOptions>,
@@ -45,20 +46,19 @@ async fn _pen_sql_pool_create(
     sqlx::any::install_default_drivers();
 
     Ok(Pool::new(
-        runtime::run(
-            sqlx::any::AnyPoolOptions::new()
-                .min_connections(f64::from(options.min_connections) as u32)
-                .max_connections(f64::from(options.max_connections) as u32)
-                .acquire_timeout(Duration::from_millis(
-                    f64::from(options.connect_timeout) as u64
-                ))
-                .connect(str::from_utf8(uri.as_slice())?),
-        )
-        .await?,
+        sqlx::any::AnyPoolOptions::new()
+            .min_connections(f64::from(options.min_connections) as u32)
+            .max_connections(f64::from(options.max_connections) as u32)
+            .acquire_timeout(Duration::from_millis(
+                f64::from(options.connect_timeout) as u64
+            ))
+            .connect(str::from_utf8(uri.as_slice())?)
+            .await?,
     ))
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_sql_pool_query(
     pool: Pool,
     query: ffi::ByteString,
@@ -66,13 +66,12 @@ async fn _pen_sql_pool_query(
 ) -> Result<ffi::List, Box<dyn Error>> {
     let mut rows = ffi::List::new();
 
-    for row in runtime::run(
-        pool.as_inner()
-            .fetch_all(build_query(&query, arguments).await?),
-    )
-    .await?
-    .iter()
-    .rev()
+    for row in pool
+        .as_inner()
+        .fetch_all(build_query(&query, arguments).await?)
+        .await?
+        .iter()
+        .rev()
     {
         let mut columns = ffi::List::new();
 
@@ -106,17 +105,17 @@ async fn _pen_sql_pool_query(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_sql_pool_execute(
     pool: Pool,
     query: ffi::ByteString,
     arguments: ffi::List,
 ) -> Result<ffi::Number, Box<dyn Error>> {
-    Ok((runtime::run(
-        pool.as_inner()
-            .execute(build_query(&query, arguments).await?),
-    )
-    .await?
-    .rows_affected() as f64)
+    Ok((pool
+        .as_inner()
+        .execute(build_query(&query, arguments).await?)
+        .await?
+        .rows_affected() as f64)
         .into())
 }
 
