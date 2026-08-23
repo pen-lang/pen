@@ -258,7 +258,6 @@ dependencies = [
 name = "os-app"
 version = "0.1.0"
 dependencies = [
- "async-stream",
  "futures",
  "pen-ffi",
  "tokio",
