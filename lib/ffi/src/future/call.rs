@@ -27,13 +27,15 @@ macro_rules! call {
                 stack.resolve(value);
             }
 
+            fn initial_step_function<C>(closure: &Closure<C>) -> InitialStepFunction<C> {
+                unsafe { transmute::<*const u8, InitialStepFunction<C>>(closure.entry_function()) }
+            }
+
             // Move closure and arguments into an initializer function.
             let mut initialize = Some(|stack: &mut AsyncStack| {
                 let closure = $closure;
 
-                (unsafe {
-                    transmute::<*const u8, InitialStepFunction<$result_type>>(closure.entry_function())
-                })(stack, resolve, closure, $($argument),*);
+                initial_step_function(&closure)(stack, resolve, closure, $($argument),*);
             });
             let mut trampoline: Option<Trampoline> = None;
             let mut stack = AsyncStack::new(INITIAL_STACK_CAPACITY);
@@ -77,7 +79,7 @@ mod tests {
 
     #[tokio::test]
     async fn call_thunk() {
-        let value = Number::new(42.0);
+        let value = 42.0;
 
         assert_eq!(
             call!(
@@ -85,7 +87,7 @@ mod tests {
                 Closure::new(thunk_entry_function as *const u8, value),
             )
             .await,
-            value
+            value.into()
         );
     }
 
@@ -105,7 +107,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(Number) -> Number,
-                Closure::new(closure_entry_function as *const u8, Default::default()),
+                Closure::new(closure_entry_function as *const u8, ()),
                 value.into(),
             )
             .await,
@@ -128,10 +130,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(Number, Number) -> Number,
-                Closure::new(
-                    closure_2_arity_entry_function as *const u8,
-                    Default::default()
-                ),
+                Closure::new(closure_2_arity_entry_function as *const u8, ()),
                 40.0.into(),
                 2.0.into(),
             )
@@ -165,10 +164,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn() -> Number,
-                Closure::new(
-                    closure_entry_function_with_suspension as *const u8,
-                    Default::default()
-                ),
+                Closure::new(closure_entry_function_with_suspension as *const u8, ()),
             )
             .await,
             42.0.into()
@@ -191,10 +187,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(ByteString) -> ByteString,
-                Closure::new(
-                    closure_entry_function_with_string as *const u8,
-                    Default::default()
-                ),
+                Closure::new(closure_entry_function_with_string as *const u8, ()),
                 value.into(),
             )
             .await,
@@ -209,10 +202,7 @@ mod tests {
         assert_eq!(
             call!(
                 fn(ByteString) -> ByteString,
-                Closure::new(
-                    closure_entry_function_with_string as *const u8,
-                    Default::default()
-                ),
+                Closure::new(closure_entry_function_with_string as *const u8, ()),
                 value.clone(),
             )
             .await,
