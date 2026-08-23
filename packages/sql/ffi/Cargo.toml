@@ -10,10 +10,11 @@ crate-type = ["staticlib"]
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.10.26", features = ["runtime", "std"] }
 futures = "0.3.34"
-sqlx = { version = "0.8.6", features = [
+sqlx = { version = "0.9.0", features = [
   "any",
   "mysql",
   "postgres",
-  "sqlite",
-  "runtime-tokio-rustls",
+  "sqlite-bundled",
+  "runtime-tokio",
+  "tls-rustls",
 ] }
