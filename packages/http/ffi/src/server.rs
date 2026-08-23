@@ -7,6 +7,7 @@ use std::error::Error;
 type BoxError = Box<dyn Error + Send + Sync + 'static>;
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_http_server_serve(
     address: ffi::ByteString,
     callback: ffi::Closure,
@@ -31,7 +32,6 @@ async fn _pen_http_server_serve(
 
                             let body = hyper::body::to_bytes(request.into_body()).await?;
 
-                            #[expect(deprecated)]
                             let response = ffi::call!(
                                 fn(
                                     ffi::ByteString,

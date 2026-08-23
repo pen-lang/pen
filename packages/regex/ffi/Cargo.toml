@@ -8,5 +8,5 @@ edition = "2021"
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "0.10.23", features = ["std"] }
+ffi = { package = "pen-ffi", version = "0.10.25", features = ["std"] }
 regex = "1.13.1"
