@@ -23,10 +23,6 @@ updates:
       - /
       - /packages/*/ffi
       - /packages/os/ffi/*
-    groups:
-      rust-toolchain:
-        patterns:
-          - "*"
     schedule:
       interval: daily
   - package-ecosystem: uv
@@ -39,13 +35,5 @@ updates:
       - /cmd/test
       - /packages/*/ffi
       - /packages/os/ffi/*
-    groups:
-      cargo:
-        patterns:
-          - "*"
-      cargo-security:
-        applies-to: security-updates
-        patterns:
-          - "*"
     schedule:
       interval: daily
