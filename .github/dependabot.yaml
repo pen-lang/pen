@@ -21,14 +21,8 @@ updates:
   - package-ecosystem: rust-toolchain
     directories:
       - /
-      - /packages/core/ffi
-      - /packages/http/ffi
-      - /packages/json/ffi
-      - /packages/os-sync/ffi
-      - /packages/os/ffi/application
-      - /packages/os/ffi/library
-      - /packages/prelude/ffi
-      - /packages/sql/ffi
+      - /packages/*/ffi
+      - /packages/os/ffi/*
     groups:
       rust-toolchain:
         patterns:
@@ -43,18 +37,8 @@ updates:
     directories:
       - /
       - /cmd/test
-      - /packages/core/ffi
-      - /packages/html/ffi
-      - /packages/http/ffi
-      - /packages/json/ffi
-      - /packages/os-sync/ffi
-      - /packages/os/ffi/application
-      - /packages/os/ffi/library
-      - /packages/prelude/ffi
-      - /packages/random/ffi
-      - /packages/regex/ffi
-      - /packages/sql/ffi
-      - /packages/test/ffi
+      - /packages/*/ffi
+      - /packages/os/ffi/*
     groups:
       cargo:
         patterns:
