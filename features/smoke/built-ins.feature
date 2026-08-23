@@ -30,7 +30,10 @@ Feature: Built-ins
       """
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the stderr from "./app" should contain exactly '<output>'
+    And the stderr from "./app" should contain exactly:
+      """
+      <output>
+      """
     Then I successfully run `check_memory_leak.sh ./app`
 
     Examples:

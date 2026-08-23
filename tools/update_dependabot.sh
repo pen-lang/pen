@@ -16,10 +16,6 @@ updates:
     directory: /
     schedule:
       interval: daily
-  - package-ecosystem: bundler
-    directory: /
-    schedule:
-      interval: daily
   - package-ecosystem: npm
     directory: /doc
     schedule:
