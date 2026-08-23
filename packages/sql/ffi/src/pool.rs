@@ -1,11 +1,11 @@
 use crate::error::SqlError;
 use futures::{pin_mut, StreamExt};
-use sqlx::{Executor, Row, ValueRef};
+use sqlx::{AssertSqlSafe, Executor, Row, ValueRef};
 use std::{error::Error, str, time::Duration};
 
 type AnyPool = sqlx::Pool<sqlx::Any>;
 
-type AnyQuery<'a> = sqlx::query::Query<'a, sqlx::Any, <sqlx::Any as sqlx::Database>::Arguments<'a>>;
+type AnyQuery = sqlx::query::Query<'static, sqlx::Any, <sqlx::Any as sqlx::Database>::Arguments>;
 
 #[repr(C)]
 struct PoolOptions {
@@ -122,8 +122,8 @@ async fn _pen_sql_pool_execute(
 async fn build_query(
     query: &ffi::ByteString,
     arguments: ffi::List,
-) -> Result<AnyQuery<'_>, Box<dyn Error>> {
-    let mut query = sqlx::query::<sqlx::Any>(str::from_utf8(query.as_slice())?);
+) -> Result<AnyQuery, Box<dyn Error>> {
+    let mut query = sqlx::query::<sqlx::Any>(AssertSqlSafe(str::from_utf8(query.as_slice())?));
     let arguments = ffi::future::stream::from_list(arguments);
 
     pin_mut!(arguments);
