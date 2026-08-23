@@ -17,6 +17,7 @@ updates:
   - package-ecosystem: rust-toolchain
     directories:
       - /
+      - /cmd/test
       - /packages/*/ffi
       - /packages/os/ffi/*
     schedule:
