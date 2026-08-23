@@ -1,24 +1,21 @@
 [package]
 name = "pen-ffi"
-description = "FFI library for Pen programming language"
 version = "0.10.26"
-publish = true
 edition = "2021"
-license = "MIT"
-authors = ["Yota Toyama <raviqqe@gmail.com>"]
+description = "FFI library for Pen programming language"
 repository = "https://github.com/pen-lang/pen"
+license = "MIT"
+publish = true
 
 [dependencies]
 async-stream = "0.3.6"
 futures = "0.3.34"
-pen-ffi-macro = { version = "0.5.2", path = "../ffi-macro" }
+pen-ffi-macro = { path = "../ffi-macro", version = "0.5.2" }
 tokio = { version = "1.53.1", features = ["rt-multi-thread"], optional = true }
 
 [dev-dependencies]
 tokio = { "version" = "1.53.1", "features" = ["full"] }
 
 [features]
-# This feature provides a runtime of Tokio isolated from ones of other FFI
-# libraries.
 runtime = ["std", "tokio"]
 std = []
