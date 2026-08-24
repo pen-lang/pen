@@ -6,7 +6,7 @@ document_directory=doc/src/content/docs
 package_directory=$document_directory/references/standard-packages
 example_directory=$document_directory/examples
 
-prepend_title() {
+prepend_title() (
   temporary_file=$1.tmp
 
   (
@@ -17,9 +17,9 @@ prepend_title() {
   ) >$temporary_file
 
   mv $temporary_file $1
-}
+)
 
-build_package_document() {
+build_package_document() (
   file=$package_directory/$1.md
 
   (
@@ -31,7 +31,7 @@ build_package_document() {
   ) >$file
 
   prepend_title $file $2
-}
+)
 
 cd $(dirname $0)/../..
 
