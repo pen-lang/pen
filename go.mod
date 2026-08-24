@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/go-memdb v1.3.5 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/raviqqe/aruba-go v0.1.11 // indirect
+	github.com/raviqqe/aruba-go v0.1.12 // indirect
 	github.com/raviqqe/gherkin2markdown v0.1.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/willf/pad v0.0.0-20200313202418-172aa767f2a4 // indirect
