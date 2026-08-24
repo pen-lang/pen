@@ -3,7 +3,7 @@
 set -ex
 
 document_directory=doc/src/content/docs
-package_document_directory=$document_directory/references/standard-packages
+package_directory=$document_directory/references/standard-packages
 example_directory=$document_directory/examples
 
 prepend_title() {
@@ -20,7 +20,7 @@ prepend_title() {
 }
 
 build_package_document() {
-  file=$package_document_directory/$1.md
+  file=$package_directory/$1.md
 
   (
     cd packages/$1
@@ -39,7 +39,7 @@ tools/build.sh
 
 export PATH=$PWD/target/release:$PATH
 
-rm -f $package_document_directory/*.md
+rm -f $package_directory/*.md
 
 build_package_document \
   core \
