@@ -55,7 +55,6 @@ Feature: Building packages
         none
       }
       """
-    And I successfully run `rustup target add <target>`
     When I successfully run `pen build --target <target>`
     Then the exit status should be 0
 
@@ -80,7 +79,6 @@ Feature: Building packages
         x
       }
       """
-    And I successfully run `rustup target add <target>`
     When I successfully run `pen build --target <target>`
     Then the exit status should be 0
 
