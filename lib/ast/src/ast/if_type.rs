@@ -1,4 +1,4 @@
-use super::{expression::Expression, if_type_branch::IfTypeBranch, Block};
+use super::{Block, expression::Expression, if_type_branch::IfTypeBranch};
 use position::Position;
 use std::rc::Rc;
 

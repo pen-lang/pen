@@ -7,9 +7,8 @@ use bumpalo::Bump;
 use context::Context;
 use itertools::Itertools;
 use mfmt::{
-    empty, flatten_if, line,
+    Document, FormatOptions, empty, flatten_if, line,
     utility::{count_lines, is_broken},
-    Document, FormatOptions,
 };
 use position::Position;
 
@@ -962,7 +961,7 @@ fn collect_union_types(type_: &Type) -> Vec<&Type> {
 mod tests {
     use super::*;
     use indoc::indoc;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn line_position(line: usize) -> Position {
@@ -1256,16 +1255,18 @@ mod tests {
             format_module(&Module::new(
                 vec![],
                 vec![],
-                vec![RecordDefinition::new(
-                    "foo",
-                    vec![types::RecordField::new(
+                vec![
+                    RecordDefinition::new(
                         "foo",
-                        types::Reference::new("none", Position::fake()),
+                        vec![types::RecordField::new(
+                            "foo",
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
+                        )],
                         Position::fake()
-                    )],
-                    Position::fake()
-                )
-                .into()],
+                    )
+                    .into()
+                ],
                 vec![],
                 Position::fake()
             )),
@@ -1285,23 +1286,25 @@ mod tests {
             format_module(&Module::new(
                 vec![],
                 vec![],
-                vec![RecordDefinition::new(
-                    "foo",
-                    vec![
-                        types::RecordField::new(
-                            "foo",
-                            types::Reference::new("none", Position::fake()),
-                            Position::fake()
-                        ),
-                        types::RecordField::new(
-                            "bar",
-                            types::Reference::new("none", Position::fake()),
-                            Position::fake()
-                        )
-                    ],
-                    Position::fake()
-                )
-                .into()],
+                vec![
+                    RecordDefinition::new(
+                        "foo",
+                        vec![
+                            types::RecordField::new(
+                                "foo",
+                                types::Reference::new("none", Position::fake()),
+                                Position::fake()
+                            ),
+                            types::RecordField::new(
+                                "bar",
+                                types::Reference::new("none", Position::fake()),
+                                Position::fake()
+                            )
+                        ],
+                        Position::fake()
+                    )
+                    .into()
+                ],
                 vec![],
                 Position::fake()
             )),
@@ -1326,12 +1329,14 @@ mod tests {
                 format_module(&Module::new(
                     vec![],
                     vec![],
-                    vec![TypeAlias::new(
-                        "foo",
-                        types::Reference::new("none", Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Reference::new("none", Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     vec![],
                     Position::fake()
                 )),
@@ -1378,16 +1383,18 @@ mod tests {
                 format_module(&Module::new(
                     vec![],
                     vec![],
-                    vec![TypeAlias::new(
-                        "foo",
-                        types::Union::new(
-                            types::Reference::new("number", line_position(1)),
-                            types::Reference::new("none", line_position(2)),
-                            Position::fake()
-                        ),
-                        Position::fake(),
-                    )
-                    .into()],
+                    vec![
+                        TypeAlias::new(
+                            "foo",
+                            types::Union::new(
+                                types::Reference::new("number", line_position(1)),
+                                types::Reference::new("none", line_position(2)),
+                                Position::fake()
+                            ),
+                            Position::fake(),
+                        )
+                        .into()
+                    ],
                     vec![],
                     Position::fake()
                 )),
@@ -2149,16 +2156,20 @@ mod tests {
                 format(
                     &Call::new(
                         Variable::new("foo", Position::fake()),
-                        vec![Call::new(
-                            Variable::new("foo", Position::fake()),
-                            vec![Number::new(
-                                NumberRepresentation::FloatingPoint("1".into()),
-                                line_position(2),
+                        vec![
+                            Call::new(
+                                Variable::new("foo", Position::fake()),
+                                vec![
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        line_position(2),
+                                    )
+                                    .into()
+                                ],
+                                line_position(1),
                             )
-                            .into()],
-                            line_position(1),
-                        )
-                        .into()],
+                            .into()
+                        ],
                         Position::fake()
                     )
                     .into()
@@ -2246,11 +2257,13 @@ mod tests {
                     format_with_comments(
                         &Call::new(
                             Variable::new("foo", line_position(1)),
-                            vec![Number::new(
-                                NumberRepresentation::FloatingPoint("1".into()),
-                                line_position(3)
-                            )
-                            .into()],
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(3)
+                                )
+                                .into()
+                            ],
                             Position::fake()
                         )
                         .into(),
@@ -2274,11 +2287,13 @@ mod tests {
                     format_with_comments(
                         &Call::new(
                             Variable::new("foo", line_position(1)),
-                            vec![Number::new(
-                                NumberRepresentation::FloatingPoint("1".into()),
-                                line_position(2)
-                            )
-                            .into()],
+                            vec![
+                                Number::new(
+                                    NumberRepresentation::FloatingPoint("1".into()),
+                                    line_position(2)
+                                )
+                                .into()
+                            ],
                             Position::fake()
                         )
                         .into(),
@@ -3334,15 +3349,17 @@ mod tests {
                         &Map::new(
                             types::Reference::new("string", Position::fake()),
                             types::Reference::new("number", Position::fake()),
-                            vec![MapEntry::new(
-                                ByteString::new("foo", Position::fake()),
-                                Number::new(
-                                    NumberRepresentation::FloatingPoint("42".into()),
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("42".into()),
+                                        Position::fake()
+                                    ),
                                     Position::fake()
-                                ),
-                                Position::fake()
-                            )
-                            .into()],
+                                )
+                                .into()
+                            ],
                             Position::fake()
                         )
                         .into()
@@ -3411,15 +3428,17 @@ mod tests {
                         &Map::new(
                             types::Reference::new("string", Position::fake()),
                             types::Reference::new("number", Position::fake()),
-                            vec![MapEntry::new(
-                                ByteString::new("foo", Position::fake()),
-                                Number::new(
-                                    NumberRepresentation::FloatingPoint("1".into()),
-                                    Position::fake()
-                                ),
-                                line_position(2)
-                            )
-                            .into()],
+                            vec![
+                                MapEntry::new(
+                                    ByteString::new("foo", Position::fake()),
+                                    Number::new(
+                                        NumberRepresentation::FloatingPoint("1".into()),
+                                        Position::fake()
+                                    ),
+                                    line_position(2)
+                                )
+                                .into()
+                            ],
                             line_position(1)
                         )
                         .into()
@@ -3932,16 +3951,18 @@ mod tests {
                     &Module::new(
                         vec![],
                         vec![],
-                        vec![RecordDefinition::new(
-                            "foo",
-                            vec![types::RecordField::new(
-                                "bar",
-                                types::Reference::new("none", Position::fake()),
-                                line_position(2),
-                            )],
-                            line_position(1)
-                        )
-                        .into()],
+                        vec![
+                            RecordDefinition::new(
+                                "foo",
+                                vec![types::RecordField::new(
+                                    "bar",
+                                    types::Reference::new("none", Position::fake()),
+                                    line_position(2),
+                                )],
+                                line_position(1)
+                            )
+                            .into()
+                        ],
                         vec![],
                         Position::fake()
                     ),
@@ -3964,16 +3985,18 @@ mod tests {
                     &Module::new(
                         vec![],
                         vec![],
-                        vec![RecordDefinition::new(
-                            "foo",
-                            vec![types::RecordField::new(
-                                "bar",
-                                types::Reference::new("none", Position::fake()),
-                                line_position(3),
-                            )],
-                            line_position(1)
-                        )
-                        .into()],
+                        vec![
+                            RecordDefinition::new(
+                                "foo",
+                                vec![types::RecordField::new(
+                                    "bar",
+                                    types::Reference::new("none", Position::fake()),
+                                    line_position(3),
+                                )],
+                                line_position(1)
+                            )
+                            .into()
+                        ],
                         vec![],
                         Position::fake()
                     ),
@@ -3997,12 +4020,14 @@ mod tests {
                     &Module::new(
                         vec![],
                         vec![],
-                        vec![TypeAlias::new(
-                            "foo",
-                            types::Reference::new("none", Position::fake()),
-                            line_position(2)
-                        )
-                        .into()],
+                        vec![
+                            TypeAlias::new(
+                                "foo",
+                                types::Reference::new("none", Position::fake()),
+                                line_position(2)
+                            )
+                            .into()
+                        ],
                         vec![],
                         Position::fake()
                     ),

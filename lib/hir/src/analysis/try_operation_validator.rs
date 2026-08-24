@@ -188,7 +188,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     const ERROR_TYPE_NAME: &str = "error";
 

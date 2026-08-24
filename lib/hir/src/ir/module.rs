@@ -1,6 +1,6 @@
 use super::{
-    function_definition::FunctionDefinition, type_definition::TypeDefinition, ForeignDeclaration,
-    FunctionDeclaration, TypeAlias,
+    ForeignDeclaration, FunctionDeclaration, TypeAlias, function_definition::FunctionDefinition,
+    type_definition::TypeDefinition,
 };
 use position::Position;
 

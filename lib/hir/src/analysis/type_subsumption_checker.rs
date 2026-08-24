@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, type_equality_checker, AnalysisError};
+use super::{AnalysisError, type_canonicalizer, type_equality_checker};
 use crate::types::Type;
 use fnv::FnvHashMap;
 
@@ -35,56 +35,64 @@ fn check_canonical(
 mod tests {
     use super::*;
     use crate::types::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn check_numbers() {
-        assert!(check(
-            &Number::new(Position::fake()).into(),
-            &Number::new(Position::fake()).into(),
-            &Default::default()
-        )
-        .unwrap());
+        assert!(
+            check(
+                &Number::new(Position::fake()).into(),
+                &Number::new(Position::fake()).into(),
+                &Default::default()
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_number_and_union() {
-        assert!(check(
-            &Number::new(Position::fake()).into(),
-            &Union::new(
-                Number::new(Position::fake()),
-                None::new(Position::fake()),
-                Position::fake()
+        assert!(
+            check(
+                &Number::new(Position::fake()).into(),
+                &Union::new(
+                    Number::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+                &Default::default()
             )
-            .into(),
-            &Default::default()
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_non_canonical_union_and_number() {
-        assert!(check(
-            &Union::new(
-                Number::new(Position::fake()),
-                Number::new(Position::fake()),
-                Position::fake()
+        assert!(
+            check(
+                &Union::new(
+                    Number::new(Position::fake()),
+                    Number::new(Position::fake()),
+                    Position::fake()
+                )
+                .into(),
+                &Number::new(Position::fake()).into(),
+                &Default::default()
             )
-            .into(),
-            &Number::new(Position::fake()).into(),
-            &Default::default()
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_lists() {
-        assert!(check(
-            &List::new(Number::new(Position::fake()), Position::fake()).into(),
-            &List::new(Number::new(Position::fake()), Position::fake()).into(),
-            &Default::default()
-        )
-        .unwrap());
+        assert!(
+            check(
+                &List::new(Number::new(Position::fake()), Position::fake()).into(),
+                &List::new(Number::new(Position::fake()), Position::fake()).into(),
+                &Default::default()
+            )
+            .unwrap()
+        );
     }
 
     #[test]

@@ -3,7 +3,7 @@ name = "infra"
 version = "0.1.0"
 publish = false
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 app = { path = "../app" }

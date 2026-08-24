@@ -88,29 +88,31 @@ pub fn compile(
                     Call::new(
                         None,
                         Variable::new(main_function_definition.name(), position.clone()),
-                        vec![RecordConstruction::new(
-                            context_type,
-                            new_context_function_declarations
-                                .iter()
-                                .map(|(key, definition)| {
-                                    RecordField::new(
-                                        key,
-                                        Call::new(
-                                            None,
-                                            Variable::new(
-                                                definition.name(),
-                                                definition.position().clone(),
+                        vec![
+                            RecordConstruction::new(
+                                context_type,
+                                new_context_function_declarations
+                                    .iter()
+                                    .map(|(key, definition)| {
+                                        RecordField::new(
+                                            key,
+                                            Call::new(
+                                                None,
+                                                Variable::new(
+                                                    definition.name(),
+                                                    definition.position().clone(),
+                                                ),
+                                                vec![],
+                                                position.clone(),
                                             ),
-                                            vec![],
                                             position.clone(),
-                                        ),
-                                        position.clone(),
-                                    )
-                                })
-                                .collect(),
-                            position.clone(),
-                        )
-                        .into()],
+                                        )
+                                    })
+                                    .collect(),
+                                position.clone(),
+                            )
+                            .into(),
+                        ],
                         position.clone(),
                     ),
                     position.clone(),
