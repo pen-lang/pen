@@ -1,8 +1,8 @@
 [package]
 name = "im-hash-map-insert"
 version = "0.1.0"
-publish = false
 edition = "2024"
+publish = false
 
 [dependencies]
 im = "15.1.0"

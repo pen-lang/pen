@@ -1,10 +1,10 @@
 [package]
 name = "mir-fmm"
-description = "MIR to F-- compiler"
 version = "0.1.0"
-publish = false
-license = "MIT"
 edition = "2024"
+description = "MIR to F-- compiler"
+license = "MIT"
+publish = false
 
 [dependencies]
 fmm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
@@ -13,7 +13,7 @@ mir = { path = "../mir" }
 plist = { git = "https://github.com/raviqqe/plist-rs", branch = "main" }
 
 [dev-dependencies]
-insta = "1.41.1"
-tempfile = "3.27.0"
 fmm-c = { git = "https://github.com/raviqqe/fmm", branch = "main" }
 fmm-llvm = { git = "https://github.com/raviqqe/fmm", branch = "main" }
+insta = "1.41.1"
+tempfile = "3.27.0"

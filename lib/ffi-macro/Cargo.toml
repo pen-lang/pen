@@ -1,11 +1,11 @@
 [package]
 name = "pen-ffi-macro"
-description = "FFI macro library for Pen programming language"
 version = "0.5.2"
-publish = true
 edition = "2024"
-license = "MIT"
+description = "FFI macro library for Pen programming language"
 repository = "https://github.com/pen-lang/pen"
+license = "MIT"
+publish = true
 
 [lib]
 proc-macro = true

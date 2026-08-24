@@ -1,10 +1,10 @@
 [package]
 name = "mir"
-description = "Mid-level Intermediate Representation"
 version = "0.1.0"
-publish = false
-license = "MIT"
 edition = "2024"
+description = "Mid-level Intermediate Representation"
+license = "MIT"
+publish = false
 
 [dependencies]
 fnv = "1.0.7"
