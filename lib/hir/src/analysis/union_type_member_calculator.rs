@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, AnalysisError};
+use super::{AnalysisError, type_canonicalizer};
 use crate::types::Type;
 use fnv::{FnvHashMap, FnvHashSet};
 use std::collections::BTreeSet;

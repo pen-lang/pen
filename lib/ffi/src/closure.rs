@@ -1,6 +1,6 @@
 use crate::Arc;
 use core::{
-    mem::{transmute, ManuallyDrop},
+    mem::{ManuallyDrop, transmute},
     ops::Deref,
     sync::atomic::{AtomicPtr, Ordering},
 };

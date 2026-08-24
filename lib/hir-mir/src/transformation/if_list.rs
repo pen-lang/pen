@@ -1,7 +1,7 @@
 use super::{super::error::CompileError, collection_type};
 use crate::{context::Context, downcast};
 use hir::{
-    analysis::{type_equality_checker, AnalysisError},
+    analysis::{AnalysisError, type_equality_checker},
     ir::*,
     types::{self, Type},
 };
@@ -122,7 +122,7 @@ pub fn transform(context: &Context, if_: &IfList) -> Result<Expression, CompileE
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn transform_if_list_with_number_type() {

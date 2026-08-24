@@ -1,7 +1,7 @@
 use crate::{CompileConfiguration, CompileError};
 use fnv::FnvHashMap;
 use hir::{
-    analysis::{type_collector, AnalysisContext},
+    analysis::{AnalysisContext, type_collector},
     ir::Module,
     types::{self, Type},
 };

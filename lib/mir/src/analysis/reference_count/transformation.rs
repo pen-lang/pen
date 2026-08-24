@@ -723,11 +723,13 @@ mod tests {
                             .collect(),
                             Variable::new("f")
                         ),
-                        vec![CloneVariables::new(
-                            [("x".into(), Type::Number)].into_iter().collect(),
-                            Variable::new("x")
-                        )
-                        .into()]
+                        vec![
+                            CloneVariables::new(
+                                [("x".into(), Type::Number)].into_iter().collect(),
+                                Variable::new("x")
+                            )
+                            .into()
+                        ]
                     )
                     .into(),
                     ["f".into(), "x".into()].into_iter().collect()
@@ -777,11 +779,13 @@ mod tests {
                                 types::Function::new(vec![Type::Number], Type::Number)
                             ),
                             Variable::new("f"),
-                            vec![CloneVariables::new(
-                                [("x".into(), Type::Number)].into_iter().collect(),
-                                Variable::new("x")
-                            )
-                            .into()]
+                            vec![
+                                CloneVariables::new(
+                                    [("x".into(), Type::Number)].into_iter().collect(),
+                                    Variable::new("x")
+                                )
+                                .into()
+                            ]
                         ),
                         vec![Variable::new("x").into()]
                     )
@@ -1116,16 +1120,19 @@ mod tests {
                         Call::new(
                             g_type,
                             Variable::new("g"),
-                            vec![CloneVariables::new(
-                                [(
-                                    "f".into(),
-                                    types::Function::new(vec![Type::Number], Type::Number).into()
-                                )]
-                                .into_iter()
-                                .collect(),
-                                Variable::new("f")
-                            )
-                            .into()]
+                            vec![
+                                CloneVariables::new(
+                                    [(
+                                        "f".into(),
+                                        types::Function::new(vec![Type::Number], Type::Number)
+                                            .into()
+                                    )]
+                                    .into_iter()
+                                    .collect(),
+                                    Variable::new("f")
+                                )
+                                .into()
+                            ]
                         ),
                         vec![Variable::new("f").into()]
                     )

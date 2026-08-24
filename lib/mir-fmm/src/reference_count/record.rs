@@ -2,7 +2,7 @@ mod utilities;
 
 use super::{
     super::{error::CompileError, type_},
-    expression, pointer, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS,
+    REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS, expression, pointer,
 };
 use crate::{context::Context, record};
 

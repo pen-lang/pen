@@ -24,7 +24,7 @@ members = [
   "lib/test-info",
 ]
 exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
-resolver = "2"
+resolver = "3"
 
 [profile.release]
 lto = true

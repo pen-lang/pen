@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, AnalysisError};
+use super::{AnalysisError, type_canonicalizer};
 use crate::types::*;
 use fnv::FnvHashMap;
 use position::Position;

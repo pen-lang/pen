@@ -25,7 +25,7 @@ pub fn parse_comments(source: &str, path: &str) -> Result<Vec<Comment>, ParseErr
 mod tests {
     use super::*;
     use ast::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn parse_empty_module() {

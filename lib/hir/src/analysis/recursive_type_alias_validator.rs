@@ -1,7 +1,7 @@
 use super::error::AnalysisError;
 use crate::{ir::*, types::Type};
 use fnv::{FnvHashMap, FnvHashSet};
-use petgraph::{algo::toposort, Graph};
+use petgraph::{Graph, algo::toposort};
 
 pub fn validate(module: &Module) -> Result<(), AnalysisError> {
     let mut graph = Graph::<&str, ()>::new();
@@ -60,7 +60,7 @@ mod tests {
         test::{ModuleFake, TypeAliasFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn fail_to_validate_direct_recursion() {
