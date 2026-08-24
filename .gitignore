@@ -4,8 +4,7 @@
 *.old
 *.tar.*
 .pen
-assets
 dhat-*
-site
+node_modules
 target
 tmp

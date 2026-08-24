@@ -11,7 +11,7 @@ updates:
     schedule:
       interval: daily
   - package-ecosystem: npm
-    directory: /doc
+    directory: /
     schedule:
       interval: daily
   - package-ecosystem: rust-toolchain
@@ -20,10 +20,6 @@ updates:
       - /cmd/test
       - /packages/*/ffi
       - /packages/os/ffi/*
-    schedule:
-      interval: daily
-  - package-ecosystem: uv
-    directory: /doc
     schedule:
       interval: daily
   - package-ecosystem: cargo
