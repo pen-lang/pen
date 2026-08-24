@@ -109,6 +109,6 @@ done
 (
   cd doc
 
-  pnpm install
+  pnpm install --frozen-lockfile
   pnpm build
 )
