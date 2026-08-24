@@ -8,8 +8,6 @@ brew install jq llvm@$llvm_version ninja pnpm sccache uv
 
 if [ $(uname) = Linux ]; then
   brew install python
-else
-  brew install go
 fi
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
