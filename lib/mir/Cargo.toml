@@ -4,7 +4,6 @@ description = "Mid-level Intermediate Representation"
 version = "0.1.0"
 publish = false
 license = "MIT"
-authors = ["Yota Toyama <raviqqe@gmail.com>"]
 edition = "2024"
 
 [dependencies]
