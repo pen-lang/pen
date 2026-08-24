@@ -1,12 +1,12 @@
 [package]
 name = "pen"
 version = "0.6.9"
-publish = false
 edition = "2024"
+publish = false
 
 [dependencies]
-clap = { version = "4.6.6", features = ["cargo"] }
 app = { path = "../../lib/app" }
+clap = { version = "4.6.6", features = ["cargo"] }
 indoc = "2.0.7"
 infra = { path = "../../lib/infra" }
 url = "2.5.8"

@@ -1,8 +1,8 @@
 [package]
 name = "test"
 version = "0.1.0"
-publish = false
 edition = "2024"
+publish = false
 
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.10.26" }
