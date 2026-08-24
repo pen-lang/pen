@@ -1,8 +1,20 @@
 {
+  "name": "doc",
+  "type": "module",
   "scripts": {
-    "build": "rm -rf theme/assets && mkdir -p theme/assets && cp -r node_modules/@highlightjs/cdn-assets theme/assets/highlight"
+    "build": "astro check && astro build",
+    "dev": "astro dev",
+    "preview": "astro preview"
   },
   "dependencies": {
-    "@highlightjs/cdn-assets": "^11.12.0"
+    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/starlight": "^0.41.7",
+    "astro": "^7.2.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.2.0",
+    "sharp": "^0.35.3",
+    "typescript": "^6.0.3"
   }
 }

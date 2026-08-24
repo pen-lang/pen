@@ -22,10 +22,6 @@ updates:
       - /packages/os/ffi/*
     schedule:
       interval: daily
-  - package-ecosystem: uv
-    directory: /doc
-    schedule:
-      interval: daily
   - package-ecosystem: cargo
     directories:
       - /

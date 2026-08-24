@@ -2,16 +2,35 @@
 
 set -ex
 
-document_directory=doc/docs/references/standard-packages
+document_directory=doc/src/content/docs
+package_document_directory=$document_directory/references/standard-packages
+example_directory=$document_directory/examples
+
+prepend_title() {
+  temporary_file=$1.tmp
+
+  (
+    echo ---
+    echo "title: $2"
+    echo ---
+    sed 1d $1
+  ) >$temporary_file
+
+  mv $temporary_file $1
+}
 
 build_package_document() {
+  file=$package_document_directory/$1.md
+
   (
     cd packages/$1
     pen document \
       --name $2 \
       --url pen:///$1 \
       --description "$3"
-  ) >$document_directory/$1.md
+  ) >$file
+
+  prepend_title $file $2
 }
 
 cd $(dirname $0)/../..
@@ -19,6 +38,8 @@ cd $(dirname $0)/../..
 tools/build.sh
 
 export PATH=$PWD/target/release:$PATH
+
+rm -f $package_document_directory/*.md
 
 build_package_document \
   core \
@@ -75,14 +96,19 @@ build_package_document \
   Test \
   "This package provides test utilities."
 
-go tool gherkin2markdown features doc/docs/examples
+rm -rf $example_directory/*
+
+go tool gherkin2markdown features $example_directory
+
+rm -r $example_directory/smoke
+
+for file in $(find $example_directory -name '*.md'); do
+  prepend_title $file "$(sed -n '1s/^# //p' $file)"
+done
 
 (
   cd doc
 
   pnpm install
   pnpm build
-
-  uv sync
-  uv run mkdocs build
 )

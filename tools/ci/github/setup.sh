@@ -4,11 +4,7 @@ set -e
 
 llvm_version=16
 
-brew install jq llvm@$llvm_version ninja pnpm sccache uv
-
-if [ $(uname) = Linux ]; then
-  brew install python
-fi
+brew install jq llvm@$llvm_version ninja pnpm sccache
 
 llvm_prefix=$(brew --prefix)/opt/llvm@$llvm_version
 

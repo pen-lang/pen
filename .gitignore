@@ -4,8 +4,6 @@
 *.old
 *.tar.*
 .pen
-assets
 dhat-*
-site
 target
 tmp

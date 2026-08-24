@@ -4,5 +4,6 @@ set -e
 
 $(dirname $0)/build.sh
 
-cd doc
-mkdocs serve "$@"
+cd $(dirname $0)/../../doc
+
+pnpm dev "$@"
