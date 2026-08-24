@@ -1,4 +1,4 @@
-use super::{context::AnalysisContext, module_environment, AnalysisError};
+use super::{AnalysisError, context::AnalysisContext, module_environment};
 use crate::{
     analysis::{
         record_field_resolver, type_canonicalizer, type_equality_checker, type_extractor,
@@ -67,7 +67,7 @@ fn check_expression(
         Expression::BuiltInFunction(function) => {
             return Err(AnalysisError::BuiltInFunctionNotCalled(
                 function.position().clone(),
-            ))
+            ));
         }
         Expression::Call(call) => {
             let type_ = call
@@ -889,7 +889,7 @@ mod tests {
         analysis::type_collector,
         test::{ForeignDeclarationFake, FunctionDefinitionFake, ModuleFake, TypeDefinitionFake},
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     fn check_module(module: &Module) -> Result<(), AnalysisError> {
         check_types(

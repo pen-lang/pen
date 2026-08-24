@@ -1,4 +1,4 @@
-use futures::{pin_mut, StreamExt};
+use futures::{StreamExt, pin_mut};
 use std::{error::Error, process::exit, str, time::Duration};
 use tokio::{process::Command, time::sleep};
 

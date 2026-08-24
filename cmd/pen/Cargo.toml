@@ -3,7 +3,7 @@ name = "pen"
 version = "0.6.9"
 publish = false
 authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 clap = { version = "4.6.6", features = ["cargo"] }

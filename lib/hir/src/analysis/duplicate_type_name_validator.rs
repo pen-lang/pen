@@ -37,7 +37,7 @@ mod tests {
         test::{ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn validate_type_definitions() {

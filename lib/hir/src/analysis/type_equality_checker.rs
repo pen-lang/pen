@@ -1,4 +1,4 @@
-use super::{type_canonicalizer, AnalysisError};
+use super::{AnalysisError, type_canonicalizer};
 use crate::types::Type;
 use fnv::FnvHashMap;
 
@@ -50,100 +50,116 @@ mod tests {
         test::RecordFake,
         types::{self, *},
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn check_numbers() {
-        assert!(check(
-            &Number::new(Position::fake()).into(),
-            &Number::new(Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            check(
+                &Number::new(Position::fake()).into(),
+                &Number::new(Position::fake()).into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn fail_to_check_number_and_none() {
-        assert!(!check(
-            &Number::new(Position::fake()).into(),
-            &None::new(Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            !check(
+                &Number::new(Position::fake()).into(),
+                &None::new(Position::fake()).into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_lists() {
-        assert!(check(
-            &List::new(Number::new(Position::fake()), Position::fake()).into(),
-            &List::new(Number::new(Position::fake()), Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            check(
+                &List::new(Number::new(Position::fake()), Position::fake()).into(),
+                &List::new(Number::new(Position::fake()), Position::fake()).into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_functions() {
-        assert!(check(
-            &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
-            &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            check(
+                &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
+                &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_function_arguments() {
-        assert!(check(
-            &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
-            &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            check(
+                &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
+                &Function::new(vec![], Number::new(Position::fake()), Position::fake()).into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_union_and_number() {
-        assert!(check(
-            &Union::new(
-                Number::new(Position::fake()),
-                Number::new(Position::fake()),
-                Position::fake(),
+        assert!(
+            check(
+                &Union::new(
+                    Number::new(Position::fake()),
+                    Number::new(Position::fake()),
+                    Position::fake(),
+                )
+                .into(),
+                &Number::new(Position::fake()).into(),
+                &Default::default(),
             )
-            .into(),
-            &Number::new(Position::fake()).into(),
-            &Default::default(),
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_unions() {
-        assert!(check(
-            &Union::new(
-                Number::new(Position::fake()),
-                None::new(Position::fake()),
-                Position::fake(),
+        assert!(
+            check(
+                &Union::new(
+                    Number::new(Position::fake()),
+                    None::new(Position::fake()),
+                    Position::fake(),
+                )
+                .into(),
+                &Union::new(
+                    None::new(Position::fake()),
+                    Number::new(Position::fake()),
+                    Position::fake(),
+                )
+                .into(),
+                &Default::default(),
             )
-            .into(),
-            &Union::new(
-                None::new(Position::fake()),
-                Number::new(Position::fake()),
-                Position::fake(),
-            )
-            .into(),
-            &Default::default(),
-        )
-        .unwrap());
+            .unwrap()
+        );
     }
 
     #[test]
     fn check_records() {
-        assert!(!check(
-            &types::Record::fake("x").into(),
-            &types::Record::fake("y").into(),
-            &Default::default(),
-        )
-        .unwrap());
+        assert!(
+            !check(
+                &types::Record::fake("x").into(),
+                &types::Record::fake("y").into(),
+                &Default::default(),
+            )
+            .unwrap()
+        );
     }
 }

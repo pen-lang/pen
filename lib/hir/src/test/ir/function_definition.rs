@@ -1,5 +1,5 @@
 use crate::ir::*;
-use position::{test::PositionFake, Position};
+use position::{Position, test::PositionFake};
 
 pub trait FunctionDefinitionFake {
     fn fake(name: impl Into<String>, lambda: Lambda, public: bool) -> Self;

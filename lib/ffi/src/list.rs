@@ -1,4 +1,4 @@
-use crate::{import, Any, Arc, Closure};
+use crate::{Any, Arc, Closure, import};
 
 import!(pen_ffi_list_create, fn() -> List);
 import!(pen_ffi_list_lazy, fn(xs: Closure) -> List);
