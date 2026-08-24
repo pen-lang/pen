@@ -27,7 +27,7 @@ export const penLanguage = {
       name: "keyword.control.pen",
     },
     number: {
-      match: "\\b\\d+(?:\\.\\d+)?\\b",
+      match: "\\b(?:0b[01]+|0x[0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][-+]?\\d+)?)\\b",
       name: "constant.numeric.pen",
     },
     string: {
