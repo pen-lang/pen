@@ -246,7 +246,7 @@ Feature: Os
     And a file named "foo.txt" with "foo"
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the file "foo.txt" does not exist
+    And the file "foo.txt" should not exist
     And the file "bar.txt" should contain "foo"
 
   Scenario: Remove a file
@@ -267,7 +267,7 @@ Feature: Os
     And a file named "foo.txt" with ""
     When I successfully run `pen build`
     Then I successfully run `./app`
-    And the file "foo.txt" does not exist
+    And the file "foo.txt" should not exist
 
   Scenario: Read a directory
     Given a file named "main.pen" with:
