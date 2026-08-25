@@ -1,4 +1,5 @@
 Feature: List as stream
+
   Background:
     Given a file named "pen.json" with:
       """json

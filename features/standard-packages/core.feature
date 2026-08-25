@@ -1,4 +1,5 @@
 Feature: Core
+
   Background:
     Given a file named "pen.json" with:
       """json

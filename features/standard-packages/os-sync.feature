@@ -1,4 +1,5 @@
 Feature: OS (synchronous version)
+
   Background:
     Given a file named "pen.json" with:
       """json
