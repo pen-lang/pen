@@ -126,7 +126,7 @@ export default defineConfig({
           label: "GitHub",
         },
       ],
-      title: "Pen programming language",
+      title: "Pen",
     }),
   ],
   site: "https://pen-lang.org",
