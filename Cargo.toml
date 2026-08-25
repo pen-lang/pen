@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
   "benchmark/rust/fibonacci",
   "benchmark/rust/im_hash_map_insert",
@@ -24,7 +25,6 @@ members = [
   "lib/test-info",
 ]
 exclude = ["benchmark", "cmd/test", "examples", "packages", "test", "tmp"]
-resolver = "3"
 
 [profile.release]
 lto = true

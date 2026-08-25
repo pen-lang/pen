@@ -1,8 +1,8 @@
 [package]
 name = "hir"
 version = "0.1.0"
-publish = false
 edition = "2024"
+publish = false
 
 [dependencies]
 fnv = "1.0.7"

@@ -1,8 +1,8 @@
 [package]
 name = "pen-http"
 version = "0.1.0"
-publish = false
 edition = "2024"
+publish = false
 
 [lib]
 crate-type = ["staticlib"]
@@ -10,10 +10,13 @@ crate-type = ["staticlib"]
 [dependencies]
 ffi = { package = "pen-ffi", version = "0.10.26", features = ["runtime", "std"] }
 futures = "0.3.34"
-hyper = { version = "0.14.32", features = [
-  "client",
-  "http1",
-  "http2",
-  "server",
-  "tcp",
-] }
+hyper = {
+  version = "0.14.32",
+  features = [
+    "client",
+    "http1",
+    "http2",
+    "server",
+    "tcp",
+  ]
+}
