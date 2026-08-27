@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
-    "@astrojs/starlight": "^0.41.7",
+    "@astrojs/starlight": "^0.41.8",
     "astro": "^7.2.4"
   },
   "devDependencies": {
