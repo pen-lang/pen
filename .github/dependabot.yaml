@@ -20,6 +20,10 @@ updates:
       - /cmd/test
       - /packages/*/ffi
       - /packages/os/ffi/*
+    groups:
+      rust-toolchain:
+        patterns:
+          - "*"
     schedule:
       interval: daily
   - package-ecosystem: cargo
