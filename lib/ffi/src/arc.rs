@@ -20,6 +20,11 @@ pub struct Arc<T> {
 
 impl<T> Arc<T> {
     pub fn new(payload: T) -> Self {
+        assert!(
+            core::mem::align_of::<T>() <= core::mem::align_of::<core::sync::atomic::AtomicIsize>(),
+            "Arc<T> does not support payload alignment greater than AtomicIsize"
+        );
+        
         let mut block = ArcBlock::new(Layout::new::<T>());
 
         unsafe { write(block.ptr_mut() as *mut T, payload) };
