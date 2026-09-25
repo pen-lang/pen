@@ -15,6 +15,10 @@ struct ArcBufferInner {
 
 impl ArcBuffer {
     pub fn new(length: usize) -> Self {
+        assert!(
+            length <= (1usize << 40),
+            "ArcBuffer length is too large"
+        );
         Self {
             block: if length == 0 {
                 ArcBlock::new(Layout::from_size_align(0, 1).unwrap())
