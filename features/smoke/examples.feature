@@ -38,7 +38,7 @@ Feature: Examples
   Scenario: Run HTTP client and server
     Given I cd to "examples/http-server"
     And I successfully run `pen build`
-    And I run `./app` in background
+    And I run `./app` in the background
     When I cd to "../http-client"
     And I successfully run `pen build`
     Then I successfully run `./app get http://localhost:8080 hello`
@@ -47,7 +47,7 @@ Feature: Examples
   Scenario: Run TCP client and server
     Given I cd to "examples/tcp-server"
     And I successfully run `pen build`
-    And I run `./app localhost:4242` in background
+    And I run `./app localhost:4242` in the background
     When I cd to "../tcp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
@@ -56,7 +56,7 @@ Feature: Examples
   Scenario: Run UDP client and server
     Given I cd to "examples/udp-server"
     And I successfully run `pen build`
-    And I run `./app localhost:4242` in background
+    And I run `./app localhost:4242` in the background
     When I cd to "../udp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
