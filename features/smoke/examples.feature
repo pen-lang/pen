@@ -42,7 +42,11 @@ Feature: Examples
     When I cd to "../http-client"
     And I successfully run `pen build`
     Then I successfully run `./app get http://localhost:8080 hello`
-    And the stdout from "./app get http://localhost:8080 hello" should contain exactly "hello"
+    And the stdout from "./app get http://localhost:8080 hello" should contain exactly:
+      """
+      hello
+
+      """
 
   Scenario: Run TCP client and server
     Given I cd to "examples/tcp-server"
@@ -51,7 +55,11 @@ Feature: Examples
     When I cd to "../tcp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
-    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
+    And the stdout from "./app localhost:4242 hello" should contain exactly:
+      """
+      hello
+
+      """
 
   Scenario: Run UDP client and server
     Given I cd to "examples/udp-server"
@@ -60,7 +68,11 @@ Feature: Examples
     When I cd to "../udp-client"
     And I successfully run `pen build`
     Then I successfully run `./app localhost:4242 hello`
-    And the stdout from "./app localhost:4242 hello" should contain exactly "hello"
+    And the stdout from "./app localhost:4242 hello" should contain exactly:
+      """
+      hello
+
+      """
 
   Scenario: Run SQL client
     Given I cd to "examples/sql-client"
@@ -69,4 +81,8 @@ Feature: Examples
     When I successfully run `pen build`
     Then I successfully run `./app execute sqlite://foo.db 'insert into foo (bar) values (42)'`
     And I successfully run `./app query sqlite://foo.db 'select * from foo'`
-    And the stdout from "./app query sqlite://foo.db 'select * from foo'" should contain exactly "42"
+    And the stdout from "./app query sqlite://foo.db 'select * from foo'" should contain exactly:
+      """
+      42
+
+      """
