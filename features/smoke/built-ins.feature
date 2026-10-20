@@ -34,6 +34,7 @@ Feature: Built-ins
     And the stderr from "./app" should contain exactly:
       """
       <output>
+
       """
     Then I successfully run `check_memory_leak.sh ./app`
 
