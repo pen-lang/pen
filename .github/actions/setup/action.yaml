@@ -8,7 +8,7 @@ runs:
     - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version: stable
-    - uses: swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+    - uses: swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
     - uses: raviqqe/enable-homebrew@6bd383659a321c332bd0c0ed445c32d54e04efe8 # v1.0.5
       with:
         stable: true
