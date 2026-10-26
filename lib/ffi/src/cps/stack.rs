@@ -14,6 +14,10 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(capacity: usize) -> Self {
+        assert!(
+            capacity <= ((1usize << 40) / CAPACITY_MULTIPLIER),
+            "Stack capacity is too large"
+        );
         let layout = Self::get_layout(capacity).pad_to_align();
 
         Self {
