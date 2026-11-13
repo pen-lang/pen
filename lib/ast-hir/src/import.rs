@@ -188,7 +188,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake, TypeAliasFake, TypeDefinitionFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn compile_module(

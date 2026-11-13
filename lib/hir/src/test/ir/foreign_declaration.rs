@@ -1,5 +1,5 @@
 use crate::{ir::*, types::Type};
-use position::{test::PositionFake, Position};
+use position::{Position, test::PositionFake};
 
 pub trait ForeignDeclarationFake {
     fn fake(name: impl Into<String>, type_: impl Into<Type>) -> Self;

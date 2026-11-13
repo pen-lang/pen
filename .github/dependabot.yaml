@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/*
+    schedule:
+      interval: daily
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: daily
+  - package-ecosystem: rust-toolchain
+    directories:
+      - /
+      - /cmd/test
+      - /packages/*/ffi
+      - /packages/os/ffi/*
+    groups:
+      rust-toolchain:
+        patterns:
+          - "*"
+    schedule:
+      interval: daily
+  - package-ecosystem: cargo
+    directories:
+      - /
+      - /cmd/test
+      - /packages/*/ffi
+      - /packages/os/ffi/*
+    schedule:
+      interval: daily

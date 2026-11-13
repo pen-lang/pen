@@ -1,14 +1,15 @@
 [package]
 name = "doc"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+publish = false
 
 [dependencies]
 ast = { path = "../ast" }
 format = { path = "../format" }
-indoc = "2"
-itertools = "0.14"
+indoc = "2.0.7"
+itertools = "0.15.0"
 position = { path = "../position" }
 
 [dev-dependencies]
-pretty_assertions = "1"
+pretty_assertions = "1.4.1"

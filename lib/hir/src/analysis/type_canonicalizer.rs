@@ -1,4 +1,4 @@
-use super::{type_resolver, AnalysisError};
+use super::{AnalysisError, type_resolver};
 use crate::types::*;
 use fnv::FnvHashMap;
 use std::collections::BTreeSet;
@@ -135,7 +135,7 @@ fn collect_types_in_place(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn canonicalize_number() {
@@ -195,12 +195,14 @@ mod tests {
         assert_eq!(
             canonicalize(
                 &Function::new(
-                    vec![Union::new(
-                        Number::new(Position::fake()),
-                        Number::new(Position::fake()),
-                        Position::fake()
-                    )
-                    .into()],
+                    vec![
+                        Union::new(
+                            Number::new(Position::fake()),
+                            Number::new(Position::fake()),
+                            Position::fake()
+                        )
+                        .into()
+                    ],
                     None::new(Position::fake()),
                     Position::fake(),
                 )

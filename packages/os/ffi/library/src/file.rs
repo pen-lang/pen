@@ -45,6 +45,7 @@ impl FileMetadata {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_open_file(
     path: ffi::ByteString,
     options: OpenFileOptions,
@@ -57,11 +58,13 @@ async fn _pen_os_open_file(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_file(file: File) -> Result<ffi::ByteString, Box<dyn Error>> {
     utilities::read(file.lock().await.deref_mut()).await
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_limit_file(
     file: File,
     limit: ffi::Number,
@@ -70,6 +73,7 @@ async fn _pen_os_read_limit_file(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_write_file(
     file: File,
     bytes: ffi::ByteString,
@@ -78,6 +82,7 @@ async fn _pen_os_write_file(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_copy_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
@@ -92,6 +97,7 @@ async fn _pen_os_copy_file(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_move_file(
     src: ffi::ByteString,
     dest: ffi::ByteString,
@@ -106,6 +112,7 @@ async fn _pen_os_move_file(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_remove_file(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
     fs::remove_file(utilities::decode_path(&path)?).await?;
 
@@ -113,6 +120,7 @@ async fn _pen_os_remove_file(path: ffi::ByteString) -> Result<(), Box<dyn Error>
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_metadata(path: ffi::ByteString) -> Result<FileMetadata, Box<dyn Error>> {
     let metadata = fs::metadata(utilities::decode_path(&path)?).await?;
 

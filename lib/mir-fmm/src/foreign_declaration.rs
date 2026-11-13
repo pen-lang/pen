@@ -1,9 +1,8 @@
 use crate::{
-    closure,
+    CompileError, closure,
     context::Context,
     foreign_value, reference_count,
     type_::{self, FUNCTION_ARGUMENT_OFFSET},
-    CompileError,
 };
 
 pub fn compile(

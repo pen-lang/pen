@@ -352,7 +352,7 @@ mod tests {
         test::{FunctionDefinitionFake, ModuleFake},
         types,
     };
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

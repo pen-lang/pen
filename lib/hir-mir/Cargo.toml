@@ -1,18 +1,18 @@
 [package]
 name = "hir_mir"
 version = "0.1.0"
-authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition = "2024"
+publish = false
 
 [dependencies]
-fnv = "1"
+fnv = "1.0.7"
 hir = { path = "../hir" }
 interface = { path = "../interface" }
-itertools = "0.14"
+itertools = "0.15.0"
 mir = { path = "../mir" }
 position = { path = "../position" }
 test-info = { path = "../test-info" }
 
 [dev-dependencies]
-insta = "1"
-pretty_assertions = "1"
+insta = "1.41.1"
+pretty_assertions = "1.4.1"

@@ -3,6 +3,7 @@ use futures::stream::StreamExt;
 use std::error::Error;
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_http_client_send(
     method: ffi::ByteString,
     uri: ffi::ByteString,

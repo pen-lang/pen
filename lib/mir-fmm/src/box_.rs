@@ -1,4 +1,4 @@
-use crate::{context::Context, reference_count, type_, CompileError};
+use crate::{CompileError, context::Context, reference_count, type_};
 
 pub fn box_(
     builder: &fmm::build::InstructionBuilder,

@@ -1,4 +1,4 @@
-use super::{context::Context, expression, generic_type_definition, type_, CompileError};
+use super::{CompileError, context::Context, expression, generic_type_definition, type_};
 use crate::{error_type, runtime_function_declaration, type_information};
 use hir::{analysis::AnalysisError, ir::*};
 
@@ -155,7 +155,7 @@ mod tests {
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::{test::ModuleFake, types};
     use mir::test::{GlobalFunctionDefinitionFake, ModuleFake as _};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn create_context(module: &Module) -> Context {

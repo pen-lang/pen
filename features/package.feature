@@ -1,4 +1,5 @@
 Feature: Packages
+
   Background:
     Given a file named "foo/pen.json" with:
       """json

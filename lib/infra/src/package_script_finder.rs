@@ -18,7 +18,7 @@ pub fn find(
         _ => {
             return Err(
                 InfrastructureError::MultipleFfiBuildScripts(package_directory.into()).into(),
-            )
+            );
         }
     })
 }

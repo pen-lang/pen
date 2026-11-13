@@ -1,9 +1,9 @@
 [package]
 name = "ast"
 version = "0.1.0"
-authors = ["Yota Toyama <raviqqe@gmail.com>"]
-edition = "2021"
+edition = "2024"
+publish = false
 
 [dependencies]
 position = { path = "../position" }
-serde = { version = "1", features = ["derive", "rc"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }

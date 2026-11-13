@@ -3,6 +3,7 @@ use std::error::Error;
 use tokio::fs;
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_directory(path: ffi::ByteString) -> Result<ffi::List, Box<dyn Error>> {
     let mut read_dir = fs::read_dir(utilities::decode_path(&path)?).await?;
     let mut entries = vec![];
@@ -20,11 +21,13 @@ async fn _pen_os_read_directory(path: ffi::ByteString) -> Result<ffi::List, Box<
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_create_directory(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
     Ok(fs::create_dir(utilities::decode_path(&path)?).await?)
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_remove_directory(path: ffi::ByteString) -> Result<(), Box<dyn Error>> {
     Ok(fs::remove_dir(utilities::decode_path(&path)?).await?)
 }

@@ -51,8 +51,8 @@ macro_rules! call_function {
 #[cfg(test)]
 mod tests {
     use crate::{
-        cps::{AsyncStack, ContinuationFunction},
         ByteString, Number,
+        cps::{AsyncStack, ContinuationFunction},
     };
     use core::future::ready;
 

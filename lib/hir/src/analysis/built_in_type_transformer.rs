@@ -46,7 +46,7 @@ pub fn transform(module: &Module) -> Module {
 mod tests {
     use super::*;
     use crate::test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     #[test]

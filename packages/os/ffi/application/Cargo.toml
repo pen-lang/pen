@@ -1,11 +1,10 @@
 [package]
 name = "os-app"
 version = "0.1.0"
+edition = "2024"
 publish = false
-edition = "2021"
 
 [dependencies]
-async-stream = "0.3"
-ffi = { package = "pen-ffi", version = "*", features = ["runtime"] }
-futures = "0.3"
-tokio = { "version" = "1", features = ["full"] }
+ffi = { package = "pen-ffi", version = "0.10.26" }
+futures = "0.3.34"
+tokio = { version = "1.53.1", features = ["rt-multi-thread", "sync", "time"] }

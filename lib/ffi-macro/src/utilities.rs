@@ -1,7 +1,7 @@
 use crate::attribute_list::AttributeList;
 use quote::quote;
 use std::error::Error;
-use syn::{parse::Parse, parse_str, Expr, ExprLit, Ident, Lit, Meta, Path};
+use syn::{Expr, ExprLit, Ident, Lit, Meta, Path, parse::Parse, parse_str};
 
 const DEFAULT_CRATE_NAME: &str = "ffi";
 

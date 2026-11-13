@@ -73,6 +73,7 @@ impl TcpAcceptedStream {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_tcp_bind(address: ffi::ByteString) -> Result<TcpListener, Box<dyn Error>> {
     Ok(TcpListener::new(
         net::TcpListener::bind(str::from_utf8(address.as_slice())?).await?,
@@ -80,6 +81,7 @@ async fn _pen_os_tcp_bind(address: ffi::ByteString) -> Result<TcpListener, Box<d
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_tcp_connect(address: ffi::ByteString) -> Result<TcpStream, Box<dyn Error>> {
     Ok(TcpStream::new(
         net::TcpStream::connect(str::from_utf8(address.as_slice())?).await?,
@@ -87,6 +89,7 @@ async fn _pen_os_tcp_connect(address: ffi::ByteString) -> Result<TcpStream, Box<
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_tcp_accept(listener: TcpListener) -> Result<TcpAcceptedStream, Box<dyn Error>> {
     let (stream, address) = listener.lock().await.accept().await?;
 
@@ -97,6 +100,7 @@ async fn _pen_os_tcp_accept(listener: TcpListener) -> Result<TcpAcceptedStream, 
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_tcp_receive(
     socket: TcpStream,
     limit: ffi::Number,
@@ -110,6 +114,7 @@ async fn _pen_os_tcp_receive(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_tcp_send(
     socket: TcpStream,
     data: ffi::ByteString,

@@ -1,7 +1,7 @@
 use crate::context::Context;
 use fnv::FnvHashSet;
 use hir::{
-    analysis::{expression_visitor, union_type_member_calculator, AnalysisError},
+    analysis::{AnalysisError, expression_visitor, union_type_member_calculator},
     ir::*,
     types::{self, Type},
 };
@@ -18,15 +18,14 @@ pub fn collect(context: &Context, module: &Module) -> Result<FnvHashSet<Type>, A
     // https://github.com/pen-lang/pen/issues/1271
     expression_visitor::visit(module, |expression| match expression {
         Expression::Call(call) => {
-            if let Expression::BuiltInFunction(function) = call.function() {
-                if function.name() == BuiltInFunctionName::Race {
-                    let position = call.position();
+            if let Expression::BuiltInFunction(function) = call.function()
+                && function.name() == BuiltInFunctionName::Race
+            {
+                let position = call.position();
 
-                    lower_types.insert(
-                        types::List::new(types::Any::new(position.clone()), position.clone())
-                            .into(),
-                    );
-                }
+                lower_types.insert(
+                    types::List::new(types::Any::new(position.clone()), position.clone()).into(),
+                );
             }
         }
         Expression::IfList(if_) => {
@@ -100,7 +99,7 @@ mod tests {
     use super::*;
     use crate::compile_configuration::COMPILE_CONFIGURATION;
     use hir::test::{FunctionDefinitionFake, ModuleFake, TypeDefinitionFake};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
     use pretty_assertions::assert_eq;
 
     fn collect_module(module: &Module) -> FnvHashSet<Type> {

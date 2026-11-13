@@ -1,4 +1,5 @@
 Feature: Generating documentation for a package
+
   Background:
     Given a file named "pen.json" with:
       """json

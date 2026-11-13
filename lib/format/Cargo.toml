@@ -1,14 +1,16 @@
 [package]
 name = "format"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+publish = false
 
 [dependencies]
 ast = { path = "../ast" }
-itertools = "0.14"
-mfmt = "0.1.4"
+bumpalo = { version = "3.20.3", features = ["allocator-api2"] }
+itertools = "0.15.0"
+mfmt = "0.4.2"
 position = { path = "../position" }
 
 [dev-dependencies]
-indoc = "2"
+indoc = "2.0.7"
 pretty_assertions = "1.4.1"

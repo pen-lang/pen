@@ -2,7 +2,7 @@ use crate::utilities;
 use core::ops::DerefMut;
 use std::{error::Error, sync::LazyLock};
 use tokio::{
-    io::{stderr, stdin, stdout, AsyncWriteExt, Stderr, Stdin, Stdout},
+    io::{AsyncWriteExt, Stderr, Stdin, Stdout, stderr, stdin, stdout},
     sync::Mutex,
 };
 
@@ -12,11 +12,13 @@ static STDOUT: LazyLock<Mutex<Stdout>> = LazyLock::new(|| Mutex::new(stdout()));
 static STDERR: LazyLock<Mutex<Stderr>> = LazyLock::new(|| Mutex::new(stderr()));
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_stdin() -> Result<ffi::ByteString, Box<dyn Error>> {
     utilities::read(&mut STDIN.lock().await.deref_mut()).await
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_read_limit_stdin(limit: ffi::Number) -> Result<ffi::ByteString, Box<dyn Error>> {
     utilities::read_limit(
         &mut STDIN.lock().await.deref_mut(),
@@ -26,6 +28,7 @@ async fn _pen_os_read_limit_stdin(limit: ffi::Number) -> Result<ffi::ByteString,
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_write_stdout(bytes: ffi::ByteString) -> Result<ffi::Number, Box<dyn Error>> {
     let mut stdout = STDOUT.lock().await;
     let count = utilities::write(&mut *stdout, bytes).await?;
@@ -36,6 +39,7 @@ async fn _pen_os_write_stdout(bytes: ffi::ByteString) -> Result<ffi::Number, Box
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_write_stderr(bytes: ffi::ByteString) -> Result<ffi::Number, Box<dyn Error>> {
     let mut stderr = STDERR.lock().await;
     let count = utilities::write(&mut *stderr, bytes).await?;

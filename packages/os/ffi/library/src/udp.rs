@@ -63,6 +63,7 @@ impl UdpDatagram {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<UdpSocket, Box<dyn Error>> {
     Ok(UdpSocket::new(
         net::UdpSocket::bind(str::from_utf8(address.as_slice())?).await?,
@@ -70,6 +71,7 @@ async fn _pen_os_udp_bind(address: ffi::ByteString) -> Result<UdpSocket, Box<dyn
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_connect(
     socket: UdpSocket,
     address: ffi::ByteString,
@@ -84,6 +86,7 @@ async fn _pen_os_udp_connect(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_receive(socket: UdpSocket) -> Result<ffi::ByteString, Box<dyn Error>> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let size = socket.lock().await.recv(&mut buffer).await?;
@@ -94,6 +97,7 @@ async fn _pen_os_udp_receive(socket: UdpSocket) -> Result<ffi::ByteString, Box<d
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_receive_from(socket: UdpSocket) -> Result<UdpDatagram, Box<dyn Error>> {
     let mut buffer = vec![0; MAX_UDP_PAYLOAD_SIZE];
     let (size, address) = socket.lock().await.recv_from(&mut buffer).await?;
@@ -104,6 +108,7 @@ async fn _pen_os_udp_receive_from(socket: UdpSocket) -> Result<UdpDatagram, Box<
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_send(
     socket: UdpSocket,
     data: ffi::ByteString,
@@ -114,6 +119,7 @@ async fn _pen_os_udp_send(
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_udp_send_to(
     socket: UdpSocket,
     data: ffi::ByteString,

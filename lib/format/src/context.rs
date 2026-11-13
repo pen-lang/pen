@@ -1,15 +1,23 @@
 use ast::Comment;
+use bumpalo::Bump;
+use mfmt::Builder;
 use std::collections::VecDeque;
 
 pub struct Context<'a> {
+    builder: Builder<&'a Bump>,
     comments: VecDeque<&'a Comment>,
 }
 
 impl<'a> Context<'a> {
-    pub fn new(comments: &'a [Comment]) -> Self {
+    pub fn new(allocator: &'a Bump, comments: &'a [Comment]) -> Self {
         Self {
+            builder: Builder::new(allocator),
             comments: comments.iter().collect(),
         }
+    }
+
+    pub fn builder(&self) -> Builder<&'a Bump> {
+        self.builder.clone()
     }
 
     pub fn drain_comments_before(

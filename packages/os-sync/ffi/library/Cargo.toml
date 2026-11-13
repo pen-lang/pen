@@ -1,14 +1,14 @@
 [package]
 name = "os"
 version = "0.1.0"
+edition = "2024"
 publish = false
-edition = "2021"
 
 [lib]
 crate-type = ["staticlib"]
 
 [dependencies]
-ffi = { package = "pen-ffi", version = "*", features = ["std"] }
+ffi = { package = "pen-ffi", version = "0.10.26", features = ["std"] }
 
 [dev-dependencies]
-tempfile = "3"
+tempfile = "3.27.0"

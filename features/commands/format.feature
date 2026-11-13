@@ -1,4 +1,5 @@
 Feature: Formatting module files
+
   Background:
     Given a file named "pen.json" with:
       """json

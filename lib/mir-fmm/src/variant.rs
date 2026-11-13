@@ -1,4 +1,4 @@
-use crate::{box_, context::Context, pointer, type_, type_information, CompileError};
+use crate::{CompileError, box_, context::Context, pointer, type_, type_information};
 
 const VARIANT_TAG_FIELD_INDEX: usize = 0;
 const VARIANT_PAYLOAD_FIELD_INDEX: usize = 1;

@@ -1,4 +1,4 @@
-use crate::{context::Context, type_, CompileError};
+use crate::{CompileError, context::Context, type_};
 use hir::{analysis::type_canonicalizer, types::Type};
 
 pub fn compile(
@@ -40,7 +40,7 @@ pub fn compile(
 mod tests {
     use super::*;
     use hir::{ir::*, test::ModuleFake, types};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn compile_boolean() {
