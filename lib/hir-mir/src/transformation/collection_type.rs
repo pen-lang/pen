@@ -1,9 +1,9 @@
-use crate::{context::Context, CompileError};
+use crate::{CompileError, context::Context};
 use fnv::FnvHashSet;
 use hir::{
     analysis::{
-        expression_visitor, type_canonicalizer, type_comparability_checker, type_visitor,
-        AnalysisError,
+        AnalysisError, expression_visitor, type_canonicalizer, type_comparability_checker,
+        type_visitor,
     },
     ir::*,
     types::{self, Type},

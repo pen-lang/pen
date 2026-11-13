@@ -102,7 +102,7 @@ impl Display for FilePath {
         if self.components.is_empty() {
             write!(formatter, ".")
         } else {
-            write!(formatter, "{}", &self.components.join("/"))
+            write!(formatter, "{}", self.components.join("/"))
         }
     }
 }

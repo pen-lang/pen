@@ -1,5 +1,5 @@
 use super::{
-    function_definition::FunctionDefinition, type_definition::TypeDefinition, ForeignImport, Import,
+    ForeignImport, Import, function_definition::FunctionDefinition, type_definition::TypeDefinition,
 };
 use position::Position;
 

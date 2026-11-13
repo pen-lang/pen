@@ -1,6 +1,6 @@
 use std::{
     error::Error,
-    io::{stdin, stdout, Read, Write},
+    io::{Read, Write, stdin, stdout},
 };
 
 const STDIN_PATH: &str = "<stdin>";

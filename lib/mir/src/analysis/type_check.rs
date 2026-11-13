@@ -831,20 +831,22 @@ mod tests {
 
         #[test]
         fn check_inconsistent_alternative_types() {
-            let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f",
-                vec![Argument::new("x", Type::Variant)],
-                Type::Number,
-                Case::new(
-                    Variable::new("x"),
-                    vec![
-                        Alternative::new(vec![Type::Boolean], "x", Variable::new("x")),
-                        Alternative::new(vec![Type::Number], "x", 42.0),
-                    ],
-                    None,
-                ),
-            )
-            .set_environment(vec![])]);
+            let module = Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Number,
+                    Case::new(
+                        Variable::new("x"),
+                        vec![
+                            Alternative::new(vec![Type::Boolean], "x", Variable::new("x")),
+                            Alternative::new(vec![Type::Number], "x", 42.0),
+                        ],
+                        None,
+                    ),
+                )
+                .set_environment(vec![]),
+            ]);
 
             assert!(matches!(
                 check_module(&module),
@@ -974,13 +976,15 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::new(
-                            "f",
-                            vec![Argument::new("x", Type::Number)],
-                            record_type.clone(),
-                            Record::new(record_type, vec![])
-                        )
-                        .set_environment(vec![])],)
+                        .set_function_definitions(vec![
+                            FunctionDefinition::new(
+                                "f",
+                                vec![Argument::new("x", Type::Number)],
+                                record_type.clone(),
+                                Record::new(record_type, vec![])
+                            )
+                            .set_environment(vec![])
+                        ],)
                 ),
                 Ok(())
             );
@@ -997,13 +1001,15 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![Type::Number])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::new(
-                            "f",
-                            vec![Argument::new("x", Type::Number)],
-                            record_type.clone(),
-                            Record::new(record_type, vec![42.0.into()],)
-                        )
-                        .set_environment(vec![])],)
+                        .set_function_definitions(vec![
+                            FunctionDefinition::new(
+                                "f",
+                                vec![Argument::new("x", Type::Number)],
+                                record_type.clone(),
+                                Record::new(record_type, vec![42.0.into()],)
+                            )
+                            .set_environment(vec![])
+                        ],)
                 ),
                 Ok(())
             );
@@ -1018,13 +1024,15 @@ mod tests {
                     "foo",
                     types::RecordBody::new(vec![Type::Number]),
                 )])
-                .set_function_definitions(vec![FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Number)],
-                    record_type.clone(),
-                    Record::new(record_type, vec![42.0.into(), 42.0.into()]),
-                )
-                .set_environment(vec![])]);
+                .set_function_definitions(vec![
+                    FunctionDefinition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        record_type.clone(),
+                        Record::new(record_type, vec![42.0.into(), 42.0.into()]),
+                    )
+                    .set_environment(vec![]),
+                ]);
 
             assert!(matches!(
                 check_module(&module),
@@ -1041,13 +1049,15 @@ mod tests {
                     "foo",
                     types::RecordBody::new(vec![Type::Number]),
                 )])
-                .set_function_definitions(vec![FunctionDefinition::new(
-                    "f",
-                    vec![Argument::new("x", Type::Number)],
-                    record_type.clone(),
-                    Record::new(record_type, vec![true.into()]),
-                )
-                .set_environment(vec![])]);
+                .set_function_definitions(vec![
+                    FunctionDefinition::new(
+                        "f",
+                        vec![Argument::new("x", Type::Number)],
+                        record_type.clone(),
+                        Record::new(record_type, vec![true.into()]),
+                    )
+                    .set_environment(vec![]),
+                ]);
 
             assert!(matches!(
                 check_module(&module),
@@ -1066,17 +1076,19 @@ mod tests {
                             "foo",
                             types::RecordBody::new(vec![Type::Number])
                         )])
-                        .set_function_definitions(vec![FunctionDefinition::new(
-                            "f",
-                            vec![Argument::new("x", Type::Number)],
-                            Type::Number,
-                            RecordField::new(
-                                record_type.clone(),
-                                0,
-                                Record::new(record_type, vec![42.0.into()],)
+                        .set_function_definitions(vec![
+                            FunctionDefinition::new(
+                                "f",
+                                vec![Argument::new("x", Type::Number)],
+                                Type::Number,
+                                RecordField::new(
+                                    record_type.clone(),
+                                    0,
+                                    Record::new(record_type, vec![42.0.into()],)
+                                )
                             )
-                        )
-                        .set_environment(vec![])],)
+                            .set_environment(vec![])
+                        ],)
                 ),
                 Ok(())
             );
@@ -1121,37 +1133,46 @@ mod tests {
 
     #[test]
     fn check_add_operator() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-            "f",
-            vec![Argument::new("x", Type::Number)],
-            Type::Number,
-            ArithmeticOperation::new(ArithmeticOperator::Add, 42.0, 42.0),
-        )
-        .set_environment(vec![])]);
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Number,
+                ArithmeticOperation::new(ArithmeticOperator::Add, 42.0, 42.0),
+            )
+            .set_environment(vec![]),
+        ]);
         assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
     fn check_equality_operator() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-            "f",
-            vec![Argument::new("x", Type::Number)],
-            Type::Boolean,
-            ComparisonOperation::new(ComparisonOperator::Equal, 42.0, 42.0),
-        )
-        .set_environment(vec![])]);
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::Number)],
+                Type::Boolean,
+                ComparisonOperation::new(ComparisonOperator::Equal, 42.0, 42.0),
+            )
+            .set_environment(vec![]),
+        ]);
         assert_eq!(check_module(&module), Ok(()));
     }
 
     #[test]
     fn check_string_concatenation() {
-        let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-            "f",
-            vec![Argument::new("x", Type::ByteString)],
-            Type::ByteString,
-            StringConcatenation::new(vec![Variable::new("x").into(), Variable::new("x").into()]),
-        )
-        .set_environment(vec![])]);
+        let module = Module::empty().set_function_definitions(vec![
+            FunctionDefinition::new(
+                "f",
+                vec![Argument::new("x", Type::ByteString)],
+                Type::ByteString,
+                StringConcatenation::new(vec![
+                    Variable::new("x").into(),
+                    Variable::new("x").into(),
+                ]),
+            )
+            .set_environment(vec![]),
+        ]);
 
         assert_eq!(check_module(&module), Ok(()));
     }
@@ -1184,18 +1205,20 @@ mod tests {
 
         #[test]
         fn check_try_operation() {
-            let module = Module::empty().set_function_definitions(vec![FunctionDefinition::new(
-                "f",
-                vec![Argument::new("x", Type::Variant)],
-                Type::Variant,
-                TryOperation::new(
-                    Variable::new("x"),
-                    "y",
-                    Type::Number,
-                    Variant::new(Type::Number, Variable::new("y")),
-                ),
-            )
-            .set_environment(vec![])]);
+            let module = Module::empty().set_function_definitions(vec![
+                FunctionDefinition::new(
+                    "f",
+                    vec![Argument::new("x", Type::Variant)],
+                    Type::Variant,
+                    TryOperation::new(
+                        Variable::new("x"),
+                        "y",
+                        Type::Number,
+                        Variant::new(Type::Number, Variable::new("y")),
+                    ),
+                )
+                .set_environment(vec![]),
+            ]);
 
             assert_eq!(check_module(&module), Ok(()));
         }

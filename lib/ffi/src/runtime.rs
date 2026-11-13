@@ -1,27 +1,78 @@
-mod error;
+use core::{
+    future::{Future, poll_fn},
+    pin::pin,
+};
+use std::sync::LazyLock;
+use tokio::runtime::{Builder, Runtime};
 
-use crate::Error;
-use error::RuntimeError;
-use std::sync::RwLock;
-use tokio::runtime::Handle;
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
+    Builder::new_multi_thread()
+        .worker_threads(1)
+        .enable_all()
+        .build()
+        .unwrap()
+});
 
-static RUNTIME_HANDLE: RwLock<Option<tokio::runtime::Handle>> = RwLock::new(None);
+// Polls a future in the runtime context.
+pub async fn run<T>(future: impl Future<Output = T>) -> T {
+    let mut future = pin!(future);
 
-pub fn set_handle(handle: Handle) -> Result<(), Error> {
-    RUNTIME_HANDLE
-        .write()
-        .map_err(|_| RuntimeError::HandleLockPoisoned)?
-        .replace(handle);
+    poll_fn(|context| {
+        let _guard = RUNTIME.enter();
 
-    Ok(())
+        future.as_mut().poll(context)
+    })
+    .await
 }
 
-pub fn handle() -> Result<Handle, Error> {
-    let guard = RUNTIME_HANDLE.read()?;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use futures::executor::block_on;
+    use tokio::runtime::Handle;
 
-    if let Some(handle) = guard.as_ref() {
-        Ok(handle.clone())
-    } else {
-        Err(RuntimeError::HandleNotInitialized.into())
+    #[test]
+    fn enter_context_on_poll() {
+        assert!(block_on(run(async { Handle::try_current().is_ok() })));
+    }
+
+    #[test]
+    fn leave_context_after_poll() {
+        block_on(run(async {}));
+
+        assert!(Handle::try_current().is_err());
+    }
+
+    mod attribute {
+        use super::*;
+
+        #[pen_ffi_macro::runtime(crate = "crate")]
+        async fn is_in_context() -> bool {
+            Handle::try_current().is_ok()
+        }
+
+        #[pen_ffi_macro::runtime(crate = "crate")]
+        async fn add(x: f64, y: f64) -> Result<f64, ()> {
+            let x = Ok::<_, ()>(x)?;
+
+            Ok(x + y)
+        }
+
+        #[test]
+        fn enter_context() {
+            assert!(block_on(is_in_context()));
+        }
+
+        #[test]
+        fn leave_context() {
+            block_on(is_in_context());
+
+            assert!(Handle::try_current().is_err());
+        }
+
+        #[test]
+        fn pass_arguments() {
+            assert_eq!(block_on(add(40.0, 2.0)), Ok(42.0));
+        }
     }
 }

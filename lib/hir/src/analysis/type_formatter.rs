@@ -7,7 +7,7 @@ pub fn format(type_: &Type) -> String {
         Type::Error(_) => "error".into(),
         Type::Function(function) => format!(
             "\\({}) {}",
-            &function
+            function
                 .arguments()
                 .iter()
                 .map(format)
@@ -30,7 +30,7 @@ pub fn format(type_: &Type) -> String {
 mod tests {
     use super::*;
     use crate::types::{self, *};
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn format_function() {

@@ -14,8 +14,6 @@ for target in \
   rustup target add $target
 done
 
-bundler install
-
 cd $(dirname $0)/..
 
-bundler exec cucumber --publish-quiet --strict-undefined "$@"
+go tool agoa "$@"

@@ -71,7 +71,7 @@ fn transform_module(module: &ir::Module, prefix: &str) -> Result<ir::Module, Com
 mod tests {
     use super::*;
     use hir::test::ModuleFake;
-    use position::{test::PositionFake, Position};
+    use position::{Position, test::PositionFake};
 
     #[test]
     fn compile_empty_module() {

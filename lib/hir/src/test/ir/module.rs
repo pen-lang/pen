@@ -1,5 +1,5 @@
 use crate::ir::*;
-use position::{test::PositionFake, Position};
+use position::{Position, test::PositionFake};
 
 pub trait ModuleFake {
     fn empty() -> Self;

@@ -1,4 +1,4 @@
-use crate::{import, Boolean, ByteString, Error, List, Number, TypeInformation};
+use crate::{Boolean, ByteString, Error, List, Number, TypeInformation, import};
 
 import!(pen_ffi_any_is_boolean, fn(any: Any) -> Boolean);
 import!(pen_ffi_any_is_error, fn(any: Any) -> Boolean);

@@ -1,8 +1,9 @@
 [package]
 name = "im-hash-map-insert"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+publish = false
 
 [dependencies]
-im = "15"
-ordered-float = "5"
+im = "15.1.0"
+ordered-float = "5.3.0"

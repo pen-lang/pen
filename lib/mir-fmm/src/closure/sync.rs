@@ -1,7 +1,8 @@
 use crate::{
+    CompileError,
     context::Context,
     reference_count::{self, REFERENCE_COUNT_FUNCTION_DEFINITION_OPTIONS},
-    type_, CompileError,
+    type_,
 };
 use std::sync::LazyLock;
 

@@ -5,7 +5,7 @@ use crate::{
 use app::package_documentation_generator::DocumentationPackage;
 use std::{
     error::Error,
-    io::{stdout, Write},
+    io::{Write, stdout},
     rc::Rc,
 };
 

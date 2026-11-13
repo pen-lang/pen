@@ -1,8 +1,8 @@
 use alloc::alloc::{alloc, dealloc};
 use core::{
     alloc::Layout,
-    ptr::{drop_in_place, null, NonNull},
-    sync::atomic::{fence, AtomicIsize, Ordering},
+    ptr::{NonNull, drop_in_place, null},
+    sync::atomic::{AtomicIsize, Ordering, fence},
 };
 
 const UNIQUE_COUNT: isize = 0;

@@ -1,5 +1,5 @@
 use crate::types;
-use position::{test::PositionFake, Position};
+use position::{Position, test::PositionFake};
 
 pub trait RecordFake {
     fn fake(name: impl Into<String>) -> Self;

@@ -11,6 +11,7 @@ fn _pen_os_get_time() -> ffi::Number {
 }
 
 #[ffi::bindgen]
+#[ffi::runtime]
 async fn _pen_os_sleep(milliseconds: ffi::Number) {
     sleep(Duration::from_millis(f64::from(milliseconds) as u64)).await;
 }

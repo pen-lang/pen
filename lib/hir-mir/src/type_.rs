@@ -1,4 +1,4 @@
-use super::{context::Context, CompileError};
+use super::{CompileError, context::Context};
 use crate::error_type;
 use fnv::FnvHashMap;
 use hir::{
