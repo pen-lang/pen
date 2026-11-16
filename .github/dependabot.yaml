@@ -32,5 +32,10 @@ updates:
       - /cmd/test
       - /packages/*/ffi
       - /packages/os/ffi/*
+    groups:
+      fmm:
+        patterns:
+          - fmm
+          - fmm-*
     schedule:
       interval: daily
