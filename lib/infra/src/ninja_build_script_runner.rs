@@ -62,12 +62,8 @@ impl NinjaBuildScriptRunner {
         run(
             &context,
             config,
-            &[target_file.to_string_lossy().into()],
-            RunOptions {
-                debug: false,
-                dry_run: false,
-                profile: false,
-            },
+            &[&target_file.to_string_lossy()],
+            RunOptions::default(),
         )
         .await
     }
