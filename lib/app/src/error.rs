@@ -3,7 +3,6 @@ use std::{error::Error, fmt::Display};
 #[derive(Clone, Debug)]
 pub enum ApplicationError {
     ArchitectureWordSize(String),
-    Build,
     ContextTypeNotFound,
     ModuleFilesNotFormatted(Vec<String>),
     ModuleNotFound(String),
@@ -25,7 +24,6 @@ impl Display for ApplicationError {
                     "cannot infer word size from target triple: {target_triple}"
                 )
             }
-            Self::Build => write!(formatter, "build failed"),
             Self::ContextTypeNotFound => {
                 write!(formatter, "context type not found")
             }

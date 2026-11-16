@@ -91,17 +91,6 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                 )
                 .await;
 
-            // Build jobs report their own failures.
-            if let Err(error) = &result
-                && !matches!(error, BuildError::Build)
-            {
-                console
-                    .lock()
-                    .await
-                    .write_stderr(format!("{error}\n").as_bytes())
-                    .await?;
-            }
-
             console.lock().await.flush().await?;
 
             result
