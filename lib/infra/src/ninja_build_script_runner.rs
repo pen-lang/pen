@@ -42,7 +42,7 @@ impl NinjaBuildScriptRunner {
                     .build_directory()
                     .map(|directory| Path::new(directory.as_ref()).join(DATABASE_DIRECTORY))
                     .unwrap_or_else(|| build_script_file.with_file_name(DATABASE_DIRECTORY))
-                    .join(self.database_version.replace('.', "_")),
+                    .join(self.database_version),
                 &path_pool,
             )
             .await?,
@@ -196,7 +196,7 @@ mod tests {
                 .path()
                 .join("build")
                 .join(DATABASE_DIRECTORY)
-                .join("1_2_3")
+                .join("1.2.3")
                 .is_dir()
         );
     }
@@ -219,7 +219,7 @@ mod tests {
             directory
                 .path()
                 .join(DATABASE_DIRECTORY)
-                .join("1_2_3")
+                .join("1.2.3")
                 .is_dir()
         );
     }
