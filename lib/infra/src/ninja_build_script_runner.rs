@@ -27,15 +27,22 @@ impl NinjaBuildScriptRunner {
         &self,
         build_script_file: &Path,
         target_file: &Path,
-        command_runner: OsCommandRunner,
-        file_system: OsFileSystem,
         console: &Arc<Mutex<OsConsole>>,
     ) -> Result<(), BuildError> {
+        increase_nofile_limit(u64::MAX)?;
+
+        let job_limit = job_limit(available_parallelism().map(usize::from).unwrap_or_default());
+        let file_system = OsFileSystem::new(
+            usize::try_from(Resource::NOFILE.get_soft()?)
+                .unwrap_or(usize::MAX)
+                .saturating_sub(DEFAULT_FILE_COUNT_PER_PROCESS * (job_limit + 1))
+                .max(1),
+        );
         let modules = load(&file_system, build_script_file).await?;
         let path_pool = Arc::new(PathPool::new());
         let config = Arc::new(compile(&modules, build_script_file, &path_pool)?);
         let context = Arc::new(Context::new(
-            command_runner,
+            OsCommandRunner::new(job_limit),
             console.clone(),
             LogDatabase::new(
                 &config
@@ -72,16 +79,6 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
         build_script_file: &app::infra::FilePath,
         target_file: &app::infra::FilePath,
     ) -> Result<(), Box<dyn Error>> {
-        increase_nofile_limit(u64::MAX)?;
-
-        let job_limit = job_limit(available_parallelism().map(usize::from).unwrap_or_default());
-        let file_system = OsFileSystem::new(
-            usize::try_from(Resource::NOFILE.get_soft()?)
-                .unwrap_or(usize::MAX)
-                .saturating_sub(DEFAULT_FILE_COUNT_PER_PROCESS * (job_limit + 1))
-                .max(1),
-        );
-
         Runtime::new()?.block_on(async {
             let console = Arc::new(Mutex::new(OsConsole::new()));
             let result = self
@@ -90,8 +87,6 @@ impl app::infra::BuildScriptRunner for NinjaBuildScriptRunner {
                         .file_path_converter
                         .convert_to_os_path(build_script_file),
                     &self.file_path_converter.convert_to_os_path(target_file),
-                    OsCommandRunner::new(job_limit),
-                    file_system,
                     &console,
                 )
                 .await;
