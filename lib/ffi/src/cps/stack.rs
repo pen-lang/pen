@@ -1,5 +1,5 @@
 use crate::DEFAULT_MEMORY_ALIGNMENT;
-use alloc::alloc::{alloc, dealloc, realloc};
+use alloc::alloc::{alloc, dealloc, handle_alloc_error, realloc};
 use core::{alloc::Layout, ptr};
 
 const CAPACITY_MULTIPLIER: usize = 2;
@@ -14,15 +14,16 @@ pub struct Stack {
 
 impl Stack {
     pub fn new(capacity: usize) -> Self {
-        assert!(
-            capacity <= ((1usize << 40) / CAPACITY_MULTIPLIER),
-            "Stack capacity is too large"
-        );
         let layout = Self::get_layout(capacity).pad_to_align();
+        let base_pointer = unsafe { alloc(layout) };
+
+        if base_pointer.is_null() {
+            handle_alloc_error(layout);
+        }
 
         Self {
             capacity: layout.size(),
-            base_pointer: unsafe { alloc(layout) },
+            base_pointer,
             size: 0,
         }
     }
@@ -33,13 +34,19 @@ impl Stack {
         while self.size + type_size > self.capacity {
             let new_capacity = CAPACITY_MULTIPLIER * self.capacity;
 
-            self.base_pointer = unsafe {
+            let base_pointer = unsafe {
                 realloc(
                     self.base_pointer,
                     Self::get_layout(self.capacity),
                     new_capacity,
                 )
             };
+
+            if base_pointer.is_null() {
+                handle_alloc_error(Self::get_layout(new_capacity));
+            }
+
+            self.base_pointer = base_pointer;
             self.capacity = new_capacity;
         }
 
