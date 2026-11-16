@@ -96,7 +96,7 @@ impl NinjaBuildScriptCompiler {
             // spell-checker: disable
             &format!(
                 "  command = {} \
-                    -p verify,function-attrs,globalopt,adce,instcombine,tailcallelim,inline,mergefunc,verify \
+                    -p 'verify,function-attrs,globalopt,adce,instcombine<no-verify-fixpoint>,tailcallelim,inline,mergefunc,verify' \
                     -o $out $in",
                 opt.display(),
             ),
