@@ -41,6 +41,7 @@ pub fn create(
         file_path_configuration: FILE_PATH_CONFIGURATION.clone().into(),
         build_script_runner: Rc::new(infra::NinjaBuildScriptRunner::new(
             file_path_converter.clone(),
+            env!("CARGO_PKG_VERSION"),
         )),
         build_script_compiler,
         package_configuration_reader: Rc::new(infra::JsonPackageConfigurationReader::new(
