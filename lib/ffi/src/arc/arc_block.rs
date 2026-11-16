@@ -1,4 +1,4 @@
-use alloc::alloc::{alloc, dealloc};
+use alloc::alloc::{alloc, dealloc, handle_alloc_error};
 use core::{
     alloc::Layout,
     ptr::{NonNull, drop_in_place, null},
@@ -27,7 +27,14 @@ impl ArcBlock {
         if layout.size() == 0 {
             Self { pointer: null() }
         } else {
-            let pointer = unsafe { &mut *(alloc(Self::inner_layout(layout)) as *mut ArcInner) };
+            let layout = Self::inner_layout(layout);
+            let pointer = unsafe { alloc(layout) };
+
+            if pointer.is_null() {
+                handle_alloc_error(layout);
+            }
+
+            let pointer = unsafe { &mut *(pointer as *mut ArcInner) };
 
             pointer.count = AtomicIsize::new(UNIQUE_COUNT);
 
