@@ -109,11 +109,30 @@ impl<T: Display> Display for Arc<T> {
 mod tests {
     use super::*;
     use alloc::boxed::Box;
-    use core::mem::{drop, forget};
+    use core::{
+        mem::{drop, forget},
+        sync::atomic::AtomicIsize,
+    };
 
     #[test]
     fn create() {
         Arc::new(0);
+    }
+
+    #[test]
+    fn create_with_maximum_alignment() {
+        Arc::new(AtomicIsize::new(0));
+    }
+
+    #[test]
+    #[should_panic]
+    fn fail_to_create_with_excessive_alignment() {
+        #[repr(align(16))]
+        struct Payload {
+            _value: u8,
+        }
+
+        Arc::new(Payload { _value: 0 });
     }
 
     #[test]
@@ -151,6 +170,15 @@ mod tests {
         #[test]
         fn create() {
             Arc::new(());
+        }
+
+        #[test]
+        #[should_panic]
+        fn fail_to_create_with_excessive_alignment() {
+            #[repr(align(16))]
+            struct Payload;
+
+            Arc::new(Payload);
         }
 
         #[test]
