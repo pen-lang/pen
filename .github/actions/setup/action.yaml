@@ -5,7 +5,7 @@ outputs: {}
 runs:
   using: composite
   steps:
-    - uses: actions/setup-go@v7.0.0
+    - uses: actions/setup-go@v7.1.0
       with:
         go-version: stable
     - uses: swatinem/rust-cache@v2.9.3
