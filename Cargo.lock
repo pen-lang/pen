@@ -826,7 +826,7 @@ dependencies = [
  "app",
  "glob",
  "regex",
- "rlimit",
+ "rlimit 0.12.0",
  "serde",
  "serde_json",
  "tempfile",
@@ -1304,6 +1304,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rlimit"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89be6f31978e7fb890f29af88b6040c1524cb9b254d20724190c2bb4d438d550"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "rustix"
 version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1623,7 +1632,7 @@ dependencies = [
  "rand",
  "rapidhash",
  "regex",
- "rlimit",
+ "rlimit 0.11.0",
  "scc",
  "thiserror",
  "tokio",
